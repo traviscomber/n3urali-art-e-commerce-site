@@ -59,7 +59,7 @@ BEGIN
   );
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger for new user registration
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;

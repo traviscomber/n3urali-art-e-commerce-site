@@ -53,7 +53,6 @@ export default function OrdersPage() {
         return
       }
 
-      // Fetch orders with order items
       const { data: ordersData, error: ordersError } = await supabase
         .from("orders")
         .select(`
@@ -72,7 +71,7 @@ export default function OrdersPage() {
             )
           )
         `)
-        .eq("user_id", user.id)
+        .eq("user_email", user.email)
         .order("created_at", { ascending: false })
 
       if (ordersError) throw ordersError

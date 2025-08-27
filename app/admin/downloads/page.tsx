@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Download, Search, Filter, TrendingDown, AlertCircle } from "lucide-react"
 
 export const dynamic = "force-dynamic"
+export const revalidate = 0
 
 interface DownloadLog {
   id: string
@@ -24,6 +25,7 @@ export default function AdminDownloadsPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [supabaseError, setSupabaseError] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const [stats, setStats] = useState({
     totalDownloads: 0,
     todayDownloads: 0,
@@ -31,6 +33,12 @@ export default function AdminDownloadsPage() {
   })
 
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+
     const supabase = createClient()
     if (!supabase) {
       setSupabaseError(true)
@@ -40,9 +48,11 @@ export default function AdminDownloadsPage() {
 
     fetchDownloads()
     fetchStats()
-  }, [])
+  }, [mounted])
 
   const fetchDownloads = async () => {
+    if (!mounted) return
+
     try {
       const supabase = createClient()
       if (!supabase) {
@@ -80,6 +90,8 @@ export default function AdminDownloadsPage() {
   }
 
   const fetchStats = async () => {
+    if (!mounted) return
+
     try {
       const supabase = createClient()
       if (!supabase) {
@@ -117,6 +129,23 @@ export default function AdminDownloadsPage() {
       download.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       download.image_title.toLowerCase().includes(searchTerm.toLowerCase()),
   )
+
+  if (!mounted) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <div className="h-4 bg-muted rounded w-1/2"></div>
+                <div className="h-8 bg-muted rounded w-1/3"></div>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   if (supabaseError) {
     return (

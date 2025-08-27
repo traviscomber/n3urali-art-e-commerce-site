@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Download, Search, Filter, TrendingDown, AlertCircle } from "lucide-react"
 
+export const dynamic = "force-dynamic"
+
 interface DownloadLog {
   id: string
   order_item_id: string
@@ -16,8 +18,6 @@ interface DownloadLog {
   image_title: string
   license_type: string
 }
-
-export const dynamic = "force-dynamic"
 
 export default function AdminDownloadsPage() {
   const [downloads, setDownloads] = useState<DownloadLog[]>([])

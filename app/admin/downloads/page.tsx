@@ -17,6 +17,8 @@ interface DownloadLog {
   license_type: string
 }
 
+export const dynamic = "force-dynamic"
+
 export default function AdminDownloadsPage() {
   const [downloads, setDownloads] = useState<DownloadLog[]>([])
   const [loading, setLoading] = useState(true)

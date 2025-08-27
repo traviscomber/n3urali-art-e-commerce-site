@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ShoppingCart, Menu, X } from "lucide-react"
+import { ShoppingCart, Menu, X, Zap } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
 import { UserMenu } from "./user-menu"
 
@@ -12,101 +12,114 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { items, toggleCart } = useCart()
 
-  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
+  const itemCount = (items || []).reduce((sum, item) => sum + (item.quantity || 0), 0)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/20 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-full bg-primary" />
-            <span className="text-xl font-bold text-foreground">n3urali.art</span>
+        <div className="flex h-20 items-center justify-between">
+          <Link href="/" className="flex items-center space-x-3 group">
+            <div className="relative">
+              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center group-hover:glow-primary transition-all duration-300">
+                <Zap className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary to-accent opacity-20 blur-sm group-hover:opacity-40 transition-opacity" />
+            </div>
+            <span className="text-2xl font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent">
+              n3urali.art
+            </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+          <nav className="hidden md:flex items-center space-x-12">
+            <Link
+              href="/gallery"
+              className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"
+            >
               Gallery
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
               href="/categories/equirectangular"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              className="relative text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-300 group"
             >
               360° Images
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
               href="/categories/fisheye"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              className="relative text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-300 group"
             >
               Fisheye
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
-              href="/downloads"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              href="/account/orders"
+              className="relative text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-300 group"
             >
-              My Downloads
+              My Orders
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
             </Link>
           </nav>
 
-          {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
             {/* Cart Button */}
-            <Button variant="outline" size="sm" onClick={toggleCart} className="relative bg-transparent">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleCart}
+              className="relative bg-card/50 border-border/50 hover:bg-card hover:glow-accent transition-all duration-300"
+            >
               <ShoppingCart className="h-4 w-4" />
               {itemCount > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground animate-pulse-glow">
                   {itemCount}
                 </Badge>
               )}
             </Button>
 
-            {/* User Menu */}
             <UserMenu />
 
-            {/* Mobile Menu Button */}
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden"
+              className="md:hidden hover:bg-card/50 transition-all duration-300"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              {isMobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-border py-4">
-            <nav className="flex flex-col space-y-4">
+          <div className="md:hidden border-t border-border/20 py-6 bg-card/30 backdrop-blur-sm rounded-b-lg">
+            <nav className="flex flex-col space-y-6">
               <Link
-                href="/"
-                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+                href="/gallery"
+                className="text-base font-medium text-foreground hover:text-primary transition-colors px-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Gallery
               </Link>
               <Link
                 href="/categories/equirectangular"
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                className="text-base font-medium text-muted-foreground hover:text-primary transition-colors px-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 360° Images
               </Link>
               <Link
                 href="/categories/fisheye"
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                className="text-base font-medium text-muted-foreground hover:text-primary transition-colors px-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Fisheye
               </Link>
               <Link
-                href="/downloads"
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                href="/account/orders"
+                className="text-base font-medium text-muted-foreground hover:text-primary transition-colors px-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                My Downloads
+                My Orders
               </Link>
             </nav>
           </div>

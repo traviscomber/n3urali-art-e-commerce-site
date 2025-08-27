@@ -32,3 +32,5 @@ CREATE POLICY "order_items_admin_access" ON public.order_items
 CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON public.order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_image_id ON public.order_items(image_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_license_type ON public.order_items(license_type);
+
+-- Execute order items table creation script

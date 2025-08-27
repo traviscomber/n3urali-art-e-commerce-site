@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createBrowserClient } from "@/lib/supabase/client"
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -19,9 +19,14 @@ export function UserMenu() {
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createBrowserClient()
+  const supabase = createClient()
 
   useEffect(() => {
+    if (!supabase) {
+      setIsLoading(false)
+      return
+    }
+
     const getUser = async () => {
       const {
         data: { user },
@@ -39,9 +44,10 @@ export function UserMenu() {
     })
 
     return () => subscription.unsubscribe()
-  }, [supabase.auth])
+  }, [supabase])
 
   const handleSignOut = async () => {
+    if (!supabase) return
     await supabase.auth.signOut()
     window.location.reload()
   }
@@ -51,6 +57,14 @@ export function UserMenu() {
   }
 
   const isAdmin = user?.email === "admin@n3urali.art" // Simple admin check
+
+  if (!supabase) {
+    return (
+      <Button variant="outline" disabled className="bg-transparent">
+        Auth Disabled
+      </Button>
+    )
+  }
 
   if (isLoading) {
     return <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />

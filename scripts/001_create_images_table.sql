@@ -38,3 +38,5 @@ CREATE INDEX IF NOT EXISTS idx_images_category ON public.images(category);
 CREATE INDEX IF NOT EXISTS idx_images_featured ON public.images(is_featured) WHERE is_featured = true;
 CREATE INDEX IF NOT EXISTS idx_images_active ON public.images(is_active) WHERE is_active = true;
 CREATE INDEX IF NOT EXISTS idx_images_created_at ON public.images(created_at DESC);
+
+-- Execute images table creation script

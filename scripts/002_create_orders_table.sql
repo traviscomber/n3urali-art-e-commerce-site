@@ -32,3 +32,5 @@ CREATE INDEX IF NOT EXISTS idx_orders_user_email ON public.orders(user_email);
 CREATE INDEX IF NOT EXISTS idx_orders_stripe_session ON public.orders(stripe_session_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON public.orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON public.orders(created_at DESC);
+
+-- Execute orders table creation script

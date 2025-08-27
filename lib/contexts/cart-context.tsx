@@ -11,6 +11,7 @@ export interface CartItem {
   licenseType: "standard" | "extended" | "commercial"
   previewUrl: string
   category: "equirectangular" | "fisheye"
+  quantity: number
 }
 
 interface CartState {
@@ -33,6 +34,7 @@ const CartContext = createContext<{
   dispatch: React.Dispatch<CartAction>
   addItem: (item: CartItem) => void
   removeItem: (id: string) => void
+  updateQuantity: (id: string, quantity: number) => void
   clearCart: () => void
   toggleCart: () => void
   openCart: () => void
@@ -47,14 +49,24 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       )
 
       if (existingItem) {
-        return state // Don't add duplicates
+        const updatedItems = state.items.map((item) =>
+          item.imageId === action.payload.imageId && item.licenseType === action.payload.licenseType
+            ? { ...item, quantity: item.quantity + 1 }
+            : item,
+        )
+        return {
+          ...state,
+          items: updatedItems,
+          total: updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        }
       }
 
-      const newItems = [...state.items, action.payload]
+      const newItem = { ...action.payload, quantity: 1 }
+      const newItems = [...state.items, newItem]
       return {
         ...state,
         items: newItems,
-        total: newItems.reduce((sum, item) => sum + item.price, 0),
+        total: newItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
       }
 
     case "REMOVE_ITEM":
@@ -62,7 +74,20 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return {
         ...state,
         items: filteredItems,
-        total: filteredItems.reduce((sum, item) => sum + item.price, 0),
+        total: filteredItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+      }
+
+    case "UPDATE_QUANTITY":
+      const updatedItems = state.items
+        .map((item) =>
+          item.id === action.payload.id ? { ...item, quantity: Math.max(0, action.payload.quantity) } : item,
+        )
+        .filter((item) => item.quantity > 0)
+
+      return {
+        ...state,
+        items: updatedItems,
+        total: updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
       }
 
     case "CLEAR_CART":
@@ -102,7 +127,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     total: 0,
   })
 
-  // Load cart from localStorage on mount
   useEffect(() => {
     const savedCart = localStorage.getItem("n3urali-cart")
     if (savedCart) {
@@ -117,7 +141,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("n3urali-cart", JSON.stringify(state))
   }, [state])
@@ -128,6 +151,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const removeItem = (id: string) => {
     dispatch({ type: "REMOVE_ITEM", payload: id })
+  }
+
+  const updateQuantity = (id: string, quantity: number) => {
+    dispatch({ type: "UPDATE_QUANTITY", payload: { id, quantity } })
   }
 
   const clearCart = () => {
@@ -153,6 +180,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         dispatch,
         addItem,
         removeItem,
+        updateQuantity,
         clearCart,
         toggleCart,
         openCart,
@@ -169,5 +197,10 @@ export function useCart() {
   if (!context) {
     throw new Error("useCart must be used within a CartProvider")
   }
-  return context
+  return {
+    ...context,
+    items: context.state.items || [],
+    total: context.state.total || 0,
+    isOpen: context.state.isOpen || false,
+  }
 }

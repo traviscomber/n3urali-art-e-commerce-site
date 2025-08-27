@@ -13,3 +13,5 @@ INSERT INTO public.images (title, description, category, price, file_url, previe
 ('Mountain Peak 360°', 'Spectacular 360-degree view from a mountain summit with panoramic alpine scenery and dramatic sky.', 'equirectangular', 59.99, '/placeholder.svg?height=400&width=800', '/placeholder.svg?height=300&width=600', '/placeholder.svg?height=150&width=300', '{"camera": "Fujifilm X-T4", "lens": "8-16mm", "settings": "f/11, 1/125s, ISO 200"}', '8192x4096', 31200000, ARRAY['mountain', 'alpine', 'summit', 'landscape', 'adventure'], true)
 
 ON CONFLICT DO NOTHING;
+
+-- Execute sample data seeding script

@@ -1,0 +1,200 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Search, Filter, Grid3X3, List, Eye, Download } from "lucide-react"
+import { useCart } from "@/lib/contexts/cart-context"
+
+interface Image {
+  id: string
+  title: string
+  category: "equirectangular" | "fisheye"
+  price: number
+  preview_url: string
+  dimensions: string
+  file_size: number
+  description?: string
+}
+
+interface ImageGalleryProps {
+  images?: Image[]
+  onImageSelect?: (image: Image) => void
+}
+
+export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) {
+  const [searchTerm, setSearchTerm] = useState("")
+  const [categoryFilter, setCategoryFilter] = useState<string>("all")
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [filteredImages, setFilteredImages] = useState<Image[]>(images)
+  const { addItem } = useCart()
+
+  useEffect(() => {
+    let filtered = images
+
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (image) =>
+          image.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          image.description?.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    }
+
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter((image) => image.category === categoryFilter)
+    }
+
+    setFilteredImages(filtered)
+  }, [images, searchTerm, categoryFilter])
+
+  const handleAddToCart = (image: Image) => {
+    addItem({
+      id: image.id,
+      imageId: image.id,
+      title: image.title,
+      price: image.price,
+      licenseType: "standard",
+      previewUrl: image.preview_url,
+      category: image.category,
+      quantity: 1,
+    })
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* Search and Filter Controls */}
+      <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-card/30 backdrop-blur-sm p-6 rounded-xl border border-border/20">
+        <div className="flex flex-col sm:flex-row gap-4 flex-1">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Search images..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 bg-background/50 border-border/50 focus:bg-background transition-all duration-300"
+            />
+          </div>
+
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-full sm:w-48 bg-background/50 border-border/50">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="equirectangular">360° Images</SelectItem>
+              <SelectItem value="fisheye">Fisheye</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant={viewMode === "grid" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setViewMode("grid")}
+            className="transition-all duration-300"
+          >
+            <Grid3X3 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === "list" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setViewMode("list")}
+            className="transition-all duration-300"
+          >
+            <List className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Results Count */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          {filteredImages.length} {filteredImages.length === 1 ? "image" : "images"} found
+        </p>
+      </div>
+
+      {/* Image Grid */}
+      <div
+        className={`grid gap-6 ${
+          viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"
+        }`}
+      >
+        {filteredImages.map((image, index) => (
+          <Card
+            key={image.id}
+            className="group overflow-hidden hover:glow-accent transition-all duration-500 animate-float bg-card/50 backdrop-blur-sm border-border/20"
+            style={{ animationDelay: `${index * 0.1}s` }}
+          >
+            <CardContent className="p-0">
+              <div className="relative aspect-square overflow-hidden">
+                <img
+                  src={image.preview_url || "/placeholder.svg"}
+                  alt={image.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                {/* Category Badge */}
+                <Badge variant="secondary" className="absolute top-3 left-3 bg-background/80 backdrop-blur-sm">
+                  {image.category === "equirectangular" ? "360°" : "Fisheye"}
+                </Badge>
+
+                {/* Action Buttons */}
+                <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => onImageSelect?.(image)}
+                    className="bg-background/80 backdrop-blur-sm hover:bg-background"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => handleAddToCart(image)}
+                    className="bg-primary/90 backdrop-blur-sm hover:bg-primary glow-primary"
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="p-6 space-y-3">
+                <h3 className="font-semibold text-lg text-balance group-hover:text-primary transition-colors">
+                  {image.title}
+                </h3>
+
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>{image.dimensions}</span>
+                  <span>{(image.file_size / 1024 / 1024).toFixed(1)} MB</span>
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <span className="text-2xl font-bold text-primary">${image.price}</span>
+                  <Button size="sm" onClick={() => handleAddToCart(image)} className="glow-primary">
+                    Add to Cart
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {filteredImages.length === 0 && (
+        <div className="text-center py-16">
+          <div className="w-24 h-24 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Search className="h-12 w-12 text-muted-foreground" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2">No images found</h3>
+          <p className="text-muted-foreground">Try adjusting your search or filter criteria.</p>
+        </div>
+      )}
+    </div>
+  )
+}

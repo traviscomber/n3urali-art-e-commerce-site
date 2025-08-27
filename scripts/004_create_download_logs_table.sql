@@ -26,3 +26,5 @@ CREATE POLICY "download_logs_admin_access" ON public.download_logs
 CREATE INDEX IF NOT EXISTS idx_download_logs_order_item_id ON public.download_logs(order_item_id);
 CREATE INDEX IF NOT EXISTS idx_download_logs_user_email ON public.download_logs(user_email);
 CREATE INDEX IF NOT EXISTS idx_download_logs_downloaded_at ON public.download_logs(downloaded_at DESC);
+
+-- Execute download logs table creation script

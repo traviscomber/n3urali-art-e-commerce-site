@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Download, Search, Filter, TrendingDown } from "lucide-react"
+import { Download, Search, Filter, TrendingDown, AlertCircle } from "lucide-react"
 
 interface DownloadLog {
   id: string
@@ -21,6 +21,7 @@ export default function AdminDownloadsPage() {
   const [downloads, setDownloads] = useState<DownloadLog[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
+  const [supabaseError, setSupabaseError] = useState(false)
   const [stats, setStats] = useState({
     totalDownloads: 0,
     todayDownloads: 0,
@@ -28,6 +29,13 @@ export default function AdminDownloadsPage() {
   })
 
   useEffect(() => {
+    const supabase = createClient()
+    if (!supabase) {
+      setSupabaseError(true)
+      setLoading(false)
+      return
+    }
+
     fetchDownloads()
     fetchStats()
   }, [])
@@ -35,6 +43,11 @@ export default function AdminDownloadsPage() {
   const fetchDownloads = async () => {
     try {
       const supabase = createClient()
+      if (!supabase) {
+        setSupabaseError(true)
+        return
+      }
+
       const { data, error } = await supabase
         .from("download_logs")
         .select(`
@@ -67,18 +80,19 @@ export default function AdminDownloadsPage() {
   const fetchStats = async () => {
     try {
       const supabase = createClient()
+      if (!supabase) {
+        setSupabaseError(true)
+        return
+      }
 
-      // Get total downloads
       const { count: totalCount } = await supabase.from("download_logs").select("*", { count: "exact", head: true })
 
-      // Get today's downloads
       const today = new Date().toISOString().split("T")[0]
       const { count: todayCount } = await supabase
         .from("download_logs")
         .select("*", { count: "exact", head: true })
         .gte("downloaded_at", today)
 
-      // Get unique users
       const { data: uniqueUsersData } = await supabase
         .from("download_logs")
         .select("user_email")
@@ -101,6 +115,26 @@ export default function AdminDownloadsPage() {
       download.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       download.image_title.toLowerCase().includes(searchTerm.toLowerCase()),
   )
+
+  if (supabaseError) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Download Management</h1>
+          <p className="text-muted-foreground">Monitor and manage user downloads</p>
+        </div>
+        <Card>
+          <CardContent className="flex items-center justify-center py-8">
+            <div className="text-center space-y-2">
+              <AlertCircle className="h-8 w-8 text-muted-foreground mx-auto" />
+              <p className="text-muted-foreground">Database connection not available</p>
+              <p className="text-sm text-muted-foreground">Please check your Supabase configuration</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   if (loading) {
     return (
@@ -126,7 +160,6 @@ export default function AdminDownloadsPage() {
         <p className="text-muted-foreground">Monitor and manage user downloads</p>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -157,7 +190,6 @@ export default function AdminDownloadsPage() {
         </Card>
       </div>
 
-      {/* Search */}
       <div className="flex items-center space-x-2">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -170,7 +202,6 @@ export default function AdminDownloadsPage() {
         </div>
       </div>
 
-      {/* Downloads Table */}
       <Card>
         <CardHeader>
           <CardTitle>Recent Downloads</CardTitle>

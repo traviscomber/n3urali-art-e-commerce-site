@@ -20,6 +20,7 @@ interface DownloadLog {
 }
 
 export default function AdminDownloadsPage() {
+  const [mounted, setMounted] = useState(false)
   const [downloads, setDownloads] = useState<DownloadLog[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -30,11 +31,19 @@ export default function AdminDownloadsPage() {
   })
 
   useEffect(() => {
-    fetchDownloads()
-    fetchStats()
+    setMounted(true)
   }, [])
 
+  useEffect(() => {
+    if (!mounted || typeof window === "undefined") return
+
+    fetchDownloads()
+    fetchStats()
+  }, [mounted])
+
   const fetchDownloads = async () => {
+    if (typeof window === "undefined") return
+
     try {
       const supabase = createClient()
       const { data, error } = await supabase
@@ -67,20 +76,19 @@ export default function AdminDownloadsPage() {
   }
 
   const fetchStats = async () => {
+    if (typeof window === "undefined") return
+
     try {
       const supabase = createClient()
 
-      // Get total downloads
       const { count: totalCount } = await supabase.from("download_logs").select("*", { count: "exact", head: true })
 
-      // Get today's downloads
       const today = new Date().toISOString().split("T")[0]
       const { count: todayCount } = await supabase
         .from("download_logs")
         .select("*", { count: "exact", head: true })
         .gte("downloaded_at", today)
 
-      // Get unique users
       const { data: uniqueUsersData } = await supabase
         .from("download_logs")
         .select("user_email")
@@ -96,6 +104,23 @@ export default function AdminDownloadsPage() {
     } catch (error) {
       console.error("Error fetching stats:", error)
     }
+  }
+
+  if (!mounted) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <div className="h-4 bg-muted rounded w-1/2"></div>
+                <div className="h-8 bg-muted rounded w-1/3"></div>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   const filteredDownloads = downloads.filter(
@@ -128,7 +153,6 @@ export default function AdminDownloadsPage() {
         <p className="text-muted-foreground">Monitor and manage user downloads</p>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -159,7 +183,6 @@ export default function AdminDownloadsPage() {
         </Card>
       </div>
 
-      {/* Search */}
       <div className="flex items-center space-x-2">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -172,7 +195,6 @@ export default function AdminDownloadsPage() {
         </div>
       </div>
 
-      {/* Downloads Table */}
       <Card>
         <CardHeader>
           <CardTitle>Recent Downloads</CardTitle>

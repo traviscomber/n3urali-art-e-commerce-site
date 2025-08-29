@@ -1,6 +1,4 @@
 import type React from "react"
-import { AdminSidebar } from "@/components/admin-sidebar"
-import { AdminAuthGuard } from "@/components/admin-auth-guard"
 
 export default function AdminLayout({
   children,
@@ -8,13 +6,13 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <AdminAuthGuard>
-      <div className="flex h-screen bg-background">
-        <AdminSidebar />
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-6">{children}</div>
-        </main>
-      </div>
-    </AdminAuthGuard>
+    <div className="min-h-screen bg-background">
+      <header className="border-b bg-card">
+        <div className="flex h-16 items-center px-6">
+          <h1 className="text-xl font-semibold">n3urali.art Admin</h1>
+        </div>
+      </header>
+      <main className="p-6">{children}</main>
+    </div>
   )
 }

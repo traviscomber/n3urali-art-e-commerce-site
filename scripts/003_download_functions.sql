@@ -19,7 +19,7 @@ BEGIN
   
   RETURN token;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to verify download token and increment count
 CREATE OR REPLACE FUNCTION verify_and_download(token_param TEXT)
@@ -80,7 +80,7 @@ BEGIN
     image_record.file_url,
     (order_item_record.download_limit - order_item_record.download_count - 1);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to get user's download history
 CREATE OR REPLACE FUNCTION get_user_downloads(user_email_param TEXT)
@@ -110,4 +110,4 @@ BEGIN
   AND o.status = 'completed'
   ORDER BY o.created_at DESC;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

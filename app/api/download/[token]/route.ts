@@ -38,45 +38,13 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
       user_agent: userAgent,
     })
 
-    try {
-      // Fetch the file from storage (this could be S3, Supabase Storage, etc.)
-      const fileResponse = await fetch(downloadData.file_url)
+    // In a real implementation, you would:
+    // 1. Fetch the actual file from secure storage (S3, etc.)
+    // 2. Stream the file to the user
+    // 3. Remove watermarks if applicable
 
-      if (!fileResponse.ok) {
-        throw new Error("File not found")
-      }
-
-      // Get file info
-      const contentType = fileResponse.headers.get("content-type") || "application/octet-stream"
-      const contentLength = fileResponse.headers.get("content-length")
-      const fileName = downloadData.file_url.split("/").pop() || "download"
-
-      // Create secure download response with proper headers
-      const headers = new Headers({
-        "Content-Type": contentType,
-        "Content-Disposition": `attachment; filename="${fileName}"`,
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        Pragma: "no-cache",
-        Expires: "0",
-        "X-Download-Token": token, // For tracking
-      })
-
-      if (contentLength) {
-        headers.set("Content-Length", contentLength)
-      }
-
-      // Stream the file to the user
-      const fileStream = fileResponse.body
-
-      return new NextResponse(fileStream, {
-        status: 200,
-        headers,
-      })
-    } catch (fileError) {
-      console.error("File streaming error:", fileError)
-      // Fallback to redirect if streaming fails
-      return NextResponse.redirect(downloadData.file_url)
-    }
+    // For now, redirect to the file URL
+    return NextResponse.redirect(downloadData.file_url)
   } catch (error) {
     console.error("Download error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

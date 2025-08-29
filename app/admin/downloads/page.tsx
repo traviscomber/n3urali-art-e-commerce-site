@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Download, Search, Filter, TrendingDown } from "lucide-react"
 
+export const dynamic = "force-dynamic"
+
 interface DownloadLog {
   id: string
   order_item_id: string

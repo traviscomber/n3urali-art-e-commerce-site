@@ -16,13 +16,11 @@ import {
   X,
   Upload,
   Download,
-  Package,
 } from "lucide-react"
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Images", href: "/admin/images", icon: Images },
-  { name: "Listings", href: "/admin/listings", icon: Package },
   { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { name: "Uploads", href: "/admin/uploads", icon: Upload },
   { name: "Downloads", href: "/admin/downloads", icon: Download },

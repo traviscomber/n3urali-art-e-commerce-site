@@ -21,6 +21,8 @@ DROP POLICY IF EXISTS "Users can update their own profile" ON public.user_profil
 DROP POLICY IF EXISTS "profiles_select_own" ON public.user_profiles;
 DROP POLICY IF EXISTS "profiles_update_own" ON public.user_profiles;
 DROP POLICY IF EXISTS "profiles_admin_access" ON public.user_profiles;
+DROP POLICY IF EXISTS "profiles_admin_select" ON public.user_profiles;
+DROP POLICY IF EXISTS "profiles_admin_update" ON public.user_profiles;
 
 -- Create comprehensive RLS policies
 CREATE POLICY "profiles_select_own" ON public.user_profiles

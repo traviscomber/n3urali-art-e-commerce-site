@@ -13,6 +13,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { User, Download, Settings, LogOut, Shield } from "lucide-react"
 import { AuthModal } from "./auth-modal"
+import Link from "next/link" // Fixed Link import to use default export instead of named export
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 
 export function UserMenu() {
@@ -115,9 +116,11 @@ export function UserMenu() {
         {isAdmin && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Shield className="mr-2 h-4 w-4" />
-              <span>Admin Dashboard</span>
+            <DropdownMenuItem asChild>
+              <Link href="/admin">
+                <Shield className="mr-2 h-4 w-4" />
+                <span>Admin Dashboard</span>
+              </Link>
             </DropdownMenuItem>
           </>
         )}

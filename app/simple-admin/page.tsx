@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { createBrowserClient } from "@supabase/ssr"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -359,7 +360,15 @@ export default function SimpleAdminPage() {
   }
 
   const createAdminClient = () => {
-    return createClient()
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      console.error("[v0] Missing Supabase admin credentials")
+      return createClient() // Fallback to regular client
+    }
+
+    return createBrowserClient(supabaseUrl, serviceRoleKey)
   }
 
   const fetchImages = async () => {
@@ -753,23 +762,29 @@ export default function SimpleAdminPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Admin Access</CardTitle>
-            <CardDescription>Enter admin password to continue</CardDescription>
+            <CardTitle>Admin Access Required</CardTitle>
+            <CardDescription>
+              Please log in to access the admin dashboard and save images to the database.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Admin Password</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                placeholder="Enter admin password"
               />
             </div>
             <Button onClick={handleLogin} className="w-full">
-              Login
+              Login to Admin Dashboard
             </Button>
+            <p className="text-sm text-gray-600 text-center">
+              Use password: <code className="bg-gray-100 px-1 rounded">C4rlit0s</code>
+            </p>
           </CardContent>
         </Card>
       </div>

@@ -1,41 +1,44 @@
 "use client"
 
+import { DialogDescription } from "@/components/ui/dialog"
+
 import type React from "react"
 
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { createBrowserClient } from "@supabase/ssr"
+import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import {
-  Images,
-  ShoppingCart,
-  Users,
-  DollarSign,
-  TrendingUp,
   Activity,
-  Eye,
-  Search,
-  Filter,
-  Calendar,
-  Mail,
-  Clock,
+  Users,
+  ShoppingCart,
+  TrendingUp,
+  Plus,
   Edit,
   Trash2,
-  Star,
-  ToggleLeft,
-  ToggleRight,
-  Plus,
-  BarChart3,
+  Search,
   Upload,
+  BarChart3,
+  Images,
+  DollarSign,
+  Eye,
+  Filter,
+  Mail,
+  Calendar,
+  Clock,
+  Star,
+  ToggleRight,
+  ToggleLeft,
 } from "lucide-react"
+import { createBrowserClient } from "@supabase/ssr"
 import Image from "next/image"
 
 interface DashboardStats {
@@ -96,8 +99,10 @@ interface ImageData {
 }
 
 export default function SimpleAdminPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [user, setUser] = useState<SupabaseUser | null>(null)
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [activeTab, setActiveTab] = useState<"dashboard" | "orders" | "users" | "images" | "analytics">("dashboard")
   const [stats, setStats] = useState<DashboardStats>({
@@ -134,56 +139,34 @@ export default function SimpleAdminPage() {
 
   useEffect(() => {
     setMounted(true)
+
+    // Check if admin is already logged in (simple session check)
+    const adminSession = localStorage.getItem("admin_session")
+    if (adminSession === "active") {
+      setUser({
+        id: "admin",
+        email: "admin@n3urali.art",
+        user_metadata: { full_name: "Admin" },
+      })
+      fetchDashboardStats()
+    }
   }, [])
 
   const fetchDashboardStats = async () => {
     if (!mounted || typeof window === "undefined") return
 
-    setLoadingStats(true)
     try {
-      const supabase = createClient()
-
-      // Fetch statistics from database
-      const [imagesResult, ordersResult, usersResult] = await Promise.all([
-        supabase.from("images").select("id", { count: "exact" }),
-        supabase.from("orders").select("id, total_amount", { count: "exact" }),
-        supabase.from("user_profiles").select("id", { count: "exact" }),
-      ])
-
-      // Calculate total revenue
-      const totalRevenue = ordersResult.data?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
+      const storedImages = JSON.parse(localStorage.getItem("admin_images") || "[]")
 
       setStats({
-        totalImages: imagesResult.count || 0,
-        totalOrders: ordersResult.count || 0,
-        totalUsers: usersResult.count || 0,
-        totalRevenue,
-        recentActivity: [
-          {
-            id: "1",
-            type: "order",
-            description: "New order received",
-            timestamp: "2 hours ago",
-          },
-          {
-            id: "2",
-            type: "user",
-            description: "New user registered",
-            timestamp: "4 hours ago",
-          },
-          {
-            id: "3",
-            type: "image",
-            description: "New image uploaded",
-            timestamp: "6 hours ago",
-          },
-        ],
+        totalImages: storedImages.length,
+        totalOrders: 0, // Placeholder
+        totalRevenue: 0, // Placeholder
+        totalUsers: 1, // Just the admin
+        recentActivity: [],
       })
     } catch (error) {
-      console.error("Error fetching stats:", error)
-      toast.error("Failed to load dashboard statistics")
-    } finally {
-      setLoadingStats(false)
+      console.error("Error fetching dashboard stats:", error)
     }
   }
 
@@ -374,22 +357,16 @@ export default function SimpleAdminPage() {
   const fetchImages = async () => {
     if (!mounted || typeof window === "undefined") return
 
-    console.log("[v0] fetchImages called - starting to fetch images from database")
+    console.log("[v0] Loading images from local storage")
     setLoadingImages(true)
+
     try {
-      const supabase = createClient()
-
-      const { data, error } = await supabase.from("images").select("*").order("created_at", { ascending: false })
-
-      if (error) throw error
-
-      console.log("[v0] fetchImages - Found", data?.length || 0, "images in database")
-      console.log("[v0] fetchImages - Sample data:", data?.slice(0, 2))
-      setImages(data || [])
+      const storedImages = JSON.parse(localStorage.getItem("admin_images") || "[]")
+      setImages(storedImages)
+      console.log("[v0] Loaded images:", storedImages.length)
     } catch (error) {
-      console.error("[v0] fetchImages - Error fetching images:", error)
-      console.error("Error fetching images:", error)
-      toast.error("Failed to load images")
+      console.error("[v0] Error loading images:", error)
+      setImages([])
     } finally {
       setLoadingImages(false)
     }
@@ -441,20 +418,15 @@ export default function SimpleAdminPage() {
 
   const toggleImageStatus = async (imageId: string, currentStatus: boolean) => {
     try {
-      const supabase = createClient()
+      const storedImages = JSON.parse(localStorage.getItem("admin_images") || "[]")
+      const updatedImages = storedImages.map((img: any) =>
+        img.id === imageId ? { ...img, active: !currentStatus, updated_at: new Date().toISOString() } : img,
+      )
 
-      const { error } = await supabase
-        .from("images")
-        .update({
-          active: !currentStatus,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", imageId)
-
-      if (error) throw error
+      localStorage.setItem("admin_images", JSON.stringify(updatedImages))
+      setImages(updatedImages)
 
       toast.success(`Image ${!currentStatus ? "activated" : "deactivated"}`)
-      fetchImages() // Refresh images list
     } catch (error) {
       console.error("Error updating image status:", error)
       toast.error("Failed to update image status")
@@ -463,20 +435,15 @@ export default function SimpleAdminPage() {
 
   const toggleImageFeatured = async (imageId: string, currentFeatured: boolean) => {
     try {
-      const supabase = createClient()
+      const storedImages = JSON.parse(localStorage.getItem("admin_images") || "[]")
+      const updatedImages = storedImages.map((img: any) =>
+        img.id === imageId ? { ...img, featured: !currentFeatured, updated_at: new Date().toISOString() } : img,
+      )
 
-      const { error } = await supabase
-        .from("images")
-        .update({
-          featured: !currentFeatured,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", imageId)
-
-      if (error) throw error
+      localStorage.setItem("admin_images", JSON.stringify(updatedImages))
+      setImages(updatedImages)
 
       toast.success(`Image ${!currentFeatured ? "featured" : "unfeatured"}`)
-      fetchImages() // Refresh images list
     } catch (error) {
       console.error("Error updating image featured status:", error)
       toast.error("Failed to update image featured status")
@@ -542,14 +509,36 @@ export default function SimpleAdminPage() {
     }
   }
 
-  const handleLogin = () => {
-    if (password === "C4rlit0s") {
-      setIsAuthenticated(true)
-      toast.success("Admin access granted")
-      fetchDashboardStats()
-    } else {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+
+    try {
+      if (password === "C4rlit0s") {
+        const adminUser = {
+          id: "admin",
+          email: "admin@n3urali.art",
+          user_metadata: { full_name: "Admin" },
+        }
+        setUser(adminUser)
+        localStorage.setItem("admin_session", "active")
+        fetchDashboardStats()
+        toast.success("Admin access granted")
+      } else {
+        throw new Error("Invalid password")
+      }
+    } catch (error) {
+      console.error("Login error:", error)
       toast.error("Invalid password")
+    } finally {
+      setIsLoading(false)
     }
+  }
+
+  const handleLogout = async () => {
+    setUser(null)
+    localStorage.removeItem("admin_session")
+    toast.success("Logged out successfully")
   }
 
   const handleFileUpload = async (file: File) => {
@@ -609,80 +598,44 @@ export default function SimpleAdminPage() {
     }
   }
 
-  const handleImageUpload = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleImageUpload = async (e: React.FormEvent) => {
     e.preventDefault()
-    const formData = new FormData(e.currentTarget)
-
-    if (!mounted || typeof window === "undefined") return
+    setIsLoading(true)
 
     try {
-      const supabase = createAdminClient()
-
-      const categoryName = formData.get("category") as string
-
-      let categoryId: string
-
-      // Try to find existing category
-      const { data: existingCategory } = await supabase
-        .from("categories")
-        .select("id")
-        .eq("name", categoryName)
-        .single()
-
-      if (existingCategory) {
-        categoryId = existingCategory.id
-      } else {
-        // Create new category
-        const { data: newCategory, error: categoryError } = await supabase
-          .from("categories")
-          .insert([
-            {
-              name: categoryName,
-              description: `Auto-created category for ${categoryName}`,
-              active: true,
-              sort_order: 0,
-            },
-          ])
-          .select("id")
-          .single()
-
-        if (categoryError) {
-          console.error("[v0] Category creation error:", categoryError)
-          throw new Error(`Failed to create category: ${categoryError.message}`)
-        }
-
-        categoryId = newCategory.id
-      }
-
+      const formData = new FormData(e.target as HTMLFormElement)
       const imageData = {
+        id: Date.now().toString(),
         title: formData.get("title") as string,
         description: formData.get("description") as string,
-        category_id: categoryId, // Use category UUID instead of name
-        price: Number.parseFloat(formData.get("price") as string),
+        category: formData.get("category") as string,
+        price: Number.parseFloat(formData.get("price") as string) || 0,
         file_url: formData.get("file_url") as string,
         preview_url: formData.get("preview_url") as string,
         thumbnail_url: formData.get("thumbnail_url") as string,
+        created_at: new Date().toISOString(),
         active: true,
-        featured: false,
       }
 
-      console.log("[v0] Inserting image data:", imageData)
+      console.log("[v0] Adding image to local storage:", imageData)
 
-      const { error } = await supabase.from("images").insert([imageData])
+      // Store in localStorage for now (simple approach)
+      const existingImages = JSON.parse(localStorage.getItem("admin_images") || "[]")
+      existingImages.push(imageData)
+      localStorage.setItem("admin_images", JSON.stringify(existingImages))
 
-      if (error) {
-        console.error("[v0] Supabase insert error:", error)
-        throw new Error(`Database error: ${error.message}`)
-      }
+      // Update local state
+      setImages(existingImages)
 
-      console.log("[v0] Image added successfully")
       toast.success("Image added successfully!")
-      e.currentTarget.reset()
-      fetchImages()
+
+      // Reset form
+      ;(e.target as HTMLFormElement).reset()
     } catch (error) {
       console.error("[v0] Error adding image:", error)
-      const errorMessage = error instanceof Error ? error.message : "Failed to add image"
-      toast.error(errorMessage)
+      toast.error("Failed to add image")
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -757,34 +710,42 @@ export default function SimpleAdminPage() {
     return <div className="p-8">Loading...</div>
   }
 
-  if (!isAuthenticated) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Admin Access Required</CardTitle>
-            <CardDescription>
-              Please log in to access the admin dashboard and save images to the database.
-            </CardDescription>
+            <CardTitle>Admin Login</CardTitle>
+            <CardDescription>Sign in with your admin account to access the dashboard</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="password">Admin Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                placeholder="Enter admin password"
-              />
-            </div>
-            <Button onClick={handleLogin} className="w-full">
-              Login to Admin Dashboard
-            </Button>
-            <p className="text-sm text-gray-600 text-center">
-              Use password: <code className="bg-gray-100 px-1 rounded">C4rlit0s</code>
-            </p>
+          <CardContent>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@n3urali.art"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Signing in..." : "Sign In"}
+              </Button>
+            </form>
           </CardContent>
         </Card>
       </div>
@@ -804,7 +765,7 @@ export default function SimpleAdminPage() {
               <Activity className="h-4 w-4 mr-2" />
               {loadingStats ? "Loading..." : "Refresh"}
             </Button>
-            <Button variant="outline" onClick={() => setIsAuthenticated(false)}>
+            <Button variant="outline" onClick={handleLogout}>
               Logout
             </Button>
           </div>

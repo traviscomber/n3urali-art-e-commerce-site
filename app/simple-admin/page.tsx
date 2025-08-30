@@ -37,6 +37,7 @@ import {
   Star,
   ToggleRight,
   ToggleLeft,
+  Database,
 } from "lucide-react"
 import { createBrowserClient } from "@supabase/ssr"
 import Image from "next/image"
@@ -168,6 +169,160 @@ export default function SimpleAdminPage() {
     } catch (error) {
       console.error("Error fetching dashboard stats:", error)
     }
+  }
+
+  const populateSampleData = () => {
+    const sampleImages: ImageData[] = [
+      {
+        id: "sample-1",
+        title: "Sunset Beach 360°",
+        description:
+          "Stunning 360° panoramic view of a tropical beach at sunset with crystal clear waters and palm trees",
+        category: "Nature & Landscapes",
+        price: 29.99,
+        file_url: "/placeholder.svg?height=2048&width=4096",
+        preview_url: "/placeholder.svg?height=720&width=1440",
+        thumbnail_url: "/placeholder.svg?height=300&width=600",
+        active: true,
+        featured: true,
+        created_at: new Date(Date.now() - 86400000).toISOString(),
+        updated_at: new Date(Date.now() - 86400000).toISOString(),
+      },
+      {
+        id: "sample-2",
+        title: "Modern Office Interior",
+        description: "Professional 360° view of a contemporary office space with modern furniture and natural lighting",
+        category: "Interior Spaces",
+        price: 39.99,
+        file_url: "/placeholder.svg?height=2048&width=4096",
+        preview_url: "/placeholder.svg?height=720&width=1440",
+        thumbnail_url: "/placeholder.svg?height=300&width=600",
+        active: true,
+        featured: false,
+        created_at: new Date(Date.now() - 172800000).toISOString(),
+        updated_at: new Date(Date.now() - 172800000).toISOString(),
+      },
+      {
+        id: "sample-3",
+        title: "City Skyline Fisheye",
+        description: "Dramatic fisheye perspective of downtown city skyline with skyscrapers and urban architecture",
+        category: "Urban & Architecture",
+        price: 24.99,
+        file_url: "/placeholder.svg?height=2048&width=2048",
+        preview_url: "/placeholder.svg?height=720&width=720",
+        thumbnail_url: "/placeholder.svg?height=300&width=300",
+        active: true,
+        featured: true,
+        created_at: new Date(Date.now() - 259200000).toISOString(),
+        updated_at: new Date(Date.now() - 259200000).toISOString(),
+      },
+      {
+        id: "sample-4",
+        title: "Mountain Peak 360°",
+        description: "Breathtaking 360° panoramic view from a mountain summit with valleys and peaks in all directions",
+        category: "Nature & Landscapes",
+        price: 34.99,
+        file_url: "/placeholder.svg?height=2048&width=4096",
+        preview_url: "/placeholder.svg?height=720&width=1440",
+        thumbnail_url: "/placeholder.svg?height=300&width=600",
+        active: true,
+        featured: false,
+        created_at: new Date(Date.now() - 345600000).toISOString(),
+        updated_at: new Date(Date.now() - 345600000).toISOString(),
+      },
+      {
+        id: "sample-5",
+        title: "Luxury Hotel Lobby",
+        description:
+          "Elegant 360° view of a five-star hotel lobby with marble floors, chandeliers, and premium furnishings",
+        category: "Interior Spaces",
+        price: 49.99,
+        file_url: "/placeholder.svg?height=2048&width=4096",
+        preview_url: "/placeholder.svg?height=720&width=1440",
+        thumbnail_url: "/placeholder.svg?height=300&width=600",
+        active: true,
+        featured: true,
+        created_at: new Date(Date.now() - 432000000).toISOString(),
+        updated_at: new Date(Date.now() - 432000000).toISOString(),
+      },
+      {
+        id: "sample-6",
+        title: "Forest Canopy Fisheye",
+        description:
+          "Unique fisheye perspective looking up through dense forest canopy with sunlight filtering through leaves",
+        category: "Nature & Landscapes",
+        price: 19.99,
+        file_url: "/placeholder.svg?height=2048&width=2048",
+        preview_url: "/placeholder.svg?height=720&width=720",
+        thumbnail_url: "/placeholder.svg?height=300&width=300",
+        active: true,
+        featured: false,
+        created_at: new Date(Date.now() - 518400000).toISOString(),
+        updated_at: new Date(Date.now() - 518400000).toISOString(),
+      },
+      {
+        id: "sample-7",
+        title: "Concert Hall 360°",
+        description: "Immersive 360° view of a grand concert hall with ornate architecture and perfect acoustics",
+        category: "Interior Spaces",
+        price: 44.99,
+        file_url: "/placeholder.svg?height=2048&width=4096",
+        preview_url: "/placeholder.svg?height=720&width=1440",
+        thumbnail_url: "/placeholder.svg?height=300&width=600",
+        active: true,
+        featured: false,
+        created_at: new Date(Date.now() - 604800000).toISOString(),
+        updated_at: new Date(Date.now() - 604800000).toISOString(),
+      },
+      {
+        id: "sample-8",
+        title: "Bridge Architecture",
+        description:
+          "Stunning fisheye view of modern bridge architecture with geometric patterns and structural details",
+        category: "Urban & Architecture",
+        price: 27.99,
+        file_url: "/placeholder.svg?height=2048&width=2048",
+        preview_url: "/placeholder.svg?height=720&width=720",
+        thumbnail_url: "/placeholder.svg?height=300&width=300",
+        active: true,
+        featured: true,
+        created_at: new Date(Date.now() - 691200000).toISOString(),
+        updated_at: new Date(Date.now() - 691200000).toISOString(),
+      },
+      {
+        id: "sample-9",
+        title: "Desert Landscape 360°",
+        description: "Vast 360° panoramic view of desert landscape with sand dunes and dramatic sky formations",
+        category: "Nature & Landscapes",
+        price: 32.99,
+        file_url: "/placeholder.svg?height=2048&width=4096",
+        preview_url: "/placeholder.svg?height=720&width=1440",
+        thumbnail_url: "/placeholder.svg?height=300&width=600",
+        active: true,
+        featured: false,
+        created_at: new Date(Date.now() - 777600000).toISOString(),
+        updated_at: new Date(Date.now() - 777600000).toISOString(),
+      },
+      {
+        id: "sample-10",
+        title: "Restaurant Interior",
+        description: "Cozy 360° view of upscale restaurant interior with ambient lighting and elegant table settings",
+        category: "Interior Spaces",
+        price: 36.99,
+        file_url: "/placeholder.svg?height=2048&width=4096",
+        preview_url: "/placeholder.svg?height=720&width=1440",
+        thumbnail_url: "/placeholder.svg?height=300&width=600",
+        active: true,
+        featured: false,
+        created_at: new Date(Date.now() - 864000000).toISOString(),
+        updated_at: new Date(Date.now() - 864000000).toISOString(),
+      },
+    ]
+
+    localStorage.setItem("admin_images", JSON.stringify(sampleImages))
+    setImages(sampleImages)
+    fetchDashboardStats()
+    toast.success(`Added ${sampleImages.length} sample images!`)
   }
 
   const fetchAnalyticsData = async () => {
@@ -741,6 +896,7 @@ export default function SimpleAdminPage() {
                   placeholder="Enter your password"
                   required
                 />
+                <p className="text-xs text-gray-500 mt-1">Hint: Use password "C4rlit0s" for admin access</p>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Signing in..." : "Sign In"}
@@ -878,6 +1034,26 @@ export default function SimpleAdminPage() {
                   <CardDescription>Common admin tasks</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
+                  <Button
+                    variant="default"
+                    className="w-full justify-start bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                    onClick={() => {
+                      setActiveTab("images")
+                      // Focus on the upload form after a short delay
+                      setTimeout(() => {
+                        const uploadForm = document.getElementById("image-upload-form")
+                        if (uploadForm) {
+                          uploadForm.scrollIntoView({ behavior: "smooth", block: "center" })
+                          const titleInput = document.getElementById("title") as HTMLInputElement
+                          if (titleInput) titleInput.focus()
+                        }
+                      }, 100)
+                    }}
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload New Photo
+                  </Button>
+
                   <Button
                     variant="outline"
                     className="w-full justify-start bg-transparent"
@@ -1214,6 +1390,34 @@ export default function SimpleAdminPage() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <Button
+                onClick={() => {
+                  setActiveTab("images")
+                  setTimeout(() => {
+                    const uploadForm = document.getElementById("upload-form")
+                    if (uploadForm) {
+                      uploadForm.scrollIntoView({ behavior: "smooth" })
+                      const titleInput = uploadForm.querySelector('input[name="title"]') as HTMLInputElement
+                      if (titleInput) titleInput.focus()
+                    }
+                  }, 100)
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg flex items-center gap-2"
+              >
+                <Upload className="h-5 w-5" />
+                Upload New Photo
+              </Button>
+
+              <Button
+                onClick={populateSampleData}
+                className="bg-green-600 hover:bg-green-700 text-white p-4 rounded-lg flex items-center gap-2"
+              >
+                <Database className="h-5 w-5" />
+                Add Sample Data
+              </Button>
             </div>
 
             <div className="grid gap-8 lg:grid-cols-3">

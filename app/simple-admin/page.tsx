@@ -33,6 +33,7 @@ import {
   ToggleRight,
   Plus,
   BarChart3,
+  Upload,
 } from "lucide-react"
 import Image from "next/image"
 
@@ -127,6 +128,8 @@ export default function SimpleAdminPage() {
     downloadTrends: [] as Array<{ category: string; downloads: number }>,
   })
   const [loadingAnalytics, setLoadingAnalytics] = useState(false)
+  const [uploadingFile, setUploadingFile] = useState(false)
+  const [dragActive, setDragActive] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -355,9 +358,14 @@ export default function SimpleAdminPage() {
     }
   }
 
+  const createAdminClient = () => {
+    return createClient()
+  }
+
   const fetchImages = async () => {
     if (!mounted || typeof window === "undefined") return
 
+    console.log("[v0] fetchImages called - starting to fetch images from database")
     setLoadingImages(true)
     try {
       const supabase = createClient()
@@ -366,8 +374,11 @@ export default function SimpleAdminPage() {
 
       if (error) throw error
 
+      console.log("[v0] fetchImages - Found", data?.length || 0, "images in database")
+      console.log("[v0] fetchImages - Sample data:", data?.slice(0, 2))
       setImages(data || [])
     } catch (error) {
+      console.error("[v0] fetchImages - Error fetching images:", error)
       console.error("Error fetching images:", error)
       toast.error("Failed to load images")
     } finally {
@@ -532,6 +543,63 @@ export default function SimpleAdminPage() {
     }
   }
 
+  const handleFileUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file")
+      return null
+    }
+
+    setUploadingFile(true)
+    try {
+      // For now, create placeholder URLs based on file name
+      // In production, you would upload to your preferred storage service
+      const fileName = file.name.replace(/\s+/g, "-").toLowerCase()
+      const baseUrl = `https://placeholder.v0.dev/800x600`
+      const placeholderUrl = `${baseUrl}?text=${encodeURIComponent(fileName)}`
+
+      // Simulate upload delay
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      toast.success("File uploaded successfully (using placeholder)")
+      return placeholderUrl
+    } catch (error) {
+      console.error("Error uploading file:", error)
+      toast.error("Failed to upload file")
+      return null
+    } finally {
+      setUploadingFile(false)
+    }
+  }
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true)
+    } else if (e.type === "dragleave") {
+      setDragActive(false)
+    }
+  }
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0]
+      const url = await handleFileUpload(file)
+      if (url) {
+        const form = document.getElementById("image-upload-form") as HTMLFormElement
+        if (form) {
+          ;(form.elements.namedItem("file_url") as HTMLInputElement).value = url
+          ;(form.elements.namedItem("preview_url") as HTMLInputElement).value = url
+          ;(form.elements.namedItem("thumbnail_url") as HTMLInputElement).value = url
+        }
+      }
+    }
+  }
+
   const handleImageUpload = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
@@ -539,12 +607,48 @@ export default function SimpleAdminPage() {
     if (!mounted || typeof window === "undefined") return
 
     try {
-      const supabase = createClient()
+      const supabase = createAdminClient()
+
+      const categoryName = formData.get("category") as string
+
+      let categoryId: string
+
+      // Try to find existing category
+      const { data: existingCategory } = await supabase
+        .from("categories")
+        .select("id")
+        .eq("name", categoryName)
+        .single()
+
+      if (existingCategory) {
+        categoryId = existingCategory.id
+      } else {
+        // Create new category
+        const { data: newCategory, error: categoryError } = await supabase
+          .from("categories")
+          .insert([
+            {
+              name: categoryName,
+              description: `Auto-created category for ${categoryName}`,
+              active: true,
+              sort_order: 0,
+            },
+          ])
+          .select("id")
+          .single()
+
+        if (categoryError) {
+          console.error("[v0] Category creation error:", categoryError)
+          throw new Error(`Failed to create category: ${categoryError.message}`)
+        }
+
+        categoryId = newCategory.id
+      }
 
       const imageData = {
         title: formData.get("title") as string,
         description: formData.get("description") as string,
-        category: formData.get("category") as string,
+        category_id: categoryId, // Use category UUID instead of name
         price: Number.parseFloat(formData.get("price") as string),
         file_url: formData.get("file_url") as string,
         preview_url: formData.get("preview_url") as string,
@@ -553,16 +657,23 @@ export default function SimpleAdminPage() {
         featured: false,
       }
 
+      console.log("[v0] Inserting image data:", imageData)
+
       const { error } = await supabase.from("images").insert([imageData])
 
-      if (error) throw error
+      if (error) {
+        console.error("[v0] Supabase insert error:", error)
+        throw new Error(`Database error: ${error.message}`)
+      }
 
+      console.log("[v0] Image added successfully")
       toast.success("Image added successfully!")
       e.currentTarget.reset()
       fetchImages()
     } catch (error) {
-      console.error("Error adding image:", error)
-      toast.error("Failed to add image")
+      console.error("[v0] Error adding image:", error)
+      const errorMessage = error instanceof Error ? error.message : "Failed to add image"
+      toast.error(errorMessage)
     }
   }
 
@@ -1140,7 +1251,56 @@ export default function SimpleAdminPage() {
                   <CardDescription>Upload a new 360° or fisheye image to your marketplace</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleImageUpload} className="space-y-4">
+                  <div
+                    className={`mb-6 border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                      dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"
+                    }`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                  >
+                    {uploadingFile ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                        <p className="text-sm text-gray-600">Uploading...</p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <Upload className="h-12 w-12 text-gray-400" />
+                        <p className="text-lg font-medium">Drag & drop your image here</p>
+                        <p className="text-sm text-gray-500">or click to browse files</p>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          id="file-input"
+                          onChange={async (e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              const url = await handleFileUpload(e.target.files[0])
+                              if (url) {
+                                const form = document.getElementById("image-upload-form") as HTMLFormElement
+                                if (form) {
+                                  ;(form.elements.namedItem("file_url") as HTMLInputElement).value = url
+                                  ;(form.elements.namedItem("preview_url") as HTMLInputElement).value = url
+                                  ;(form.elements.namedItem("thumbnail_url") as HTMLInputElement).value = url
+                                }
+                              }
+                            }
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => document.getElementById("file-input")?.click()}
+                        >
+                          Choose File
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  <form id="image-upload-form" onSubmit={handleImageUpload} className="space-y-4">
                     <div>
                       <Label htmlFor="title">Title</Label>
                       <Input id="title" name="title" required />
@@ -1150,9 +1310,12 @@ export default function SimpleAdminPage() {
                       <Label htmlFor="category">Category</Label>
                       <select id="category" name="category" className="w-full p-2 border rounded-md" required>
                         <option value="">Select category</option>
-                        <option value="360">360° Images</option>
-                        <option value="fisheye">Fisheye Images</option>
-                        <option value="panoramic">Panoramic</option>
+                        <option value="360° Images">360° Images</option>
+                        <option value="Fisheye">Fisheye Images</option>
+                        <option value="Panoramic">Panoramic</option>
+                        <option value="Nature & Landscapes">Nature & Landscapes</option>
+                        <option value="Urban & Architecture">Urban & Architecture</option>
+                        <option value="Interior Spaces">Interior Spaces</option>
                       </select>
                     </div>
 
@@ -1167,23 +1330,26 @@ export default function SimpleAdminPage() {
                     </div>
 
                     <div>
-                      <Label htmlFor="file_url">Image URL</Label>
-                      <Input id="file_url" name="file_url" type="url" required />
+                      <Label htmlFor="file_url">Image URL (auto-filled)</Label>
+                      <Input id="file_url" name="file_url" type="url" required readOnly className="bg-gray-50" />
                     </div>
 
                     <div>
-                      <Label htmlFor="preview_url">Preview URL</Label>
-                      <Input id="preview_url" name="preview_url" type="url" />
+                      <Label htmlFor="preview_url">Preview URL (auto-filled)</Label>
+                      <Input id="preview_url" name="preview_url" type="url" readOnly className="bg-gray-50" />
                     </div>
 
                     <div>
-                      <Label htmlFor="thumbnail_url">Thumbnail URL</Label>
-                      <Input id="thumbnail_url" name="thumbnail_url" type="url" />
+                      <Label htmlFor="thumbnail_url">Thumbnail URL (auto-filled)</Label>
+                      <Input id="thumbnail_url" name="thumbnail_url" type="url" readOnly className="bg-gray-50" />
                     </div>
 
-                    <Button type="submit" className="w-full">
+                    <Button
+                      type="submit"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3"
+                    >
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Image
+                      Save Image to Database
                     </Button>
                   </form>
                 </CardContent>

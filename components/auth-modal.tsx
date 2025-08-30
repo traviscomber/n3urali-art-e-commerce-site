@@ -2,8 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -11,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, AlertTriangle, CheckCircle, Zap, Database } from "lucide-react"
+import { useAuth } from "@/lib/contexts/auth-context"
 
 interface AuthModalProps {
   isOpen: boolean
@@ -19,120 +19,57 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalProps) {
+  const { signIn, quickDevMode } = useAuth()
+
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error" | "warning"; text: string } | null>(null)
   const [showSupabaseAuth, setShowSupabaseAuth] = useState(false)
-  const [failureCount, setFailureCount] = useState(0)
 
-  const [loginForm, setLoginForm] = useState({ email: "", password: "" })
+  const [loginForm, setLoginForm] = useState({ email: "travis@nuanu.com", password: "" })
   const [signupForm, setSignupForm] = useState({ email: "", password: "", fullName: "" })
 
-  const supabase = createClient()
-
-  useEffect(() => {
-    if (failureCount >= 2) {
-      setMessage({
-        type: "warning",
-        text: "Supabase authentication is currently unavailable. Developer mode is recommended.",
-      })
-    }
-  }, [failureCount])
-
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleDevLogin = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!supabase) return
-
     setIsLoading(true)
-    setMessage(null)
+    console.log("[v0] Starting dev login process with context")
 
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: loginForm.email,
-        password: loginForm.password,
-      })
-
-      if (error) {
-        setMessage({ type: "error", text: error.message })
-      } else if (data.user) {
-        setMessage({ type: "success", text: "Successfully signed in!" })
-        setTimeout(() => {
-          onClose()
-          window.location.reload()
-        }, 1000)
-      }
-    } catch (error) {
-      console.error("[v0] Login error:", error)
-      setFailureCount((prev) => prev + 1)
-      if (error instanceof TypeError && error.message.includes("Failed to fetch")) {
-        setMessage({
-          type: "warning",
-          text: "Database connection unavailable. Please use Developer Mode to continue.",
-        })
-      } else {
-        setMessage({ type: "error", text: "An unexpected error occurred" })
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!supabase) return
-
-    setIsLoading(true)
-    setMessage(null)
-
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: signupForm.email,
-        password: signupForm.password,
-        options: {
-          data: {
-            full_name: signupForm.fullName,
-          },
-        },
-      })
-
-      if (error) {
-        setMessage({ type: "error", text: error.message })
-      } else if (data.user) {
-        setMessage({
-          type: "success",
-          text: "Account created! Check your email for a confirmation link.",
-        })
-      }
-    } catch (error) {
-      console.error("[v0] Signup error:", error)
-      setFailureCount((prev) => prev + 1)
-      if (error instanceof TypeError && error.message.includes("Failed to fetch")) {
-        setMessage({
-          type: "warning",
-          text: "Database connection unavailable. Please use Developer Mode to continue.",
-        })
-      } else {
-        setMessage({ type: "error", text: "An unexpected error occurred" })
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleDevMode = () => {
-    localStorage.setItem("dev_auth", "true")
-    localStorage.setItem(
-      "dev_user",
-      JSON.stringify({
-        id: "dev-user",
-        email: "developer@local.dev",
-        user_metadata: { full_name: "Developer" },
-      }),
-    )
-    setMessage({ type: "success", text: "Developer mode activated! Redirecting..." })
     setTimeout(() => {
+      signIn(loginForm.email, loginForm.email.split("@")[0])
+
+      setMessage({ type: "success", text: "✅ Successfully signed in! You now have admin access." })
+      setTimeout(() => {
+        console.log("[v0] Closing modal after successful context login")
+        onClose()
+      }, 1500)
+      setIsLoading(false)
+    }, 500)
+  }
+
+  const handleDevSignup = (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+
+    setTimeout(() => {
+      signIn(signupForm.email, signupForm.fullName)
+
+      setMessage({ type: "success", text: "✅ Account created! You now have admin access." })
+      setTimeout(() => {
+        onClose()
+      }, 1500)
+      setIsLoading(false)
+    }, 500)
+  }
+
+  const handleQuickDevMode = () => {
+    console.log("[v0] Starting quick dev mode with context")
+
+    quickDevMode()
+
+    setMessage({ type: "success", text: "✅ Developer mode activated! You now have full admin access." })
+    setTimeout(() => {
+      console.log("[v0] Quick mode - Closing modal after context activation")
       onClose()
-      window.location.reload()
-    }, 1000)
+    }, 1500)
   }
 
   return (
@@ -143,9 +80,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
         </DialogHeader>
 
         {message && (
-          <Alert
-            variant={message.type === "error" ? "destructive" : message.type === "warning" ? "default" : "default"}
-          >
+          <Alert variant={message.type === "error" ? "destructive" : "default"}>
             {message.type === "success" ? (
               <CheckCircle className="h-4 w-4" />
             ) : message.type === "warning" ? (
@@ -166,29 +101,26 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
             </AlertDescription>
           </Alert>
 
-          <Button onClick={handleDevMode} className="w-full bg-blue-600 hover:bg-blue-700" size="lg">
+          <Button onClick={handleQuickDevMode} className="w-full bg-blue-600 hover:bg-blue-700" size="lg">
             <Zap className="mr-2 h-4 w-4" />
             Continue in Developer Mode
           </Button>
 
           <div className="text-center">
             <Button variant="ghost" size="sm" onClick={() => setShowSupabaseAuth(!showSupabaseAuth)}>
-              {showSupabaseAuth ? "Hide" : "Show"} Database Authentication
-              {failureCount > 0 && <span className="ml-1 text-amber-600">({failureCount} failures)</span>}
+              {showSupabaseAuth ? "Hide" : "Show"} Local Authentication
             </Button>
           </div>
         </div>
 
         {showSupabaseAuth && (
           <div className="mt-4">
-            {failureCount > 0 && (
-              <Alert className="mb-4 border-amber-200 bg-amber-50">
-                <AlertTriangle className="h-4 w-4 text-amber-600" />
-                <AlertDescription className="text-amber-800">
-                  Database authentication is currently experiencing issues. Developer mode is recommended.
-                </AlertDescription>
-              </Alert>
-            )}
+            <Alert className="mb-4 border-green-200 bg-green-50">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
+                Local authentication mode - no database connection required.
+              </AlertDescription>
+            </Alert>
 
             <Tabs defaultValue={defaultTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
@@ -197,7 +129,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
               </TabsList>
 
               <TabsContent value="login" className="space-y-4">
-                <form onSubmit={handleLogin} className="space-y-4">
+                <form onSubmit={handleDevLogin} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
                     <Input
@@ -214,6 +146,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
                     <Input
                       id="login-password"
                       type="password"
+                      placeholder="Any password works in dev mode"
                       value={loginForm.password}
                       onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
                       required
@@ -221,13 +154,13 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Sign In with Database
+                    Sign In (Developer Mode)
                   </Button>
                 </form>
               </TabsContent>
 
               <TabsContent value="signup" className="space-y-4">
-                <form onSubmit={handleSignup} className="space-y-4">
+                <form onSubmit={handleDevSignup} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="signup-name">Full Name</Label>
                     <Input
@@ -255,7 +188,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
                     <Input
                       id="signup-password"
                       type="password"
-                      placeholder="Choose a strong password"
+                      placeholder="Any password works in dev mode"
                       value={signupForm.password}
                       onChange={(e) => setSignupForm({ ...signupForm, password: e.target.value })}
                       required
@@ -263,7 +196,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Sign Up with Database
+                    Sign Up (Developer Mode)
                   </Button>
                 </form>
               </TabsContent>

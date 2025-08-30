@@ -2,7 +2,13 @@ import { createBrowserClient } from "@supabase/ssr"
 
 export { createBrowserClient }
 
+let supabaseClient: ReturnType<typeof createBrowserClient> | null = null
+
 export function createClient() {
+  if (supabaseClient) {
+    return supabaseClient
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -16,9 +22,9 @@ export function createClient() {
   }
 
   try {
-    const client = createBrowserClient(supabaseUrl, supabaseAnonKey)
+    supabaseClient = createBrowserClient(supabaseUrl, supabaseAnonKey)
     console.log("[v0] Supabase client created successfully")
-    return client
+    return supabaseClient
   } catch (error) {
     console.error("[v0] Failed to create Supabase client:", error)
     return null

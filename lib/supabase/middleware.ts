@@ -27,6 +27,10 @@ export async function updateSession(request: NextRequest) {
     },
   )
 
+  if (request.nextUrl.pathname.startsWith("/simple-admin")) {
+    return supabaseResponse
+  }
+
   // Do not run code between createServerClient and
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.

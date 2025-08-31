@@ -33,6 +33,19 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const getStoredImages = () => {
+      try {
+        const stored = localStorage.getItem("admin_images")
+        return stored ? JSON.parse(stored) : []
+      } catch (error) {
+        console.error("Error loading images:", error)
+        return []
+      }
+    }
+
+    const storedImages = getStoredImages()
+
+    // Create realistic orders using actual uploaded images or high-quality placeholders
     const sampleOrders: Order[] = [
       {
         id: "order_001",
@@ -45,8 +58,10 @@ export default function OrdersPage() {
         items: [
           {
             id: "item_001",
-            image_title: "Sunset Beach 360° Panorama",
-            image_url: "/placeholder.svg?height=200&width=300",
+            image_title: storedImages[0]?.title || "Sunset Beach 360° Panorama",
+            image_url:
+              storedImages[0]?.file_url ||
+              "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop&crop=center",
             license_type: "standard",
             price: 29.99,
             download_count: 2,
@@ -54,8 +69,10 @@ export default function OrdersPage() {
           },
           {
             id: "item_002",
-            image_title: "Modern Office Interior Fisheye",
-            image_url: "/placeholder.svg?height=200&width=300",
+            image_title: storedImages[1]?.title || "Modern Office Interior Fisheye",
+            image_url:
+              storedImages[1]?.file_url ||
+              "https://images.unsplash.com/photo-1497366216548-37526070297c?w=300&h=200&fit=crop&crop=center",
             license_type: "extended",
             price: 59.98,
             download_count: 0,
@@ -74,8 +91,10 @@ export default function OrdersPage() {
         items: [
           {
             id: "item_003",
-            image_title: "Urban Cityscape 360° Night View",
-            image_url: "/placeholder.svg?height=200&width=300",
+            image_title: storedImages[2]?.title || "Urban Cityscape 360° Night View",
+            image_url:
+              storedImages[2]?.file_url ||
+              "https://images.unsplash.com/photo-1519501049412-61c2a3083791?w=300&h=200&fit=crop&crop=center",
             license_type: "commercial",
             price: 99.99,
             download_count: 0,
@@ -83,8 +102,10 @@ export default function OrdersPage() {
           },
           {
             id: "item_004",
-            image_title: "Forest Trail Equirectangular",
-            image_url: "/placeholder.svg?height=200&width=300",
+            image_title: storedImages[3]?.title || "Forest Trail Equirectangular",
+            image_url:
+              storedImages[3]?.file_url ||
+              "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=300&h=200&fit=crop&crop=center",
             license_type: "standard",
             price: 49.96,
             download_count: 1,
@@ -103,8 +124,10 @@ export default function OrdersPage() {
         items: [
           {
             id: "item_005",
-            image_title: "Luxury Hotel Lobby 360°",
-            image_url: "/placeholder.svg?height=200&width=300",
+            image_title: storedImages[4]?.title || "Luxury Hotel Lobby 360°",
+            image_url:
+              storedImages[4]?.file_url ||
+              "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=300&h=200&fit=crop&crop=center",
             license_type: "commercial",
             price: 199.99,
             download_count: 5,

@@ -41,6 +41,7 @@ import {
 } from "lucide-react"
 import { createBrowserClient } from "@supabase/ssr"
 import Image from "next/image"
+import { createImage, updateImage } from "@/lib/actions"
 
 interface DashboardStats {
   totalImages: number
@@ -137,6 +138,7 @@ export default function SimpleAdminPage() {
   const [loadingAnalytics, setLoadingAnalytics] = useState(false)
   const [uploadingFile, setUploadingFile] = useState(false)
   const [dragActive, setDragActive] = useState(false)
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
 
   useEffect(() => {
     setMounted(true)
@@ -157,10 +159,13 @@ export default function SimpleAdminPage() {
     if (!mounted || typeof window === "undefined") return
 
     try {
-      const storedImages = JSON.parse(localStorage.getItem("admin_images") || "[]")
+      // Get images from localStorage instead of database
+      const storedImages = localStorage.getItem("admin_images")
+      const images = storedImages ? JSON.parse(storedImages) : []
+      const imageCount = images.length
 
       setStats({
-        totalImages: storedImages.length,
+        totalImages: imageCount,
         totalOrders: 0, // Placeholder
         totalRevenue: 0, // Placeholder
         totalUsers: 1, // Just the admin
@@ -171,158 +176,70 @@ export default function SimpleAdminPage() {
     }
   }
 
-  const populateSampleData = () => {
-    const sampleImages: ImageData[] = [
+  const populateSampleData = async () => {
+    const sampleImages = [
       {
-        id: "sample-1",
         title: "Sunset Beach 360°",
         description:
           "Stunning 360° panoramic view of a tropical beach at sunset with crystal clear waters and palm trees",
         category: "Nature & Landscapes",
         price: 29.99,
-        file_url: "/placeholder.svg?height=2048&width=4096",
-        preview_url: "/placeholder.svg?height=720&width=1440",
-        thumbnail_url: "/placeholder.svg?height=300&width=600",
-        active: true,
-        featured: true,
-        created_at: new Date(Date.now() - 86400000).toISOString(),
-        updated_at: new Date(Date.now() - 86400000).toISOString(),
+        file_url: "/placeholder.svg?height=800&width=800&text=Sunset+Beach+360",
+        preview_url: "/placeholder.svg?height=400&width=400&text=Sunset+Beach+Preview",
+        thumbnail_url: "/placeholder.svg?height=200&width=200&text=Sunset+Beach+Thumb",
       },
       {
-        id: "sample-2",
         title: "Modern Office Interior",
         description: "Professional 360° view of a contemporary office space with modern furniture and natural lighting",
         category: "Interior Spaces",
         price: 39.99,
-        file_url: "/placeholder.svg?height=2048&width=4096",
-        preview_url: "/placeholder.svg?height=720&width=1440",
-        thumbnail_url: "/placeholder.svg?height=300&width=600",
-        active: true,
-        featured: false,
-        created_at: new Date(Date.now() - 172800000).toISOString(),
-        updated_at: new Date(Date.now() - 172800000).toISOString(),
+        file_url: "/placeholder.svg?height=800&width=800&text=Modern+Office+360",
+        preview_url: "/placeholder.svg?height=400&width=400&text=Modern+Office+Preview",
+        thumbnail_url: "/placeholder.svg?height=200&width=200&text=Modern+Office+Thumb",
       },
       {
-        id: "sample-3",
         title: "City Skyline Fisheye",
-        description: "Dramatic fisheye perspective of downtown city skyline with skyscrapers and urban architecture",
+        description: "Dynamic fisheye perspective of a bustling city skyline with skyscrapers and urban architecture",
         category: "Urban & Architecture",
         price: 24.99,
-        file_url: "/placeholder.svg?height=2048&width=2048",
-        preview_url: "/placeholder.svg?height=720&width=720",
-        thumbnail_url: "/placeholder.svg?height=300&width=300",
-        active: true,
-        featured: true,
-        created_at: new Date(Date.now() - 259200000).toISOString(),
-        updated_at: new Date(Date.now() - 259200000).toISOString(),
+        file_url: "/placeholder.svg?height=800&width=800&text=City+Skyline+Fisheye",
+        preview_url: "/placeholder.svg?height=400&width=400&text=City+Skyline+Preview",
+        thumbnail_url: "/placeholder.svg?height=200&width=200&text=City+Skyline+Thumb",
       },
       {
-        id: "sample-4",
         title: "Mountain Peak 360°",
         description: "Breathtaking 360° panoramic view from a mountain summit with valleys and peaks in all directions",
         category: "Nature & Landscapes",
         price: 34.99,
-        file_url: "/placeholder.svg?height=2048&width=4096",
-        preview_url: "/placeholder.svg?height=720&width=1440",
-        thumbnail_url: "/placeholder.svg?height=300&width=600",
-        active: true,
-        featured: false,
-        created_at: new Date(Date.now() - 345600000).toISOString(),
-        updated_at: new Date(Date.now() - 345600000).toISOString(),
+        file_url: "/placeholder.svg?height=800&width=800&text=Mountain+Peak+360",
+        preview_url: "/placeholder.svg?height=400&width=400&text=Mountain+Peak+Preview",
+        thumbnail_url: "/placeholder.svg?height=200&width=200&text=Mountain+Peak+Thumb",
       },
       {
-        id: "sample-5",
         title: "Luxury Hotel Lobby",
         description:
           "Elegant 360° view of a five-star hotel lobby with marble floors, chandeliers, and premium furnishings",
         category: "Interior Spaces",
-        price: 49.99,
-        file_url: "/placeholder.svg?height=2048&width=4096",
-        preview_url: "/placeholder.svg?height=720&width=1440",
-        thumbnail_url: "/placeholder.svg?height=300&width=600",
-        active: true,
-        featured: true,
-        created_at: new Date(Date.now() - 432000000).toISOString(),
-        updated_at: new Date(Date.now() - 432000000).toISOString(),
-      },
-      {
-        id: "sample-6",
-        title: "Forest Canopy Fisheye",
-        description:
-          "Unique fisheye perspective looking up through dense forest canopy with sunlight filtering through leaves",
-        category: "Nature & Landscapes",
-        price: 19.99,
-        file_url: "/placeholder.svg?height=2048&width=2048",
-        preview_url: "/placeholder.svg?height=720&width=720",
-        thumbnail_url: "/placeholder.svg?height=300&width=300",
-        active: true,
-        featured: false,
-        created_at: new Date(Date.now() - 518400000).toISOString(),
-        updated_at: new Date(Date.now() - 518400000).toISOString(),
-      },
-      {
-        id: "sample-7",
-        title: "Concert Hall 360°",
-        description: "Immersive 360° view of a grand concert hall with ornate architecture and perfect acoustics",
-        category: "Interior Spaces",
         price: 44.99,
-        file_url: "/placeholder.svg?height=2048&width=4096",
-        preview_url: "/placeholder.svg?height=720&width=1440",
-        thumbnail_url: "/placeholder.svg?height=300&width=600",
-        active: true,
-        featured: false,
-        created_at: new Date(Date.now() - 604800000).toISOString(),
-        updated_at: new Date(Date.now() - 604800000).toISOString(),
-      },
-      {
-        id: "sample-8",
-        title: "Bridge Architecture",
-        description:
-          "Stunning fisheye view of modern bridge architecture with geometric patterns and structural details",
-        category: "Urban & Architecture",
-        price: 27.99,
-        file_url: "/placeholder.svg?height=2048&width=2048",
-        preview_url: "/placeholder.svg?height=720&width=720",
-        thumbnail_url: "/placeholder.svg?height=300&width=300",
-        active: true,
-        featured: true,
-        created_at: new Date(Date.now() - 691200000).toISOString(),
-        updated_at: new Date(Date.now() - 691200000).toISOString(),
-      },
-      {
-        id: "sample-9",
-        title: "Desert Landscape 360°",
-        description: "Vast 360° panoramic view of desert landscape with sand dunes and dramatic sky formations",
-        category: "Nature & Landscapes",
-        price: 32.99,
-        file_url: "/placeholder.svg?height=2048&width=4096",
-        preview_url: "/placeholder.svg?height=720&width=1440",
-        thumbnail_url: "/placeholder.svg?height=300&width=600",
-        active: true,
-        featured: false,
-        created_at: new Date(Date.now() - 777600000).toISOString(),
-        updated_at: new Date(Date.now() - 777600000).toISOString(),
-      },
-      {
-        id: "sample-10",
-        title: "Restaurant Interior",
-        description: "Cozy 360° view of upscale restaurant interior with ambient lighting and elegant table settings",
-        category: "Interior Spaces",
-        price: 36.99,
-        file_url: "/placeholder.svg?height=2048&width=4096",
-        preview_url: "/placeholder.svg?height=720&width=1440",
-        thumbnail_url: "/placeholder.svg?height=300&width=600",
-        active: true,
-        featured: false,
-        created_at: new Date(Date.now() - 864000000).toISOString(),
-        updated_at: new Date(Date.now() - 864000000).toISOString(),
+        file_url: "/placeholder.svg?height=800&width=800&text=Luxury+Hotel+Lobby",
+        preview_url: "/placeholder.svg?height=400&width=400&text=Luxury+Hotel+Preview",
+        thumbnail_url: "/placeholder.svg?height=200&width=200&text=Luxury+Hotel+Thumb",
       },
     ]
 
-    localStorage.setItem("admin_images", JSON.stringify(sampleImages))
-    setImages(sampleImages)
-    fetchDashboardStats()
-    toast.success(`Added ${sampleImages.length} sample images!`)
+    try {
+      for (const imageData of sampleImages) {
+        const result = await createImage(imageData)
+        if (!result.success) {
+          console.error("Failed to create sample image:", result.error)
+        }
+      }
+      toast.success("Sample data added successfully!")
+      await fetchImages() // Refresh the list
+    } catch (error) {
+      console.error("Error adding sample data:", error)
+      toast.error("Failed to add sample data")
+    }
   }
 
   const fetchAnalyticsData = async () => {
@@ -509,21 +426,30 @@ export default function SimpleAdminPage() {
     return createBrowserClient(supabaseUrl, serviceRoleKey)
   }
 
-  const fetchImages = async () => {
-    if (!mounted || typeof window === "undefined") return
+  const handleFileUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file")
+      return null
+    }
 
-    console.log("[v0] Loading images from local storage")
-    setLoadingImages(true)
-
+    setUploadingFile(true)
     try {
-      const storedImages = JSON.parse(localStorage.getItem("admin_images") || "[]")
-      setImages(storedImages)
-      console.log("[v0] Loaded images:", storedImages.length)
+      // Convert file to base64 data URL for immediate display
+      const reader = new FileReader()
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        reader.onload = (e) => resolve(e.target?.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
+
+      toast.success("File processed successfully")
+      return dataUrl
     } catch (error) {
-      console.error("[v0] Error loading images:", error)
-      setImages([])
+      console.error("Error processing file:", error)
+      toast.error("Failed to process file")
+      return null
     } finally {
-      setLoadingImages(false)
+      setUploadingFile(false)
     }
   }
 
@@ -571,34 +497,52 @@ export default function SimpleAdminPage() {
     }
   }
 
-  const toggleImageStatus = async (imageId: string, currentStatus: boolean) => {
+  const fetchImages = async () => {
     try {
-      const storedImages = JSON.parse(localStorage.getItem("admin_images") || "[]")
-      const updatedImages = storedImages.map((img: any) =>
-        img.id === imageId ? { ...img, active: !currentStatus, updated_at: new Date().toISOString() } : img,
-      )
+      // Get images from localStorage instead of database
+      if (typeof window !== "undefined") {
+        const storedImages = localStorage.getItem("admin_images")
+        const images = storedImages ? JSON.parse(storedImages) : []
+        setImages(images)
+      }
+    } catch (error) {
+      console.error("Error fetching images:", error)
+      setImages([])
+    }
+  }
 
-      localStorage.setItem("admin_images", JSON.stringify(updatedImages))
-      setImages(updatedImages)
+  const toggleImageStatus = async (imageId: string) => {
+    try {
+      const image = images.find((img) => img.id === imageId)
+      if (!image) return
 
-      toast.success(`Image ${!currentStatus ? "activated" : "deactivated"}`)
+      const result = await updateImage(imageId, { active: !image.active })
+
+      if (result.success) {
+        toast.success(`Image ${!image.active ? "activated" : "deactivated"}`)
+        await fetchImages() // Refresh the list
+      } else {
+        throw new Error(result.error || "Failed to update image")
+      }
     } catch (error) {
       console.error("Error updating image status:", error)
       toast.error("Failed to update image status")
     }
   }
 
-  const toggleImageFeatured = async (imageId: string, currentFeatured: boolean) => {
+  const toggleImageFeatured = async (imageId: string) => {
     try {
-      const storedImages = JSON.parse(localStorage.getItem("admin_images") || "[]")
-      const updatedImages = storedImages.map((img: any) =>
-        img.id === imageId ? { ...img, featured: !currentFeatured, updated_at: new Date().toISOString() } : img,
-      )
+      const image = images.find((img) => img.id === imageId)
+      if (!image) return
 
-      localStorage.setItem("admin_images", JSON.stringify(updatedImages))
-      setImages(updatedImages)
+      const result = await updateImage(imageId, { featured: !image.featured })
 
-      toast.success(`Image ${!currentFeatured ? "featured" : "unfeatured"}`)
+      if (result.success) {
+        toast.success(`Image ${!image.featured ? "featured" : "unfeatured"}`)
+        await fetchImages() // Refresh the list
+      } else {
+        throw new Error(result.error || "Failed to update image")
+      }
     } catch (error) {
       console.error("Error updating image featured status:", error)
       toast.error("Failed to update image featured status")
@@ -696,34 +640,6 @@ export default function SimpleAdminPage() {
     toast.success("Logged out successfully")
   }
 
-  const handleFileUpload = async (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please upload an image file")
-      return null
-    }
-
-    setUploadingFile(true)
-    try {
-      // For now, create placeholder URLs based on file name
-      // In production, you would upload to your preferred storage service
-      const fileName = file.name.replace(/\s+/g, "-").toLowerCase()
-      const baseUrl = `https://placeholder.v0.dev/800x600`
-      const placeholderUrl = `${baseUrl}?text=${encodeURIComponent(fileName)}`
-
-      // Simulate upload delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      toast.success("File uploaded successfully (using placeholder)")
-      return placeholderUrl
-    } catch (error) {
-      console.error("Error uploading file:", error)
-      toast.error("Failed to upload file")
-      return null
-    } finally {
-      setUploadingFile(false)
-    }
-  }
-
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -753,44 +669,50 @@ export default function SimpleAdminPage() {
     }
   }
 
-  const handleImageUpload = async (e: React.FormEvent) => {
+  const handleImageUpload = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setIsLoading(true)
+
+    const formData = new FormData(e.currentTarget)
+
+    const imageData = {
+      title: formData.get("title") as string,
+      description: formData.get("description") as string,
+      category: formData.get("category") as string,
+      price: Number.parseFloat(formData.get("price") as string),
+      file_url: formData.get("file_url") as string,
+      preview_url: formData.get("preview_url") as string,
+      thumbnail_url: formData.get("thumbnail_url") as string,
+    }
+
+    if (!imageData.title || !imageData.file_url) {
+      toast.error("Please fill in all required fields")
+      return
+    }
 
     try {
-      const formData = new FormData(e.target as HTMLFormElement)
-      const imageData = {
-        id: Date.now().toString(),
-        title: formData.get("title") as string,
-        description: formData.get("description") as string,
-        category: formData.get("category") as string,
-        price: Number.parseFloat(formData.get("price") as string) || 0,
-        file_url: formData.get("file_url") as string,
-        preview_url: formData.get("preview_url") as string,
-        thumbnail_url: formData.get("thumbnail_url") as string,
-        created_at: new Date().toISOString(),
-        active: true,
+      const result = await createImage(imageData)
+
+      if (result.success) {
+        toast.success("Image added successfully!")
+        // Reset form
+        e.currentTarget.reset()
+        setUploadedFiles([])
+
+        // Store the new image in localStorage
+        if (typeof window !== "undefined") {
+          const storedImages = localStorage.getItem("admin_images")
+          const images = storedImages ? JSON.parse(storedImages) : []
+          localStorage.setItem("admin_images", JSON.stringify([...images, result.data]))
+        }
+
+        // Refresh images list
+        await fetchImages()
+      } else {
+        throw new Error(result.error || "Failed to add image")
       }
-
-      console.log("[v0] Adding image to local storage:", imageData)
-
-      // Store in localStorage for now (simple approach)
-      const existingImages = JSON.parse(localStorage.getItem("admin_images") || "[]")
-      existingImages.push(imageData)
-      localStorage.setItem("admin_images", JSON.stringify(existingImages))
-
-      // Update local state
-      setImages(existingImages)
-
-      toast.success("Image added successfully!")
-
-      // Reset form
-      ;(e.target as HTMLFormElement).reset()
     } catch (error) {
-      console.error("[v0] Error adding image:", error)
-      toast.error("Failed to add image")
-    } finally {
-      setIsLoading(false)
+      console.error("Error adding image:", error)
+      toast.error(`Error adding image: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
 
@@ -860,6 +782,65 @@ export default function SimpleAdminPage() {
 
     return matchesSearch && matchesFilter
   })
+
+  const addSampleData = async () => {
+    const sampleImages = [
+      {
+        title: "Sunset Beach 360°",
+        description:
+          "Stunning 360° panoramic view of a tropical beach at sunset with crystal clear waters and palm trees",
+        category: "Nature & Landscapes",
+        price: 29.99,
+        file_url: "/placeholder.svg?height=800&width=800",
+        preview_url: "/placeholder.svg?height=400&width=400",
+        thumbnail_url: "/placeholder.svg?height=200&width=200",
+      },
+      {
+        title: "Modern Office Interior",
+        description: "Professional 360° view of a contemporary office space with modern furniture and natural lighting",
+        category: "Interior Spaces",
+        price: 39.99,
+        file_url: "/placeholder.svg?height=800&width=800",
+        preview_url: "/placeholder.svg?height=400&width=400",
+        thumbnail_url: "/placeholder.svg?height=200&width=200",
+      },
+      {
+        title: "City Skyline Fisheye",
+        description: "Dramatic fisheye perspective of urban architecture and city skyline during golden hour",
+        category: "Urban & Architecture",
+        price: 24.99,
+        file_url: "/placeholder.svg?height=800&width=800",
+        preview_url: "/placeholder.svg?height=400&width=400",
+        thumbnail_url: "/placeholder.svg?height=200&width=200",
+      },
+    ]
+
+    try {
+      for (const imageData of sampleImages) {
+        const result = await createImage(imageData)
+        if (!result.success) {
+          console.error("Failed to create sample image:", result.error)
+        }
+        // Store the new image in localStorage
+        if (typeof window !== "undefined") {
+          const storedImages = localStorage.getItem("admin_images")
+          const images = storedImages ? JSON.parse(storedImages) : []
+          localStorage.setItem("admin_images", JSON.stringify([...images, result.data]))
+        }
+      }
+      toast.success("Sample data added successfully!")
+      await fetchImages() // Refresh the list
+    } catch (error) {
+      console.error("Error adding sample data:", error)
+      toast.error("Failed to add sample data")
+    }
+  }
+
+  useEffect(() => {
+    if (user) {
+      fetchImages()
+    }
+  }, [user])
 
   if (!mounted) {
     return <div className="p-8">Loading...</div>
@@ -1412,7 +1393,7 @@ export default function SimpleAdminPage() {
               </Button>
 
               <Button
-                onClick={populateSampleData}
+                onClick={addSampleData}
                 className="bg-green-600 hover:bg-green-700 text-white p-4 rounded-lg flex items-center gap-2"
               >
                 <Database className="h-5 w-5" />

@@ -1,21 +1,7 @@
 "use server"
 
-import { createClient } from "@supabase/supabase-js"
-
-const createAdminClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-  console.log("[v0] Supabase URL:", supabaseUrl ? "✓ Available" : "✗ Missing")
-  console.log("[v0] Service Role Key:", serviceRoleKey ? "✓ Available" : "✗ Missing")
-
-  return createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  })
-}
+import { createClient } from "@/lib/supabase/server"
+import { revalidatePath } from "next/cache"
 
 export async function createImageWithCategory(imageData: {
   title: string
@@ -28,7 +14,16 @@ export async function createImageWithCategory(imageData: {
 }) {
   try {
     console.log("[v0] Starting image creation with data:", imageData)
-    const supabase = createAdminClient()
+    const supabase = await createClient()
+
+    // Check if user is authenticated
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      throw new Error("Authentication required")
+    }
 
     console.log("[v0] Looking up category:", imageData.category)
     const { data: categoryData, error: categoryError } = await supabase
@@ -74,7 +69,7 @@ export async function createImageWithCategory(imageData: {
         {
           title: imageData.title,
           description: imageData.description,
-          category_id: categoryId, // Use category_id UUID instead of category string
+          category_id: categoryId,
           price: imageData.price,
           file_url: imageData.file_url,
           preview_url: imageData.preview_url,
@@ -87,23 +82,242 @@ export async function createImageWithCategory(imageData: {
 
     if (error) {
       console.error("[v0] Image insertion error:", error)
-      console.error("[v0] Error details:", JSON.stringify(error, null, 2))
       throw new Error(`Database error: ${error.message}`)
     }
 
     console.log("[v0] Image created successfully:", data)
+    revalidatePath("/simple-admin")
     return { success: true, data }
   } catch (error) {
     console.error("[v0] Server action error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
 
-    if (error instanceof SyntaxError && error.message.includes("Unexpected token")) {
-      console.error("[v0] JSON parsing error - likely invalid API response")
-      return {
-        success: false,
-        error: "Database connection error. Please check Supabase configuration.",
-      }
+export async function getImages() {
+  try {
+    const supabase = await createClient()
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      throw new Error("Authentication required")
     }
 
+    const { data, error } = await supabase
+      .from("images")
+      .select(`
+        *,
+        categories (
+          id,
+          name,
+          slug
+        )
+      `)
+      .order("created_at", { ascending: false })
+
+    if (error) {
+      console.error("[v0] Error fetching images:", error)
+      throw new Error(`Database error: ${error.message}`)
+    }
+
+    return { success: true, data }
+  } catch (error) {
+    console.error("[v0] Get images error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
+
+export async function toggleImageStatus(imageId: string, currentStatus: boolean) {
+  try {
+    const supabase = await createClient()
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      throw new Error("Authentication required")
+    }
+
+    const { data, error } = await supabase
+      .from("images")
+      .update({
+        active: !currentStatus,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", imageId)
+      .select()
+
+    if (error) {
+      console.error("[v0] Error updating image status:", error)
+      throw new Error(`Database error: ${error.message}`)
+    }
+
+    revalidatePath("/simple-admin")
+    return { success: true, data }
+  } catch (error) {
+    console.error("[v0] Toggle image status error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
+
+export async function toggleImageFeatured(imageId: string, currentFeatured: boolean) {
+  try {
+    const supabase = await createClient()
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      throw new Error("Authentication required")
+    }
+
+    const { data, error } = await supabase
+      .from("images")
+      .update({
+        featured: !currentFeatured,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", imageId)
+      .select()
+
+    if (error) {
+      console.error("[v0] Error updating image featured status:", error)
+      throw new Error(`Database error: ${error.message}`)
+    }
+
+    revalidatePath("/simple-admin")
+    return { success: true, data }
+  } catch (error) {
+    console.error("[v0] Toggle image featured error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
+
+export async function getDashboardStats() {
+  try {
+    const supabase = await createClient()
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      throw new Error("Authentication required")
+    }
+
+    // Get total images
+    const { count: totalImages } = await supabase.from("images").select("*", { count: "exact", head: true })
+
+    // Get total orders
+    const { count: totalOrders } = await supabase.from("orders").select("*", { count: "exact", head: true })
+
+    // Get total revenue
+    const { data: revenueData } = await supabase.from("orders").select("total_amount").eq("payment_status", "completed")
+
+    const totalRevenue = revenueData?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
+
+    // Get total users
+    const { count: totalUsers } = await supabase.from("user_profiles").select("*", { count: "exact", head: true })
+
+    return {
+      success: true,
+      data: {
+        totalImages: totalImages || 0,
+        totalOrders: totalOrders || 0,
+        totalRevenue,
+        totalUsers: totalUsers || 0,
+        recentActivity: [], // Can be populated later
+      },
+    }
+  } catch (error) {
+    console.error("[v0] Get dashboard stats error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
+
+export async function getOrders() {
+  try {
+    const supabase = await createClient()
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      throw new Error("Authentication required")
+    }
+
+    const { data, error } = await supabase
+      .from("orders")
+      .select(`
+        *,
+        order_items (
+          *,
+          images (
+            title,
+            thumbnail_url
+          )
+        )
+      `)
+      .order("created_at", { ascending: false })
+
+    if (error) {
+      console.error("[v0] Error fetching orders:", error)
+      throw new Error(`Database error: ${error.message}`)
+    }
+
+    return { success: true, data }
+  } catch (error) {
+    console.error("[v0] Get orders error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
+
+export async function getUsers() {
+  try {
+    const supabase = await createClient()
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      throw new Error("Authentication required")
+    }
+
+    const { data, error } = await supabase.from("user_profiles").select("*").order("created_at", { ascending: false })
+
+    if (error) {
+      console.error("[v0] Error fetching users:", error)
+      throw new Error(`Database error: ${error.message}`)
+    }
+
+    return { success: true, data }
+  } catch (error) {
+    console.error("[v0] Get users error:", error)
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

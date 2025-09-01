@@ -29,6 +29,14 @@ export async function createImage(imageData: ImageData) {
   try {
     const supabase = await createClient()
 
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      throw new Error("Authentication required for admin operations")
+    }
+
     let categoryId: string
 
     const { data: existingCategory, error: categoryError } = await supabase
@@ -144,6 +152,14 @@ export async function updateImage(imageId: string, updateData: ImageUpdateData) 
   try {
     const supabase = await createClient()
 
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      throw new Error("Authentication required for admin operations")
+    }
+
     let finalUpdateData = { ...updateData }
 
     if (updateData.category) {
@@ -215,6 +231,14 @@ export async function updateImage(imageId: string, updateData: ImageUpdateData) 
 export async function deleteImage(imageId: string) {
   try {
     const supabase = await createClient()
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      throw new Error("Authentication required for admin operations")
+    }
 
     const { error } = await supabase.from("images").delete().eq("id", imageId)
 

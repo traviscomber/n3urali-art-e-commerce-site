@@ -11,19 +11,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { createBrowserClient } from "@supabase/ssr"
-import { updateImage } from "@/lib/actions"
+import { getImages, createImage } from "@/lib/actions"
 
 interface DashboardStats {
   totalImages: number
+  activeImages: number
+  featuredImages: number
   totalOrders: number
-  totalUsers: number
-  totalRevenue: number
-  recentActivity: Array<{
-    id: string
-    type: "order" | "user" | "image"
-    description: string
-    timestamp: string
-  }>
 }
 
 interface Order {
@@ -79,10 +73,9 @@ export default function SimpleAdminPage() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "orders" | "users" | "images" | "analytics">("dashboard")
   const [stats, setStats] = useState<DashboardStats>({
     totalImages: 0,
+    activeImages: 0,
+    featuredImages: 0,
     totalOrders: 0,
-    totalRevenue: 0,
-    totalUsers: 0,
-    recentActivity: [],
   })
   const [orders, setOrders] = useState<Order[]>([])
   const [users, setUsers] = useState<User[]>([])
@@ -129,20 +122,25 @@ export default function SimpleAdminPage() {
     if (!mounted || typeof window === "undefined") return
 
     try {
-      // Get images from localStorage instead of database
-      const storedImages = localStorage.getItem("admin_images")
-      const images = storedImages ? JSON.parse(storedImages) : []
-      const imageCount = images.length
+      const imagesData = await getImages()
+      const totalImages = imagesData?.length || 0
+      const activeImages = imagesData?.filter((img) => img.active)?.length || 0
+      const featuredImages = imagesData?.filter((img) => img.featured)?.length || 0
 
       setStats({
-        totalImages: imageCount,
-        totalOrders: 0, // Placeholder
-        totalRevenue: 0, // Placeholder
-        totalUsers: 1, // Just the admin
-        recentActivity: [],
+        totalImages,
+        activeImages,
+        featuredImages,
+        totalOrders: 0, // Will be implemented when orders are added to database
       })
     } catch (error) {
       console.error("Error fetching dashboard stats:", error)
+      setStats({
+        totalImages: 0,
+        activeImages: 0,
+        featuredImages: 0,
+        totalOrders: 0,
+      })
     }
   }
 
@@ -198,22 +196,25 @@ export default function SimpleAdminPage() {
     ]
 
     try {
-      if (typeof window !== "undefined") {
-        const storedImages = localStorage.getItem("admin_images")
-        const existingImages = storedImages ? JSON.parse(storedImages) : []
+      const supabase = createClient()
 
-        const newImages = sampleImages.map((imageData) => ({
-          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-          ...imageData,
-          active: true,
-          featured: Math.random() > 0.5, // Randomly feature some images
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }))
+      const { data: imagesData, error: imagesError } = await supabase.from("images").select("*")
+      if (imagesError) throw imagesError
 
-        const updatedImages = [...existingImages, ...newImages]
-        localStorage.setItem("admin_images", JSON.stringify(updatedImages))
-      }
+      const existingImages = imagesData || []
+
+      const newImages = sampleImages.map((imageData) => ({
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        ...imageData,
+        active: true,
+        featured: Math.random() > 0.5, // Randomly feature some images
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }))
+
+      const updatedImages = [...existingImages, ...newImages]
+      const { error: insertError } = await supabase.from("images").insert(updatedImages)
+      if (insertError) throw insertError
 
       toast.success("Sample data added successfully!")
       await fetchImages() // Refresh the list
@@ -480,12 +481,8 @@ export default function SimpleAdminPage() {
 
   const fetchImages = async () => {
     try {
-      // Get images from localStorage instead of database
-      if (typeof window !== "undefined") {
-        const storedImages = localStorage.getItem("admin_images")
-        const images = storedImages ? JSON.parse(storedImages) : []
-        setImages(images)
-      }
+      const imagesData = await getImages()
+      setImages(imagesData || [])
     } catch (error) {
       console.error("Error fetching images:", error)
       setImages([])
@@ -494,17 +491,15 @@ export default function SimpleAdminPage() {
 
   const toggleImageStatus = async (imageId: string) => {
     try {
-      const image = images.find((img) => img.id === imageId)
-      if (!image) return
+      const supabase = createClient()
+      const { error } = await supabase
+        .from("images")
+        .update({ active: !images.find((img) => img.id === imageId)?.active })
+        .eq("id", imageId)
+      if (error) throw error
 
-      const result = await updateImage(imageId, { active: !image.active })
-
-      if (result.success) {
-        toast.success(`Image ${!image.active ? "activated" : "deactivated"}`)
-        await fetchImages() // Refresh the list
-      } else {
-        throw new Error(result.error || "Failed to update image")
-      }
+      await fetchImages()
+      toast.success(`Image ${!images.find((img) => img.id === imageId)?.active ? "activated" : "deactivated"}`)
     } catch (error) {
       console.error("Error updating image status:", error)
       toast.error("Failed to update image status")
@@ -513,17 +508,15 @@ export default function SimpleAdminPage() {
 
   const toggleImageFeatured = async (imageId: string) => {
     try {
-      const image = images.find((img) => img.id === imageId)
-      if (!image) return
+      const supabase = createClient()
+      const { error } = await supabase
+        .from("images")
+        .update({ featured: !images.find((img) => img.id === imageId)?.featured })
+        .eq("id", imageId)
+      if (error) throw error
 
-      const result = await updateImage(imageId, { featured: !image.featured })
-
-      if (result.success) {
-        toast.success(`Image ${!image.featured ? "featured" : "unfeatured"}`)
-        await fetchImages() // Refresh the list
-      } else {
-        throw new Error(result.error || "Failed to update image")
-      }
+      await fetchImages()
+      toast.success(`Image ${!images.find((img) => img.id === imageId)?.featured ? "featured" : "unfeatured"}`)
     } catch (error) {
       console.error("Error updating image featured status:", error)
       toast.error("Failed to update image featured status")
@@ -652,52 +645,48 @@ export default function SimpleAdminPage() {
 
   const handleImageUpload = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-
     const formData = new FormData(e.currentTarget)
+    const file = formData.get("image") as File
+    const title = formData.get("title") as string
+    const description = formData.get("description") as string
+    const category = formData.get("category") as string
+    const price = Number.parseFloat(formData.get("price") as string)
 
-    const imageData = {
-      title: formData.get("title") as string,
-      description: formData.get("description") as string,
-      category: formData.get("category") as string,
-      price: Number.parseFloat(formData.get("price") as string),
-      file_url: formData.get("file_url") as string,
-      preview_url: formData.get("preview_url") as string,
-      thumbnail_url: formData.get("thumbnail_url") as string,
-    }
-
-    if (!imageData.title || !imageData.file_url) {
-      toast.error("Please fill in all required fields")
+    if (!file || !title || !description || !category || !price) {
+      toast.error("Please fill in all fields")
       return
     }
 
     try {
-      const newImage = {
-        id: Date.now().toString(),
-        ...imageData,
-        active: true,
-        featured: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+      const reader = new FileReader()
+      reader.onload = async (event) => {
+        const base64String = event.target?.result as string
+
+        const imageData = {
+          title,
+          description,
+          category,
+          price,
+          file_url: base64String,
+          preview_url: base64String,
+          thumbnail_url: base64String,
+          active: true,
+          featured: false,
+        }
+
+        const { error } = await createImage(imageData)
+        if (error) throw error
+
+        await fetchImages()
+        toast.success("Image added successfully!")
+
+        e.currentTarget.reset()
+        setUploadedFiles([])
       }
-
-      // Store the new image in localStorage
-      if (typeof window !== "undefined") {
-        const storedImages = localStorage.getItem("admin_images")
-        const images = storedImages ? JSON.parse(storedImages) : []
-        const updatedImages = [...images, newImage]
-        localStorage.setItem("admin_images", JSON.stringify(updatedImages))
-      }
-
-      toast.success("Image added successfully!")
-      // Reset form
-      e.currentTarget.reset()
-      setUploadedFiles([])
-
-      // Refresh images list
-      await fetchImages()
+      reader.readAsDataURL(file)
     } catch (error) {
-      console.error("Error adding image:", error)
-      toast.error(`Error adding image: ${error instanceof Error ? error.message : "Unknown error"}`)
+      console.error("Error uploading image:", error)
+      toast.error("Failed to upload image")
     }
   }
 
@@ -776,8 +765,8 @@ export default function SimpleAdminPage() {
           "Stunning 360° panoramic view of a tropical beach at sunset with crystal clear waters and palm trees",
         category: "Nature & Landscapes",
         price: 29.99,
-        file_url: "/placeholder.svg?height=800&width=800",
-        preview_url: "/placeholder.svg?height=400&width=400",
+        file_url: "/placeholder.svg?height=800&width=1600",
+        preview_url: "/placeholder.svg?height=400&width=800",
         thumbnail_url: "/placeholder.svg?height=200&width=200",
       },
       {
@@ -785,13 +774,13 @@ export default function SimpleAdminPage() {
         description: "Professional 360° view of a contemporary office space with modern furniture and natural lighting",
         category: "Interior Spaces",
         price: 39.99,
-        file_url: "/placeholder.svg?height=800&width=800",
-        preview_url: "/placeholder.svg?height=400&width=400",
+        file_url: "/placeholder.svg?height=800&width=1600",
+        preview_url: "/placeholder.svg?height=400&width=800",
         thumbnail_url: "/placeholder.svg?height=200&width=200",
       },
       {
         title: "City Skyline Fisheye",
-        description: "Dramatic fisheye perspective of urban architecture and city skyline during golden hour",
+        description: "Dramatic fisheye view of urban cityscape with skyscrapers and bustling street life",
         category: "Urban & Architecture",
         price: 24.99,
         file_url: "/placeholder.svg?height=800&width=800",
@@ -801,22 +790,25 @@ export default function SimpleAdminPage() {
     ]
 
     try {
-      if (typeof window !== "undefined") {
-        const storedImages = localStorage.getItem("admin_images")
-        const existingImages = storedImages ? JSON.parse(storedImages) : []
+      const supabase = createClient()
 
-        const newImages = sampleImages.map((imageData) => ({
-          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-          ...imageData,
-          active: true,
-          featured: Math.random() > 0.5, // Randomly feature some images
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }))
+      const { data: imagesData, error: imagesError } = await supabase.from("images").select("*")
+      if (imagesError) throw imagesError
 
-        const updatedImages = [...existingImages, ...newImages]
-        localStorage.setItem("admin_images", JSON.stringify(updatedImages))
-      }
+      const existingImages = imagesData || []
+
+      const newImages = sampleImages.map((imageData) => ({
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        ...imageData,
+        active: true,
+        featured: Math.random() > 0.5, // Randomly feature some images
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }))
+
+      const updatedImages = [...existingImages, ...newImages]
+      const { error: insertError } = await supabase.from("images").insert(updatedImages)
+      if (insertError) throw insertError
 
       toast.success("Sample data added successfully!")
       await fetchImages() // Refresh the list
@@ -881,7 +873,327 @@ export default function SimpleAdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto space-y-8">{/* Admin dashboard content goes here */}</div>
+      <div className="max-w-6xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="text-gray-600">Manage your n3urali.art e-commerce platform</p>
+          </div>
+          <Button onClick={handleLogout} variant="outline">
+            Sign Out
+          </Button>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            {[
+              { id: "dashboard", label: "Dashboard", icon: "📊" },
+              { id: "images", label: "Images", icon: "🖼️" },
+              { id: "orders", label: "Orders", icon: "📦" },
+              { id: "users", label: "Users", icon: "👥" },
+              { id: "analytics", label: "Analytics", icon: "📈" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === tab.id
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <span className="mr-2">{tab.icon}</span>
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* Dashboard Tab */}
+        {activeTab === "dashboard" && (
+          <div className="space-y-6">
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+                <CardDescription>Common administrative tasks</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button
+                    onClick={() => setActiveTab("images")}
+                    className="h-20 bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <div className="text-center">
+                      <div className="text-2xl mb-1">📸</div>
+                      <div>Upload New Photo</div>
+                    </div>
+                  </Button>
+                  <Button onClick={populateSampleData} className="h-20 bg-green-600 hover:bg-green-700 text-white">
+                    <div className="text-center">
+                      <div className="text-2xl mb-1">📊</div>
+                      <div>Add Sample Data</div>
+                    </div>
+                  </Button>
+                  <Button
+                    onClick={() => setActiveTab("analytics")}
+                    className="h-20 bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    <div className="text-center">
+                      <div className="text-2xl mb-1">📈</div>
+                      <div>View Analytics</div>
+                    </div>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <div className="text-2xl mr-4">🖼️</div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Images</p>
+                      <p className="text-2xl font-bold">{stats.totalImages}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <div className="text-2xl mr-4">📦</div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Orders</p>
+                      <p className="text-2xl font-bold">{stats.totalOrders}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <div className="text-2xl mr-4">👥</div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Users</p>
+                      <p className="text-2xl font-bold">{stats.totalUsers}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <div className="text-2xl mr-4">💰</div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                      <p className="text-2xl font-bold">${stats.totalRevenue}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* Images Tab */}
+        {activeTab === "images" && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Image Upload Form */}
+              <div className="lg:col-span-1">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Add New Image</CardTitle>
+                    <CardDescription>Upload a new 360° or fisheye image</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form id="image-upload-form" onSubmit={handleImageUpload} className="space-y-4">
+                      {/* Drag and Drop Area */}
+                      <div
+                        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                          dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"
+                        }`}
+                        onDragEnter={handleDrag}
+                        onDragLeave={handleDrag}
+                        onDragOver={handleDrag}
+                        onDrop={handleDrop}
+                      >
+                        <div className="text-4xl mb-2">📸</div>
+                        <p className="text-sm text-gray-600 mb-2">Drag and drop your image here, or click to browse</p>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0]
+                            if (file) {
+                              const url = await handleFileUpload(file)
+                              if (url) {
+                                const form = document.getElementById("image-upload-form") as HTMLFormElement
+                                if (form) {
+                                  ;(form.elements.namedItem("file_url") as HTMLInputElement).value = url
+                                  ;(form.elements.namedItem("preview_url") as HTMLInputElement).value = url
+                                  ;(form.elements.namedItem("thumbnail_url") as HTMLInputElement).value = url
+                                }
+                              }
+                            }
+                          }}
+                          className="hidden"
+                          id="file-upload"
+                        />
+                        <label htmlFor="file-upload" className="cursor-pointer text-blue-600 hover:text-blue-500">
+                          Browse files
+                        </label>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="title">Title *</Label>
+                        <Input id="title" name="title" placeholder="e.g., Sunset Beach 360°" required />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="description">Description</Label>
+                        <textarea
+                          id="description"
+                          name="description"
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                          rows={3}
+                          placeholder="Describe your image..."
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="category">Category</Label>
+                        <select
+                          id="category"
+                          name="category"
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                          required
+                        >
+                          <option value="">Select a category</option>
+                          <option value="Nature & Landscapes">Nature & Landscapes</option>
+                          <option value="Interior Spaces">Interior Spaces</option>
+                          <option value="Urban & Architecture">Urban & Architecture</option>
+                          <option value="Fisheye">Fisheye</option>
+                          <option value="Panoramic">Panoramic</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="price">Price ($)</Label>
+                        <Input id="price" name="price" type="number" step="0.01" min="0" placeholder="29.99" required />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="image">Image</Label>
+                        <Input id="image" name="image" type="file" accept="image/*" required />
+                      </div>
+
+                      <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3">
+                        💾 Save Image to Database
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Images List */}
+              <div className="lg:col-span-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Manage Images</CardTitle>
+                    <CardDescription>View and manage your uploaded images</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {images.length === 0 ? (
+                        <div className="text-center py-8">
+                          <div className="text-4xl mb-4">📷</div>
+                          <p className="text-gray-500">No images uploaded yet</p>
+                          <p className="text-sm text-gray-400">Upload your first image using the form on the left</p>
+                        </div>
+                      ) : (
+                        images.map((image) => (
+                          <div key={image.id} className="border rounded-lg p-4 bg-white">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <h3 className="font-semibold text-lg">{image.title}</h3>
+                                <p className="text-gray-600 text-sm mb-2">{image.description}</p>
+                                <div className="flex items-center gap-4 text-sm text-gray-500">
+                                  <span className="bg-gray-100 px-2 py-1 rounded">{image.category}</span>
+                                  <span>${image.price}</span>
+                                  <span>{new Date(image.created_at).toLocaleDateString()}</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant={image.featured ? "default" : "outline"}
+                                  onClick={() => toggleImageFeatured(image.id)}
+                                >
+                                  ⭐ {image.featured ? "Featured" : "Feature"}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant={image.active ? "default" : "outline"}
+                                  onClick={() => toggleImageStatus(image.id)}
+                                >
+                                  {image.active ? "✅ Active" : "❌ Inactive"}
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Other tabs would go here */}
+        {activeTab === "orders" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Orders Management</CardTitle>
+              <CardDescription>View and manage customer orders</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-500">Orders management functionality coming soon...</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {activeTab === "users" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>User Management</CardTitle>
+              <CardDescription>View and manage user accounts</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-500">User management functionality coming soon...</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {activeTab === "analytics" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Analytics & Reports</CardTitle>
+              <CardDescription>View sales and performance analytics</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-500">Analytics functionality coming soon...</p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   )
 }

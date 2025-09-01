@@ -1,7 +1,8 @@
 "use server"
 
-import { createAdminClient } from "@/lib/supabase/admin"
+import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 
 export interface ImageData {
   title: string
@@ -27,12 +28,18 @@ export interface ImageUpdateData {
 
 export async function createImage(imageData: ImageData) {
   try {
-    const supabase = createAdminClient()
+    const supabase = await createClient()
 
-    // First, get or create the category
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      redirect("/auth/login")
+    }
+
     let categoryId: string
 
-    // Try to find existing category
     const { data: existingCategory, error: categoryError } = await supabase
       .from("categories")
       .select("id")
@@ -40,14 +47,12 @@ export async function createImage(imageData: ImageData) {
       .single()
 
     if (categoryError && categoryError.code !== "PGRST116") {
-      // PGRST116 is "not found" error, other errors are actual problems
       throw categoryError
     }
 
     if (existingCategory) {
       categoryId = existingCategory.id
     } else {
-      // Create new category
       const { data: newCategory, error: createCategoryError } = await supabase
         .from("categories")
         .insert({
@@ -65,7 +70,6 @@ export async function createImage(imageData: ImageData) {
       categoryId = newCategory.id
     }
 
-    // Create the image record
     const { data, error } = await supabase
       .from("images")
       .insert({
@@ -106,9 +110,15 @@ export async function createImage(imageData: ImageData) {
 
 export async function getImages() {
   try {
-    console.log("[v0] Starting getImages server action")
-    const supabase = createAdminClient()
-    console.log("[v0] Admin client created, attempting database query")
+    const supabase = await createClient()
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      redirect("/auth/login")
+    }
 
     const { data, error } = await supabase
       .from("images")
@@ -130,40 +140,23 @@ export async function getImages() {
       `)
       .order("created_at", { ascending: false })
 
-    console.log("[v0] Database query completed")
-    console.log("[v0] Query error:", error)
-    console.log("[v0] Query data length:", data?.length || 0)
-
     if (error) {
-      console.error("[v0] Database error details:", {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code,
-      })
       throw error
     }
 
-    // Transform the data to include category name directly
     const transformedData =
       data?.map((image) => ({
         ...image,
         category: image.categories?.name || "Uncategorized",
       })) || []
 
-    console.log("[v0] Successfully fetched", transformedData.length, "images")
     return {
       success: true,
       data: transformedData,
       error: null,
     }
   } catch (error) {
-    console.error("[v0] Error in getImages:", error)
-    if (error instanceof Error) {
-      console.error("[v0] Error name:", error.name)
-      console.error("[v0] Error message:", error.message)
-      console.error("[v0] Error stack:", error.stack)
-    }
+    console.error("Error in getImages:", error)
     return {
       success: false,
       data: null,
@@ -174,13 +167,19 @@ export async function getImages() {
 
 export async function updateImage(imageId: string, updateData: ImageUpdateData) {
   try {
-    const supabase = createAdminClient()
+    const supabase = await createClient()
 
-    // If category is being updated, handle the category_id lookup
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      redirect("/auth/login")
+    }
+
     let finalUpdateData = { ...updateData }
 
     if (updateData.category) {
-      // Get or create the category
       let categoryId: string
 
       const { data: existingCategory, error: categoryError } = await supabase
@@ -196,7 +195,6 @@ export async function updateImage(imageId: string, updateData: ImageUpdateData) 
       if (existingCategory) {
         categoryId = existingCategory.id
       } else {
-        // Create new category
         const { data: newCategory, error: createCategoryError } = await supabase
           .from("categories")
           .insert({
@@ -214,7 +212,6 @@ export async function updateImage(imageId: string, updateData: ImageUpdateData) 
         categoryId = newCategory.id
       }
 
-      // Replace category name with category_id
       finalUpdateData = {
         ...updateData,
         category_id: categoryId,
@@ -222,7 +219,6 @@ export async function updateImage(imageId: string, updateData: ImageUpdateData) 
       delete finalUpdateData.category
     }
 
-    // Add updated_at timestamp
     finalUpdateData.updated_at = new Date().toISOString()
 
     const { data, error } = await supabase.from("images").update(finalUpdateData).eq("id", imageId).select().single()
@@ -251,7 +247,15 @@ export async function updateImage(imageId: string, updateData: ImageUpdateData) 
 
 export async function deleteImage(imageId: string) {
   try {
-    const supabase = createAdminClient()
+    const supabase = await createClient()
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      redirect("/auth/login")
+    }
 
     const { error } = await supabase.from("images").delete().eq("id", imageId)
 
@@ -270,6 +274,7 @@ export async function deleteImage(imageId: string) {
     console.error("Error deleting image:", error)
     return {
       success: false,
+      data: null,
       error: error instanceof Error ? error.message : "Failed to delete image",
     }
   }

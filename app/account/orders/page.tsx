@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ShoppingBag, Eye, Calendar, Package, Download, CreditCard } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ShoppingBag, Eye, Calendar, Package, Download, CreditCard, X } from "lucide-react"
 import { toast } from "sonner"
 
 interface OrderItem {
@@ -31,6 +32,8 @@ interface Order {
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
+  const [previewImage, setPreviewImage] = useState<OrderItem | null>(null)
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
 
   useEffect(() => {
     const getStoredImages = () => {
@@ -45,7 +48,6 @@ export default function OrdersPage() {
 
     const storedImages = getStoredImages()
 
-    // Create realistic orders using actual uploaded images or high-quality placeholders
     const sampleOrders: Order[] = [
       {
         id: "order_001",
@@ -59,9 +61,7 @@ export default function OrdersPage() {
           {
             id: "item_001",
             image_title: storedImages[0]?.title || "Sunset Beach 360° Panorama",
-            image_url:
-              storedImages[0]?.file_url ||
-              "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop&crop=center",
+            image_url: storedImages[0]?.file_url || "/sunset_beach_panorama.jpg",
             license_type: "standard",
             price: 29.99,
             download_count: 2,
@@ -70,9 +70,7 @@ export default function OrdersPage() {
           {
             id: "item_002",
             image_title: storedImages[1]?.title || "Modern Office Interior Fisheye",
-            image_url:
-              storedImages[1]?.file_url ||
-              "https://images.unsplash.com/photo-1497366216548-37526070297c?w=300&h=200&fit=crop&crop=center",
+            image_url: storedImages[1]?.file_url || "/modern_office_fisheye.jpg",
             license_type: "extended",
             price: 59.98,
             download_count: 0,
@@ -92,9 +90,7 @@ export default function OrdersPage() {
           {
             id: "item_003",
             image_title: storedImages[2]?.title || "Urban Cityscape 360° Night View",
-            image_url:
-              storedImages[2]?.file_url ||
-              "https://images.unsplash.com/photo-1519501049412-61c2a3083791?w=300&h=200&fit=crop&crop=center",
+            image_url: storedImages[2]?.file_url || "/urban_cityscape_night.jpg",
             license_type: "commercial",
             price: 99.99,
             download_count: 0,
@@ -103,9 +99,7 @@ export default function OrdersPage() {
           {
             id: "item_004",
             image_title: storedImages[3]?.title || "Forest Trail Equirectangular",
-            image_url:
-              storedImages[3]?.file_url ||
-              "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=300&h=200&fit=crop&crop=center",
+            image_url: storedImages[3]?.file_url || "/forest_trail_equirectangular.jpg",
             license_type: "standard",
             price: 49.96,
             download_count: 1,
@@ -125,9 +119,7 @@ export default function OrdersPage() {
           {
             id: "item_005",
             image_title: storedImages[4]?.title || "Luxury Hotel Lobby 360°",
-            image_url:
-              storedImages[4]?.file_url ||
-              "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=300&h=200&fit=crop&crop=center",
+            image_url: storedImages[4]?.file_url || "/luxury_hotel_lobby.jpg",
             license_type: "commercial",
             price: 199.99,
             download_count: 5,
@@ -170,13 +162,37 @@ export default function OrdersPage() {
   }
 
   const handleDownload = (item: OrderItem) => {
+    if (item.download_count >= item.download_limit) {
+      toast.error("Download limit reached for this item")
+      return
+    }
+
+    const link = document.createElement("a")
+    link.href = item.image_url
+    link.download = `${item.image_title.replace(/\s+/g, "_")}.jpg`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
     toast.success(`Download started for ${item.image_title}`)
-    // In a real app, this would generate a download link
+
+    setOrders((prevOrders) =>
+      prevOrders.map((order) => ({
+        ...order,
+        items: order.items.map((orderItem) =>
+          orderItem.id === item.id ? { ...orderItem, download_count: orderItem.download_count + 1 } : orderItem,
+        ),
+      })),
+    )
   }
 
   const handleViewOrder = (orderId: string) => {
     toast.info(`Viewing order details for ${orderId}`)
-    // In a real app, this would navigate to order details page
+  }
+
+  const handlePreview = (item: OrderItem) => {
+    setPreviewImage(item)
+    setIsPreviewOpen(true)
   }
 
   if (loading) {
@@ -273,7 +289,7 @@ export default function OrdersPage() {
                       <div className="text-right">
                         <div className="font-semibold">${item.price.toFixed(2)}</div>
                         <div className="flex gap-2 mt-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handlePreview(item)}>
                             <Eye className="h-4 w-4 mr-1" />
                             Preview
                           </Button>
@@ -297,6 +313,45 @@ export default function OrdersPage() {
           ))}
         </div>
       )}
+
+      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              {previewImage?.image_title}
+              <Button variant="ghost" size="sm" onClick={() => setIsPreviewOpen(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          {previewImage && (
+            <div className="relative">
+              <img
+                src={previewImage.image_url || "/placeholder.svg"}
+                alt={previewImage.image_title}
+                className="w-full h-auto max-h-[70vh] object-contain rounded-lg"
+              />
+              <div className="mt-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Badge className={getLicenseBadgeColor(previewImage.license_type)} variant="secondary">
+                    {previewImage.license_type.charAt(0).toUpperCase() + previewImage.license_type.slice(1)}
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">
+                    Downloads: {previewImage.download_count}/{previewImage.download_limit}
+                  </span>
+                </div>
+                <Button
+                  onClick={() => handleDownload(previewImage)}
+                  disabled={previewImage.download_count >= previewImage.download_limit}
+                >
+                  <Download className="h-4 w-4 mr-1" />
+                  Download
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

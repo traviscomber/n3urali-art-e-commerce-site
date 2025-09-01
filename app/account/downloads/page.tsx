@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -21,6 +22,7 @@ export default function DownloadsPage() {
   const [downloads, setDownloads] = useState<UserDownload[]>([])
   const [loading, setLoading] = useState(true)
   const [downloadingIds, setDownloadingIds] = useState<Set<number>>(new Set())
+  const supabase = createClient()
 
   useEffect(() => {
     fetchDownloads()
@@ -28,19 +30,11 @@ export default function DownloadsPage() {
 
   const fetchDownloads = async () => {
     try {
-      // Mock data for now - will be replaced with Neon database calls
-      const mockDownloads: UserDownload[] = [
-        {
-          order_id: 1,
-          image_title: "Sunset Panorama",
-          license_type: "standard",
-          download_count: 1,
-          download_limit: 5,
-          order_date: new Date().toISOString(),
-          can_download: true,
-        },
-      ]
-      setDownloads(mockDownloads)
+      const response = await fetch("/api/downloads/user")
+      if (!response.ok) throw new Error("Failed to fetch downloads")
+
+      const data = await response.json()
+      setDownloads(data.downloads)
     } catch (error) {
       console.error("Error fetching downloads:", error)
       toast.error("Failed to load downloads")
@@ -53,8 +47,22 @@ export default function DownloadsPage() {
     setDownloadingIds((prev) => new Set(prev).add(orderItemId))
 
     try {
-      // Mock download functionality
+      // Generate download token
+      const response = await fetch("/api/download/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderItemId }),
+      })
+
+      if (!response.ok) throw new Error("Failed to generate download link")
+
+      const data = await response.json()
+
+      // Open download in new tab
+      window.open(data.downloadUrl, "_blank")
       toast.success(`Download started for ${imageTitle}`)
+
+      // Refresh downloads to update counts
       setTimeout(fetchDownloads, 1000)
     } catch (error) {
       console.error("Download error:", error)

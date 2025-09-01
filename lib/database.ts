@@ -1,48 +1,15 @@
-import { neon } from "@neondatabase/serverless"
+import { createClient } from "@/lib/supabase/server"
+import type { Database } from "@/types/database"
 
-const sql = neon(process.env.DATABASE_URL!)
+export type Tables<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Row"]
+export type InsertTables<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Insert"]
+export type UpdateTables<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Update"]
 
-// Type definitions for database tables
-export interface Image {
-  id: string
-  title: string
-  description: string
-  category_id: string
-  price: number
-  image_url: string
-  thumbnail_url: string
-  active: boolean
-  featured: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface Order {
-  id: string
-  user_email: string
-  total_amount: number
-  payment_status: string
-  created_at: string
-  updated_at: string
-}
-
-export interface OrderItem {
-  id: string
-  order_id: string
-  image_id: string
-  license_type: string
-  price: number
-  created_at: string
-}
-
-export interface DownloadLog {
-  id: string
-  order_item_id: string
-  user_email: string
-  ip_address: string
-  user_agent: string
-  created_at: string
-}
+// Type aliases for easier use
+export type Image = Tables<"images">
+export type Order = Tables<"orders">
+export type OrderItem = Tables<"order_items">
+export type DownloadLog = Tables<"download_logs">
 
 // License type definitions
 export const LICENSE_TYPES = {
@@ -65,7 +32,7 @@ export const LICENSE_TYPES = {
 
 export type LicenseType = keyof typeof LICENSE_TYPES
 
-// Helper function to get Neon SQL client
-export function getNeonClient() {
-  return sql
+// Helper function to get typed Supabase client
+export async function getSupabaseClient() {
+  return createClient()
 }

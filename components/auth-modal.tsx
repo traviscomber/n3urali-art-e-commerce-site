@@ -23,7 +23,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
 
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error" | "warning"; text: string } | null>(null)
-  const [showLocalAuth, setShowLocalAuth] = useState(false)
+  const [showSupabaseAuth, setShowSupabaseAuth] = useState(false)
 
   const [loginForm, setLoginForm] = useState({ email: "travis@nuanu.com", password: "" })
   const [signupForm, setSignupForm] = useState({ email: "", password: "", fullName: "" })
@@ -107,13 +107,13 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
           </Button>
 
           <div className="text-center">
-            <Button variant="ghost" size="sm" onClick={() => setShowLocalAuth(!showLocalAuth)}>
-              {showLocalAuth ? "Hide" : "Show"} Local Authentication
+            <Button variant="ghost" size="sm" onClick={() => setShowSupabaseAuth(!showSupabaseAuth)}>
+              {showSupabaseAuth ? "Hide" : "Show"} Local Authentication
             </Button>
           </div>
         </div>
 
-        {showLocalAuth && (
+        {showSupabaseAuth && (
           <div className="mt-4">
             <Alert className="mb-4 border-green-200 bg-green-50">
               <CheckCircle className="h-4 w-4 text-green-600" />

@@ -215,77 +215,6 @@ INSERT INTO licenses (name, description, price, features) VALUES
     ('Extended', 'Full rights for unlimited commercial use', 199.99, '["Unlimited commercial use", "Highest resolution", "24/7 support", "Resale rights", "Exclusive usage options"]')
 ON CONFLICT (name) DO NOTHING;
 
--- Insert sample images for immediate platform readiness
--- Insert sample images with realistic data
-INSERT INTO images (title, description, category_id, file_url, preview_url, thumbnail_url, price, featured, active) VALUES
-    (
-        'Sunset Beach Paradise 360°',
-        'Stunning 360° panoramic view of a tropical beach at sunset with crystal clear waters and palm trees',
-        (SELECT id FROM categories WHERE slug = '360-images' LIMIT 1),
-        '/placeholder.svg?height=2048&width=4096',
-        '/placeholder.svg?height=1024&width=2048',
-        '/placeholder.svg?height=300&width=400',
-        29.99,
-        TRUE,
-        TRUE
-    ),
-    (
-        'Modern Office Interior Fisheye',
-        'Professional 360° view of a contemporary office space with modern furniture and natural lighting',
-        (SELECT id FROM categories WHERE slug = 'fisheye' LIMIT 1),
-        '/placeholder.svg?height=2048&width=2048',
-        '/placeholder.svg?height=1024&width=1024',
-        '/placeholder.svg?height=300&width=400',
-        39.99,
-        TRUE,
-        TRUE
-    ),
-    (
-        'City Skyline 360° Night View',
-        'Breathtaking 360° panoramic view of a modern city skyline at night with illuminated skyscrapers',
-        (SELECT id FROM categories WHERE slug = 'architecture' LIMIT 1),
-        '/placeholder.svg?height=2048&width=4096',
-        '/placeholder.svg?height=1024&width=2048',
-        '/placeholder.svg?height=300&width=400',
-        49.99,
-        TRUE,
-        TRUE
-    ),
-    (
-        'Forest Trail VR Experience',
-        'Immersive 360° forest trail experience perfect for VR applications with lush greenery and natural paths',
-        (SELECT id FROM categories WHERE slug = 'virtual-reality' LIMIT 1),
-        '/placeholder.svg?height=2048&width=4096',
-        '/placeholder.svg?height=1024&width=2048',
-        '/placeholder.svg?height=300&width=400',
-        34.99,
-        FALSE,
-        TRUE
-    ),
-    (
-        'Mountain Peak 360° Panorama',
-        'Epic 360° panoramic view from a mountain peak with stunning valley views and dramatic clouds',
-        (SELECT id FROM categories WHERE slug = 'nature' LIMIT 1),
-        '/placeholder.svg?height=2048&width=4096',
-        '/placeholder.svg?height=1024&width=2048',
-        '/placeholder.svg?height=300&width=400',
-        44.99,
-        TRUE,
-        TRUE
-    ),
-    (
-        'Luxury Hotel Lobby Fisheye',
-        'Elegant fisheye view of a luxury hotel lobby with marble floors, chandeliers, and premium furnishings',
-        (SELECT id FROM categories WHERE slug = 'fisheye' LIMIT 1),
-        '/placeholder.svg?height=2048&width=2048',
-        '/placeholder.svg?height=1024&width=1024',
-        '/placeholder.svg?height=300&width=400',
-        54.99,
-        FALSE,
-        TRUE
-    )
-ON CONFLICT DO NOTHING;
-
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_images_category_id ON images(category_id);
 CREATE INDEX IF NOT EXISTS idx_images_active ON images(active);
@@ -319,6 +248,9 @@ CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders FOR EACH ROW EXE
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
+
+-- Insert admin user profile (will be created automatically via trigger when user signs up)
+-- The trigger will set is_admin = TRUE for travis@nuanu.com
 
 COMMENT ON TABLE user_profiles IS 'User profiles with admin capabilities';
 COMMENT ON TABLE categories IS 'Image categories for organizing content';

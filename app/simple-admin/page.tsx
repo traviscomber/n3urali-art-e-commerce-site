@@ -19,8 +19,7 @@ interface ImageData {
   description: string
   category: string
   price: number
-  file_url: string
-  preview_url: string
+  image_url: string
   thumbnail_url: string
   active: boolean
   featured: boolean
@@ -171,8 +170,7 @@ export default function SimpleAdminPage() {
           description: (formData.get("description") as string) || "",
           category: formData.get("category") as string,
           price: Number.parseFloat(formData.get("price") as string) || 0,
-          file_url: base64Url,
-          preview_url: base64Url,
+          image_url: base64Url, // Changed from file_url to image_url
           thumbnail_url: base64Url,
           active: true,
           featured: false,
@@ -204,8 +202,10 @@ export default function SimpleAdminPage() {
 
     await handleFileUpload(file, formData)
 
-    // Reset form
-    e.currentTarget.reset()
+    const form = e.currentTarget
+    if (form) {
+      form.reset()
+    }
   }
 
   const addSampleData = async () => {
@@ -216,9 +216,8 @@ export default function SimpleAdminPage() {
           "Stunning 360° panoramic view of a tropical beach at sunset with crystal clear waters and palm trees",
         category: "Nature & Landscapes",
         price: 29.99,
-        file_url:
+        image_url:
           "/placeholder.svg?height=800&width=800&text=Sunset+Beach+360°+panoramic+view+of+tropical+beach+at+golden+hour",
-        preview_url: "/placeholder.svg?height=400&width=400&text=Sunset+Beach+360°+preview",
         thumbnail_url: "/placeholder.svg?height=200&width=200&text=Sunset+Beach+thumbnail",
         active: true,
         featured: true,
@@ -228,9 +227,8 @@ export default function SimpleAdminPage() {
         description: "Professional 360° view of a contemporary office space with modern furniture and natural lighting",
         category: "Interior Spaces",
         price: 39.99,
-        file_url:
+        image_url:
           "/placeholder.svg?height=800&width=800&text=Modern+office+interior+360°+view+with+contemporary+furniture",
-        preview_url: "/placeholder.svg?height=400&width=400&text=Modern+office+interior+preview",
         thumbnail_url: "/placeholder.svg?height=200&width=200&text=Modern+office+thumbnail",
         active: true,
         featured: false,
@@ -240,9 +238,8 @@ export default function SimpleAdminPage() {
         description: "Dynamic fisheye perspective of a bustling city skyline with skyscrapers and urban architecture",
         category: "Urban & Architecture",
         price: 24.99,
-        file_url:
+        image_url:
           "/placeholder.svg?height=800&width=800&text=City+skyline+fisheye+view+with+skyscrapers+and+urban+architecture",
-        preview_url: "/placeholder.svg?height=400&width=400&text=City+skyline+fisheye+preview",
         thumbnail_url: "/placeholder.svg?height=200&width=200&text=City+skyline+thumbnail",
         active: true,
         featured: true,
@@ -508,7 +505,7 @@ export default function SimpleAdminPage() {
                     {images.map((image) => (
                       <div key={image.id} className="border rounded-lg p-4 space-y-3">
                         <img
-                          src={image.thumbnail_url || image.preview_url || image.file_url}
+                          src={image.thumbnail_url || image.image_url}
                           alt={image.title}
                           className="w-full h-32 object-cover rounded"
                         />

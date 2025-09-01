@@ -57,7 +57,6 @@ export function UserMenu() {
     }
 
     console.log("[v0] No context user, falling back to Supabase authentication")
-    // Fall back to Supabase authentication
     if (!supabase) {
       console.log("[v0] No Supabase client available")
       setIsLoading(false)
@@ -65,22 +64,52 @@ export function UserMenu() {
     }
 
     const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      setUser(user)
-      setIsLoading(false)
+      try {
+        console.log("[v0] Attempting to get Supabase user...")
+        const {
+          data: { user },
+          error,
+        } = await supabase.auth.getUser()
+
+        if (error) {
+          console.log("[v0] Supabase auth error:", error.message)
+          setUser(null)
+        } else {
+          console.log("[v0] Supabase user retrieved:", user ? "authenticated" : "not authenticated")
+          setUser(user)
+        }
+      } catch (error) {
+        console.log("[v0] Error getting Supabase user:", error)
+        setUser(null)
+      } finally {
+        setIsLoading(false)
+      }
     }
 
     getUser()
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
+    let subscription: any = null
+    try {
+      const {
+        data: { subscription: authSubscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        console.log("[v0] Auth state changed:", _event, session ? "authenticated" : "not authenticated")
+        setUser(session?.user ?? null)
+      })
+      subscription = authSubscription
+    } catch (error) {
+      console.log("[v0] Error setting up auth state listener:", error)
+    }
 
-    return () => subscription.unsubscribe()
+    return () => {
+      if (subscription) {
+        try {
+          subscription.unsubscribe()
+        } catch (error) {
+          console.log("[v0] Error unsubscribing from auth state:", error)
+        }
+      }
+    }
   }, [supabase, isAuthenticated, contextUser])
 
   const handleSignOut = async () => {
@@ -93,8 +122,15 @@ export function UserMenu() {
     }
 
     if (!supabase) return
-    await supabase.auth.signOut()
-    window.location.reload()
+
+    try {
+      await supabase.auth.signOut()
+      window.location.reload()
+    } catch (error) {
+      console.log("[v0] Error signing out:", error)
+      // Still reload the page to clear any cached state
+      window.location.reload()
+    }
   }
 
   const handleAdminDashboard = () => {

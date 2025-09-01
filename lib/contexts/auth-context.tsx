@@ -102,7 +102,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       sessionStorage.removeItem("dev_auth")
       sessionStorage.removeItem("dev_user")
-      console.log("[v0] AuthContext - Cleared sessionStorage")
+      localStorage.removeItem("admin_session")
+      console.log("[v0] AuthContext - Cleared sessionStorage and admin session")
     } catch (error) {
       console.log("[v0] AuthContext - Error clearing sessionStorage:", error)
     }

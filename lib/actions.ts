@@ -2,7 +2,6 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
 
 export interface ImageData {
   title: string
@@ -29,14 +28,6 @@ export interface ImageUpdateData {
 export async function createImage(imageData: ImageData) {
   try {
     const supabase = await createClient()
-
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-    if (authError || !user) {
-      redirect("/auth/login")
-    }
 
     let categoryId: string
 
@@ -112,14 +103,6 @@ export async function getImages() {
   try {
     const supabase = await createClient()
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-    if (authError || !user) {
-      redirect("/auth/login")
-    }
-
     const { data, error } = await supabase
       .from("images")
       .select(`
@@ -150,32 +133,16 @@ export async function getImages() {
         category: image.categories?.name || "Uncategorized",
       })) || []
 
-    return {
-      success: true,
-      data: transformedData,
-      error: null,
-    }
+    return transformedData
   } catch (error) {
     console.error("Error in getImages:", error)
-    return {
-      success: false,
-      data: null,
-      error: error instanceof Error ? error.message : "Failed to fetch images",
-    }
+    return []
   }
 }
 
 export async function updateImage(imageId: string, updateData: ImageUpdateData) {
   try {
     const supabase = await createClient()
-
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-    if (authError || !user) {
-      redirect("/auth/login")
-    }
 
     let finalUpdateData = { ...updateData }
 
@@ -248,14 +215,6 @@ export async function updateImage(imageId: string, updateData: ImageUpdateData) 
 export async function deleteImage(imageId: string) {
   try {
     const supabase = await createClient()
-
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-    if (authError || !user) {
-      redirect("/auth/login")
-    }
 
     const { error } = await supabase.from("images").delete().eq("id", imageId)
 

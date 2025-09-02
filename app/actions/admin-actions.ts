@@ -133,3 +133,35 @@ export async function getCategories() {
     }
   }
 }
+
+export async function deleteImage(imageId: string) {
+  try {
+    console.log("[v0] Starting image deletion for ID:", imageId)
+    const sql = createNeonClient()
+
+    // Delete the image from the database
+    const result = await sql`
+      DELETE FROM images 
+      WHERE id = ${imageId}
+      RETURNING *
+    `
+
+    if (result.length === 0) {
+      console.log("[v0] No image found with ID:", imageId)
+      return {
+        success: false,
+        error: "Image not found",
+      }
+    }
+
+    console.log("[v0] Image deleted successfully:", result[0])
+    revalidatePath("/simple-admin")
+    return { success: true, data: result[0] }
+  } catch (error) {
+    console.error("[v0] Delete image error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}

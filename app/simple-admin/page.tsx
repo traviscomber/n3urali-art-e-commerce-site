@@ -6,7 +6,13 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { getImages, createImageWithCategory, getOrders, getCategories } from "@/app/actions/admin-actions"
+import {
+  getImages,
+  createImageWithCategory,
+  getOrders,
+  getCategories,
+  deleteImage as deleteImageAction,
+} from "@/app/actions/admin-actions"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
@@ -296,9 +302,19 @@ export default function SimpleAdminPage() {
     if (!confirm("Are you sure you want to delete this image?")) return
 
     try {
-      toast.info("Delete functionality is being updated")
+      console.log("[v0] Deleting image with ID:", imageId)
+      const result = await deleteImageAction(imageId)
+
+      if (result.success) {
+        toast.success("Image deleted successfully")
+        // Refresh the images list
+        fetchImages()
+      } else {
+        console.log("[v0] Delete failed:", result.error)
+        toast.error(`Failed to delete image: ${result.error}`)
+      }
     } catch (error) {
-      console.error("Error deleting image:", error)
+      console.error("[v0] Error deleting image:", error)
       toast.error("Failed to delete image")
     }
   }

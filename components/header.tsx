@@ -39,6 +39,13 @@ export function Header() {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
+              href="/browse"
+              className="relative text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-300 group"
+            >
+              Browse
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
+            </Link>
+            <Link
               href="/categories/equirectangular"
               className="relative text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-300 group"
             >
@@ -99,6 +106,13 @@ export function Header() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Gallery
+              </Link>
+              <Link
+                href="/browse"
+                className="text-base font-medium text-muted-foreground hover:text-primary transition-colors px-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Browse
               </Link>
               <Link
                 href="/categories/equirectangular"

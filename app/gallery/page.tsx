@@ -1,41 +1,22 @@
 import { ImageGallery } from "@/components/image-gallery"
 import { Badge } from "@/components/ui/badge"
+import { getImages } from "@/app/actions/admin-actions"
 
-// Mock data for demonstration
-const mockImages = [
-  {
-    id: "1",
-    title: "Urban Skyline 360°",
-    category: "equirectangular" as const,
-    price: 49.99,
-    preview_url: "/urban-skyline-360-degree-view.png",
-    dimensions: "8192x4096",
-    file_size: 25600000,
-    description: "Stunning urban skyline captured in full 360° for immersive experiences",
-  },
-  {
-    id: "2",
-    title: "Forest Canopy Fisheye",
-    category: "fisheye" as const,
-    price: 39.99,
-    preview_url: "/forest-canopy-fisheye-view.png",
-    dimensions: "4096x4096",
-    file_size: 18400000,
-    description: "Dense forest canopy captured with fisheye lens for unique perspective",
-  },
-  {
-    id: "3",
-    title: "Modern Architecture 360°",
-    category: "equirectangular" as const,
-    price: 59.99,
-    preview_url: "/modern-architecture-360-interior.png",
-    dimensions: "8192x4096",
-    file_size: 28800000,
-    description: "Contemporary architectural interior in full 360° detail",
-  },
-]
+export default async function GalleryPage() {
+  const result = await getImages()
+  const images = result.success ? result.data : []
 
-export default function GalleryPage() {
+  const transformedImages = images.map((image: any) => ({
+    id: image.id,
+    title: image.title,
+    category: image.category_name?.toLowerCase() === "fisheye" ? ("fisheye" as const) : ("equirectangular" as const),
+    price: Number.parseFloat(image.price) || 0,
+    preview_url: image.thumbnail_url || image.image_url,
+    dimensions: "4096x4096", // Default dimensions
+    file_size: 20000000, // Default file size
+    description: image.description || "",
+  }))
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -63,7 +44,14 @@ export default function GalleryPage() {
       {/* Gallery Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <ImageGallery images={mockImages} />
+          {transformedImages.length === 0 ? (
+            <div className="text-center py-16">
+              <h3 className="text-lg font-semibold mb-2">No images available</h3>
+              <p className="text-muted-foreground">Upload some images in the admin panel to see them here</p>
+            </div>
+          ) : (
+            <ImageGallery images={transformedImages} />
+          )}
         </div>
       </section>
     </div>

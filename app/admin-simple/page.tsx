@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Trash2, Edit, Eye, EyeOff } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
+import { getImages, createImageWithCategory } from "@/app/actions/admin-actions"
 
 export default function SimpleAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -42,16 +42,19 @@ export default function SimpleAdminPage() {
   }, [])
 
   const fetchData = async () => {
-    const supabase = createClient()
-
     try {
-      const [imagesResult, categoriesResult] = await Promise.all([
-        supabase.from("images").select("*").order("created_at", { ascending: false }),
-        supabase.from("categories").select("*"),
-      ])
-
-      if (imagesResult.data) setImages(imagesResult.data)
-      if (categoriesResult.data) setCategories(categoriesResult.data)
+      const imagesResult = await getImages()
+      if (imagesResult.success) {
+        setImages(imagesResult.data)
+        // Extract unique categories from images
+        const uniqueCategories = imagesResult.data.reduce((acc, image) => {
+          if (image.category_name && !acc.find((cat) => cat.name === image.category_name)) {
+            acc.push({ id: image.category_id, name: image.category_name })
+          }
+          return acc
+        }, [])
+        setCategories(uniqueCategories)
+      }
     } catch (error) {
       console.error("Error fetching data:", error)
     }
@@ -74,37 +77,37 @@ export default function SimpleAdminPage() {
     e.preventDefault()
     setLoading(true)
 
-    const supabase = createClient()
-
     try {
       const imageData = {
-        ...newImage,
+        title: newImage.title,
+        description: newImage.description,
+        category: categories.find((cat) => cat.id === newImage.category_id)?.name || "Uncategorized",
         price: Number.parseFloat(newImage.price) || 0,
-        file_size: Number.parseInt(newImage.file_size) || 0,
-        created_at: new Date().toISOString(),
+        image_url: newImage.image_url,
+        thumbnail_url: newImage.preview_url || newImage.image_url,
       }
 
-      if (editingImage) {
-        await supabase.from("images").update(imageData).eq("id", editingImage.id)
+      const result = await createImageWithCategory(imageData)
+
+      if (result.success) {
+        // Reset form
+        setNewImage({
+          title: "",
+          description: "",
+          category_id: "",
+          price: "",
+          image_url: "",
+          preview_url: "",
+          file_size: "",
+          dimensions: "",
+          is_active: true,
+          is_featured: false,
+        })
+        setEditingImage(null)
+        fetchData()
       } else {
-        await supabase.from("images").insert([imageData])
+        alert("Error saving image: " + result.error)
       }
-
-      // Reset form
-      setNewImage({
-        title: "",
-        description: "",
-        category_id: "",
-        price: "",
-        image_url: "",
-        preview_url: "",
-        file_size: "",
-        dimensions: "",
-        is_active: true,
-        is_featured: false,
-      })
-      setEditingImage(null)
-      fetchData()
     } catch (error) {
       console.error("Error saving image:", error)
       alert("Error saving image")
@@ -132,27 +135,11 @@ export default function SimpleAdminPage() {
   const handleDelete = async (imageId) => {
     if (!confirm("Are you sure you want to delete this image?")) return
 
-    const supabase = createClient()
-    try {
-      await supabase.from("images").delete().eq("id", imageId)
-      fetchData()
-    } catch (error) {
-      console.error("Error deleting image:", error)
-      alert("Error deleting image")
-    }
+    alert("Delete functionality needs to be implemented with server actions")
   }
 
   const toggleStatus = async (image, field) => {
-    const supabase = createClient()
-    try {
-      await supabase
-        .from("images")
-        .update({ [field]: !image[field] })
-        .eq("id", image.id)
-      fetchData()
-    } catch (error) {
-      console.error("Error updating image:", error)
-    }
+    alert("Toggle functionality needs to be implemented with server actions")
   }
 
   if (!isAuthenticated) {

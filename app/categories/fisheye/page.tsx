@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Grid, List, Eye, ShoppingCart } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
+import { getImages } from "@/app/actions/admin-actions"
 
 interface Image {
   id: string
@@ -21,83 +22,44 @@ interface Image {
   tags: string[]
 }
 
-// Mock fisheye images data
-const fisheyeImages: Image[] = [
-  {
-    id: "1",
-    title: "Forest Canopy Fisheye",
-    description: "Immersive forest canopy view captured with fisheye lens",
-    category: "fisheye",
-    price: 89,
-    previewUrl: "/forest-canopy-fisheye-view.png",
-    dimensions: "4096x4096",
-    fileSize: "12.5 MB",
-    tags: ["nature", "forest", "canopy", "immersive"],
-  },
-  {
-    id: "2",
-    title: "Urban Architecture Fisheye",
-    description: "Dynamic city architecture captured with fisheye perspective",
-    category: "fisheye",
-    price: 95,
-    previewUrl: "/urban-architecture-fisheye.png",
-    dimensions: "4096x4096",
-    fileSize: "14.2 MB",
-    tags: ["urban", "architecture", "city", "perspective"],
-  },
-  {
-    id: "3",
-    title: "Concert Hall Fisheye",
-    description: "Dramatic concert hall interior with fisheye distortion",
-    category: "fisheye",
-    price: 105,
-    previewUrl: "/concert-hall-fisheye-interior.png",
-    dimensions: "5120x5120",
-    fileSize: "18.7 MB",
-    tags: ["interior", "concert", "hall", "dramatic"],
-  },
-  {
-    id: "4",
-    title: "Underwater Fisheye",
-    description: "Unique underwater perspective captured with fisheye lens",
-    category: "fisheye",
-    price: 120,
-    previewUrl: "/underwater-fisheye-perspective.png",
-    dimensions: "4096x4096",
-    fileSize: "16.3 MB",
-    tags: ["underwater", "marine", "unique", "perspective"],
-  },
-  {
-    id: "5",
-    title: "Stadium Fisheye",
-    description: "Expansive stadium view with dramatic fisheye effect",
-    category: "fisheye",
-    price: 110,
-    previewUrl: "/stadium-fisheye-expansive.png",
-    dimensions: "6144x6144",
-    fileSize: "22.1 MB",
-    tags: ["stadium", "sports", "expansive", "dramatic"],
-  },
-  {
-    id: "6",
-    title: "Galaxy Observatory Fisheye",
-    description: "Celestial observatory dome captured with fisheye lens",
-    category: "fisheye",
-    price: 135,
-    previewUrl: "/observatory-dome-fisheye-stars.png",
-    dimensions: "5120x5120",
-    fileSize: "19.8 MB",
-    tags: ["observatory", "celestial", "dome", "stars"],
-  },
-]
-
 export default function FisheyeCategoryPage() {
-  const [images, setImages] = useState<Image[]>(fisheyeImages)
-  const [filteredImages, setFilteredImages] = useState<Image[]>(fisheyeImages)
+  const [images, setImages] = useState<Image[]>([])
+  const [filteredImages, setFilteredImages] = useState<Image[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState("newest")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [loading, setLoading] = useState(true)
   const { addItem } = useCart()
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const result = await getImages()
+        if (result.success) {
+          const fisheyeImages = result.data
+            .filter((img: any) => img.category_name?.toLowerCase().includes("fisheye"))
+            .map((image: any) => ({
+              id: image.id,
+              title: image.title,
+              description: image.description || "",
+              category: "fisheye" as const,
+              price: Number.parseFloat(image.price) || 0,
+              previewUrl: image.thumbnail_url || image.image_url,
+              dimensions: "4096x4096",
+              fileSize: "15.0 MB",
+              tags: [image.category_name?.toLowerCase() || "fisheye"],
+            }))
+          setImages(fisheyeImages)
+          setFilteredImages(fisheyeImages)
+        }
+      } catch (error) {
+        console.error("Error fetching images:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchImages()
+  }, [])
 
   useEffect(() => {
     const filtered = images.filter(
@@ -107,7 +69,6 @@ export default function FisheyeCategoryPage() {
         image.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())),
     )
 
-    // Sort images
     switch (sortBy) {
       case "price-low":
         filtered.sort((a, b) => a.price - b.price)
@@ -119,7 +80,6 @@ export default function FisheyeCategoryPage() {
         filtered.sort((a, b) => a.title.localeCompare(b.title))
         break
       default:
-        // Keep original order for 'newest'
         break
     }
 
@@ -137,6 +97,17 @@ export default function FisheyeCategoryPage() {
       category: image.category,
       quantity: 1,
     })
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading fisheye images...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -300,13 +271,13 @@ export default function FisheyeCategoryPage() {
           ))}
         </div>
 
-        {filteredImages.length === 0 && (
+        {filteredImages.length === 0 && !loading && (
           <div className="text-center py-16">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
               <Search className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">No images found</h3>
-            <p className="text-muted-foreground">Try adjusting your search terms or filters</p>
+            <h3 className="text-lg font-semibold mb-2">No fisheye images found</h3>
+            <p className="text-muted-foreground">Upload some fisheye images in the admin panel to see them here</p>
           </div>
         )}
       </div>

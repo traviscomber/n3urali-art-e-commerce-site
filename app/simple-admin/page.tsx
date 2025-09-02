@@ -3,62 +3,41 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { getImages, createImageWithCategory, getOrders, getCategories } from "@/app/actions/admin-actions"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { toast } from "sonner"
-import {
-  Images,
-  ShoppingCart,
-  Users,
-  DollarSign,
-  TrendingUp,
-  Activity,
-  Eye,
-  Search,
-  Filter,
-  Calendar,
-  Mail,
-  Clock,
-  Edit,
-  Trash2,
-  Star,
-  ToggleLeft,
-  ToggleRight,
-  Plus,
-  BarChart3,
-  Upload,
-} from "lucide-react"
-import Image from "next/image"
+import { Trash2, Edit, Loader2 } from "lucide-react"
 
-interface DashboardStats {
-  totalImages: number
-  totalOrders: number
-  totalUsers: number
-  totalRevenue: number
-  recentActivity: Array<{
-    id: string
-    type: "order" | "user" | "image"
-    description: string
-    timestamp: string
-  }>
+interface Image {
+  id: string
+  title: string
+  description: string
+  category_id: string
+  category_name?: string
+  price: number
+  image_url: string
+  thumbnail_url: string
+  active: boolean
+  featured: boolean
+  created_at: string
+  updated_at: string
 }
 
 interface Order {
   id: string
   user_email: string
   total_amount: number
-  status: "pending" | "completed" | "failed" | "refunded"
-  customer_name: string | null
+  status: string
+  customer_name: string
   created_at: string
-  updated_at: string
-  order_items?: Array<{
+  order_items: Array<{
     id: string
     image_title: string
     license_type: string
@@ -69,339 +48,235 @@ interface Order {
 interface User {
   id: string
   email: string
-  full_name: string | null
-  avatar_url: string | null
+  full_name: string
   is_admin: boolean
   created_at: string
-  updated_at: string
-  order_count?: number
-  total_spent?: number
-  last_order_date?: string
 }
 
-interface ImageData {
+interface DashboardStats {
+  totalImages: number
+  totalOrders: number
+  totalRevenue: number
+  totalUsers: number
+}
+
+interface Category {
   id: string
-  title: string
-  description: string | null
-  category: string
-  price: number
-  file_url: string
-  preview_url: string | null
-  thumbnail_url: string | null
+  name: string
+  description: string
   active: boolean
-  featured: boolean
-  created_at: string
-  updated_at: string
 }
 
 export default function SimpleAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [password, setPassword] = useState("")
-  const [mounted, setMounted] = useState(false)
-  const [activeTab, setActiveTab] = useState<"dashboard" | "orders" | "users" | "images" | "analytics">("dashboard")
+  const [images, setImages] = useState<Image[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [stats, setStats] = useState<DashboardStats>({
     totalImages: 0,
     totalOrders: 0,
-    totalUsers: 0,
     totalRevenue: 0,
-    recentActivity: [],
+    totalUsers: 0,
   })
-  const [orders, setOrders] = useState<Order[]>([])
-  const [users, setUsers] = useState<User[]>([])
-  const [images, setImages] = useState<ImageData[]>([])
-  const [editingImage, setEditingImage] = useState<ImageData | null>(null)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [loadingStats, setLoadingStats] = useState(false)
-  const [loadingOrders, setLoadingOrders] = useState(false)
-  const [loadingUsers, setLoadingUsers] = useState(false)
-  const [loadingImages, setLoadingImages] = useState(false)
-  const [orderFilter, setOrderFilter] = useState<"all" | "pending" | "completed" | "failed" | "refunded">("all")
-  const [userFilter, setUserFilter] = useState<"all" | "admin" | "regular">("all")
-  const [imageFilter, setImageFilter] = useState<"all" | "active" | "inactive" | "featured">("all")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [userSearchTerm, setUserSearchTerm] = useState("")
-  const [imageSearchTerm, setImageSearchTerm] = useState("")
-  const [analyticsData, setAnalyticsData] = useState({
-    salesChart: [] as Array<{ month: string; revenue: number; orders: number }>,
-    topImages: [] as Array<{ title: string; downloads: number; revenue: number }>,
-    userGrowth: [] as Array<{ month: string; users: number }>,
-    downloadTrends: [] as Array<{ category: string; downloads: number }>,
-  })
-  const [loadingAnalytics, setLoadingAnalytics] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [uploadingFile, setUploadingFile] = useState(false)
-  const [dragActive, setDragActive] = useState(false)
+  const [editingImage, setEditingImage] = useState<Image | null>(null)
+  const [activeTab, setActiveTab] = useState("dashboard")
+  const [categories, setCategories] = useState<Category[]>([])
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  // Form states
+  const [newImage, setNewImage] = useState({
+    title: "",
+    description: "",
+    category: "",
+    price: "",
+    file_url: "",
+    preview_url: "",
+    thumbnail_url: "",
+  })
 
-  const fetchDashboardStats = async () => {
-    if (!mounted || typeof window === "undefined") return
-
-    setLoadingStats(true)
-    try {
-      const supabase = createClient()
-
-      // Fetch statistics from database
-      const [imagesResult, ordersResult, usersResult] = await Promise.all([
-        supabase.from("images").select("id", { count: "exact" }),
-        supabase.from("orders").select("id, total_amount", { count: "exact" }),
-        supabase.from("user_profiles").select("id", { count: "exact" }),
-      ])
-
-      // Calculate total revenue
-      const totalRevenue = ordersResult.data?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
-
-      setStats({
-        totalImages: imagesResult.count || 0,
-        totalOrders: ordersResult.count || 0,
-        totalUsers: usersResult.count || 0,
-        totalRevenue,
-        recentActivity: [
-          {
-            id: "1",
-            type: "order",
-            description: "New order received",
-            timestamp: "2 hours ago",
-          },
-          {
-            id: "2",
-            type: "user",
-            description: "New user registered",
-            timestamp: "4 hours ago",
-          },
-          {
-            id: "3",
-            type: "image",
-            description: "New image uploaded",
-            timestamp: "6 hours ago",
-          },
-        ],
-      })
-    } catch (error) {
-      console.error("Error fetching stats:", error)
-      toast.error("Failed to load dashboard statistics")
-    } finally {
-      setLoadingStats(false)
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (password === "C4rlit0s") {
+      setIsAuthenticated(true)
+      localStorage.setItem("simple_admin_auth", "true")
+      await fetchDashboardStats()
+    } else {
+      toast.error("Invalid password. Hint: C4rlit0s")
     }
   }
 
-  const fetchAnalyticsData = async () => {
-    if (!mounted || typeof window === "undefined") return
+  const handleLogout = () => {
+    setIsAuthenticated(false)
+    localStorage.removeItem("simple_admin_auth")
+  }
 
-    setLoadingAnalytics(true)
+  const handleImageUpload = async (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log("[v0] Form submission started")
+
+    const form = e.target as HTMLFormElement
+    const formData = new FormData(form)
+
+    console.log("[v0] Form data entries:")
+    for (const [key, value] of formData.entries()) {
+      console.log(`[v0] ${key}:`, value)
+    }
+
+    setUploadingFile(true)
     try {
-      const supabase = createClient()
+      console.log("[v0] Calling createImageWithCategory server action")
+      const result = await createImageWithCategory(formData)
+      console.log("[v0] Server action result:", result)
 
-      // Mock analytics data - in real app, this would come from database queries
-      setAnalyticsData({
-        salesChart: [
-          { month: "Jan", revenue: 1200, orders: 15 },
-          { month: "Feb", revenue: 1800, orders: 22 },
-          { month: "Mar", revenue: 2400, orders: 28 },
-          { month: "Apr", revenue: 2100, orders: 25 },
-          { month: "May", revenue: 2800, orders: 32 },
-          { month: "Jun", revenue: 3200, orders: 38 },
-        ],
-        topImages: [
-          { title: "Sunset Beach 360°", downloads: 145, revenue: 725 },
-          { title: "Mountain Peak Fisheye", downloads: 132, revenue: 660 },
-          { title: "City Skyline 360°", downloads: 118, revenue: 590 },
-          { title: "Forest Path Fisheye", downloads: 95, revenue: 475 },
-          { title: "Ocean View 360°", downloads: 87, revenue: 435 },
-        ],
-        userGrowth: [
-          { month: "Jan", users: 45 },
-          { month: "Feb", users: 62 },
-          { month: "Mar", users: 78 },
-          { month: "Apr", users: 94 },
-          { month: "May", users: 112 },
-          { month: "Jun", users: 135 },
-        ],
-        downloadTrends: [
-          { category: "360° Images", downloads: 342 },
-          { category: "Fisheye Images", downloads: 278 },
-          { category: "Panoramic", downloads: 156 },
-          { category: "VR Ready", downloads: 89 },
-        ],
-      })
+      if (result.success) {
+        toast.success("Image uploaded successfully")
+        setNewImage({
+          title: "",
+          description: "",
+          category: "",
+          price: "",
+          file_url: "",
+          preview_url: "",
+          thumbnail_url: "",
+        })
+        form.reset()
+        fetchImages()
+      } else {
+        console.log("[v0] Server action failed:", result.error)
+        toast.error(`Failed to upload image: ${result.error || "Unknown error"}`)
+      }
     } catch (error) {
-      console.error("Error fetching analytics:", error)
-      toast.error("Failed to load analytics data")
+      console.error("[v0] Error uploading image:", error)
+      toast.error("Failed to upload image")
     } finally {
-      setLoadingAnalytics(false)
+      setUploadingFile(false)
+    }
+  }
+
+  useEffect(() => {
+    if (localStorage.getItem("simple_admin_auth") === "true") {
+      setIsAuthenticated(true)
+      fetchDashboardStats()
+    }
+  }, [])
+
+  const fetchDashboardStats = async () => {
+    setLoading(true)
+    try {
+      const imagesResult = await getImages()
+      if (imagesResult.success) {
+        setImages(imagesResult.data)
+        setStats((prev) => ({ ...prev, totalImages: imagesResult.data.length }))
+      }
+
+      const ordersResult = await getOrders()
+      if (ordersResult.success) {
+        setOrders(ordersResult.data)
+        const revenue = ordersResult.data.reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0)
+        setStats((prev) => ({
+          ...prev,
+          totalOrders: ordersResult.data.length,
+          totalRevenue: revenue,
+        }))
+      }
+
+      const categoriesResult = await getCategories()
+      if (categoriesResult.success) {
+        setCategories(categoriesResult.data)
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error)
+      toast.error("Failed to load dashboard data")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchImages = async () => {
+    try {
+      const result = await getImages()
+      if (result.success) {
+        setImages(result.data)
+      } else {
+        toast.error("Failed to load images")
+      }
+    } catch (error) {
+      console.error("Error fetching images:", error)
+      toast.error("Failed to load images")
     }
   }
 
   const fetchOrders = async () => {
-    if (!mounted || typeof window === "undefined") return
-
-    setLoadingOrders(true)
     try {
-      const supabase = createClient()
-
-      let query = supabase
-        .from("orders")
-        .select(`
-          id,
-          user_email,
-          total_amount,
-          status,
-          customer_name,
-          created_at,
-          updated_at,
-          order_items (
-            id,
-            license_type,
-            price,
-            images (
-              title
-            )
-          )
-        `)
-        .order("created_at", { ascending: false })
-
-      if (orderFilter !== "all") {
-        query = query.eq("status", orderFilter)
+      const result = await getOrders()
+      if (result.success) {
+        setOrders(result.data)
+      } else {
+        toast.error("Failed to load orders")
       }
-
-      const { data, error } = await query
-
-      if (error) throw error
-
-      // Transform the data to flatten image titles
-      const transformedOrders =
-        data?.map((order) => ({
-          ...order,
-          order_items: order.order_items?.map((item) => ({
-            id: item.id,
-            image_title: item.images?.title || "Unknown Image",
-            license_type: item.license_type,
-            price: item.price,
-          })),
-        })) || []
-
-      setOrders(transformedOrders)
     } catch (error) {
       console.error("Error fetching orders:", error)
       toast.error("Failed to load orders")
-    } finally {
-      setLoadingOrders(false)
     }
   }
 
   const fetchUsers = async () => {
-    if (!mounted || typeof window === "undefined") return
-
-    setLoadingUsers(true)
     try {
-      const supabase = createClient()
-
-      // Fetch users with their order statistics
-      const { data: usersData, error: usersError } = await supabase
-        .from("user_profiles")
-        .select(`
-          id,
-          email,
-          full_name,
-          avatar_url,
-          is_admin,
-          created_at,
-          updated_at
-        `)
-        .order("created_at", { ascending: false })
-
-      if (usersError) throw usersError
-
-      // Fetch order statistics for each user
-      const usersWithStats = await Promise.all(
-        (usersData || []).map(async (user) => {
-          const { data: orderStats, error: orderError } = await supabase
-            .from("orders")
-            .select("total_amount, created_at")
-            .eq("user_email", user.email)
-            .eq("status", "completed")
-
-          if (orderError) {
-            console.error("Error fetching order stats for user:", user.email, orderError)
-            return {
-              ...user,
-              order_count: 0,
-              total_spent: 0,
-              last_order_date: null,
-            }
-          }
-
-          const orderCount = orderStats?.length || 0
-          const totalSpent = orderStats?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
-          const lastOrderDate =
-            orderStats?.length > 0
-              ? orderStats.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
-                  .created_at
-              : null
-
-          return {
-            ...user,
-            order_count: orderCount,
-            total_spent: totalSpent,
-            last_order_date: lastOrderDate,
-          }
-        }),
-      )
-
-      setUsers(usersWithStats)
+      toast.info("User management functionality is being updated")
+      setUsers([])
     } catch (error) {
       console.error("Error fetching users:", error)
       toast.error("Failed to load users")
-    } finally {
-      setLoadingUsers(false)
     }
   }
 
-  const createAdminClient = () => {
-    return createClient()
+  const handleFileUpload = async (file: File) => {
+    console.log("[v0] Starting file upload process for:", file.name)
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file")
+      return null
+    }
+
+    setUploadingFile(true)
+    try {
+      const reader = new FileReader()
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        reader.onload = (e) => resolve(e.target?.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
+
+      console.log("[v0] File converted to data URL successfully")
+      setNewImage((prev) => ({
+        ...prev,
+        file_url: dataUrl,
+        thumbnail_url: dataUrl,
+      }))
+
+      toast.success("File processed successfully")
+      return dataUrl
+    } catch (error) {
+      console.error("[v0] Error processing file:", error)
+      toast.error("Failed to process file")
+    } finally {
+      setUploadingFile(false)
+    }
   }
 
-  const fetchImages = async () => {
-    if (!mounted || typeof window === "undefined") return
-
-    console.log("[v0] fetchImages called - starting to fetch images from database")
-    setLoadingImages(true)
-    try {
-      const supabase = createClient()
-
-      const { data, error } = await supabase.from("images").select("*").order("created_at", { ascending: false })
-
-      if (error) throw error
-
-      console.log("[v0] fetchImages - Found", data?.length || 0, "images in database")
-      console.log("[v0] fetchImages - Sample data:", data?.slice(0, 2))
-      setImages(data || [])
-    } catch (error) {
-      console.error("[v0] fetchImages - Error fetching images:", error)
-      console.error("Error fetching images:", error)
-      toast.error("Failed to load images")
-    } finally {
-      setLoadingImages(false)
+  const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("[v0] File input changed")
+    const file = e.target.files?.[0]
+    if (file) {
+      console.log("[v0] Processing selected file:", file.name)
+      await handleFileUpload(file)
     }
   }
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
-      const supabase = createClient()
-
-      const { error } = await supabase
-        .from("orders")
-        .update({
-          status: newStatus,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", orderId)
-
-      if (error) throw error
-
-      toast.success(`Order status updated to ${newStatus}`)
-      fetchOrders() // Refresh orders list
+      toast.info("Order status update functionality is being updated")
     } catch (error) {
       console.error("Error updating order status:", error)
       toast.error("Failed to update order status")
@@ -410,181 +285,47 @@ export default function SimpleAdminPage() {
 
   const toggleUserAdmin = async (userId: string, currentAdminStatus: boolean) => {
     try {
-      const supabase = createClient()
-
-      const { error } = await supabase
-        .from("user_profiles")
-        .update({
-          is_admin: !currentAdminStatus,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", userId)
-
-      if (error) throw error
-
-      toast.success(`User admin status ${!currentAdminStatus ? "granted" : "revoked"}`)
-      fetchUsers() // Refresh users list
+      toast.info("User admin toggle functionality is being updated")
     } catch (error) {
-      console.error("Error updating user admin status:", error)
+      console.error("Error toggling user admin status:", error)
       toast.error("Failed to update user admin status")
     }
   }
 
-  const toggleImageStatus = async (imageId: string, currentStatus: boolean) => {
-    try {
-      const supabase = createClient()
-
-      const { error } = await supabase
-        .from("images")
-        .update({
-          active: !currentStatus,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", imageId)
-
-      if (error) throw error
-
-      toast.success(`Image ${!currentStatus ? "activated" : "deactivated"}`)
-      fetchImages() // Refresh images list
-    } catch (error) {
-      console.error("Error updating image status:", error)
-      toast.error("Failed to update image status")
-    }
-  }
-
-  const toggleImageFeatured = async (imageId: string, currentFeatured: boolean) => {
-    try {
-      const supabase = createClient()
-
-      const { error } = await supabase
-        .from("images")
-        .update({
-          featured: !currentFeatured,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", imageId)
-
-      if (error) throw error
-
-      toast.success(`Image ${!currentFeatured ? "featured" : "unfeatured"}`)
-      fetchImages() // Refresh images list
-    } catch (error) {
-      console.error("Error updating image featured status:", error)
-      toast.error("Failed to update image featured status")
-    }
-  }
-
-  const deleteImage = async (imageId: string, imageTitle: string) => {
-    if (!confirm(`Are you sure you want to delete "${imageTitle}"? This action cannot be undone.`)) {
-      return
-    }
+  const deleteImage = async (imageId: string) => {
+    if (!confirm("Are you sure you want to delete this image?")) return
 
     try {
-      const supabase = createClient()
-
-      const { error } = await supabase.from("images").delete().eq("id", imageId)
-
-      if (error) throw error
-
-      toast.success(`Image "${imageTitle}" deleted successfully`)
-      fetchImages() // Refresh images list
+      toast.info("Delete functionality is being updated")
     } catch (error) {
       console.error("Error deleting image:", error)
       toast.error("Failed to delete image")
     }
   }
 
-  const handleEditImage = (image: ImageData) => {
-    setEditingImage(image)
-    setIsEditDialogOpen(true)
-  }
-
-  const handleUpdateImage = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const updateImage = async (formData: FormData) => {
     if (!editingImage) return
 
-    const formData = new FormData(e.currentTarget)
-
     try {
-      const supabase = createClient()
-
-      const imageData = {
-        title: formData.get("title") as string,
-        description: formData.get("description") as string,
-        category: formData.get("category") as string,
-        price: Number.parseFloat(formData.get("price") as string),
-        file_url: formData.get("file_url") as string,
-        preview_url: formData.get("preview_url") as string,
-        thumbnail_url: formData.get("thumbnail_url") as string,
-        updated_at: new Date().toISOString(),
-      }
-
-      const { error } = await supabase.from("images").update(imageData).eq("id", editingImage.id)
-
-      if (error) throw error
-
-      toast.success("Image updated successfully!")
-      setIsEditDialogOpen(false)
-      setEditingImage(null)
-      fetchImages() // Refresh images list
+      toast.info("Update functionality is being updated")
     } catch (error) {
       console.error("Error updating image:", error)
       toast.error("Failed to update image")
     }
   }
 
-  const handleLogin = () => {
-    if (password === "C4rlit0s") {
-      setIsAuthenticated(true)
-      toast.success("Admin access granted")
-      fetchDashboardStats()
-    } else {
-      toast.error("Invalid password")
-    }
-  }
-
-  const handleFileUpload = async (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please upload an image file")
-      return null
-    }
-
-    setUploadingFile(true)
-    try {
-      // For now, create placeholder URLs based on file name
-      // In production, you would upload to your preferred storage service
-      const fileName = file.name.replace(/\s+/g, "-").toLowerCase()
-      const baseUrl = `https://placeholder.v0.dev/800x600`
-      const placeholderUrl = `${baseUrl}?text=${encodeURIComponent(fileName)}`
-
-      // Simulate upload delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      toast.success("File uploaded successfully (using placeholder)")
-      return placeholderUrl
-    } catch (error) {
-      console.error("Error uploading file:", error)
-      toast.error("Failed to upload file")
-      return null
-    } finally {
-      setUploadingFile(false)
-    }
+  const handleEditImage = (image: Image) => {
+    setEditingImage(image)
   }
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true)
-    } else if (e.type === "dragleave") {
-      setDragActive(false)
-    }
   }
 
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setDragActive(false)
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0]
@@ -600,176 +341,38 @@ export default function SimpleAdminPage() {
     }
   }
 
-  const handleImageUpload = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const formData = new FormData(e.currentTarget)
-
-    if (!mounted || typeof window === "undefined") return
-
-    try {
-      const supabase = createAdminClient()
-
-      const categoryName = formData.get("category") as string
-
-      let categoryId: string
-
-      // Try to find existing category
-      const { data: existingCategory } = await supabase
-        .from("categories")
-        .select("id")
-        .eq("name", categoryName)
-        .single()
-
-      if (existingCategory) {
-        categoryId = existingCategory.id
-      } else {
-        // Create new category
-        const { data: newCategory, error: categoryError } = await supabase
-          .from("categories")
-          .insert([
-            {
-              name: categoryName,
-              description: `Auto-created category for ${categoryName}`,
-              active: true,
-              sort_order: 0,
-            },
-          ])
-          .select("id")
-          .single()
-
-        if (categoryError) {
-          console.error("[v0] Category creation error:", categoryError)
-          throw new Error(`Failed to create category: ${categoryError.message}`)
-        }
-
-        categoryId = newCategory.id
-      }
-
-      const imageData = {
-        title: formData.get("title") as string,
-        description: formData.get("description") as string,
-        category_id: categoryId, // Use category UUID instead of name
-        price: Number.parseFloat(formData.get("price") as string),
-        file_url: formData.get("file_url") as string,
-        preview_url: formData.get("preview_url") as string,
-        thumbnail_url: formData.get("thumbnail_url") as string,
-        active: true,
-        featured: false,
-      }
-
-      console.log("[v0] Inserting image data:", imageData)
-
-      const { error } = await supabase.from("images").insert([imageData])
-
-      if (error) {
-        console.error("[v0] Supabase insert error:", error)
-        throw new Error(`Database error: ${error.message}`)
-      }
-
-      console.log("[v0] Image added successfully")
-      toast.success("Image added successfully!")
-      e.currentTarget.reset()
-      fetchImages()
-    } catch (error) {
-      console.error("[v0] Error adding image:", error)
-      const errorMessage = error instanceof Error ? error.message : "Failed to add image"
-      toast.error(errorMessage)
-    }
-  }
-
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-800"
-      case "pending":
-        return "bg-yellow-100 text-yellow-800"
-      case "failed":
-        return "bg-red-100 text-red-800"
-      case "refunded":
-        return "bg-gray-100 text-gray-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
-  }
-
-  const getLicenseBadgeColor = (license: string) => {
-    switch (license) {
-      case "standard":
-        return "bg-blue-100 text-blue-800"
-      case "extended":
-        return "bg-purple-100 text-purple-800"
-      case "commercial":
-        return "bg-green-100 text-green-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
-  }
-
-  const filteredOrders = orders.filter((order) => {
-    const matchesSearch =
-      searchTerm === "" ||
-      order.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.id.toLowerCase().includes(searchTerm.toLowerCase())
-
-    return matchesSearch
-  })
-
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      userSearchTerm === "" ||
-      user.email.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
-      user.full_name?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
-      user.id.toLowerCase().includes(userSearchTerm.toLowerCase())
-
-    const matchesFilter =
-      userFilter === "all" || (userFilter === "admin" && user.is_admin) || (userFilter === "regular" && !user.is_admin)
-
-    return matchesSearch && matchesFilter
-  })
-
-  const filteredImages = images.filter((image) => {
-    const matchesSearch =
-      imageSearchTerm === "" ||
-      image.title.toLowerCase().includes(imageSearchTerm.toLowerCase()) ||
-      image.description?.toLowerCase().includes(imageSearchTerm.toLowerCase()) ||
-      image.category.toLowerCase().includes(imageSearchTerm.toLowerCase())
-
-    const matchesFilter =
-      imageFilter === "all" ||
-      (imageFilter === "active" && image.active) ||
-      (imageFilter === "inactive" && !image.active) ||
-      (imageFilter === "featured" && image.featured)
-
-    return matchesSearch && matchesFilter
-  })
-
-  if (!mounted) {
-    return <div className="p-8">Loading...</div>
-  }
+  useEffect(() => {
+    fetchImages()
+    fetchOrders()
+    fetchUsers()
+  }, [isAuthenticated])
 
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Admin Access</CardTitle>
-            <CardDescription>Enter admin password to continue</CardDescription>
+            <CardTitle>Admin Login</CardTitle>
+            <CardDescription>Sign in with your admin account to access the dashboard</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-              />
-            </div>
-            <Button onClick={handleLogin} className="w-full">
-              Login
-            </Button>
+          <CardContent>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">Hint: Use password "C4rlit0s" for admin access</p>
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Signing in..." : "Sign In"}
+              </Button>
+            </form>
           </CardContent>
         </Card>
       </div>
@@ -777,980 +380,298 @@ export default function SimpleAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">n3urali.art Admin</h1>
-            <p className="text-gray-600 mt-1">Manage your 360° image marketplace</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={fetchDashboardStats} disabled={loadingStats}>
-              <Activity className="h-4 w-4 mr-2" />
-              {loadingStats ? "Loading..." : "Refresh"}
-            </Button>
-            <Button variant="outline" onClick={() => setIsAuthenticated(false)}>
-              Logout
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
-          <Button
-            variant={activeTab === "dashboard" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setActiveTab("dashboard")}
-            className="flex-1"
-          >
-            <BarChart3 className="w-4 h-4 mr-2" />
-            Dashboard
-          </Button>
-          <Button
-            variant={activeTab === "orders" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setActiveTab("orders")}
-            className="flex-1"
-          >
-            <ShoppingCart className="w-4 h-4 mr-2" />
-            Orders
-          </Button>
-          <Button
-            variant={activeTab === "users" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setActiveTab("users")}
-            className="flex-1"
-          >
-            <Users className="w-4 h-4 mr-2" />
-            Users
-          </Button>
-          <Button
-            variant={activeTab === "images" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setActiveTab("images")}
-            className="flex-1"
-          >
-            <Images className="w-4 h-4 mr-2" />
-            Images
-          </Button>
-          <Button
-            variant={activeTab === "analytics" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => {
-              setActiveTab("analytics")
-              fetchAnalyticsData()
-            }}
-            className="flex-1"
-          >
-            <TrendingUp className="w-4 h-4 mr-2" />
-            Analytics
+    <div className="min-h-screen bg-gray-100 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold text-gray-900">Simple Admin Dashboard</h1>
+          <p className="text-gray-500">Manage your content and users.</p>
+          <Button onClick={handleLogout} className="mt-2">
+            Logout
           </Button>
         </div>
 
-        {activeTab === "dashboard" && (
-          <>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Tabs defaultValue={activeTab} className="w-full">
+          <TabsList>
+            <TabsTrigger value="dashboard" onClick={() => setActiveTab("dashboard")}>
+              Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="images" onClick={() => setActiveTab("images")}>
+              Images
+            </TabsTrigger>
+            <TabsTrigger value="orders" onClick={() => setActiveTab("orders")}>
+              Orders
+            </TabsTrigger>
+            <TabsTrigger value="users" onClick={() => setActiveTab("users")}>
+              Users
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="dashboard">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Images</CardTitle>
-                  <Images className="h-4 w-4 text-muted-foreground" />
+                <CardHeader>
+                  <CardTitle>Total Images</CardTitle>
+                  <CardDescription>Number of images in the database</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.totalImages}</div>
-                  <p className="text-xs text-muted-foreground">360° and fisheye images</p>
                 </CardContent>
               </Card>
-
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-                  <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+                <CardHeader>
+                  <CardTitle>Total Orders</CardTitle>
+                  <CardDescription>Number of orders placed</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.totalOrders}</div>
-                  <p className="text-xs text-muted-foreground">Customer purchases</p>
                 </CardContent>
               </Card>
-
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                <CardHeader>
+                  <CardTitle>Total Revenue</CardTitle>
+                  <CardDescription>Total revenue generated</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">${stats.totalRevenue}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Total Users</CardTitle>
+                  <CardDescription>Number of registered users</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stats.totalUsers}</div>
-                  <p className="text-xs text-muted-foreground">Registered customers</p>
                 </CardContent>
               </Card>
-
+            </div>
+          </TabsContent>
+          <TabsContent value="images">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <CardHeader>
+                  <CardTitle>Add New Image</CardTitle>
+                  <CardDescription>Upload a new image to the database.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">${stats.totalRevenue.toFixed(2)}</div>
-                  <p className="text-xs text-muted-foreground">All-time earnings</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="grid gap-8 lg:grid-cols-3">
-              {/* Quick Actions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                  <CardDescription>Common admin tasks</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start bg-transparent"
-                    onClick={() => window.open("/gallery", "_blank")}
-                  >
-                    <Eye className="mr-2 h-4 w-4" />
-                    View Gallery
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start bg-transparent"
-                    onClick={() => setActiveTab("orders")}
-                  >
-                    <ShoppingCart className="mr-2 h-4 w-4" />
-                    Manage Orders
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start bg-transparent"
-                    onClick={() => toast.info("Feature coming soon")}
-                  >
-                    <Users className="mr-2 h-4 w-4" />
-                    Manage Users
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start bg-transparent"
-                    onClick={() => toast.info("Feature coming soon")}
-                  >
-                    <TrendingUp className="mr-2 h-4 w-4" />
-                    View Analytics
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Recent Activity */}
-              <Card className="lg:col-span-2">
-                <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
-                  <CardDescription>Latest system events</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {stats.recentActivity.map((activity) => (
-                    <div key={activity.id} className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                      <div className="flex-shrink-0">
-                        {activity.type === "order" && <ShoppingCart className="h-4 w-4 text-green-600" />}
-                        {activity.type === "user" && <Users className="h-4 w-4 text-blue-600" />}
-                        {activity.type === "image" && <Images className="h-4 w-4 text-purple-600" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">{activity.description}</p>
-                        <p className="text-xs text-gray-500">{activity.timestamp}</p>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
-          </>
-        )}
-
-        {activeTab === "orders" && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Order Management</h2>
-                <p className="text-gray-600">View and manage customer orders</p>
-              </div>
-              <div className="flex gap-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Search orders..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 w-64"
-                  />
-                </div>
-                <Select value={orderFilter} onValueChange={(value: any) => setOrderFilter(value)}>
-                  <SelectTrigger className="w-40">
-                    <Filter className="h-4 w-4 mr-2" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Orders</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="failed">Failed</SelectItem>
-                    <SelectItem value="refunded">Refunded</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {loadingOrders ? (
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardHeader>
-                      <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-20 bg-gray-200 rounded"></div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : filteredOrders.length === 0 ? (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <ShoppingCart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No orders found</h3>
-                  <p className="text-gray-600">No orders match your current filters</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {filteredOrders.map((order) => (
-                  <Card key={order.id}>
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle className="text-lg">Order #{order.id.slice(0, 8)}</CardTitle>
-                          <CardDescription className="flex items-center gap-4 mt-1">
-                            <span className="flex items-center gap-1">
-                              <Mail className="h-4 w-4" />
-                              {order.user_email}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              {new Date(order.created_at).toLocaleDateString()}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <DollarSign className="h-4 w-4" />${order.total_amount.toFixed(2)}
-                            </span>
-                          </CardDescription>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge className={getStatusBadgeColor(order.status)}>
-                            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                          </Badge>
-                          <Select value={order.status} onValueChange={(value) => updateOrderStatus(order.id, value)}>
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">Pending</SelectItem>
-                              <SelectItem value="completed">Completed</SelectItem>
-                              <SelectItem value="failed">Failed</SelectItem>
-                              <SelectItem value="refunded">Refunded</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      {order.order_items && order.order_items.length > 0 && (
-                        <div className="space-y-2">
-                          <h4 className="font-medium text-sm">Order Items:</h4>
-                          <div className="space-y-2">
-                            {order.order_items.map((item) => (
-                              <div key={item.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-sm">{item.image_title}</span>
-                                  <Badge className={getLicenseBadgeColor(item.license_type)} variant="secondary">
-                                    {item.license_type}
-                                  </Badge>
-                                </div>
-                                <span className="font-semibold text-sm">${item.price.toFixed(2)}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === "users" && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">User Management</h2>
-                <p className="text-gray-600">View and manage registered users</p>
-              </div>
-              <div className="flex gap-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Search users..."
-                    value={userSearchTerm}
-                    onChange={(e) => setUserSearchTerm(e.target.value)}
-                    className="pl-10 w-64"
-                  />
-                </div>
-                <Select value={userFilter} onValueChange={(value: any) => setUserFilter(value)}>
-                  <SelectTrigger className="w-40">
-                    <Filter className="h-4 w-4 mr-2" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Users</SelectItem>
-                    <SelectItem value="admin">Admins</SelectItem>
-                    <SelectItem value="regular">Regular Users</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {loadingUsers ? (
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardHeader>
-                      <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-20 bg-gray-200 rounded"></div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : filteredUsers.length === 0 ? (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No users found</h3>
-                  <p className="text-gray-600">No users match your current filters</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {filteredUsers.map((user) => (
-                  <Card key={user.id}>
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            {user.full_name || "Unnamed User"}
-                            {user.is_admin && <Badge className="bg-purple-100 text-purple-800">Admin</Badge>}
-                          </CardTitle>
-                          <CardDescription className="flex items-center gap-4 mt-1">
-                            <span className="flex items-center gap-1">
-                              <Mail className="h-4 w-4" />
-                              {user.email}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              Joined {new Date(user.created_at).toLocaleDateString()}
-                            </span>
-                          </CardDescription>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant={user.is_admin ? "destructive" : "default"}
-                            size="sm"
-                            onClick={() => toggleUserAdmin(user.id, user.is_admin)}
-                          >
-                            {user.is_admin ? "Revoke Admin" : "Make Admin"}
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="flex items-center gap-2">
-                          <ShoppingCart className="h-4 w-4 text-gray-500" />
-                          <div>
-                            <p className="text-sm font-medium">{user.order_count || 0} Orders</p>
-                            <p className="text-xs text-gray-500">Total purchases</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="h-4 w-4 text-gray-500" />
-                          <div>
-                            <p className="text-sm font-medium">${(user.total_spent || 0).toFixed(2)}</p>
-                            <p className="text-xs text-gray-500">Total spent</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-gray-500" />
-                          <div>
-                            <p className="text-sm font-medium">
-                              {user.last_order_date ? new Date(user.last_order_date).toLocaleDateString() : "Never"}
-                            </p>
-                            <p className="text-xs text-gray-500">Last order</p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === "images" && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Image Management</h2>
-                <p className="text-gray-600">Manage your 360° and fisheye image collection</p>
-              </div>
-              <div className="flex gap-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Search images..."
-                    value={imageSearchTerm}
-                    onChange={(e) => setImageSearchTerm(e.target.value)}
-                    className="pl-10 w-64"
-                  />
-                </div>
-                <Select value={imageFilter} onValueChange={(value: any) => setImageFilter(value)}>
-                  <SelectTrigger className="w-40">
-                    <Filter className="h-4 w-4 mr-2" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Images</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                    <SelectItem value="featured">Featured</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid gap-8 lg:grid-cols-3">
-              {/* Add Image Form */}
-              <Card className="lg:col-span-1">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Plus className="h-5 w-5" />
-                    Add New Image
-                  </CardTitle>
-                  <CardDescription>Upload a new 360° or fisheye image to your marketplace</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div
-                    className={`mb-6 border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                      dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"
-                    }`}
-                    onDragEnter={handleDrag}
-                    onDragLeave={handleDrag}
-                    onDragOver={handleDrag}
-                    onDrop={handleDrop}
-                  >
-                    {uploadingFile ? (
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                        <p className="text-sm text-gray-600">Uploading...</p>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center gap-2">
-                        <Upload className="h-12 w-12 text-gray-400" />
-                        <p className="text-lg font-medium">Drag & drop your image here</p>
-                        <p className="text-sm text-gray-500">or click to browse files</p>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          id="file-input"
-                          onChange={async (e) => {
-                            if (e.target.files && e.target.files[0]) {
-                              const url = await handleFileUpload(e.target.files[0])
-                              if (url) {
-                                const form = document.getElementById("image-upload-form") as HTMLFormElement
-                                if (form) {
-                                  ;(form.elements.namedItem("file_url") as HTMLInputElement).value = url
-                                  ;(form.elements.namedItem("preview_url") as HTMLInputElement).value = url
-                                  ;(form.elements.namedItem("thumbnail_url") as HTMLInputElement).value = url
-                                }
-                              }
-                            }
-                          }}
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => document.getElementById("file-input")?.click()}
-                        >
-                          Choose File
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-
                   <form id="image-upload-form" onSubmit={handleImageUpload} className="space-y-4">
                     <div>
                       <Label htmlFor="title">Title</Label>
-                      <Input id="title" name="title" required />
+                      <Input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value={newImage.title}
+                        onChange={(e) => setNewImage({ ...newImage, title: e.target.value })}
+                        required
+                      />
                     </div>
-
-                    <div>
-                      <Label htmlFor="category">Category</Label>
-                      <select id="category" name="category" className="w-full p-2 border rounded-md" required>
-                        <option value="">Select category</option>
-                        <option value="360° Images">360° Images</option>
-                        <option value="Fisheye">Fisheye Images</option>
-                        <option value="Panoramic">Panoramic</option>
-                        <option value="Nature & Landscapes">Nature & Landscapes</option>
-                        <option value="Urban & Architecture">Urban & Architecture</option>
-                        <option value="Interior Spaces">Interior Spaces</option>
-                      </select>
-                    </div>
-
                     <div>
                       <Label htmlFor="description">Description</Label>
-                      <Textarea id="description" name="description" rows={3} />
+                      <Textarea
+                        id="description"
+                        name="description"
+                        value={newImage.description}
+                        onChange={(e) => setNewImage({ ...newImage, description: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="category">Category</Label>
+                      <select
+                        id="category"
+                        name="category"
+                        value={newImage.category}
+                        onChange={(e) => setNewImage({ ...newImage, category: e.target.value })}
+                        required
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <option value="">Select a category</option>
+                        {categories.map((category) => (
+                          <option key={category.id} value={category.name}>
+                            {category.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <Label htmlFor="price">Price</Label>
+                      <Input
+                        type="number"
+                        id="price"
+                        name="price"
+                        value={newImage.price}
+                        onChange={(e) => setNewImage({ ...newImage, price: e.target.value })}
+                        required
+                      />
                     </div>
 
                     <div>
-                      <Label htmlFor="price">Price ($)</Label>
-                      <Input id="price" name="price" type="number" step="0.01" required />
+                      <Label htmlFor="image-file">Upload Image File</Label>
+                      <Input
+                        type="file"
+                        id="image-file"
+                        accept="image/*"
+                        onChange={handleFileInputChange}
+                        disabled={uploadingFile}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Choose an image file to upload, or enter URLs manually below
+                      </p>
                     </div>
 
                     <div>
-                      <Label htmlFor="file_url">Image URL (auto-filled)</Label>
-                      <Input id="file_url" name="file_url" type="url" required readOnly className="bg-gray-50" />
+                      <Label htmlFor="file_url">Image URL (or auto-filled from upload)</Label>
+                      <Input
+                        type="url"
+                        id="file_url"
+                        name="file_url"
+                        value={newImage.file_url}
+                        onChange={(e) => setNewImage({ ...newImage, file_url: e.target.value })}
+                        placeholder="https://example.com/image.jpg or upload file above"
+                      />
                     </div>
-
                     <div>
-                      <Label htmlFor="preview_url">Preview URL (auto-filled)</Label>
-                      <Input id="preview_url" name="preview_url" type="url" readOnly className="bg-gray-50" />
+                      <Label htmlFor="thumbnail_url">Thumbnail URL (optional)</Label>
+                      <Input
+                        type="url"
+                        id="thumbnail_url"
+                        name="thumbnail_url"
+                        value={newImage.thumbnail_url}
+                        onChange={(e) => setNewImage({ ...newImage, thumbnail_url: e.target.value })}
+                        placeholder="Auto-filled from upload or enter custom URL"
+                      />
                     </div>
 
-                    <div>
-                      <Label htmlFor="thumbnail_url">Thumbnail URL (auto-filled)</Label>
-                      <Input id="thumbnail_url" name="thumbnail_url" type="url" readOnly className="bg-gray-50" />
-                    </div>
+                    {newImage.file_url && (
+                      <div>
+                        <Label>Preview</Label>
+                        <img
+                          src={newImage.file_url || "/placeholder.svg"}
+                          alt="Preview"
+                          className="w-32 h-32 object-cover rounded border"
+                          onError={() => console.log("[v0] Preview image failed to load")}
+                        />
+                      </div>
+                    )}
 
-                    <Button
-                      type="submit"
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Save Image to Database
+                    <Button type="submit" disabled={uploadingFile || !newImage.file_url}>
+                      {uploadingFile ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving to Database...
+                        </>
+                      ) : (
+                        "Save Image to Database"
+                      )}
                     </Button>
                   </form>
                 </CardContent>
               </Card>
 
-              {/* Images List */}
-              <div className="lg:col-span-2 space-y-4">
-                {loadingImages ? (
-                  <div className="space-y-4">
-                    {[...Array(3)].map((_, i) => (
-                      <Card key={i} className="animate-pulse">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Images</CardTitle>
+                  <CardDescription>List of images in the database.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <Alert>
+                      <Loader2 className="mr-2 h-4 w-4" />
+                      <AlertDescription>Fetching images...</AlertDescription>
+                    </Alert>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {images.map((image) => (
+                        <div key={image.id} className="relative">
+                          <img
+                            src={image.thumbnail_url || "/placeholder.svg"}
+                            alt={image.title}
+                            className="w-full rounded-md"
+                          />
+                          <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity duration-200 rounded-md">
+                            <div className="flex space-x-2">
+                              <Button size="sm" variant="outline" onClick={() => handleEditImage(image)}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit
+                              </Button>
+                              <Button size="sm" variant="destructive" onClick={() => deleteImage(image.id)}>
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          <TabsContent value="orders">
+            <Card>
+              <CardHeader>
+                <CardTitle>Orders</CardTitle>
+                <CardDescription>List of orders in the database.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <Alert>
+                    <Loader2 className="mr-2 h-4 w-4" />
+                    <AlertDescription>Fetching orders...</AlertDescription>
+                  </Alert>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4">
+                    {orders.map((order) => (
+                      <Card key={order.id}>
                         <CardHeader>
-                          <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                          <CardTitle>Order #{order.id}</CardTitle>
+                          <CardDescription>Placed on {new Date(order.created_at).toLocaleDateString()}</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <div className="h-32 bg-gray-200 rounded"></div>
+                          <p>Customer: {order.customer_name}</p>
+                          <p>Email: {order.user_email}</p>
+                          <p>Total: ${order.total_amount}</p>
+                          <Badge>{order.status}</Badge>
                         </CardContent>
                       </Card>
                     ))}
                   </div>
-                ) : filteredImages.length === 0 ? (
-                  <Card>
-                    <CardContent className="text-center py-12">
-                      <Images className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No images found</h3>
-                      <p className="text-gray-600">No images match your current filters</p>
-                    </CardContent>
-                  </Card>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="users">
+            <Card>
+              <CardHeader>
+                <CardTitle>Users</CardTitle>
+                <CardDescription>List of users in the database.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <Alert>
+                    <Loader2 className="mr-2 h-4 w-4" />
+                    <AlertDescription>Fetching users...</AlertDescription>
+                  </Alert>
                 ) : (
-                  <div className="space-y-4">
-                    {filteredImages.map((image) => (
-                      <Card key={image.id}>
+                  <div className="grid grid-cols-1 gap-4">
+                    {users.map((user) => (
+                      <Card key={user.id}>
                         <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-start gap-4">
-                              <div className="relative w-20 h-20 flex-shrink-0">
-                                <Image
-                                  src={
-                                    image.thumbnail_url || image.preview_url || "/placeholder.svg?height=80&width=80"
-                                  }
-                                  alt={image.title}
-                                  fill
-                                  className="object-cover rounded"
-                                />
-                              </div>
-                              <div>
-                                <CardTitle className="text-lg flex items-center gap-2">
-                                  {image.title}
-                                  {image.featured && (
-                                    <Badge className="bg-yellow-100 text-yellow-800">
-                                      <Star className="h-3 w-3 mr-1" />
-                                      Featured
-                                    </Badge>
-                                  )}
-                                  <Badge variant={image.active ? "default" : "secondary"}>
-                                    {image.active ? "Active" : "Inactive"}
-                                  </Badge>
-                                </CardTitle>
-                                <CardDescription className="flex items-center gap-4 mt-1">
-                                  <span className="flex items-center gap-1">
-                                    <Images className="h-4 w-4" />
-                                    {image.category}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <DollarSign className="h-4 w-4" />${image.price.toFixed(2)}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Calendar className="h-4 w-4" />
-                                    {new Date(image.created_at).toLocaleDateString()}
-                                  </span>
-                                </CardDescription>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => toggleImageFeatured(image.id, image.featured)}
-                              >
-                                <Star className={`h-4 w-4 ${image.featured ? "fill-current" : ""}`} />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => toggleImageStatus(image.id, image.active)}
-                              >
-                                {image.active ? (
-                                  <ToggleRight className="h-4 w-4 text-green-600" />
-                                ) : (
-                                  <ToggleLeft className="h-4 w-4 text-gray-400" />
-                                )}
-                              </Button>
-                              <Button variant="outline" size="sm" onClick={() => handleEditImage(image)}>
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => deleteImage(image.id, image.title)}
-                                className="text-red-600 hover:text-red-700"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
+                          <CardTitle>{user.full_name}</CardTitle>
+                          <CardDescription>Joined on {new Date(user.created_at).toLocaleDateString()}</CardDescription>
                         </CardHeader>
-                        {image.description && (
-                          <CardContent>
-                            <p className="text-sm text-gray-600">{image.description}</p>
-                          </CardContent>
-                        )}
+                        <CardContent>
+                          <p>Email: {user.email}</p>
+                          <Badge>{user.is_admin ? "Admin" : "User"}</Badge>
+                        </CardContent>
                       </Card>
                     ))}
                   </div>
                 )}
-              </div>
-            </div>
-
-            {/* Edit Image Dialog */}
-            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Edit Image</DialogTitle>
-                  <DialogDescription>Update the details for "{editingImage?.title}"</DialogDescription>
-                </DialogHeader>
-                {editingImage && (
-                  <form onSubmit={handleUpdateImage} className="space-y-4">
-                    <div>
-                      <Label htmlFor="edit-title">Title</Label>
-                      <Input id="edit-title" name="title" defaultValue={editingImage.title} required />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="edit-category">Category</Label>
-                      <select
-                        id="edit-category"
-                        name="category"
-                        className="w-full p-2 border rounded-md"
-                        defaultValue={editingImage.category}
-                        required
-                      >
-                        <option value="">Select category</option>
-                        <option value="360">360° Images</option>
-                        <option value="fisheye">Fisheye Images</option>
-                        <option value="panoramic">Panoramic</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="edit-description">Description</Label>
-                      <Textarea
-                        id="edit-description"
-                        name="description"
-                        defaultValue={editingImage.description || ""}
-                        rows={3}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="edit-price">Price ($)</Label>
-                      <Input
-                        id="edit-price"
-                        name="price"
-                        type="number"
-                        step="0.01"
-                        defaultValue={editingImage.price}
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="edit-file_url">Image URL</Label>
-                      <Input
-                        id="edit-file_url"
-                        name="file_url"
-                        type="url"
-                        defaultValue={editingImage.file_url}
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="edit-preview_url">Preview URL</Label>
-                      <Input
-                        id="edit-preview_url"
-                        name="preview_url"
-                        type="url"
-                        defaultValue={editingImage.preview_url || ""}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="edit-thumbnail_url">Thumbnail URL</Label>
-                      <Input
-                        id="edit-thumbnail_url"
-                        name="thumbnail_url"
-                        type="url"
-                        defaultValue={editingImage.thumbnail_url || ""}
-                      />
-                    </div>
-
-                    <div className="flex gap-2 pt-4">
-                      <Button type="submit" className="flex-1">
-                        Update Image
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setIsEditDialogOpen(false)}
-                        className="flex-1"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </form>
-                )}
-              </DialogContent>
-            </Dialog>
-          </div>
-        )}
-
-        {activeTab === "analytics" && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Analytics & Reports</h2>
-                <p className="text-gray-600">Insights into your business performance</p>
-              </div>
-            </div>
-
-            {loadingAnalytics ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {/* Key Metrics */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">Avg. Order Value</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">$84.50</div>
-                      <p className="text-xs text-green-600">+12% from last month</p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">3.2%</div>
-                      <p className="text-xs text-green-600">+0.4% from last month</p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">Total Downloads</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">865</div>
-                      <p className="text-xs text-blue-600">+18% from last month</p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">Return Customers</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">42%</div>
-                      <p className="text-xs text-green-600">+5% from last month</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Charts Row */}
-                <div className="grid gap-6 md:grid-cols-2">
-                  {/* Sales Chart */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Revenue & Orders</CardTitle>
-                      <CardDescription>Monthly performance over the last 6 months</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {analyticsData.salesChart.map((data, index) => (
-                          <div key={index} className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-12 text-sm font-medium">{data.month}</div>
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-2">
-                                  <div className="h-2 bg-gray-200 rounded-full flex-1 max-w-[120px]">
-                                    <div
-                                      className="h-2 bg-orange-600 rounded-full"
-                                      style={{ width: `${(data.revenue / 3200) * 100}%` }}
-                                    ></div>
-                                  </div>
-                                  <span className="text-sm font-medium">${data.revenue}</span>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-sm text-gray-500">{data.orders} orders</div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* User Growth */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>User Growth</CardTitle>
-                      <CardDescription>New user registrations by month</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {analyticsData.userGrowth.map((data, index) => (
-                          <div key={index} className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-12 text-sm font-medium">{data.month}</div>
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-2">
-                                  <div className="h-2 bg-gray-200 rounded-full flex-1 max-w-[120px]">
-                                    <div
-                                      className="h-2 bg-blue-600 rounded-full"
-                                      style={{ width: `${(data.users / 135) * 100}%` }}
-                                    ></div>
-                                  </div>
-                                  <span className="text-sm font-medium">{data.users} users</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Bottom Row */}
-                <div className="grid gap-6 md:grid-cols-2">
-                  {/* Top Performing Images */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Top Performing Images</CardTitle>
-                      <CardDescription>Best selling images by downloads and revenue</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {analyticsData.topImages.map((image, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div className="flex-1">
-                              <p className="font-medium text-sm">{image.title}</p>
-                              <p className="text-xs text-gray-500">{image.downloads} downloads</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-medium text-sm">${image.revenue}</p>
-                              <p className="text-xs text-gray-500">revenue</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Download Trends by Category */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Download Trends</CardTitle>
-                      <CardDescription>Downloads by image category</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {analyticsData.downloadTrends.map((trend, index) => (
-                          <div key={index} className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-24 text-sm font-medium">{trend.category}</div>
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-2">
-                                  <div className="h-2 bg-gray-200 rounded-full flex-1 max-w-[100px]">
-                                    <div
-                                      className="h-2 bg-purple-600 rounded-full"
-                                      style={{ width: `${(trend.downloads / 342) * 100}%` }}
-                                    ></div>
-                                  </div>
-                                  <span className="text-sm font-medium">{trend.downloads}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   )

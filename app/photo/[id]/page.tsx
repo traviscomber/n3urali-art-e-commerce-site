@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -28,6 +30,19 @@ export default function PhotoDetailPage() {
   const [image, setImage] = useState<Image | null>(null)
   const [loading, setLoading] = useState(true)
   const [purchasing, setPurchasing] = useState(false)
+  const [showQualityPreview, setShowQualityPreview] = useState(false)
+  const [previewPosition, setPreviewPosition] = useState({ x: 50, y: 50 })
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault()
+    return false
+  }
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.preventDefault()
+    return false
+  }
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -82,6 +97,25 @@ export default function PhotoDetailPage() {
     return { text: "Standard License", icon: Eye, color: "text-gray-600" }
   }
 
+  const handleQualityPreviewToggle = () => {
+    setShowQualityPreview(!showQualityPreview)
+  }
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!showQualityPreview) return
+
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width) * 100
+    const y = ((e.clientY - rect.top) / rect.height) * 100
+
+    setPreviewPosition({ x, y })
+    setMousePosition({ x: e.clientX - rect.left, y: e.clientY - rect.top })
+  }
+
+  const handleMouseLeave = () => {
+    setShowQualityPreview(false)
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -129,37 +163,144 @@ export default function PhotoDetailPage() {
           <div className="space-y-4">
             <Card className="overflow-hidden">
               <CardContent className="p-0">
-                <div className="relative aspect-square bg-muted/10">
-                  <img
-                    src={image.image_url || image.thumbnail_url}
-                    alt={image.title}
-                    className="w-full h-full object-contain"
-                  />
+                <div
+                  className={`relative aspect-square bg-muted/10 ${
+                    showQualityPreview ? "cursor-crosshair" : "cursor-default"
+                  }`}
+                  onMouseMove={handleMouseMove}
+                  onMouseLeave={handleMouseLeave}
+                  onContextMenu={handleContextMenu}
+                >
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleQualityPreviewToggle}
+                    className={`absolute top-4 right-4 z-20 h-12 w-16 p-0 shadow-lg flex flex-col items-center justify-center transition-all ${
+                      showQualityPreview
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                        : "bg-white/95 hover:bg-white"
+                    }`}
+                  >
+                    <Eye className="h-4 w-4" />
+                    <span className="text-xs font-medium">HQ</span>
+                  </Button>
 
-                  {/* Watermark overlay */}
-                  <div className="absolute inset-0 pointer-events-none">
-                    <div className="relative w-full h-full overflow-hidden">
-                      {Array.from({ length: 12 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="absolute text-white/15 font-bold text-4xl transform -rotate-45 select-none"
-                          style={{
-                            left: `${(i % 4) * 25}%`,
-                            top: `${Math.floor(i / 4) * 33}%`,
-                            textStroke: "1px rgba(255,255,255,0.1)",
-                          }}
-                        >
-                          n3urali.art
-                        </div>
-                      ))}
+                  <div
+                    className="relative w-full h-full select-none"
+                    onContextMenu={handleContextMenu}
+                    onDragStart={handleDragStart}
+                    style={{ userSelect: "none", WebkitUserSelect: "none", MozUserSelect: "none" }}
+                  >
+                    <img
+                      src={image.image_url || image.thumbnail_url}
+                      alt={image.title}
+                      className="w-full h-full object-contain select-none pointer-events-none"
+                      draggable={false}
+                      onContextMenu={handleContextMenu}
+                      onDragStart={handleDragStart}
+                      style={{
+                        userSelect: "none",
+                        WebkitUserSelect: "none",
+                        MozUserSelect: "none",
+                        WebkitUserDrag: "none",
+                        WebkitTouchCallout: "none",
+                      }}
+                    />
+
+                    <div className="absolute inset-0 pointer-events-none select-none" style={{ userSelect: "none" }}>
+                      <div className="relative w-full h-full overflow-hidden">
+                        {Array.from({ length: 35 }).map((_, i) => (
+                          <div
+                            key={i}
+                            className="absolute text-white/15 font-bold text-2xl transform -rotate-45 select-none pointer-events-none"
+                            style={{
+                              left: `${(i % 7) * 14.3}%`,
+                              top: `${Math.floor(i / 7) * 20}%`,
+                              textStroke: "1px rgba(255,255,255,0.1)",
+                              WebkitTextStroke: "1px rgba(255,255,255,0.1)",
+                              userSelect: "none",
+                              WebkitUserSelect: "none",
+                              MozUserSelect: "none",
+                            }}
+                          >
+                            n3urali.art
+                          </div>
+                        ))}
+                      </div>
                     </div>
+
+                    <div
+                      className="absolute inset-0 z-10 bg-transparent"
+                      onContextMenu={handleContextMenu}
+                      onDragStart={handleDragStart}
+                      style={{
+                        userSelect: "none",
+                        WebkitUserSelect: "none",
+                        MozUserSelect: "none",
+                      }}
+                    />
                   </div>
+
+                  {/* Quality preview window showing cropped original image */}
+                  {showQualityPreview && (
+                    <div
+                      className="absolute pointer-events-none z-30 border-2 border-primary shadow-2xl rounded-lg overflow-hidden bg-white"
+                      style={{
+                        left: Math.min(mousePosition.x + 20, 400),
+                        top: Math.min(mousePosition.y - 100, 300),
+                        width: "200px",
+                        height: "200px",
+                      }}
+                    >
+                      <div className="relative w-full h-full">
+                        <img
+                          src={image.image_url || image.thumbnail_url}
+                          alt="Quality Preview"
+                          className="w-full h-full object-cover"
+                          style={{
+                            transform: `scale(4)`,
+                            transformOrigin: `${previewPosition.x}% ${previewPosition.y}%`,
+                          }}
+                        />
+                        <div className="absolute inset-0 border border-primary/20"></div>
+                        <div className="absolute bottom-0 left-0 right-0 bg-primary text-primary-foreground text-xs px-2 py-1 text-center font-medium">
+                          Original Quality Preview
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Crosshair indicator when quality preview is active */}
+                  {showQualityPreview && (
+                    <div
+                      className="absolute pointer-events-none z-20"
+                      style={{
+                        left: mousePosition.x - 10,
+                        top: mousePosition.y - 10,
+                        width: "20px",
+                        height: "20px",
+                      }}
+                    >
+                      <div className="w-full h-full border-2 border-primary rounded-full bg-primary/20"></div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
             <div className="text-center text-sm text-muted-foreground">
               Preview • Watermarked • Full resolution available after purchase
+              {showQualityPreview && (
+                <span className="block mt-1 text-primary font-medium">
+                  Move mouse to explore original quality • Quality preview shows actual image detail
+                </span>
+              )}
+              {!showQualityPreview && (
+                <span className="block mt-1">Click HQ button to see original quality preview</span>
+              )}
+              <span className="block mt-1 text-xs text-red-600">
+                ⚠️ Preview images are protected - Purchase required for full resolution download
+              </span>
             </div>
           </div>
 

@@ -216,13 +216,8 @@ export async function getCategories() {
     const result = await sql`
       SELECT id, name, description, active
       FROM categories
-      WHERE active = true AND (name = 'equirectangular' OR name = 'fisheye')
-      ORDER BY 
-        CASE 
-          WHEN name = 'equirectangular' THEN 1
-          WHEN name = 'fisheye' THEN 2
-          ELSE 3
-        END
+      WHERE active = true
+      ORDER BY name
     `
 
     // Map the categories to use display names
@@ -231,6 +226,13 @@ export async function getCategories() {
       display_name:
         category.name === "equirectangular" ? "360 images" : category.name === "fisheye" ? "180 images" : category.name,
     }))
+
+    console.log(
+      "[v0] getCategories returning",
+      mappedResult.length,
+      "categories:",
+      mappedResult.map((c) => c.name),
+    )
 
     return { success: true, data: mappedResult }
   } catch (error) {

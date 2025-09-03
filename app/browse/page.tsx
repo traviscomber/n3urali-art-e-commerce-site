@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -36,6 +36,51 @@ interface CategoryWithImages extends Category {
   images: Image[]
 }
 
+const LazyImage = ({
+  src,
+  alt,
+  className,
+  onClick,
+}: { src: string; alt: string; className: string; onClick?: () => void }) => {
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [isInView, setIsInView] = useState(false)
+  const imgRef = useRef<HTMLImageElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    if (imgRef.current) {
+      observer.observe(imgRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div ref={imgRef} className={className} onClick={onClick}>
+      {isInView ? (
+        <img
+          src={src || "/placeholder.svg"}
+          alt={alt}
+          className="w-full h-full object-contain bg-muted/10 transition-all duration-200"
+          onLoad={() => setIsLoaded(true)}
+          style={{ opacity: isLoaded ? 1 : 0 }}
+        />
+      ) : (
+        <div className="w-full h-full bg-muted/30 animate-pulse" />
+      )}
+    </div>
+  )
+}
+
 export default function BrowsePage() {
   const [categoriesWithImages, setCategoriesWithImages] = useState<CategoryWithImages[]>([])
   const [loading, setLoading] = useState(true)
@@ -43,10 +88,16 @@ export default function BrowsePage() {
   const [editingImage, setEditingImage] = useState<Image | null>(null)
   const [previewImage, setPreviewImage] = useState<Image | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
-  const [allImages, setAllImages] = useState<Image[]>([])
+  const [displayedImages, setDisplayedImages] = useState<Image[]>([])
+  const [hasMore, setHasMore] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [totalImages, setTotalImages] = useState(0)
+  const observerRef = useRef<IntersectionObserver | null>(null)
+  const loadMoreRef = useRef<HTMLDivElement | null>(null)
   const { user } = useAuth()
 
   const isAdmin = user?.is_admin
+  const IMAGES_PER_LOAD = 24 // Load 24 images at a time (4 rows of 6)
 
   useEffect(() => {
     loadData()
@@ -61,8 +112,16 @@ export default function BrowsePage() {
         const images = imagesResult.data || []
         const cats = categoriesResult.data || []
 
+        console.log("[v0] Total images loaded:", images.length)
+        console.log("[v0] Categories loaded:", cats.length)
+
         setCategories(cats)
-        setAllImages(images)
+        setTotalImages(images.length)
+        setDisplayedImages(images.slice(0, IMAGES_PER_LOAD))
+        setHasMore(images.length > IMAGES_PER_LOAD)
+
+        console.log("[v0] Displayed images:", Math.min(images.length, IMAGES_PER_LOAD))
+        console.log("[v0] Has more images:", images.length > IMAGES_PER_LOAD)
 
         const categoryMap = new Map<string, CategoryWithImages>()
 
@@ -91,6 +150,53 @@ export default function BrowsePage() {
       setLoading(false)
     }
   }
+
+  const loadMoreImages = useCallback(async () => {
+    if (loadingMore || !hasMore) return
+
+    setLoadingMore(true)
+
+    try {
+      const imagesResult = await getImages()
+      if (imagesResult.success) {
+        const allImages = imagesResult.data || []
+        const currentLength = displayedImages.length
+        const nextBatch = allImages.slice(currentLength, currentLength + IMAGES_PER_LOAD)
+
+        if (nextBatch.length > 0) {
+          setDisplayedImages((prev) => [...prev, ...nextBatch])
+          setHasMore(currentLength + nextBatch.length < allImages.length)
+        } else {
+          setHasMore(false)
+        }
+      }
+    } catch (error) {
+      console.error("Error loading more images:", error)
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [displayedImages.length, loadingMore, hasMore])
+
+  useEffect(() => {
+    if (observerRef.current) observerRef.current.disconnect()
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          loadMoreImages()
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current)
+    }
+
+    return () => {
+      if (observerRef.current) observerRef.current.disconnect()
+    }
+  }, [loadMoreImages, hasMore, loadingMore])
 
   const getCategoryDisplayName = (category: Category) => {
     return category.display_name || category.name
@@ -209,31 +315,31 @@ export default function BrowsePage() {
             <div className="relative">
               <div
                 id={`category-${category.id}`}
-                className="flex gap-8 overflow-x-auto scrollbar-hide pb-6"
+                className="flex gap-6 overflow-x-auto scrollbar-hide pb-6"
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
               >
                 {category.images.slice(0, 6).map((image) => (
                   <div
                     key={image.id}
-                    className="flex-shrink-0 w-96 gallery-frame rounded-xl p-4 transition-all duration-500 hover:animate-elegant-float group cursor-pointer"
+                    className="flex-shrink-0 w-72 gallery-frame rounded-xl p-3 transition-all duration-500 hover:animate-elegant-float group cursor-pointer"
                   >
-                    <div className="relative aspect-video overflow-hidden rounded-lg bg-muted/30">
-                      <img
+                    <div className="relative aspect-video overflow-hidden rounded-lg bg-muted/10">
+                      <LazyImage
                         src={image.thumbnail_url || image.image_url}
                         alt={image.title}
-                        className="w-full h-full object-contain transition-all duration-500 group-hover:scale-[1.02]"
+                        className="w-full h-full transition-all duration-500 group-hover:scale-[1.02]"
                       />
                       {image.featured && (
-                        <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground font-semibold px-3 py-1">
+                        <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground font-semibold px-2 py-1 text-xs">
                           Featured
                         </Badge>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center gap-4">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center gap-3">
                         <Button
                           size="sm"
                           variant="secondary"
                           onClick={() => handlePreviewImage(image)}
-                          className="flex items-center gap-2 bg-white/90 text-foreground hover:bg-white font-semibold px-4 py-2 backdrop-blur-sm"
+                          className="flex items-center gap-2 bg-white/90 text-foreground hover:bg-white font-semibold px-3 py-2 backdrop-blur-sm text-sm"
                         >
                           <Eye className="h-4 w-4" />
                           Preview
@@ -243,7 +349,7 @@ export default function BrowsePage() {
                             size="sm"
                             variant="secondary"
                             onClick={() => handleEditImage(image)}
-                            className="flex items-center gap-2 bg-primary/90 text-primary-foreground hover:bg-primary font-semibold px-4 py-2 backdrop-blur-sm"
+                            className="flex items-center gap-2 bg-primary/90 text-primary-foreground hover:bg-primary font-semibold px-3 py-2 backdrop-blur-sm text-sm"
                           >
                             <Edit3 className="h-4 w-4" />
                             Edit
@@ -251,14 +357,12 @@ export default function BrowsePage() {
                         )}
                       </div>
                     </div>
-                    <div className="pt-4 space-y-3">
-                      <h3 className="font-bold text-xl text-foreground line-clamp-1">{image.title}</h3>
-                      <p className="text-base text-muted-foreground line-clamp-2 leading-relaxed">
-                        {image.description}
-                      </p>
-                      <div className="flex items-center justify-between pt-2">
-                        <span className="text-2xl font-bold text-primary">${image.price}</span>
-                        <Badge variant="secondary" className="text-sm font-semibold px-3 py-1">
+                    <div className="pt-3 space-y-2">
+                      <h3 className="font-bold text-lg text-foreground line-clamp-1">{image.title}</h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{image.description}</p>
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-xl font-bold text-primary">${image.price}</span>
+                        <Badge variant="secondary" className="text-xs font-semibold px-2 py-1">
                           {getCategoryBadgeName(image.category_name)}
                         </Badge>
                       </div>
@@ -270,68 +374,70 @@ export default function BrowsePage() {
           </div>
         ))}
 
-        {allImages.length > 0 && (
+        {totalImages > 0 && (
           <div className="space-y-8 pt-16 border-t border-border/30">
             <div className="text-center">
               <h2 className="text-4xl font-bold text-foreground mb-4">Complete Gallery</h2>
               <p className="text-lg text-muted-foreground font-medium">
-                Browse all {allImages.length} premium images in our collection
+                {totalImages} premium images • 6 per row • Click to view details
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {allImages.map((image) => (
+            <div className="grid grid-cols-5 lg:grid-cols-10 gap-3">
+              {displayedImages.map((image) => (
                 <div
                   key={image.id}
-                  className="gallery-frame rounded-xl p-4 transition-all duration-500 hover:animate-elegant-float group cursor-pointer"
+                  className="relative aspect-square overflow-hidden cursor-pointer group"
+                  onClick={() => handlePreviewImage(image)}
                 >
-                  <div className="relative aspect-video overflow-hidden rounded-lg bg-muted/30">
-                    <img
-                      src={image.thumbnail_url || image.image_url}
-                      alt={image.title}
-                      className="w-full h-full object-contain transition-all duration-500 group-hover:scale-[1.02]"
-                    />
-                    {image.featured && (
-                      <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground font-semibold px-3 py-1">
-                        Featured
-                      </Badge>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center gap-4">
+                  <LazyImage src={image.thumbnail_url || image.image_url} alt="" className="w-full h-full" />
+                  <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center p-4">
+                    <div className="text-center text-white">
+                      <h3 className="font-bold text-lg mb-2 line-clamp-2">{image.title}</h3>
+                      <p className="text-2xl font-bold text-green-400">${image.price}</p>
+                      <p className="text-sm text-gray-300 mt-1">{getCategoryBadgeName(image.category_name)}</p>
+                    </div>
+                  </div>
+                  {image.featured && <div className="absolute top-2 left-2 w-2 h-2 bg-yellow-400 rounded-full"></div>}
+                  {editMode && isAdmin && (
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center">
                       <Button
                         size="sm"
                         variant="secondary"
-                        onClick={() => handlePreviewImage(image)}
-                        className="flex items-center gap-2 bg-white/90 text-foreground hover:bg-white font-semibold px-4 py-2 backdrop-blur-sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleEditImage(image)
+                        }}
+                        className="h-8 w-8 p-0 bg-white/90 text-foreground hover:bg-white"
                       >
-                        <Eye className="h-4 w-4" />
-                        Preview
+                        <Edit3 className="h-4 w-4" />
                       </Button>
-                      {editMode && isAdmin && (
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => handleEditImage(image)}
-                          className="flex items-center gap-2 bg-primary/90 text-primary-foreground hover:bg-primary font-semibold px-4 py-2 backdrop-blur-sm"
-                        >
-                          <Edit3 className="h-4 w-4" />
-                          Edit
-                        </Button>
-                      )}
                     </div>
-                  </div>
-                  <div className="pt-4 space-y-3">
-                    <h3 className="font-bold text-lg text-foreground line-clamp-1">{image.title}</h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{image.description}</p>
-                    <div className="flex items-center justify-between pt-2">
-                      <span className="text-xl font-bold text-primary">${image.price}</span>
-                      <Badge variant="secondary" className="text-xs font-semibold px-3 py-1">
-                        {getCategoryBadgeName(image.category_name)}
-                      </Badge>
-                    </div>
-                  </div>
+                  )}
                 </div>
               ))}
             </div>
+
+            {hasMore && (
+              <div ref={loadMoreRef} className="flex justify-center py-8">
+                {loadingMore ? (
+                  <div className="flex items-center gap-3 text-muted-foreground">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                    <span className="font-medium">Loading more images...</span>
+                  </div>
+                ) : (
+                  <div className="text-muted-foreground font-medium">Scroll to load more</div>
+                )}
+              </div>
+            )}
+
+            {!hasMore && displayedImages.length > 0 && (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground font-medium">
+                  You've reached the end • {displayedImages.length} images total
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -425,11 +531,11 @@ export default function BrowsePage() {
               </div>
 
               <div className="space-y-4">
-                <div className="aspect-video overflow-hidden rounded-lg mb-4">
+                <div className="aspect-video overflow-hidden rounded-lg mb-4 bg-muted/10">
                   <img
                     src={editingImage.thumbnail_url || editingImage.image_url}
                     alt={editingImage.title}
-                    className="w-full h-full object-contain bg-gray-100"
+                    className="w-full h-full object-contain"
                   />
                 </div>
 

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
 import { Loader2, Upload, Eye, Trash2, Database, BarChart3 } from "lucide-react"
 
@@ -429,20 +430,25 @@ export default function SimpleAdminPage() {
                   <Label htmlFor="category" className="text-lg font-medium">
                     Category *
                   </Label>
-                  <select
-                    id="category"
+                  <Select
                     value={newImage.category}
-                    onChange={(e) => setNewImage((prev) => ({ ...prev, category: e.target.value }))}
-                    className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-lg"
+                    onValueChange={(value) => setNewImage((prev) => ({ ...prev, category: value }))}
                     required
                   >
-                    <option value="">Select category</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.name}>
-                        {getCategoryDisplayName(cat)}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger className="h-12 text-lg">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.name} className="text-lg">
+                          {getCategoryDisplayName(cat)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {categories.length} categories loaded: {categories.map((c) => getCategoryDisplayName(c)).join(", ")}
+                  </p>
                 </div>
 
                 <div>

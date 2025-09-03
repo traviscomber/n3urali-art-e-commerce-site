@@ -238,9 +238,36 @@ export default function GalleryPage() {
             </div>
 
             {transformedImages.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-5 lg:grid-cols-10 gap-3">
                 {transformedImages.map((image) => (
-                  <ImageCard key={image.id} image={image} />
+                  <div
+                    key={image.id}
+                    className="group relative cursor-pointer"
+                    onClick={() => handleImageSelect(image)}
+                  >
+                    {/* Clean thumbnail without frame */}
+                    <div className="relative aspect-square overflow-hidden">
+                      <img
+                        src={image.preview_url || "/placeholder.svg"}
+                        alt={image.title}
+                        className="w-full h-full object-contain bg-muted/10 transition-transform duration-300 group-hover:scale-105"
+                      />
+
+                      {/* Hover overlay with image data */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/80 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <div className="text-center text-white p-2 space-y-1">
+                          <h3 className="font-semibold text-sm truncate">{image.title}</h3>
+                          <p className="text-xs text-gray-300">
+                            {image.category === "equirectangular" ? "360°" : "Fisheye"}
+                          </p>
+                          <p className="text-sm font-bold text-emerald-400">${image.price}</p>
+                        </div>
+                      </div>
+
+                      {/* Small indicator for featured images */}
+                      <div className="absolute top-2 right-2 w-2 h-2 bg-yellow-400 rounded-full opacity-60" />
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : (

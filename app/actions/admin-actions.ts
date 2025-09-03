@@ -165,3 +165,172 @@ export async function deleteImage(imageId: string) {
     }
   }
 }
+
+export async function updateImage(formData: FormData) {
+  try {
+    const imageId = formData.get("id") as string
+    const imageData = {
+      title: formData.get("title") as string,
+      description: formData.get("description") as string,
+      category: formData.get("category") as string,
+      price: Number.parseFloat(formData.get("price") as string),
+      image_url: formData.get("file_url") as string,
+      thumbnail_url: formData.get("thumbnail_url") as string,
+    }
+
+    console.log("[v0] Starting image update for ID:", imageId, "with data:", imageData)
+    const sql = createNeonClient()
+
+    // Look up or create category
+    console.log("[v0] Looking up category:", imageData.category)
+    const categoryResult = await sql`
+      SELECT id FROM categories WHERE name = ${imageData.category} LIMIT 1
+    `
+
+    let categoryId: string
+
+    if (categoryResult.length === 0) {
+      console.log("[v0] Category not found, creating new category:", imageData.category)
+      const newCategoryResult = await sql`
+        INSERT INTO categories (name, description, active)
+        VALUES (${imageData.category}, ${"Auto-created category for " + imageData.category}, true)
+        RETURNING id
+      `
+      categoryId = newCategoryResult[0].id
+    } else {
+      categoryId = categoryResult[0].id
+    }
+
+    // Update the image
+    const result = await sql`
+      UPDATE images 
+      SET title = ${imageData.title}, 
+          description = ${imageData.description}, 
+          category_id = ${categoryId}, 
+          price = ${imageData.price}, 
+          image_url = ${imageData.image_url}, 
+          thumbnail_url = ${imageData.thumbnail_url},
+          updated_at = NOW()
+      WHERE id = ${imageId}
+      RETURNING *
+    `
+
+    if (result.length === 0) {
+      return { success: false, error: "Image not found" }
+    }
+
+    console.log("[v0] Image updated successfully:", result[0])
+    revalidatePath("/simple-admin")
+    return { success: true, data: result[0] }
+  } catch (error) {
+    console.error("[v0] Update image error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
+
+export async function toggleImageStatus(imageId: string, field: "active" | "featured", value: boolean) {
+  try {
+    console.log("[v0] Toggling image status:", imageId, field, value)
+    const sql = createNeonClient()
+
+    const result = await sql`
+      UPDATE images 
+      SET ${field} = ${value}, updated_at = NOW()
+      WHERE id = ${imageId}
+      RETURNING *
+    `
+
+    if (result.length === 0) {
+      return { success: false, error: "Image not found" }
+    }
+
+    console.log("[v0] Image status updated successfully")
+    revalidatePath("/simple-admin")
+    return { success: true, data: result[0] }
+  } catch (error) {
+    console.error("[v0] Toggle image status error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
+
+export async function updateOrderStatus(orderId: string, newStatus: string) {
+  try {
+    console.log("[v0] Updating order status:", orderId, "to", newStatus)
+    const sql = createNeonClient()
+
+    const result = await sql`
+      UPDATE orders 
+      SET status = ${newStatus}, updated_at = NOW()
+      WHERE id = ${orderId}
+      RETURNING *
+    `
+
+    if (result.length === 0) {
+      return { success: false, error: "Order not found" }
+    }
+
+    console.log("[v0] Order status updated successfully")
+    revalidatePath("/simple-admin")
+    return { success: true, data: result[0] }
+  } catch (error) {
+    console.error("[v0] Update order status error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
+
+export async function getUsers() {
+  try {
+    const sql = createNeonClient()
+
+    const result = await sql`
+      SELECT id, email, full_name, is_admin, created_at, updated_at
+      FROM user_profiles
+      ORDER BY created_at DESC
+    `
+
+    return { success: true, data: result }
+  } catch (error) {
+    console.error("[v0] Get users error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
+
+export async function toggleUserAdmin(userId: string, isAdmin: boolean) {
+  try {
+    console.log("[v0] Toggling user admin status:", userId, "to", isAdmin)
+    const sql = createNeonClient()
+
+    const result = await sql`
+      UPDATE user_profiles 
+      SET is_admin = ${isAdmin}, updated_at = NOW()
+      WHERE id = ${userId}
+      RETURNING *
+    `
+
+    if (result.length === 0) {
+      return { success: false, error: "User not found" }
+    }
+
+    console.log("[v0] User admin status updated successfully")
+    revalidatePath("/simple-admin")
+    return { success: true, data: result[0] }
+  } catch (error) {
+    console.error("[v0] Toggle user admin error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}

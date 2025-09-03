@@ -12,6 +12,11 @@ import {
   getOrders,
   getCategories,
   deleteImage as deleteImageAction,
+  updateImage as updateImageAction,
+  toggleImageStatus,
+  updateOrderStatus as updateOrderStatusAction,
+  getUsers as getUsersAction,
+  toggleUserAdmin as toggleUserAdminAction,
 } from "@/app/actions/admin-actions"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -161,6 +166,21 @@ export default function SimpleAdminPage() {
     }
   }
 
+  const deleteImage = async (imageId: string) => {
+    try {
+      const result = await deleteImageAction(imageId)
+      if (result.success) {
+        toast.success("Image deleted successfully")
+        fetchImages() // Refresh images list
+      } else {
+        toast.error(`Failed to delete image: ${result.error}`)
+      }
+    } catch (error) {
+      console.error("Error deleting image:", error)
+      toast.error("Failed to delete image")
+    }
+  }
+
   useEffect(() => {
     if (localStorage.getItem("simple_admin_auth") === "true") {
       setIsAuthenticated(true)
@@ -191,6 +211,12 @@ export default function SimpleAdminPage() {
       const categoriesResult = await getCategories()
       if (categoriesResult.success) {
         setCategories(categoriesResult.data)
+      }
+
+      const usersResult = await getUsersAction()
+      if (usersResult.success) {
+        setUsers(usersResult.data)
+        setStats((prev) => ({ ...prev, totalUsers: usersResult.data.length }))
       }
     } catch (error) {
       console.error("Error fetching dashboard stats:", error)
@@ -230,8 +256,13 @@ export default function SimpleAdminPage() {
 
   const fetchUsers = async () => {
     try {
-      toast.info("User management functionality is being updated")
-      setUsers([])
+      const result = await getUsersAction()
+      if (result.success) {
+        setUsers(result.data)
+        setStats((prev) => ({ ...prev, totalUsers: result.data.length }))
+      } else {
+        toast.error("Failed to load users")
+      }
     } catch (error) {
       console.error("Error fetching users:", error)
       toast.error("Failed to load users")
@@ -282,7 +313,13 @@ export default function SimpleAdminPage() {
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
-      toast.info("Order status update functionality is being updated")
+      const result = await updateOrderStatusAction(orderId, newStatus)
+      if (result.success) {
+        toast.success("Order status updated successfully")
+        fetchOrders() // Refresh orders list
+      } else {
+        toast.error(`Failed to update order status: ${result.error}`)
+      }
     } catch (error) {
       console.error("Error updating order status:", error)
       toast.error("Failed to update order status")
@@ -291,31 +328,16 @@ export default function SimpleAdminPage() {
 
   const toggleUserAdmin = async (userId: string, currentAdminStatus: boolean) => {
     try {
-      toast.info("User admin toggle functionality is being updated")
+      const result = await toggleUserAdminAction(userId, !currentAdminStatus)
+      if (result.success) {
+        toast.success("User admin status updated successfully")
+        fetchUsers() // Refresh users list
+      } else {
+        toast.error(`Failed to update user admin status: ${result.error}`)
+      }
     } catch (error) {
       console.error("Error toggling user admin status:", error)
       toast.error("Failed to update user admin status")
-    }
-  }
-
-  const deleteImage = async (imageId: string) => {
-    if (!confirm("Are you sure you want to delete this image?")) return
-
-    try {
-      console.log("[v0] Deleting image with ID:", imageId)
-      const result = await deleteImageAction(imageId)
-
-      if (result.success) {
-        toast.success("Image deleted successfully")
-        // Refresh the images list
-        fetchImages()
-      } else {
-        console.log("[v0] Delete failed:", result.error)
-        toast.error(`Failed to delete image: ${result.error}`)
-      }
-    } catch (error) {
-      console.error("[v0] Error deleting image:", error)
-      toast.error("Failed to delete image")
     }
   }
 
@@ -323,10 +345,49 @@ export default function SimpleAdminPage() {
     if (!editingImage) return
 
     try {
-      toast.info("Update functionality is being updated")
+      formData.append("id", editingImage.id)
+      const result = await updateImageAction(formData)
+
+      if (result.success) {
+        toast.success("Image updated successfully")
+        setEditingImage(null)
+        fetchImages() // Refresh images list
+      } else {
+        toast.error(`Failed to update image: ${result.error}`)
+      }
     } catch (error) {
       console.error("Error updating image:", error)
       toast.error("Failed to update image")
+    }
+  }
+
+  const toggleImageActiveStatus = async (imageId: string, currentStatus: boolean) => {
+    try {
+      const result = await toggleImageStatus(imageId, "active", !currentStatus)
+      if (result.success) {
+        toast.success("Image status updated successfully")
+        fetchImages() // Refresh images list
+      } else {
+        toast.error(`Failed to update image status: ${result.error}`)
+      }
+    } catch (error) {
+      console.error("Error toggling image status:", error)
+      toast.error("Failed to update image status")
+    }
+  }
+
+  const toggleImageFeaturedStatus = async (imageId: string, currentStatus: boolean) => {
+    try {
+      const result = await toggleImageStatus(imageId, "featured", !currentStatus)
+      if (result.success) {
+        toast.success("Image featured status updated successfully")
+        fetchImages() // Refresh images list
+      } else {
+        toast.error(`Failed to update featured status: ${result.error}`)
+      }
+    } catch (error) {
+      console.error("Error toggling featured status:", error)
+      toast.error("Failed to update featured status")
     }
   }
 
@@ -604,15 +665,33 @@ export default function SimpleAdminPage() {
                             className="w-full rounded-md"
                           />
                           <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity duration-200 rounded-md">
-                            <div className="flex space-x-2">
-                              <Button size="sm" variant="outline" onClick={() => handleEditImage(image)}>
-                                <Edit className="h-4 w-4 mr-2" />
-                                Edit
-                              </Button>
-                              <Button size="sm" variant="destructive" onClick={() => deleteImage(image.id)}>
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
-                              </Button>
+                            <div className="flex flex-col space-y-2 p-2">
+                              <div className="flex space-x-2">
+                                <Button size="sm" variant="outline" onClick={() => handleEditImage(image)}>
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Edit
+                                </Button>
+                                <Button size="sm" variant="destructive" onClick={() => deleteImage(image.id)}>
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete
+                                </Button>
+                              </div>
+                              <div className="flex space-x-2">
+                                <Button
+                                  size="sm"
+                                  variant={image.active ? "default" : "secondary"}
+                                  onClick={() => toggleImageActiveStatus(image.id, image.active)}
+                                >
+                                  {image.active ? "Active" : "Inactive"}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant={image.featured ? "default" : "secondary"}
+                                  onClick={() => toggleImageFeaturedStatus(image.id, image.featured)}
+                                >
+                                  {image.featured ? "Featured" : "Not Featured"}
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -647,7 +726,19 @@ export default function SimpleAdminPage() {
                           <p>Customer: {order.customer_name}</p>
                           <p>Email: {order.user_email}</p>
                           <p>Total: ${order.total_amount}</p>
-                          <Badge>{order.status}</Badge>
+                          <div className="flex items-center space-x-2 mt-2">
+                            <Badge>{order.status}</Badge>
+                            <select
+                              value={order.status}
+                              onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                              className="text-sm border rounded px-2 py-1"
+                            >
+                              <option value="pending">Pending</option>
+                              <option value="processing">Processing</option>
+                              <option value="completed">Completed</option>
+                              <option value="cancelled">Cancelled</option>
+                            </select>
+                          </div>
                         </CardContent>
                       </Card>
                     ))}
@@ -678,7 +769,16 @@ export default function SimpleAdminPage() {
                         </CardHeader>
                         <CardContent>
                           <p>Email: {user.email}</p>
-                          <Badge>{user.is_admin ? "Admin" : "User"}</Badge>
+                          <div className="flex items-center space-x-2 mt-2">
+                            <Badge>{user.is_admin ? "Admin" : "User"}</Badge>
+                            <Button
+                              size="sm"
+                              variant={user.is_admin ? "destructive" : "default"}
+                              onClick={() => toggleUserAdmin(user.id, user.is_admin)}
+                            >
+                              {user.is_admin ? "Remove Admin" : "Make Admin"}
+                            </Button>
+                          </div>
                         </CardContent>
                       </Card>
                     ))}
@@ -689,6 +789,75 @@ export default function SimpleAdminPage() {
           </TabsContent>
         </Tabs>
       </div>
+      {editingImage && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <CardHeader>
+              <CardTitle>Edit Image</CardTitle>
+              <CardDescription>Update image details</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  const formData = new FormData(e.target as HTMLFormElement)
+                  updateImage(formData)
+                }}
+                className="space-y-4"
+              >
+                <div>
+                  <Label htmlFor="edit-title">Title</Label>
+                  <Input type="text" id="edit-title" name="title" defaultValue={editingImage.title} required />
+                </div>
+                <div>
+                  <Label htmlFor="edit-description">Description</Label>
+                  <Textarea id="edit-description" name="description" defaultValue={editingImage.description} />
+                </div>
+                <div>
+                  <Label htmlFor="edit-category">Category</Label>
+                  <select
+                    id="edit-category"
+                    name="category"
+                    defaultValue={editingImage.category_name}
+                    required
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="">Select a category</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.name}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="edit-price">Price</Label>
+                  <Input type="number" id="edit-price" name="price" defaultValue={editingImage.price} required />
+                </div>
+                <div>
+                  <Label htmlFor="edit-file_url">Image URL</Label>
+                  <Input type="url" id="edit-file_url" name="file_url" defaultValue={editingImage.image_url} required />
+                </div>
+                <div>
+                  <Label htmlFor="edit-thumbnail_url">Thumbnail URL</Label>
+                  <Input
+                    type="url"
+                    id="edit-thumbnail_url"
+                    name="thumbnail_url"
+                    defaultValue={editingImage.thumbnail_url}
+                  />
+                </div>
+                <div className="flex space-x-2">
+                  <Button type="submit">Update Image</Button>
+                  <Button type="button" variant="outline" onClick={() => setEditingImage(null)}>
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

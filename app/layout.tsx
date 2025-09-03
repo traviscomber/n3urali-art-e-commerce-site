@@ -5,6 +5,7 @@ import { GeistMono } from "geist/font/mono"
 import "./globals.css"
 import { CartProvider } from "@/lib/contexts/cart-context"
 import { AuthProvider } from "@/lib/contexts/auth-context"
+import { ThemeProvider } from "@/components/theme-provider"
 import { Header } from "@/components/header"
 import { CartSidebar } from "@/components/cart-sidebar"
 
@@ -22,13 +23,15 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}>
       <body>
-        <AuthProvider>
-          <CartProvider>
-            <Header />
-            {children}
-            <CartSidebar />
-          </CartProvider>
-        </AuthProvider>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <AuthProvider>
+            <CartProvider>
+              <Header />
+              {children}
+              <CartSidebar />
+            </CartProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

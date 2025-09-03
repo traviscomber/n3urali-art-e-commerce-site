@@ -67,20 +67,20 @@ export default function GalleryPage() {
 
   const ImageCard = ({ image, size = "normal" }: { image: Image; size?: "normal" | "large" }) => (
     <div
-      className={`group relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden ${size === "large" ? "min-w-[280px]" : "min-w-[250px]"}`}
+      className={`group relative bg-card rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-border overflow-hidden ${size === "large" ? "min-w-[280px]" : "min-w-[250px]"}`}
     >
       <div className={`relative ${size === "large" ? "aspect-[4/3]" : "aspect-video"} overflow-hidden`}>
         <img
           src={image.preview_url || "/placeholder.svg"}
           alt={image.title}
-          className="w-full h-full object-contain bg-gray-50 group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-contain bg-muted/20 group-hover:scale-105 transition-transform duration-300"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="absolute bottom-4 left-4 right-4 flex gap-2">
             <Button
               size="sm"
               variant="secondary"
-              className="bg-white/95 hover:bg-white text-gray-900 border border-gray-200 shadow-lg flex-1"
+              className="bg-background/95 hover:bg-background text-foreground border border-border shadow-lg flex-1"
               onClick={(e) => {
                 e.stopPropagation()
                 handleImageSelect(image, "preview")
@@ -92,7 +92,7 @@ export default function GalleryPage() {
             {image.category === "equirectangular" && (
               <Button
                 size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg flex-1"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg flex-1"
                 onClick={(e) => {
                   e.stopPropagation()
                   handleImageSelect(image, "360")
@@ -109,12 +109,12 @@ export default function GalleryPage() {
         </div>
       </div>
       <div className="p-4 space-y-2">
-        <h3 className="font-semibold text-gray-900 truncate text-sm">{image.title}</h3>
+        <h3 className="font-semibold text-foreground truncate text-sm">{image.title}</h3>
         <div className="flex items-center justify-between">
           <Badge variant="outline" className="text-xs">
             {image.category === "equirectangular" ? "360°" : "Fisheye"}
           </Badge>
-          <span className="text-sm font-bold text-emerald-600">${image.price}</span>
+          <span className="text-sm font-bold text-emerald-500">${image.price}</span>
         </div>
       </div>
     </div>
@@ -151,8 +151,8 @@ export default function GalleryPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900">360° Images</h2>
-                <p className="text-gray-600 mt-1">Equirectangular panoramic photography</p>
+                <h2 className="text-3xl font-bold text-foreground">360° Images</h2>
+                <p className="text-muted-foreground mt-1">Equirectangular panoramic photography</p>
               </div>
               <div className="flex gap-2">
                 <Button
@@ -185,7 +185,7 @@ export default function GalleryPage() {
                   .map((image) => <ImageCard key={image.id} image={image} size="large" />)
               ) : (
                 <div className="text-center py-8 w-full">
-                  <p className="text-gray-500">No 360° images available</p>
+                  <p className="text-muted-foreground">No 360° images available</p>
                 </div>
               )}
             </div>
@@ -195,8 +195,8 @@ export default function GalleryPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900">180° Images</h2>
-                <p className="text-gray-600 mt-1">Fisheye lens photography</p>
+                <h2 className="text-3xl font-bold text-foreground">180° Images</h2>
+                <p className="text-muted-foreground mt-1">Fisheye lens photography</p>
               </div>
               <div className="flex gap-2">
                 <Button
@@ -227,7 +227,7 @@ export default function GalleryPage() {
                 fisheyeImages.slice(0, 6).map((image) => <ImageCard key={image.id} image={image} size="large" />)
               ) : (
                 <div className="text-center py-8 w-full">
-                  <p className="text-gray-500">No fisheye images available</p>
+                  <p className="text-muted-foreground">No fisheye images available</p>
                 </div>
               )}
             </div>
@@ -236,8 +236,8 @@ export default function GalleryPage() {
           {/* Complete Gallery Section */}
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900">Complete Gallery</h2>
-              <p className="text-gray-600 mt-1">Click any image to view details and purchase</p>
+              <h2 className="text-3xl font-bold text-foreground">Complete Gallery</h2>
+              <p className="text-muted-foreground mt-1">Click any image to view details and purchase</p>
             </div>
 
             {transformedImages.length > 0 ? (
@@ -264,7 +264,7 @@ export default function GalleryPage() {
                             <Button
                               size="sm"
                               variant="secondary"
-                              className="bg-white/95 hover:bg-white text-gray-900 text-xs px-2 py-1 h-auto"
+                              className="bg-background/95 hover:bg-background text-foreground text-xs px-2 py-1 h-auto"
                               onClick={(e) => {
                                 e.stopPropagation()
                                 handleImageSelect(image, "preview")
@@ -276,7 +276,7 @@ export default function GalleryPage() {
                             {image.category === "equirectangular" && (
                               <Button
                                 size="sm"
-                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1 h-auto"
+                                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs px-2 py-1 h-auto"
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   handleImageSelect(image, "360")
@@ -307,7 +307,7 @@ export default function GalleryPage() {
               </div>
             ) : (
               <div className="text-center py-16">
-                <h3 className="text-lg font-semibold mb-2">No images available</h3>
+                <h3 className="text-lg font-semibold mb-2 text-foreground">No images available</h3>
                 <p className="text-muted-foreground">Upload some images in the admin panel to see them here</p>
               </div>
             )}

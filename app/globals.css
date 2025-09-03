@@ -4,76 +4,77 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated to elegant emerald-based design tokens for premium photography marketplace */
+  /* Light theme with elegant magenta and indigo accents */
   --background: #ffffff;
-  --foreground: #475569;
-  --card: #f1f5f9;
-  --card-foreground: #000000;
+  --foreground: #1f2937;
+  --card: #ffffff;
+  --card-foreground: #1f2937;
   --popover: #ffffff;
-  --popover-foreground: #475569;
-  --primary: #059669;
+  --popover-foreground: #1f2937;
+  --primary: #d946ef;
   --primary-foreground: #ffffff;
-  --secondary: #10b981;
-  --secondary-foreground: #ffffff;
-  --muted: #f1f5f9;
-  --muted-foreground: #475569;
-  --accent: #10b981;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #1f2937;
+  --muted: #f9fafb;
+  --muted-foreground: #6b7280;
+  --accent: #6366f1;
   --accent-foreground: #ffffff;
-  --destructive: #ff4c4c;
+  --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #f1f5f9;
-  --ring: rgba(5, 150, 105, 0.5);
-  --chart-1: #059669;
-  --chart-2: #10b981;
-  --chart-3: #475569;
-  --chart-4: #ffffff;
-  --chart-5: #f1f5f9;
+  --border: #e5e7eb;
+  --input: #ffffff;
+  --ring: rgba(217, 70, 239, 0.4);
+  --chart-1: #d946ef;
+  --chart-2: #6366f1;
+  --chart-3: #4b5563;
+  --chart-4: #dc2626;
+  --chart-5: #10b981;
   --radius: 0.5rem;
   --sidebar: #ffffff;
-  --sidebar-foreground: #475569;
-  --sidebar-primary: #059669;
+  --sidebar-foreground: #1f2937;
+  --sidebar-primary: #d946ef;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #10b981;
+  --sidebar-accent: #6366f1;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: rgba(5, 150, 105, 0.5);
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: rgba(217, 70, 239, 0.4);
 }
 
 .dark {
-  /* Updated dark mode tokens for elegant gallery aesthetic */
-  --background: #0f172a;
-  --foreground: #f1f5f9;
-  --card: #1e293b;
-  --card-foreground: #f1f5f9;
-  --popover: #1e293b;
-  --popover-foreground: #f1f5f9;
-  --primary: #10b981;
-  --primary-foreground: #0f172a;
-  --secondary: #059669;
-  --secondary-foreground: #f1f5f9;
-  --muted: #334155;
-  --muted-foreground: #94a3b8;
-  --accent: #10b981;
-  --accent-foreground: #0f172a;
-  --destructive: #ff4c4c;
-  --destructive-foreground: #f1f5f9;
-  --border: #334155;
-  --input: #1e293b;
-  --ring: rgba(16, 185, 129, 0.3);
-  --chart-1: #10b981;
-  --chart-2: #059669;
-  --chart-3: #475569;
-  --chart-4: #f1f5f9;
-  --chart-5: #334155;
-  --sidebar: #1e293b;
-  --sidebar-foreground: #f1f5f9;
-  --sidebar-primary: #334155;
-  --sidebar-primary-foreground: #f1f5f9;
-  --sidebar-accent: #10b981;
-  --sidebar-accent-foreground: #0f172a;
-  --sidebar-border: #334155;
-  --sidebar-ring: rgba(16, 185, 129, 0.3);
+  /* Updated to sophisticated dark theme with magenta and indigo accents for excellent contrast */
+  --background: #1f2937;
+  --foreground: #ffffff;
+  --card: #374151;
+  --card-foreground: #ffffff;
+  --popover: #4b5563;
+  --popover-foreground: #ffffff;
+  --primary: #d946ef;
+  --primary-foreground: #ffffff;
+  --secondary: #6366f1;
+  --secondary-foreground: #ffffff;
+  --muted: #4b5563;
+  --muted-foreground: #ffffff;
+  --accent: #d946ef;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #4b5563;
+  --input: #374151;
+  --ring: rgba(255, 255, 255, 0.2);
+  --chart-1: #6366f1;
+  --chart-2: #d946ef;
+  --chart-3: #4b5563;
+  --chart-4: #dc2626;
+  --chart-5: #10b981;
+  --radius: 0.5rem;
+  --sidebar: #1f2937;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #374151;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #d946ef;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #4b5563;
+  --sidebar-ring: rgba(255, 255, 255, 0.2);
 }
 
 @theme inline {
@@ -125,7 +126,6 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 
-  /* Added elegant gallery typography and spacing utilities */
   .text-balance {
     text-wrap: balance;
   }
@@ -134,37 +134,76 @@
     text-wrap: pretty;
   }
 
-  /* Gallery-style frame effects for premium presentation */
+  /* Updated gallery frame effects with new magenta and indigo color scheme */
   .gallery-frame {
-    background: linear-gradient(145deg, #ffffff, #f8fafc);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--muted)));
+    border: 1px solid hsl(var(--border));
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), inset 0 1px 0
-      rgba(255, 255, 255, 0.1);
+      hsl(var(--foreground) / 0.03);
   }
 
   .gallery-frame:hover {
-    border-color: rgba(16, 185, 129, 0.3);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px
-      rgba(16, 185, 129, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border-color: hsl(var(--primary) / 0.5);
+    box-shadow:
+      0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px hsl(var(--primary) / 0.4),
+      inset 0 1px 0 hsl(var(--foreground) / 0.05);
   }
 
-  /* Elegant glow effects for interactive elements */
+  /* Enhanced glow effects with magenta and indigo colors for better contrast */
   .glow-primary {
-    box-shadow: 0 0 20px rgba(5, 150, 105, 0.3);
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.6);
   }
 
   .glow-accent {
-    box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+    box-shadow: 0 0 15px hsl(var(--accent) / 0.8);
   }
 
-  /* Premium backdrop for preview modal */
   .premium-backdrop {
-    background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.95) 0%, rgba(0, 0, 0, 0.98) 100%);
+    background: radial-gradient(ellipse at center, hsl(var(--background) / 0.85) 0%, hsl(var(--background) / 0.92) 100%);
     backdrop-filter: blur(8px);
+  }
+
+  /* Updated metallic effects with magenta and indigo gradient combinations */
+  .metallic-navy {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary)) 0%,
+      #e879f9 30%,
+      #d946ef 50%,
+      #c026d3 70%,
+      hsl(var(--primary)) 100%
+    );
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.1), 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  .metallic-cyan {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--secondary)) 0%,
+      #818cf8 30%,
+      #6366f1 50%,
+      #4f46e5 70%,
+      hsl(var(--secondary)) 100%
+    );
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.15), 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Dark theme specific enhanced gradients with magenta and indigo for excellent visibility */
+  .dark .glow-primary {
+    box-shadow: 0 0 25px #d946ef, 0 0 50px rgba(217, 70, 239, 0.4), 0 0 75px rgba(217, 70, 239, 0.2);
+  }
+
+  .dark .glow-accent {
+    box-shadow: 0 0 20px #6366f1, 0 0 40px rgba(99, 102, 241, 0.5), 0 0 60px rgba(99, 102, 241, 0.3);
+  }
+
+  .dark .premium-backdrop {
+    background: radial-gradient(ellipse at center, rgba(31, 41, 55, 0.8) 0%, rgba(31, 41, 55, 0.9) 100%);
+    backdrop-filter: blur(12px);
   }
 }
 
-/* Added elegant animations for gallery presentation */
+/* Enhanced animations with magenta and indigo colors for dark theme visibility */
 @keyframes elegant-float {
   0%,
   100% {
@@ -181,8 +220,31 @@
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
   50% {
-    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1), 0 4px 6px -2px rgba(16, 185, 129, 0.05), 0 0 0 1px
-      rgba(16, 185, 129, 0.1);
+    box-shadow: 0 10px 15px -3px hsl(var(--primary) / 0.4), 0 4px 6px -2px hsl(var(--primary) / 0.2), 0 0 0 1px
+      hsl(var(--primary) / 0.5);
+  }
+}
+
+.dark .animate-frame-glow {
+  animation: frame-glow-dark 3s ease-in-out infinite;
+}
+
+@keyframes frame-glow-dark {
+  0%,
+  100% {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 10px 15px -3px #d946ef, 0 4px 6px -2px rgba(217, 70, 239, 0.4), 0 0 0 1px rgba(217, 70, 239, 0.7);
+  }
+}
+
+@keyframes metallic-shine {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
   }
 }
 
@@ -192,4 +254,17 @@
 
 .animate-frame-glow {
   animation: frame-glow 3s ease-in-out infinite;
+}
+
+.animate-metallic-shine {
+  background: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.1), transparent);
+  background-size: 200% 100%;
+  animation: metallic-shine 2s ease-in-out infinite;
+}
+
+/* Enhanced metallic shine for dark theme with magenta colors for better visibility */
+.dark .animate-metallic-shine {
+  background: linear-gradient(90deg, transparent, rgba(217, 70, 239, 0.3), transparent);
+  background-size: 200% 100%;
+  animation: metallic-shine 2s ease-in-out infinite;
 }

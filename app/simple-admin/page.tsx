@@ -183,25 +183,34 @@ export default function SimpleAdminPage() {
   }
 
   const handleFileSelect = (file: File) => {
-    console.log("[v0] SimpleAdmin: File selected:", file.name)
+    console.log("[v0] SimpleAdmin: File selected:", file.name, "Size:", (file.size / (1024 * 1024)).toFixed(2), "MB")
 
     if (!file.type.startsWith("image/")) {
       toast.error("Please select an image file")
       return
     }
 
-    // Check file size (limit to 50MB for better performance)
-    if (file.size > 50 * 1024 * 1024) {
-      toast.error("File size too large. Please select a file under 50MB.")
+    if (file.size > 200 * 1024 * 1024) {
+      toast.error("File size too large. Please select a file under 200MB for optimal performance.")
       return
+    }
+
+    if (file.size > 100 * 1024 * 1024) {
+      toast.warning("Large file detected. Upload may take longer. Please wait for completion.")
     }
 
     const reader = new FileReader()
     reader.onload = (e) => {
       const preview = e.target?.result as string
       setNewImage((prev) => ({ ...prev, file, preview }))
-      console.log("[v0] SimpleAdmin: File preview generated")
+      console.log("[v0] SimpleAdmin: File preview generated for", (file.size / (1024 * 1024)).toFixed(2), "MB file")
     }
+
+    reader.onerror = (error) => {
+      console.error("[v0] SimpleAdmin: Error reading file:", error)
+      toast.error("Error reading file. Please try again.")
+    }
+
     reader.readAsDataURL(file)
   }
 
@@ -241,7 +250,12 @@ export default function SimpleAdminPage() {
 
   const handleImageUpload = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("[v0] SimpleAdmin: Starting image upload")
+    console.log(
+      "[v0] SimpleAdmin: Starting image upload for",
+      newImage.file?.name,
+      "Size:",
+      newImage.file ? (newImage.file.size / (1024 * 1024)).toFixed(2) + "MB" : "unknown",
+    )
 
     if (!newImage.file) {
       toast.error("Please select an image file")
@@ -257,6 +271,10 @@ export default function SimpleAdminPage() {
     setError(null)
 
     try {
+      if (newImage.file.size > 50 * 1024 * 1024) {
+        toast.info("Uploading large file... This may take several minutes. Please do not close the browser.")
+      }
+
       const { createImageWithCategoryObject } = await import("@/app/actions/admin-actions")
 
       const result = await createImageWithCategoryObject({
@@ -267,17 +285,22 @@ export default function SimpleAdminPage() {
         image_url: newImage.preview,
         thumbnail_url: newImage.preview,
         price: Number.parseFloat(newImage.price) || 0,
+        original_file_size: newImage.file.size,
       })
 
       if (result.success) {
-        console.log("[v0] SimpleAdmin: Upload successful")
-        toast.success("Image uploaded successfully with pricing!")
+        console.log(
+          "[v0] SimpleAdmin: Upload successful for",
+          (newImage.file.size / (1024 * 1024)).toFixed(2),
+          "MB file",
+        )
+        toast.success("Large image uploaded successfully with premium quality preserved!")
 
         setNewImage({
           title: "",
           description: "",
           category: "",
-          rightsType: "both", // Reset rightsType to default
+          rightsType: "both",
           price: "",
           file: null,
           preview: "",
@@ -291,8 +314,22 @@ export default function SimpleAdminPage() {
       }
     } catch (error) {
       console.error("[v0] SimpleAdmin: Upload error:", error)
-      setError("Upload failed")
-      toast.error("Upload failed")
+
+      if (error instanceof Error) {
+        if (error.message.includes("Request Entity Too Large") || error.message.includes("413")) {
+          setError("File too large for server. Please contact admin to increase upload limits.")
+          toast.error("File too large for server. Please use a smaller file or contact support.")
+        } else if (error.message.includes("timeout") || error.message.includes("network")) {
+          setError("Upload timeout. Please check your connection and try again.")
+          toast.error("Upload timeout. Please check your internet connection and try again.")
+        } else {
+          setError("Upload failed: " + error.message)
+          toast.error("Upload failed: " + error.message)
+        }
+      } else {
+        setError("Upload failed")
+        toast.error("Upload failed")
+      }
     } finally {
       setUploading(false)
     }
@@ -616,7 +653,7 @@ export default function SimpleAdminPage() {
                           {isDragOver ? "Drop your HQ image here" : "Drag & drop your HQ image here (4K-16K)"}
                         </p>
                         <p className="text-sm text-gray-500">or click to browse files</p>
-                        <p className="text-xs text-gray-400">High Quality Only: JPG, PNG, WebP (Max: 50MB)</p>
+                        <p className="text-xs text-gray-400">High Quality Only: JPG, PNG, WebP (Max: 200MB)</p>
                       </div>
                     )}
                   </div>

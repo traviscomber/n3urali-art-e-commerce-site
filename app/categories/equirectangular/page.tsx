@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Grid3X3, List, Eye, X, Loader2 } from "lucide-react"
+import { Search, Grid3X3, List, Eye, X, Loader2, Play, ShoppingCart, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { PanoramaViewer } from "@/components/panorama-viewer"
 import { getImages } from "@/app/actions/admin-actions"
+import { useCart } from "@/lib/contexts/cart-context"
 import Image from "next/image"
 
 interface EquirectangularImage {
@@ -35,6 +36,8 @@ export default function EquirectangularCategoryPage() {
   const [show360Viewer, setShow360Viewer] = useState(false)
   const [current360Image, setCurrent360Image] = useState<EquirectangularImage | null>(null)
   const [pannellumLoaded, setPannellumLoaded] = useState(false)
+  const { addItem, openCart } = useCart()
+  const [addedToCart, setAddedToCart] = useState<string | null>(null)
 
   const loadPannellum = async () => {
     if (pannellumLoaded || window.pannellum) {
@@ -188,26 +191,62 @@ export default function EquirectangularCategoryPage() {
     setShowWatermarkedImage(null)
   }
 
+  const handleAddToCart = (image: EquirectangularImage) => {
+    const cartItem = {
+      id: `${image.id}-standard`, // Unique ID for cart item
+      imageId: image.id,
+      title: image.title,
+      price: image.price,
+      licenseType: "standard" as const,
+      previewUrl: image.thumbnail_url || image.image_url || "/placeholder.svg",
+      category: "equirectangular" as const,
+      quantity: 1,
+    }
+
+    addItem(cartItem)
+    setAddedToCart(image.id)
+
+    // Show feedback for 2 seconds
+    setTimeout(() => {
+      setAddedToCart(null)
+    }, 2000)
+
+    // Open cart sidebar to show the added item
+    setTimeout(() => {
+      openCart()
+    }, 500)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-primary/10 via-accent/5 to-primary/10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(217,119,6,0.1),transparent_50%)]" />
-        <div className="container mx-auto px-4 py-16 relative">
-          <div className="text-center space-y-6">
-            <Badge variant="outline" className="border-primary/20 text-primary bg-primary/5">
-              360° Panoramic Gallery
-            </Badge>
-            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-transparent">
-              Equirectangular Images
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Explore our collection of immersive 360-degree panoramic images. Perfect for VR environments, projection
-              mapping, and architectural visualization.
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(217,119,6,0.15),transparent_70%)]" />
+        <div className="container mx-auto px-6 py-20 relative">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <div className="space-y-4">
+              <Badge
+                variant="outline"
+                className="border-primary/30 text-primary bg-primary/10 px-4 py-2 text-sm font-medium"
+              >
+                360° Panoramic Gallery
+              </Badge>
+              <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-transparent leading-tight">
+                Equirectangular
+                <br />
+                <span className="text-4xl md:text-6xl">Images</span>
+              </h1>
+            </div>
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-light">
+              Immersive 360-degree panoramic experiences for VR, projection mapping, and architectural visualization
             </p>
-            <div className="flex flex-wrap justify-center gap-2 mt-8">
-              {["360° Preview", "High Resolution", "VR Compatible", "Professional Quality"].map((feature) => (
-                <Badge key={feature} variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+            <div className="flex flex-wrap justify-center gap-3 mt-10">
+              {["360° Interactive", "8K Resolution", "VR Ready", "Professional"].map((feature) => (
+                <Badge
+                  key={feature}
+                  variant="secondary"
+                  className="bg-primary/15 text-primary border-primary/25 px-4 py-2 text-sm"
+                >
                   {feature}
                 </Badge>
               ))}
@@ -216,122 +255,141 @@ export default function EquirectangularCategoryPage() {
         </div>
       </div>
 
-      {/* Filters and Controls */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-4 items-center justify-between mb-8">
-          <div className="flex flex-col sm:flex-row gap-4 flex-1">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search equirectangular images..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-background/50 backdrop-blur-sm border-primary/20"
-              />
+      <div className="container mx-auto px-6 py-12">
+        <div className="bg-background/60 backdrop-blur-xl border border-primary/10 rounded-2xl p-6 mb-8 shadow-lg">
+          <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
+            <div className="flex flex-col sm:flex-row gap-4 flex-1 w-full">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                <Input
+                  placeholder="Search panoramic images..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-12 h-12 bg-background/80 backdrop-blur-sm border-primary/20 rounded-xl text-base"
+                />
+              </div>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-full sm:w-52 h-12 bg-background/80 backdrop-blur-sm border-primary/20 rounded-xl">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest First</SelectItem>
+                  <SelectItem value="name">Name A-Z</SelectItem>
+                  <SelectItem value="price-low">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high">Price: High to Low</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full sm:w-48 bg-background/50 backdrop-blur-sm border-primary/20">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest First</SelectItem>
-                <SelectItem value="name">Name A-Z</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant={viewMode === "grid" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setViewMode("grid")}
-              className="bg-primary/10 hover:bg-primary/20 border-primary/20"
-            >
-              <Grid3X3 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === "list" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setViewMode("list")}
-              className="bg-primary/10 hover:bg-primary/20 border-primary/20"
-            >
-              <List className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button
+                variant={viewMode === "grid" ? "default" : "outline"}
+                size="lg"
+                onClick={() => setViewMode("grid")}
+                className="h-12 px-6 rounded-xl"
+              >
+                <Grid3X3 className="h-5 w-5" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="lg"
+                onClick={() => setViewMode("list")}
+                className="h-12 px-6 rounded-xl"
+              >
+                <List className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
         </div>
 
-        <div className="mb-6">
-          <p className="text-muted-foreground">
-            Showing {filteredImages.length} of {images.length} equirectangular images
+        <div className="mb-8">
+          <p className="text-lg text-muted-foreground font-medium">
+            {filteredImages.length} panoramic {filteredImages.length === 1 ? "image" : "images"} available
           </p>
         </div>
 
         <div
-          className={`grid gap-4 ${viewMode === "grid" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" : "grid-cols-1"}`}
+          className={`grid gap-6 ${viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"}`}
         >
           {filteredImages.map((image) => (
             <Card
               key={image.id}
-              className="group overflow-hidden bg-background/50 backdrop-blur-sm border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10"
+              className="group overflow-hidden bg-background/70 backdrop-blur-sm border-primary/15 hover:border-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-2"
             >
-              <div className="relative aspect-[2/1] overflow-hidden">
+              <div className="relative aspect-[16/9] overflow-hidden">
                 <Image
                   src={image.thumbnail_url || image.image_url || "/placeholder.svg"}
                   alt={image.title}
                   fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="object-cover transition-all duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute top-2 left-2">
-                  <Badge className="bg-primary text-primary-foreground text-xs">360°</Badge>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
+
+                <div className="absolute top-3 left-3">
+                  <Badge className="bg-primary/90 text-primary-foreground text-sm font-semibold px-3 py-1 backdrop-blur-sm">
+                    <Play className="h-3 w-3 mr-1" />
+                    360°
+                  </Badge>
                 </div>
-                <div className="absolute top-2 right-2">
-                  <Badge variant="secondary" className="bg-background/80 text-foreground text-xs">
+                <div className="absolute top-3 right-3">
+                  <Badge
+                    variant="secondary"
+                    className="bg-background/90 text-foreground text-sm font-bold px-3 py-1 backdrop-blur-sm"
+                  >
                     ${image.price}
                   </Badge>
                 </div>
+
                 {loadingImage === image.id ? (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                    <Loader2 className="h-8 w-8 animate-spin text-white" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                    <div className="text-center text-white">
+                      <Loader2 className="h-10 w-10 animate-spin mx-auto mb-2" />
+                      <p className="text-sm font-medium">Loading preview...</p>
+                    </div>
                   </div>
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="flex gap-2">
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
+                    <div className="flex gap-3">
                       <Button
-                        size="sm"
+                        size="lg"
                         variant="secondary"
-                        className="bg-white/95 hover:bg-white text-gray-900 border border-gray-200 shadow-lg"
+                        className="bg-white/95 hover:bg-white text-gray-900 border border-gray-200 shadow-xl backdrop-blur-sm px-6 py-3 rounded-xl font-semibold"
                         onClick={(e) => {
                           e.stopPropagation()
                           handleImageClick(image)
                         }}
                       >
-                        <Eye className="h-4 w-4 mr-2" />
+                        <Eye className="h-5 w-5 mr-2" />
                         Preview
                       </Button>
                       <Button
-                        size="sm"
+                        size="lg"
                         variant="default"
-                        className="bg-primary/90 hover:bg-primary text-primary-foreground"
+                        className="bg-primary/95 hover:bg-primary text-primary-foreground shadow-xl backdrop-blur-sm px-6 py-3 rounded-xl font-semibold"
                         onClick={(e) => {
                           e.stopPropagation()
                           init360Viewer(image)
                         }}
                       >
-                        360°
+                        <Play className="h-5 w-5 mr-2" />
+                        360° View
                       </Button>
                     </div>
                   </div>
                 )}
               </div>
-              <CardContent className="p-3">
-                <div className="space-y-2">
-                  <h3 className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-2">
+
+              <CardContent className="p-5">
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-base group-hover:text-primary transition-colors line-clamp-2 leading-tight">
                     {image.title}
                   </h3>
-                  <div className="text-xs text-muted-foreground">{image.category_name}</div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground font-medium">{image.category_name}</span>
+                    <Badge variant="outline" className="text-xs border-primary/20 text-primary">
+                      High-Res
+                    </Badge>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -354,54 +412,113 @@ export default function EquirectangularCategoryPage() {
         )}
       </div>
 
-      {/* Updated watermarked image modal with simplified single background watermark */}
       {showWatermarkedImage && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-          <div className="relative max-w-7xl max-h-full">
-            <Button
-              onClick={closeWatermarkedView}
-              className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 text-white"
-              size="sm"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-            <div className="relative">
-              <Image
-                src={showWatermarkedImage.image_url || "/placeholder.svg"}
-                alt={showWatermarkedImage.title}
-                width={1200}
-                height={600}
-                className="max-w-full max-h-[80vh] object-contain"
-              />
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="relative max-w-7xl w-full max-h-[95vh] overflow-y-auto">
+            <div className="absolute top-4 right-4 z-20">
+              <Button
+                onClick={closeWatermarkedView}
+                className="bg-black/70 hover:bg-black/90 text-white border border-white/20 backdrop-blur-sm rounded-xl h-12 w-12 p-0"
+                size="sm"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
 
-              <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute inset-0 opacity-15">
-                  {Array.from({ length: 12 }).map((_, row) => (
-                    <div
-                      key={row}
-                      className="flex whitespace-nowrap"
-                      style={{
-                        transform: `translateY(${row * 80}px) rotate(-45deg) translateX(-50%)`,
-                        transformOrigin: "center",
-                      }}
-                    >
-                      {Array.from({ length: 20 }).map((_, col) => (
-                        <span
-                          key={col}
-                          className="text-white font-bold text-2xl mx-8 drop-shadow-lg"
-                          style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
+            <div className="bg-background/95 backdrop-blur-sm rounded-2xl overflow-hidden border border-primary/20 shadow-2xl">
+              {/* Header with gradient */}
+              <div className="bg-gradient-to-r from-primary via-accent to-primary p-6">
+                <h2 className="text-2xl font-bold text-white mb-2">{showWatermarkedImage.title}</h2>
+                <p className="text-white/90">Preview • Watermarked • Size: 720×720px</p>
+              </div>
+
+              {/* Image container with proper aspect ratio */}
+              <div className="relative bg-muted/20 p-6">
+                <div className="relative mx-auto max-w-4xl">
+                  <Image
+                    src={showWatermarkedImage.image_url || "/placeholder.svg"}
+                    alt={showWatermarkedImage.title}
+                    width={1200}
+                    height={800}
+                    className="w-full h-auto object-contain rounded-lg"
+                  />
+
+                  {/* Watermark overlay */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute inset-0 opacity-15">
+                      {Array.from({ length: 12 }).map((_, row) => (
+                        <div
+                          key={row}
+                          className="flex whitespace-nowrap"
+                          style={{
+                            transform: `translateY(${row * 80}px) rotate(-45deg) translateX(-50%)`,
+                            transformOrigin: "center",
+                          }}
                         >
-                          N3URALI.ART
-                        </span>
+                          {Array.from({ length: 20 }).map((_, col) => (
+                            <span
+                              key={col}
+                              className="text-white font-bold text-2xl mx-8 drop-shadow-lg"
+                              style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
+                            >
+                              N3URALI.ART
+                            </span>
+                          ))}
+                        </div>
                       ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
               </div>
 
-              <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded z-10">
-                <h3 className="font-medium">{showWatermarkedImage.title}</h3>
-                <p className="text-sm opacity-80">${showWatermarkedImage.price}</p>
+              {/* Details section */}
+              <div className="p-6 bg-background/50">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div>
+                    <h4 className="font-semibold text-muted-foreground mb-2">Description</h4>
+                    <p className="text-foreground">{showWatermarkedImage.description}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-muted-foreground mb-2">Type</h4>
+                    <Badge variant="outline" className="text-primary border-primary/30">
+                      {showWatermarkedImage.category_name}
+                    </Badge>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-muted-foreground mb-2">Price</h4>
+                    <p className="text-2xl font-bold text-primary">${showWatermarkedImage.price}</p>
+                  </div>
+                </div>
+
+                <Button
+                  size="lg"
+                  className={`w-full font-semibold py-4 text-lg rounded-xl transition-all duration-300 ${
+                    addedToCart === showWatermarkedImage.id
+                      ? "bg-green-600 hover:bg-green-700 text-white"
+                      : "bg-primary hover:bg-primary/90 text-primary-foreground"
+                  }`}
+                  onClick={() => handleAddToCart(showWatermarkedImage)}
+                  disabled={addedToCart === showWatermarkedImage.id}
+                >
+                  {addedToCart === showWatermarkedImage.id ? (
+                    <>
+                      <Check className="h-5 w-5 mr-2" />
+                      Added to Cart!
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="h-5 w-5 mr-2" />
+                      Add to Cart - ${showWatermarkedImage.price}
+                    </>
+                  )}
+                </Button>
+
+                <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+                  <p className="text-sm text-amber-800 dark:text-amber-200">
+                    <strong>Preview Notice:</strong> This is a watermarked preview limited to 720×720px. Purchase to
+                    download the full resolution image (4K-16K) without watermark.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -419,24 +536,27 @@ export default function EquirectangularCategoryPage() {
 
       {show360Viewer && current360Image && (
         <div className="fixed inset-0 bg-black z-50">
-          <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
-            <div className="text-white">
-              <h2 className="text-xl font-semibold">{current360Image.title}</h2>
-              <p className="text-sm text-white/70">Interactive 360° • Drag to look around • Scroll to zoom</p>
+          <div className="absolute top-6 left-6 right-6 z-30 flex items-start justify-between">
+            <div className="bg-black/80 text-white px-6 py-4 rounded-xl backdrop-blur-sm border border-white/20 max-w-md">
+              <h2 className="text-2xl font-bold mb-2">{current360Image.title}</h2>
+              <p className="text-white/80">Interactive 360° Experience</p>
+              <p className="text-xs text-white/60">
+                Drag to explore • Scroll to zoom • Click fullscreen for best experience
+              </p>
             </div>
             <Button
               variant="secondary"
-              size="sm"
+              size="lg"
               onClick={close360Viewer}
-              className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+              className="bg-black/80 hover:bg-black/90 text-white border border-white/20 backdrop-blur-sm rounded-xl h-14 w-14 p-0"
             >
-              <X className="h-4 w-4" />
+              <X className="h-6 w-6" />
             </Button>
           </div>
 
           <div id="pannellum-container" className="w-full h-full" style={{ position: "relative" }} />
 
-          {/* Watermark overlay for 360° viewer */}
+          {/* Existing watermark overlay */}
           <div className="absolute inset-0 pointer-events-none z-20">
             <div className="absolute inset-0 opacity-20">
               {Array.from({ length: 15 }).map((_, row) => (

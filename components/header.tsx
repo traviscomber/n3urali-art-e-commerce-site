@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { ShoppingCart, Menu, X, Zap } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
 import { UserMenu } from "./user-menu"
+import { ThemeToggle } from "./theme-toggle"
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -69,6 +70,8 @@ export function Header() {
           </nav>
 
           <div className="flex items-center space-x-4">
+            <ThemeToggle />
+
             {/* Cart Button */}
             <Button
               variant="outline"

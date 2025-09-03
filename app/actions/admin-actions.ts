@@ -3,7 +3,7 @@
 import { createNeonClient } from "@/lib/neon/client"
 import { revalidatePath } from "next/cache"
 
-function compressBase64Image(base64String: string, maxSizeKB = 500): Promise<string> {
+function compressBase64Image(base64String: string, maxSizeKB = 2000, preserveQuality = false): Promise<string> {
   return new Promise((resolve) => {
     try {
       // If it's already a placeholder or external URL, return as-is
@@ -14,6 +14,12 @@ function compressBase64Image(base64String: string, maxSizeKB = 500): Promise<str
 
       const sizeInKB = (base64String.length * 3) / 4 / 1024
       console.log(`[v0] Original image size: ${sizeInKB.toFixed(1)}KB`)
+
+      if (preserveQuality && sizeInKB <= maxSizeKB * 2) {
+        console.log(`[v0] Preserving quality for premium image`)
+        resolve(base64String)
+        return
+      }
 
       // If image is already small enough, return as-is
       if (sizeInKB <= maxSizeKB) {
@@ -28,8 +34,10 @@ function compressBase64Image(base64String: string, maxSizeKB = 500): Promise<str
         const canvas = document.createElement("canvas")
         const ctx = canvas.getContext("2d")!
 
-        // Calculate new dimensions (reduce by ratio to target size)
-        const compressionRatio = Math.sqrt(maxSizeKB / sizeInKB)
+        const compressionRatio = preserveQuality
+          ? Math.sqrt((maxSizeKB * 1.5) / sizeInKB)
+          : Math.sqrt(maxSizeKB / sizeInKB)
+
         const newWidth = Math.floor(img.width * compressionRatio)
         const newHeight = Math.floor(img.height * compressionRatio)
 
@@ -39,12 +47,14 @@ function compressBase64Image(base64String: string, maxSizeKB = 500): Promise<str
         // Draw and compress
         ctx.drawImage(img, 0, 0, newWidth, newHeight)
 
-        // Try different quality levels until we get under the size limit
-        let quality = 0.8
+        let quality = preserveQuality ? 0.95 : 0.8
         let compressedBase64 = canvas.toDataURL("image/jpeg", quality)
 
-        while ((compressedBase64.length * 3) / 4 / 1024 > maxSizeKB && quality > 0.1) {
-          quality -= 0.1
+        const targetSize = preserveQuality ? maxSizeKB * 1.5 : maxSizeKB
+        const minQuality = preserveQuality ? 0.7 : 0.1
+
+        while ((compressedBase64.length * 3) / 4 / 1024 > targetSize && quality > minQuality) {
+          quality -= preserveQuality ? 0.05 : 0.1
           compressedBase64 = canvas.toDataURL("image/jpeg", quality)
         }
 
@@ -70,19 +80,35 @@ function compressBase64Image(base64String: string, maxSizeKB = 500): Promise<str
 function handleDatabaseError(error: any): { success: false; error: string } {
   console.error("[v0] Database error:", error)
 
-  // Handle HTML error responses (like "Request Entity Too Large")
-  if (typeof error === "string" && error.includes("Request")) {
-    return {
-      success: false,
-      error: "Image too large. Please use a smaller image (max 500KB).",
+  // Handle large file errors
+  if (typeof error === "string") {
+    if (error.includes("Request Entity Too Large") || error.includes("413")) {
+      return {
+        success: false,
+        error: "File too large for server. Maximum supported size is 150MB. Please contact admin to increase limits.",
+      }
+    }
+    if (error.includes("timeout") || error.includes("TIMEOUT")) {
+      return {
+        success: false,
+        error: "Upload timeout. Large files may take longer. Please try again or use a smaller file.",
+      }
     }
   }
 
-  // Handle JSON parsing errors
+  // Handle JSON parsing errors from large payloads
   if (error.message && error.message.includes("Unexpected token")) {
     return {
       success: false,
-      error: "Server error: Image may be too large. Please try a smaller image.",
+      error: "Server error processing large file. Please try a smaller image or contact support.",
+    }
+  }
+
+  // Handle network errors
+  if (error.message && (error.message.includes("fetch") || error.message.includes("network"))) {
+    return {
+      success: false,
+      error: "Network error during upload. Please check your connection and try again.",
     }
   }
 
@@ -190,12 +216,16 @@ export async function createImageWithCategoryObject(imageData: {
   image_url: string
   thumbnail_url: string
   price: number
+  original_file_size?: number
 }) {
   try {
     console.log("[v0] Starting image creation with object data:", {
       ...imageData,
       image_url: imageData.image_url.substring(0, 50) + "...",
       thumbnail_url: imageData.thumbnail_url.substring(0, 50) + "...",
+      original_file_size: imageData.original_file_size
+        ? `${(imageData.original_file_size / (1024 * 1024)).toFixed(2)}MB`
+        : "unknown",
     })
 
     const sql = createNeonClient()
@@ -231,22 +261,33 @@ export async function createImageWithCategoryObject(imageData: {
       return { success: false, error: "No default license found" }
     }
 
-    // Compress images
-    const compressedImageUrl = await compressBase64Image(imageData.image_url, 500)
-    const compressedThumbnailUrl = await compressBase64Image(imageData.thumbnail_url, 200)
+    const isLargeFile = imageData.original_file_size && imageData.original_file_size > 50 * 1024 * 1024
+    const compressedImageUrl = await compressBase64Image(imageData.image_url, isLargeFile ? 3000 : 1000, isLargeFile)
+    const compressedThumbnailUrl = await compressBase64Image(imageData.thumbnail_url, 500, false)
 
-    console.log("[v0] Inserting image with license_id:", licenseId, "price:", imageData.price)
+    console.log(
+      "[v0] Inserting image with license_id:",
+      licenseId,
+      "price:",
+      imageData.price,
+      "large file:",
+      isLargeFile,
+    )
     const result = await sql`
       INSERT INTO images (title, description, category_id, license_id, price, image_url, thumbnail_url, 
                          active, featured, metadata)
       VALUES (${imageData.title}, ${imageData.description}, ${categoryId}, ${licenseId}, 
               ${imageData.price}, ${compressedImageUrl}, ${compressedThumbnailUrl}, 
               true, false, 
-              ${JSON.stringify({ rights_type: imageData.rights_type })})
+              ${JSON.stringify({
+                rights_type: imageData.rights_type,
+                original_file_size: imageData.original_file_size,
+                upload_timestamp: new Date().toISOString(),
+              })})
       RETURNING *
     `
 
-    console.log("[v0] Image created successfully with ID:", result[0]?.id)
+    console.log("[v0] Large image created successfully with ID:", result[0]?.id)
     revalidatePath("/simple-admin")
     return { success: true, data: result }
   } catch (error) {
@@ -283,27 +324,25 @@ export async function getOrders(userEmail?: string) {
 
     let result
     if (userEmail) {
-      // Filter orders by user email for regular users
       result = await sql`
         SELECT o.*, 
                json_agg(
                  json_build_object(
                    'id', oi.id,
-                   'license_name', l.name,
                    'license_id', oi.license_id,
                    'price', oi.price,
                    'image_id', oi.image_id,
+                   'download_count', oi.download_count,
+                   'download_limit', oi.download_limit,
                    'images', json_build_object(
                      'title', i.title,
-                     'thumbnail_url', i.thumbnail_url,
-                     'download_count', i.download_count
+                     'thumbnail_url', i.thumbnail_url
                    )
                  )
                ) as order_items
         FROM orders o
         LEFT JOIN order_items oi ON o.id = oi.order_id
         LEFT JOIN images i ON oi.image_id = i.id
-        LEFT JOIN licenses l ON oi.license_id = l.id
         WHERE o.user_email = ${userEmail}
         GROUP BY o.id
         ORDER BY o.created_at DESC
@@ -315,26 +354,26 @@ export async function getOrders(userEmail?: string) {
                json_agg(
                  json_build_object(
                    'id', oi.id,
-                   'license_name', l.name,
                    'license_id', oi.license_id,
                    'price', oi.price,
                    'image_id', oi.image_id,
+                   'download_count', oi.download_count,
+                   'download_limit', oi.download_limit,
                    'images', json_build_object(
                      'title', i.title,
-                     'thumbnail_url', i.thumbnail_url,
-                     'download_count', i.download_count
+                     'thumbnail_url', i.thumbnail_url
                    )
                  )
                ) as order_items
         FROM orders o
         LEFT JOIN order_items oi ON o.id = oi.order_id
         LEFT JOIN images i ON oi.image_id = i.id
-        LEFT JOIN licenses l ON oi.license_id = l.id
         GROUP BY o.id
         ORDER BY o.created_at DESC
       `
     }
 
+    console.log("[v0] getOrders found", result.length, "orders for user:", userEmail || "all users")
     return { success: true, data: result }
   } catch (error) {
     console.error("[v0] Get orders error:", error)

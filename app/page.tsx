@@ -104,6 +104,100 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* AI Generation and Enhancement Showcase Section */}
+      <section className="py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center mb-16">
+            <Badge variant="secondary" className="mb-4 animate-pulse-glow">
+              AI-Powered Excellence
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-balance">
+              Supreme Quality Through
+              <span className="text-primary block">AI Generation & Enhancement</span>
+            </h2>
+            <p className="text-lg text-muted-foreground text-pretty">
+              Experience the future of digital imagery with our cutting-edge AI generation and enhancement pipeline,
+              delivering unprecedented quality and detail in every 360° image.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto items-center">
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                    <div className="w-3 h-3 bg-primary rounded-full animate-pulse" />
+                  </div>
+                  <h3 className="text-xl font-semibold">AI-Generated Foundations</h3>
+                </div>
+                <p className="text-muted-foreground pl-11">
+                  Every image begins with advanced AI generation, creating unique 360° environments with unprecedented
+                  detail and artistic vision.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                    <div className="w-3 h-3 bg-primary rounded-full animate-pulse" style={{ animationDelay: "0.5s" }} />
+                  </div>
+                  <h3 className="text-xl font-semibold">Professional Enhancement</h3>
+                </div>
+                <p className="text-muted-foreground pl-11">
+                  Our proprietary enhancement pipeline transforms raw AI output into professional-grade imagery with
+                  superior clarity, color accuracy, and resolution.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                    <div className="w-3 h-3 bg-primary rounded-full animate-pulse" style={{ animationDelay: "1s" }} />
+                  </div>
+                  <h3 className="text-xl font-semibold">Built From Scratch</h3>
+                </div>
+                <p className="text-muted-foreground pl-11">
+                  Every tool in our pipeline is custom-built, ensuring complete control over quality, performance, and
+                  the final artistic vision.
+                </p>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl blur-xl" />
+              <Card className="relative bg-card/80 backdrop-blur-sm border-primary/20">
+                <CardContent className="p-8">
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-primary mb-2">4K - 16K</div>
+                      <p className="text-sm text-muted-foreground">Resolution Range</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 text-center">
+                      <div>
+                        <div className="text-2xl font-bold mb-1">100%</div>
+                        <p className="text-xs text-muted-foreground">AI Generated</p>
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold mb-1">∞</div>
+                        <p className="text-xs text-muted-foreground">Unique Scenes</p>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-border/50">
+                      <p className="text-sm text-muted-foreground text-center">
+                        "Demonstrating that AI-generated material of supreme quality is not just possible, but the
+                        future of digital imagery."
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5" />

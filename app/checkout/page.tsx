@@ -64,13 +64,52 @@ export default function CheckoutPage() {
     e.preventDefault()
     setIsProcessing(true)
 
-    // Simulate payment processing
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    try {
+      console.log("[v0] Submitting order with", items.length, "items")
 
-    // Clear cart and show success
-    clearCart()
-    setOrderComplete(true)
-    setIsProcessing(false)
+      const response = await fetch("/api/orders/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items,
+          total,
+          customerInfo: {
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            billingAddress: formData.billingAddress,
+            city: formData.city,
+            zipCode: formData.zipCode,
+            country: formData.country,
+          },
+          paymentInfo: {
+            cardNumber: formData.cardNumber,
+            expiryDate: formData.expiryDate,
+            cvv: formData.cvv,
+          },
+        }),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        console.log("[v0] Order created successfully:", result.data.orderNumber)
+        // Clear cart and show success
+        clearCart()
+        setOrderComplete(true)
+      } else {
+        console.error("[v0] Order creation failed:", result.error)
+        // You could show an error toast here
+        alert(`Order failed: ${result.error}`)
+      }
+    } catch (error) {
+      console.error("[v0] Order submission error:", error)
+      alert("Failed to process order. Please try again.")
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   // Redirect if cart is empty and order not complete

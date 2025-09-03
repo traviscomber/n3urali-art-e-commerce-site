@@ -2,14 +2,20 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Download, ShoppingCart, Eye, Crown } from "lucide-react"
+import { ArrowLeft, Download, ShoppingCart, Eye, Crown, RotateCcw } from "lucide-react"
 import { getImages } from "@/app/actions/admin-actions"
 import { useAuth } from "@/lib/contexts/auth-context"
+
+declare global {
+  interface Window {
+    pannellum: any
+  }
+}
 
 interface Image {
   id: string
@@ -33,6 +39,182 @@ export default function PhotoDetailPage() {
   const [showQualityPreview, setShowQualityPreview] = useState(false)
   const [previewPosition, setPreviewPosition] = useState({ x: 50, y: 50 })
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [show360Viewer, setShow360Viewer] = useState(false)
+  const [viewerLoaded, setViewerLoaded] = useState(false)
+  const viewerRef = useRef<HTMLDivElement>(null)
+  const pannellumViewerRef = useRef<any>(null)
+
+  const loadPannellum = () => {
+    return new Promise((resolve, reject) => {
+      if (window.pannellum) {
+        resolve(window.pannellum)
+        return
+      }
+
+      // Load CSS
+      const link = document.createElement("link")
+      link.rel = "stylesheet"
+      link.href = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"
+      document.head.appendChild(link)
+
+      // Load JS
+      const script = document.createElement("script")
+      script.src = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"
+      script.onload = () => {
+        console.log("[v0] Pannellum loaded successfully")
+        resolve(window.pannellum)
+      }
+      script.onerror = (error) => {
+        console.error("[v0] Pannellum loading error:", error)
+        reject(new Error("Failed to load Pannellum"))
+      }
+      document.head.appendChild(script)
+    })
+  }
+
+  const init360Viewer = async () => {
+    if (!viewerRef.current || !image) return
+
+    try {
+      console.log("[v0] Starting Pannellum 360° viewer initialization...")
+      await loadPannellum()
+
+      if (!window.pannellum) {
+        throw new Error("Pannellum library not loaded properly")
+      }
+
+      // Destroy existing viewer if any
+      if (pannellumViewerRef.current) {
+        try {
+          window.pannellum.destroy(viewerRef.current)
+        } catch (e) {
+          console.warn("[v0] Error destroying previous viewer:", e)
+        }
+      }
+
+      console.log("[v0] Creating Pannellum viewer instance...")
+
+      // Determine projection type based on category
+      const projection = image.category_name === "Fisheye" ? "fisheye" : "equirectangular"
+
+      pannellumViewerRef.current = window.pannellum.viewer(viewerRef.current, {
+        type: projection,
+        panorama: image.image_url || image.thumbnail_url,
+        autoLoad: true,
+        autoRotate: -2,
+        compass: true,
+        showZoomCtrl: true,
+        showFullscreenCtrl: true,
+        showControls: true,
+        mouseZoom: true,
+        doubleClickZoom: true,
+        draggable: true,
+        keyboardZoom: true,
+        preview: "/placeholder.svg?height=500&width=500",
+        loadButtonLabel: "Click to Load 360° View",
+        noscriptErrorMsg: "JavaScript must be enabled to view this panorama.",
+        notSupportedMsg: "Your browser does not support WebGL.",
+      })
+
+      // Add event listeners
+      pannellumViewerRef.current.on("load", () => {
+        console.log("[v0] Pannellum viewer loaded successfully")
+        setViewerLoaded(true)
+
+        // Add watermark overlay
+        addWatermarkOverlay()
+      })
+
+      pannellumViewerRef.current.on("error", (error: any) => {
+        console.error("[v0] Pannellum viewer error:", error)
+        setViewerLoaded(false)
+      })
+
+      console.log("[v0] Pannellum 360° viewer initialized successfully")
+    } catch (error) {
+      console.error("[v0] Error initializing Pannellum viewer:", error)
+      setViewerLoaded(false)
+      alert("Unable to load 360° viewer. Please try again or check your internet connection.")
+    }
+  }
+
+  const addWatermarkOverlay = () => {
+    if (!viewerRef.current) return
+
+    const canvas = viewerRef.current.querySelector("canvas")
+    if (!canvas) return
+
+    const watermarkOverlay = document.createElement("div")
+    watermarkOverlay.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 80px,
+        rgba(255,255,255,0.1) 80px,
+        rgba(255,255,255,0.1) 120px
+      );
+    `
+
+    // Add text watermarks
+    for (let i = 0; i < 20; i++) {
+      const watermark = document.createElement("div")
+      watermark.textContent = "n3urali.art"
+      watermark.style.cssText = `
+        position: absolute;
+        color: rgba(255,255,255,0.15);
+        font-size: 18px;
+        font-weight: bold;
+        transform: rotate(-45deg);
+        user-select: none;
+        pointer-events: none;
+        left: ${(i % 5) * 20}%;
+        top: ${Math.floor(i / 5) * 25}%;
+      `
+      watermarkOverlay.appendChild(watermark)
+    }
+
+    viewerRef.current.appendChild(watermarkOverlay)
+  }
+
+  const toggle360Viewer = async () => {
+    if (!show360Viewer) {
+      setShow360Viewer(true)
+      setViewerLoaded(false)
+      setTimeout(() => {
+        init360Viewer()
+      }, 200)
+    } else {
+      if (pannellumViewerRef.current && viewerRef.current) {
+        try {
+          window.pannellum.destroy(viewerRef.current)
+        } catch (e) {
+          console.warn("[v0] Error destroying Pannellum viewer:", e)
+        }
+        pannellumViewerRef.current = null
+      }
+      setShow360Viewer(false)
+      setViewerLoaded(false)
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      if (pannellumViewerRef.current && viewerRef.current) {
+        try {
+          window.pannellum.destroy(viewerRef.current)
+        } catch (e) {
+          console.warn("[v0] Error destroying Pannellum viewer on unmount:", e)
+        }
+      }
+    }
+  }, [])
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -163,140 +345,179 @@ export default function PhotoDetailPage() {
           <div className="space-y-4">
             <Card className="overflow-hidden">
               <CardContent className="p-0">
-                <div
-                  className={`relative aspect-square bg-muted/10 ${
-                    showQualityPreview ? "cursor-crosshair" : "cursor-default"
-                  }`}
-                  onMouseMove={handleMouseMove}
-                  onMouseLeave={handleMouseLeave}
-                  onContextMenu={handleContextMenu}
-                >
+                <div className="flex gap-2 p-4 bg-muted/5 border-b">
                   <Button
-                    variant="secondary"
+                    variant={show360Viewer ? "default" : "outline"}
                     size="sm"
-                    onClick={handleQualityPreviewToggle}
-                    className={`absolute top-4 right-4 z-20 h-12 w-16 p-0 shadow-lg flex flex-col items-center justify-center transition-all ${
-                      showQualityPreview
-                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                        : "bg-white/95 hover:bg-white"
-                    }`}
+                    onClick={toggle360Viewer}
+                    className="flex items-center gap-2"
                   >
-                    <Eye className="h-4 w-4" />
-                    <span className="text-xs font-medium">HQ</span>
+                    <RotateCcw className="w-4 h-4" />
+                    {show360Viewer ? "Exit 360° View" : "360° Interactive View"}
                   </Button>
 
-                  <div
-                    className="relative w-full h-full select-none"
-                    onContextMenu={handleContextMenu}
-                    onDragStart={handleDragStart}
-                    style={{ userSelect: "none", WebkitUserSelect: "none", MozUserSelect: "none" }}
-                  >
-                    <img
-                      src={image.image_url || image.thumbnail_url}
-                      alt={image.title}
-                      className="w-full h-full object-contain select-none pointer-events-none"
-                      draggable={false}
-                      onContextMenu={handleContextMenu}
-                      onDragStart={handleDragStart}
-                      style={{
-                        userSelect: "none",
-                        WebkitUserSelect: "none",
-                        MozUserSelect: "none",
-                        WebkitUserDrag: "none",
-                        WebkitTouchCallout: "none",
-                      }}
-                    />
-
-                    <div className="absolute inset-0 pointer-events-none select-none" style={{ userSelect: "none" }}>
-                      <div className="relative w-full h-full overflow-hidden">
-                        {Array.from({ length: 35 }).map((_, i) => (
-                          <div
-                            key={i}
-                            className="absolute text-white/15 font-bold text-2xl transform -rotate-45 select-none pointer-events-none"
-                            style={{
-                              left: `${(i % 7) * 14.3}%`,
-                              top: `${Math.floor(i / 7) * 20}%`,
-                              textStroke: "1px rgba(255,255,255,0.1)",
-                              WebkitTextStroke: "1px rgba(255,255,255,0.1)",
-                              userSelect: "none",
-                              WebkitUserSelect: "none",
-                              MozUserSelect: "none",
-                            }}
-                          >
-                            n3urali.art
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div
-                      className="absolute inset-0 z-10 bg-transparent"
-                      onContextMenu={handleContextMenu}
-                      onDragStart={handleDragStart}
-                      style={{
-                        userSelect: "none",
-                        WebkitUserSelect: "none",
-                        MozUserSelect: "none",
-                      }}
-                    />
-                  </div>
-
-                  {/* Quality preview window showing cropped original image */}
-                  {showQualityPreview && (
-                    <div
-                      className="absolute pointer-events-none z-30 border-2 border-primary shadow-2xl rounded-lg overflow-hidden bg-white"
-                      style={{
-                        left: Math.min(mousePosition.x + 20, 400),
-                        top: Math.min(mousePosition.y - 100, 300),
-                        width: "200px",
-                        height: "200px",
-                      }}
+                  {!show360Viewer && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleQualityPreviewToggle}
+                      className={`flex items-center gap-2 transition-all ${
+                        showQualityPreview
+                          ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                          : "bg-white/95 hover:bg-white"
+                      }`}
                     >
-                      <div className="relative w-full h-full">
-                        <img
-                          src={image.image_url || image.thumbnail_url}
-                          alt="Quality Preview"
-                          className="w-full h-full object-cover"
-                          style={{
-                            transform: `scale(4)`,
-                            transformOrigin: `${previewPosition.x}% ${previewPosition.y}%`,
-                          }}
-                        />
-                        <div className="absolute inset-0 border border-primary/20"></div>
-                        <div className="absolute bottom-0 left-0 right-0 bg-primary text-primary-foreground text-xs px-2 py-1 text-center font-medium">
-                          Original Quality Preview
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Crosshair indicator when quality preview is active */}
-                  {showQualityPreview && (
-                    <div
-                      className="absolute pointer-events-none z-20"
-                      style={{
-                        left: mousePosition.x - 10,
-                        top: mousePosition.y - 10,
-                        width: "20px",
-                        height: "20px",
-                      }}
-                    >
-                      <div className="w-full h-full border-2 border-primary rounded-full bg-primary/20"></div>
-                    </div>
+                      <Eye className="h-4 w-4" />
+                      <span className="text-xs font-medium">HQ Preview</span>
+                    </Button>
                   )}
                 </div>
+
+                {show360Viewer ? (
+                  <div className="relative">
+                    <div ref={viewerRef} className="w-full h-[500px] bg-muted/10" style={{ minHeight: "500px" }} />
+                    {!viewerLoaded && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-muted/10">
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                          <p className="text-sm text-muted-foreground">Loading 360° viewer...</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div
+                    className={`relative aspect-square bg-muted/10 ${
+                      showQualityPreview ? "cursor-crosshair" : "cursor-default"
+                    }`}
+                    onMouseMove={handleMouseMove}
+                    onMouseLeave={handleMouseLeave}
+                    onContextMenu={handleContextMenu}
+                  >
+                    <div
+                      className="relative w-full h-full select-none"
+                      onContextMenu={handleContextMenu}
+                      onDragStart={handleDragStart}
+                      style={{ userSelect: "none", WebkitUserSelect: "none", MozUserSelect: "none" }}
+                    >
+                      <img
+                        src={image.image_url || image.thumbnail_url}
+                        alt={image.title}
+                        className="w-full h-full object-contain select-none pointer-events-none"
+                        draggable={false}
+                        onContextMenu={handleContextMenu}
+                        onDragStart={handleDragStart}
+                        style={{
+                          userSelect: "none",
+                          WebkitUserSelect: "none",
+                          MozUserSelect: "none",
+                          WebkitUserDrag: "none",
+                          WebkitTouchCallout: "none",
+                        }}
+                      />
+
+                      <div className="absolute inset-0 pointer-events-none select-none" style={{ userSelect: "none" }}>
+                        <div className="relative w-full h-full overflow-hidden">
+                          {Array.from({ length: 35 }).map((_, i) => (
+                            <div
+                              key={i}
+                              className="absolute text-white/15 font-bold text-2xl transform -rotate-45 select-none pointer-events-none"
+                              style={{
+                                left: `${(i % 7) * 14.3}%`,
+                                top: `${Math.floor(i / 7) * 20}%`,
+                                textStroke: "1px rgba(255,255,255,0.1)",
+                                WebkitTextStroke: "1px rgba(255,255,255,0.1)",
+                                userSelect: "none",
+                                WebkitUserSelect: "none",
+                                MozUserSelect: "none",
+                              }}
+                            >
+                              n3urali.art
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div
+                        className="absolute inset-0 z-10 bg-transparent"
+                        onContextMenu={handleContextMenu}
+                        onDragStart={handleDragStart}
+                        style={{
+                          userSelect: "none",
+                          WebkitUserSelect: "none",
+                          MozUserSelect: "none",
+                        }}
+                      />
+                    </div>
+
+                    {/* Quality preview window showing cropped original image */}
+                    {showQualityPreview && (
+                      <div
+                        className="absolute pointer-events-none z-30 border-2 border-primary shadow-2xl rounded-lg overflow-hidden bg-white"
+                        style={{
+                          left: Math.min(mousePosition.x + 20, 400),
+                          top: Math.min(mousePosition.y - 100, 300),
+                          width: "200px",
+                          height: "200px",
+                        }}
+                      >
+                        <div className="relative w-full h-full">
+                          <img
+                            src={image.image_url || image.thumbnail_url}
+                            alt="Quality Preview"
+                            className="w-full h-full object-cover"
+                            style={{
+                              transform: `scale(4)`,
+                              transformOrigin: `${previewPosition.x}% ${previewPosition.y}%`,
+                            }}
+                          />
+                          <div className="absolute inset-0 border border-primary/20"></div>
+                          <div className="absolute bottom-0 left-0 right-0 bg-primary text-primary-foreground text-xs px-2 py-1 text-center font-medium">
+                            Original Quality Preview
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Crosshair indicator when quality preview is active */}
+                    {showQualityPreview && (
+                      <div
+                        className="absolute pointer-events-none z-20"
+                        style={{
+                          left: mousePosition.x - 10,
+                          top: mousePosition.y - 10,
+                          width: "20px",
+                          height: "20px",
+                        }}
+                      >
+                        <div className="w-full h-full border-2 border-primary rounded-full bg-primary/20"></div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
             <div className="text-center text-sm text-muted-foreground">
-              Preview • Watermarked • Full resolution available after purchase
-              {showQualityPreview && (
-                <span className="block mt-1 text-primary font-medium">
-                  Move mouse to explore original quality • Quality preview shows actual image detail
+              {show360Viewer ? (
+                <span className="text-primary font-medium">
+                  Interactive 360° View • Drag to look around • Scroll to zoom • Double-click to zoom • Click fullscreen
+                  for immersive experience
                 </span>
-              )}
-              {!showQualityPreview && (
-                <span className="block mt-1">Click HQ button to see original quality preview</span>
+              ) : (
+                <>
+                  Preview • Watermarked • Full resolution available after purchase
+                  {showQualityPreview && (
+                    <span className="block mt-1 text-primary font-medium">
+                      Move mouse to explore original quality • Quality preview shows actual image detail
+                    </span>
+                  )}
+                  {!showQualityPreview && (
+                    <span className="block mt-1">
+                      Click HQ Preview to see original quality or 360° Interactive View for immersive experience
+                    </span>
+                  )}
+                </>
               )}
               <span className="block mt-1 text-xs text-red-600">
                 ⚠️ Preview images are protected - Purchase required for full resolution download

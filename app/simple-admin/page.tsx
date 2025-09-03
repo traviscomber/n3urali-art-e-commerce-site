@@ -1,453 +1,245 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  getImages,
-  createImageWithCategory,
-  getOrders,
-  getCategories,
-  deleteImage as deleteImageAction,
-  updateImage as updateImageAction,
-  toggleImageStatus,
-  updateOrderStatus as updateOrderStatusAction,
-  getUsers as getUsersAction,
-  toggleUserAdmin as toggleUserAdminAction,
-} from "@/app/actions/admin-actions"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { toast } from "sonner"
-import { Trash2, Edit, Loader2 } from "lucide-react"
+import { Loader2, Upload, Eye, Trash2 } from "lucide-react"
 
 interface Image {
   id: string
   title: string
   description: string
-  category_id: string
   category_name?: string
   price: number
   image_url: string
   thumbnail_url: string
   active: boolean
-  featured: boolean
   created_at: string
-  updated_at: string
-}
-
-interface Order {
-  id: string
-  user_email: string
-  total_amount: number
-  status: string
-  customer_name: string
-  created_at: string
-  order_items: Array<{
-    id: string
-    image_title: string
-    license_type: string
-    price: number
-  }>
-}
-
-interface User {
-  id: string
-  email: string
-  full_name: string
-  is_admin: boolean
-  created_at: string
-}
-
-interface DashboardStats {
-  totalImages: number
-  totalOrders: number
-  totalRevenue: number
-  totalUsers: number
 }
 
 interface Category {
   id: string
   name: string
   description: string
-  active: boolean
 }
 
 export default function SimpleAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [password, setPassword] = useState("")
   const [images, setImages] = useState<Image[]>([])
-  const [orders, setOrders] = useState<Order[]>([])
-  const [users, setUsers] = useState<User[]>([])
-  const [stats, setStats] = useState<DashboardStats>({
-    totalImages: 0,
-    totalOrders: 0,
-    totalRevenue: 0,
-    totalUsers: 0,
-  })
-  const [loading, setLoading] = useState(false)
-  const [uploadingFile, setUploadingFile] = useState(false)
-  const [editingImage, setEditingImage] = useState<Image | null>(null)
-  const [activeTab, setActiveTab] = useState("dashboard")
   const [categories, setCategories] = useState<Category[]>([])
+  const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  // Form states
   const [newImage, setNewImage] = useState({
     title: "",
     description: "",
     category: "",
     price: "",
-    file_url: "",
-    preview_url: "",
-    thumbnail_url: "",
+    file: null as File | null,
+    preview: "",
   })
+
+  useEffect(() => {
+    console.log("[v0] SimpleAdmin: Clearing any existing auth and forcing login")
+    localStorage.removeItem("simple_admin_auth")
+    setIsAuthenticated(false)
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log("[v0] SimpleAdmin: Login attempt")
+
     if (password === "C4rlit0s") {
+      console.log("[v0] SimpleAdmin: Login successful")
       setIsAuthenticated(true)
       localStorage.setItem("simple_admin_auth", "true")
-      await fetchDashboardStats()
+      await loadInitialData()
     } else {
-      toast.error("Invalid password. Hint: C4rlit0s")
+      console.log("[v0] SimpleAdmin: Login failed")
+      setError("Invalid password")
+      toast.error("Invalid password. Use: C4rlit0s")
     }
   }
 
-  const handleLogout = () => {
-    setIsAuthenticated(false)
-    localStorage.removeItem("simple_admin_auth")
-  }
-
-  const handleImageUpload = async (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("[v0] Form submission started")
-
-    const form = e.target as HTMLFormElement
-    const formData = new FormData(form)
-
-    console.log("[v0] Form data entries:")
-    for (const [key, value] of formData.entries()) {
-      console.log(`[v0] ${key}:`, value)
-    }
-
-    setUploadingFile(true)
-    try {
-      console.log("[v0] Calling createImageWithCategory server action")
-      const result = await createImageWithCategory(formData)
-      console.log("[v0] Server action result:", result)
-
-      if (result.success) {
-        toast.success("Image uploaded successfully")
-        setNewImage({
-          title: "",
-          description: "",
-          category: "",
-          price: "",
-          file_url: "",
-          preview_url: "",
-          thumbnail_url: "",
-        })
-        form.reset()
-        fetchImages()
-      } else {
-        console.log("[v0] Server action failed:", result.error)
-        toast.error(`Failed to upload image: ${result.error || "Unknown error"}`)
-      }
-    } catch (error) {
-      console.error("[v0] Error uploading image:", error)
-      toast.error("Failed to upload image")
-    } finally {
-      setUploadingFile(false)
-    }
-  }
-
-  const deleteImage = async (imageId: string) => {
-    try {
-      const result = await deleteImageAction(imageId)
-      if (result.success) {
-        toast.success("Image deleted successfully")
-        fetchImages() // Refresh images list
-      } else {
-        toast.error(`Failed to delete image: ${result.error}`)
-      }
-    } catch (error) {
-      console.error("Error deleting image:", error)
-      toast.error("Failed to delete image")
-    }
-  }
-
-  useEffect(() => {
-    if (localStorage.getItem("simple_admin_auth") === "true") {
-      setIsAuthenticated(true)
-      fetchDashboardStats()
-    }
-  }, [])
-
-  const fetchDashboardStats = async () => {
+  const loadInitialData = async () => {
+    console.log("[v0] SimpleAdmin: Loading initial data")
     setLoading(true)
+    setError(null)
+
     try {
-      const imagesResult = await getImages()
+      // Dynamic import to avoid middleware issues
+      const { getImages, getCategories } = await import("@/app/actions/admin-actions")
+
+      const [imagesResult, categoriesResult] = await Promise.all([getImages(), getCategories()])
+
       if (imagesResult.success) {
         setImages(imagesResult.data)
-        setStats((prev) => ({ ...prev, totalImages: imagesResult.data.length }))
+        console.log("[v0] SimpleAdmin: Loaded", imagesResult.data.length, "images")
+      } else {
+        console.error("[v0] SimpleAdmin: Failed to load images:", imagesResult.error)
       }
 
-      const ordersResult = await getOrders()
-      if (ordersResult.success) {
-        setOrders(ordersResult.data)
-        const revenue = ordersResult.data.reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0)
-        setStats((prev) => ({
-          ...prev,
-          totalOrders: ordersResult.data.length,
-          totalRevenue: revenue,
-        }))
-      }
-
-      const categoriesResult = await getCategories()
       if (categoriesResult.success) {
         setCategories(categoriesResult.data)
-      }
-
-      const usersResult = await getUsersAction()
-      if (usersResult.success) {
-        setUsers(usersResult.data)
-        setStats((prev) => ({ ...prev, totalUsers: usersResult.data.length }))
+        console.log("[v0] SimpleAdmin: Loaded", categoriesResult.data.length, "categories")
+      } else {
+        console.error("[v0] SimpleAdmin: Failed to load categories:", categoriesResult.error)
       }
     } catch (error) {
-      console.error("Error fetching dashboard stats:", error)
-      toast.error("Failed to load dashboard data")
+      console.error("[v0] SimpleAdmin: Error loading data:", error)
+      setError("Failed to load data")
     } finally {
       setLoading(false)
     }
   }
 
-  const fetchImages = async () => {
-    try {
-      const result = await getImages()
-      if (result.success) {
-        setImages(result.data)
-      } else {
-        toast.error("Failed to load images")
-      }
-    } catch (error) {
-      console.error("Error fetching images:", error)
-      toast.error("Failed to load images")
-    }
-  }
-
-  const fetchOrders = async () => {
-    try {
-      const result = await getOrders()
-      if (result.success) {
-        setOrders(result.data)
-      } else {
-        toast.error("Failed to load orders")
-      }
-    } catch (error) {
-      console.error("Error fetching orders:", error)
-      toast.error("Failed to load orders")
-    }
-  }
-
-  const fetchUsers = async () => {
-    try {
-      const result = await getUsersAction()
-      if (result.success) {
-        setUsers(result.data)
-        setStats((prev) => ({ ...prev, totalUsers: result.data.length }))
-      } else {
-        toast.error("Failed to load users")
-      }
-    } catch (error) {
-      console.error("Error fetching users:", error)
-      toast.error("Failed to load users")
-    }
-  }
-
-  const handleFileUpload = async (file: File) => {
-    console.log("[v0] Starting file upload process for:", file.name)
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please upload an image file")
-      return null
-    }
-
-    setUploadingFile(true)
-    try {
-      const reader = new FileReader()
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        reader.onload = (e) => resolve(e.target?.result as string)
-        reader.onerror = reject
-        reader.readAsDataURL(file)
-      })
-
-      console.log("[v0] File converted to data URL successfully")
-      setNewImage((prev) => ({
-        ...prev,
-        file_url: dataUrl,
-        thumbnail_url: dataUrl,
-      }))
-
-      toast.success("File processed successfully")
-      return dataUrl
-    } catch (error) {
-      console.error("[v0] Error processing file:", error)
-      toast.error("Failed to process file")
-    } finally {
-      setUploadingFile(false)
-    }
-  }
-
-  const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("[v0] File input changed")
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      console.log("[v0] Processing selected file:", file.name)
-      await handleFileUpload(file)
-    }
-  }
+      console.log("[v0] SimpleAdmin: File selected:", file.name)
 
-  const updateOrderStatus = async (orderId: string, newStatus: string) => {
-    try {
-      const result = await updateOrderStatusAction(orderId, newStatus)
-      if (result.success) {
-        toast.success("Order status updated successfully")
-        fetchOrders() // Refresh orders list
-      } else {
-        toast.error(`Failed to update order status: ${result.error}`)
+      if (!file.type.startsWith("image/")) {
+        toast.error("Please select an image file")
+        return
       }
-    } catch (error) {
-      console.error("Error updating order status:", error)
-      toast.error("Failed to update order status")
-    }
-  }
 
-  const toggleUserAdmin = async (userId: string, currentAdminStatus: boolean) => {
-    try {
-      const result = await toggleUserAdminAction(userId, !currentAdminStatus)
-      if (result.success) {
-        toast.success("User admin status updated successfully")
-        fetchUsers() // Refresh users list
-      } else {
-        toast.error(`Failed to update user admin status: ${result.error}`)
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const preview = e.target?.result as string
+        setNewImage((prev) => ({ ...prev, file, preview }))
+        console.log("[v0] SimpleAdmin: File preview generated")
       }
-    } catch (error) {
-      console.error("Error toggling user admin status:", error)
-      toast.error("Failed to update user admin status")
+      reader.readAsDataURL(file)
     }
   }
 
-  const updateImage = async (formData: FormData) => {
-    if (!editingImage) return
-
-    try {
-      formData.append("id", editingImage.id)
-      const result = await updateImageAction(formData)
-
-      if (result.success) {
-        toast.success("Image updated successfully")
-        setEditingImage(null)
-        fetchImages() // Refresh images list
-      } else {
-        toast.error(`Failed to update image: ${result.error}`)
-      }
-    } catch (error) {
-      console.error("Error updating image:", error)
-      toast.error("Failed to update image")
-    }
-  }
-
-  const toggleImageActiveStatus = async (imageId: string, currentStatus: boolean) => {
-    try {
-      const result = await toggleImageStatus(imageId, "active", !currentStatus)
-      if (result.success) {
-        toast.success("Image status updated successfully")
-        fetchImages() // Refresh images list
-      } else {
-        toast.error(`Failed to update image status: ${result.error}`)
-      }
-    } catch (error) {
-      console.error("Error toggling image status:", error)
-      toast.error("Failed to update image status")
-    }
-  }
-
-  const toggleImageFeaturedStatus = async (imageId: string, currentStatus: boolean) => {
-    try {
-      const result = await toggleImageStatus(imageId, "featured", !currentStatus)
-      if (result.success) {
-        toast.success("Image featured status updated successfully")
-        fetchImages() // Refresh images list
-      } else {
-        toast.error(`Failed to update featured status: ${result.error}`)
-      }
-    } catch (error) {
-      console.error("Error toggling featured status:", error)
-      toast.error("Failed to update featured status")
-    }
-  }
-
-  const handleEditImage = (image: Image) => {
-    setEditingImage(image)
-  }
-
-  const handleDrag = (e: React.DragEvent) => {
+  const handleImageUpload = async (e: React.FormEvent) => {
     e.preventDefault()
-    e.stopPropagation()
-  }
+    console.log("[v0] SimpleAdmin: Starting image upload")
 
-  const handleDrop = async (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+    if (!newImage.file) {
+      toast.error("Please select an image file")
+      return
+    }
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0]
-      const url = await handleFileUpload(file)
-      if (url) {
-        const form = document.getElementById("image-upload-form") as HTMLFormElement
-        if (form) {
-          ;(form.elements.namedItem("file_url") as HTMLInputElement).value = url
-          ;(form.elements.namedItem("preview_url") as HTMLInputElement).value = url
-          ;(form.elements.namedItem("thumbnail_url") as HTMLInputElement).value = url
-        }
+    if (!newImage.title || !newImage.category || !newImage.price) {
+      toast.error("Please fill in all required fields")
+      return
+    }
+
+    setUploading(true)
+    setError(null)
+
+    try {
+      const { createImageWithCategory } = await import("@/app/actions/admin-actions")
+
+      const formData = new FormData()
+      formData.append("title", newImage.title)
+      formData.append("description", newImage.description)
+      formData.append("category", newImage.category)
+      formData.append("price", newImage.price)
+      formData.append("file_url", newImage.preview)
+      formData.append("thumbnail_url", newImage.preview)
+
+      console.log("[v0] SimpleAdmin: Calling server action")
+      const result = await createImageWithCategory(formData)
+
+      if (result.success) {
+        console.log("[v0] SimpleAdmin: Upload successful")
+        toast.success("Image uploaded successfully!")
+
+        // Reset form
+        setNewImage({
+          title: "",
+          description: "",
+          category: "",
+          price: "",
+          file: null,
+          preview: "",
+        })
+
+        // Reload images
+        await loadInitialData()
+      } else {
+        console.error("[v0] SimpleAdmin: Upload failed:", result.error)
+        setError(result.error || "Upload failed")
+        toast.error("Upload failed: " + (result.error || "Unknown error"))
       }
+    } catch (error) {
+      console.error("[v0] SimpleAdmin: Upload error:", error)
+      setError("Upload failed")
+      toast.error("Upload failed")
+    } finally {
+      setUploading(false)
     }
   }
 
-  useEffect(() => {
-    fetchImages()
-    fetchOrders()
-    fetchUsers()
-  }, [isAuthenticated])
+  const handleDeleteImage = async (imageId: string) => {
+    if (!confirm("Are you sure you want to delete this image?")) return
+
+    try {
+      const { deleteImage } = await import("@/app/actions/admin-actions")
+      const result = await deleteImage(imageId)
+
+      if (result.success) {
+        toast.success("Image deleted successfully")
+        await loadInitialData()
+      } else {
+        toast.error("Failed to delete image")
+      }
+    } catch (error) {
+      console.error("[v0] SimpleAdmin: Delete error:", error)
+      toast.error("Failed to delete image")
+    }
+  }
+
+  const handleLogout = () => {
+    console.log("[v0] SimpleAdmin: Logging out")
+    setIsAuthenticated(false)
+    localStorage.removeItem("simple_admin_auth")
+  }
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Admin Login</CardTitle>
-            <CardDescription>Sign in with your admin account to access the dashboard</CardDescription>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-orange-100">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold text-orange-600">n3urali.art Admin</CardTitle>
+            <CardDescription>Enter password to access admin dashboard</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Admin Password</Label>
                 <Input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
+                  placeholder="Enter admin password"
+                  className="mt-1"
+                  autoFocus
                   required
                 />
-                <p className="text-xs text-gray-500 mt-1">Hint: Use password "C4rlit0s" for admin access</p>
+                <p className="text-xs text-gray-500 mt-1">Password: C4rlit0s</p>
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Signing in..." : "Sign In"}
+
+              {error && (
+                <Alert className="border-red-200 bg-red-50">
+                  <AlertDescription className="text-red-600">{error}</AlertDescription>
+                </Alert>
+              )}
+
+              <Button type="submit" className="w-full bg-orange-600 hover:bg-orange-700">
+                Access Admin Dashboard
               </Button>
             </form>
           </CardContent>
@@ -457,407 +249,175 @@ export default function SimpleAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-6">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900">Simple Admin Dashboard</h1>
-          <p className="text-gray-500">Manage your content and users.</p>
-          <Button onClick={handleLogout} className="mt-2">
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">n3urali.art Admin</h1>
+            <p className="text-gray-600">Photo Upload & Management</p>
+          </div>
+          <Button onClick={handleLogout} variant="outline">
             Logout
           </Button>
         </div>
-
-        <Tabs defaultValue={activeTab} className="w-full">
-          <TabsList>
-            <TabsTrigger value="dashboard" onClick={() => setActiveTab("dashboard")}>
-              Dashboard
-            </TabsTrigger>
-            <TabsTrigger value="images" onClick={() => setActiveTab("images")}>
-              Images
-            </TabsTrigger>
-            <TabsTrigger value="orders" onClick={() => setActiveTab("orders")}>
-              Orders
-            </TabsTrigger>
-            <TabsTrigger value="users" onClick={() => setActiveTab("users")}>
-              Users
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="dashboard">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Total Images</CardTitle>
-                  <CardDescription>Number of images in the database</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalImages}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Total Orders</CardTitle>
-                  <CardDescription>Number of orders placed</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalOrders}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Total Revenue</CardTitle>
-                  <CardDescription>Total revenue generated</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">${stats.totalRevenue}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Total Users</CardTitle>
-                  <CardDescription>Number of registered users</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalUsers}</div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          <TabsContent value="images">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Add New Image</CardTitle>
-                  <CardDescription>Upload a new image to the database.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form id="image-upload-form" onSubmit={handleImageUpload} className="space-y-4">
-                    <div>
-                      <Label htmlFor="title">Title</Label>
-                      <Input
-                        type="text"
-                        id="title"
-                        name="title"
-                        value={newImage.title}
-                        onChange={(e) => setNewImage({ ...newImage, title: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="description">Description</Label>
-                      <Textarea
-                        id="description"
-                        name="description"
-                        value={newImage.description}
-                        onChange={(e) => setNewImage({ ...newImage, description: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="category">Category</Label>
-                      <select
-                        id="category"
-                        name="category"
-                        value={newImage.category}
-                        onChange={(e) => setNewImage({ ...newImage, category: e.target.value })}
-                        required
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        <option value="">Select a category</option>
-                        {categories.map((category) => (
-                          <option key={category.id} value={category.name}>
-                            {category.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <Label htmlFor="price">Price</Label>
-                      <Input
-                        type="number"
-                        id="price"
-                        name="price"
-                        value={newImage.price}
-                        onChange={(e) => setNewImage({ ...newImage, price: e.target.value })}
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="image-file">Upload Image File</Label>
-                      <Input
-                        type="file"
-                        id="image-file"
-                        accept="image/*"
-                        onChange={handleFileInputChange}
-                        disabled={uploadingFile}
-                      />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Choose an image file to upload, or enter URLs manually below
-                      </p>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="file_url">Image URL (or auto-filled from upload)</Label>
-                      <Input
-                        type="url"
-                        id="file_url"
-                        name="file_url"
-                        value={newImage.file_url}
-                        onChange={(e) => setNewImage({ ...newImage, file_url: e.target.value })}
-                        placeholder="https://example.com/image.jpg or upload file above"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="thumbnail_url">Thumbnail URL (optional)</Label>
-                      <Input
-                        type="url"
-                        id="thumbnail_url"
-                        name="thumbnail_url"
-                        value={newImage.thumbnail_url}
-                        onChange={(e) => setNewImage({ ...newImage, thumbnail_url: e.target.value })}
-                        placeholder="Auto-filled from upload or enter custom URL"
-                      />
-                    </div>
-
-                    {newImage.file_url && (
-                      <div>
-                        <Label>Preview</Label>
-                        <img
-                          src={newImage.file_url || "/placeholder.svg"}
-                          alt="Preview"
-                          className="w-32 h-32 object-cover rounded border"
-                          onError={() => console.log("[v0] Preview image failed to load")}
-                        />
-                      </div>
-                    )}
-
-                    <Button type="submit" disabled={uploadingFile || !newImage.file_url}>
-                      {uploadingFile ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Saving to Database...
-                        </>
-                      ) : (
-                        "Save Image to Database"
-                      )}
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Images</CardTitle>
-                  <CardDescription>List of images in the database.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <Alert>
-                      <Loader2 className="mr-2 h-4 w-4" />
-                      <AlertDescription>Fetching images...</AlertDescription>
-                    </Alert>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {images.map((image) => (
-                        <div key={image.id} className="relative">
-                          <img
-                            src={image.thumbnail_url || "/placeholder.svg"}
-                            alt={image.title}
-                            className="w-full rounded-md"
-                          />
-                          <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity duration-200 rounded-md">
-                            <div className="flex flex-col space-y-2 p-2">
-                              <div className="flex space-x-2">
-                                <Button size="sm" variant="outline" onClick={() => handleEditImage(image)}>
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Edit
-                                </Button>
-                                <Button size="sm" variant="destructive" onClick={() => deleteImage(image.id)}>
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Delete
-                                </Button>
-                              </div>
-                              <div className="flex space-x-2">
-                                <Button
-                                  size="sm"
-                                  variant={image.active ? "default" : "secondary"}
-                                  onClick={() => toggleImageActiveStatus(image.id, image.active)}
-                                >
-                                  {image.active ? "Active" : "Inactive"}
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant={image.featured ? "default" : "secondary"}
-                                  onClick={() => toggleImageFeaturedStatus(image.id, image.featured)}
-                                >
-                                  {image.featured ? "Featured" : "Not Featured"}
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          <TabsContent value="orders">
-            <Card>
-              <CardHeader>
-                <CardTitle>Orders</CardTitle>
-                <CardDescription>List of orders in the database.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <Alert>
-                    <Loader2 className="mr-2 h-4 w-4" />
-                    <AlertDescription>Fetching orders...</AlertDescription>
-                  </Alert>
-                ) : (
-                  <div className="grid grid-cols-1 gap-4">
-                    {orders.map((order) => (
-                      <Card key={order.id}>
-                        <CardHeader>
-                          <CardTitle>Order #{order.id}</CardTitle>
-                          <CardDescription>Placed on {new Date(order.created_at).toLocaleDateString()}</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <p>Customer: {order.customer_name}</p>
-                          <p>Email: {order.user_email}</p>
-                          <p>Total: ${order.total_amount}</p>
-                          <div className="flex items-center space-x-2 mt-2">
-                            <Badge>{order.status}</Badge>
-                            <select
-                              value={order.status}
-                              onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                              className="text-sm border rounded px-2 py-1"
-                            >
-                              <option value="pending">Pending</option>
-                              <option value="processing">Processing</option>
-                              <option value="completed">Completed</option>
-                              <option value="cancelled">Cancelled</option>
-                            </select>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="users">
-            <Card>
-              <CardHeader>
-                <CardTitle>Users</CardTitle>
-                <CardDescription>List of users in the database.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <Alert>
-                    <Loader2 className="mr-2 h-4 w-4" />
-                    <AlertDescription>Fetching users...</AlertDescription>
-                  </Alert>
-                ) : (
-                  <div className="grid grid-cols-1 gap-4">
-                    {users.map((user) => (
-                      <Card key={user.id}>
-                        <CardHeader>
-                          <CardTitle>{user.full_name}</CardTitle>
-                          <CardDescription>Joined on {new Date(user.created_at).toLocaleDateString()}</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <p>Email: {user.email}</p>
-                          <div className="flex items-center space-x-2 mt-2">
-                            <Badge>{user.is_admin ? "Admin" : "User"}</Badge>
-                            <Button
-                              size="sm"
-                              variant={user.is_admin ? "destructive" : "default"}
-                              onClick={() => toggleUserAdmin(user.id, user.is_admin)}
-                            >
-                              {user.is_admin ? "Remove Admin" : "Make Admin"}
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
       </div>
-      {editingImage && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {error && (
+          <Alert className="mb-6 border-red-200 bg-red-50">
+            <AlertDescription className="text-red-600">{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Upload Section */}
+          <Card>
             <CardHeader>
-              <CardTitle>Edit Image</CardTitle>
-              <CardDescription>Update image details</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Upload New Photo
+              </CardTitle>
+              <CardDescription>Add a new image to the gallery</CardDescription>
             </CardHeader>
             <CardContent>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  const formData = new FormData(e.target as HTMLFormElement)
-                  updateImage(formData)
-                }}
-                className="space-y-4"
-              >
+              <form onSubmit={handleImageUpload} className="space-y-4">
                 <div>
-                  <Label htmlFor="edit-title">Title</Label>
-                  <Input type="text" id="edit-title" name="title" defaultValue={editingImage.title} required />
-                </div>
-                <div>
-                  <Label htmlFor="edit-description">Description</Label>
-                  <Textarea id="edit-description" name="description" defaultValue={editingImage.description} />
-                </div>
-                <div>
-                  <Label htmlFor="edit-category">Category</Label>
-                  <select
-                    id="edit-category"
-                    name="category"
-                    defaultValue={editingImage.category_name}
+                  <Label htmlFor="title">Title *</Label>
+                  <Input
+                    id="title"
+                    value={newImage.title}
+                    onChange={(e) => setNewImage((prev) => ({ ...prev, title: e.target.value }))}
+                    placeholder="Enter image title"
                     required
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={newImage.description}
+                    onChange={(e) => setNewImage((prev) => ({ ...prev, description: e.target.value }))}
+                    placeholder="Enter image description"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="category">Category *</Label>
+                  <select
+                    id="category"
+                    value={newImage.category}
+                    onChange={(e) => setNewImage((prev) => ({ ...prev, category: e.target.value }))}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    required
                   >
-                    <option value="">Select a category</option>
-                    {categories.map((category) => (
-                      <option key={category.id} value={category.name}>
-                        {category.name}
+                    <option value="">Select category</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.name}>
+                        {cat.name}
                       </option>
                     ))}
                   </select>
                 </div>
+
                 <div>
-                  <Label htmlFor="edit-price">Price</Label>
-                  <Input type="number" id="edit-price" name="price" defaultValue={editingImage.price} required />
-                </div>
-                <div>
-                  <Label htmlFor="edit-file_url">Image URL</Label>
-                  <Input type="url" id="edit-file_url" name="file_url" defaultValue={editingImage.image_url} required />
-                </div>
-                <div>
-                  <Label htmlFor="edit-thumbnail_url">Thumbnail URL</Label>
+                  <Label htmlFor="price">Price (USD) *</Label>
                   <Input
-                    type="url"
-                    id="edit-thumbnail_url"
-                    name="thumbnail_url"
-                    defaultValue={editingImage.thumbnail_url}
+                    id="price"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={newImage.price}
+                    onChange={(e) => setNewImage((prev) => ({ ...prev, price: e.target.value }))}
+                    placeholder="29.99"
+                    required
                   />
                 </div>
-                <div className="flex space-x-2">
-                  <Button type="submit">Update Image</Button>
-                  <Button type="button" variant="outline" onClick={() => setEditingImage(null)}>
-                    Cancel
-                  </Button>
+
+                <div>
+                  <Label htmlFor="file">Image File *</Label>
+                  <Input
+                    id="file"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="cursor-pointer"
+                    required
+                  />
                 </div>
+
+                {newImage.preview && (
+                  <div>
+                    <Label>Preview</Label>
+                    <img
+                      src={newImage.preview || "/placeholder.svg"}
+                      alt="Preview"
+                      className="w-full max-w-xs h-32 object-cover rounded border mt-2"
+                    />
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  disabled={uploading || !newImage.file}
+                  className="w-full bg-orange-600 hover:bg-orange-700"
+                >
+                  {uploading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    "Upload Photo"
+                  )}
+                </Button>
               </form>
             </CardContent>
           </Card>
+
+          {/* Images List */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5" />
+                Uploaded Photos ({images.length})
+              </CardTitle>
+              <CardDescription>Manage your uploaded images</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                  Loading images...
+                </div>
+              ) : images.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">No images uploaded yet</div>
+              ) : (
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {images.map((image) => (
+                    <div key={image.id} className="flex items-center gap-4 p-3 border rounded-lg">
+                      <img
+                        src={image.thumbnail_url || image.image_url}
+                        alt={image.title}
+                        className="w-16 h-16 object-cover rounded"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium truncate">{image.title}</h4>
+                        <p className="text-sm text-gray-500">{image.category_name}</p>
+                        <p className="text-sm font-medium">${image.price}</p>
+                      </div>
+                      <Button size="sm" variant="destructive" onClick={() => handleDeleteImage(image.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
-      )}
+      </div>
     </div>
   )
 }

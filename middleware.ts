@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  const protectedRoutes = ["/simple-admin", "/admin", "/account"]
+  const protectedRoutes = ["/admin", "/account"]
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
 
   if (isProtectedRoute) {
@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(redirectUrl)
       }
 
-      if (pathname.startsWith("/simple-admin") || pathname.startsWith("/admin")) {
+      if (pathname.startsWith("/admin")) {
         if (!data.user.user_metadata?.is_admin) {
           return NextResponse.redirect(new URL("/", request.url))
         }

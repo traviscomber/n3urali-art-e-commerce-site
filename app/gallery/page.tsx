@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Eye, ChevronLeft, ChevronRight } from "lucide-react"
 import { getImages } from "@/app/actions/admin-actions"
 
@@ -19,11 +19,8 @@ interface Image {
 }
 
 export default function GalleryPage() {
+  const router = useRouter()
   const [images, setImages] = useState<any[]>([])
-  const [selectedImage, setSelectedImage] = useState<Image | null>(null)
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [imageLoaded, setImageLoaded] = useState(false)
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -49,27 +46,8 @@ export default function GalleryPage() {
   const fisheyeImages = transformedImages.filter((img) => img.category === "fisheye")
 
   const handleImageSelect = async (image: Image) => {
-    console.log("[v0] Image preview clicked:", image.title)
-    setSelectedImage(image)
-    setIsPreviewOpen(true)
-    setIsLoading(true)
-    setImageLoaded(false)
-
-    const loadingTime = Math.random() * 2000 + 1000
-    setTimeout(() => {
-      setIsLoading(false)
-    }, loadingTime)
-  }
-
-  const handleImageLoad = () => {
-    setImageLoaded(true)
-  }
-
-  const closePreview = () => {
-    setIsPreviewOpen(false)
-    setSelectedImage(null)
-    setIsLoading(false)
-    setImageLoaded(false)
+    console.log("[v0] Image clicked, redirecting to photo details:", image.title)
+    router.push(`/photo/${image.id}`)
   }
 
   const scrollSection = (direction: "left" | "right", sectionId: string) => {
@@ -85,7 +63,8 @@ export default function GalleryPage() {
 
   const ImageCard = ({ image, size = "normal" }: { image: Image; size?: "normal" | "large" }) => (
     <div
-      className={`group relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden ${size === "large" ? "min-w-[280px]" : "min-w-[250px]"}`}
+      className={`group relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden cursor-pointer ${size === "large" ? "min-w-[280px]" : "min-w-[250px]"}`}
+      onClick={() => handleImageSelect(image)}
     >
       <div className={`relative ${size === "large" ? "aspect-[4/3]" : "aspect-video"} overflow-hidden`}>
         <img
@@ -97,11 +76,10 @@ export default function GalleryPage() {
           <Button
             size="sm"
             variant="secondary"
-            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 hover:bg-white text-gray-900 shadow-lg"
-            onClick={() => handleImageSelect(image)}
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 hover:bg-white text-gray-900 shadow-lg pointer-events-none"
           >
             <Eye className="w-4 h-4 mr-2" />
-            Preview
+            View & Buy
           </Button>
         </div>
       </div>
@@ -134,8 +112,8 @@ export default function GalleryPage() {
             </h1>
 
             <p className="text-xl text-muted-foreground text-pretty">
-              Discover our curated collection of high-resolution equirectangular and fisheye images, perfect for VR
-              experiences, projection mapping, and architectural visualization.
+              Discover our curated collection of high-resolution equirectangular and fisheye images. Click any image to
+              view details and purchase directly.
             </p>
           </div>
         </div>
@@ -234,7 +212,7 @@ export default function GalleryPage() {
           <div className="space-y-6">
             <div className="text-center">
               <h2 className="text-3xl font-bold text-gray-900">Complete Gallery</h2>
-              <p className="text-gray-600 mt-1">Browse all available images</p>
+              <p className="text-gray-600 mt-1">Click any image to view details and purchase</p>
             </div>
 
             {transformedImages.length > 0 ? (
@@ -261,6 +239,7 @@ export default function GalleryPage() {
                             {image.category === "equirectangular" ? "360°" : "Fisheye"}
                           </p>
                           <p className="text-sm font-bold text-emerald-400">${image.price}</p>
+                          <p className="text-xs text-blue-300">Click to buy</p>
                         </div>
                       </div>
 
@@ -279,105 +258,6 @@ export default function GalleryPage() {
           </div>
         </div>
       </section>
-
-      {/* Preview Dialog */}
-      <Dialog open={isPreviewOpen} onOpenChange={closePreview}>
-        <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] p-0 overflow-hidden">
-          <div className="relative w-full bg-gradient-to-br from-background via-background to-muted/20 border-2 border-border/50 shadow-2xl rounded-lg overflow-hidden">
-            <DialogHeader className="relative px-6 py-4 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-b border-border/30">
-              <div className="space-y-1">
-                <DialogTitle className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-                  {selectedImage?.title}
-                </DialogTitle>
-                <p className="text-sm text-muted-foreground font-medium">Preview • Watermarked • Max 720px</p>
-              </div>
-            </DialogHeader>
-
-            <div className="p-4">
-              <div className="relative w-full min-h-[300px] flex items-center justify-center">
-                <div className="relative rounded-lg overflow-hidden shadow-2xl border border-border/30 w-full max-w-[580px]">
-                  <img
-                    src={selectedImage?.preview_url || "/placeholder.svg"}
-                    alt={selectedImage?.title || "Image preview"}
-                    className="w-full h-auto max-h-[400px] object-contain select-none pointer-events-none block"
-                    onLoad={handleImageLoad}
-                    onContextMenu={(e) => e.preventDefault()}
-                    draggable={false}
-                    style={{
-                      userSelect: "none",
-                      WebkitUserSelect: "none",
-                      MozUserSelect: "none",
-                      msUserSelect: "none",
-                    }}
-                  />
-                  {imageLoaded && (
-                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                      <div className="absolute inset-0 opacity-15">
-                        {Array.from({ length: 12 }).map((_, row) => (
-                          <div
-                            key={row}
-                            className="flex whitespace-nowrap absolute"
-                            style={{
-                              top: `${row * 60}px`,
-                              left: "50%",
-                              transform: `translateX(-50%) rotate(-45deg)`,
-                              transformOrigin: "center",
-                              width: "200%",
-                            }}
-                          >
-                            {Array.from({ length: 20 }).map((_, col) => (
-                              <span
-                                key={col}
-                                className="text-white font-bold text-2xl mx-8 drop-shadow-lg"
-                                style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
-                              >
-                                N3URALI.ART
-                              </span>
-                            ))}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div
-                  className="absolute inset-0 bg-transparent cursor-default"
-                  onContextMenu={(e) => e.preventDefault()}
-                  onDragStart={(e) => e.preventDefault()}
-                />
-              </div>
-
-              {selectedImage && !isLoading && (
-                <div className="mt-4 p-4 bg-gradient-to-r from-muted/20 via-muted/10 to-muted/20 rounded-xl border border-border/20">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-semibold text-foreground/90 uppercase tracking-wide">Description</h4>
-                      <p className="text-base text-muted-foreground leading-relaxed">
-                        {selectedImage?.description || "No description available"}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-6 pt-2 border-t border-border/20">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="font-medium">
-                          {selectedImage?.category === "equirectangular" ? "360°" : "Fisheye"}
-                        </Badge>
-                      </div>
-                      <div className="text-sm font-medium text-foreground">
-                        <span className="text-muted-foreground">Price:</span>{" "}
-                        <span className="text-primary">${selectedImage?.price || 0}</span>
-                      </div>
-                      <div className="text-sm font-medium text-foreground">
-                        <span className="text-muted-foreground">Size:</span>{" "}
-                        {((selectedImage?.file_size || 0) / 1024 / 1024).toFixed(1)} MB
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

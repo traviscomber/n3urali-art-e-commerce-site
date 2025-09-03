@@ -36,7 +36,10 @@ export default function GalleryPage() {
     title: image.title,
     category: image.category_name?.toLowerCase() === "fisheye" ? ("fisheye" as const) : ("equirectangular" as const),
     price: Number.parseFloat(image.price) || 0,
-    preview_url: image.thumbnail_url || image.image_url,
+    preview_url:
+      image.category_name?.toLowerCase() === "fisheye"
+        ? image.thumbnail_url || "/placeholder.svg"
+        : image.thumbnail_url || image.image_url,
     dimensions: "4096x4096",
     file_size: 20000000,
     description: image.description || "",
@@ -67,13 +70,15 @@ export default function GalleryPage() {
 
   const ImageCard = ({ image, size = "normal" }: { image: Image; size?: "normal" | "large" }) => (
     <div
-      className={`group relative bg-card rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-border overflow-hidden ${size === "large" ? "min-w-[280px]" : "min-w-[250px]"}`}
+      className={`group relative bg-card rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-border overflow-hidden ${size === "large" ? "min-w-[280px] max-w-[280px]" : "min-w-[250px] max-w-[250px]"}`}
     >
-      <div className={`relative ${size === "large" ? "aspect-[4/3]" : "aspect-video"} overflow-hidden`}>
+      <div
+        className={`relative ${size === "large" ? "aspect-video h-[157px]" : "aspect-video h-[140px]"} overflow-hidden`}
+      >
         <img
           src={image.preview_url || "/placeholder.svg"}
           alt={image.title}
-          className="w-full h-full object-contain bg-muted/20 group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover bg-muted/20 group-hover:scale-105 transition-transform duration-300"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="absolute bottom-4 left-4 right-4 flex gap-2">

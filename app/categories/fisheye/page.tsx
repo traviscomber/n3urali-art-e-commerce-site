@@ -201,15 +201,15 @@ export default function FisheyeCategoryPage() {
               key={image.id}
               className="group overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-300"
             >
-              <div className="relative aspect-square overflow-hidden">
+              <div className="relative aspect-video overflow-hidden">
                 <img
                   src={image.previewUrl || "/placeholder.svg"}
                   alt={image.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="absolute top-4 right-4">
-                  <Badge variant="secondary" className="bg-black/50 text-white border-0">
+                  <Badge variant="secondary" className="bg-card/90 text-card-foreground border border-border">
                     Fisheye
                   </Badge>
                 </div>
@@ -218,7 +218,7 @@ export default function FisheyeCategoryPage() {
                     <Button
                       size="sm"
                       variant="secondary"
-                      className="bg-white/20 backdrop-blur-sm text-white border-0 hover:bg-white/30"
+                      className="bg-card/90 backdrop-blur-sm text-card-foreground border border-border hover:bg-card"
                     >
                       <Eye className="w-4 h-4 mr-2" />
                       Preview
@@ -226,7 +226,7 @@ export default function FisheyeCategoryPage() {
                     <Button
                       size="sm"
                       variant="secondary"
-                      className="bg-white/20 backdrop-blur-sm text-white border-0 hover:bg-white/30"
+                      className="bg-card/90 backdrop-blur-sm text-card-foreground border border-border hover:bg-card"
                       onClick={() => handleAddToCart(image)}
                     >
                       <ShoppingCart className="w-4 h-4 mr-2" />

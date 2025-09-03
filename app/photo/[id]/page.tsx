@@ -339,10 +339,12 @@ export default function PhotoDetailPage() {
 
   const getRightsTypeDisplay = () => {
     const rightsType = image?.metadata?.rights_type
-    if (rightsType === "exclusive") return { text: "Exclusive Rights", icon: Crown, color: "text-yellow-600" }
-    if (rightsType === "non-exclusive") return { text: "Non-Exclusive Rights", icon: Eye, color: "text-blue-600" }
-    if (rightsType === "both") return { text: "Both Rights Available", icon: Crown, color: "text-purple-600" }
-    return { text: "Standard License", icon: Eye, color: "text-gray-600" }
+    if (rightsType === "exclusive")
+      return { text: "Exclusive Rights", icon: Crown, color: "bg-primary text-primary-foreground" }
+    if (rightsType === "non-exclusive")
+      return { text: "Non-Exclusive Rights", icon: Eye, color: "bg-blue-600 text-white" }
+    if (rightsType === "both") return { text: "Both Rights Available", icon: Crown, color: "bg-purple-600 text-white" }
+    return { text: "Standard License", icon: Eye, color: "bg-gray-600 text-white" }
   }
 
   const handleQualityPreviewToggle = () => {
@@ -432,7 +434,7 @@ export default function PhotoDetailPage() {
                       className={`flex items-center gap-2 transition-all ${
                         showQualityPreview
                           ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                          : "bg-white/95 hover:bg-white"
+                          : "bg-card text-card-foreground hover:bg-muted border border-border"
                       }`}
                     >
                       <Eye className="h-4 w-4" />
@@ -600,10 +602,10 @@ export default function PhotoDetailPage() {
           <div className="space-y-6">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <Badge variant="outline">
+                <Badge variant="outline" className="bg-card text-card-foreground border-border">
                   {image.category_name === "Fisheye" ? "180° Fisheye" : "360° Equirectangular"}
                 </Badge>
-                <Badge variant="secondary" className={rightsDisplay.color}>
+                <Badge variant="secondary" className="bg-primary text-primary-foreground">
                   <RightsIcon className="w-3 h-3 mr-1" />
                   {rightsDisplay.text}
                 </Badge>
@@ -683,9 +685,9 @@ export default function PhotoDetailPage() {
             </Card>
 
             {!user && (
-              <Card className="border-yellow-200 bg-yellow-50">
+              <Card className="border-yellow-500 bg-yellow-100 dark:bg-yellow-900/20 dark:border-yellow-600">
                 <CardContent className="p-4">
-                  <p className="text-sm text-yellow-800">
+                  <p className="text-sm text-yellow-800 dark:text-yellow-200">
                     <strong>Sign in required:</strong> You'll be redirected to sign in before completing your purchase.
                   </p>
                 </CardContent>

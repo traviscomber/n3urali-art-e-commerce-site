@@ -43,13 +43,13 @@ export default function CheckoutPage() {
   const getLicenseBadgeColor = (license: string) => {
     switch (license) {
       case "standard":
-        return "bg-blue-100 text-blue-800"
+        return "bg-secondary text-secondary-foreground"
       case "extended":
-        return "bg-purple-100 text-purple-800"
+        return "bg-primary text-primary-foreground"
       case "commercial":
-        return "bg-amber-100 text-amber-800"
+        return "bg-accent text-accent-foreground"
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-muted text-muted-foreground"
     }
   }
 

@@ -69,11 +69,11 @@ export function UserMenu() {
               {isAuthenticated && <CheckCircle className="w-3 h-3 text-green-500" />}
             </div>
             <p className="w-[200px] truncate text-xs text-muted-foreground">{contextUser.email}</p>
-            <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">
+            <Badge variant="secondary" className="text-xs bg-secondary text-secondary-foreground">
               Developer Mode
             </Badge>
             {isAdmin && (
-              <Badge variant="default" className="text-xs bg-orange-100 text-orange-800">
+              <Badge variant="default" className="text-xs bg-primary text-primary-foreground">
                 Admin Access
               </Badge>
             )}

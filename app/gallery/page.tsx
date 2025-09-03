@@ -45,9 +45,13 @@ export default function GalleryPage() {
   const equirectangularImages = transformedImages.filter((img) => img.category === "equirectangular")
   const fisheyeImages = transformedImages.filter((img) => img.category === "fisheye")
 
-  const handleImageSelect = async (image: Image) => {
-    console.log("[v0] Image clicked, redirecting to photo details:", image.title)
-    router.push(`/photo/${image.id}`)
+  const handleImageSelect = async (image: Image, mode: "preview" | "360" = "preview") => {
+    console.log("[v0] Image clicked, redirecting to photo details:", image.title, "Mode:", mode)
+    if (mode === "360" && image.category === "equirectangular") {
+      router.push(`/photo/${image.id}?view=360`)
+    } else {
+      router.push(`/photo/${image.id}`)
+    }
   }
 
   const scrollSection = (direction: "left" | "right", sectionId: string) => {
@@ -63,8 +67,7 @@ export default function GalleryPage() {
 
   const ImageCard = ({ image, size = "normal" }: { image: Image; size?: "normal" | "large" }) => (
     <div
-      className={`group relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden cursor-pointer ${size === "large" ? "min-w-[280px]" : "min-w-[250px]"}`}
-      onClick={() => handleImageSelect(image)}
+      className={`group relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden ${size === "large" ? "min-w-[280px]" : "min-w-[250px]"}`}
     >
       <div className={`relative ${size === "large" ? "aspect-[4/3]" : "aspect-video"} overflow-hidden`}>
         <img
@@ -72,15 +75,37 @@ export default function GalleryPage() {
           alt={image.title}
           className="w-full h-full object-contain bg-gray-50 group-hover:scale-105 transition-transform duration-300"
         />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-          <Button
-            size="sm"
-            variant="secondary"
-            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 hover:bg-white text-gray-900 shadow-lg pointer-events-none"
-          >
-            <Eye className="w-4 h-4 mr-2" />
-            View & Buy
-          </Button>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute bottom-4 left-4 right-4 flex gap-2">
+            <Button
+              size="sm"
+              variant="secondary"
+              className="bg-white/95 hover:bg-white text-gray-900 border border-gray-200 shadow-lg flex-1"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleImageSelect(image, "preview")
+              }}
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Preview
+            </Button>
+            {image.category === "equirectangular" && (
+              <Button
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg flex-1"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleImageSelect(image, "360")
+                }}
+              >
+                <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+                360°
+              </Button>
+            )}
+          </div>
         </div>
       </div>
       <div className="p-4 space-y-2">
@@ -218,11 +243,7 @@ export default function GalleryPage() {
             {transformedImages.length > 0 ? (
               <div className="grid grid-cols-5 lg:grid-cols-10 gap-3">
                 {transformedImages.map((image) => (
-                  <div
-                    key={image.id}
-                    className="group relative cursor-pointer"
-                    onClick={() => handleImageSelect(image)}
-                  >
+                  <div key={image.id} className="group relative cursor-pointer">
                     {/* Clean thumbnail without frame */}
                     <div className="relative aspect-square overflow-hidden">
                       <img
@@ -231,20 +252,55 @@ export default function GalleryPage() {
                         className="w-full h-full object-cover bg-muted/10 transition-transform duration-300 group-hover:scale-105"
                       />
 
-                      {/* Hover overlay with image data */}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/80 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                        <div className="text-center text-white p-2 space-y-1">
-                          <h3 className="font-semibold text-sm truncate">{image.title}</h3>
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/80 transition-all duration-300 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100">
+                        <div className="text-center text-white p-2 space-y-2">
+                          <h3 className="font-semibold text-xs truncate">{image.title}</h3>
                           <p className="text-xs text-gray-300">
                             {image.category === "equirectangular" ? "360°" : "Fisheye"}
                           </p>
-                          <p className="text-sm font-bold text-emerald-400">${image.price}</p>
-                          <p className="text-xs text-blue-300">Click to buy</p>
+                          <p className="text-xs font-bold text-emerald-400">${image.price}</p>
+
+                          <div className="flex gap-1 mt-2">
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              className="bg-white/95 hover:bg-white text-gray-900 text-xs px-2 py-1 h-auto"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleImageSelect(image, "preview")
+                              }}
+                            >
+                              <Eye className="h-3 w-3 mr-1" />
+                              Preview
+                            </Button>
+                            {image.category === "equirectangular" && (
+                              <Button
+                                size="sm"
+                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1 h-auto"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleImageSelect(image, "360")
+                                }}
+                              >
+                                <svg
+                                  className="h-3 w-3 mr-1"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                >
+                                  <circle cx="12" cy="12" r="10" />
+                                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                                </svg>
+                                360°
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </div>
 
                       {/* Small indicator for featured images */}
-                      <div className="absolute top-2 right-2 w-2 h-2 bg-yellow-400 rounded-full opacity-60" />
+                      <div className="absolute top-1 right-1 w-2 h-2 bg-yellow-400 rounded-full opacity-60" />
                     </div>
                   </div>
                 ))}

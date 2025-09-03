@@ -32,6 +32,100 @@ export default function EquirectangularCategoryPage() {
   const [viewingPanorama, setViewingPanorama] = useState<EquirectangularImage | null>(null)
   const [loadingImage, setLoadingImage] = useState<string | null>(null)
   const [showWatermarkedImage, setShowWatermarkedImage] = useState<EquirectangularImage | null>(null)
+  const [show360Viewer, setShow360Viewer] = useState(false)
+  const [current360Image, setCurrent360Image] = useState<EquirectangularImage | null>(null)
+  const [pannellumLoaded, setPannellumLoaded] = useState(false)
+
+  const loadPannellum = async () => {
+    if (pannellumLoaded || window.pannellum) {
+      return true
+    }
+
+    return new Promise<boolean>((resolve) => {
+      // Load CSS
+      const cssLink = document.createElement("link")
+      cssLink.rel = "stylesheet"
+      cssLink.href = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"
+      document.head.appendChild(cssLink)
+
+      // Load JS
+      const script = document.createElement("script")
+      script.src = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"
+      script.onload = () => {
+        setPannellumLoaded(true)
+        resolve(true)
+      }
+      script.onerror = () => {
+        console.error("Failed to load Pannellum")
+        resolve(false)
+      }
+      document.head.appendChild(script)
+    })
+  }
+
+  const init360Viewer = async (image: EquirectangularImage) => {
+    console.log("[v0] Starting Pannellum 360° viewer initialization...")
+
+    const loaded = await loadPannellum()
+    if (!loaded || !window.pannellum) {
+      console.error("[v0] Pannellum failed to load")
+      return
+    }
+
+    setCurrent360Image(image)
+    setShow360Viewer(true)
+
+    // Wait for the container to be rendered
+    setTimeout(() => {
+      const container = document.getElementById("pannellum-container")
+      if (!container) {
+        console.error("[v0] Pannellum container not found")
+        return
+      }
+
+      try {
+        console.log("[v0] Creating Pannellum viewer instance...")
+        window.pannellum.viewer("pannellum-container", {
+          type: "equirectangular",
+          panorama: image.image_url || image.thumbnail_url,
+          autoLoad: true,
+          showControls: true,
+          showFullscreenCtrl: true,
+          showZoomCtrl: true,
+          mouseZoom: true,
+          doubleClickZoom: true,
+          draggable: true,
+          keyboardZoom: true,
+          compass: true,
+          northOffset: 0,
+          preview: image.thumbnail_url,
+          title: image.title,
+          author: "n3urali.art",
+          hfov: 100,
+          pitch: 0,
+          yaw: 0,
+          minHfov: 50,
+          maxHfov: 120,
+        })
+        console.log("[v0] Pannellum 360° viewer initialized successfully")
+      } catch (error) {
+        console.error("[v0] Error initializing Pannellum viewer:", error)
+      }
+    }, 100)
+  }
+
+  const close360Viewer = () => {
+    setShow360Viewer(false)
+    setCurrent360Image(null)
+
+    // Clean up Pannellum instance
+    setTimeout(() => {
+      const container = document.getElementById("pannellum-container")
+      if (container) {
+        container.innerHTML = ""
+      }
+    }, 100)
+  }
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -180,8 +274,7 @@ export default function EquirectangularCategoryPage() {
           {filteredImages.map((image) => (
             <Card
               key={image.id}
-              className="group overflow-hidden bg-background/50 backdrop-blur-sm border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 cursor-pointer"
-              onClick={() => handleImageClick(image)}
+              className="group overflow-hidden bg-background/50 backdrop-blur-sm border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10"
             >
               <div className="relative aspect-[2/1] overflow-hidden">
                 <Image
@@ -205,10 +298,31 @@ export default function EquirectangularCategoryPage() {
                   </div>
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <Button size="sm" variant="secondary" className="bg-background/90 hover:bg-background">
-                      <Eye className="h-4 w-4 mr-2" />
-                      View Image
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="bg-white/95 hover:bg-white text-gray-900 border border-gray-200 shadow-lg"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleImageClick(image)
+                        }}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Preview
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="bg-primary/90 hover:bg-primary text-primary-foreground"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          init360Viewer(image)
+                        }}
+                      >
+                        360°
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -301,6 +415,56 @@ export default function EquirectangularCategoryPage() {
           title={viewingPanorama.title}
           onClose={() => setViewingPanorama(null)}
         />
+      )}
+
+      {show360Viewer && current360Image && (
+        <div className="fixed inset-0 bg-black z-50">
+          <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
+            <div className="text-white">
+              <h2 className="text-xl font-semibold">{current360Image.title}</h2>
+              <p className="text-sm text-white/70">Interactive 360° • Drag to look around • Scroll to zoom</p>
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={close360Viewer}
+              className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div id="pannellum-container" className="w-full h-full" style={{ position: "relative" }} />
+
+          {/* Watermark overlay for 360° viewer */}
+          <div className="absolute inset-0 pointer-events-none z-20">
+            <div className="absolute inset-0 opacity-20">
+              {Array.from({ length: 15 }).map((_, row) => (
+                <div
+                  key={row}
+                  className="flex whitespace-nowrap"
+                  style={{
+                    transform: `translateY(${row * 100}px) rotate(-45deg) translateX(-50%)`,
+                    transformOrigin: "center",
+                  }}
+                >
+                  {Array.from({ length: 25 }).map((_, col) => (
+                    <span
+                      key={col}
+                      className="text-white font-bold text-3xl mx-12 drop-shadow-lg"
+                      style={{
+                        textShadow: "3px 3px 6px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.5)",
+                        WebkitTextStroke: "1px rgba(255,255,255,0.3)",
+                      }}
+                    >
+                      N3URALI.ART
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

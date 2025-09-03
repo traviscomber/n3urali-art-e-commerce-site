@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -32,6 +32,7 @@ interface Image {
 export default function PhotoDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user } = useAuth()
   const [image, setImage] = useState<Image | null>(null)
   const [loading, setLoading] = useState(true)
@@ -43,6 +44,7 @@ export default function PhotoDetailPage() {
   const [viewerLoaded, setViewerLoaded] = useState(false)
   const viewerRef = useRef<HTMLDivElement>(null)
   const pannellumViewerRef = useRef<any>(null)
+  const watermarkRefreshInterval = useRef<NodeJS.Timeout | null>(null)
 
   const loadPannellum = () => {
     return new Promise((resolve, reject) => {
@@ -99,7 +101,7 @@ export default function PhotoDetailPage() {
 
       pannellumViewerRef.current = window.pannellum.viewer(viewerRef.current, {
         type: projection,
-        panorama: image.image_url || image.thumbnail_url,
+        panorama: image.image_url, // Always use original image for best quality
         autoLoad: true,
         autoRotate: -2,
         compass: true,
@@ -121,8 +123,9 @@ export default function PhotoDetailPage() {
         console.log("[v0] Pannellum viewer loaded successfully")
         setViewerLoaded(true)
 
-        // Add watermark overlay
-        addWatermarkOverlay()
+        addEnhancedWatermarkOverlay()
+
+        startWatermarkRefresh()
       })
 
       pannellumViewerRef.current.on("error", (error: any) => {
@@ -138,13 +141,18 @@ export default function PhotoDetailPage() {
     }
   }
 
-  const addWatermarkOverlay = () => {
+  const addEnhancedWatermarkOverlay = () => {
     if (!viewerRef.current) return
 
     const canvas = viewerRef.current.querySelector("canvas")
     if (!canvas) return
 
+    // Remove any existing watermark overlays
+    const existingOverlays = viewerRef.current.querySelectorAll(".watermark-overlay")
+    existingOverlays.forEach((overlay) => overlay.remove())
+
     const watermarkOverlay = document.createElement("div")
+    watermarkOverlay.className = "watermark-overlay"
     watermarkOverlay.style.cssText = `
       position: absolute;
       top: 0;
@@ -152,35 +160,77 @@ export default function PhotoDetailPage() {
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 10;
+      z-index: 15;
       background: repeating-linear-gradient(
         45deg,
         transparent,
-        transparent 80px,
-        rgba(255,255,255,0.1) 80px,
-        rgba(255,255,255,0.1) 120px
+        transparent 60px,
+        rgba(255,255,255,0.08) 60px,
+        rgba(255,255,255,0.08) 80px
       );
     `
 
-    // Add text watermarks
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 50; i++) {
       const watermark = document.createElement("div")
       watermark.textContent = "n3urali.art"
       watermark.style.cssText = `
         position: absolute;
-        color: rgba(255,255,255,0.15);
-        font-size: 18px;
-        font-weight: bold;
+        color: rgba(255,255,255,0.12);
+        font-size: 16px;
+        font-weight: 700;
         transform: rotate(-45deg);
         user-select: none;
         pointer-events: none;
-        left: ${(i % 5) * 20}%;
-        top: ${Math.floor(i / 5) * 25}%;
+        left: ${(i % 10) * 10}%;
+        top: ${Math.floor(i / 10) * 20}%;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
       `
       watermarkOverlay.appendChild(watermark)
     }
 
+    const protectionOverlay = document.createElement("div")
+    protectionOverlay.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 20;
+      background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(255,255,255,0.02) 100%);
+    `
+
+    watermarkOverlay.appendChild(protectionOverlay)
     viewerRef.current.appendChild(watermarkOverlay)
+
+    const preventInteraction = (e: Event) => {
+      e.preventDefault()
+      e.stopPropagation()
+      return false
+    }
+
+    canvas.addEventListener("contextmenu", preventInteraction)
+    canvas.addEventListener("selectstart", preventInteraction)
+    canvas.addEventListener("dragstart", preventInteraction)
+  }
+
+  const startWatermarkRefresh = () => {
+    if (watermarkRefreshInterval.current) {
+      clearInterval(watermarkRefreshInterval.current)
+    }
+
+    watermarkRefreshInterval.current = setInterval(() => {
+      if (viewerRef.current && show360Viewer) {
+        addEnhancedWatermarkOverlay()
+      }
+    }, 5000) // Refresh every 5 seconds
+  }
+
+  const stopWatermarkRefresh = () => {
+    if (watermarkRefreshInterval.current) {
+      clearInterval(watermarkRefreshInterval.current)
+      watermarkRefreshInterval.current = null
+    }
   }
 
   const toggle360Viewer = async () => {
@@ -191,6 +241,8 @@ export default function PhotoDetailPage() {
         init360Viewer()
       }, 200)
     } else {
+      stopWatermarkRefresh()
+
       if (pannellumViewerRef.current && viewerRef.current) {
         try {
           window.pannellum.destroy(viewerRef.current)
@@ -206,6 +258,8 @@ export default function PhotoDetailPage() {
 
   useEffect(() => {
     return () => {
+      stopWatermarkRefresh()
+
       if (pannellumViewerRef.current && viewerRef.current) {
         try {
           window.pannellum.destroy(viewerRef.current)
@@ -225,6 +279,18 @@ export default function PhotoDetailPage() {
     e.preventDefault()
     return false
   }
+
+  useEffect(() => {
+    const viewParam = searchParams.get("view")
+    if (viewParam === "360" && image && image.category_name !== "Fisheye") {
+      console.log("[v0] Auto-activating 360° viewer from URL parameter")
+      setShow360Viewer(true)
+      setViewerLoaded(false)
+      setTimeout(() => {
+        init360Viewer()
+      }, 500) // Small delay to ensure image is loaded
+    }
+  }, [image, searchParams])
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -346,15 +412,17 @@ export default function PhotoDetailPage() {
             <Card className="overflow-hidden">
               <CardContent className="p-0">
                 <div className="flex gap-2 p-4 bg-muted/5 border-b">
-                  <Button
-                    variant={show360Viewer ? "default" : "outline"}
-                    size="sm"
-                    onClick={toggle360Viewer}
-                    className="flex items-center gap-2"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    {show360Viewer ? "Exit 360° View" : "360° Interactive View"}
-                  </Button>
+                  {image.category_name !== "Fisheye" && (
+                    <Button
+                      variant={show360Viewer ? "default" : "outline"}
+                      size="sm"
+                      onClick={toggle360Viewer}
+                      className="flex items-center gap-2"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      {show360Viewer ? "Exit 360° View" : "360° Interactive View"}
+                    </Button>
+                  )}
 
                   {!show360Viewer && (
                     <Button
@@ -373,7 +441,7 @@ export default function PhotoDetailPage() {
                   )}
                 </div>
 
-                {show360Viewer ? (
+                {show360Viewer && image.category_name !== "Fisheye" ? (
                   <div className="relative">
                     <div ref={viewerRef} className="w-full h-[500px] bg-muted/10" style={{ minHeight: "500px" }} />
                     {!viewerLoaded && (
@@ -401,7 +469,7 @@ export default function PhotoDetailPage() {
                       style={{ userSelect: "none", WebkitUserSelect: "none", MozUserSelect: "none" }}
                     >
                       <img
-                        src={image.image_url || image.thumbnail_url}
+                        src={image.image_url || "/placeholder.svg"}
                         alt={image.title}
                         className="w-full h-full object-contain select-none pointer-events-none"
                         draggable={false}
@@ -418,15 +486,16 @@ export default function PhotoDetailPage() {
 
                       <div className="absolute inset-0 pointer-events-none select-none" style={{ userSelect: "none" }}>
                         <div className="relative w-full h-full overflow-hidden">
-                          {Array.from({ length: 35 }).map((_, i) => (
+                          {Array.from({ length: 60 }).map((_, i) => (
                             <div
                               key={i}
-                              className="absolute text-white/15 font-bold text-2xl transform -rotate-45 select-none pointer-events-none"
+                              className="absolute text-white/12 font-bold text-xl transform -rotate-45 select-none pointer-events-none"
                               style={{
-                                left: `${(i % 7) * 14.3}%`,
-                                top: `${Math.floor(i / 7) * 20}%`,
-                                textStroke: "1px rgba(255,255,255,0.1)",
-                                WebkitTextStroke: "1px rgba(255,255,255,0.1)",
+                                left: `${(i % 10) * 10}%`,
+                                top: `${Math.floor(i / 10) * 16.67}%`,
+                                textStroke: "1px rgba(255,255,255,0.08)",
+                                WebkitTextStroke: "1px rgba(255,255,255,0.08)",
+                                textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                                 userSelect: "none",
                                 WebkitUserSelect: "none",
                                 MozUserSelect: "none",
@@ -463,7 +532,7 @@ export default function PhotoDetailPage() {
                       >
                         <div className="relative w-full h-full">
                           <img
-                            src={image.image_url || image.thumbnail_url}
+                            src={image.image_url || "/placeholder.svg"}
                             alt="Quality Preview"
                             className="w-full h-full object-cover"
                             style={{
@@ -499,28 +568,30 @@ export default function PhotoDetailPage() {
             </Card>
 
             <div className="text-center text-sm text-muted-foreground">
-              {show360Viewer ? (
+              {show360Viewer && image.category_name !== "Fisheye" ? (
                 <span className="text-primary font-medium">
-                  Interactive 360° View • Drag to look around • Scroll to zoom • Double-click to zoom • Click fullscreen
-                  for immersive experience
+                  Interactive 360° View • Original Resolution • Drag to look around • Scroll to zoom • Double-click to
+                  zoom • Click fullscreen for immersive experience
                 </span>
               ) : (
                 <>
-                  Preview • Watermarked • Full resolution available after purchase
+                  Original Resolution Preview • Watermarked • Full commercial license available after purchase
                   {showQualityPreview && (
                     <span className="block mt-1 text-primary font-medium">
-                      Move mouse to explore original quality • Quality preview shows actual image detail
+                      Move mouse to explore original quality • This is the actual full-resolution image
                     </span>
                   )}
                   {!showQualityPreview && (
                     <span className="block mt-1">
-                      Click HQ Preview to see original quality or 360° Interactive View for immersive experience
+                      {image.category_name === "Fisheye"
+                        ? "Click HQ Preview to inspect details of this fisheye image"
+                        : "Click HQ Preview to inspect details or 360° Interactive View for immersive experience"}
                     </span>
                   )}
                 </>
               )}
               <span className="block mt-1 text-xs text-red-600">
-                ⚠️ Preview images are protected - Purchase required for full resolution download
+                ⚠️ Original images are protected with watermarks - Purchase required for clean, commercial-use files
               </span>
             </div>
           </div>

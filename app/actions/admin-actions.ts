@@ -3,18 +3,118 @@
 import { createNeonClient } from "@/lib/neon/client"
 import { revalidatePath } from "next/cache"
 
+function compressBase64Image(base64String: string, maxSizeKB = 500): Promise<string> {
+  return new Promise((resolve) => {
+    try {
+      // If it's already a placeholder or external URL, return as-is
+      if (!base64String.startsWith("data:image/")) {
+        resolve(base64String)
+        return
+      }
+
+      const sizeInKB = (base64String.length * 3) / 4 / 1024
+      console.log(`[v0] Original image size: ${sizeInKB.toFixed(1)}KB`)
+
+      // If image is already small enough, return as-is
+      if (sizeInKB <= maxSizeKB) {
+        resolve(base64String)
+        return
+      }
+
+      // Create image element to get dimensions
+      const img = new Image()
+      img.onload = () => {
+        // Create canvas for compression
+        const canvas = document.createElement("canvas")
+        const ctx = canvas.getContext("2d")!
+
+        // Calculate new dimensions (reduce by ratio to target size)
+        const compressionRatio = Math.sqrt(maxSizeKB / sizeInKB)
+        const newWidth = Math.floor(img.width * compressionRatio)
+        const newHeight = Math.floor(img.height * compressionRatio)
+
+        canvas.width = newWidth
+        canvas.height = newHeight
+
+        // Draw and compress
+        ctx.drawImage(img, 0, 0, newWidth, newHeight)
+
+        // Try different quality levels until we get under the size limit
+        let quality = 0.8
+        let compressedBase64 = canvas.toDataURL("image/jpeg", quality)
+
+        while ((compressedBase64.length * 3) / 4 / 1024 > maxSizeKB && quality > 0.1) {
+          quality -= 0.1
+          compressedBase64 = canvas.toDataURL("image/jpeg", quality)
+        }
+
+        const finalSizeKB = (compressedBase64.length * 3) / 4 / 1024
+        console.log(`[v0] Compressed image size: ${finalSizeKB.toFixed(1)}KB (quality: ${quality})`)
+
+        resolve(compressedBase64)
+      }
+
+      img.onerror = () => {
+        console.error("[v0] Error loading image for compression")
+        resolve(base64String) // Return original if compression fails
+      }
+
+      img.src = base64String
+    } catch (error) {
+      console.error("[v0] Error compressing image:", error)
+      resolve(base64String) // Return original if compression fails
+    }
+  })
+}
+
+function handleDatabaseError(error: any): { success: false; error: string } {
+  console.error("[v0] Database error:", error)
+
+  // Handle HTML error responses (like "Request Entity Too Large")
+  if (typeof error === "string" && error.includes("Request")) {
+    return {
+      success: false,
+      error: "Image too large. Please use a smaller image (max 500KB).",
+    }
+  }
+
+  // Handle JSON parsing errors
+  if (error.message && error.message.includes("Unexpected token")) {
+    return {
+      success: false,
+      error: "Server error: Image may be too large. Please try a smaller image.",
+    }
+  }
+
+  return {
+    success: false,
+    error: error instanceof Error ? error.message : "Database operation failed",
+  }
+}
+
 export async function createImageWithCategory(formData: FormData) {
   try {
+    const rawImageUrl = formData.get("file_url") as string
+    const rawThumbnailUrl = formData.get("thumbnail_url") as string
+
+    const compressedImageUrl = await compressBase64Image(rawImageUrl, 500)
+    const compressedThumbnailUrl = await compressBase64Image(rawThumbnailUrl, 200)
+
     const imageData = {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
       category: formData.get("category") as string,
       price: Number.parseFloat(formData.get("price") as string),
-      image_url: formData.get("file_url") as string,
-      thumbnail_url: formData.get("thumbnail_url") as string,
+      image_url: compressedImageUrl,
+      thumbnail_url: compressedThumbnailUrl,
     }
 
-    console.log("[v0] Starting image creation with data:", imageData)
+    console.log("[v0] Starting image creation with data:", {
+      ...imageData,
+      image_url: imageData.image_url.substring(0, 50) + "...",
+      thumbnail_url: imageData.thumbnail_url.substring(0, 50) + "...",
+    })
+
     const sql = createNeonClient()
 
     console.log("[v0] Looking up category:", imageData.category)
@@ -46,15 +146,11 @@ export async function createImageWithCategory(formData: FormData) {
       RETURNING *
     `
 
-    console.log("[v0] Image created successfully:", result)
+    console.log("[v0] Image created successfully with ID:", result[0]?.id)
     revalidatePath("/simple-admin")
     return { success: true, data: result }
   } catch (error) {
-    console.error("[v0] Server action error:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    }
+    return handleDatabaseError(error)
   }
 }
 
@@ -120,11 +216,23 @@ export async function getCategories() {
     const result = await sql`
       SELECT id, name, description, active
       FROM categories
-      WHERE active = true
-      ORDER BY name ASC
+      WHERE active = true AND (name = 'equirectangular' OR name = 'fisheye')
+      ORDER BY 
+        CASE 
+          WHEN name = 'equirectangular' THEN 1
+          WHEN name = 'fisheye' THEN 2
+          ELSE 3
+        END
     `
 
-    return { success: true, data: result }
+    // Map the categories to use display names
+    const mappedResult = result.map((category) => ({
+      ...category,
+      display_name:
+        category.name === "equirectangular" ? "360 images" : category.name === "fisheye" ? "180 images" : category.name,
+    }))
+
+    return { success: true, data: mappedResult }
   } catch (error) {
     console.error("[v0] Get categories error:", error)
     return {
@@ -158,27 +266,29 @@ export async function deleteImage(imageId: string) {
     revalidatePath("/simple-admin")
     return { success: true, data: result[0] }
   } catch (error) {
-    console.error("[v0] Delete image error:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    }
+    return handleDatabaseError(error)
   }
 }
 
 export async function updateImage(formData: FormData) {
   try {
     const imageId = formData.get("id") as string
+    const rawImageUrl = formData.get("file_url") as string
+    const rawThumbnailUrl = formData.get("thumbnail_url") as string
+
+    const compressedImageUrl = await compressBase64Image(rawImageUrl, 500)
+    const compressedThumbnailUrl = await compressBase64Image(rawThumbnailUrl, 200)
+
     const imageData = {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
       category: formData.get("category") as string,
       price: Number.parseFloat(formData.get("price") as string),
-      image_url: formData.get("file_url") as string,
-      thumbnail_url: formData.get("thumbnail_url") as string,
+      image_url: compressedImageUrl,
+      thumbnail_url: compressedThumbnailUrl,
     }
 
-    console.log("[v0] Starting image update for ID:", imageId, "with data:", imageData)
+    console.log("[v0] Starting image update for ID:", imageId)
     const sql = createNeonClient()
 
     // Look up or create category
@@ -219,15 +329,11 @@ export async function updateImage(formData: FormData) {
       return { success: false, error: "Image not found" }
     }
 
-    console.log("[v0] Image updated successfully:", result[0])
+    console.log("[v0] Image updated successfully:", result[0].id)
     revalidatePath("/simple-admin")
     return { success: true, data: result[0] }
   } catch (error) {
-    console.error("[v0] Update image error:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    }
+    return handleDatabaseError(error)
   }
 }
 
@@ -251,11 +357,7 @@ export async function toggleImageStatus(imageId: string, field: "active" | "feat
     revalidatePath("/simple-admin")
     return { success: true, data: result[0] }
   } catch (error) {
-    console.error("[v0] Toggle image status error:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    }
+    return handleDatabaseError(error)
   }
 }
 
@@ -279,11 +381,7 @@ export async function updateOrderStatus(orderId: string, newStatus: string) {
     revalidatePath("/simple-admin")
     return { success: true, data: result[0] }
   } catch (error) {
-    console.error("[v0] Update order status error:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    }
+    return handleDatabaseError(error)
   }
 }
 
@@ -327,10 +425,70 @@ export async function toggleUserAdmin(userId: string, isAdmin: boolean) {
     revalidatePath("/simple-admin")
     return { success: true, data: result[0] }
   } catch (error) {
-    console.error("[v0] Toggle user admin error:", error)
+    return handleDatabaseError(error)
+  }
+}
+
+export async function cleanupSampleImages() {
+  try {
+    console.log("[v0] Starting sample image cleanup...")
+    const sql = createNeonClient()
+
+    // Delete images that are clearly sample/placeholder data
+    const result = await sql`
+      DELETE FROM images 
+      WHERE 
+        image_url LIKE '%placeholder%' OR
+        image_url LIKE '%example%' OR
+        image_url LIKE '%sample%' OR
+        image_url LIKE '%demo%' OR
+        title LIKE '%sample%' OR
+        title LIKE '%example%' OR
+        title LIKE '%demo%' OR
+        title LIKE '%placeholder%' OR
+        description LIKE '%sample%' OR
+        description LIKE '%example%' OR
+        description LIKE '%demo%' OR
+        description LIKE '%placeholder%'
+      RETURNING id, title
+    `
+
+    console.log(
+      `[v0] Deleted ${result.length} sample images:`,
+      result.map((img) => ({ id: img.id, title: img.title })),
+    )
+
+    revalidatePath("/simple-admin")
+    revalidatePath("/browse")
+    revalidatePath("/gallery")
+
     return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      success: true,
+      data: result,
+      message: `Successfully deleted ${result.length} sample images`,
     }
+  } catch (error) {
+    return handleDatabaseError(error)
+  }
+}
+
+export async function getDatabaseStats() {
+  try {
+    const sql = createNeonClient()
+
+    const imageCount = await sql`SELECT COUNT(*) as count FROM images WHERE active = true`
+    const categoryCount = await sql`SELECT COUNT(*) as count FROM categories WHERE active = true`
+    const orderCount = await sql`SELECT COUNT(*) as count FROM orders`
+
+    return {
+      success: true,
+      data: {
+        images: imageCount[0].count,
+        categories: categoryCount[0].count,
+        orders: orderCount[0].count,
+      },
+    }
+  } catch (error) {
+    return handleDatabaseError(error)
   }
 }

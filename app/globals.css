@@ -4,76 +4,76 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated to minimalistic, futuristic design tokens */
+  /* Updated to elegant emerald-based design tokens for premium photography marketplace */
   --background: #ffffff;
-  --foreground: #374151;
-  --card: #fefce8;
-  --card-foreground: #374151;
+  --foreground: #475569;
+  --card: #f1f5f9;
+  --card-foreground: #000000;
   --popover: #ffffff;
-  --popover-foreground: #374151;
-  --primary: #d97706;
+  --popover-foreground: #475569;
+  --primary: #059669;
   --primary-foreground: #ffffff;
-  --secondary: #f97316;
+  --secondary: #10b981;
   --secondary-foreground: #ffffff;
-  --muted: #fefce8;
-  --muted-foreground: #374151;
-  --accent: #f97316;
+  --muted: #f1f5f9;
+  --muted-foreground: #475569;
+  --accent: #10b981;
   --accent-foreground: #ffffff;
-  --destructive: #be123c;
+  --destructive: #ff4c4c;
   --destructive-foreground: #ffffff;
-  --border: #e5e7eb;
-  --input: #fefce8;
-  --ring: rgba(217, 119, 6, 0.5);
-  --chart-1: #d97706;
-  --chart-2: #f97316;
-  --chart-3: #ea580c;
-  --chart-4: #be123c;
-  --chart-5: #4b5563;
+  --border: #e2e8f0;
+  --input: #f1f5f9;
+  --ring: rgba(5, 150, 105, 0.5);
+  --chart-1: #059669;
+  --chart-2: #10b981;
+  --chart-3: #475569;
+  --chart-4: #ffffff;
+  --chart-5: #f1f5f9;
   --radius: 0.5rem;
   --sidebar: #ffffff;
-  --sidebar-foreground: #374151;
-  --sidebar-primary: #fefce8;
-  --sidebar-primary-foreground: #374151;
-  --sidebar-accent: #f97316;
+  --sidebar-foreground: #475569;
+  --sidebar-primary: #059669;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #10b981;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #e5e7eb;
-  --sidebar-ring: rgba(217, 119, 6, 0.5);
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: rgba(5, 150, 105, 0.5);
 }
 
 .dark {
-  /* Updated dark mode tokens for futuristic aesthetic */
-  --background: #0f0f0f;
-  --foreground: #f5f5f5;
-  --card: #1a1a1a;
-  --card-foreground: #f5f5f5;
-  --popover: #1a1a1a;
-  --popover-foreground: #f5f5f5;
-  --primary: #f59e0b;
-  --primary-foreground: #0f0f0f;
-  --secondary: #fb923c;
-  --secondary-foreground: #0f0f0f;
-  --muted: #262626;
-  --muted-foreground: #a3a3a3;
-  --accent: #fb923c;
-  --accent-foreground: #0f0f0f;
-  --destructive: #dc2626;
-  --destructive-foreground: #f5f5f5;
-  --border: #404040;
-  --input: #1a1a1a;
-  --ring: rgba(245, 158, 11, 0.3);
-  --chart-1: #f59e0b;
-  --chart-2: #fb923c;
-  --chart-3: #ea580c;
-  --chart-4: #dc2626;
-  --chart-5: #6b7280;
-  --sidebar: #1a1a1a;
-  --sidebar-foreground: #f5f5f5;
-  --sidebar-primary: #262626;
-  --sidebar-primary-foreground: #f5f5f5;
-  --sidebar-accent: #fb923c;
-  --sidebar-accent-foreground: #0f0f0f;
-  --sidebar-border: #404040;
-  --sidebar-ring: rgba(245, 158, 11, 0.3);
+  /* Updated dark mode tokens for elegant gallery aesthetic */
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --card: #1e293b;
+  --card-foreground: #f1f5f9;
+  --popover: #1e293b;
+  --popover-foreground: #f1f5f9;
+  --primary: #10b981;
+  --primary-foreground: #0f172a;
+  --secondary: #059669;
+  --secondary-foreground: #f1f5f9;
+  --muted: #334155;
+  --muted-foreground: #94a3b8;
+  --accent: #10b981;
+  --accent-foreground: #0f172a;
+  --destructive: #ff4c4c;
+  --destructive-foreground: #f1f5f9;
+  --border: #334155;
+  --input: #1e293b;
+  --ring: rgba(16, 185, 129, 0.3);
+  --chart-1: #10b981;
+  --chart-2: #059669;
+  --chart-3: #475569;
+  --chart-4: #f1f5f9;
+  --chart-5: #334155;
+  --sidebar: #1e293b;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #334155;
+  --sidebar-primary-foreground: #f1f5f9;
+  --sidebar-accent: #10b981;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #334155;
+  --sidebar-ring: rgba(16, 185, 129, 0.3);
 }
 
 @theme inline {
@@ -125,7 +125,7 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 
-  /* Added futuristic typography and spacing utilities */
+  /* Added elegant gallery typography and spacing utilities */
   .text-balance {
     text-wrap: balance;
   }
@@ -134,48 +134,62 @@
     text-wrap: pretty;
   }
 
-  /* Geometric grid patterns for futuristic aesthetic */
-  .grid-pattern {
-    background-image: linear-gradient(rgba(217, 119, 6, 0.1) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(217, 119, 6, 0.1) 1px, transparent 1px);
-    background-size: 20px 20px;
+  /* Gallery-style frame effects for premium presentation */
+  .gallery-frame {
+    background: linear-gradient(145deg, #ffffff, #f8fafc);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), inset 0 1px 0
+      rgba(255, 255, 255, 0.1);
   }
 
-  /* Subtle glow effects for interactive elements */
+  .gallery-frame:hover {
+    border-color: rgba(16, 185, 129, 0.3);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px
+      rgba(16, 185, 129, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* Elegant glow effects for interactive elements */
   .glow-primary {
-    box-shadow: 0 0 20px rgba(217, 119, 6, 0.3);
+    box-shadow: 0 0 20px rgba(5, 150, 105, 0.3);
   }
 
   .glow-accent {
-    box-shadow: 0 0 15px rgba(249, 115, 22, 0.2);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+  }
+
+  /* Premium backdrop for preview modal */
+  .premium-backdrop {
+    background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.95) 0%, rgba(0, 0, 0, 0.98) 100%);
+    backdrop-filter: blur(8px);
   }
 }
 
-/* Added custom animations for futuristic feel */
-@keyframes float {
+/* Added elegant animations for gallery presentation */
+@keyframes elegant-float {
   0%,
   100% {
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-2px);
   }
 }
 
-@keyframes pulse-glow {
+@keyframes frame-glow {
   0%,
   100% {
-    box-shadow: 0 0 5px rgba(217, 119, 6, 0.3);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
   50% {
-    box-shadow: 0 0 20px rgba(217, 119, 6, 0.6);
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1), 0 4px 6px -2px rgba(16, 185, 129, 0.05), 0 0 0 1px
+      rgba(16, 185, 129, 0.1);
   }
 }
 
-.animate-float {
-  animation: float 6s ease-in-out infinite;
+.animate-elegant-float {
+  animation: elegant-float 4s ease-in-out infinite;
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+.animate-frame-glow {
+  animation: frame-glow 3s ease-in-out infinite;
 }

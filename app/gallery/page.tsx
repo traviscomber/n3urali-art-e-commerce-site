@@ -78,7 +78,7 @@ export default function GalleryPage() {
         <img
           src={image.preview_url || "/placeholder.svg"}
           alt={image.title}
-          className="w-full h-full object-cover bg-muted/20 group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-contain bg-muted/20 group-hover:scale-105 transition-transform duration-300"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="absolute bottom-4 left-4 right-4 flex gap-2">
@@ -254,7 +254,7 @@ export default function GalleryPage() {
                       <img
                         src={image.preview_url || "/placeholder.svg"}
                         alt={image.title}
-                        className="w-full h-full object-cover bg-muted/10 transition-transform duration-300 group-hover:scale-105"
+                        className="w-full h-full object-contain bg-muted/10 transition-transform duration-300 group-hover:scale-105"
                       />
 
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/80 transition-all duration-300 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100">

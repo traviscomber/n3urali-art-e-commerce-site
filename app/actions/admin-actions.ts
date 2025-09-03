@@ -93,6 +93,20 @@ function handleDatabaseError(error: any): { success: false; error: string } {
 }
 
 export async function createImageWithCategory(formData: FormData) {
+  // Get default PRO license
+  const sql = createNeonClient()
+  const defaultLicense = await sql`
+    SELECT id FROM licenses WHERE name = 'PRO' LIMIT 1
+  `
+
+  if (defaultLicense.length > 0) {
+    formData.set("license_id", defaultLicense[0].id)
+  }
+
+  return createImageWithLicense(formData)
+}
+
+export async function createImageWithLicense(formData: FormData) {
   try {
     const rawImageUrl = formData.get("file_url") as string
     const rawThumbnailUrl = formData.get("thumbnail_url") as string
@@ -104,12 +118,14 @@ export async function createImageWithCategory(formData: FormData) {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
       category: formData.get("category") as string,
-      price: Number.parseFloat(formData.get("price") as string),
+      license_id: formData.get("license_id") as string,
       image_url: compressedImageUrl,
       thumbnail_url: compressedThumbnailUrl,
+      resolution: (formData.get("resolution") as string) || "4096x4096",
+      format: (formData.get("format") as string) || "JPG",
     }
 
-    console.log("[v0] Starting image creation with data:", {
+    console.log("[v0] Starting image creation with license:", {
       ...imageData,
       image_url: imageData.image_url.substring(0, 50) + "...",
       thumbnail_url: imageData.thumbnail_url.substring(0, 50) + "...",
@@ -117,6 +133,7 @@ export async function createImageWithCategory(formData: FormData) {
 
     const sql = createNeonClient()
 
+    // Look up category
     console.log("[v0] Looking up category:", imageData.category)
     const categoryResult = await sql`
       SELECT id FROM categories WHERE name = ${imageData.category} LIMIT 1
@@ -132,17 +149,100 @@ export async function createImageWithCategory(formData: FormData) {
         RETURNING id
       `
       categoryId = newCategoryResult[0].id
-      console.log("[v0] Created new category with ID:", categoryId)
     } else {
       categoryId = categoryResult[0].id
-      console.log("[v0] Found existing category with ID:", categoryId)
     }
 
-    console.log("[v0] Inserting image with category_id:", categoryId)
+    // Get license price
+    const licenseResult = await sql`
+      SELECT price FROM licenses WHERE id = ${imageData.license_id} LIMIT 1
+    `
+
+    if (licenseResult.length === 0) {
+      return { success: false, error: "Invalid license selected" }
+    }
+
+    const price = licenseResult[0].price
+
+    console.log("[v0] Inserting image with license_id:", imageData.license_id, "price:", price)
     const result = await sql`
-      INSERT INTO images (title, description, category_id, price, image_url, thumbnail_url, active, featured)
-      VALUES (${imageData.title}, ${imageData.description}, ${categoryId}, ${imageData.price}, 
-              ${imageData.image_url}, ${imageData.thumbnail_url}, true, false)
+      INSERT INTO images (title, description, category_id, license_id, price, image_url, thumbnail_url, 
+                         resolution, format, active, featured)
+      VALUES (${imageData.title}, ${imageData.description}, ${categoryId}, ${imageData.license_id}, 
+              ${price}, ${imageData.image_url}, ${imageData.thumbnail_url}, 
+              ${imageData.resolution}, ${imageData.format}, true, false)
+      RETURNING *
+    `
+
+    console.log("[v0] Image created successfully with ID:", result[0]?.id)
+    revalidatePath("/simple-admin")
+    return { success: true, data: result }
+  } catch (error) {
+    return handleDatabaseError(error)
+  }
+}
+
+export async function createImageWithCategoryObject(imageData: {
+  title: string
+  description: string
+  category_name: string
+  rights_type: string
+  image_url: string
+  thumbnail_url: string
+  price: number
+}) {
+  try {
+    console.log("[v0] Starting image creation with object data:", {
+      ...imageData,
+      image_url: imageData.image_url.substring(0, 50) + "...",
+      thumbnail_url: imageData.thumbnail_url.substring(0, 50) + "...",
+    })
+
+    const sql = createNeonClient()
+
+    // Look up category
+    console.log("[v0] Looking up category:", imageData.category_name)
+    const categoryResult = await sql`
+      SELECT id FROM categories WHERE name = ${imageData.category_name} LIMIT 1
+    `
+
+    let categoryId: string
+
+    if (categoryResult.length === 0) {
+      console.log("[v0] Category not found, creating new category:", imageData.category_name)
+      const newCategoryResult = await sql`
+        INSERT INTO categories (name, description, active)
+        VALUES (${imageData.category_name}, ${"Auto-created category for " + imageData.category_name}, true)
+        RETURNING id
+      `
+      categoryId = newCategoryResult[0].id
+    } else {
+      categoryId = categoryResult[0].id
+    }
+
+    // Get default PRO license
+    const defaultLicense = await sql`
+      SELECT id FROM licenses WHERE name = 'PRO' LIMIT 1
+    `
+
+    const licenseId = defaultLicense.length > 0 ? defaultLicense[0].id : null
+
+    if (!licenseId) {
+      return { success: false, error: "No default license found" }
+    }
+
+    // Compress images
+    const compressedImageUrl = await compressBase64Image(imageData.image_url, 500)
+    const compressedThumbnailUrl = await compressBase64Image(imageData.thumbnail_url, 200)
+
+    console.log("[v0] Inserting image with license_id:", licenseId, "price:", imageData.price)
+    const result = await sql`
+      INSERT INTO images (title, description, category_id, license_id, price, image_url, thumbnail_url, 
+                         active, featured, metadata)
+      VALUES (${imageData.title}, ${imageData.description}, ${categoryId}, ${licenseId}, 
+              ${imageData.price}, ${compressedImageUrl}, ${compressedThumbnailUrl}, 
+              true, false, 
+              ${JSON.stringify({ rights_type: imageData.rights_type })})
       RETURNING *
     `
 
@@ -159,9 +259,11 @@ export async function getImages() {
     const sql = createNeonClient()
 
     const result = await sql`
-      SELECT i.*, c.name as category_name, c.id as category_id
+      SELECT i.*, c.name as category_name, c.id as category_id,
+             l.name as license_name, l.description as license_description
       FROM images i
       LEFT JOIN categories c ON i.category_id = c.id
+      LEFT JOIN licenses l ON i.license_id = l.id
       ORDER BY i.created_at DESC
     `
 
@@ -175,29 +277,63 @@ export async function getImages() {
   }
 }
 
-export async function getOrders() {
+export async function getOrders(userEmail?: string) {
   try {
     const sql = createNeonClient()
 
-    const result = await sql`
-      SELECT o.*, 
-             json_agg(
-               json_build_object(
-                 'id', oi.id,
-                 'license_name', l.name,
-                 'license_id', oi.license_id,
-                 'price', oi.price,
-                 'image_title', i.title,
-                 'image_thumbnail', i.thumbnail_url
-               )
-             ) as order_items
-      FROM orders o
-      LEFT JOIN order_items oi ON o.id = oi.order_id
-      LEFT JOIN images i ON oi.image_id = i.id
-      LEFT JOIN licenses l ON oi.license_id = l.id
-      GROUP BY o.id
-      ORDER BY o.created_at DESC
-    `
+    let result
+    if (userEmail) {
+      // Filter orders by user email for regular users
+      result = await sql`
+        SELECT o.*, 
+               json_agg(
+                 json_build_object(
+                   'id', oi.id,
+                   'license_name', l.name,
+                   'license_id', oi.license_id,
+                   'price', oi.price,
+                   'image_id', oi.image_id,
+                   'images', json_build_object(
+                     'title', i.title,
+                     'thumbnail_url', i.thumbnail_url,
+                     'download_count', i.download_count
+                   )
+                 )
+               ) as order_items
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        LEFT JOIN images i ON oi.image_id = i.id
+        LEFT JOIN licenses l ON oi.license_id = l.id
+        WHERE o.user_email = ${userEmail}
+        GROUP BY o.id
+        ORDER BY o.created_at DESC
+      `
+    } else {
+      // Return all orders for admin users
+      result = await sql`
+        SELECT o.*, 
+               json_agg(
+                 json_build_object(
+                   'id', oi.id,
+                   'license_name', l.name,
+                   'license_id', oi.license_id,
+                   'price', oi.price,
+                   'image_id', oi.image_id,
+                   'images', json_build_object(
+                     'title', i.title,
+                     'thumbnail_url', i.thumbnail_url,
+                     'download_count', i.download_count
+                   )
+                 )
+               ) as order_items
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        LEFT JOIN images i ON oi.image_id = i.id
+        LEFT JOIN licenses l ON oi.license_id = l.id
+        GROUP BY o.id
+        ORDER BY o.created_at DESC
+      `
+    }
 
     return { success: true, data: result }
   } catch (error) {
@@ -285,9 +421,12 @@ export async function updateImage(formData: FormData) {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
       category: formData.get("category") as string,
+      license_id: formData.get("license_id") as string,
       price: Number.parseFloat(formData.get("price") as string),
       image_url: compressedImageUrl,
       thumbnail_url: compressedThumbnailUrl,
+      resolution: (formData.get("resolution") as string) || "4096x4096",
+      format: (formData.get("format") as string) || "JPG",
     }
 
     console.log("[v0] Starting image update for ID:", imageId)
@@ -319,9 +458,12 @@ export async function updateImage(formData: FormData) {
       SET title = ${imageData.title}, 
           description = ${imageData.description}, 
           category_id = ${categoryId}, 
+          license_id = ${imageData.license_id},
           price = ${imageData.price}, 
           image_url = ${imageData.image_url}, 
           thumbnail_url = ${imageData.thumbnail_url},
+          resolution = ${imageData.resolution},
+          format = ${imageData.format},
           updated_at = NOW()
       WHERE id = ${imageId}
       RETURNING *
@@ -492,5 +634,33 @@ export async function getDatabaseStats() {
     }
   } catch (error) {
     return handleDatabaseError(error)
+  }
+}
+
+export async function getLicenses() {
+  try {
+    const sql = createNeonClient()
+
+    const result = await sql`
+      SELECT id, name, description, price, active
+      FROM licenses
+      WHERE active = true
+      ORDER BY price ASC
+    `
+
+    console.log(
+      "[v0] getLicenses returning",
+      result.length,
+      "licenses:",
+      result.map((l) => l.name),
+    )
+
+    return { success: true, data: result }
+  } catch (error) {
+    console.error("[v0] Get licenses error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
   }
 }

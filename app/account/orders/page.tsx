@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { ShoppingBag, Eye, Calendar, Package, Download, CreditCard } from "lucide-react"
 import { toast } from "sonner"
 import { getOrders } from "@/app/actions/admin-actions"
+import { useAuth } from "@/lib/contexts/auth-context"
 
 interface OrderItem {
   id: string
@@ -35,19 +36,41 @@ interface Order {
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
+  const { user, isAuthenticated } = useAuth()
+
+  console.log("[v0] OrdersPage component mounting...")
+  console.log("[v0] Auth state - isAuthenticated:", isAuthenticated, "user:", user)
 
   useEffect(() => {
+    console.log("[v0] OrdersPage useEffect starting...")
+
     const fetchOrders = async () => {
       try {
-        const result = await getOrders()
+        const userEmail = user?.email
+        if (!isAuthenticated || !userEmail) {
+          console.log(
+            "[v0] User not authenticated, skipping orders fetch - isAuthenticated:",
+            isAuthenticated,
+            "userEmail:",
+            userEmail,
+          )
+          setLoading(false)
+          return
+        }
+
+        console.log("[v0] Fetching orders for user:", userEmail)
+        const result = await getOrders(userEmail)
+        console.log("[v0] getOrders result:", result)
+
         if (result.success && result.data) {
           setOrders(result.data)
+          console.log("[v0] Loaded", result.data.length, "orders")
         } else {
-          console.error("Failed to fetch orders:", result.error)
+          console.error("[v0] Failed to fetch orders:", result.error)
           toast.error("Failed to load orders")
         }
       } catch (error) {
-        console.error("Error fetching orders:", error)
+        console.error("[v0] Error fetching orders:", error)
         toast.error("Failed to load orders")
       } finally {
         setLoading(false)
@@ -55,7 +78,7 @@ export default function OrdersPage() {
     }
 
     fetchOrders()
-  }, [])
+  }, [user, isAuthenticated])
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
@@ -93,7 +116,24 @@ export default function OrdersPage() {
     // In a real app, this would navigate to order details page
   }
 
+  if (!isAuthenticated) {
+    console.log("[v0] Showing unauthenticated message")
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card>
+          <CardContent className="text-center py-12">
+            <ShoppingBag className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Please sign in</h3>
+            <p className="text-muted-foreground mb-4">You need to be signed in to view your orders</p>
+            <Button onClick={() => (window.location.href = "/")}>Go to Home</Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   if (loading) {
+    console.log("[v0] Showing loading state")
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-4">
@@ -112,6 +152,8 @@ export default function OrdersPage() {
       </div>
     )
   }
+
+  console.log("[v0] Rendering orders page with", orders.length, "orders")
 
   return (
     <div className="container mx-auto px-4 py-8">

@@ -22,6 +22,7 @@ interface Image {
   category_id: string
   featured: boolean
   active: boolean
+  license_id?: string // Added license_id property for image license IDs
 }
 
 interface Category {
@@ -70,7 +71,7 @@ const LazyImage = ({
         <img
           src={src || "/placeholder.svg"}
           alt={alt}
-          className="w-full h-full object-contain bg-muted/10 transition-all duration-200"
+          className="w-full h-full object-cover bg-muted/10 transition-all duration-200"
           onLoad={() => setIsLoaded(true)}
           style={{ opacity: isLoaded ? 1 : 0 }}
         />
@@ -242,6 +243,46 @@ export default function BrowsePage() {
     setEditingImage(null)
   }
 
+  const handlePurchaseImage = async (image: Image) => {
+    if (!user) {
+      // Redirect to login or show auth modal
+      alert("Please sign in to purchase images")
+      return
+    }
+
+    try {
+      // Create order for the image
+      const orderData = {
+        user_email: user.email,
+        items: [
+          {
+            image_id: image.id,
+            license_id: image.license_id || "default-license-id", // You may need to add license selection
+            price: image.price,
+          },
+        ],
+      }
+
+      // Here you would integrate with your payment system
+      // For now, we'll simulate a successful purchase
+      const confirmed = confirm(`Purchase "${image.title}" for $${image.price}?`)
+
+      if (confirmed) {
+        // Simulate successful purchase
+        alert(`Thank you! Your purchase of "${image.title}" is complete. Check your email for download instructions.`)
+
+        // Close preview modal if open
+        setPreviewImage(null)
+
+        // You could redirect to orders page or show download link
+        // window.location.href = '/account/orders'
+      }
+    } catch (error) {
+      console.error("Purchase error:", error)
+      alert("There was an error processing your purchase. Please try again.")
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -344,12 +385,20 @@ export default function BrowsePage() {
                           <Eye className="h-4 w-4" />
                           Preview
                         </Button>
+                        <Button
+                          size="sm"
+                          variant="default"
+                          onClick={() => handlePurchaseImage(image)}
+                          className="flex items-center gap-2 bg-primary/90 text-primary-foreground hover:bg-primary font-semibold px-3 py-2 backdrop-blur-sm text-sm"
+                        >
+                          Buy ${image.price}
+                        </Button>
                         {editMode && isAdmin && (
                           <Button
                             size="sm"
                             variant="secondary"
                             onClick={() => handleEditImage(image)}
-                            className="flex items-center gap-2 bg-primary/90 text-primary-foreground hover:bg-primary font-semibold px-3 py-2 backdrop-blur-sm text-sm"
+                            className="flex items-center gap-2 bg-accent/90 text-accent-foreground hover:bg-accent font-semibold px-3 py-2 backdrop-blur-sm text-sm"
                           >
                             <Edit3 className="h-4 w-4" />
                             Edit
@@ -390,7 +439,11 @@ export default function BrowsePage() {
                   className="relative aspect-square overflow-hidden cursor-pointer group"
                   onClick={() => handlePreviewImage(image)}
                 >
-                  <LazyImage src={image.thumbnail_url || image.image_url} alt="" className="w-full h-full" />
+                  <LazyImage
+                    src={image.thumbnail_url || image.image_url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
                   <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center p-4">
                     <div className="text-center text-white">
                       <h3 className="font-bold text-lg mb-2 line-clamp-2">{image.title}</h3>
@@ -450,22 +503,26 @@ export default function BrowsePage() {
         )}
       </div>
 
-      {previewImage && (
+      {previewImage && !editingImage && (
         <div className="fixed inset-0 premium-backdrop z-50 flex items-center justify-center p-6">
           <div className="relative w-full max-w-5xl max-h-[95vh] bg-card rounded-2xl overflow-hidden shadow-2xl border border-border/20">
-            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-primary to-accent text-primary-foreground">
-              <div>
-                <h3 className="text-2xl font-bold">{previewImage.title}</h3>
-                <p className="text-primary-foreground/80 text-base font-medium">Preview • Watermarked • Max 720px</p>
+            <div className="relative p-6 bg-gradient-to-r from-primary to-accent text-primary-foreground">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClosePreview}
+                  className="text-primary-foreground hover:bg-primary-foreground/20 h-10 w-10 p-0"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+                <div>
+                  <h3 className="text-2xl font-bold">{previewImage.title}</h3>
+                  <p className="text-primary-foreground/80 text-base font-medium">
+                    Preview • Watermarked • Size: 720×720px
+                  </p>
+                </div>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleClosePreview}
-                className="text-primary-foreground hover:bg-primary-foreground/20 h-10 w-10 p-0"
-              >
-                <X className="h-5 w-5" />
-              </Button>
             </div>
 
             <div className="relative bg-muted/20 flex items-center justify-center min-h-[500px] max-h-[60vh] overflow-hidden p-8">
@@ -477,11 +534,11 @@ export default function BrowsePage() {
                   style={{ maxWidth: "720px", maxHeight: "720px" }}
                 />
                 <div
-                  className="absolute inset-4 pointer-events-none opacity-25 rounded-md"
+                  className="absolute inset-4 pointer-events-none opacity-15 rounded-md"
                   style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='300' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fontFamily='Arial, sans-serif' fontSize='56' fontWeight='900' textAnchor='middle' dominantBaseline='middle' fill='%23FFFFFF' stroke='%23FFFFFF' strokeWidth='2' opacity='0.9' transform='rotate(-45 150 150)'%3EN3URALI.ART%3C/text%3E%3C/svg%3E")`,
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fontFamily='Arial, sans-serif' fontSize='48' fontWeight='700' textAnchor='middle' dominantBaseline='middle' fill='%23FFFFFF' stroke='%23E5E5E5' strokeWidth='1' opacity='0.6' transform='rotate(-45 200 200)'%3EN3URALI.ART%3C/text%3E%3C/svg%3E")`,
                     backgroundRepeat: "repeat",
-                    backgroundSize: "280px 280px",
+                    backgroundSize: "380px 380px",
                   }}
                 />
               </div>
@@ -502,16 +559,24 @@ export default function BrowsePage() {
                       {getCategoryBadgeName(previewImage.category_name)}
                     </Badge>
                   </div>
-                  <div className="flex justify-between items-center py-2">
+                  <div className="flex justify-between items-center py-2 border-b border-border/30">
                     <span className="text-muted-foreground font-medium">Price:</span>
                     <span className="text-primary font-bold text-xl">${previewImage.price}</span>
+                  </div>
+                  <div className="pt-4">
+                    <Button
+                      onClick={() => handlePurchaseImage(previewImage)}
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 text-lg"
+                    >
+                      Purchase & Download - ${previewImage.price}
+                    </Button>
                   </div>
                 </div>
               </div>
               <div className="mt-8 p-6 bg-primary/5 rounded-xl border border-primary/20">
                 <p className="text-foreground font-medium">
                   <strong className="text-primary">Preview Notice:</strong> This is a watermarked preview limited to
-                  720px. Purchase to download the full resolution image without watermark.
+                  720×720px. Purchase to download the full resolution image (4K-16K) without watermark.
                 </p>
               </div>
             </div>

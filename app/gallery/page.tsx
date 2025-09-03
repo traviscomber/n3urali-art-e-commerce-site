@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { X, Eye, ChevronLeft, ChevronRight } from "lucide-react"
+import { Eye, ChevronLeft, ChevronRight } from "lucide-react"
 import { getImages } from "@/app/actions/admin-actions"
 
 interface Image {
@@ -250,7 +250,7 @@ export default function GalleryPage() {
                       <img
                         src={image.preview_url || "/placeholder.svg"}
                         alt={image.title}
-                        className="w-full h-full object-contain bg-muted/10 transition-transform duration-300 group-hover:scale-105"
+                        className="w-full h-full object-cover bg-muted/10 transition-transform duration-300 group-hover:scale-105"
                       />
 
                       {/* Hover overlay with image data */}
@@ -285,21 +285,11 @@ export default function GalleryPage() {
         <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] p-0 overflow-hidden">
           <div className="relative w-full bg-gradient-to-br from-background via-background to-muted/20 border-2 border-border/50 shadow-2xl rounded-lg overflow-hidden">
             <DialogHeader className="relative px-6 py-4 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-b border-border/30">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <DialogTitle className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-                    {selectedImage?.title}
-                  </DialogTitle>
-                  <p className="text-sm text-muted-foreground font-medium">Preview • Watermarked • Max 720px</p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={closePreview}
-                  className="h-10 w-10 rounded-full hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
+              <div className="space-y-1">
+                <DialogTitle className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                  {selectedImage?.title}
+                </DialogTitle>
+                <p className="text-sm text-muted-foreground font-medium">Preview • Watermarked • Max 720px</p>
               </div>
             </DialogHeader>
 

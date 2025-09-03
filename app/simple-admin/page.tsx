@@ -10,13 +10,14 @@ import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
-import { Loader2, Upload, Eye, Trash2, Database, BarChart3 } from "lucide-react"
+import { Loader2, Upload, Eye, Trash2, Database, BarChart3, Crown } from "lucide-react"
 
 interface Image {
   id: string
   title: string
   description: string
   category_name?: string
+  license_name?: string
   price: number
   image_url: string
   thumbnail_url: string
@@ -28,7 +29,22 @@ interface Category {
   id: string
   name: string
   description: string
-  display_name?: string // Added display_name property for category display names
+  display_name?: string
+}
+
+interface License {
+  id: string
+  name: string
+  description: string
+  price: number
+  metadata?: {
+    resolution?: string
+    formats?: string[]
+    use_cases?: string[]
+    exclusivity?: boolean
+    resale_rights?: boolean
+    nft_rights?: boolean
+  }
 }
 
 interface DatabaseStats {
@@ -42,16 +58,19 @@ export default function SimpleAdminPage() {
   const [password, setPassword] = useState("")
   const [images, setImages] = useState<Image[]>([])
   const [categories, setCategories] = useState<Category[]>([])
+  const [licenses, setLicenses] = useState<License[]>([])
   const [stats, setStats] = useState<DatabaseStats | null>(null)
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [cleaning, setCleaning] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isDragOver, setIsDragOver] = useState(false)
 
   const [newImage, setNewImage] = useState({
     title: "",
     description: "",
     category: "",
+    rightsType: "both", // Set "both" as default rights type
     price: "",
     file: null as File | null,
     preview: "",
@@ -95,12 +114,12 @@ export default function SimpleAdminPage() {
     setError(null)
 
     try {
-      // Dynamic import to avoid middleware issues
-      const { getImages, getCategories, getDatabaseStats } = await import("@/app/actions/admin-actions")
+      const { getImages, getCategories, getLicenses, getDatabaseStats } = await import("@/app/actions/admin-actions")
 
-      const [imagesResult, categoriesResult, statsResult] = await Promise.all([
+      const [imagesResult, categoriesResult, licensesResult, statsResult] = await Promise.all([
         getImages(),
         getCategories(),
+        getLicenses(),
         getDatabaseStats(),
       ])
 
@@ -116,6 +135,13 @@ export default function SimpleAdminPage() {
         console.log("[v0] SimpleAdmin: Loaded", categoriesResult.data.length, "categories")
       } else {
         console.error("[v0] SimpleAdmin: Failed to load categories:", categoriesResult.error)
+      }
+
+      if (licensesResult.success) {
+        setLicenses(licensesResult.data)
+        console.log("[v0] SimpleAdmin: Loaded", licensesResult.data.length, "licenses")
+      } else {
+        console.error("[v0] SimpleAdmin: Failed to load licenses:", licensesResult.error)
       }
 
       if (statsResult.success) {
@@ -144,7 +170,7 @@ export default function SimpleAdminPage() {
 
       if (result.success) {
         toast.success(result.message || `Deleted ${result.data.length} sample images`)
-        await loadInitialData() // Reload data to reflect changes
+        await loadInitialData()
       } else {
         toast.error("Failed to cleanup sample images: " + result.error)
       }
@@ -156,23 +182,60 @@ export default function SimpleAdminPage() {
     }
   }
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (file: File) => {
+    console.log("[v0] SimpleAdmin: File selected:", file.name)
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file")
+      return
+    }
+
+    // Check file size (limit to 50MB for better performance)
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("File size too large. Please select a file under 50MB.")
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const preview = e.target?.result as string
+      setNewImage((prev) => ({ ...prev, file, preview }))
+      console.log("[v0] SimpleAdmin: File preview generated")
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleInputFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      console.log("[v0] SimpleAdmin: File selected:", file.name)
+      handleFileSelect(file)
+    }
+  }
 
-      if (!file.type.startsWith("image/")) {
-        toast.error("Please select an image file")
-        return
-      }
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(true)
+  }
 
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const preview = e.target?.result as string
-        setNewImage((prev) => ({ ...prev, file, preview }))
-        console.log("[v0] SimpleAdmin: File preview generated")
-      }
-      reader.readAsDataURL(file)
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(false)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(false)
+
+    const files = Array.from(e.dataTransfer.files)
+    const imageFile = files.find((file) => file.type.startsWith("image/"))
+
+    if (imageFile) {
+      handleFileSelect(imageFile)
+    } else {
+      toast.error("Please drop an image file")
     }
   }
 
@@ -185,8 +248,8 @@ export default function SimpleAdminPage() {
       return
     }
 
-    if (!newImage.title || !newImage.category || !newImage.price) {
-      toast.error("Please fill in all required fields")
+    if (!newImage.title || !newImage.category || !newImage.rightsType || !newImage.price) {
+      toast.error("Please fill in all required fields including price")
       return
     }
 
@@ -194,34 +257,32 @@ export default function SimpleAdminPage() {
     setError(null)
 
     try {
-      const { createImageWithCategory } = await import("@/app/actions/admin-actions")
+      const { createImageWithCategoryObject } = await import("@/app/actions/admin-actions")
 
-      const formData = new FormData()
-      formData.append("title", newImage.title)
-      formData.append("description", newImage.description)
-      formData.append("category", newImage.category)
-      formData.append("price", newImage.price)
-      formData.append("file_url", newImage.preview)
-      formData.append("thumbnail_url", newImage.preview)
-
-      console.log("[v0] SimpleAdmin: Calling server action")
-      const result = await createImageWithCategory(formData)
+      const result = await createImageWithCategoryObject({
+        title: newImage.title,
+        description: newImage.description,
+        category_name: newImage.category,
+        rights_type: newImage.rightsType,
+        image_url: newImage.preview,
+        thumbnail_url: newImage.preview,
+        price: Number.parseFloat(newImage.price) || 0,
+      })
 
       if (result.success) {
         console.log("[v0] SimpleAdmin: Upload successful")
-        toast.success("Image uploaded successfully!")
+        toast.success("Image uploaded successfully with pricing!")
 
-        // Reset form
         setNewImage({
           title: "",
           description: "",
           category: "",
+          rightsType: "both", // Reset rightsType to default
           price: "",
           file: null,
           preview: "",
         })
 
-        // Reload images
         await loadInitialData()
       } else {
         console.error("[v0] SimpleAdmin: Upload failed:", result.error)
@@ -311,7 +372,7 @@ export default function SimpleAdminPage() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div>
             <h1 className="text-4xl font-bold text-gray-900">n3urali.art Admin</h1>
-            <p className="text-xl text-gray-600 font-medium">Photo Upload & Management</p>
+            <p className="text-xl text-gray-600 font-medium">Full HQ Resolution Only - 4K to 16K Premium Images</p>
           </div>
           <Button onClick={handleLogout} variant="outline" className="text-lg h-12 px-6 bg-transparent">
             Logout
@@ -394,7 +455,9 @@ export default function SimpleAdminPage() {
                 <Upload className="h-6 w-6" />
                 Upload New Photo
               </CardTitle>
-              <CardDescription className="text-lg">Add a new image to the gallery</CardDescription>
+              <CardDescription className="text-lg">
+                Add a new full resolution image (4K-16K) to the premium gallery
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleImageUpload} className="space-y-4">
@@ -446,8 +509,50 @@ export default function SimpleAdminPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="rightsType" className="text-lg font-medium">
+                    Rights Type *
+                  </Label>
+                  <Select
+                    value={newImage.rightsType}
+                    onValueChange={(value) => setNewImage((prev) => ({ ...prev, rightsType: value }))}
+                    required
+                  >
+                    <SelectTrigger className="h-12 text-lg">
+                      <SelectValue placeholder="Select rights type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="both" className="text-lg">
+                        <div>
+                          <div className="font-medium">Both Rights Available</div>
+                          <div className="text-sm text-gray-500">
+                            Exclusive & Non-Exclusive - Full HQ resolution (4K-16K)
+                          </div>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="exclusive" className="text-lg">
+                        <div className="flex items-center gap-2">
+                          <Crown className="h-4 w-4 text-yellow-500" />
+                          <div>
+                            <div className="font-medium">Exclusive Rights</div>
+                            <div className="text-sm text-gray-500">
+                              Full ownership - Complete HQ resolution (4K-16K)
+                            </div>
+                          </div>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="non-exclusive" className="text-lg">
+                        <div>
+                          <div className="font-medium">Non-Exclusive Rights</div>
+                          <div className="text-sm text-gray-500">Shared licensing - Full HQ resolution (4K-16K)</div>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                   <p className="text-sm text-gray-500 mt-1">
-                    {categories.length} categories loaded: {categories.map((c) => getCategoryDisplayName(c)).join(", ")}
+                    All images sold at full resolution (4K-16K). Pricing based on rights type and exclusivity.
                   </p>
                 </div>
 
@@ -458,38 +563,101 @@ export default function SimpleAdminPage() {
                   <Input
                     id="price"
                     type="number"
-                    step="0.01"
                     min="0"
+                    step="0.01"
                     value={newImage.price}
                     onChange={(e) => setNewImage((prev) => ({ ...prev, price: e.target.value }))}
-                    placeholder="29.99"
+                    placeholder="Enter price (e.g., 99.00)"
                     className="text-lg h-12"
                     required
                   />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Premium pricing for full HQ resolution (4K-16K). Starting from $99 for standard rights.
+                  </p>
                 </div>
 
                 <div>
-                  <Label htmlFor="file" className="text-lg font-medium">
-                    Image File *
-                  </Label>
-                  <Input
-                    id="file"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="cursor-pointer text-lg h-12"
-                    required
-                  />
+                  <Label className="text-lg font-medium">Image File * (Full HQ Resolution: 4K-16K)</Label>
+                  <div
+                    className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                      isDragOver
+                        ? "border-orange-500 bg-orange-50"
+                        : newImage.file
+                          ? "border-green-500 bg-green-50"
+                          : "border-gray-300 hover:border-gray-400"
+                    }`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
+                    <input
+                      id="file"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleInputFileSelect}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+
+                    {newImage.file ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-center">
+                          <Upload className="h-8 w-8 text-green-600" />
+                        </div>
+                        <p className="text-lg font-medium text-green-700">{newImage.file.name}</p>
+                        <p className="text-sm text-gray-500">{(newImage.file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                        <p className="text-sm text-gray-500">Click or drag to replace</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-center">
+                          <Upload className={`h-8 w-8 ${isDragOver ? "text-orange-600" : "text-gray-400"}`} />
+                        </div>
+                        <p className={`text-lg font-medium ${isDragOver ? "text-orange-700" : "text-gray-700"}`}>
+                          {isDragOver ? "Drop your HQ image here" : "Drag & drop your HQ image here (4K-16K)"}
+                        </p>
+                        <p className="text-sm text-gray-500">or click to browse files</p>
+                        <p className="text-xs text-gray-400">High Quality Only: JPG, PNG, WebP (Max: 50MB)</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {newImage.preview && (
-                  <div>
+                  <div className="space-y-3">
                     <Label className="text-lg font-medium">Preview</Label>
-                    <img
-                      src={newImage.preview || "/placeholder.svg"}
-                      alt="Preview"
-                      className="w-full max-w-xs h-32 object-cover rounded border mt-2"
-                    />
+                    <div className="border rounded-lg p-4 bg-gray-50">
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="flex-shrink-0">
+                          <img
+                            src={newImage.preview || "/placeholder.svg"}
+                            alt="Preview"
+                            className="w-full sm:w-32 h-32 object-cover rounded border shadow-sm"
+                          />
+                        </div>
+                        <div className="flex-1 space-y-2">
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                              <span className="font-medium text-gray-600">File:</span>
+                              <p className="text-gray-800 truncate">{newImage.file?.name}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-600">Size:</span>
+                              <p className="text-gray-800">
+                                {newImage.file ? (newImage.file.size / (1024 * 1024)).toFixed(2) : "0"} MB
+                              </p>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-600">Type:</span>
+                              <p className="text-gray-800">{newImage.file?.type}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-600">Status:</span>
+                              <p className="text-green-600 font-medium">Ready to upload</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -504,7 +672,7 @@ export default function SimpleAdminPage() {
                       Uploading...
                     </>
                   ) : (
-                    "Upload Photo"
+                    "Upload Full Resolution Photo"
                   )}
                 </Button>
               </form>
@@ -518,7 +686,9 @@ export default function SimpleAdminPage() {
                 <Eye className="h-6 w-6" />
                 Uploaded Photos ({images.length})
               </CardTitle>
-              <CardDescription className="text-lg">Manage your uploaded images</CardDescription>
+              <CardDescription className="text-lg">
+                Manage your full resolution premium collection (4K-16K)
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -540,7 +710,10 @@ export default function SimpleAdminPage() {
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium truncate text-lg">{image.title}</h4>
                         <p className="text-base text-gray-500">{getCategoryBadgeName(image.category_name || "")}</p>
-                        <p className="text-base font-medium">${image.price}</p>
+                        <div className="flex items-center gap-2">
+                          {image.license_name?.includes("EXCLUSIVE") && <Crown className="h-3 w-3 text-yellow-500" />}
+                          <p className="text-base font-medium">${image.price > 0 ? image.price : "Price TBD"}</p>
+                        </div>
                       </div>
                       <Button
                         size="sm"

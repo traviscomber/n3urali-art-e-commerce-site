@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
-import { Loader2, Upload, Eye, Trash2, Database, BarChart3, Crown } from "lucide-react"
+import { Loader2, Upload, Eye, Trash2, Database, BarChart3, Crown, Edit2, Check, X } from "lucide-react"
 
 interface Image {
   id: string
@@ -53,6 +53,16 @@ interface DatabaseStats {
   orders: number
 }
 
+interface NewImage {
+  title: string
+  description: string
+  category: string
+  rightsType: string
+  price: string
+  file: File | null
+  preview: string
+}
+
 export default function SimpleAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [password, setPassword] = useState("")
@@ -65,14 +75,15 @@ export default function SimpleAdminPage() {
   const [cleaning, setCleaning] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
-
-  const [newImage, setNewImage] = useState({
+  const [editingImage, setEditingImage] = useState<string | null>(null)
+  const [editValues, setEditValues] = useState({ title: "", price: "" })
+  const [newImage, setNewImage] = useState<NewImage>({
     title: "",
     description: "",
     category: "",
-    rightsType: "both", // Set "both" as default rights type
+    rightsType: "both",
     price: "",
-    file: null as File | null,
+    file: null,
     preview: "",
   })
 
@@ -455,6 +466,49 @@ export default function SimpleAdminPage() {
     console.log("[v0] SimpleAdmin: Logging out")
     setIsAuthenticated(false)
     localStorage.removeItem("simple_admin_auth")
+  }
+
+  const handleEditStart = (image: Image) => {
+    setEditingImage(image.id)
+    setEditValues({ title: image.title, price: image.price.toString() })
+  }
+
+  const handleEditCancel = () => {
+    setEditingImage(null)
+    setEditValues({ title: "", price: "" })
+  }
+
+  const handleEditSave = async (imageId: string) => {
+    if (!editValues.title.trim()) {
+      toast.error("Title cannot be empty")
+      return
+    }
+
+    const price = Number.parseFloat(editValues.price)
+    if (isNaN(price) || price < 0) {
+      toast.error("Please enter a valid price")
+      return
+    }
+
+    try {
+      const { updateImageDetails } = await import("@/app/actions/admin-actions")
+      const result = await updateImageDetails(imageId, {
+        title: editValues.title.trim(),
+        price: price,
+      })
+
+      if (result.success) {
+        toast.success("Image updated successfully")
+        setEditingImage(null)
+        setEditValues({ title: "", price: "" })
+        await loadInitialData()
+      } else {
+        toast.error("Failed to update image: " + result.error)
+      }
+    } catch (error) {
+      console.error("[v0] SimpleAdmin: Update error:", error)
+      toast.error("Failed to update image")
+    }
   }
 
   if (!isAuthenticated) {
@@ -842,21 +896,76 @@ export default function SimpleAdminPage() {
                         className="w-16 h-16 object-cover rounded"
                       />
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium truncate text-lg">{image.title}</h4>
-                        <p className="text-base text-gray-500">{getCategoryBadgeName(image.category_name || "")}</p>
-                        <div className="flex items-center gap-2">
-                          {image.license_name?.includes("EXCLUSIVE") && <Crown className="h-3 w-3 text-yellow-500" />}
-                          <p className="text-base font-medium">${image.price > 0 ? image.price : "Price TBD"}</p>
-                        </div>
+                        {editingImage === image.id ? (
+                          <div className="space-y-2">
+                            <Input
+                              value={editValues.title}
+                              onChange={(e) => setEditValues((prev) => ({ ...prev, title: e.target.value }))}
+                              placeholder="Image title"
+                              className="text-sm"
+                            />
+                            <Input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={editValues.price}
+                              onChange={(e) => setEditValues((prev) => ({ ...prev, price: e.target.value }))}
+                              placeholder="Price"
+                              className="text-sm"
+                            />
+                          </div>
+                        ) : (
+                          <>
+                            <h4 className="font-medium truncate text-lg">{image.title}</h4>
+                            <p className="text-base text-gray-500">{getCategoryBadgeName(image.category_name || "")}</p>
+                            <div className="flex items-center gap-2">
+                              {image.license_name?.includes("EXCLUSIVE") && (
+                                <Crown className="h-3 w-3 text-yellow-500" />
+                              )}
+                              <p className="text-base font-medium">${image.price > 0 ? image.price : "Price TBD"}</p>
+                            </div>
+                          </>
+                        )}
                       </div>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleDeleteImage(image.id)}
-                        className="h-10 w-10"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        {editingImage === image.id ? (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="default"
+                              onClick={() => handleEditSave(image.id)}
+                              className="h-8 w-8 bg-green-600 hover:bg-green-700"
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={handleEditCancel}
+                              className="h-8 w-8 bg-transparent"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditStart(image)}
+                            className="h-8 w-8"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleDeleteImage(image.id)}
+                          className="h-8 w-8"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>

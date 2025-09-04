@@ -716,3 +716,29 @@ export async function getLicenses() {
     }
   }
 }
+
+export async function updateImageDetails(imageId: string, updates: { title: string; price: number }) {
+  try {
+    console.log("[v0] Updating image details for ID:", imageId, "with:", updates)
+    const sql = createNeonClient()
+
+    const result = await sql`
+      UPDATE images 
+      SET title = ${updates.title}, 
+          price = ${updates.price},
+          updated_at = NOW()
+      WHERE id = ${imageId}
+      RETURNING *
+    `
+
+    if (result.length === 0) {
+      return { success: false, error: "Image not found" }
+    }
+
+    console.log("[v0] Image details updated successfully:", result[0].id)
+    revalidatePath("/simple-admin")
+    return { success: true, data: result[0] }
+  } catch (error) {
+    return handleDatabaseError(error)
+  }
+}

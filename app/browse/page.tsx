@@ -527,20 +527,64 @@ export default function BrowsePage() {
 
             <div className="relative bg-muted/20 flex items-center justify-center min-h-[500px] max-h-[60vh] overflow-hidden p-8">
               <div className="relative max-w-[720px] max-h-[720px] gallery-frame rounded-lg p-4 bg-background">
-                <img
-                  src={previewImage.image_url || "/placeholder.svg"}
-                  alt={previewImage.title}
-                  className="max-w-full max-h-full object-contain rounded-md"
-                  style={{ maxWidth: "720px", maxHeight: "720px" }}
-                />
                 <div
-                  className="absolute inset-4 pointer-events-none opacity-15 rounded-md"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fontFamily='Arial, sans-serif' fontSize='48' fontWeight='700' textAnchor='middle' dominantBaseline='middle' fill='%23FFFFFF' stroke='%23E5E5E5' strokeWidth='1' opacity='0.6' transform='rotate(-45 200 200)'%3EN3URALI.ART%3C/text%3E%3C/svg%3E")`,
-                    backgroundRepeat: "repeat",
-                    backgroundSize: "380px 380px",
-                  }}
-                />
+                  className="relative select-none"
+                  onContextMenu={(e) => e.preventDefault()}
+                  onDragStart={(e) => e.preventDefault()}
+                  style={{ userSelect: "none", WebkitUserSelect: "none" }}
+                >
+                  <img
+                    src={previewImage.thumbnail_url || previewImage.image_url || "/placeholder.svg"}
+                    alt={previewImage.title}
+                    className="max-w-full max-h-full object-contain rounded-md select-none pointer-events-none"
+                    style={{
+                      maxWidth: "720px",
+                      maxHeight: "720px",
+                      userSelect: "none",
+                      WebkitUserSelect: "none",
+                      WebkitUserDrag: "none",
+                      WebkitTouchCallout: "none",
+                    }}
+                    onContextMenu={(e) => e.preventDefault()}
+                    onDragStart={(e) => e.preventDefault()}
+                    draggable={false}
+                  />
+
+                  {/* Enhanced watermark overlay */}
+                  <div
+                    className="absolute inset-0 pointer-events-none opacity-25 rounded-md"
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fontFamily='Arial, sans-serif' fontSize='24' fontWeight='700' textAnchor='middle' dominantBaseline='middle' fill='%23FFFFFF' stroke='%23000000' strokeWidth='1' opacity='0.8' transform='rotate(-45 100 100)'%3En3uralia.art%3C/text%3E%3C/svg%3E")`,
+                      backgroundRepeat: "repeat",
+                      backgroundSize: "150px 150px",
+                    }}
+                  />
+
+                  {/* Additional watermark protection overlay */}
+                  <div
+                    className="absolute inset-0 pointer-events-none opacity-15 rounded-md"
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='300' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fontFamily='Arial, sans-serif' fontSize='32' fontWeight='900' textAnchor='middle' dominantBaseline='middle' fill='%23FFFFFF' stroke='%23333333' strokeWidth='2' opacity='0.9' transform='rotate(45 150 150)'%3En3uralia.art%3C/text%3E%3C/svg%3E")`,
+                      backgroundRepeat: "repeat",
+                      backgroundSize: "200px 200px",
+                      backgroundPosition: "25px 25px",
+                    }}
+                  />
+
+                  {/* Center watermark */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div
+                      className="text-white/30 text-4xl font-black transform -rotate-45 select-none"
+                      style={{
+                        textShadow: "2px 2px 4px rgba(0,0,0,0.8)",
+                        userSelect: "none",
+                        WebkitUserSelect: "none",
+                      }}
+                    >
+                      n3uralia.art
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 

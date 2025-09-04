@@ -461,7 +461,7 @@ export default function EquirectangularCategoryPage() {
                               className="text-white font-bold text-2xl mx-8 drop-shadow-lg"
                               style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
                             >
-                              N3URALI.ART
+                              n3uralia.art
                             </span>
                           ))}
                         </div>
@@ -577,7 +577,7 @@ export default function EquirectangularCategoryPage() {
                         WebkitTextStroke: "1px rgba(255,255,255,0.3)",
                       }}
                     >
-                      N3URALI.ART
+                      n3uralia.art
                     </span>
                   ))}
                 </div>

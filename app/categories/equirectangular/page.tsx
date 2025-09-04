@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Grid3X3, List, Eye, X, Loader2, Play, ShoppingCart, Check } from "lucide-react"
+import { Search, Grid3X3, List, Eye, X, Loader2, Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -11,6 +11,7 @@ import { PanoramaViewer } from "@/components/panorama-viewer"
 import { getImages } from "@/app/actions/admin-actions"
 import { useCart } from "@/lib/contexts/cart-context"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 interface EquirectangularImage {
   id: string
@@ -32,12 +33,12 @@ export default function EquirectangularCategoryPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [viewingPanorama, setViewingPanorama] = useState<EquirectangularImage | null>(null)
   const [loadingImage, setLoadingImage] = useState<string | null>(null)
-  const [showWatermarkedImage, setShowWatermarkedImage] = useState<EquirectangularImage | null>(null)
   const [show360Viewer, setShow360Viewer] = useState(false)
   const [current360Image, setCurrent360Image] = useState<EquirectangularImage | null>(null)
   const [pannellumLoaded, setPannellumLoaded] = useState(false)
   const { addItem, openCart } = useCart()
   const [addedToCart, setAddedToCart] = useState<string | null>(null)
+  const router = useRouter()
 
   const loadPannellum = async () => {
     if (pannellumLoaded || window.pannellum) {
@@ -176,19 +177,8 @@ export default function EquirectangularCategoryPage() {
   }, [searchTerm, sortBy, images])
 
   const handleImageClick = async (image: EquirectangularImage) => {
-    setLoadingImage(image.id)
-
-    // Simulate loading time (1-3 seconds)
-    const loadingTime = Math.random() * 2000 + 1000
-
-    setTimeout(() => {
-      setLoadingImage(null)
-      setShowWatermarkedImage(image)
-    }, loadingTime)
-  }
-
-  const closeWatermarkedView = () => {
-    setShowWatermarkedImage(null)
+    console.log("[v0] Image clicked, redirecting to photo:", image.title, "ID:", image.id)
+    router.push(`/photo/${image.id}`)
   }
 
   const handleAddToCart = (image: EquirectangularImage) => {
@@ -412,119 +402,6 @@ export default function EquirectangularCategoryPage() {
         )}
       </div>
 
-      {showWatermarkedImage && (
-        <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="relative max-w-7xl w-full max-h-[95vh] overflow-y-auto">
-            <div className="absolute top-4 right-4 z-20">
-              <Button
-                onClick={closeWatermarkedView}
-                className="bg-black/70 hover:bg-black/90 text-white border border-white/20 backdrop-blur-sm rounded-xl h-12 w-12 p-0"
-                size="sm"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-
-            <div className="bg-background/95 backdrop-blur-sm rounded-2xl overflow-hidden border border-primary/20 shadow-2xl">
-              {/* Header with gradient */}
-              <div className="bg-gradient-to-r from-primary via-accent to-primary p-6">
-                <h2 className="text-2xl font-bold text-white mb-2">{showWatermarkedImage.title}</h2>
-                <p className="text-white/90">Preview • Watermarked • Size: 720×720px</p>
-              </div>
-
-              {/* Image container with proper aspect ratio */}
-              <div className="relative bg-muted/20 p-6">
-                <div className="relative mx-auto max-w-4xl">
-                  <Image
-                    src={showWatermarkedImage.image_url || "/placeholder.svg"}
-                    alt={showWatermarkedImage.title}
-                    width={1200}
-                    height={800}
-                    className="w-full h-auto object-contain rounded-lg"
-                  />
-
-                  {/* Watermark overlay */}
-                  <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute inset-0 opacity-15">
-                      {Array.from({ length: 12 }).map((_, row) => (
-                        <div
-                          key={row}
-                          className="flex whitespace-nowrap"
-                          style={{
-                            transform: `translateY(${row * 80}px) rotate(-45deg) translateX(-50%)`,
-                            transformOrigin: "center",
-                          }}
-                        >
-                          {Array.from({ length: 20 }).map((_, col) => (
-                            <span
-                              key={col}
-                              className="text-white font-bold text-2xl mx-8 drop-shadow-lg"
-                              style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
-                            >
-                              n3uralia.art
-                            </span>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Details section */}
-              <div className="p-6 bg-background/50">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                  <div>
-                    <h4 className="font-semibold text-muted-foreground mb-2">Description</h4>
-                    <p className="text-foreground">{showWatermarkedImage.description}</p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-muted-foreground mb-2">Type</h4>
-                    <Badge variant="outline" className="text-primary border-primary/30">
-                      {showWatermarkedImage.category_name}
-                    </Badge>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-muted-foreground mb-2">Price</h4>
-                    <p className="text-2xl font-bold text-primary">${showWatermarkedImage.price}</p>
-                  </div>
-                </div>
-
-                <Button
-                  size="lg"
-                  className={`w-full font-semibold py-4 text-lg rounded-xl transition-all duration-300 ${
-                    addedToCart === showWatermarkedImage.id
-                      ? "bg-green-600 hover:bg-green-700 text-white"
-                      : "bg-primary hover:bg-primary/90 text-primary-foreground"
-                  }`}
-                  onClick={() => handleAddToCart(showWatermarkedImage)}
-                  disabled={addedToCart === showWatermarkedImage.id}
-                >
-                  {addedToCart === showWatermarkedImage.id ? (
-                    <>
-                      <Check className="h-5 w-5 mr-2" />
-                      Added to Cart!
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart className="h-5 w-5 mr-2" />
-                      Add to Cart - ${showWatermarkedImage.price}
-                    </>
-                  )}
-                </Button>
-
-                <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl">
-                  <p className="text-sm text-amber-800 dark:text-amber-200">
-                    <strong>Preview Notice:</strong> This is a watermarked preview limited to 720×720px. Purchase to
-                    download the full resolution image (4K-16K) without watermark.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Panorama Viewer */}
       {viewingPanorama && (
         <PanoramaViewer
@@ -556,32 +433,65 @@ export default function EquirectangularCategoryPage() {
 
           <div id="pannellum-container" className="w-full h-full" style={{ position: "relative" }} />
 
-          {/* Existing watermark overlay */}
           <div className="absolute inset-0 pointer-events-none z-20">
-            <div className="absolute inset-0 opacity-20">
-              {Array.from({ length: 15 }).map((_, row) => (
-                <div
-                  key={row}
-                  className="flex whitespace-nowrap"
-                  style={{
-                    transform: `translateY(${row * 100}px) rotate(-45deg) translateX(-50%)`,
-                    transformOrigin: "center",
-                  }}
-                >
-                  {Array.from({ length: 25 }).map((_, col) => (
-                    <span
-                      key={col}
-                      className="text-white font-bold text-3xl mx-12 drop-shadow-lg"
-                      style={{
-                        textShadow: "3px 3px 6px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.5)",
-                        WebkitTextStroke: "1px rgba(255,255,255,0.3)",
-                      }}
-                    >
-                      n3uralia.art
-                    </span>
-                  ))}
-                </div>
-              ))}
+            {/* Primary watermark pattern - diagonal */}
+            <div
+              className="absolute inset-0 opacity-20"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fontFamily='Arial, sans-serif' fontSize='24' fontWeight='600' textAnchor='middle' dominantBaseline='middle' fill='%23FFFFFF' opacity='0.7' transform='rotate(-30 100 100)'%3En3uralia.art%3C/text%3E%3C/svg%3E")`,
+                backgroundRepeat: "repeat",
+                backgroundSize: "140px 140px",
+              }}
+            />
+
+            {/* Secondary watermark pattern - opposite diagonal */}
+            <div
+              className="absolute inset-0 opacity-15"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='220' height='220' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fontFamily='Arial, sans-serif' fontSize='20' fontWeight='500' textAnchor='middle' dominantBaseline='middle' fill='%23FFFFFF' opacity='0.6' transform='rotate(30 110 110)'%3En3uralia.art%3C/text%3E%3C/svg%3E")`,
+                backgroundRepeat: "repeat",
+                backgroundSize: "160px 160px",
+                backgroundPosition: "40px 40px",
+              }}
+            />
+
+            {/* Tertiary watermark pattern - horizontal */}
+            <div
+              className="absolute inset-0 opacity-12"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='240' height='240' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fontFamily='Arial, sans-serif' fontSize='18' fontWeight='400' textAnchor='middle' dominantBaseline='middle' fill='%23FFFFFF' opacity='0.5'%3En3uralia.art%3C/text%3E%3C/svg%3E")`,
+                backgroundRepeat: "repeat",
+                backgroundSize: "180px 180px",
+                backgroundPosition: "80px 80px",
+              }}
+            />
+
+            {/* Center prominent watermark */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div
+                className="text-white/25 text-4xl font-bold transform -rotate-12 select-none"
+                style={{
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
+                  userSelect: "none",
+                  WebkitUserSelect: "none",
+                }}
+              >
+                n3uralia.art
+              </div>
+            </div>
+
+            {/* Corner watermarks */}
+            <div className="absolute top-8 left-8 text-white/20 text-lg font-medium transform -rotate-12 select-none">
+              n3uralia.art
+            </div>
+            <div className="absolute top-8 right-8 text-white/20 text-lg font-medium transform rotate-12 select-none">
+              n3uralia.art
+            </div>
+            <div className="absolute bottom-8 left-8 text-white/20 text-lg font-medium transform rotate-12 select-none">
+              n3uralia.art
+            </div>
+            <div className="absolute bottom-8 right-8 text-white/20 text-lg font-medium transform -rotate-12 select-none">
+              n3uralia.art
             </div>
           </div>
         </div>

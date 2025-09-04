@@ -486,26 +486,37 @@ export default function PhotoDetailPage() {
                         }}
                       />
 
-                      <div className="absolute inset-0 pointer-events-none select-none" style={{ userSelect: "none" }}>
-                        <div className="relative w-full h-full overflow-hidden">
-                          {Array.from({ length: 60 }).map((_, i) => (
-                            <div
-                              key={i}
-                              className="absolute text-white/12 font-bold text-xl transform -rotate-45 select-none pointer-events-none"
-                              style={{
-                                left: `${(i % 10) * 10}%`,
-                                top: `${Math.floor(i / 10) * 16.67}%`,
-                                textStroke: "1px rgba(255,255,255,0.08)",
-                                WebkitTextStroke: "1px rgba(255,255,255,0.08)",
-                                textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
-                                userSelect: "none",
-                                WebkitUserSelect: "none",
-                                MozUserSelect: "none",
-                              }}
-                            >
-                              n3urali.art
-                            </div>
-                          ))}
+                      <div
+                        className="absolute inset-0 pointer-events-none select-none flex items-center justify-center"
+                        style={{ userSelect: "none" }}
+                      >
+                        <div className="relative max-w-full max-h-full" style={{ aspectRatio: "auto" }}>
+                          <img
+                            src={image.image_url || "/placeholder.svg"}
+                            alt=""
+                            className="w-full h-full object-contain opacity-0 pointer-events-none"
+                            style={{ maxWidth: "100%", maxHeight: "100%" }}
+                          />
+                          <div className="absolute inset-0 overflow-hidden">
+                            {Array.from({ length: 60 }).map((_, i) => (
+                              <div
+                                key={i}
+                                className="absolute text-white/12 font-bold text-xl transform -rotate-45 select-none pointer-events-none"
+                                style={{
+                                  left: `${(i % 10) * 10}%`,
+                                  top: `${Math.floor(i / 10) * 16.67}%`,
+                                  textStroke: "1px rgba(255,255,255,0.08)",
+                                  WebkitTextStroke: "1px rgba(255,255,255,0.08)",
+                                  textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
+                                  userSelect: "none",
+                                  WebkitUserSelect: "none",
+                                  MozUserSelect: "none",
+                                }}
+                              >
+                                n3urali.art
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
 

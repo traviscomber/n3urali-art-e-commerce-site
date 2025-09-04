@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Eye, ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { getImages } from "@/app/actions/admin-actions"
 
 interface Image {
@@ -48,13 +48,9 @@ export default function GalleryPage() {
   const equirectangularImages = transformedImages.filter((img) => img.category === "equirectangular")
   const fisheyeImages = transformedImages.filter((img) => img.category === "fisheye")
 
-  const handleImageSelect = async (image: Image, mode: "preview" | "360" = "preview") => {
-    console.log("[v0] Image clicked, redirecting to photo details:", image.title, "Mode:", mode)
-    if (mode === "360" && image.category === "equirectangular") {
-      router.push(`/photo/${image.id}?view=360`)
-    } else {
-      router.push(`/photo/${image.id}`)
-    }
+  const handleImageSelect = async (image: Image) => {
+    console.log("[v0] Image clicked, redirecting to photo:", image.title, "ID:", image.id)
+    router.push(`/photo/${image.id}`)
   }
 
   const scrollSection = (direction: "left" | "right", sectionId: string) => {
@@ -70,7 +66,8 @@ export default function GalleryPage() {
 
   const ImageCard = ({ image, size = "normal" }: { image: Image; size?: "normal" | "large" }) => (
     <div
-      className={`group relative bg-card rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-border overflow-hidden ${size === "large" ? "min-w-[280px] max-w-[280px]" : "min-w-[250px] max-w-[250px]"}`}
+      className={`group relative bg-card rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-border overflow-hidden cursor-pointer ${size === "large" ? "min-w-[280px] max-w-[280px]" : "min-w-[250px] max-w-[250px]"}`}
+      onClick={() => handleImageSelect(image)}
     >
       <div
         className={`relative ${size === "large" ? "aspect-video h-[157px]" : "aspect-video h-[140px]"} overflow-hidden`}
@@ -81,35 +78,10 @@ export default function GalleryPage() {
           className="w-full h-full object-contain bg-muted/20 group-hover:scale-105 transition-transform duration-300"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="absolute bottom-4 left-4 right-4 flex gap-2">
-            <Button
-              size="sm"
-              variant="secondary"
-              className="bg-background/95 hover:bg-background text-foreground border border-border shadow-lg flex-1"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleImageSelect(image, "preview")
-              }}
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              Preview
+          <div className="absolute bottom-4 left-4 right-4 text-center">
+            <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg w-full">
+              View Photo
             </Button>
-            {image.category === "equirectangular" && (
-              <Button
-                size="sm"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg flex-1"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleImageSelect(image, "360")
-                }}
-              >
-                <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                </svg>
-                360°
-              </Button>
-            )}
           </div>
         </div>
       </div>
@@ -248,7 +220,11 @@ export default function GalleryPage() {
             {transformedImages.length > 0 ? (
               <div className="grid grid-cols-5 lg:grid-cols-10 gap-3">
                 {transformedImages.map((image) => (
-                  <div key={image.id} className="group relative cursor-pointer">
+                  <div
+                    key={image.id}
+                    className="group relative cursor-pointer"
+                    onClick={() => handleImageSelect(image)}
+                  >
                     {/* Clean thumbnail without frame */}
                     <div className="relative aspect-square overflow-hidden">
                       <img
@@ -264,43 +240,12 @@ export default function GalleryPage() {
                             {image.category === "equirectangular" ? "360°" : "Fisheye"}
                           </p>
                           <p className="text-xs font-bold text-emerald-400">${image.price}</p>
-
-                          <div className="flex gap-1 mt-2">
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              className="bg-background/95 hover:bg-background text-foreground text-xs px-2 py-1 h-auto"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleImageSelect(image, "preview")
-                              }}
-                            >
-                              <Eye className="h-3 w-3 mr-1" />
-                              Preview
-                            </Button>
-                            {image.category === "equirectangular" && (
-                              <Button
-                                size="sm"
-                                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs px-2 py-1 h-auto"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleImageSelect(image, "360")
-                                }}
-                              >
-                                <svg
-                                  className="h-3 w-3 mr-1"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                >
-                                  <circle cx="12" cy="12" r="10" />
-                                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                                </svg>
-                                360°
-                              </Button>
-                            )}
-                          </div>
+                          <Button
+                            size="sm"
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs px-2 py-1 h-auto mt-2"
+                          >
+                            View Photo
+                          </Button>
                         </div>
                       </div>
 

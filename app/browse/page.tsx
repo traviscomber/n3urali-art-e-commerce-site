@@ -550,39 +550,64 @@ export default function BrowsePage() {
                     draggable={false}
                   />
 
-                  {/* Enhanced watermark overlay */}
+                  {/* Primary watermark pattern - diagonal */}
                   <div
-                    className="absolute inset-0 pointer-events-none opacity-25 rounded-md"
+                    className="absolute inset-0 pointer-events-none opacity-20 rounded-md"
                     style={{
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fontFamily='Arial, sans-serif' fontSize='24' fontWeight='700' textAnchor='middle' dominantBaseline='middle' fill='%23FFFFFF' stroke='%23000000' strokeWidth='1' opacity='0.8' transform='rotate(-45 100 100)'%3En3uralia.art%3C/text%3E%3C/svg%3E")`,
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='180' height='180' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fontFamily='Arial, sans-serif' fontSize='20' fontWeight='600' textAnchor='middle' dominantBaseline='middle' fill='%23FFFFFF' opacity='0.7' transform='rotate(-30 90 90)'%3En3uralia.art%3C/text%3E%3C/svg%3E")`,
                       backgroundRepeat: "repeat",
-                      backgroundSize: "150px 150px",
+                      backgroundSize: "120px 120px",
                     }}
                   />
 
-                  {/* Additional watermark protection overlay */}
+                  {/* Secondary watermark pattern - opposite diagonal */}
                   <div
                     className="absolute inset-0 pointer-events-none opacity-15 rounded-md"
                     style={{
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='300' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fontFamily='Arial, sans-serif' fontSize='32' fontWeight='900' textAnchor='middle' dominantBaseline='middle' fill='%23FFFFFF' stroke='%23333333' strokeWidth='2' opacity='0.9' transform='rotate(45 150 150)'%3En3uralia.art%3C/text%3E%3C/svg%3E")`,
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fontFamily='Arial, sans-serif' fontSize='18' fontWeight='500' textAnchor='middle' dominantBaseline='middle' fill='%23FFFFFF' opacity='0.6' transform='rotate(30 100 100)'%3En3uralia.art%3C/text%3E%3C/svg%3E")`,
                       backgroundRepeat: "repeat",
-                      backgroundSize: "200px 200px",
-                      backgroundPosition: "25px 25px",
+                      backgroundSize: "140px 140px",
+                      backgroundPosition: "35px 35px",
                     }}
                   />
 
-                  {/* Center watermark */}
+                  {/* Tertiary watermark pattern - horizontal */}
+                  <div
+                    className="absolute inset-0 pointer-events-none opacity-12 rounded-md"
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='220' height='220' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fontFamily='Arial, sans-serif' fontSize='16' fontWeight='400' textAnchor='middle' dominantBaseline='middle' fill='%23FFFFFF' opacity='0.5'%3En3uralia.art%3C/text%3E%3C/svg%3E")`,
+                      backgroundRepeat: "repeat",
+                      backgroundSize: "160px 160px",
+                      backgroundPosition: "70px 70px",
+                    }}
+                  />
+
+                  {/* Center prominent watermark */}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div
-                      className="text-white/30 text-4xl font-black transform -rotate-45 select-none"
+                      className="text-white/25 text-3xl font-bold transform -rotate-12 select-none"
                       style={{
-                        textShadow: "2px 2px 4px rgba(0,0,0,0.8)",
+                        textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                         userSelect: "none",
                         WebkitUserSelect: "none",
                       }}
                     >
                       n3uralia.art
                     </div>
+                  </div>
+
+                  {/* Corner watermarks */}
+                  <div className="absolute top-4 left-4 text-white/20 text-sm font-medium transform -rotate-12 select-none pointer-events-none">
+                    n3uralia.art
+                  </div>
+                  <div className="absolute top-4 right-4 text-white/20 text-sm font-medium transform rotate-12 select-none pointer-events-none">
+                    n3uralia.art
+                  </div>
+                  <div className="absolute bottom-4 left-4 text-white/20 text-sm font-medium transform rotate-12 select-none pointer-events-none">
+                    n3uralia.art
+                  </div>
+                  <div className="absolute bottom-4 right-4 text-white/20 text-sm font-medium transform -rotate-12 select-none pointer-events-none">
+                    n3uralia.art
                   </div>
                 </div>
               </div>

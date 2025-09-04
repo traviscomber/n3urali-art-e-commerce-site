@@ -90,7 +90,7 @@ function handleDatabaseError(error: any): { success: false; error: string } {
       return {
         success: false,
         error:
-          "File payload too large for serverless function. Maximum supported size is 4MB after compression. Please use a smaller image.",
+          "File payload too large for serverless function. Maximum supported size is 2MB after compression. Please use a smaller image.",
       }
     }
     if (error.includes("timeout") || error.includes("TIMEOUT")) {
@@ -240,10 +240,10 @@ export async function createImageWithCategoryObject(imageData: {
       `[v0] Processing upload - Image: ${imageSize.toFixed(1)}MB, Thumbnail: ${thumbnailSize.toFixed(1)}MB, Total: ${totalSize.toFixed(1)}MB`,
     )
 
-    if (totalSize > 4) {
+    if (totalSize > 2) {
       return {
         success: false,
-        error: `Payload too large (${totalSize.toFixed(1)}MB). Maximum supported size is 4MB. Please use more aggressive compression.`,
+        error: `Payload too large (${totalSize.toFixed(1)}MB). Maximum supported size is 2MB. Please use more aggressive compression.`,
       }
     }
 

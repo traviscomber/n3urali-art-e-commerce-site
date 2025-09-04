@@ -11,7 +11,7 @@ const nextConfig = {
   },
   experimental: {
     serverActions: {
-      bodySizeLimit: '4mb', // Maximum allowed by Vercel serverless functions
+      bodySizeLimit: '2mb', // Conservative limit to ensure reliable uploads with compression
     },
   },
 }

@@ -191,7 +191,7 @@ export default function SimpleAdminPage() {
       img.onload = () => {
         // Calculate compression ratio based on file size
         const fileSizeKB = file.size / 1024
-        const compressionRatio = fileSizeKB > maxSizeKB ? Math.sqrt(maxSizeKB / fileSizeKB) : 1
+        const compressionRatio = fileSizeKB > maxSizeKB ? Math.sqrt(maxSizeKB / fileSizeKB) * 0.8 : 1
 
         // Set canvas dimensions
         canvas.width = Math.floor(img.width * compressionRatio)
@@ -200,13 +200,12 @@ export default function SimpleAdminPage() {
         // Draw and compress
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
 
-        // Start with high quality and reduce if needed
-        let quality = 0.9
+        let quality = 0.8
         let compressedDataUrl = canvas.toDataURL("image/jpeg", quality)
 
         // Reduce quality until we're under the size limit
         while ((compressedDataUrl.length * 3) / 4 / 1024 > maxSizeKB && quality > 0.1) {
-          quality -= 0.1
+          quality -= 0.05
           compressedDataUrl = canvas.toDataURL("image/jpeg", quality)
         }
 
@@ -222,12 +221,12 @@ export default function SimpleAdminPage() {
   }
 
   const uploadInChunks = async (imageData: any, compressedImage: string, compressedThumbnail: string) => {
-    const CHUNK_SIZE = 3 * 1024 * 1024 // 3MB chunks (safely under 4MB Vercel limit)
+    const SAFE_UPLOAD_SIZE = 2 * 1024 * 1024 // 2MB chunks (safely under 4MB Vercel limit)
 
     // If compressed image is small enough, upload normally
     const totalSize = ((compressedImage.length + compressedThumbnail.length) * 3) / 4 / 1024 / 1024 // Size in MB
 
-    if (totalSize < 3) {
+    if (totalSize < 2) {
       console.log(`[v0] File small enough (${totalSize.toFixed(1)}MB), uploading normally`)
       return await createImageWithCategoryObject({
         ...imageData,
@@ -236,15 +235,15 @@ export default function SimpleAdminPage() {
       })
     }
 
-    // For large files, we need to compress more aggressively
-    console.log(`[v0] File too large (${totalSize.toFixed(1)}MB), applying aggressive compression`)
+    // For files between 2-4MB, apply more aggressive compression
+    console.log(`[v0] File over 2MB (${totalSize.toFixed(1)}MB), applying aggressive compression`)
 
-    const aggressiveImage = await compressImageOnClient(newImage.file!, 1500) // More aggressive compression
-    const aggressiveThumbnail = await compressImageOnClient(newImage.file!, 300) // Smaller thumbnail
+    const aggressiveImage = await compressImageOnClient(newImage.file!, 1200) // More aggressive compression
+    const aggressiveThumbnail = await compressImageOnClient(newImage.file!, 200) // Smaller thumbnail
 
     const newTotalSize = ((aggressiveImage.length + aggressiveThumbnail.length) * 3) / 4 / 1024 / 1024
 
-    if (newTotalSize < 3) {
+    if (newTotalSize < 2) {
       console.log(`[v0] Aggressive compression successful (${newTotalSize.toFixed(1)}MB), uploading`)
       return await createImageWithCategoryObject({
         ...imageData,
@@ -253,9 +252,25 @@ export default function SimpleAdminPage() {
       })
     }
 
+    console.log(`[v0] Still over 2MB (${newTotalSize.toFixed(1)}MB), applying ultra-aggressive compression`)
+
+    const ultraImage = await compressImageOnClient(newImage.file!, 800) // Ultra compression
+    const ultraThumbnail = await compressImageOnClient(newImage.file!, 150) // Ultra small thumbnail
+
+    const ultraTotalSize = ((ultraImage.length + ultraThumbnail.length) * 3) / 4 / 1024 / 1024
+
+    if (ultraTotalSize < 2) {
+      console.log(`[v0] Ultra compression successful (${ultraTotalSize.toFixed(1)}MB), uploading`)
+      return await createImageWithCategoryObject({
+        ...imageData,
+        image_url: ultraImage,
+        thumbnail_url: ultraThumbnail,
+      })
+    }
+
     // If still too large, return error
     throw new Error(
-      `File too large even after compression (${newTotalSize.toFixed(1)}MB). Please use a smaller image or contact support.`,
+      `File too large even after ultra compression (${ultraTotalSize.toFixed(1)}MB). Maximum supported size is 2MB. Please use a smaller image or contact support.`,
     )
   }
 
@@ -855,6 +870,6 @@ export default function SimpleAdminPage() {
 }
 
 const createImageWithCategoryObject = async (imageData: any) => {
-  // Placeholder for actual implementation
-  return { success: true, data: imageData }
+  const { createImageWithCategoryObject: actualFunction } = await import("@/app/actions/admin-actions")
+  return actualFunction(imageData)
 }

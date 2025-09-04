@@ -332,8 +332,6 @@ export async function getOrders(userEmail?: string) {
                    'license_id', oi.license_id,
                    'price', oi.price,
                    'image_id', oi.image_id,
-                   'download_count', oi.download_count,
-                   'download_limit', oi.download_limit,
                    'images', json_build_object(
                      'title', i.title,
                      'thumbnail_url', i.thumbnail_url
@@ -348,7 +346,6 @@ export async function getOrders(userEmail?: string) {
         ORDER BY o.created_at DESC
       `
     } else {
-      // Return all orders for admin users
       result = await sql`
         SELECT o.*, 
                json_agg(
@@ -357,8 +354,6 @@ export async function getOrders(userEmail?: string) {
                    'license_id', oi.license_id,
                    'price', oi.price,
                    'image_id', oi.image_id,
-                   'download_count', oi.download_count,
-                   'download_limit', oi.download_limit,
                    'images', json_build_object(
                      'title', i.title,
                      'thumbnail_url', i.thumbnail_url

@@ -268,8 +268,40 @@
   }
 }
 
-.dark .animate-frame-glow {
-  animation: frame-glow-dark 3s ease-in-out infinite;
+/* Adding gentle rotation animation for the 360 logo */
+@keyframes gentle-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Adding gentle pulse animation for the 360 overlay effect */
+@keyframes gentle-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+/* Adding very subtle neuralia pulse animation for the text portion */
+@keyframes neuralia-pulse {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
 }
 
 @keyframes frame-glow-dark {
@@ -297,6 +329,21 @@
 
 .animate-frame-glow {
   animation: frame-glow 3s ease-in-out infinite;
+}
+
+/* Adding gentle rotation animation class */
+.animate-gentle-rotate {
+  animation: gentle-rotate 20s linear infinite;
+}
+
+/* Adding gentle pulse animation class for the 360 overlay */
+.animate-gentle-pulse {
+  animation: gentle-pulse 4s ease-in-out infinite;
+}
+
+/* Adding neuralia pulse animation class for very slow, subtle pulsing */
+.animate-neuralia-pulse {
+  animation: neuralia-pulse 8s ease-in-out infinite;
 }
 
 .animate-metallic-shine {

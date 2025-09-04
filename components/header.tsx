@@ -4,10 +4,11 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ShoppingCart, Menu, X, Zap } from "lucide-react"
+import { ShoppingCart, Menu, X } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
 import { UserMenu } from "./user-menu"
 import { ThemeToggle } from "./theme-toggle"
+import Image from "next/image"
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -16,19 +17,28 @@ export function Header() {
   const itemCount = (items || []).reduce((sum, item) => sum + (item.quantity || 0), 0)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/20 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/20 bg-black backdrop-blur-xl supports-[backdrop-filter]:bg-black/95">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
-          <Link href="/" className="flex items-center space-x-3 group">
-            <div className="relative">
-              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center group-hover:glow-primary transition-all duration-300">
-                <Zap className="h-5 w-5 text-primary-foreground" />
+          <Link href="/" className="flex items-center group">
+            <div className="relative h-16 w-auto">
+              {/* Animated overlay positioned over the neuralia text part of the logo */}
+              <div className="absolute top-0 left-0 w-48 h-16 flex items-center justify-center pointer-events-none">
+                <div className="w-40 h-12 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 animate-neuralia-pulse opacity-40" />
               </div>
-              <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary to-accent opacity-20 blur-sm group-hover:opacity-40 transition-opacity" />
+              {/* Animated overlay positioned over the 360° part of the logo */}
+              <div className="absolute top-0 right-0 w-12 h-16 flex items-center justify-center pointer-events-none">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 animate-gentle-pulse opacity-60" />
+              </div>
+              <Image
+                src="/images/n3uralia-logo.png"
+                alt="n3uralia 360°"
+                width={320}
+                height={64}
+                className="h-16 w-auto object-contain group-hover:opacity-80 transition-opacity duration-300"
+                priority
+              />
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent">
-              n3urali.art
-            </span>
           </Link>
 
           <nav className="hidden md:flex items-center space-x-12">
@@ -101,7 +111,7 @@ export function Header() {
         </div>
 
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-border/20 py-6 bg-card/30 backdrop-blur-sm rounded-b-lg">
+          <div className="md:hidden border-t border-border/20 py-6 bg-black/95 backdrop-blur-sm rounded-b-lg">
             <nav className="flex flex-col space-y-6">
               <Link
                 href="/gallery"

@@ -9,6 +9,11 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '4mb', // Maximum allowed by Vercel serverless functions
+    },
+  },
 }
 
 export default nextConfig

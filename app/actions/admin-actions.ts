@@ -80,12 +80,17 @@ function compressBase64Image(base64String: string, maxSizeKB = 2000, preserveQua
 function handleDatabaseError(error: any): { success: false; error: string } {
   console.error("[v0] Database error:", error)
 
-  // Handle large file errors
+  // Handle Vercel serverless function payload limits
   if (typeof error === "string") {
-    if (error.includes("Request Entity Too Large") || error.includes("413")) {
+    if (
+      error.includes("Request Entity Too Large") ||
+      error.includes("413") ||
+      error.includes("FUNCTION_PAYLOAD_TOO_LARGE")
+    ) {
       return {
         success: false,
-        error: "File too large for server. Maximum supported size is 150MB. Please contact admin to increase limits.",
+        error:
+          "File payload too large for serverless function. Maximum supported size is 4MB after compression. Please use a smaller image.",
       }
     }
     if (error.includes("timeout") || error.includes("TIMEOUT")) {
@@ -93,6 +98,14 @@ function handleDatabaseError(error: any): { success: false; error: string } {
         success: false,
         error: "Upload timeout. Large files may take longer. Please try again or use a smaller file.",
       }
+    }
+  }
+
+  // Handle Next.js server action body size limits
+  if (error.message && error.message.includes("Body exceeded")) {
+    return {
+      success: false,
+      error: "Upload payload too large. Please use a smaller image or contact support.",
     }
   }
 
@@ -219,6 +232,21 @@ export async function createImageWithCategoryObject(imageData: {
   original_file_size?: number
 }) {
   try {
+    const imageSize = (imageData.image_url.length * 3) / 4 / 1024 / 1024 // Size in MB
+    const thumbnailSize = (imageData.thumbnail_url.length * 3) / 4 / 1024 / 1024 // Size in MB
+    const totalSize = imageSize + thumbnailSize
+
+    console.log(
+      `[v0] Processing upload - Image: ${imageSize.toFixed(1)}MB, Thumbnail: ${thumbnailSize.toFixed(1)}MB, Total: ${totalSize.toFixed(1)}MB`,
+    )
+
+    if (totalSize > 4) {
+      return {
+        success: false,
+        error: `Payload too large (${totalSize.toFixed(1)}MB). Maximum supported size is 4MB. Please use more aggressive compression.`,
+      }
+    }
+
     console.log("[v0] Starting image creation with object data:", {
       ...imageData,
       image_url: imageData.image_url.substring(0, 50) + "...",
@@ -261,28 +289,18 @@ export async function createImageWithCategoryObject(imageData: {
       return { success: false, error: "No default license found" }
     }
 
-    const isLargeFile = imageData.original_file_size && imageData.original_file_size > 50 * 1024 * 1024
-    const compressedImageUrl = await compressBase64Image(imageData.image_url, isLargeFile ? 3000 : 1000, isLargeFile)
-    const compressedThumbnailUrl = await compressBase64Image(imageData.thumbnail_url, 500, false)
-
-    console.log(
-      "[v0] Inserting image with license_id:",
-      licenseId,
-      "price:",
-      imageData.price,
-      "large file:",
-      isLargeFile,
-    )
+    console.log("[v0] Inserting pre-compressed image with license_id:", licenseId, "price:", imageData.price)
     const result = await sql`
       INSERT INTO images (title, description, category_id, license_id, price, image_url, thumbnail_url, 
                          active, featured, metadata)
       VALUES (${imageData.title}, ${imageData.description}, ${categoryId}, ${licenseId}, 
-              ${imageData.price}, ${compressedImageUrl}, ${compressedThumbnailUrl}, 
+              ${imageData.price}, ${imageData.image_url}, ${imageData.thumbnail_url}, 
               true, false, 
               ${JSON.stringify({
                 rights_type: imageData.rights_type,
                 original_file_size: imageData.original_file_size,
                 upload_timestamp: new Date().toISOString(),
+                compression_applied: "client-side",
               })})
       RETURNING *
     `

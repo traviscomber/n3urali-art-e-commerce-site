@@ -752,43 +752,59 @@ export async function updateImageDetails(
       }
     }
 
-    // Build the update query dynamically based on provided fields
-    const updateFields: string[] = []
-    const updateValues: any[] = []
-
-    updateFields.push("title = $" + (updateValues.length + 1))
-    updateValues.push(updates.title)
-
-    updateFields.push("price = $" + (updateValues.length + 1))
-    updateValues.push(updates.price)
-
-    if (updates.description !== undefined) {
-      updateFields.push("description = $" + (updateValues.length + 1))
-      updateValues.push(updates.description)
-    }
-
-    if (categoryId) {
-      updateFields.push("category_id = $" + (updateValues.length + 1))
-      updateValues.push(categoryId)
-    }
-
-    // Update metadata with rights type if provided
+    // Build metadata object for rights type
+    let metadataUpdate = null
     if (updates.rightsType) {
-      updateFields.push("metadata = COALESCE(metadata, '{}') || $" + (updateValues.length + 1))
-      updateValues.push(JSON.stringify({ rights_type: updates.rightsType }))
+      metadataUpdate = JSON.stringify({ rights_type: updates.rightsType })
     }
 
-    updateFields.push("updated_at = NOW()")
-
-    // Add imageId as the last parameter for WHERE clause
-    updateValues.push(imageId)
-
-    const result = await sql`
-      UPDATE images 
-      SET ${sql.unsafe(updateFields.join(", "))}
-      WHERE id = $${updateValues.length}
-      RETURNING *
-    `
+    // Execute update with proper parameterized query
+    let result
+    if (categoryId && metadataUpdate) {
+      result = await sql`
+        UPDATE images 
+        SET title = ${updates.title},
+            price = ${updates.price},
+            description = ${updates.description || null},
+            category_id = ${categoryId},
+            metadata = COALESCE(metadata, '{}') || ${metadataUpdate}::jsonb,
+            updated_at = NOW()
+        WHERE id = ${imageId}
+        RETURNING *
+      `
+    } else if (categoryId) {
+      result = await sql`
+        UPDATE images 
+        SET title = ${updates.title},
+            price = ${updates.price},
+            description = ${updates.description || null},
+            category_id = ${categoryId},
+            updated_at = NOW()
+        WHERE id = ${imageId}
+        RETURNING *
+      `
+    } else if (metadataUpdate) {
+      result = await sql`
+        UPDATE images 
+        SET title = ${updates.title},
+            price = ${updates.price},
+            description = ${updates.description || null},
+            metadata = COALESCE(metadata, '{}') || ${metadataUpdate}::jsonb,
+            updated_at = NOW()
+        WHERE id = ${imageId}
+        RETURNING *
+      `
+    } else {
+      result = await sql`
+        UPDATE images 
+        SET title = ${updates.title},
+            price = ${updates.price},
+            description = ${updates.description || null},
+            updated_at = NOW()
+        WHERE id = ${imageId}
+        RETURNING *
+      `
+    }
 
     if (result.length === 0) {
       return { success: false, error: "Image not found" }

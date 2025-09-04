@@ -40,6 +40,7 @@ export default function PhotoDetailPage() {
   const [showQualityPreview, setShowQualityPreview] = useState(false)
   const [previewPosition, setPreviewPosition] = useState({ x: 50, y: 50 })
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [zoomLevel, setZoomLevel] = useState(6)
   const [show360Viewer, setShow360Viewer] = useState(false)
   const [viewerLoaded, setViewerLoaded] = useState(false)
   const viewerRef = useRef<HTMLDivElement>(null)
@@ -362,8 +363,17 @@ export default function PhotoDetailPage() {
     setMousePosition({ x: e.clientX - rect.left, y: e.clientY - rect.top })
   }
 
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (!showQualityPreview) return
+
+    e.preventDefault()
+    const delta = e.deltaY > 0 ? -1 : 1
+    setZoomLevel((prev) => Math.max(2, Math.min(12, prev + delta)))
+  }
+
   const handleMouseLeave = () => {
     setShowQualityPreview(false)
+    setZoomLevel(6)
   }
 
   if (loading) {
@@ -462,6 +472,7 @@ export default function PhotoDetailPage() {
                     }`}
                     onMouseMove={handleMouseMove}
                     onMouseLeave={handleMouseLeave}
+                    onWheel={handleWheel}
                     onContextMenu={handleContextMenu}
                   >
                     <div
@@ -537,10 +548,10 @@ export default function PhotoDetailPage() {
                       <div
                         className="absolute pointer-events-none z-30 border-2 border-primary shadow-2xl rounded-lg overflow-hidden bg-white"
                         style={{
-                          left: Math.min(mousePosition.x + 20, 400),
-                          top: Math.min(mousePosition.y - 100, 300),
-                          width: "200px",
-                          height: "200px",
+                          left: Math.min(mousePosition.x + 20, 300),
+                          top: Math.min(mousePosition.y - 150, 200),
+                          width: "300px",
+                          height: "300px",
                         }}
                       >
                         <div className="relative w-full h-full">
@@ -549,13 +560,16 @@ export default function PhotoDetailPage() {
                             alt="Quality Preview"
                             className="w-full h-full object-cover"
                             style={{
-                              transform: `scale(4)`,
+                              transform: `scale(${zoomLevel})`,
                               transformOrigin: `${previewPosition.x}% ${previewPosition.y}%`,
                             }}
                           />
                           <div className="absolute inset-0 border border-primary/20"></div>
                           <div className="absolute bottom-0 left-0 right-0 bg-primary text-primary-foreground text-xs px-2 py-1 text-center font-medium">
-                            Original Quality Preview
+                            Original Quality • {zoomLevel}x Zoom
+                          </div>
+                          <div className="absolute top-1 right-1 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                            {zoomLevel}x
                           </div>
                         </div>
                       </div>
@@ -591,14 +605,14 @@ export default function PhotoDetailPage() {
                   Original Resolution Preview • Watermarked • Full commercial license available after purchase
                   {showQualityPreview && (
                     <span className="block mt-1 text-primary font-medium">
-                      Move mouse to explore original quality • This is the actual full-resolution image
+                      Move mouse to explore • Scroll wheel to zoom (2x-12x) • This is the actual full-resolution image
                     </span>
                   )}
                   {!showQualityPreview && (
                     <span className="block mt-1">
                       {image.category_name === "Fisheye"
-                        ? "Click HQ Preview to inspect details of this fisheye image"
-                        : "Click HQ Preview to inspect details or 360° Interactive View for immersive experience"}
+                        ? "Click HQ Preview to inspect details with enhanced zoom (scroll to zoom up to 12x)"
+                        : "Click HQ Preview to inspect details with enhanced zoom or 360° Interactive View for immersive experience"}
                     </span>
                   )}
                 </>

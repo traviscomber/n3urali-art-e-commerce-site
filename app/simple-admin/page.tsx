@@ -76,7 +76,13 @@ export default function SimpleAdminPage() {
   const [error, setError] = useState<string | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const [editingImage, setEditingImage] = useState<string | null>(null)
-  const [editValues, setEditValues] = useState({ title: "", price: "" })
+  const [editValues, setEditValues] = useState({
+    title: "",
+    price: "",
+    description: "",
+    category: "",
+    rightsType: "",
+  })
   const [newImage, setNewImage] = useState<NewImage>({
     title: "",
     description: "",
@@ -470,12 +476,18 @@ export default function SimpleAdminPage() {
 
   const handleEditStart = (image: Image) => {
     setEditingImage(image.id)
-    setEditValues({ title: image.title, price: image.price.toString() })
+    setEditValues({
+      title: image.title,
+      price: image.price.toString(),
+      description: image.description || "",
+      category: image.category_name || "",
+      rightsType: "both", // Default since we don't store this separately
+    })
   }
 
   const handleEditCancel = () => {
     setEditingImage(null)
-    setEditValues({ title: "", price: "" })
+    setEditValues({ title: "", price: "", description: "", category: "", rightsType: "" })
   }
 
   const handleEditSave = async (imageId: string) => {
@@ -490,17 +502,25 @@ export default function SimpleAdminPage() {
       return
     }
 
+    if (!editValues.category) {
+      toast.error("Please select a category")
+      return
+    }
+
     try {
       const { updateImageDetails } = await import("@/app/actions/admin-actions")
       const result = await updateImageDetails(imageId, {
         title: editValues.title.trim(),
         price: price,
+        description: editValues.description.trim(),
+        category: editValues.category,
+        rightsType: editValues.rightsType,
       })
 
       if (result.success) {
         toast.success("Image updated successfully")
         setEditingImage(null)
-        setEditValues({ title: "", price: "" })
+        setEditValues({ title: "", price: "", description: "", category: "", rightsType: "" })
         await loadInitialData()
       } else {
         toast.error("Failed to update image: " + result.error)
@@ -904,6 +924,47 @@ export default function SimpleAdminPage() {
                               placeholder="Image title"
                               className="text-sm"
                             />
+                            <Textarea
+                              value={editValues.description}
+                              onChange={(e) => setEditValues((prev) => ({ ...prev, description: e.target.value }))}
+                              placeholder="Description"
+                              className="text-sm"
+                              rows={2}
+                            />
+                            <Select
+                              value={editValues.category}
+                              onValueChange={(value) => setEditValues((prev) => ({ ...prev, category: value }))}
+                            >
+                              <SelectTrigger className="text-sm">
+                                <SelectValue placeholder="Select category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {categories.map((cat) => (
+                                  <SelectItem key={cat.id} value={cat.name} className="text-sm">
+                                    {getCategoryDisplayName(cat)}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Select
+                              value={editValues.rightsType}
+                              onValueChange={(value) => setEditValues((prev) => ({ ...prev, rightsType: value }))}
+                            >
+                              <SelectTrigger className="text-sm">
+                                <SelectValue placeholder="Select rights type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="both" className="text-sm">
+                                  Both Rights Available
+                                </SelectItem>
+                                <SelectItem value="exclusive" className="text-sm">
+                                  Exclusive Rights
+                                </SelectItem>
+                                <SelectItem value="non-exclusive" className="text-sm">
+                                  Non-Exclusive Rights
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
                             <Input
                               type="number"
                               min="0"
@@ -917,6 +978,7 @@ export default function SimpleAdminPage() {
                         ) : (
                           <>
                             <h4 className="font-medium truncate text-lg">{image.title}</h4>
+                            {image.description && <p className="text-sm text-gray-600 truncate">{image.description}</p>}
                             <p className="text-base text-gray-500">{getCategoryBadgeName(image.category_name || "")}</p>
                             <div className="flex items-center gap-2">
                               {image.license_name?.includes("EXCLUSIVE") && (

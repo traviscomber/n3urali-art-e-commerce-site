@@ -717,17 +717,76 @@ export async function getLicenses() {
   }
 }
 
-export async function updateImageDetails(imageId: string, updates: { title: string; price: number }) {
+export async function updateImageDetails(
+  imageId: string,
+  updates: {
+    title: string
+    price: number
+    description?: string
+    category?: string
+    rightsType?: string
+  },
+) {
   try {
     console.log("[v0] Updating image details for ID:", imageId, "with:", updates)
     const sql = createNeonClient()
 
+    // If category is provided, look up or create the category
+    let categoryId: string | undefined
+    if (updates.category) {
+      console.log("[v0] Looking up category:", updates.category)
+      const categoryResult = await sql`
+        SELECT id FROM categories WHERE name = ${updates.category} LIMIT 1
+      `
+
+      if (categoryResult.length === 0) {
+        console.log("[v0] Category not found, creating new category:", updates.category)
+        const newCategoryResult = await sql`
+          INSERT INTO categories (name, description, active)
+          VALUES (${updates.category}, ${"Auto-created category for " + updates.category}, true)
+          RETURNING id
+        `
+        categoryId = newCategoryResult[0].id
+      } else {
+        categoryId = categoryResult[0].id
+      }
+    }
+
+    // Build the update query dynamically based on provided fields
+    const updateFields: string[] = []
+    const updateValues: any[] = []
+
+    updateFields.push("title = $" + (updateValues.length + 1))
+    updateValues.push(updates.title)
+
+    updateFields.push("price = $" + (updateValues.length + 1))
+    updateValues.push(updates.price)
+
+    if (updates.description !== undefined) {
+      updateFields.push("description = $" + (updateValues.length + 1))
+      updateValues.push(updates.description)
+    }
+
+    if (categoryId) {
+      updateFields.push("category_id = $" + (updateValues.length + 1))
+      updateValues.push(categoryId)
+    }
+
+    // Update metadata with rights type if provided
+    if (updates.rightsType) {
+      updateFields.push("metadata = COALESCE(metadata, '{}') || $" + (updateValues.length + 1))
+      updateValues.push(JSON.stringify({ rights_type: updates.rightsType }))
+    }
+
+    updateFields.push("updated_at = NOW()")
+
+    // Add imageId as the last parameter for WHERE clause
+    updateValues.push(imageId)
+
     const result = await sql`
       UPDATE images 
-      SET title = ${updates.title}, 
-          price = ${updates.price},
-          updated_at = NOW()
-      WHERE id = ${imageId}
+      SET ${sql.unsafe(updateFields.join(", "))}
+      WHERE id = $${updateValues.length}
       RETURNING *
     `
 

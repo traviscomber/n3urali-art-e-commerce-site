@@ -11,19 +11,21 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { User, Download, Settings, LogOut, Shield, CheckCircle } from "lucide-react"
+import { User, Download, Settings, LogOut, Shield, CheckCircle, Loader2 } from "lucide-react"
 import { AuthModal } from "./auth-modal"
 import { useAuth } from "@/lib/contexts/auth-context"
 import { useRouter } from "next/navigation"
 
 export function UserMenu() {
-  const { user: contextUser, isAuthenticated, signOut: contextSignOut } = useAuth()
+  const { user, isAuthenticated, isLoading, signOut } = useAuth()
   const router = useRouter()
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [isSigningOut, setIsSigningOut] = useState(false)
 
   const handleSignOut = async () => {
-    console.log("[v0] Signing out from context")
-    contextSignOut()
+    setIsSigningOut(true)
+    await signOut()
+    setIsSigningOut(false)
   }
 
   const handleAdminDashboard = () => {
@@ -34,9 +36,17 @@ export function UserMenu() {
     return email.substring(0, 2).toUpperCase()
   }
 
-  const isAdmin = contextUser?.user_metadata?.is_admin === true
+  const isAdmin = user?.user_metadata?.is_admin === true
 
-  if (!isAuthenticated || !contextUser) {
+  if (isLoading) {
+    return (
+      <Button variant="ghost" disabled className="h-8 w-8 rounded-full">
+        <Loader2 className="h-4 w-4 animate-spin" />
+      </Button>
+    )
+  }
+
+  if (!isAuthenticated || !user) {
     return (
       <>
         <Button
@@ -57,7 +67,7 @@ export function UserMenu() {
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-primary text-primary-foreground">
-              {getInitials(contextUser.email || "")}
+              {getInitials(user.email || "")}
             </AvatarFallback>
           </Avatar>
           {isAuthenticated && (
@@ -69,13 +79,10 @@ export function UserMenu() {
         <div className="flex items-center justify-start gap-2 p-2">
           <div className="flex flex-col space-y-1 leading-none">
             <div className="flex items-center gap-2">
-              <p className="font-medium text-sm">{contextUser.user_metadata?.full_name || "User"}</p>
+              <p className="font-medium text-sm">{user.user_metadata?.full_name || "User"}</p>
               {isAuthenticated && <CheckCircle className="w-3 h-3 text-green-500" />}
             </div>
-            <p className="w-[200px] truncate text-xs text-muted-foreground">{contextUser.email}</p>
-            <Badge variant="secondary" className="text-xs bg-secondary text-secondary-foreground">
-              Developer Mode
-            </Badge>
+            <p className="w-[200px] truncate text-xs text-muted-foreground">{user.email}</p>
             {isAdmin && (
               <Badge variant="default" className="text-xs bg-primary text-primary-foreground">
                 Admin Access
@@ -106,8 +113,8 @@ export function UserMenu() {
           </>
         )}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut}>
-          <LogOut className="mr-2 h-4 w-4" />
+        <DropdownMenuItem onClick={handleSignOut} disabled={isSigningOut}>
+          {isSigningOut ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogOut className="mr-2 h-4 w-4" />}
           <span>Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -302,7 +302,8 @@ export default function SimpleAdminPage() {
         original_file_size: newImage.file.size,
       }
 
-      const result = await createImageWithCategoryObject(imageData)
+      // Use chunked upload system that automatically handles large files
+      const result = await createImageWithCategoryObjectChunked(imageData)
 
       if (!result.success) {
         throw new Error(result.error || "Failed to save image")
@@ -702,7 +703,9 @@ export default function SimpleAdminPage() {
                           {isDragOver ? "Drop your HQ image here" : "Drag & drop your HQ image here (4K-16K)"}
                         </p>
                         <p className="text-sm text-gray-500">or click to browse files</p>
-                        <p className="text-xs text-gray-400">High Quality Only: JPG, PNG, WebP (Max: 200MB)</p>
+                        <p className="text-xs text-gray-400">
+                          High Quality Only: JPG, PNG, WebP (Max: 60MB with chunked upload)
+                        </p>
                       </div>
                     )}
                   </div>
@@ -913,5 +916,10 @@ export default function SimpleAdminPage() {
 
 const createImageWithCategoryObject = async (imageData: any) => {
   const { createImageWithCategoryObject: actualFunction } = await import("@/app/actions/admin-actions")
+  return actualFunction(imageData)
+}
+
+const createImageWithCategoryObjectChunked = async (imageData: any) => {
+  const { createImageWithCategoryObjectChunked: actualFunction } = await import("@/app/actions/admin-actions")
   return actualFunction(imageData)
 }

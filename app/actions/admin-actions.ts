@@ -1167,4 +1167,214 @@ export async function getDatabaseHealth() {
   }
 }
 
+export async function createChunkedUpload(fileData: {
+  filename: string
+  totalSize: number
+  mimeType: string
+  totalChunks: number
+}) {
+  try {
+    const sql = createNeonClient()
+
+    const result = await sql`
+      INSERT INTO chunked_images (original_filename, total_chunks, total_size, mime_type, upload_status)
+      VALUES (${fileData.filename}, ${fileData.totalChunks}, ${fileData.totalSize}, ${fileData.mimeType}, 'uploading')
+      RETURNING id
+    `
+
+    console.log("[v0] Created chunked upload session:", result[0].id)
+    return { success: true, data: { uploadId: result[0].id } }
+  } catch (error) {
+    return handleDatabaseError(error, "createChunkedUpload")
+  }
+}
+
+export async function uploadChunk(uploadId: string, chunkIndex: number, chunkData: string) {
+  try {
+    const sql = createNeonClient()
+
+    const chunkSize = Math.floor((chunkData.length * 3) / 4) // Convert base64 to bytes
+
+    await sql`
+      INSERT INTO image_chunks (image_id, chunk_index, chunk_data, chunk_size)
+      VALUES (${uploadId}, ${chunkIndex}, ${chunkData}, ${chunkSize})
+      ON CONFLICT (image_id, chunk_index) 
+      DO UPDATE SET chunk_data = EXCLUDED.chunk_data, chunk_size = EXCLUDED.chunk_size
+    `
+
+    console.log("[v0] Uploaded chunk", chunkIndex, "for upload", uploadId, "size:", Math.round(chunkSize / 1024), "KB")
+    return { success: true }
+  } catch (error) {
+    return handleDatabaseError(error, "uploadChunk")
+  }
+}
+
+export async function completeChunkedUpload(
+  uploadId: string,
+  imageMetadata: {
+    title: string
+    description: string
+    category_name: string
+    rights_type: string
+    price: number
+  },
+) {
+  try {
+    const sql = createNeonClient()
+
+    // Get all chunks for this upload
+    const chunks = await sql`
+      SELECT chunk_index, chunk_data 
+      FROM image_chunks 
+      WHERE image_id = ${uploadId} 
+      ORDER BY chunk_index
+    `
+
+    // Get upload metadata
+    const uploadInfo = await sql`
+      SELECT * FROM chunked_images WHERE id = ${uploadId}
+    `
+
+    if (uploadInfo.length === 0) {
+      return { success: false, error: "Upload session not found" }
+    }
+
+    if (chunks.length !== uploadInfo[0].total_chunks) {
+      return { success: false, error: `Missing chunks. Expected ${uploadInfo[0].total_chunks}, got ${chunks.length}` }
+    }
+
+    // Reassemble the image
+    const fullImageData = chunks.map((chunk) => chunk.chunk_data).join("")
+
+    // Create thumbnail from reassembled image
+    const thumbnailDataUrl = await createThumbnailFromBase64(fullImageData)
+
+    // Create the image record using existing function
+    const imageData = {
+      title: imageMetadata.title,
+      description: imageMetadata.description,
+      category_name: imageMetadata.category_name,
+      rights_type: imageMetadata.rights_type,
+      price: imageMetadata.price,
+      image_url: fullImageData,
+      thumbnail_url: thumbnailDataUrl,
+      original_file_size: uploadInfo[0].total_size,
+    }
+
+    const result = await createImageWithCategoryObject(imageData)
+
+    if (result.success) {
+      // Mark upload as complete and cleanup chunks
+      await sql`
+        UPDATE chunked_images 
+        SET upload_status = 'complete', completed_at = NOW() 
+        WHERE id = ${uploadId}
+      `
+
+      // Clean up chunks after successful image creation
+      await sql`DELETE FROM image_chunks WHERE image_id = ${uploadId}`
+
+      console.log("[v0] Completed chunked upload and created image:", result.data[0]?.id)
+    }
+
+    return result
+  } catch (error) {
+    return handleDatabaseError(error, "completeChunkedUpload")
+  }
+}
+
+async function createThumbnailFromBase64(base64Data: string): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement("canvas")
+      const ctx = canvas.getContext("2d")!
+
+      const maxThumbnailSize = 600
+      const ratio = Math.min(maxThumbnailSize / img.width, maxThumbnailSize / img.height)
+
+      canvas.width = img.width * ratio
+      canvas.height = img.height * ratio
+
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+
+      canvas.toBlob(
+        (blob) => {
+          const reader = new FileReader()
+          reader.onload = (e) => resolve(e.target?.result as string)
+          reader.readAsDataURL(blob!)
+        },
+        "image/jpeg",
+        0.95,
+      )
+    }
+    img.src = base64Data
+  })
+}
+
+export async function createImageWithCategoryObjectChunked(imageData: {
+  title: string
+  description: string
+  category_name: string
+  rights_type: string
+  image_url: string
+  thumbnail_url: string
+  price: number
+  original_file_size?: number
+}) {
+  try {
+    const totalPayloadSize = imageData.image_url.length + imageData.thumbnail_url.length
+    const payloadSizeMB = totalPayloadSize / (1024 * 1024)
+
+    console.log("[v0] Processing upload with payload size:", `${payloadSizeMB.toFixed(2)}MB`)
+
+    // If payload is larger than 10MB, use chunked upload
+    if (payloadSizeMB > 10) {
+      console.log("[v0] Using chunked upload for large file:", `${payloadSizeMB.toFixed(2)}MB`)
+
+      const chunkSize = 2 * 1024 * 1024 // 2MB chunks in base64 characters
+      const imageChunks = []
+
+      // Split image into chunks
+      for (let i = 0; i < imageData.image_url.length; i += chunkSize) {
+        imageChunks.push(imageData.image_url.slice(i, i + chunkSize))
+      }
+
+      // Create chunked upload session
+      const uploadSession = await createChunkedUpload({
+        filename: `${imageData.title}.jpg`,
+        totalSize: imageData.original_file_size || 0,
+        mimeType: "image/jpeg",
+        totalChunks: imageChunks.length,
+      })
+
+      if (!uploadSession.success) {
+        return uploadSession
+      }
+
+      // Upload each chunk
+      for (let i = 0; i < imageChunks.length; i++) {
+        const chunkResult = await uploadChunk(uploadSession.data.uploadId, i, imageChunks[i])
+        if (!chunkResult.success) {
+          return chunkResult
+        }
+      }
+
+      // Complete the upload
+      return await completeChunkedUpload(uploadSession.data.uploadId, {
+        title: imageData.title,
+        description: imageData.description,
+        category_name: imageData.category_name,
+        rights_type: imageData.rights_type,
+        price: imageData.price,
+      })
+    } else {
+      // Use regular upload for smaller files
+      return await createImageWithCategoryObject(imageData)
+    }
+  } catch (error) {
+    return handleDatabaseError(error, "createImageWithCategoryObjectChunked")
+  }
+}
+
 export { getCachedImagesPaginated, getCachedCategoriesOptimized }

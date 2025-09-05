@@ -15,36 +15,19 @@ interface User {
 interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
-  signIn: (email: string, name?: string) => void
-  signOut: () => void
-  quickDevMode: () => void
+  isLoading: boolean
+  signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
+  signUp: (email: string, password: string, fullName: string) => Promise<{ success: boolean; error?: string }>
+  signOut: () => Promise<void>
+  checkSession: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const initialState = useMemo(() => {
-    if (typeof window === "undefined") return { user: null, isAuthenticated: false }
-
-    try {
-      const storedAuth = sessionStorage.getItem("dev_auth")
-      const storedUser = sessionStorage.getItem("dev_user")
-
-      if (storedAuth === "true" && storedUser) {
-        return {
-          user: JSON.parse(storedUser),
-          isAuthenticated: true,
-        }
-      }
-    } catch (error) {
-      console.log("[v0] AuthProvider - Error reading initial state:", error)
-    }
-
-    return { user: null, isAuthenticated: false }
-  }, [])
-
-  const [user, setUser] = useState<User | null>(initialState.user)
-  const [isAuthenticated, setIsAuthenticated] = useState(initialState.isAuthenticated)
+  const [user, setUser] = useState<User | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const isInitializedRef = useRef(false)
 
   useEffect(() => {
@@ -54,74 +37,102 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     console.log("[v0] AuthProvider useEffect starting...")
+    checkSession().catch((error) => {
+      console.error("[v0] AuthProvider initialization error:", error)
+      setIsLoading(false)
+    })
     isInitializedRef.current = true
-    console.log("[v0] AuthProvider useEffect completed - State already initialized")
   }, [])
+
+  const checkSession = async () => {
+    try {
+      const response = await fetch("/api/auth/session")
+      const data = await response.json()
+
+      if (data.user) {
+        setUser(data.user)
+        setIsAuthenticated(true)
+      } else {
+        setUser(null)
+        setIsAuthenticated(false)
+      }
+    } catch (error) {
+      console.error("Session check failed:", error)
+      setUser(null)
+      setIsAuthenticated(false)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const contextValue = useMemo(
     () => ({
       user,
       isAuthenticated,
-      signIn: (email: string, name?: string) => {
-        console.log("[v0] AuthContext signIn called with:", { email, name })
-
-        const userData: User = {
-          id: `dev-user-${Date.now()}`,
-          email,
-          user_metadata: {
-            full_name: name || email.split("@")[0],
-            is_admin: true,
-          },
-        }
-
-        console.log("[v0] AuthContext setting user:", userData)
-        setUser(userData)
-        setIsAuthenticated(true)
-
+      isLoading,
+      signIn: async (email: string, password: string) => {
         try {
-          sessionStorage.setItem("dev_auth", "true")
-          sessionStorage.setItem("dev_user", JSON.stringify(userData))
-          console.log("[v0] AuthContext - Persisted to sessionStorage")
+          const response = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+          })
+
+          const data = await response.json()
+
+          if (response.ok) {
+            setUser(data.user)
+            setIsAuthenticated(true)
+            return { success: true }
+          } else {
+            return { success: false, error: data.error || "Login failed" }
+          }
         } catch (error) {
-          console.log("[v0] AuthContext - Error persisting to sessionStorage:", error)
+          console.error("Login error:", error)
+          return { success: false, error: "Network error. Please try again." }
         }
       },
-      quickDevMode: () => {
-        console.log("[v0] AuthContext quickDevMode called")
-        const userData: User = {
-          id: `dev-user-${Date.now()}`,
-          email: "developer@local.dev",
-          user_metadata: {
-            full_name: "Developer",
-            is_admin: true,
-          },
-        }
-
-        setUser(userData)
-        setIsAuthenticated(true)
-
+      signUp: async (email: string, password: string, fullName: string) => {
         try {
-          sessionStorage.setItem("dev_auth", "true")
-          sessionStorage.setItem("dev_user", JSON.stringify(userData))
+          const response = await fetch("/api/auth/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password, fullName }),
+          })
+
+          const data = await response.json()
+
+          if (response.ok) {
+            // Auto-login after successful registration
+            const loginResult = await contextValue.signIn(email, password)
+            return loginResult
+          } else {
+            return { success: false, error: data.error || "Registration failed" }
+          }
         } catch (error) {
-          console.log("[v0] AuthContext - Error persisting to sessionStorage:", error)
+          console.error("Registration error:", error)
+          return { success: false, error: "Network error. Please try again." }
         }
       },
-      signOut: () => {
-        console.log("[v0] AuthContext signOut called")
-        setUser(null)
-        setIsAuthenticated(false)
-
+      signOut: async () => {
         try {
-          sessionStorage.removeItem("dev_auth")
-          sessionStorage.removeItem("dev_user")
-          console.log("[v0] AuthContext - Cleared sessionStorage")
+          await fetch("/api/auth/session", {
+            method: "DELETE",
+          })
         } catch (error) {
-          console.log("[v0] AuthContext - Error clearing sessionStorage:", error)
+          console.error("Logout error:", error)
+        } finally {
+          setUser(null)
+          setIsAuthenticated(false)
         }
       },
+      checkSession,
     }),
-    [user, isAuthenticated],
+    [user, isAuthenticated, isLoading],
   )
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>

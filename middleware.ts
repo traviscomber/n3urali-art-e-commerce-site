@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { verifyJWT } from "@/lib/auth/jwt"
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -7,36 +8,30 @@ export async function middleware(request: NextRequest) {
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
 
   if (isProtectedRoute) {
-    const sessionToken = request.cookies.get("session_token")?.value
+    const authToken = request.cookies.get("auth_token")?.value
 
-    if (!sessionToken) {
+    if (!authToken) {
       const redirectUrl = new URL("/", request.url)
       redirectUrl.searchParams.set("auth", "required")
       return NextResponse.redirect(redirectUrl)
     }
 
     try {
-      const response = await fetch(`${request.nextUrl.origin}/api/auth/session`, {
-        headers: {
-          Cookie: `session_token=${sessionToken}`,
-        },
-      })
+      const payload = verifyJWT(authToken)
 
-      const data = await response.json()
-
-      if (!data.user) {
+      if (!payload) {
         const redirectUrl = new URL("/", request.url)
         redirectUrl.searchParams.set("auth", "required")
         return NextResponse.redirect(redirectUrl)
       }
 
       if (pathname.startsWith("/admin")) {
-        if (!data.user.user_metadata?.is_admin) {
+        if (!payload.isAdmin) {
           return NextResponse.redirect(new URL("/", request.url))
         }
       }
     } catch (error) {
-      console.error("Session validation error:", error)
+      console.error("JWT validation error:", error)
       const redirectUrl = new URL("/", request.url)
       redirectUrl.searchParams.set("auth", "required")
       return NextResponse.redirect(redirectUrl)

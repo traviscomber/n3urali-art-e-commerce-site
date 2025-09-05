@@ -219,8 +219,41 @@ export default function EquirectangularCategoryPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
         <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5 animate-pulse" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(217,119,6,0.15),transparent_70%)]" />
+
+          {/* Animated circles */}
+          <div
+            className="absolute top-20 left-20 w-32 h-32 bg-primary/10 rounded-full animate-bounce"
+            style={{ animationDuration: "3s" }}
+          />
+          <div
+            className="absolute top-40 right-32 w-24 h-24 bg-accent/15 rounded-full animate-ping"
+            style={{ animationDuration: "4s" }}
+          />
+          <div
+            className="absolute bottom-32 left-1/4 w-20 h-20 bg-primary/8 rounded-full animate-pulse"
+            style={{ animationDuration: "2.5s" }}
+          />
+          <div
+            className="absolute top-1/3 right-1/4 w-16 h-16 bg-accent/12 rounded-full animate-bounce"
+            style={{ animationDuration: "3.5s" }}
+          />
+          <div
+            className="absolute bottom-20 right-20 w-28 h-28 bg-primary/6 rounded-full animate-ping"
+            style={{ animationDuration: "5s" }}
+          />
+
+          {/* Floating gradient orbs */}
+          <div
+            className="absolute top-1/4 left-1/3 w-40 h-40 bg-gradient-to-r from-primary/20 to-accent/20 rounded-full blur-xl animate-pulse"
+            style={{ animationDuration: "4s" }}
+          />
+          <div
+            className="absolute bottom-1/4 right-1/3 w-36 h-36 bg-gradient-to-l from-accent/15 to-primary/15 rounded-full blur-xl animate-bounce"
+            style={{ animationDuration: "6s" }}
+          />
+
           <div className="container mx-auto px-6 py-20 relative">
             <div className="max-w-4xl mx-auto text-center space-y-8">
               <div className="space-y-4">
@@ -250,8 +283,42 @@ export default function EquirectangularCategoryPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5" />
+        {/* Animated background layers */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5 animate-pulse" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(217,119,6,0.15),transparent_70%)]" />
+
+        {/* Animated circles */}
+        <div
+          className="absolute top-20 left-20 w-32 h-32 bg-primary/10 rounded-full animate-bounce"
+          style={{ animationDuration: "3s" }}
+        />
+        <div
+          className="absolute top-40 right-32 w-24 h-24 bg-accent/15 rounded-full animate-ping"
+          style={{ animationDuration: "4s" }}
+        />
+        <div
+          className="absolute bottom-32 left-1/4 w-20 h-20 bg-primary/8 rounded-full animate-pulse"
+          style={{ animationDuration: "2.5s" }}
+        />
+        <div
+          className="absolute top-1/3 right-1/4 w-16 h-16 bg-accent/12 rounded-full animate-bounce"
+          style={{ animationDuration: "3.5s" }}
+        />
+        <div
+          className="absolute bottom-20 right-20 w-28 h-28 bg-primary/6 rounded-full animate-ping"
+          style={{ animationDuration: "5s" }}
+        />
+
+        {/* Floating gradient orbs */}
+        <div
+          className="absolute top-1/4 left-1/3 w-40 h-40 bg-gradient-to-r from-primary/20 to-accent/20 rounded-full blur-xl animate-pulse"
+          style={{ animationDuration: "4s" }}
+        />
+        <div
+          className="absolute bottom-1/4 right-1/3 w-36 h-36 bg-gradient-to-l from-accent/15 to-primary/15 rounded-full blur-xl animate-bounce"
+          style={{ animationDuration: "6s" }}
+        />
+
         <div className="container mx-auto px-6 py-20 relative">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <div className="space-y-4">
@@ -267,10 +334,12 @@ export default function EquirectangularCategoryPage() {
                 <span className="text-4xl md:text-6xl">Images</span>
               </h1>
             </div>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-light">
-              Immersive 360-degree panoramic experiences for VR, projection mapping, and architectural visualization
-            </p>
-            <div className="flex flex-wrap justify-center gap-3 mt-10">
+            <div className="opacity-0 hover:opacity-100 transition-opacity duration-500">
+              <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-light">
+                Immersive 360-degree panoramic experiences for VR, projection mapping, and architectural visualization
+              </p>
+            </div>
+            <div className="opacity-0 hover:opacity-100 transition-opacity duration-700 flex flex-wrap justify-center gap-3 mt-10">
               {["360° Interactive", "8K Resolution", "VR Ready", "Professional"].map((feature) => (
                 <Badge
                   key={feature}
@@ -355,13 +424,13 @@ export default function EquirectangularCategoryPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
 
-                <div className="absolute top-3 left-3">
+                <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <Badge className="bg-primary/90 text-primary-foreground text-sm font-semibold px-3 py-1 backdrop-blur-sm">
                     <Play className="h-3 w-3 mr-1" />
                     360°
                   </Badge>
                 </div>
-                <div className="absolute top-3 right-3">
+                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <Badge
                     variant="secondary"
                     className="bg-background/90 text-foreground text-sm font-bold px-3 py-1 backdrop-blur-sm"
@@ -414,7 +483,7 @@ export default function EquirectangularCategoryPage() {
                   <h3 className="font-semibold text-base group-hover:text-primary transition-colors line-clamp-2 leading-tight">
                     {image.title}
                   </h3>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <span className="text-sm text-muted-foreground font-medium">{image.category_name}</span>
                     <Badge variant="outline" className="text-xs border-primary/20 text-primary">
                       High-Res

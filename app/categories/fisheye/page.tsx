@@ -119,13 +119,44 @@ export default function FisheyeCategoryPage() {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5">
-        <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-        <div className="relative container mx-auto px-4 py-16">
+        <div className="absolute inset-0 w-full h-full" style={{ zIndex: 1 }}>
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-accent/20 to-primary/30 animate-pulse"></div>
+          <div
+            className="absolute inset-0 bg-gradient-to-tl from-accent/25 via-transparent to-primary/25 animate-pulse"
+            style={{ animationDuration: "3s" }}
+          ></div>
+          <div className="absolute top-0 left-0 w-full h-full">
+            <div
+              className="absolute top-1/4 left-1/4 w-32 h-32 bg-primary/20 rounded-full blur-xl animate-ping"
+              style={{ animationDuration: "4s" }}
+            ></div>
+            <div
+              className="absolute top-3/4 right-1/4 w-24 h-24 bg-accent/25 rounded-full blur-lg animate-pulse"
+              style={{ animationDuration: "2s" }}
+            ></div>
+            <div
+              className="absolute top-1/2 left-1/2 w-40 h-40 bg-primary/15 rounded-full blur-2xl animate-pulse"
+              style={{ animationDuration: "5s" }}
+            ></div>
+            <div
+              className="absolute top-1/3 right-1/3 w-20 h-20 bg-accent/20 rounded-full blur-lg animate-spin"
+              style={{ animationDuration: "20s" }}
+            ></div>
+          </div>
+        </div>
+
+        <div
+          className="absolute inset-0 bg-gradient-to-br from-background/70 via-background/50 to-background/70"
+          style={{ zIndex: 2 }}
+        />
+
+        <div className="absolute inset-0 bg-grid-pattern opacity-5" style={{ zIndex: 3 }} />
+        <div className="relative container mx-auto px-4 py-16" style={{ zIndex: 10 }}>
           <div className="text-center space-y-6">
             <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5">
               Fisheye Collection
             </Badge>
-            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-6xl font-bold text-primary bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent [text-shadow:_0_0_0_rgb(var(--primary))] leading-tight">
               Fisheye Images
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
@@ -134,15 +165,15 @@ export default function FisheyeCategoryPage() {
             </p>
             <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
               <span className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-primary" />
+                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                 {filteredImages.length} Images Available
               </span>
               <span className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-accent" />
+                <div className="w-2 h-2 rounded-full bg-accent animate-pulse" style={{ animationDelay: "0.5s" }} />
                 High Resolution
               </span>
               <span className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-primary" />
+                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: "1s" }} />
                 Commercial License
               </span>
             </div>

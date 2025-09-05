@@ -39,7 +39,11 @@ export function UserMenu() {
   if (!isAuthenticated || !contextUser) {
     return (
       <>
-        <Button variant="outline" onClick={() => setIsAuthModalOpen(true)} className="bg-transparent">
+        <Button
+          variant="outline"
+          onClick={() => setIsAuthModalOpen(true)}
+          className="bg-transparent text-white border-white/20 hover:bg-white/10 hover:text-white"
+        >
           Sign In
         </Button>
         <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />

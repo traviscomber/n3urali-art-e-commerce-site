@@ -460,21 +460,30 @@ export default function SimpleAdminPage() {
 
     setUploading(true)
     try {
-      const { createHighQualityImage } = await import("@/app/actions/high-quality-upload")
+      const reader = new FileReader()
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
 
-      const result = await createHighQualityImage({
+      const base64Image = await base64Promise
+
+      const result = await createImageWithCategoryObject({
         title,
         description,
         category_name: category,
         rights_type: rightsType,
         price: Number.parseFloat(price),
-        file,
+        image_url: base64Image, // Full quality image
+        thumbnail_url: base64Image, // Use same image as thumbnail for HQ uploads
         resolution: "4K-16K (Full HQ)",
+        active: true,
       })
 
       if (result.success) {
         console.log("[v0] High-quality upload successful")
-        toast.success("High-quality image uploaded successfully without compression!")
+        toast.success("High-quality image uploaded successfully!")
 
         setNewImage({
           title: "",

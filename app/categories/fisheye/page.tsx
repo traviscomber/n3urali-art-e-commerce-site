@@ -51,12 +51,13 @@ const FisheyeCard = React.memo(
     onAddToCart: (image: FisheyeImage) => void
   }) => (
     <Card className="group overflow-hidden bg-background/70 backdrop-blur-sm border-primary/15 hover:border-primary/40 transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
-      <div className="relative aspect-square overflow-hidden cursor-pointer" onClick={() => onPreview(image)}>
+      <div className="relative w-full min-h-[200px] overflow-hidden cursor-pointer" onClick={() => onPreview(image)}>
         <NextImage
           src={image.previewUrl || "/placeholder.svg"}
           alt={image.title}
-          fill
-          className="object-cover transition-transform duration-200 group-hover:scale-105"
+          width={400}
+          height={400}
+          className="w-full h-auto object-contain transition-transform duration-200 group-hover:scale-105"
           loading="lazy"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
           placeholder="blur"

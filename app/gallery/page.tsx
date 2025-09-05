@@ -29,47 +29,87 @@ const ImageCard = React.memo(
     image: GalleryImage
     size?: "normal" | "large" | "xlarge"
     onImageSelect: (image: GalleryImage) => void
-  }) => (
-    <div
-      className={`group relative bg-card rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-border overflow-hidden cursor-pointer ${
-        size === "xlarge"
-          ? "min-w-[420px] max-w-[420px]"
-          : size === "large"
-            ? "min-w-[280px] max-w-[280px]"
-            : "min-w-[250px] max-w-[250px]"
-      }`}
-      onClick={() => onImageSelect(image)}
-    >
+  }) => {
+    const [imageError, setImageError] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+
+    const handleImageError = useCallback(() => {
+      console.log("[v0] Image failed to load:", image.preview_url)
+      setImageError(true)
+      setIsLoading(false)
+    }, [image.preview_url])
+
+    const handleImageLoad = useCallback(() => {
+      setIsLoading(false)
+    }, [])
+
+    const getImageSrc = useCallback(() => {
+      if (imageError) {
+        return "/placeholder.svg?height=400&width=400&text=Image+Unavailable"
+      }
+
+      return image.preview_url || "/placeholder.svg?height=400&width=400&text=No+Image"
+    }, [image.preview_url, imageError])
+
+    return (
       <div
-        className={`relative ${
+        className={`group relative bg-card rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-border overflow-hidden cursor-pointer ${
           size === "xlarge"
-            ? "aspect-video h-[236px]"
+            ? "min-w-[420px] max-w-[420px]"
             : size === "large"
-              ? "aspect-video h-[157px]"
-              : "aspect-video h-[140px]"
-        } overflow-hidden`}
+              ? "min-w-[280px] max-w-[280px]"
+              : "min-w-[250px] max-w-[250px]"
+        }`}
+        onClick={() => onImageSelect(image)}
       >
-        <NextImage
-          src={image.preview_url || "/placeholder.svg"}
-          alt={image.title}
-          fill
-          className="object-contain bg-muted/20 group-hover:scale-105 transition-transform duration-300"
-          loading="lazy"
-          placeholder="blur"
-          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
-        />
-      </div>
-      <div className="p-4 space-y-2">
-        <h3 className="font-semibold text-foreground truncate text-sm">{image.title}</h3>
-        <div className="flex items-center justify-between">
-          <Badge variant="outline" className="text-xs">
-            {image.category === "equirectangular" ? "360°" : "Fisheye"}
-          </Badge>
-          <span className="text-sm font-bold text-emerald-500">${image.price}</span>
+        <div
+          className={`relative ${
+            size === "xlarge"
+              ? "aspect-video h-[236px]"
+              : size === "large"
+                ? "aspect-video h-[157px]"
+                : "aspect-video h-[140px]"
+          } overflow-hidden`}
+        >
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-muted/20">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          )}
+
+          <NextImage
+            src={getImageSrc()}
+            alt={image.title}
+            fill
+            className="object-contain bg-muted/20 group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            onError={handleImageError}
+            onLoad={handleImageLoad}
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+          />
+
+          {imageError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-muted/40">
+              <div className="text-center text-xs text-muted-foreground">
+                <div className="w-8 h-8 mx-auto mb-1 bg-muted-foreground/20 rounded" />
+                Image Unavailable
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="p-4 space-y-2">
+          <h3 className="font-semibold text-foreground truncate text-sm">{image.title}</h3>
+          <div className="flex items-center justify-between">
+            <Badge variant="outline" className="text-xs">
+              {image.category === "equirectangular" ? "360°" : "Fisheye"}
+            </Badge>
+            <span className="text-sm font-bold text-emerald-500">${image.price}</span>
+          </div>
         </div>
       </div>
-    </div>
-  ),
+    )
+  },
 )
 
 ImageCard.displayName = "ImageCard"
@@ -92,20 +132,22 @@ export default function GalleryPage() {
 
   const transformedImages = useMemo(
     () =>
-      images.map((image: any) => ({
-        id: image.id,
-        title: image.title,
-        category:
-          image.category_name?.toLowerCase() === "fisheye" ? ("fisheye" as const) : ("equirectangular" as const),
-        price: Number.parseFloat(image.price) || 0,
-        preview_url:
-          image.category_name?.toLowerCase() === "fisheye"
-            ? image.thumbnail_url || "/placeholder.svg"
-            : image.thumbnail_url || image.image_url,
-        dimensions: "4096x4096",
-        file_size: 20000000,
-        description: image.description || "",
-      })),
+      images.map((image: any) => {
+        const preview_url =
+          image.thumbnail_url || image.image_url || "/placeholder.svg?height=400&width=400&text=No+Image"
+
+        return {
+          id: image.id,
+          title: image.title,
+          category:
+            image.category_name?.toLowerCase() === "fisheye" ? ("fisheye" as const) : ("equirectangular" as const),
+          price: Number.parseFloat(image.price) || 0,
+          preview_url,
+          dimensions: "4096x4096",
+          file_size: 20000000,
+          description: image.description || "",
+        }
+      }),
     [images],
   )
 
@@ -180,15 +222,11 @@ export default function GalleryPage() {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="relative py-16 bg-gradient-to-b from-muted/30 to-background overflow-hidden">
-        {/* Simplified Background Effects */}
         <div className="absolute inset-0">
-          {/* Single animated gradient layer */}
           <div
             className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 animate-pulse"
             style={{ animationDuration: "4s" }}
           />
-
-          {/* Minimal floating elements */}
           <div
             className="absolute top-20 left-10 w-24 h-24 bg-primary/8 rounded-full animate-pulse"
             style={{ animationDuration: "6s" }}
@@ -329,11 +367,15 @@ export default function GalleryPage() {
                   >
                     <div className="relative aspect-square overflow-hidden rounded-lg">
                       <NextImage
-                        src={image.preview_url || "/placeholder.svg"}
+                        src={image.preview_url}
                         alt={image.title}
                         fill
                         className="object-contain bg-muted/10"
                         loading="lazy"
+                        onError={(e) => {
+                          console.log("[v0] Grid image failed to load:", image.preview_url)
+                          e.currentTarget.src = "/placeholder.svg?height=200&width=200&text=Error"
+                        }}
                         placeholder="blur"
                         blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
                       />

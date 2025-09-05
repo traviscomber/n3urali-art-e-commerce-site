@@ -1,6 +1,6 @@
 "use server"
 
-import { neon } from "@neondatabase/serverless"
+import { createNeonClient } from "@/lib/neon/client"
 import { revalidatePath } from "next/cache"
 import { unstable_cache } from "next/cache"
 
@@ -33,54 +33,26 @@ function logQueryPerformance(queryName: string, startTime: number, recordCount?:
   }
 }
 
-function createNeonClient() {
-  const databaseUrl = process.env.DATABASE_URL
-
-  if (!databaseUrl) {
-    console.error("[v0] DATABASE_URL environment variable is missing")
-    throw new Error("DATABASE_URL environment variable is required")
-  }
-
-  console.log("[v0] Creating Neon client with URL:", databaseUrl.substring(0, 30) + "...")
-
-  try {
-    return neon(databaseUrl)
-  } catch (error) {
-    console.error("[v0] Failed to create Neon client:", error)
-    throw error
-  }
-}
-
 const getCachedImages = unstable_cache(
   async () => {
-    console.log("[v0] getCachedImages: Starting database query")
+    const sql = createNeonClient()
 
-    try {
-      const sql = createNeonClient()
-      console.log("[v0] getCachedImages: Neon client created successfully")
+    // Optimized query with selective fields and proper indexing
+    const result = await sql`
+      SELECT 
+        i.id, i.title, i.description, i.price, i.image_url, i.thumbnail_url,
+        i.active, i.featured, i.created_at, i.updated_at,
+        c.name as category_name, c.id as category_id,
+        l.name as license_name, l.description as license_description
+      FROM images i
+      LEFT JOIN categories c ON i.category_id = c.id
+      LEFT JOIN licenses l ON i.license_id = l.id
+      WHERE i.active = true
+      ORDER BY i.featured DESC, i.created_at DESC
+      LIMIT 100
+    `
 
-      // Optimized query with selective fields and proper indexing
-      const result = await sql`
-        SELECT 
-          i.id, i.title, i.description, i.price, i.image_url, i.thumbnail_url,
-          i.active, i.featured, i.created_at, i.updated_at,
-          c.name as category_name, c.id as category_id,
-          l.name as license_name, l.description as license_description
-        FROM images i
-        LEFT JOIN categories c ON i.category_id = c.id
-        LEFT JOIN licenses l ON i.license_id = l.id
-        WHERE i.active = true
-        ORDER BY i.featured DESC, i.created_at DESC
-        LIMIT 100
-      `
-
-      console.log("[v0] getCachedImages: Query executed successfully, found", result.length, "images")
-      return result
-    } catch (error) {
-      console.error("[v0] getCachedImages: Database query failed:", error)
-      // Return empty array instead of throwing to prevent app crash
-      return []
-    }
+    return result
   },
   ["images-list"],
   {
@@ -599,47 +571,14 @@ export async function createImageWithCategoryObject(imageData: {
 }
 
 export async function getImages() {
-  console.log("[v0] getImages: Starting image fetch")
-
   try {
-    // Test database connection first
-    console.log("[v0] getImages: Testing database connection")
-    const sql = createNeonClient()
-    await sql`SELECT 1 as test`
-    console.log("[v0] getImages: Database connection test successful")
-
     const data = await getCachedImages()
-    console.log("[v0] getImages: Successfully fetched", data.length, "images")
-
     return { success: true, data }
   } catch (error) {
-    console.error("[v0] getImages: Error occurred:", error)
-
-    // Provide detailed error information for debugging
-    const errorMessage = error instanceof Error ? error.message : String(error)
-
-    if (errorMessage.includes("DATABASE_URL")) {
-      console.error("[v0] getImages: Database URL configuration issue")
-      return {
-        success: false,
-        error: "Database configuration error",
-        data: [],
-      }
-    }
-
-    if (errorMessage.includes("connection") || errorMessage.includes("network")) {
-      console.error("[v0] getImages: Database connection issue")
-      return {
-        success: false,
-        error: "Database connection failed",
-        data: [],
-      }
-    }
-
+    console.error("[v0] Get images error:", error)
     return {
       success: false,
-      error: errorMessage,
-      data: [],
+      error: error instanceof Error ? error.message : "Unknown error",
     }
   }
 }

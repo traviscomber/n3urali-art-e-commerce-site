@@ -1,4 +1,3 @@
-import { put } from "@vercel/blob"
 import { type NextRequest, NextResponse } from "next/server"
 
 export async function POST(request: NextRequest) {
@@ -11,30 +10,44 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 })
     }
 
-    const timestamp = Date.now()
-    const originalFilename = `original-${timestamp}-${file.name}`
-    const originalBlob = await put(originalFilename, file, {
-      access: "public",
-    })
+    // Check file size - limit to 50MB for base64 storage
+    const maxSize = 50 * 1024 * 1024 // 50MB
+    if (file.size > maxSize) {
+      return NextResponse.json(
+        {
+          error: `File too large. Maximum size is ${maxSize / (1024 * 1024)}MB`,
+        },
+        { status: 400 },
+      )
+    }
 
-    let thumbnailUrl = null
+    // Convert original file to base64 without compression
+    const originalArrayBuffer = await file.arrayBuffer()
+    const originalBase64 = Buffer.from(originalArrayBuffer).toString("base64")
+    const originalDataUrl = `data:${file.type};base64,${originalBase64}`
+
+    // Convert thumbnail to base64 if provided
+    let thumbnailDataUrl = null
     if (thumbnail) {
-      const thumbnailFilename = `thumbnail-${timestamp}-${file.name}`
-      const thumbnailBlob = await put(thumbnailFilename, thumbnail, {
-        access: "public",
-      })
-      thumbnailUrl = thumbnailBlob.url
+      const thumbnailArrayBuffer = await thumbnail.arrayBuffer()
+      const thumbnailBase64 = Buffer.from(thumbnailArrayBuffer).toString("base64")
+      thumbnailDataUrl = `data:${thumbnail.type};base64,${thumbnailBase64}`
     }
 
     return NextResponse.json({
-      originalUrl: originalBlob.url,
-      thumbnailUrl,
+      originalUrl: originalDataUrl,
+      thumbnailUrl: thumbnailDataUrl,
       filename: file.name,
       size: file.size,
       type: file.type,
     })
   } catch (error) {
     console.error("Upload error:", error)
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "Upload failed",
+      },
+      { status: 500 },
+    )
   }
 }

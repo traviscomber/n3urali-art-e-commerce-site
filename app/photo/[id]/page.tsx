@@ -171,23 +171,31 @@ export default function PhotoDetailPage() {
       );
     `
 
-    for (let i = 0; i < 50; i++) {
-      const watermark = document.createElement("div")
-      watermark.textContent = "n3urali.art"
-      watermark.style.cssText = `
-        position: absolute;
-        color: rgba(255,255,255,0.12);
-        font-size: 16px;
-        font-weight: 700;
-        transform: rotate(-45deg);
-        user-select: none;
-        pointer-events: none;
-        left: ${(i % 10) * 10}%;
-        top: ${Math.floor(i / 10) * 20}%;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-      `
-      watermarkOverlay.appendChild(watermark)
-    }
+    // Reduced from 60 watermarks to just 2 corner watermarks
+    const watermarkStyles = `
+      position: absolute;
+      color: rgba(255,255,255,0.20);
+      font-size: 16px;
+      font-weight: 700;
+      transform: rotate(-45deg);
+      user-select: none;
+      pointer-events: none;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+      user-select: none;
+      WebkitUserSelect: none;
+      MozUserSelect: none;
+    `
+
+    const topLeftWatermark = document.createElement("div")
+    topLeftWatermark.textContent = "n3urali.art"
+    topLeftWatermark.style.cssText = `${watermarkStyles} left: 5%; top: 5%;`
+
+    const bottomRightWatermark = document.createElement("div")
+    bottomRightWatermark.textContent = "n3urali.art"
+    bottomRightWatermark.style.cssText = `${watermarkStyles} right: 5%; bottom: 5%;`
+
+    watermarkOverlay.appendChild(topLeftWatermark)
+    watermarkOverlay.appendChild(bottomRightWatermark)
 
     const protectionOverlay = document.createElement("div")
     protectionOverlay.style.cssText = `
@@ -509,24 +517,36 @@ export default function PhotoDetailPage() {
                             style={{ maxWidth: "100%", maxHeight: "100%" }}
                           />
                           <div className="absolute inset-0 overflow-hidden">
-                            {Array.from({ length: 60 }).map((_, i) => (
-                              <div
-                                key={i}
-                                className="absolute text-white/12 font-bold text-xl transform -rotate-45 select-none pointer-events-none"
-                                style={{
-                                  left: `${(i % 10) * 10}%`,
-                                  top: `${Math.floor(i / 10) * 16.67}%`,
-                                  textStroke: "1px rgba(255,255,255,0.08)",
-                                  WebkitTextStroke: "1px rgba(255,255,255,0.08)",
-                                  textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
-                                  userSelect: "none",
-                                  WebkitUserSelect: "none",
-                                  MozUserSelect: "none",
-                                }}
-                              >
-                                n3urali.art
-                              </div>
-                            ))}
+                            <div
+                              className="absolute text-white/20 font-bold text-sm transform -rotate-45 select-none pointer-events-none"
+                              style={{
+                                left: "5%",
+                                top: "5%",
+                                textStroke: "1px rgba(255,255,255,0.08)",
+                                WebkitTextStroke: "1px rgba(255,255,255,0.08)",
+                                textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
+                                userSelect: "none",
+                                WebkitUserSelect: "none",
+                                MozUserSelect: "none",
+                              }}
+                            >
+                              n3urali.art
+                            </div>
+                            <div
+                              className="absolute text-white/20 font-bold text-sm transform -rotate-45 select-none pointer-events-none"
+                              style={{
+                                right: "5%",
+                                bottom: "5%",
+                                textStroke: "1px rgba(255,255,255,0.08)",
+                                WebkitTextStroke: "1px rgba(255,255,255,0.08)",
+                                textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
+                                userSelect: "none",
+                                WebkitUserSelect: "none",
+                                MozUserSelect: "none",
+                              }}
+                            >
+                              n3urali.art
+                            </div>
                           </div>
                         </div>
                       </div>

@@ -216,15 +216,11 @@ export default function FisheyeCategoryPage() {
                   style={{ userSelect: "none", WebkitUserSelect: "none" }}
                 />
                 <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/40 text-6xl font-bold rotate-12 select-none">
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/25 text-2xl font-bold rotate-12 select-none">
                     n3uralia.art
                   </div>
-                  <div className="absolute top-8 left-8 text-white/50 text-lg font-bold select-none">n3uralia.art</div>
-                  <div className="absolute top-8 right-8 text-white/50 text-lg font-bold select-none">n3uralia.art</div>
-                  <div className="absolute bottom-8 left-8 text-white/50 text-lg font-bold select-none">
-                    n3uralia.art
-                  </div>
-                  <div className="absolute bottom-8 right-8 text-white/50 text-lg font-bold select-none">
+                  <div className="absolute top-4 left-4 text-white/30 text-sm font-bold select-none">n3uralia.art</div>
+                  <div className="absolute bottom-4 right-4 text-white/30 text-sm font-bold select-none">
                     n3uralia.art
                   </div>
                 </div>
@@ -339,15 +335,11 @@ export default function FisheyeCategoryPage() {
                 />
                 {/* Multiple watermark layers */}
                 <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/40 text-6xl font-bold rotate-12 select-none">
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/25 text-3xl font-bold rotate-12 select-none">
                     n3uralia.art
                   </div>
-                  <div className="absolute top-8 left-8 text-white/50 text-lg font-bold select-none">n3uralia.art</div>
-                  <div className="absolute top-8 right-8 text-white/50 text-lg font-bold select-none">n3uralia.art</div>
-                  <div className="absolute bottom-8 left-8 text-white/50 text-lg font-bold select-none">
-                    n3uralia.art
-                  </div>
-                  <div className="absolute bottom-8 right-8 text-white/50 text-lg font-bold select-none">
+                  <div className="absolute top-4 left-4 text-white/30 text-sm font-bold select-none">n3uralia.art</div>
+                  <div className="absolute bottom-4 right-4 text-white/30 text-sm font-bold select-none">
                     n3uralia.art
                   </div>
                 </div>

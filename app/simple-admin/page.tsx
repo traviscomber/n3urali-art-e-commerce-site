@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
 import { Loader2, Upload, Eye, Trash2, Database, BarChart3, Crown, Edit2, Check, X } from "lucide-react"
+import { createHighQualityImage } from "@/app/actions/high-quality-upload"
 
 interface Image {
   id: string
@@ -92,6 +93,7 @@ export default function SimpleAdminPage() {
     file: null,
     preview: "",
   })
+  const [highQualityMode, setHighQualityMode] = useState(false)
 
   useEffect(() => {
     console.log("[v0] SimpleAdmin: Clearing any existing auth and forcing login")
@@ -449,6 +451,71 @@ export default function SimpleAdminPage() {
     }
   }
 
+  const handleHighQualityUpload = async (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log("[v0] Starting high-quality upload for", newImage.file?.name)
+
+    if (!newImage.file) {
+      toast.error("Please select an image file")
+      return
+    }
+
+    if (!newImage.title || !newImage.category || !newImage.rightsType || !newImage.price) {
+      toast.error("Please fill in all required fields")
+      return
+    }
+
+    setUploading(true)
+    setError(null)
+
+    try {
+      // Determine resolution based on file size and dimensions
+      const resolution =
+        newImage.file.size > 50 * 1024 * 1024
+          ? "16K (16384x16384)"
+          : newImage.file.size > 20 * 1024 * 1024
+            ? "8K (8192x8192)"
+            : "4K (4096x4096)"
+
+      const result = await createHighQualityImage({
+        title: newImage.title,
+        description: newImage.description,
+        category_name: newImage.category,
+        rights_type: newImage.rightsType,
+        price: Number.parseFloat(newImage.price) || 0,
+        file: newImage.file,
+        resolution: resolution,
+      })
+
+      if (result.success) {
+        console.log("[v0] High-quality upload successful")
+        toast.success("High-quality image uploaded successfully without compression!")
+
+        setNewImage({
+          title: "",
+          description: "",
+          category: "",
+          rightsType: "both",
+          price: "",
+          file: null,
+          preview: "",
+        })
+
+        await loadInitialData()
+      } else {
+        console.error("[v0] High-quality upload failed:", result.error)
+        setError(result.error || "High-quality upload failed")
+        toast.error("Upload failed: " + (result.error || "Unknown error"))
+      }
+    } catch (error) {
+      console.error("[v0] High-quality upload error:", error)
+      setError("High-quality upload failed")
+      toast.error("High-quality upload failed")
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const handleDeleteImage = async (imageId: string) => {
     if (!confirm("Are you sure you want to delete this image?")) return
 
@@ -668,7 +735,7 @@ export default function SimpleAdminPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleImageUpload} className="space-y-4">
+              <form onSubmit={highQualityMode ? handleHighQualityUpload : handleImageUpload} className="space-y-4">
                 <div>
                   <Label htmlFor="title" className="text-lg font-medium">
                     Title *
@@ -869,6 +936,19 @@ export default function SimpleAdminPage() {
                   </div>
                 )}
 
+                <div className="flex items-center space-x-2 mb-4">
+                  <input
+                    type="checkbox"
+                    id="highQualityMode"
+                    checked={highQualityMode}
+                    onChange={(e) => setHighQualityMode(e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                  <label htmlFor="highQualityMode" className="text-sm font-medium">
+                    High-Quality Mode (4K-16K without compression)
+                  </label>
+                </div>
+
                 <Button
                   type="submit"
                   disabled={uploading || !newImage.file}
@@ -877,10 +957,10 @@ export default function SimpleAdminPage() {
                   {uploading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Uploading...
+                      {highQualityMode ? "Uploading High-Quality..." : "Uploading..."}
                     </>
                   ) : (
-                    "Upload Full Resolution Photo"
+                    `${highQualityMode ? "Upload High-Quality" : "Upload Compressed"} Image`
                   )}
                 </Button>
               </form>

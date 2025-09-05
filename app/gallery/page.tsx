@@ -27,15 +27,27 @@ const ImageCard = React.memo(
     onImageSelect,
   }: {
     image: GalleryImage
-    size?: "normal" | "large"
+    size?: "normal" | "large" | "xlarge"
     onImageSelect: (image: GalleryImage) => void
   }) => (
     <div
-      className={`group relative bg-card rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-border overflow-hidden cursor-pointer ${size === "large" ? "min-w-[280px] max-w-[280px]" : "min-w-[250px] max-w-[250px]"}`}
+      className={`group relative bg-card rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-border overflow-hidden cursor-pointer ${
+        size === "xlarge"
+          ? "min-w-[420px] max-w-[420px]"
+          : size === "large"
+            ? "min-w-[280px] max-w-[280px]"
+            : "min-w-[250px] max-w-[250px]"
+      }`}
       onClick={() => onImageSelect(image)}
     >
       <div
-        className={`relative ${size === "large" ? "aspect-video h-[157px]" : "aspect-video h-[140px]"} overflow-hidden`}
+        className={`relative ${
+          size === "xlarge"
+            ? "aspect-video h-[236px]"
+            : size === "large"
+              ? "aspect-video h-[157px]"
+              : "aspect-video h-[140px]"
+        } overflow-hidden`}
       >
         <NextImage
           src={image.preview_url || "/placeholder.svg"}
@@ -278,7 +290,7 @@ export default function GalleryPage() {
                 equirectangularImages
                   .slice(0, 6)
                   .map((image) => (
-                    <ImageCard key={image.id} image={image} size="large" onImageSelect={handleImageSelect} />
+                    <ImageCard key={image.id} image={image} size="xlarge" onImageSelect={handleImageSelect} />
                   ))
               ) : (
                 <div className="text-center py-8 w-full">
@@ -324,7 +336,7 @@ export default function GalleryPage() {
                 fisheyeImages
                   .slice(0, 6)
                   .map((image) => (
-                    <ImageCard key={image.id} image={image} size="large" onImageSelect={handleImageSelect} />
+                    <ImageCard key={image.id} image={image} size="xlarge" onImageSelect={handleImageSelect} />
                   ))
               ) : (
                 <div className="text-center py-8 w-full">

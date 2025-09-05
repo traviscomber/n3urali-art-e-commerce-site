@@ -11,7 +11,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
 import { Loader2, Upload, Eye, Trash2, Database, BarChart3, Crown, Edit2, Check, X } from "lucide-react"
-import { createHighQualityImage } from "@/app/actions/high-quality-upload"
 
 interface Image {
   id: string
@@ -451,40 +450,26 @@ export default function SimpleAdminPage() {
     }
   }
 
-  const handleHighQualityUpload = async (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("[v0] Starting high-quality upload for", newImage.file?.name)
+  const handleHighQualityUpload = async () => {
+    const { file, title, description, category, rightsType, price } = newImage
 
-    if (!newImage.file) {
-      toast.error("Please select an image file")
-      return
-    }
-
-    if (!newImage.title || !newImage.category || !newImage.rightsType || !newImage.price) {
-      toast.error("Please fill in all required fields")
+    if (!file || !title || !description || !category || !rightsType || !price) {
+      toast.error("Please fill in all fields and select a file")
       return
     }
 
     setUploading(true)
-    setError(null)
-
     try {
-      // Determine resolution based on file size and dimensions
-      const resolution =
-        newImage.file.size > 50 * 1024 * 1024
-          ? "16K (16384x16384)"
-          : newImage.file.size > 20 * 1024 * 1024
-            ? "8K (8192x8192)"
-            : "4K (4096x4096)"
+      const { createHighQualityImage } = await import("@/app/actions/high-quality-upload")
 
       const result = await createHighQualityImage({
-        title: newImage.title,
-        description: newImage.description,
-        category_name: newImage.category,
-        rights_type: newImage.rightsType,
-        price: Number.parseFloat(newImage.price) || 0,
-        file: newImage.file,
-        resolution: resolution,
+        title,
+        description,
+        category_name: category,
+        rights_type: rightsType,
+        price: Number.parseFloat(price),
+        file,
+        resolution: "4K-16K (Full HQ)",
       })
 
       if (result.success) {

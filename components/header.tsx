@@ -44,28 +44,28 @@ export function Header() {
           <nav className="hidden md:flex items-center space-x-12">
             <Link
               href="/gallery"
-              className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"
+              className="relative text-sm font-medium text-white hover:text-primary transition-all duration-300 group"
             >
               Gallery
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
               href="/categories/equirectangular"
-              className="relative text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-300 group"
+              className="relative text-sm font-medium text-gray-300 hover:text-primary transition-all duration-300 group"
             >
               360° Images
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
               href="/categories/fisheye"
-              className="relative text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-300 group"
+              className="relative text-sm font-medium text-gray-300 hover:text-primary transition-all duration-300 group"
             >
               Fisheye
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
               href="/account/orders"
-              className="relative text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-300 group"
+              className="relative text-sm font-medium text-gray-300 hover:text-primary transition-all duration-300 group"
             >
               My Orders
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
@@ -95,7 +95,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden hover:bg-card/50 transition-all duration-300"
+              className="md:hidden hover:bg-card/50 transition-all duration-300 text-white hover:text-primary"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -108,28 +108,28 @@ export function Header() {
             <nav className="flex flex-col space-y-6">
               <Link
                 href="/gallery"
-                className="text-base font-medium text-foreground hover:text-primary transition-colors px-2"
+                className="text-base font-medium text-white hover:text-primary transition-colors px-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Gallery
               </Link>
               <Link
                 href="/categories/equirectangular"
-                className="text-base font-medium text-muted-foreground hover:text-primary transition-colors px-2"
+                className="text-base font-medium text-gray-300 hover:text-primary transition-colors px-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 360° Images
               </Link>
               <Link
                 href="/categories/fisheye"
-                className="text-base font-medium text-muted-foreground hover:text-primary transition-colors px-2"
+                className="text-base font-medium text-gray-300 hover:text-primary transition-colors px-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Fisheye
               </Link>
               <Link
                 href="/account/orders"
-                className="text-base font-medium text-muted-foreground hover:text-primary transition-colors px-2"
+                className="text-base font-medium text-gray-300 hover:text-primary transition-colors px-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 My Orders

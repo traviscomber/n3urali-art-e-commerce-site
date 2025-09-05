@@ -313,7 +313,7 @@ function handleDatabaseError(error: any, functionName?: string): { success: fals
       return {
         success: false,
         error:
-          "File payload too large for serverless function. Maximum supported size is 2MB after compression. Please use a smaller image.",
+          "File payload too large for serverless function. Maximum supported size is 10MB after compression. Please use a smaller image.",
       }
     }
     if (error.includes("timeout") || error.includes("TIMEOUT")) {
@@ -478,11 +478,11 @@ export async function createImageWithCategoryObject(imageData: {
 
     console.log("[v0] Total payload size:", `${payloadSizeMB.toFixed(2)}MB`)
 
-    if (payloadSizeMB > 2) {
+    if (payloadSizeMB > 10) {
       console.log("[v0] Payload too large for database:", `${payloadSizeMB.toFixed(2)}MB`)
       return {
         success: false,
-        error: `File too large for database storage (${payloadSizeMB.toFixed(1)}MB). Maximum supported size is 2MB. Please use a smaller image or compress the file before uploading.`,
+        error: `File too large for database storage (${payloadSizeMB.toFixed(1)}MB). Maximum supported size is 10MB. Please use a smaller image or compress the file before uploading.`,
       }
     }
 
@@ -533,7 +533,7 @@ export async function createImageWithCategoryObject(imageData: {
                   rights_type: imageData.rights_type,
                   original_file_size: imageData.original_file_size,
                   upload_timestamp: new Date().toISOString(),
-                  storage_type: "base64_database",
+                  storage_type: "neon_database", // Updated storage type to reflect Neon database storage
                 })})
         RETURNING *
       `
@@ -552,7 +552,7 @@ export async function createImageWithCategoryObject(imageData: {
       ) {
         return {
           success: false,
-          error: `Image file too large for database storage (${payloadSizeMB.toFixed(1)}MB). Please use a smaller image (max: 2MB) or compress the file before uploading.`,
+          error: `Image file too large for database storage (${payloadSizeMB.toFixed(1)}MB). Please use a smaller image (max: 10MB) or compress the file before uploading.`,
         }
       }
 

@@ -249,137 +249,47 @@ export default function SimpleAdminPage() {
     }
   }
 
-  const handleImageUpload = async (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("[v0] Starting Blob upload for", newImage.file?.name)
-
-    if (!newImage.file) {
-      toast.error("Please select an image file")
-      return
-    }
-
-    if (!newImage.title || !newImage.category || !newImage.rightsType || !newImage.price) {
-      toast.error("Please fill in all required fields including price")
-      return
-    }
+  const handleImageUpload = async () => {
+    if (!newImage.file) return
 
     setUploading(true)
-    setError(null)
-
     try {
-      const fileSize = newImage.file.size
-      const isLargeFile = fileSize > 4 * 1024 * 1024 // 4MB threshold
+      console.log("[v0] Starting image upload process...")
 
-      let originalUrl: string
-      let thumbnailUrl: string | null = null
+      const originalDataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader()
+        reader.onload = (e) => resolve(e.target?.result as string)
+        reader.readAsDataURL(newImage.file!)
+      })
 
-      if (isLargeFile) {
-        console.log("[v0] Large file detected, using direct Blob upload...")
+      // Create thumbnail
+      const thumbnailCanvas = document.createElement("canvas")
+      const thumbnailCtx = thumbnailCanvas.getContext("2d")!
+      const img = new Image()
 
-        // Get upload configuration for large files
-        const configResponse = await fetch("/api/upload-large", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            filename: newImage.file.name,
-            fileSize: fileSize,
-            fileType: newImage.file.type,
-          }),
-        })
+      const thumbnailDataUrl = await new Promise<string>((resolve) => {
+        img.onload = () => {
+          const maxThumbnailSize = 600
+          const ratio = Math.min(maxThumbnailSize / img.width, maxThumbnailSize / img.height)
 
-        if (!configResponse.ok) {
-          throw new Error(`Failed to get upload configuration: ${configResponse.status}`)
+          thumbnailCanvas.width = img.width * ratio
+          thumbnailCanvas.height = img.height * ratio
+
+          thumbnailCtx.drawImage(img, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height)
+          thumbnailCanvas.toBlob(
+            (blob) => {
+              const reader = new FileReader()
+              reader.onload = (e) => resolve(e.target?.result as string)
+              reader.readAsDataURL(blob!)
+            },
+            "image/jpeg",
+            0.95,
+          )
         }
+        img.src = originalDataUrl
+      })
 
-        const config = await configResponse.json()
-
-        // Direct upload to Vercel Blob using provided token
-        const { put } = await import("@vercel/blob")
-
-        const originalBlob = await put(config.originalFilename, newImage.file, {
-          access: "public",
-          token: config.token,
-        })
-
-        originalUrl = originalBlob.url
-        console.log("[v0] Direct Blob upload successful for large file")
-
-        // Create and upload thumbnail
-        const thumbnailCanvas = document.createElement("canvas")
-        const thumbnailCtx = thumbnailCanvas.getContext("2d")!
-        const img = new Image()
-
-        const thumbnailPromise = new Promise<Blob>((resolve) => {
-          img.onload = () => {
-            const maxThumbnailSize = 600
-            const ratio = Math.min(maxThumbnailSize / img.width, maxThumbnailSize / img.height)
-
-            thumbnailCanvas.width = img.width * ratio
-            thumbnailCanvas.height = img.height * ratio
-
-            thumbnailCtx.drawImage(img, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height)
-            thumbnailCanvas.toBlob((blob) => resolve(blob!), "image/jpeg", 0.95)
-          }
-          img.src = URL.createObjectURL(newImage.file!)
-        })
-
-        const thumbnailBlob = await thumbnailPromise
-        const thumbnailBlobResult = await put(config.thumbnailFilename, thumbnailBlob, {
-          access: "public",
-          token: config.token,
-        })
-
-        thumbnailUrl = thumbnailBlobResult.url
-      } else {
-        console.log("[v0] Small file, using server upload...")
-
-        // Use existing server upload for smaller files
-        const formData = new FormData()
-        formData.append("file", newImage.file)
-
-        // Create thumbnail for browsing
-        const thumbnailCanvas = document.createElement("canvas")
-        const thumbnailCtx = thumbnailCanvas.getContext("2d")!
-        const img = new Image()
-
-        const thumbnailPromise = new Promise<Blob>((resolve) => {
-          img.onload = () => {
-            const maxThumbnailSize = 600
-            const ratio = Math.min(maxThumbnailSize / img.width, maxThumbnailSize / img.height)
-
-            thumbnailCanvas.width = img.width * ratio
-            thumbnailCanvas.height = img.height * ratio
-
-            thumbnailCtx.drawImage(img, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height)
-            thumbnailCanvas.toBlob((blob) => resolve(blob!), "image/jpeg", 0.95)
-          }
-          img.src = URL.createObjectURL(newImage.file!)
-        })
-
-        const thumbnailBlob = await thumbnailPromise
-        formData.append("thumbnail", thumbnailBlob)
-
-        console.log("[v0] Uploading to Vercel Blob...")
-        const uploadResponse = await fetch("/api/upload-image", {
-          method: "POST",
-          body: formData,
-        })
-
-        if (!uploadResponse.ok) {
-          throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`)
-        }
-
-        const uploadResult = await uploadResponse.json()
-
-        if (uploadResult.error) {
-          throw new Error(uploadResult.error)
-        }
-
-        originalUrl = uploadResult.originalUrl
-        thumbnailUrl = uploadResult.thumbnailUrl
-      }
-
-      console.log("[v0] Blob upload successful, saving to database...")
+      console.log("[v0] Images converted to base64, saving to database...")
 
       const imageData = {
         title: newImage.title,
@@ -387,44 +297,31 @@ export default function SimpleAdminPage() {
         category_name: newImage.category,
         rights_type: newImage.rightsType,
         price: Number.parseFloat(newImage.price) || 0,
+        image_url: originalDataUrl,
+        thumbnail_url: thumbnailDataUrl,
         original_file_size: newImage.file.size,
-        image_url: originalUrl, // Blob URL for original
-        thumbnail_url: thumbnailUrl || originalUrl, // Blob URL for thumbnail
-        resolution: `Original Quality (${(fileSize / (1024 * 1024)).toFixed(2)}MB)`,
-        active: true,
       }
 
       const result = await createImageWithCategoryObject(imageData)
 
-      if (result.success) {
-        console.log("[v0] Original quality upload completed successfully")
-        toast.success("Image uploaded in original quality!")
-
-        setNewImage({
-          title: "",
-          description: "",
-          category: "",
-          rightsType: "both",
-          price: "",
-          file: null,
-          preview: "",
-        })
-
-        await loadInitialData()
-      } else {
-        console.error("[v0] Upload failed:", result.error)
-        setError(result.error || "Upload failed")
-        toast.error("Upload failed: " + (result.error || "Unknown error"))
+      if (!result.success) {
+        throw new Error(result.error || "Failed to save image")
       }
-    } catch (error) {
-      console.error("[v0] Upload error:", error)
-      if (error instanceof Error) {
-        setError("Upload failed: " + error.message)
-        toast.error("Upload failed: " + error.message)
-      } else {
-        setError("Upload failed")
-        toast.error("Upload failed")
-      }
+
+      console.log("[v0] Image saved successfully to database")
+      setNewImage({
+        title: "",
+        description: "",
+        category: "",
+        rightsType: "both",
+        price: "",
+        file: null,
+        preview: "",
+      })
+      await loadInitialData()
+    } catch (error: any) {
+      console.error("[v0] Upload error:", error.message || error)
+      alert(`Upload error: ${error.message || error}`)
     } finally {
       setUploading(false)
     }
@@ -649,7 +546,7 @@ export default function SimpleAdminPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleImageUpload} className="space-y-4">
+              <div className="space-y-4">
                 <div>
                   <Label htmlFor="title" className="text-lg font-medium">
                     Title *
@@ -851,13 +748,13 @@ export default function SimpleAdminPage() {
                 )}
 
                 <Button
-                  type="submit"
+                  onClick={handleImageUpload}
                   disabled={uploading}
                   className="w-full bg-orange-600 hover:bg-orange-700 text-lg h-12"
                 >
                   {uploading ? "Uploading Original Quality..." : "Upload Original Quality Image"}
                 </Button>
-              </form>
+              </div>
             </CardContent>
           </Card>
 

@@ -58,13 +58,6 @@ const ImageCard = React.memo(
           placeholder="blur"
           blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="absolute bottom-4 left-4 right-4 text-center">
-            <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg w-full">
-              View Photo
-            </Button>
-          </div>
-        </div>
       </div>
       <div className="p-4 space-y-2">
         <h3 className="font-semibold text-foreground truncate text-sm">{image.title}</h3>
@@ -187,56 +180,29 @@ export default function GalleryPage() {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="relative py-16 bg-gradient-to-b from-muted/30 to-background overflow-hidden">
-        {/* Animated Background Effects */}
+        {/* Simplified Background Effects */}
         <div className="absolute inset-0">
-          {/* Animated gradient layers */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 animate-pulse" />
+          {/* Single animated gradient layer */}
           <div
-            className="absolute inset-0 bg-gradient-to-tl from-accent/5 via-transparent to-primary/5 opacity-50"
-            style={{
-              animation: "pulse 4s ease-in-out infinite alternate",
-            }}
+            className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 animate-pulse"
+            style={{ animationDuration: "4s" }}
           />
 
-          {/* Floating animated circles - replaced bounce with gentle pulse and rotation */}
+          {/* Minimal floating elements */}
           <div
-            className="absolute top-20 left-10 w-32 h-32 bg-primary/10 rounded-full animate-pulse"
-            style={{ animationDuration: "4s" }}
-          />
-          <div
-            className="absolute top-40 right-20 w-24 h-24 bg-secondary/10 rounded-full"
-            style={{
-              animation: "pulse 3s ease-in-out infinite, spin 20s linear infinite",
-            }}
-          />
-          <div
-            className="absolute bottom-20 left-1/4 w-20 h-20 bg-accent/10 rounded-full animate-ping"
-            style={{ animationDuration: "4s" }}
-          />
-          <div
-            className="absolute bottom-40 right-1/3 w-16 h-16 bg-primary/15 rounded-full animate-pulse"
+            className="absolute top-20 left-10 w-24 h-24 bg-primary/8 rounded-full animate-pulse"
             style={{ animationDuration: "6s" }}
           />
-
-          {/* Pulsing orbs */}
           <div
-            className="absolute top-1/3 left-1/2 w-40 h-40 bg-gradient-radial from-primary/10 to-transparent rounded-full animate-pulse"
-            style={{ animationDuration: "5s" }}
-          />
-          <div
-            className="absolute bottom-1/3 right-1/4 w-28 h-28 bg-gradient-radial from-secondary/10 to-transparent rounded-full"
-            style={{
-              animation: "pulse 7s ease-in-out infinite alternate",
-            }}
+            className="absolute bottom-20 right-20 w-20 h-20 bg-secondary/8 rounded-full animate-pulse"
+            style={{ animationDuration: "8s" }}
           />
         </div>
 
-        <div className="absolute inset-0 grid-pattern opacity-20" />
+        <div className="absolute inset-0 grid-pattern opacity-10" />
         <div className="relative container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center space-y-6">
-            <Badge variant="secondary" className="animate-pulse-glow">
-              Professional Collection
-            </Badge>
+            <Badge variant="secondary">Professional Collection</Badge>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-balance">
               Immersive
@@ -358,36 +324,19 @@ export default function GalleryPage() {
                 {transformedImages.map((image) => (
                   <div
                     key={image.id}
-                    className="group relative cursor-pointer"
+                    className="group relative cursor-pointer hover:scale-105 transition-transform duration-200"
                     onClick={() => handleImageSelect(image)}
                   >
-                    <div className="relative aspect-square overflow-hidden">
+                    <div className="relative aspect-square overflow-hidden rounded-lg">
                       <NextImage
                         src={image.preview_url || "/placeholder.svg"}
                         alt={image.title}
                         fill
-                        className="object-contain bg-muted/10 transition-transform duration-300 group-hover:scale-105"
+                        className="object-contain bg-muted/10"
                         loading="lazy"
                         placeholder="blur"
                         blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
                       />
-
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/80 transition-all duration-300 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100">
-                        <div className="text-center text-white p-2 space-y-2">
-                          <h3 className="font-semibold text-xs truncate">{image.title}</h3>
-                          <p className="text-xs text-gray-300">
-                            {image.category === "equirectangular" ? "360°" : "Fisheye"}
-                          </p>
-                          <p className="text-xs font-bold text-emerald-400">${image.price}</p>
-                          <Button
-                            size="sm"
-                            className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs px-2 py-1 h-auto mt-2"
-                          >
-                            View Photo
-                          </Button>
-                        </div>
-                      </div>
-
                       <div className="absolute top-1 right-1 w-2 h-2 bg-yellow-400 rounded-full opacity-60" />
                     </div>
                   </div>

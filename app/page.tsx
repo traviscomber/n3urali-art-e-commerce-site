@@ -84,7 +84,7 @@ export default function HomePage() {
                   <Download className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Instant Downloads</h3>
-                <p className="text-muted-foreground">Get high-resolution files immediately after purchase.</p>
+                <p className="text-muted-foreground">Get high-resolution files immediately after purchase. 4K-16K</p>
               </CardContent>
             </Card>
 
@@ -97,7 +97,7 @@ export default function HomePage() {
                   <Shield className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Flexible Licensing</h3>
-                <p className="text-muted-foreground">Choose from standard, extended, or commercial licenses.</p>
+                <p className="text-muted-foreground">Choose from exclusive or non-exclusive license options.</p>
               </CardContent>
             </Card>
           </div>

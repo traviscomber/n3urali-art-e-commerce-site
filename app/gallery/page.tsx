@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import { getImages } from "@/app/actions/admin-actions"
 
 interface Image {
@@ -21,12 +21,15 @@ interface Image {
 export default function GalleryPage() {
   const router = useRouter()
   const [images, setImages] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchImages = async () => {
+      setLoading(true)
       const result = await getImages()
       const fetchedImages = result.success ? result.data : []
       setImages(fetchedImages)
+      setLoading(false)
     }
     fetchImages()
   }, [])
@@ -96,6 +99,44 @@ export default function GalleryPage() {
       </div>
     </div>
   )
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        {/* Hero Section */}
+        <section className="relative py-16 bg-gradient-to-b from-muted/30 to-background">
+          <div className="absolute inset-0 grid-pattern opacity-20" />
+          <div className="relative container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center space-y-6">
+              <Badge variant="secondary" className="animate-pulse-glow">
+                Professional Collection
+              </Badge>
+
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-balance">
+                Immersive
+                <span className="text-primary block">Image Gallery</span>
+              </h1>
+
+              <p className="text-xl text-muted-foreground text-pretty">
+                Discover our curated collection of high-resolution equirectangular and fisheye images. Click any image
+                to view details and purchase directly.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Loading Section */}
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col items-center justify-center py-20 space-y-4">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <p className="text-muted-foreground">Loading gallery images...</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -225,7 +266,6 @@ export default function GalleryPage() {
                     className="group relative cursor-pointer"
                     onClick={() => handleImageSelect(image)}
                   >
-                    {/* Clean thumbnail without frame */}
                     <div className="relative aspect-square overflow-hidden">
                       <img
                         src={image.preview_url || "/placeholder.svg"}
@@ -249,7 +289,6 @@ export default function GalleryPage() {
                         </div>
                       </div>
 
-                      {/* Small indicator for featured images */}
                       <div className="absolute top-1 right-1 w-2 h-2 bg-yellow-400 rounded-full opacity-60" />
                     </div>
                   </div>

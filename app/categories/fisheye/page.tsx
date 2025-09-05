@@ -42,6 +42,8 @@ const FisheyeCard = React.memo(
           fill
           className="object-contain transition-transform duration-500 group-hover:scale-105 select-none"
           loading="lazy"
+          quality={85}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           placeholder="blur"
           blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
           onContextMenu={(e) => e.preventDefault()}
@@ -145,7 +147,7 @@ export default function FisheyeCategoryPage() {
               description: image.description || "",
               category: "fisheye" as const,
               price: Number.parseFloat(image.price) || 0,
-              previewUrl: image.thumbnail_url || image.image_url,
+              previewUrl: image.image_url || image.thumbnail_url,
               dimensions: "4096x4096",
               fileSize: "15.0 MB",
               tags: [image.category_name?.toLowerCase() || "fisheye"],

@@ -534,7 +534,7 @@ export default function BrowsePage() {
                   style={{ userSelect: "none", WebkitUserSelect: "none" }}
                 >
                   <img
-                    src={previewImage.thumbnail_url || previewImage.image_url || "/placeholder.svg"}
+                    src={previewImage.image_url || previewImage.thumbnail_url || "/placeholder.svg"}
                     alt={previewImage.title}
                     className="max-w-full max-h-full object-contain rounded-md select-none pointer-events-none"
                     style={{

@@ -311,14 +311,14 @@ export default function SimpleAdminPage() {
 
         const thumbnailPromise = new Promise<Blob>((resolve) => {
           img.onload = () => {
-            const maxThumbnailSize = 300
+            const maxThumbnailSize = 600
             const ratio = Math.min(maxThumbnailSize / img.width, maxThumbnailSize / img.height)
 
             thumbnailCanvas.width = img.width * ratio
             thumbnailCanvas.height = img.height * ratio
 
             thumbnailCtx.drawImage(img, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height)
-            thumbnailCanvas.toBlob((blob) => resolve(blob!), "image/jpeg", 0.8)
+            thumbnailCanvas.toBlob((blob) => resolve(blob!), "image/jpeg", 0.95)
           }
           img.src = URL.createObjectURL(newImage.file!)
         })
@@ -344,14 +344,14 @@ export default function SimpleAdminPage() {
 
         const thumbnailPromise = new Promise<Blob>((resolve) => {
           img.onload = () => {
-            const maxThumbnailSize = 300
+            const maxThumbnailSize = 600
             const ratio = Math.min(maxThumbnailSize / img.width, maxThumbnailSize / img.height)
 
             thumbnailCanvas.width = img.width * ratio
             thumbnailCanvas.height = img.height * ratio
 
             thumbnailCtx.drawImage(img, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height)
-            thumbnailCanvas.toBlob((blob) => resolve(blob!), "image/jpeg", 0.8)
+            thumbnailCanvas.toBlob((blob) => resolve(blob!), "image/jpeg", 0.95)
           }
           img.src = URL.createObjectURL(newImage.file!)
         })

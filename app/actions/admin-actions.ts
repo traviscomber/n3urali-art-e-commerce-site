@@ -380,7 +380,7 @@ export async function createImageWithLicense(formData: FormData) {
     const rawThumbnailUrl = formData.get("thumbnail_url") as string
 
     const compressedImageUrl = await compressBase64Image(rawImageUrl, 500)
-    const compressedThumbnailUrl = await compressBase64Image(rawThumbnailUrl, 200)
+    const compressedThumbnailUrl = await compressBase64Image(rawThumbnailUrl, 500, true)
 
     const imageData = {
       title: formData.get("title") as string,
@@ -787,7 +787,7 @@ export async function updateImage(formData: FormData) {
     const rawThumbnailUrl = formData.get("thumbnail_url") as string
 
     const compressedImageUrl = await compressBase64Image(rawImageUrl, 500)
-    const compressedThumbnailUrl = await compressBase64Image(rawThumbnailUrl, 200)
+    const compressedThumbnailUrl = await compressBase64Image(rawThumbnailUrl, 500, true)
 
     const imageData = {
       title: formData.get("title") as string,

@@ -55,6 +55,8 @@ const ImageCard = React.memo(
           fill
           className="object-contain bg-muted/20 group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
+          quality={80}
+          sizes={size === "xlarge" ? "420px" : size === "large" ? "280px" : "250px"}
           placeholder="blur"
           blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
         />
@@ -289,7 +291,7 @@ export default function GalleryPage() {
               {equirectangularImages.length > 0 ? (
                 equirectangularImages
                   .slice(0, 6)
-                  .map((image) => (
+                  .map((image, index) => (
                     <ImageCard key={image.id} image={image} size="xlarge" onImageSelect={handleImageSelect} />
                   ))
               ) : (
@@ -335,7 +337,7 @@ export default function GalleryPage() {
               {fisheyeImages.length > 0 ? (
                 fisheyeImages
                   .slice(0, 6)
-                  .map((image) => (
+                  .map((image, index) => (
                     <ImageCard key={image.id} image={image} size="xlarge" onImageSelect={handleImageSelect} />
                   ))
               ) : (
@@ -355,7 +357,7 @@ export default function GalleryPage() {
 
             {transformedImages.length > 0 ? (
               <div className="grid grid-cols-5 lg:grid-cols-10 gap-3">
-                {transformedImages.map((image) => (
+                {transformedImages.map((image, index) => (
                   <div
                     key={image.id}
                     className="group relative cursor-pointer"
@@ -367,7 +369,10 @@ export default function GalleryPage() {
                         alt={image.title}
                         fill
                         className="object-contain bg-muted/10 transition-transform duration-300 group-hover:scale-105"
-                        loading="lazy"
+                        loading={index < 20 ? "eager" : "lazy"}
+                        priority={index < 10}
+                        quality={75}
+                        sizes="(max-width: 640px) 20vw, (max-width: 1024px) 10vw, 10vw"
                         placeholder="blur"
                         blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
                       />

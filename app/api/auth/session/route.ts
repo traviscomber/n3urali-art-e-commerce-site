@@ -1,20 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createNeonClient } from "@/lib/neon/client"
 import { cookies } from "next/headers"
-import { verifyJWT } from "@/lib/auth/jwt"
 
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = cookies()
-    const authToken = cookieStore.get("auth_token")?.value
+    const sessionToken = cookieStore.get("session_token")?.value
 
-    if (!authToken) {
-      return NextResponse.json({ user: null }, { status: 200 })
-    }
-
-    const payload = await verifyJWT(authToken)
-    if (!payload) {
-      cookieStore.delete("auth_token")
+    if (!sessionToken) {
       return NextResponse.json({ user: null }, { status: 200 })
     }
 
@@ -25,13 +18,13 @@ export async function GET(request: NextRequest) {
       FROM user_sessions us
       JOIN user_profiles up ON us.user_id = up.id
       JOIN auth.users u ON up.id = u.id
-      WHERE us.session_token = ${authToken}
+      WHERE us.session_token = ${sessionToken}
       AND us.expires_at > NOW()
       LIMIT 1
     `
 
     if (sessionResult.length === 0) {
-      cookieStore.delete("auth_token")
+      cookieStore.delete("session_token")
       return NextResponse.json({ user: null }, { status: 200 })
     }
 
@@ -56,17 +49,17 @@ export async function GET(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const cookieStore = cookies()
-    const authToken = cookieStore.get("auth_token")?.value
+    const sessionToken = cookieStore.get("session_token")?.value
 
-    if (authToken) {
+    if (sessionToken) {
       const sql = createNeonClient()
 
       await sql`
-        DELETE FROM user_sessions WHERE session_token = ${authToken}
+        DELETE FROM user_sessions WHERE session_token = ${sessionToken}
       `
     }
 
-    cookieStore.delete("auth_token")
+    cookieStore.delete("session_token")
 
     return NextResponse.json({ message: "Logged out successfully" })
   } catch (error) {

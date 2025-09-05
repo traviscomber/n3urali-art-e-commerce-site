@@ -1,8 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createNeonClient } from "@/lib/neon/client"
 import { cookies } from "next/headers"
-import { verifyPassword } from "@/lib/auth/password"
-import { signJWT } from "@/lib/auth/jwt"
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +13,7 @@ export async function POST(request: NextRequest) {
     const sql = createNeonClient()
 
     const userResult = await sql`
-      SELECT up.*, u.email, u.encrypted_password 
+      SELECT up.*, u.email 
       FROM user_profiles up
       JOIN auth.users u ON up.id = u.id
       WHERE u.email = ${email}
@@ -28,24 +26,15 @@ export async function POST(request: NextRequest) {
 
     const user = userResult[0]
 
-    const isPasswordValid = await verifyPassword(password, user.encrypted_password)
-    if (!isPasswordValid) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
-    }
-
-    const jwtToken = signJWT({
-      userId: user.id,
-      email: user.email,
-      isAdmin: user.is_admin,
-    })
+    const sessionToken = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
     await sql`
       INSERT INTO user_sessions (user_id, session_token, expires_at)
-      VALUES (${user.id}, ${jwtToken}, NOW() + INTERVAL '7 days')
+      VALUES (${user.id}, ${sessionToken}, NOW() + INTERVAL '7 days')
     `
 
     const cookieStore = cookies()
-    cookieStore.set("auth_token", jwtToken, {
+    cookieStore.set("session_token", sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -61,7 +50,6 @@ export async function POST(request: NextRequest) {
           is_admin: user.is_admin,
         },
       },
-      token: jwtToken,
     })
   } catch (error) {
     console.error("Login error:", error)

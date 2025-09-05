@@ -2,6 +2,229 @@
 
 import { createNeonClient } from "@/lib/neon/client"
 import { revalidatePath } from "next/cache"
+import { unstable_cache } from "next/cache"
+
+const CACHE_TAGS = {
+  IMAGES: "images",
+  CATEGORIES: "categories",
+  ORDERS: "orders",
+  USERS: "users",
+  LICENSES: "licenses",
+  STATS: "stats",
+} as const
+
+const CACHE_REVALIDATE = {
+  IMAGES: 300, // 5 minutes
+  CATEGORIES: 3600, // 1 hour
+  STATIC: 86400, // 24 hours
+} as const
+
+const PERFORMANCE_MONITORING = process.env.NODE_ENV === "development"
+
+function logQueryPerformance(queryName: string, startTime: number, recordCount?: number) {
+  if (PERFORMANCE_MONITORING) {
+    const duration = Date.now() - startTime
+    console.log(`[v0] Query Performance: ${queryName} - ${duration}ms${recordCount ? ` (${recordCount} records)` : ""}`)
+
+    // Log slow queries (>500ms)
+    if (duration > 500) {
+      console.warn(`[v0] Slow Query Alert: ${queryName} took ${duration}ms`)
+    }
+  }
+}
+
+const getCachedImages = unstable_cache(
+  async () => {
+    const sql = createNeonClient()
+
+    // Optimized query with selective fields and proper indexing
+    const result = await sql`
+      SELECT 
+        i.id, i.title, i.description, i.price, i.image_url, i.thumbnail_url,
+        i.active, i.featured, i.created_at, i.updated_at,
+        c.name as category_name, c.id as category_id,
+        l.name as license_name, l.description as license_description
+      FROM images i
+      LEFT JOIN categories c ON i.category_id = c.id
+      LEFT JOIN licenses l ON i.license_id = l.id
+      WHERE i.active = true
+      ORDER BY i.featured DESC, i.created_at DESC
+      LIMIT 100
+    `
+
+    return result
+  },
+  ["images-list"],
+  {
+    revalidate: CACHE_REVALIDATE.IMAGES,
+    tags: [CACHE_TAGS.IMAGES],
+  },
+)
+
+const getCachedImagesPaginated = unstable_cache(
+  async (page = 1, limit = 50, category?: string, featured?: boolean) => {
+    const startTime = Date.now()
+    const sql = createNeonClient()
+    const offset = (page - 1) * limit
+
+    let whereClause = "WHERE i.active = true"
+    const params: any[] = []
+
+    if (category) {
+      whereClause += " AND c.name = $" + (params.length + 1)
+      params.push(category)
+    }
+
+    if (featured !== undefined) {
+      whereClause += " AND i.featured = $" + (params.length + 1)
+      params.push(featured)
+    }
+
+    // Use parameterized query with proper indexing
+    const result = await sql`
+      SELECT 
+        i.id, i.title, i.description, i.price, i.image_url, i.thumbnail_url,
+        i.active, i.featured, i.created_at, i.updated_at,
+        c.name as category_name, c.id as category_id,
+        l.name as license_name, l.description as license_description
+      FROM images i
+      LEFT JOIN categories c ON i.category_id = c.id
+      LEFT JOIN licenses l ON i.license_id = l.id
+      ${sql.unsafe(whereClause)}
+      ORDER BY i.featured DESC, i.created_at DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `
+
+    // Get total count for pagination
+    const countResult = await sql`
+      SELECT COUNT(*) as total
+      FROM images i
+      LEFT JOIN categories c ON i.category_id = c.id
+      ${sql.unsafe(whereClause)}
+    `
+
+    logQueryPerformance("getCachedImagesPaginated", startTime, result.length)
+
+    return {
+      images: result,
+      pagination: {
+        page,
+        limit,
+        total: Number.parseInt(countResult[0].total),
+        totalPages: Math.ceil(Number.parseInt(countResult[0].total) / limit),
+      },
+    }
+  },
+  ["images-paginated"],
+  {
+    revalidate: CACHE_REVALIDATE.IMAGES,
+    tags: [CACHE_TAGS.IMAGES],
+  },
+)
+
+const getCachedCategories = unstable_cache(
+  async () => {
+    const sql = createNeonClient()
+
+    const result = await sql`
+      SELECT c.id, c.name, c.description, c.active,
+             COUNT(i.id) as image_count
+      FROM categories c
+      LEFT JOIN images i ON c.id = i.category_id AND i.active = true
+      WHERE c.active = true
+      GROUP BY c.id, c.name, c.description, c.active
+      ORDER BY c.name
+    `
+
+    return result.map((category) => ({
+      ...category,
+      display_name:
+        category.name === "equirectangular" ? "360 images" : category.name === "fisheye" ? "180 images" : category.name,
+    }))
+  },
+  ["categories-list"],
+  {
+    revalidate: CACHE_REVALIDATE.CATEGORIES,
+    tags: [CACHE_TAGS.CATEGORIES],
+  },
+)
+
+const getCachedCategoriesOptimized = unstable_cache(
+  async () => {
+    const startTime = Date.now()
+    const sql = createNeonClient()
+
+    // Optimized query using proper indexes
+    const result = await sql`
+      SELECT 
+        c.id, c.name, c.description, c.active,
+        COALESCE(img_counts.image_count, 0) as image_count
+      FROM categories c
+      LEFT JOIN (
+        SELECT category_id, COUNT(*) as image_count
+        FROM images 
+        WHERE active = true
+        GROUP BY category_id
+      ) img_counts ON c.id = img_counts.category_id
+      WHERE c.active = true
+      ORDER BY c.name
+    `
+
+    logQueryPerformance("getCachedCategoriesOptimized", startTime, result.length)
+
+    return result.map((category) => ({
+      ...category,
+      display_name:
+        category.name === "equirectangular" ? "360 images" : category.name === "fisheye" ? "180 images" : category.name,
+    }))
+  },
+  ["categories-optimized"],
+  {
+    revalidate: CACHE_REVALIDATE.CATEGORIES,
+    tags: [CACHE_TAGS.CATEGORIES],
+  },
+)
+
+const getCachedLicenses = unstable_cache(
+  async () => {
+    const sql = createNeonClient()
+
+    const result = await sql`
+      SELECT id, name, description, price, active
+      FROM licenses
+      WHERE active = true
+      ORDER BY price ASC
+    `
+
+    return result
+  },
+  ["licenses-list"],
+  {
+    revalidate: CACHE_REVALIDATE.STATIC,
+    tags: [CACHE_TAGS.LICENSES],
+  },
+)
+
+const getCachedDatabaseStats = unstable_cache(
+  async () => {
+    const sql = createNeonClient()
+
+    // Use a single query with subqueries for better performance
+    const result = await sql`
+      SELECT 
+        (SELECT COUNT(*) FROM images WHERE active = true) as images,
+        (SELECT COUNT(*) FROM categories WHERE active = true) as categories,
+        (SELECT COUNT(*) FROM orders) as orders
+    `
+
+    return result[0]
+  },
+  ["database-stats"],
+  {
+    revalidate: CACHE_REVALIDATE.IMAGES,
+    tags: [CACHE_TAGS.STATS],
+  },
+)
 
 function compressBase64Image(base64String: string, maxSizeKB = 2000, preserveQuality = false): Promise<string> {
   return new Promise((resolve) => {
@@ -131,6 +354,12 @@ function handleDatabaseError(error: any): { success: false; error: string } {
   }
 }
 
+function invalidateCache(tags: string[]) {
+  tags.forEach((tag) => {
+    revalidatePath("/", "layout")
+  })
+}
+
 export async function createImageWithCategory(formData: FormData) {
   // Get default PRO license
   const sql = createNeonClient()
@@ -214,7 +443,10 @@ export async function createImageWithLicense(formData: FormData) {
     `
 
     console.log("[v0] Image created successfully with ID:", result[0]?.id)
+
+    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
     revalidatePath("/simple-admin")
+
     return { success: true, data: result }
   } catch (error) {
     return handleDatabaseError(error)
@@ -306,7 +538,10 @@ export async function createImageWithCategoryObject(imageData: {
     `
 
     console.log("[v0] Large image created successfully with ID:", result[0]?.id)
+
+    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
     revalidatePath("/simple-admin")
+
     return { success: true, data: result }
   } catch (error) {
     return handleDatabaseError(error)
@@ -315,18 +550,8 @@ export async function createImageWithCategoryObject(imageData: {
 
 export async function getImages() {
   try {
-    const sql = createNeonClient()
-
-    const result = await sql`
-      SELECT i.*, c.name as category_name, c.id as category_id,
-             l.name as license_name, l.description as license_description
-      FROM images i
-      LEFT JOIN categories c ON i.category_id = c.id
-      LEFT JOIN licenses l ON i.license_id = l.id
-      ORDER BY i.created_at DESC
-    `
-
-    return { success: true, data: result }
+    const data = await getCachedImages()
+    return { success: true, data }
   } catch (error) {
     console.error("[v0] Get images error:", error)
     return {
@@ -397,32 +622,102 @@ export async function getOrders(userEmail?: string) {
   }
 }
 
+export async function getOrdersOptimized(userEmail?: string, page = 1, limit = 20) {
+  try {
+    const startTime = Date.now()
+    const sql = createNeonClient()
+    const offset = (page - 1) * limit
+
+    let result
+    if (userEmail) {
+      result = await sql`
+        SELECT o.*, 
+               json_agg(
+                 json_build_object(
+                   'id', oi.id,
+                   'license_id', oi.license_id,
+                   'price', oi.price,
+                   'image_id', oi.image_id,
+                   'images', json_build_object(
+                     'title', i.title,
+                     'thumbnail_url', i.thumbnail_url
+                   )
+                 ) ORDER BY oi.created_at
+               ) FILTER (WHERE oi.id IS NOT NULL) as order_items
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        LEFT JOIN images i ON oi.image_id = i.id
+        WHERE o.user_email = ${userEmail}
+        GROUP BY o.id
+        ORDER BY o.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+    } else {
+      result = await sql`
+        SELECT o.*, 
+               json_agg(
+                 json_build_object(
+                   'id', oi.id,
+                   'license_id', oi.license_id,
+                   'price', oi.price,
+                   'image_id', oi.image_id,
+                   'images', json_build_object(
+                     'title', i.title,
+                     'thumbnail_url', i.thumbnail_url
+                   )
+                 ) ORDER BY oi.created_at
+               ) FILTER (WHERE oi.id IS NOT NULL) as order_items
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        LEFT JOIN images i ON oi.image_id = i.id
+        GROUP BY o.id
+        ORDER BY o.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+    }
+
+    logQueryPerformance("getOrdersOptimized", startTime, result.length)
+
+    console.log("[v0] getOrdersOptimized found", result.length, "orders for user:", userEmail || "all users")
+    return { success: true, data: result }
+  } catch (error) {
+    console.error("[v0] Get orders error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
+
 export async function getCategories() {
   try {
-    const sql = createNeonClient()
-
-    const result = await sql`
-      SELECT id, name, description, active
-      FROM categories
-      WHERE active = true
-      ORDER BY name
-    `
-
-    // Map the categories to use display names
-    const mappedResult = result.map((category) => ({
-      ...category,
-      display_name:
-        category.name === "equirectangular" ? "360 images" : category.name === "fisheye" ? "180 images" : category.name,
-    }))
-
+    const data = await getCachedCategories()
     console.log(
       "[v0] getCategories returning",
-      mappedResult.length,
+      data.length,
       "categories:",
-      mappedResult.map((c) => c.name),
+      data.map((c) => c.name),
     )
+    return { success: true, data }
+  } catch (error) {
+    console.error("[v0] Get categories error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
 
-    return { success: true, data: mappedResult }
+export async function getCategoriesOptimized() {
+  try {
+    const data = await getCachedCategoriesOptimized()
+    console.log(
+      "[v0] getCategoriesOptimized returning",
+      data.length,
+      "categories:",
+      data.map((c) => c.name),
+    )
+    return { success: true, data }
   } catch (error) {
     console.error("[v0] Get categories error:", error)
     return {
@@ -453,7 +748,10 @@ export async function deleteImage(imageId: string) {
     }
 
     console.log("[v0] Image deleted successfully:", result[0])
+
+    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
     revalidatePath("/simple-admin")
+
     return { success: true, data: result[0] }
   } catch (error) {
     return handleDatabaseError(error)
@@ -526,7 +824,10 @@ export async function updateImage(formData: FormData) {
     }
 
     console.log("[v0] Image updated successfully:", result[0].id)
+
+    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES])
     revalidatePath("/simple-admin")
+
     return { success: true, data: result[0] }
   } catch (error) {
     return handleDatabaseError(error)
@@ -550,7 +851,10 @@ export async function toggleImageStatus(imageId: string, field: "active" | "feat
     }
 
     console.log("[v0] Image status updated successfully")
+
+    invalidateCache([CACHE_TAGS.IMAGES])
     revalidatePath("/simple-admin")
+
     return { success: true, data: result[0] }
   } catch (error) {
     return handleDatabaseError(error)
@@ -654,6 +958,7 @@ export async function cleanupSampleImages() {
       result.map((img) => ({ id: img.id, title: img.title })),
     )
 
+    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
     revalidatePath("/simple-admin")
     revalidatePath("/browse")
     revalidatePath("/gallery")
@@ -670,20 +975,8 @@ export async function cleanupSampleImages() {
 
 export async function getDatabaseStats() {
   try {
-    const sql = createNeonClient()
-
-    const imageCount = await sql`SELECT COUNT(*) as count FROM images WHERE active = true`
-    const categoryCount = await sql`SELECT COUNT(*) as count FROM categories WHERE active = true`
-    const orderCount = await sql`SELECT COUNT(*) as count FROM orders`
-
-    return {
-      success: true,
-      data: {
-        images: imageCount[0].count,
-        categories: categoryCount[0].count,
-        orders: orderCount[0].count,
-      },
-    }
+    const data = await getCachedDatabaseStats()
+    return { success: true, data }
   } catch (error) {
     return handleDatabaseError(error)
   }
@@ -691,23 +984,14 @@ export async function getDatabaseStats() {
 
 export async function getLicenses() {
   try {
-    const sql = createNeonClient()
-
-    const result = await sql`
-      SELECT id, name, description, price, active
-      FROM licenses
-      WHERE active = true
-      ORDER BY price ASC
-    `
-
+    const data = await getCachedLicenses()
     console.log(
       "[v0] getLicenses returning",
-      result.length,
+      data.length,
       "licenses:",
-      result.map((l) => l.name),
+      data.map((l) => l.name),
     )
-
-    return { success: true, data: result }
+    return { success: true, data }
   } catch (error) {
     console.error("[v0] Get licenses error:", error)
     return {
@@ -811,9 +1095,54 @@ export async function updateImageDetails(
     }
 
     console.log("[v0] Image details updated successfully:", result[0].id)
+
+    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES])
     revalidatePath("/simple-admin")
+
     return { success: true, data: result[0] }
   } catch (error) {
     return handleDatabaseError(error)
   }
 }
+
+export async function getDatabaseHealth() {
+  try {
+    const startTime = Date.now()
+    const sql = createNeonClient()
+
+    // Check database connectivity and basic stats
+    const healthCheck = await sql`
+      SELECT 
+        NOW() as server_time,
+        version() as postgres_version,
+        current_database() as database_name
+    `
+
+    // Get table sizes for monitoring
+    const tableSizes = await sql`
+      SELECT 
+        schemaname,
+        tablename,
+        pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size,
+        pg_total_relation_size(schemaname||'.'||tablename) as size_bytes
+      FROM pg_tables 
+      WHERE schemaname = 'public'
+      ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
+    `
+
+    logQueryPerformance("getDatabaseHealth", startTime)
+
+    return {
+      success: true,
+      data: {
+        health: healthCheck[0],
+        tableSizes: tableSizes,
+        timestamp: new Date().toISOString(),
+      },
+    }
+  } catch (error) {
+    return handleDatabaseError(error)
+  }
+}
+
+export { getCachedImagesPaginated, getCachedCategoriesOptimized }

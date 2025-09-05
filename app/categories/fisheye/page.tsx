@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -9,8 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Grid, List, Eye, ShoppingCart } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
 import { getImages } from "@/app/actions/admin-actions"
+import NextImage from "next/image"
+import React from "react"
 
-interface Image {
+interface FisheyeImage {
   id: string
   title: string
   description: string
@@ -22,14 +24,112 @@ interface Image {
   tags: string[]
 }
 
+const FisheyeCard = React.memo(
+  ({
+    image,
+    onPreview,
+    onAddToCart,
+  }: {
+    image: FisheyeImage
+    onPreview: (image: FisheyeImage) => void
+    onAddToCart: (image: FisheyeImage) => void
+  }) => (
+    <Card className="group overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-300">
+      <div className="relative aspect-video overflow-hidden">
+        <NextImage
+          src={image.previewUrl || "/placeholder.svg"}
+          alt={image.title}
+          fill
+          className="object-contain transition-transform duration-500 group-hover:scale-105 select-none"
+          loading="lazy"
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+          onContextMenu={(e) => e.preventDefault()}
+          onDragStart={(e) => e.preventDefault()}
+          style={{ userSelect: "none", WebkitUserSelect: "none" }}
+        />
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/25 text-2xl font-bold rotate-12 select-none">
+            n3uralia.art
+          </div>
+          <div className="absolute top-4 left-4 text-white/30 text-sm font-bold select-none">n3uralia.art</div>
+          <div className="absolute bottom-4 right-4 text-white/30 text-sm font-bold select-none">n3uralia.art</div>
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute top-4 right-4">
+          <Badge variant="secondary" className="bg-card/90 text-card-foreground border border-border">
+            Fisheye
+          </Badge>
+        </div>
+        <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="secondary"
+              className="bg-card/90 backdrop-blur-sm text-card-foreground border border-border hover:bg-card"
+              onClick={() => onPreview(image)}
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              Preview
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="bg-card/90 backdrop-blur-sm text-card-foreground border border-border hover:bg-card"
+              onClick={() => onAddToCart(image)}
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Add to Cart
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <CardContent className="p-6">
+        <div className="space-y-3">
+          <div>
+            <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors">
+              {image.title}
+            </h3>
+            <p className="text-sm text-muted-foreground line-clamp-2">{image.description}</p>
+          </div>
+
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <span>{image.dimensions}</span>
+            <span>{image.fileSize}</span>
+          </div>
+
+          <div className="flex flex-wrap gap-1">
+            {image.tags.slice(0, 3).map((tag) => (
+              <Badge key={tag} variant="outline" className="text-xs border-border/50">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between pt-2 border-t border-border/50">
+            <span className="text-2xl font-bold text-primary">${image.price}</span>
+            <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => onAddToCart(image)}>
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Add to Cart
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ),
+)
+
+FisheyeCard.displayName = "FisheyeCard"
+
 export default function FisheyeCategoryPage() {
-  const [images, setImages] = useState<Image[]>([])
-  const [filteredImages, setFilteredImages] = useState<Image[]>([])
+  const [images, setImages] = useState<FisheyeImage[]>([])
+  const [filteredImages, setFilteredImages] = useState<FisheyeImage[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState("newest")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [loading, setLoading] = useState(true)
-  const [previewImage, setPreviewImage] = useState<Image | null>(null)
+  const [previewImage, setPreviewImage] = useState<FisheyeImage | null>(null)
   const { addItem } = useCart()
 
   useEffect(() => {
@@ -87,22 +187,25 @@ export default function FisheyeCategoryPage() {
     setFilteredImages(filtered)
   }, [searchTerm, sortBy, images])
 
-  const handleAddToCart = (image: Image) => {
-    addItem({
-      id: image.id,
-      imageId: image.id,
-      title: image.title,
-      price: image.price,
-      licenseType: "standard",
-      previewUrl: image.previewUrl,
-      category: image.category,
-      quantity: 1,
-    })
-  }
+  const handleAddToCart = useCallback(
+    (image: FisheyeImage) => {
+      addItem({
+        id: image.id,
+        imageId: image.id,
+        title: image.title,
+        price: image.price,
+        licenseType: "standard",
+        previewUrl: image.previewUrl,
+        category: image.category,
+        quantity: 1,
+      })
+    },
+    [addItem],
+  )
 
-  const handlePreview = (image: Image) => {
+  const handlePreview = useCallback((image: FisheyeImage) => {
     setPreviewImage(image)
-  }
+  }, [])
 
   if (loading) {
     return (
@@ -233,90 +336,7 @@ export default function FisheyeCategoryPage() {
           className={`grid gap-6 ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}
         >
           {filteredImages.map((image) => (
-            <Card
-              key={image.id}
-              className="group overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-300"
-            >
-              <div className="relative aspect-video overflow-hidden">
-                <img
-                  src={image.previewUrl || "/placeholder.svg"}
-                  alt={image.title}
-                  className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105 select-none"
-                  onContextMenu={(e) => e.preventDefault()}
-                  onDragStart={(e) => e.preventDefault()}
-                  style={{ userSelect: "none", WebkitUserSelect: "none" }}
-                />
-                <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/25 text-2xl font-bold rotate-12 select-none">
-                    n3uralia.art
-                  </div>
-                  <div className="absolute top-4 left-4 text-white/30 text-sm font-bold select-none">n3uralia.art</div>
-                  <div className="absolute bottom-4 right-4 text-white/30 text-sm font-bold select-none">
-                    n3uralia.art
-                  </div>
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute top-4 right-4">
-                  <Badge variant="secondary" className="bg-card/90 text-card-foreground border border-border">
-                    Fisheye
-                  </Badge>
-                </div>
-                <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="bg-card/90 backdrop-blur-sm text-card-foreground border border-border hover:bg-card"
-                      onClick={() => handlePreview(image)}
-                    >
-                      <Eye className="w-4 h-4 mr-2" />
-                      Preview
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="bg-card/90 backdrop-blur-sm text-card-foreground border border-border hover:bg-card"
-                      onClick={() => handleAddToCart(image)}
-                    >
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      Add to Cart
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              <CardContent className="p-6">
-                <div className="space-y-3">
-                  <div>
-                    <h3 className="font-semibold text-lg text-foreground group-hover:text-primary transition-colors">
-                      {image.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{image.description}</p>
-                  </div>
-
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>{image.dimensions}</span>
-                    <span>{image.fileSize}</span>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1">
-                    {image.tags.slice(0, 3).map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs border-border/50">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                    <span className="text-2xl font-bold text-primary">${image.price}</span>
-                    <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => handleAddToCart(image)}>
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      Add to Cart
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <FisheyeCard key={image.id} image={image} onPreview={handlePreview} onAddToCart={handleAddToCart} />
           ))}
         </div>
 
@@ -356,13 +376,18 @@ export default function FisheyeCategoryPage() {
             {/* Image Container */}
             <div className="p-6 flex justify-center">
               <div className="relative max-w-full">
-                <img
+                <NextImage
                   src={previewImage.previewUrl || "/placeholder.svg"}
                   alt={previewImage.title}
+                  width={720}
+                  height={720}
                   className="max-w-full max-h-full object-contain rounded-md select-none"
                   style={{ maxWidth: "720px", maxHeight: "720px", userSelect: "none", WebkitUserSelect: "none" }}
                   onContextMenu={(e) => e.preventDefault()}
                   onDragStart={(e) => e.preventDefault()}
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
                 />
                 {/* Multiple watermark layers */}
                 <div className="absolute inset-0 pointer-events-none">

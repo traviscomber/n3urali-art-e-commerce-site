@@ -1,13 +1,15 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import { getImages } from "@/app/actions/admin-actions"
+import NextImage from "next/image"
+import React from "react"
 
-interface Image {
+interface GalleryImage {
   id: string
   title: string
   category: "equirectangular" | "fisheye"
@@ -18,67 +20,31 @@ interface Image {
   description?: string
 }
 
-export default function GalleryPage() {
-  const router = useRouter()
-  const [images, setImages] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchImages = async () => {
-      setLoading(true)
-      const result = await getImages()
-      const fetchedImages = result.success ? result.data : []
-      setImages(fetchedImages)
-      setLoading(false)
-    }
-    fetchImages()
-  }, [])
-
-  const transformedImages = images.map((image: any) => ({
-    id: image.id,
-    title: image.title,
-    category: image.category_name?.toLowerCase() === "fisheye" ? ("fisheye" as const) : ("equirectangular" as const),
-    price: Number.parseFloat(image.price) || 0,
-    preview_url:
-      image.category_name?.toLowerCase() === "fisheye"
-        ? image.thumbnail_url || "/placeholder.svg"
-        : image.thumbnail_url || image.image_url,
-    dimensions: "4096x4096",
-    file_size: 20000000,
-    description: image.description || "",
-  }))
-
-  const equirectangularImages = transformedImages.filter((img) => img.category === "equirectangular")
-  const fisheyeImages = transformedImages.filter((img) => img.category === "fisheye")
-
-  const handleImageSelect = async (image: Image) => {
-    console.log("[v0] Image clicked, redirecting to photo:", image.title, "ID:", image.id)
-    router.push(`/photo/${image.id}`)
-  }
-
-  const scrollSection = (direction: "left" | "right", sectionId: string) => {
-    const section = document.getElementById(sectionId)
-    if (section) {
-      const scrollAmount = 320
-      section.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      })
-    }
-  }
-
-  const ImageCard = ({ image, size = "normal" }: { image: Image; size?: "normal" | "large" }) => (
+const ImageCard = React.memo(
+  ({
+    image,
+    size = "normal",
+    onImageSelect,
+  }: {
+    image: GalleryImage
+    size?: "normal" | "large"
+    onImageSelect: (image: GalleryImage) => void
+  }) => (
     <div
       className={`group relative bg-card rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-border overflow-hidden cursor-pointer ${size === "large" ? "min-w-[280px] max-w-[280px]" : "min-w-[250px] max-w-[250px]"}`}
-      onClick={() => handleImageSelect(image)}
+      onClick={() => onImageSelect(image)}
     >
       <div
         className={`relative ${size === "large" ? "aspect-video h-[157px]" : "aspect-video h-[140px]"} overflow-hidden`}
       >
-        <img
+        <NextImage
           src={image.preview_url || "/placeholder.svg"}
           alt={image.title}
-          className="w-full h-full object-contain bg-muted/20 group-hover:scale-105 transition-transform duration-300"
+          fill
+          className="object-contain bg-muted/20 group-hover:scale-105 transition-transform duration-300"
+          loading="lazy"
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="absolute bottom-4 left-4 right-4 text-center">
@@ -98,7 +64,74 @@ export default function GalleryPage() {
         </div>
       </div>
     </div>
+  ),
+)
+
+ImageCard.displayName = "ImageCard"
+
+export default function GalleryPage() {
+  const router = useRouter()
+  const [images, setImages] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      setLoading(true)
+      const result = await getImages()
+      const fetchedImages = result.success ? result.data : []
+      setImages(fetchedImages)
+      setLoading(false)
+    }
+    fetchImages()
+  }, [])
+
+  const transformedImages = useMemo(
+    () =>
+      images.map((image: any) => ({
+        id: image.id,
+        title: image.title,
+        category:
+          image.category_name?.toLowerCase() === "fisheye" ? ("fisheye" as const) : ("equirectangular" as const),
+        price: Number.parseFloat(image.price) || 0,
+        preview_url:
+          image.category_name?.toLowerCase() === "fisheye"
+            ? image.thumbnail_url || "/placeholder.svg"
+            : image.thumbnail_url || image.image_url,
+        dimensions: "4096x4096",
+        file_size: 20000000,
+        description: image.description || "",
+      })),
+    [images],
   )
+
+  const equirectangularImages = useMemo(
+    () => transformedImages.filter((img) => img.category === "equirectangular"),
+    [transformedImages],
+  )
+
+  const fisheyeImages = useMemo(
+    () => transformedImages.filter((img) => img.category === "fisheye"),
+    [transformedImages],
+  )
+
+  const handleImageSelect = useCallback(
+    async (image: GalleryImage) => {
+      console.log("[v0] Image clicked, redirecting to photo:", image.title, "ID:", image.id)
+      router.push(`/photo/${image.id}`)
+    },
+    [router],
+  )
+
+  const scrollSection = useCallback((direction: "left" | "right", sectionId: string) => {
+    const section = document.getElementById(sectionId)
+    if (section) {
+      const scrollAmount = 320
+      section.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      })
+    }
+  }, [])
 
   if (loading) {
     return (
@@ -244,7 +277,9 @@ export default function GalleryPage() {
               {equirectangularImages.length > 0 ? (
                 equirectangularImages
                   .slice(0, 6)
-                  .map((image) => <ImageCard key={image.id} image={image} size="large" />)
+                  .map((image) => (
+                    <ImageCard key={image.id} image={image} size="large" onImageSelect={handleImageSelect} />
+                  ))
               ) : (
                 <div className="text-center py-8 w-full">
                   <p className="text-muted-foreground">No 360° images available</p>
@@ -286,7 +321,11 @@ export default function GalleryPage() {
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               {fisheyeImages.length > 0 ? (
-                fisheyeImages.slice(0, 6).map((image) => <ImageCard key={image.id} image={image} size="large" />)
+                fisheyeImages
+                  .slice(0, 6)
+                  .map((image) => (
+                    <ImageCard key={image.id} image={image} size="large" onImageSelect={handleImageSelect} />
+                  ))
               ) : (
                 <div className="text-center py-8 w-full">
                   <p className="text-muted-foreground">No fisheye images available</p>
@@ -311,10 +350,14 @@ export default function GalleryPage() {
                     onClick={() => handleImageSelect(image)}
                   >
                     <div className="relative aspect-square overflow-hidden">
-                      <img
+                      <NextImage
                         src={image.preview_url || "/placeholder.svg"}
                         alt={image.title}
-                        className="w-full h-full object-contain bg-muted/10 transition-transform duration-300 group-hover:scale-105"
+                        fill
+                        className="object-contain bg-muted/10 transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                        placeholder="blur"
+                        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
                       />
 
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/80 transition-all duration-300 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100">

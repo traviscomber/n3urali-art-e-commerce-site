@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Filter, Grid3X3, List, Eye, Download } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
+import NextImage from "next/image"
 
-interface Image {
+interface GalleryImage {
   id: string
   title: string
   category: "equirectangular" | "fisheye"
@@ -21,15 +22,15 @@ interface Image {
 }
 
 interface ImageGalleryProps {
-  images?: Image[]
-  onImageSelect?: (image: Image) => void
+  images?: GalleryImage[]
+  onImageSelect?: (image: GalleryImage) => void
 }
 
 export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [filteredImages, setFilteredImages] = useState<Image[]>(images)
+  const [filteredImages, setFilteredImages] = useState<GalleryImage[]>(images)
   const { addItem } = useCart()
 
   useEffect(() => {
@@ -50,7 +51,7 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
     setFilteredImages(filtered)
   }, [images, searchTerm, categoryFilter])
 
-  const handleAddToCart = (image: Image) => {
+  const handleAddToCart = (image: GalleryImage) => {
     addItem({
       id: image.id,
       imageId: image.id,
@@ -132,11 +133,16 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
           >
             <CardContent className="p-0">
               <div className="relative aspect-square overflow-hidden">
-                <img
+                <NextImage
                   src={image.preview_url || "/placeholder.svg"}
                   alt={image.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
                 />
+
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                 {/* Category Badge */}

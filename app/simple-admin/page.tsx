@@ -267,48 +267,119 @@ export default function SimpleAdminPage() {
     setError(null)
 
     try {
-      const formData = new FormData()
-      formData.append("file", newImage.file)
+      const fileSize = newImage.file.size
+      const isLargeFile = fileSize > 4 * 1024 * 1024 // 4MB threshold
 
-      // Create thumbnail for browsing
-      const thumbnailCanvas = document.createElement("canvas")
-      const thumbnailCtx = thumbnailCanvas.getContext("2d")!
-      const img = new Image()
+      let originalUrl: string
+      let thumbnailUrl: string | null = null
 
-      const thumbnailPromise = new Promise<Blob>((resolve) => {
-        img.onload = () => {
-          const maxThumbnailSize = 300
-          const ratio = Math.min(maxThumbnailSize / img.width, maxThumbnailSize / img.height)
+      if (isLargeFile) {
+        console.log("[v0] Large file detected, using direct Blob upload...")
 
-          thumbnailCanvas.width = img.width * ratio
-          thumbnailCanvas.height = img.height * ratio
+        // Get upload configuration for large files
+        const configResponse = await fetch("/api/upload-large", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            filename: newImage.file.name,
+            fileSize: fileSize,
+            fileType: newImage.file.type,
+          }),
+        })
 
-          thumbnailCtx.drawImage(img, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height)
-          thumbnailCanvas.toBlob((blob) => resolve(blob!), "image/jpeg", 0.8)
+        if (!configResponse.ok) {
+          throw new Error(`Failed to get upload configuration: ${configResponse.status}`)
         }
-        img.src = URL.createObjectURL(newImage.file!)
-      })
 
-      const thumbnailBlob = await thumbnailPromise
-      formData.append("thumbnail", thumbnailBlob)
+        const config = await configResponse.json()
 
-      console.log("[v0] Uploading to Vercel Blob...")
-      const uploadResponse = await fetch("/api/upload-image", {
-        method: "POST",
-        body: formData,
-      })
+        // Direct upload to Vercel Blob using provided token
+        const { put } = await import("@vercel/blob")
 
-      if (!uploadResponse.ok) {
-        throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`)
+        const originalBlob = await put(config.originalFilename, newImage.file, {
+          access: "public",
+          token: config.token,
+        })
+
+        originalUrl = originalBlob.url
+        console.log("[v0] Direct Blob upload successful for large file")
+
+        // Create and upload thumbnail
+        const thumbnailCanvas = document.createElement("canvas")
+        const thumbnailCtx = thumbnailCanvas.getContext("2d")!
+        const img = new Image()
+
+        const thumbnailPromise = new Promise<Blob>((resolve) => {
+          img.onload = () => {
+            const maxThumbnailSize = 300
+            const ratio = Math.min(maxThumbnailSize / img.width, maxThumbnailSize / img.height)
+
+            thumbnailCanvas.width = img.width * ratio
+            thumbnailCanvas.height = img.height * ratio
+
+            thumbnailCtx.drawImage(img, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height)
+            thumbnailCanvas.toBlob((blob) => resolve(blob!), "image/jpeg", 0.8)
+          }
+          img.src = URL.createObjectURL(newImage.file!)
+        })
+
+        const thumbnailBlob = await thumbnailPromise
+        const thumbnailBlobResult = await put(config.thumbnailFilename, thumbnailBlob, {
+          access: "public",
+          token: config.token,
+        })
+
+        thumbnailUrl = thumbnailBlobResult.url
+      } else {
+        console.log("[v0] Small file, using server upload...")
+
+        // Use existing server upload for smaller files
+        const formData = new FormData()
+        formData.append("file", newImage.file)
+
+        // Create thumbnail for browsing
+        const thumbnailCanvas = document.createElement("canvas")
+        const thumbnailCtx = thumbnailCanvas.getContext("2d")!
+        const img = new Image()
+
+        const thumbnailPromise = new Promise<Blob>((resolve) => {
+          img.onload = () => {
+            const maxThumbnailSize = 300
+            const ratio = Math.min(maxThumbnailSize / img.width, maxThumbnailSize / img.height)
+
+            thumbnailCanvas.width = img.width * ratio
+            thumbnailCanvas.height = img.height * ratio
+
+            thumbnailCtx.drawImage(img, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height)
+            thumbnailCanvas.toBlob((blob) => resolve(blob!), "image/jpeg", 0.8)
+          }
+          img.src = URL.createObjectURL(newImage.file!)
+        })
+
+        const thumbnailBlob = await thumbnailPromise
+        formData.append("thumbnail", thumbnailBlob)
+
+        console.log("[v0] Uploading to Vercel Blob...")
+        const uploadResponse = await fetch("/api/upload-image", {
+          method: "POST",
+          body: formData,
+        })
+
+        if (!uploadResponse.ok) {
+          throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`)
+        }
+
+        const uploadResult = await uploadResponse.json()
+
+        if (uploadResult.error) {
+          throw new Error(uploadResult.error)
+        }
+
+        originalUrl = uploadResult.originalUrl
+        thumbnailUrl = uploadResult.thumbnailUrl
       }
 
-      const uploadResult = await uploadResponse.json()
-
-      if (uploadResult.error) {
-        throw new Error(uploadResult.error)
-      }
-
-      console.log("[v0] Blob upload successful:", uploadResult)
+      console.log("[v0] Blob upload successful, saving to database...")
 
       const imageData = {
         title: newImage.title,
@@ -317,9 +388,9 @@ export default function SimpleAdminPage() {
         rights_type: newImage.rightsType,
         price: Number.parseFloat(newImage.price) || 0,
         original_file_size: newImage.file.size,
-        image_url: uploadResult.originalUrl, // Blob URL for original
-        thumbnail_url: uploadResult.thumbnailUrl || uploadResult.originalUrl, // Blob URL for thumbnail
-        resolution: `${img.naturalWidth}x${img.naturalHeight} (Original Quality)`,
+        image_url: originalUrl, // Blob URL for original
+        thumbnail_url: thumbnailUrl || originalUrl, // Blob URL for thumbnail
+        resolution: `Original Quality (${(fileSize / (1024 * 1024)).toFixed(2)}MB)`,
         active: true,
       }
 

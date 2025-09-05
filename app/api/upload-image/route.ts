@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { put } from "@vercel/blob"
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,33 +11,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 })
     }
 
-    // Check file size - limit to 50MB for base64 storage
-    const maxSize = 50 * 1024 * 1024 // 50MB
-    if (file.size > maxSize) {
+    // Check if file is too large for serverless function
+    if (file.size > 4 * 1024 * 1024) {
+      // 4MB limit
       return NextResponse.json(
         {
-          error: `File too large. Maximum size is ${maxSize / (1024 * 1024)}MB`,
+          error: "File too large for server upload. Use client-side upload.",
+          useClientUpload: true,
+          fileSize: file.size,
         },
-        { status: 400 },
+        { status: 413 },
       )
     }
 
-    // Convert original file to base64 without compression
-    const originalArrayBuffer = await file.arrayBuffer()
-    const originalBase64 = Buffer.from(originalArrayBuffer).toString("base64")
-    const originalDataUrl = `data:${file.type};base64,${originalBase64}`
+    const token = "vercel_blob_rw_0NpI635IzSq52HgK_O1tlS1gUX6IpzKF3SnhJP3P05phXU4"
 
-    // Convert thumbnail to base64 if provided
-    let thumbnailDataUrl = null
+    const originalBlob = await put(`original-${Date.now()}-${file.name}`, file, {
+      access: "public",
+      token: token,
+    })
+
+    let thumbnailUrl = null
     if (thumbnail) {
-      const thumbnailArrayBuffer = await thumbnail.arrayBuffer()
-      const thumbnailBase64 = Buffer.from(thumbnailArrayBuffer).toString("base64")
-      thumbnailDataUrl = `data:${thumbnail.type};base64,${thumbnailBase64}`
+      const thumbnailBlob = await put(`thumbnail-${Date.now()}-${thumbnail.name}`, thumbnail, {
+        access: "public",
+        token: token,
+      })
+      thumbnailUrl = thumbnailBlob.url
     }
 
     return NextResponse.json({
-      originalUrl: originalDataUrl,
-      thumbnailUrl: thumbnailDataUrl,
+      originalUrl: originalBlob.url,
+      thumbnailUrl: thumbnailUrl,
       filename: file.name,
       size: file.size,
       type: file.type,

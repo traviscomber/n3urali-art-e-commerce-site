@@ -300,8 +300,8 @@ function compressBase64Image(base64String: string, maxSizeKB = 2000, preserveQua
   })
 }
 
-function handleDatabaseError(error: any): { success: false; error: string } {
-  console.error("[v0] Database error:", error)
+function handleDatabaseError(error: any, functionName?: string): { success: false; error: string } {
+  console.error(`[v0] Database error in ${functionName || "unknown function"}:`, error)
 
   // Handle Vercel serverless function payload limits
   if (typeof error === "string") {
@@ -464,14 +464,27 @@ export async function createImageWithCategoryObject(imageData: {
   original_file_size?: number
 }) {
   try {
-    console.log("[v0] Processing upload with Blob URLs:", {
+    console.log("[v0] Processing upload with data:", {
       ...imageData,
-      image_url: imageData.image_url.substring(0, 100) + "...",
-      thumbnail_url: imageData.thumbnail_url.substring(0, 100) + "...",
+      image_url: `${imageData.image_url.substring(0, 50)}... (${Math.round(imageData.image_url.length / 1024)}KB)`,
+      thumbnail_url: `${imageData.thumbnail_url.substring(0, 50)}... (${Math.round(imageData.thumbnail_url.length / 1024)}KB)`,
       original_file_size: imageData.original_file_size
         ? `${(imageData.original_file_size / (1024 * 1024)).toFixed(2)}MB`
         : "unknown",
     })
+
+    const totalPayloadSize = imageData.image_url.length + imageData.thumbnail_url.length
+    const payloadSizeMB = totalPayloadSize / (1024 * 1024)
+
+    console.log("[v0] Total payload size:", `${payloadSizeMB.toFixed(2)}MB`)
+
+    if (payloadSizeMB > 2) {
+      console.log("[v0] Payload too large for database:", `${payloadSizeMB.toFixed(2)}MB`)
+      return {
+        success: false,
+        error: `File too large for database storage (${payloadSizeMB.toFixed(1)}MB). Maximum supported size is 2MB. Please use a smaller image or compress the file before uploading.`,
+      }
+    }
 
     const sql = createNeonClient()
 
@@ -506,30 +519,54 @@ export async function createImageWithCategoryObject(imageData: {
       return { success: false, error: "No default license found" }
     }
 
-    console.log("[v0] Inserting image with Blob URLs, license_id:", licenseId, "price:", imageData.price)
-    const result = await sql`
-      INSERT INTO images (title, description, category_id, license_id, price, image_url, thumbnail_url, 
-                         active, featured, metadata)
-      VALUES (${imageData.title}, ${imageData.description}, ${categoryId}, ${licenseId}, 
-              ${imageData.price}, ${imageData.image_url}, ${imageData.thumbnail_url}, 
-              true, false, 
-              ${JSON.stringify({
-                rights_type: imageData.rights_type,
-                original_file_size: imageData.original_file_size,
-                upload_timestamp: new Date().toISOString(),
-                storage_type: "vercel_blob",
-              })})
-      RETURNING *
-    `
+    console.log("[v0] Inserting image, license_id:", licenseId, "price:", imageData.price)
 
-    console.log("[v0] Image created successfully with Blob storage, ID:", result[0]?.id)
+    let result
+    try {
+      result = await sql`
+        INSERT INTO images (title, description, category_id, license_id, price, image_url, thumbnail_url, 
+                           active, featured, metadata)
+        VALUES (${imageData.title}, ${imageData.description}, ${categoryId}, ${licenseId}, 
+                ${imageData.price}, ${imageData.image_url}, ${imageData.thumbnail_url}, 
+                true, false, 
+                ${JSON.stringify({
+                  rights_type: imageData.rights_type,
+                  original_file_size: imageData.original_file_size,
+                  upload_timestamp: new Date().toISOString(),
+                  storage_type: "base64_database",
+                })})
+        RETURNING *
+      `
+    } catch (dbError: any) {
+      console.log("[v0] Database insertion failed:", dbError.message || dbError)
+
+      const errorMessage = dbError.message || String(dbError)
+
+      if (
+        errorMessage.includes("Request entity too large") ||
+        errorMessage.includes("413") ||
+        errorMessage.includes("payload") ||
+        errorMessage.includes("body size") ||
+        errorMessage.includes("Request En") ||
+        errorMessage.includes("Unexpected token")
+      ) {
+        return {
+          success: false,
+          error: `Image file too large for database storage (${payloadSizeMB.toFixed(1)}MB). Please use a smaller image (max: 2MB) or compress the file before uploading.`,
+        }
+      }
+
+      throw dbError // Re-throw if it's not a size-related error
+    }
+
+    console.log("[v0] Image created successfully, ID:", result[0]?.id)
 
     invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
     revalidatePath("/simple-admin")
 
     return { success: true, data: result }
   } catch (error) {
-    return handleDatabaseError(error)
+    return handleDatabaseError(error, "createImageWithCategoryObject")
   }
 }
 

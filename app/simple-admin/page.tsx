@@ -92,7 +92,6 @@ export default function SimpleAdminPage() {
     file: null,
     preview: "",
   })
-  const [highQualityMode, setHighQualityMode] = useState(false)
 
   useEffect(() => {
     console.log("[v0] SimpleAdmin: Clearing any existing auth and forcing login")
@@ -200,134 +199,26 @@ export default function SimpleAdminPage() {
     }
   }
 
-  const compressImageOnClient = (file: File, maxSizeKB = 2000): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const canvas = document.createElement("canvas")
-      const ctx = canvas.getContext("2d")!
-      const img = new Image()
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-      img.onload = () => {
-        // Calculate compression ratio based on file size
-        const fileSizeKB = file.size / 1024
-        const compressionRatio = fileSizeKB > maxSizeKB ? Math.sqrt(maxSizeKB / fileSizeKB) * 0.8 : 1
-
-        // Set canvas dimensions
-        canvas.width = Math.floor(img.width * compressionRatio)
-        canvas.height = Math.floor(img.height * compressionRatio)
-
-        // Draw and compress
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-
-        let quality = 0.8
-        let compressedDataUrl = canvas.toDataURL("image/jpeg", quality)
-
-        // Reduce quality until we're under the size limit
-        while ((compressedDataUrl.length * 3) / 4 / 1024 > maxSizeKB && quality > 0.1) {
-          quality -= 0.05
-          compressedDataUrl = canvas.toDataURL("image/jpeg", quality)
-        }
-
-        console.log(
-          `[v0] Client compression: ${fileSizeKB.toFixed(1)}KB -> ${((compressedDataUrl.length * 3) / 4 / 1024).toFixed(1)}KB (quality: ${quality})`,
-        )
-        resolve(compressedDataUrl)
-      }
-
-      img.onerror = () => reject(new Error("Failed to load image for compression"))
-      img.src = URL.createObjectURL(file)
-    })
-  }
-
-  const uploadInChunks = async (imageData: any, compressedImage: string, compressedThumbnail: string) => {
-    const SAFE_UPLOAD_SIZE = 2 * 1024 * 1024 // 2MB chunks (safely under 4MB Vercel limit)
-
-    // If compressed image is small enough, upload normally
-    const totalSize = ((compressedImage.length + compressedThumbnail.length) * 3) / 4 / 1024 / 1024 // Size in MB
-
-    if (totalSize < 2) {
-      console.log(`[v0] File small enough (${totalSize.toFixed(1)}MB), uploading normally`)
-      return await createImageWithCategoryObject({
-        ...imageData,
-        image_url: compressedImage,
-        thumbnail_url: compressedThumbnail,
-      })
-    }
-
-    // For files between 2-4MB, apply more aggressive compression
-    console.log(`[v0] File over 2MB (${totalSize.toFixed(1)}MB), applying aggressive compression`)
-
-    const aggressiveImage = await compressImageOnClient(newImage.file!, 1200) // More aggressive compression
-    const aggressiveThumbnail = await compressImageOnClient(newImage.file!, 200) // Smaller thumbnail
-
-    const newTotalSize = ((aggressiveImage.length + aggressiveThumbnail.length) * 3) / 4 / 1024 / 1024
-
-    if (newTotalSize < 2) {
-      console.log(`[v0] Aggressive compression successful (${newTotalSize.toFixed(1)}MB), uploading`)
-      return await createImageWithCategoryObject({
-        ...imageData,
-        image_url: aggressiveImage,
-        thumbnail_url: aggressiveThumbnail,
-      })
-    }
-
-    console.log(`[v0] Still over 2MB (${newTotalSize.toFixed(1)}MB), applying ultra-aggressive compression`)
-
-    const ultraImage = await compressImageOnClient(newImage.file!, 800) // Ultra compression
-    const ultraThumbnail = await compressImageOnClient(newImage.file!, 150) // Ultra small thumbnail
-
-    const ultraTotalSize = ((ultraImage.length + ultraThumbnail.length) * 3) / 4 / 1024 / 1024
-
-    if (ultraTotalSize < 2) {
-      console.log(`[v0] Ultra compression successful (${ultraTotalSize.toFixed(1)}MB), uploading`)
-      return await createImageWithCategoryObject({
-        ...imageData,
-        image_url: ultraImage,
-        thumbnail_url: ultraThumbnail,
-      })
-    }
-
-    // If still too large, return error
-    throw new Error(
-      `File too large even after ultra compression (${ultraTotalSize.toFixed(1)}MB). Maximum supported size is 2MB. Please use a smaller image or contact support.`,
-    )
-  }
-
-  const handleFileSelect = async (file: File) => {
-    console.log("[v0] SimpleAdmin: File selected:", file.name, "Size:", (file.size / (1024 * 1024)).toFixed(2), "MB")
-
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file")
-      return
-    }
-
-    if (file.size > 200 * 1024 * 1024) {
-      toast.error("File size too large. Please select a file under 200MB for optimal performance.")
-      return
-    }
-
-    if (file.size > 50 * 1024 * 1024) {
-      toast.warning("Large file detected. Applying compression for upload optimization...")
-    }
+    console.log("[v0] SimpleAdmin: File selected:", file.name, (file.size / (1024 * 1024)).toFixed(2), "MB")
 
     try {
-      const compressedPreview = await compressImageOnClient(file, 500) // Small preview
+      const reader = new FileReader()
+      const previewPromise = new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
 
-      setNewImage((prev) => ({ ...prev, file, preview: compressedPreview }))
-      console.log(
-        "[v0] SimpleAdmin: File preview generated and compressed for",
-        (file.size / (1024 * 1024)).toFixed(2),
-        "MB file",
-      )
+      const preview = await previewPromise
+      setNewImage((prev) => ({ ...prev, file, preview }))
+      console.log("[v0] SimpleAdmin: File preview generated for", (file.size / (1024 * 1024)).toFixed(2), "MB file")
     } catch (error) {
       console.error("[v0] SimpleAdmin: Error processing file:", error)
       toast.error("Error processing file. Please try again.")
-    }
-  }
-
-  const handleInputFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      handleFileSelect(file)
     }
   }
 
@@ -352,7 +243,7 @@ export default function SimpleAdminPage() {
     const imageFile = files.find((file) => file.type.startsWith("image/"))
 
     if (imageFile) {
-      handleFileSelect(imageFile)
+      handleFileSelect({ target: { files: [imageFile] } } as React.ChangeEvent<HTMLInputElement>)
     } else {
       toast.error("Please drop an image file")
     }
@@ -360,12 +251,7 @@ export default function SimpleAdminPage() {
 
   const handleImageUpload = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log(
-      "[v0] SimpleAdmin: Starting image upload for",
-      newImage.file?.name,
-      "Size:",
-      newImage.file ? (newImage.file.size / (1024 * 1024)).toFixed(2) + "MB" : "unknown",
-    )
+    console.log("[v0] Starting original quality upload for", newImage.file?.name)
 
     if (!newImage.file) {
       toast.error("Please select an image file")
@@ -381,12 +267,35 @@ export default function SimpleAdminPage() {
     setError(null)
 
     try {
-      if (newImage.file.size > 50 * 1024 * 1024) {
-        toast.info("Processing large file with advanced compression... This may take a moment.")
-      }
+      const reader = new FileReader()
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(newImage.file!)
+      })
 
-      const compressedImage = await compressImageOnClient(newImage.file, 2000) // Main image
-      const compressedThumbnail = await compressImageOnClient(newImage.file, 500) // Thumbnail
+      const originalImage = await base64Promise
+
+      const thumbnailCanvas = document.createElement("canvas")
+      const thumbnailCtx = thumbnailCanvas.getContext("2d")!
+      const img = new Image()
+
+      const thumbnailPromise = new Promise<string>((resolve) => {
+        img.onload = () => {
+          // Create small thumbnail (300px max dimension) for browsing
+          const maxThumbnailSize = 300
+          const ratio = Math.min(maxThumbnailSize / img.width, maxThumbnailSize / img.height)
+
+          thumbnailCanvas.width = img.width * ratio
+          thumbnailCanvas.height = img.height * ratio
+
+          thumbnailCtx.drawImage(img, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height)
+          resolve(thumbnailCanvas.toDataURL("image/jpeg", 0.8))
+        }
+        img.src = originalImage
+      })
+
+      const thumbnail = await thumbnailPromise
 
       const imageData = {
         title: newImage.title,
@@ -395,17 +304,17 @@ export default function SimpleAdminPage() {
         rights_type: newImage.rightsType,
         price: Number.parseFloat(newImage.price) || 0,
         original_file_size: newImage.file.size,
+        image_url: originalImage, // Store original image without any compression
+        thumbnail_url: thumbnail, // Only thumbnail is compressed for browsing
+        resolution: `${img.naturalWidth}x${img.naturalHeight} (Original Quality)`,
+        active: true,
       }
 
-      const result = await uploadInChunks(imageData, compressedImage, compressedThumbnail)
+      const result = await createImageWithCategoryObject(imageData)
 
       if (result.success) {
-        console.log(
-          "[v0] SimpleAdmin: Upload successful for",
-          (newImage.file.size / (1024 * 1024)).toFixed(2),
-          "MB file",
-        )
-        toast.success("Large image uploaded successfully with optimized compression!")
+        console.log("[v0] Original quality upload completed successfully")
+        toast.success("Image uploaded in original quality!")
 
         setNewImage({
           title: "",
@@ -419,92 +328,19 @@ export default function SimpleAdminPage() {
 
         await loadInitialData()
       } else {
-        console.error("[v0] SimpleAdmin: Upload failed:", result.error)
+        console.error("[v0] Upload failed:", result.error)
         setError(result.error || "Upload failed")
         toast.error("Upload failed: " + (result.error || "Unknown error"))
       }
     } catch (error) {
-      console.error("[v0] SimpleAdmin: Upload error:", error)
-
+      console.error("[v0] Upload error:", error)
       if (error instanceof Error) {
-        if (
-          error.message.includes("Request Entity Too Large") ||
-          error.message.includes("413") ||
-          error.message.includes("FUNCTION_PAYLOAD_TOO_LARGE")
-        ) {
-          setError("File too large for server after compression. Please use a smaller file.")
-          toast.error("File too large even after compression. Please use a smaller image or contact support.")
-        } else if (error.message.includes("timeout") || error.message.includes("network")) {
-          setError("Upload timeout. Please check your connection and try again.")
-          toast.error("Upload timeout. Please check your internet connection and try again.")
-        } else {
-          setError("Upload failed: " + error.message)
-          toast.error("Upload failed: " + error.message)
-        }
+        setError("Upload failed: " + error.message)
+        toast.error("Upload failed: " + error.message)
       } else {
         setError("Upload failed")
         toast.error("Upload failed")
       }
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  const handleHighQualityUpload = async () => {
-    const { file, title, description, category, rightsType, price } = newImage
-
-    if (!file || !title || !description || !category || !rightsType || !price) {
-      toast.error("Please fill in all fields and select a file")
-      return
-    }
-
-    setUploading(true)
-    try {
-      const reader = new FileReader()
-      const base64Promise = new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string)
-        reader.onerror = reject
-        reader.readAsDataURL(file)
-      })
-
-      const base64Image = await base64Promise
-
-      const result = await createImageWithCategoryObject({
-        title,
-        description,
-        category_name: category,
-        rights_type: rightsType,
-        price: Number.parseFloat(price),
-        image_url: base64Image, // Full quality image
-        thumbnail_url: base64Image, // Use same image as thumbnail for HQ uploads
-        resolution: "4K-16K (Full HQ)",
-        active: true,
-      })
-
-      if (result.success) {
-        console.log("[v0] High-quality upload successful")
-        toast.success("High-quality image uploaded successfully!")
-
-        setNewImage({
-          title: "",
-          description: "",
-          category: "",
-          rightsType: "both",
-          price: "",
-          file: null,
-          preview: "",
-        })
-
-        await loadInitialData()
-      } else {
-        console.error("[v0] High-quality upload failed:", result.error)
-        setError(result.error || "High-quality upload failed")
-        toast.error("Upload failed: " + (result.error || "Unknown error"))
-      }
-    } catch (error) {
-      console.error("[v0] High-quality upload error:", error)
-      setError("High-quality upload failed")
-      toast.error("High-quality upload failed")
     } finally {
       setUploading(false)
     }
@@ -729,7 +565,7 @@ export default function SimpleAdminPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={highQualityMode ? handleHighQualityUpload : handleImageUpload} className="space-y-4">
+              <form onSubmit={handleImageUpload} className="space-y-4">
                 <div>
                   <Label htmlFor="title" className="text-lg font-medium">
                     Title *
@@ -863,7 +699,7 @@ export default function SimpleAdminPage() {
                       id="file"
                       type="file"
                       accept="image/*"
-                      onChange={handleInputFileSelect}
+                      onChange={handleFileSelect}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
 
@@ -930,32 +766,12 @@ export default function SimpleAdminPage() {
                   </div>
                 )}
 
-                <div className="flex items-center space-x-2 mb-4">
-                  <input
-                    type="checkbox"
-                    id="highQualityMode"
-                    checked={highQualityMode}
-                    onChange={(e) => setHighQualityMode(e.target.checked)}
-                    className="rounded border-gray-300"
-                  />
-                  <label htmlFor="highQualityMode" className="text-sm font-medium">
-                    High-Quality Mode (4K-16K without compression)
-                  </label>
-                </div>
-
                 <Button
                   type="submit"
-                  disabled={uploading || !newImage.file}
+                  disabled={uploading}
                   className="w-full bg-orange-600 hover:bg-orange-700 text-lg h-12"
                 >
-                  {uploading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {highQualityMode ? "Uploading High-Quality..." : "Uploading..."}
-                    </>
-                  ) : (
-                    `${highQualityMode ? "Upload High-Quality" : "Upload Compressed"} Image`
-                  )}
+                  {uploading ? "Uploading Original Quality..." : "Upload Original Quality Image"}
                 </Button>
               </form>
             </CardContent>

@@ -464,25 +464,10 @@ export async function createImageWithCategoryObject(imageData: {
   original_file_size?: number
 }) {
   try {
-    const imageSize = (imageData.image_url.length * 3) / 4 / 1024 / 1024 // Size in MB
-    const thumbnailSize = (imageData.thumbnail_url.length * 3) / 4 / 1024 / 1024 // Size in MB
-    const totalSize = imageSize + thumbnailSize
-
-    console.log(
-      `[v0] Processing upload - Image: ${imageSize.toFixed(1)}MB, Thumbnail: ${thumbnailSize.toFixed(1)}MB, Total: ${totalSize.toFixed(1)}MB`,
-    )
-
-    if (totalSize > 2) {
-      return {
-        success: false,
-        error: `Payload too large (${totalSize.toFixed(1)}MB). Maximum supported size is 2MB. Please use more aggressive compression.`,
-      }
-    }
-
-    console.log("[v0] Starting image creation with object data:", {
+    console.log("[v0] Processing upload with Blob URLs:", {
       ...imageData,
-      image_url: imageData.image_url.substring(0, 50) + "...",
-      thumbnail_url: imageData.thumbnail_url.substring(0, 50) + "...",
+      image_url: imageData.image_url.substring(0, 100) + "...",
+      thumbnail_url: imageData.thumbnail_url.substring(0, 100) + "...",
       original_file_size: imageData.original_file_size
         ? `${(imageData.original_file_size / (1024 * 1024)).toFixed(2)}MB`
         : "unknown",
@@ -521,7 +506,7 @@ export async function createImageWithCategoryObject(imageData: {
       return { success: false, error: "No default license found" }
     }
 
-    console.log("[v0] Inserting pre-compressed image with license_id:", licenseId, "price:", imageData.price)
+    console.log("[v0] Inserting image with Blob URLs, license_id:", licenseId, "price:", imageData.price)
     const result = await sql`
       INSERT INTO images (title, description, category_id, license_id, price, image_url, thumbnail_url, 
                          active, featured, metadata)
@@ -532,12 +517,12 @@ export async function createImageWithCategoryObject(imageData: {
                 rights_type: imageData.rights_type,
                 original_file_size: imageData.original_file_size,
                 upload_timestamp: new Date().toISOString(),
-                compression_applied: "client-side",
+                storage_type: "vercel_blob",
               })})
       RETURNING *
     `
 
-    console.log("[v0] Large image created successfully with ID:", result[0]?.id)
+    console.log("[v0] Image created successfully with Blob storage, ID:", result[0]?.id)
 
     invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
     revalidatePath("/simple-admin")

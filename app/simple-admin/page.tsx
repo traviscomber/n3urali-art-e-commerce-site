@@ -251,7 +251,7 @@ export default function SimpleAdminPage() {
 
   const handleImageUpload = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("[v0] Starting original quality upload for", newImage.file?.name)
+    console.log("[v0] Starting Blob upload for", newImage.file?.name)
 
     if (!newImage.file) {
       toast.error("Please select an image file")
@@ -267,22 +267,16 @@ export default function SimpleAdminPage() {
     setError(null)
 
     try {
-      const reader = new FileReader()
-      const base64Promise = new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string)
-        reader.onerror = reject
-        reader.readAsDataURL(newImage.file!)
-      })
+      const formData = new FormData()
+      formData.append("file", newImage.file)
 
-      const originalImage = await base64Promise
-
+      // Create thumbnail for browsing
       const thumbnailCanvas = document.createElement("canvas")
       const thumbnailCtx = thumbnailCanvas.getContext("2d")!
       const img = new Image()
 
-      const thumbnailPromise = new Promise<string>((resolve) => {
+      const thumbnailPromise = new Promise<Blob>((resolve) => {
         img.onload = () => {
-          // Create small thumbnail (300px max dimension) for browsing
           const maxThumbnailSize = 300
           const ratio = Math.min(maxThumbnailSize / img.width, maxThumbnailSize / img.height)
 
@@ -290,12 +284,31 @@ export default function SimpleAdminPage() {
           thumbnailCanvas.height = img.height * ratio
 
           thumbnailCtx.drawImage(img, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height)
-          resolve(thumbnailCanvas.toDataURL("image/jpeg", 0.8))
+          thumbnailCanvas.toBlob((blob) => resolve(blob!), "image/jpeg", 0.8)
         }
-        img.src = originalImage
+        img.src = URL.createObjectURL(newImage.file!)
       })
 
-      const thumbnail = await thumbnailPromise
+      const thumbnailBlob = await thumbnailPromise
+      formData.append("thumbnail", thumbnailBlob)
+
+      console.log("[v0] Uploading to Vercel Blob...")
+      const uploadResponse = await fetch("/api/upload-image", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!uploadResponse.ok) {
+        throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`)
+      }
+
+      const uploadResult = await uploadResponse.json()
+
+      if (uploadResult.error) {
+        throw new Error(uploadResult.error)
+      }
+
+      console.log("[v0] Blob upload successful:", uploadResult)
 
       const imageData = {
         title: newImage.title,
@@ -304,8 +317,8 @@ export default function SimpleAdminPage() {
         rights_type: newImage.rightsType,
         price: Number.parseFloat(newImage.price) || 0,
         original_file_size: newImage.file.size,
-        image_url: originalImage, // Store original image without any compression
-        thumbnail_url: thumbnail, // Only thumbnail is compressed for browsing
+        image_url: uploadResult.originalUrl, // Blob URL for original
+        thumbnail_url: uploadResult.thumbnailUrl || uploadResult.originalUrl, // Blob URL for thumbnail
         resolution: `${img.naturalWidth}x${img.naturalHeight} (Original Quality)`,
         active: true,
       }

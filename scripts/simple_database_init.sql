@@ -98,9 +98,9 @@ ALTER TABLE downloads ENABLE ROW LEVEL SECURITY;
 -- Create basic RLS policies
 CREATE POLICY "Users can view their own profile" ON user_profiles FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Users can update their own profile" ON user_profiles FOR UPDATE USING (auth.uid() = id);
-CREATE POLICY "Anyone can view categories" ON categories FOR SELECT TO authenticated, anon USING (true);
-CREATE POLICY "Anyone can view active images" ON images FOR SELECT TO authenticated, anon USING (active = true);
-CREATE POLICY "Anyone can view licenses" ON licenses FOR SELECT TO authenticated, anon USING (true);
+CREATE POLICY "Anyone can view categories" ON categories FOR SELECT USING (true);
+CREATE POLICY "Anyone can view active images" ON images FOR SELECT USING (active = true);
+CREATE POLICY "Anyone can view licenses" ON licenses FOR SELECT USING (true);
 CREATE POLICY "Users can view their own orders" ON orders FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can view their own order items" ON order_items FOR SELECT USING (auth.uid() = (SELECT user_id FROM orders WHERE id = order_id));
 CREATE POLICY "Users can view their own downloads" ON downloads FOR SELECT USING (auth.uid() = (SELECT user_id FROM orders WHERE id = (SELECT order_id FROM order_items WHERE id = order_item_id)));

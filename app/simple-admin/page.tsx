@@ -108,15 +108,8 @@ export default function SimpleAdminPage() {
   })
 
   useEffect(() => {
-    const existingAuth = localStorage.getItem("simple_admin_auth")
-    if (existingAuth === "true") {
-      console.log("[v0] SimpleAdmin: Found existing authentication, logging in automatically")
-      setIsAuthenticated(true)
-      loadInitialData()
-    } else {
-      console.log("[v0] SimpleAdmin: No existing authentication found")
-      setIsAuthenticated(false)
-    }
+    console.log("[v0] SimpleAdmin: Authentication required")
+    setIsAuthenticated(false)
   }, [])
 
   const getCategoryDisplayName = (category: Category) => {
@@ -137,7 +130,6 @@ export default function SimpleAdminPage() {
     if (password === "C4rlit0s") {
       console.log("[v0] SimpleAdmin: Login successful")
       setIsAuthenticated(true)
-      localStorage.setItem("simple_admin_auth", "true")
       setPassword("")
       await loadInitialData()
     } else {

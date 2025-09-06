@@ -245,12 +245,9 @@ CREATE TRIGGER update_images_updated_at BEFORE UPDATE ON images FOR EACH ROW EXE
 CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Grant necessary permissions
-GRANT USAGE ON SCHEMA public TO anon, authenticated;
-GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated;
-GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
-
--- Insert admin user profile (will be created automatically via trigger when user signs up)
--- The trigger will set is_admin = TRUE for travis@nuanu.com
+GRANT USAGE ON SCHEMA public TO PUBLIC;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO PUBLIC;
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO PUBLIC;
 
 COMMENT ON TABLE user_profiles IS 'User profiles with admin capabilities';
 COMMENT ON TABLE categories IS 'Image categories for organizing content';

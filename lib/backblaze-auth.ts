@@ -16,7 +16,7 @@ export class BackblazeAuth {
 
   constructor() {
     this.config = {
-      accessKeyId: process.env.BACKBLAZE_KEY_ID!,
+      accessKeyId: process.env.BACKBLAZE_API_KEY!,
       secretAccessKey: process.env.BACKBLAZE_APPLICATION_KEY!,
       region: process.env.B2_REGION || "us-east-005",
       endpoint: process.env.B2_ENDPOINT || "https://s3.us-east-005.backblazeb2.com",

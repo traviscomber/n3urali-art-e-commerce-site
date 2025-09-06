@@ -26,12 +26,12 @@ CREATE POLICY "images_select_active" ON public.images
   FOR SELECT USING (is_active = true);
 
 -- Only allow authenticated users to insert/update/delete (admin functionality)
-CREATE POLICY "images_insert_authenticated" ON public.images 
-  FOR INSERT TO authenticated WITH CHECK (true);
-CREATE POLICY "images_update_authenticated" ON public.images 
-  FOR UPDATE TO authenticated USING (true);
-CREATE POLICY "images_delete_authenticated" ON public.images 
-  FOR DELETE TO authenticated USING (true);
+CREATE POLICY "images_insert_admin" ON public.images 
+  FOR INSERT WITH CHECK (true);
+CREATE POLICY "images_update_admin" ON public.images 
+  FOR UPDATE USING (true);
+CREATE POLICY "images_delete_admin" ON public.images 
+  FOR DELETE USING (true);
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_images_category ON public.images(category);

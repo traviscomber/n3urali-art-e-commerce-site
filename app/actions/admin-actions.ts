@@ -4,9 +4,10 @@ import { createNeonClient } from "@/lib/neon/client"
 import { unstable_cache } from "next/cache"
 import { revalidatePath, revalidateTag } from "next/cache" // Added revalidateTag import
 import { put } from "@vercel/blob"
-import { BackblazeStorage } from "@/lib/backblaze-auth"
 import { ImageCompressor } from "@/lib/storage/image-compression"
 import { DropboxStorage } from "@/lib/storage/dropbox"
+
+import { WorkingBackblazeStorage } from "@/lib/backblaze-working"
 
 const CACHE_TAGS = {
   IMAGES: "images",
@@ -1431,11 +1432,11 @@ export async function createImageWithCategoryObjectChunked(imageData: {
 
 export async function uploadToBackblaze(file: File): Promise<{ success: boolean; url?: string; error?: string }> {
   try {
-    console.log("[v0] Backblaze env check - keyId exists:", !!process.env.BACKBLAZE_KEY_ID)
+    console.log("[v0] Backblaze env check - keyId exists:", !!process.env.BACKBLAZE_API_KEY)
     console.log("[v0] Backblaze env check - applicationKey exists:", !!process.env.BACKBLAZE_APPLICATION_KEY)
     console.log("[v0] Backblaze env check - bucketName:", process.env.BACKBLAZE_BUCKET_NAME)
 
-    const backblaze = new BackblazeStorage()
+    const backblaze = new WorkingBackblazeStorage()
 
     let fileToUpload = file
     const fileSizeMB = file.size / (1024 * 1024)
@@ -1463,25 +1464,7 @@ export async function uploadToBackblaze(file: File): Promise<{ success: boolean;
 
     console.log("[v0] Starting Backblaze upload for:", fileName)
 
-    const presignedUrl = await backblaze.generatePresignedUrl(key, fileToUpload.type || "application/octet-stream")
-    console.log("[v0] Generated presigned URL, uploading to Backblaze...")
-
-    const uploadResponse = await fetch(presignedUrl, {
-      method: "PUT",
-      body: fileToUpload,
-      headers: {
-        "Content-Type": fileToUpload.type || "application/octet-stream",
-      },
-    })
-
-    if (!uploadResponse.ok) {
-      const errorText = await uploadResponse.text()
-      console.log("[v0] Backblaze upload error:", uploadResponse.status, errorText)
-      throw new Error(`Upload failed: ${uploadResponse.status} ${errorText}`)
-    }
-
-    const config = backblaze.getConfig()
-    const publicUrl = `${config.endpoint}/${config.bucket}/${key}`
+    const publicUrl = await backblaze.uploadFile(fileToUpload, key)
 
     console.log("[v0] Backblaze upload successful:", publicUrl)
     return {
@@ -1626,7 +1609,7 @@ export async function createImageWithHybridStorage(
     const fileSizeMB = file.size / (1024 * 1024)
     console.log("[v0] Processing file:", file.name, `${fileSizeMB.toFixed(2)}MB`)
 
-    const maxDatabaseSizeMB = 10
+    const maxDatabaseSizeMB = 2
 
     let imageUrl: string
     let thumbnailUrl: string
@@ -1660,7 +1643,7 @@ export async function createImageWithHybridStorage(
       const estimatedBase64Size = (file.size * 4) / 3
       const estimatedBase64SizeMB = estimatedBase64Size / (1024 * 1024)
 
-      if (estimatedBase64SizeMB > 40) {
+      if (estimatedBase64SizeMB > 8) {
         console.log("[v0] File too large for database after base64 encoding:", `${estimatedBase64SizeMB.toFixed(2)}MB`)
         return {
           success: false,

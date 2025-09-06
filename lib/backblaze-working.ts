@@ -465,4 +465,20 @@ export class WorkingBackblazeStorage {
       keyId: this.config.keyId,
     }
   }
+
+  async getAuthenticatedApiInfo() {
+    if (!this.authToken || !this.apiUrl) {
+      await this.authenticate()
+    }
+
+    return {
+      authToken: this.authToken!,
+      apiUrl: this.apiUrl!,
+      accountId: this.config.keyId,
+    }
+  }
+
+  async getPublicBucketId(): Promise<string> {
+    return await this.getBucketId()
+  }
 }

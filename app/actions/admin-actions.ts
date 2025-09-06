@@ -7,6 +7,7 @@ import { put } from "@vercel/blob"
 import { DropboxStorage } from "@/lib/storage/dropbox"
 
 import { WorkingBackblazeStorage } from "@/lib/backblaze-working"
+import { neon } from "@neondatabase/serverless"
 
 const CACHE_TAGS = {
   IMAGES: "images",
@@ -1041,30 +1042,21 @@ export async function getDatabaseStats() {
 
 export async function getLicenses() {
   try {
-    const simplifiedLicenses = [
-      {
-        id: "non-exclusive",
-        name: "NON_EXCLUSIVE",
-        description: "Non-exclusive license for standard commercial use",
-        price: 99.0,
-        active: true,
-      },
-      {
-        id: "exclusive",
-        name: "EXCLUSIVE",
-        description: "Exclusive license with full commercial rights",
-        price: 999.0,
-        active: true,
-      },
-    ]
+    const sql = neon(process.env.DATABASE_URL!)
+    const licenses = await sql`
+      SELECT id, name, description, price, active
+      FROM licenses
+      WHERE active = true
+      ORDER BY name
+    `
 
     console.log(
       "[v0] getLicenses returning",
-      simplifiedLicenses.length,
+      licenses.length,
       "licenses:",
-      simplifiedLicenses.map((l) => l.name),
+      licenses.map((l) => l.name),
     )
-    return { success: true, data: simplifiedLicenses }
+    return { success: true, data: licenses }
   } catch (error) {
     console.error("[v0] Get licenses error:", error)
     return {
@@ -1647,140 +1639,140 @@ export async function createImageWithHybridStorage(formData: FormData) {
     const category = formData.get("category") as string
     const licenseId = formData.get("license_id") as string
 
-    // Determine storage method based on file size
     const fileSizeMB = file.size / (1024 * 1024)
-    const maxDatabaseSizeMB = 2 // Reduced threshold for database storage
+    console.log(`[v0] Using Backblaze storage for file: ${fileSizeMB.toFixed(2)}MB`)
 
-    if (fileSizeMB > maxDatabaseSizeMB) {
-      console.log(`[v0] Using Backblaze storage for large file: ${fileSizeMB.toFixed(2)}MB`)
+    const fullImageResult = await uploadToBackblaze(file, "full", category)
+    if (!fullImageResult.success) {
+      return { success: false, error: fullImageResult.error }
+    }
 
-      const fullImageResult = await uploadToBackblaze(file, "full", category)
-      if (!fullImageResult.success) {
-        return { success: false, error: fullImageResult.error }
-      }
+    // Create and upload thumbnail with category
+    const thumbnailFile = await createThumbnailFile(file)
+    const thumbnailResult = await uploadToBackblaze(thumbnailFile, "thumbnail", category)
+    if (!thumbnailResult.success) {
+      return { success: false, error: thumbnailResult.error }
+    }
 
-      // Create and upload thumbnail with category
-      const thumbnailFile = await createThumbnailFile(file)
-      const thumbnailResult = await uploadToBackblaze(thumbnailFile, "thumbnail", category)
-      if (!thumbnailResult.success) {
-        return { success: false, error: thumbnailResult.error }
-      }
+    // Look up category and license IDs
+    const sql = createNeonClient()
 
-      // Look up category and license IDs
-      const sql = createNeonClient()
-
-      async function getCategoryByName(categoryName: string): Promise<{ success: boolean; category?: any }> {
-        try {
-          const categoryResult = await sql`
-            SELECT id FROM categories WHERE name = ${categoryName} LIMIT 1
-          `
-          if (categoryResult.length === 0) {
-            return { success: false }
-          }
-          return { success: true, category: { id: categoryResult[0].id } }
-        } catch (error) {
-          console.error("Error looking up category:", error)
+    async function getCategoryByName(categoryName: string): Promise<{ success: boolean; category?: any }> {
+      try {
+        const categoryResult = await sql`
+          SELECT id FROM categories WHERE name = ${categoryName} LIMIT 1
+        `
+        if (categoryResult.length === 0) {
           return { success: false }
         }
+        return { success: true, category: { id: categoryResult[0].id } }
+      } catch (error) {
+        console.error("Error looking up category:", error)
+        return { success: false }
       }
+    }
 
-      async function getLicenseById(licenseId: string): Promise<{ success: boolean; license?: any }> {
-        try {
-          const licenseResult = await sql`
-            SELECT id FROM licenses WHERE id = ${licenseId} LIMIT 1
-          `
-          if (licenseResult.length === 0) {
-            return { success: false }
-          }
-          return { success: true, license: { id: licenseResult[0].id } }
-        } catch (error) {
-          console.error("Error looking up license:", error)
-          return { success: false }
+    async function getLicenseById(licenseId: string): Promise<{ success: boolean; license?: any }> {
+      try {
+        const sql = neon(process.env.DATABASE_URL!)
+        const result = await sql`
+          SELECT id, name, description, price, active 
+          FROM licenses 
+          WHERE id = ${licenseId} AND active = true
+        `
+
+        if (result.length > 0) {
+          return { success: true, license: result[0] }
         }
+
+        return { success: false }
+      } catch (error) {
+        console.error("Error looking up license:", error)
+        return { success: false }
       }
+    }
 
-      const categoryResult = await getCategoryByName(category)
-      if (!categoryResult.success) {
-        return { success: false, error: `Category not found: ${category}` }
+    const categoryResult = await getCategoryByName(category)
+    if (!categoryResult.success) {
+      return { success: false, error: `Category not found: ${category}` }
+    }
+
+    const licenseResult = await getLicenseById(licenseId)
+    if (!licenseResult.success) {
+      return { success: false, error: `License not found: ${licenseId}` }
+    }
+
+    console.log("[v0] Using license ID:", licenseResult.license?.id)
+
+    const imageData = {
+      title,
+      description,
+      price: 99, // TODO: Get price from license
+      category_id: categoryResult.category!.id,
+      license_id: licenseResult.license!.id,
+      tags: [], // TODO: Add tags
+      storage_type: "backblaze_b2" as const,
+      file_url: fullImageResult.url!, // Original full-resolution file in full-images/
+      thumbnail_url: thumbnailResult.url!, // Thumbnail in thumbnails/
+      file_size: file.size,
+      file_type: file.type,
+      width: null,
+      height: null,
+    }
+
+    async function createImageInDatabase(
+      imageData: any,
+    ): Promise<{ success: boolean; message: string; imageId?: string }> {
+      try {
+        const tagsArray = Array.isArray(imageData.tags) && imageData.tags.length > 0 ? imageData.tags : null
+
+        const result = await sql`
+          INSERT INTO images (title, description, category_id, license_id, price, image_url, thumbnail_url, 
+                             active, featured, metadata, tags)
+          VALUES (
+            ${imageData.title}, ${imageData.description}, ${imageData.category_id}, ${imageData.license_id}, 
+            ${imageData.price}, ${imageData.file_url}, ${imageData.thumbnail_url},
+            true, false, 
+            ${JSON.stringify({
+              storage_type: imageData.storage_type,
+              folder_structure: {
+                full_image: "full-images/",
+                thumbnail: "thumbnails/",
+              },
+              file_size: imageData.file_size,
+              file_type: imageData.file_type,
+              width: imageData.width,
+              height: imageData.height,
+            })},
+            ${tagsArray}
+          )
+          RETURNING id
+        `
+        return { success: true, message: "Image created successfully", imageId: result[0].id }
+      } catch (dbError: any) {
+        console.error("Database insertion failed:", dbError)
+        return { success: false, message: dbError.message || "Database error" }
       }
+    }
 
-      const licenseResult = await getLicenseById(licenseId)
-      if (!licenseResult.success) {
-        return { success: false, error: `License not found: ${licenseId}` }
-      }
+    console.log("[v0] Inserting image with organized Backblaze storage")
+    const result = await createImageInDatabase(imageData)
 
-      console.log("[v0] Using license ID:", licenseResult.license?.id)
-
-      const imageData = {
-        title,
-        description,
-        price: 99, // TODO: Get price from license
-        category_id: categoryResult.category!.id,
-        license_id: licenseResult.license!.id,
-        tags: [], // TODO: Add tags
-        storage_type: "backblaze_b2" as const,
-        file_url: fullImageResult.url!, // Original full-resolution file in full-images/
-        thumbnail_url: thumbnailResult.url!, // Thumbnail in thumbnails/
-        file_size: file.size,
-        file_type: file.type,
-        width: null,
-        height: null,
-      }
-
-      async function createImageInDatabase(
-        imageData: any,
-      ): Promise<{ success: boolean; message: string; imageId?: string }> {
-        try {
-          const tagsString = JSON.stringify(imageData.tags)
-          const result = await sql`
-            INSERT INTO images (title, description, category_id, license_id, price, image_url, thumbnail_url, 
-                               active, featured, metadata, file_size, file_type, width, height, tags)
-            VALUES (
-              ${imageData.title}, ${imageData.description}, ${imageData.category_id}, ${imageData.license_id}, 
-              ${imageData.price}, ${imageData.file_url}, ${imageData.thumbnail_url},
-              true, false, 
-              ${JSON.stringify({
-                storage_type: imageData.storage_type,
-                folder_structure: {
-                  full_image: "full-images/",
-                  thumbnail: "thumbnails/",
-                },
-              })},
-              ${imageData.file_size}, ${imageData.file_type}, ${imageData.width}, ${imageData.height}, ${tagsString}
-            )
-            RETURNING id
-          `
-          return { success: true, message: "Image created successfully", imageId: result[0].id }
-        } catch (dbError: any) {
-          console.error("Database insertion failed:", dbError)
-          return { success: false, message: dbError.message || "Database error" }
-        }
-      }
-
-      console.log("[v0] Inserting image with organized Backblaze storage")
-      const result = await createImageInDatabase(imageData)
-
-      if (result.success) {
-        console.log("[v0] Image created successfully with organized storage, ID:", result.imageId)
-        invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
-        revalidatePath("/simple-admin")
-        return {
-          success: true,
-          message: "Image uploaded successfully with organized folder structure!",
-          imageId: result.imageId,
-        }
-      } else {
-        return { success: false, error: result.message }
+    if (result.success) {
+      console.log("[v0] Image created successfully with organized storage, ID:", result.imageId)
+      invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
+      revalidatePath("/simple-admin")
+      return {
+        success: true,
+        message: "Image uploaded successfully with organized storage",
+        imageId: result.imageId,
       }
     } else {
-      return { success: false, error: "Database storage not yet implemented" }
+      return { success: false, error: result.message }
     }
   } catch (error: any) {
-    console.error("[v0] Upload error:", error.message)
-    return {
-      success: false,
-      error: error.message || "Upload failed",
-    }
+    console.error("[v0] Error in createImageWithHybridStorage:", error)
+    return { success: false, error: error.message || "Upload failed" }
   }
 }
 

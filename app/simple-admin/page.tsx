@@ -982,19 +982,36 @@ const createImageWithHybridStorage = async (file: File, imageData: any, licenses
   formData.append("description", imageData.description || "")
   formData.append("category", imageData.category_name || "")
 
+  console.log("[v0] License mapping debug - rights_type:", imageData.rights_type)
+  console.log(
+    "[v0] License mapping debug - available licenses:",
+    licenses.map((l) => ({ id: l.id, name: l.name })),
+  )
+
   let licenseId = ""
   if (imageData.rights_type === "exclusive") {
     // Find the exclusive license ID
     const exclusiveLicense = licenses.find((license) => license.name === "EXCLUSIVE")
+    console.log("[v0] License mapping debug - found exclusive license:", exclusiveLicense)
     licenseId = exclusiveLicense?.id || ""
   } else if (imageData.rights_type === "non-exclusive") {
     // Find the non-exclusive license ID
     const nonExclusiveLicense = licenses.find((license) => license.name === "NON_EXCLUSIVE")
+    console.log("[v0] License mapping debug - found non-exclusive license:", nonExclusiveLicense)
     licenseId = nonExclusiveLicense?.id || ""
   } else {
     // For "both", default to non-exclusive license
     const nonExclusiveLicense = licenses.find((license) => license.name === "NON_EXCLUSIVE")
+    console.log("[v0] License mapping debug - found non-exclusive license (both case):", nonExclusiveLicense)
     licenseId = nonExclusiveLicense?.id || ""
+  }
+
+  console.log("[v0] License mapping debug - final licenseId:", licenseId)
+
+  if (!licenseId) {
+    throw new Error(
+      `License not found for rights_type: ${imageData.rights_type}. Available licenses: ${licenses.map((l) => l.name).join(", ")}`,
+    )
   }
 
   formData.append("license_id", licenseId)

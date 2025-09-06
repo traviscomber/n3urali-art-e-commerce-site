@@ -24,7 +24,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const token = "vercel_blob_rw_0NpI635IzSq52HgK_O1tlS1gUX6IpzKF3SnhJP3P05phXU4"
+    const token = process.env.BLOB_READ_WRITE_TOKEN
+
+    if (!token) {
+      return NextResponse.json({ error: "Blob storage not configured" }, { status: 500 })
+    }
 
     const originalBlob = await put(`original-${Date.now()}-${file.name}`, file, {
       access: "public",

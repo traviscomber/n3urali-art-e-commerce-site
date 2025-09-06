@@ -8,6 +8,7 @@ import { AuthProvider } from "@/lib/contexts/auth-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Header } from "@/components/header"
 import { CartSidebar } from "@/components/cart-sidebar"
+import { ToastProvider } from "@/components/toast-notifications"
 
 export const metadata: Metadata = {
   title: "v0 App",
@@ -26,9 +27,11 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <AuthProvider>
             <CartProvider>
-              <Header />
-              {children}
-              <CartSidebar />
+              <ToastProvider>
+                <Header />
+                {children}
+                <CartSidebar />
+              </ToastProvider>
             </CartProvider>
           </AuthProvider>
         </ThemeProvider>

@@ -187,3 +187,5 @@ export class BackblazeAuth {
     return { ...this.config }
   }
 }
+
+export { BackblazeAuth as BackblazeStorage }

@@ -5,9 +5,13 @@ import { useRouter } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
-import { getImages } from "@/app/actions/admin-actions"
+import { getImagesPaginated } from "@/app/actions/admin-actions"
 import NextImage from "next/image"
 import React from "react"
+import { useInView } from "react-intersection-observer"
+import { BreadcrumbNav } from "@/components/breadcrumb-nav"
+import { QuickPreviewModal } from "@/components/quick-preview-modal"
+import { useToast } from "@/components/toast-notifications"
 
 interface GalleryImage {
   id: string
@@ -25,13 +29,20 @@ const ImageCard = React.memo(
     image,
     size = "normal",
     onImageSelect,
+    onQuickPreview,
   }: {
     image: GalleryImage
     size?: "normal" | "large" | "xlarge"
     onImageSelect: (image: GalleryImage) => void
+    onQuickPreview: (image: GalleryImage) => void
   }) => {
     const [imageError, setImageError] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
+    const { ref, inView } = useInView({
+      threshold: 0.1,
+      triggerOnce: true,
+      rootMargin: "50px",
+    })
 
     const handleImageError = useCallback(() => {
       console.log("[v0] Image failed to load:", image.preview_url)
@@ -48,11 +59,16 @@ const ImageCard = React.memo(
         return "/placeholder.svg?height=400&width=400&text=Image+Unavailable"
       }
 
+      if (!inView) {
+        return "/placeholder.svg?height=400&width=400&text=Loading"
+      }
+
       return image.preview_url || "/placeholder.svg?height=400&width=400&text=No+Image"
-    }, [image.preview_url, imageError])
+    }, [image.preview_url, imageError, inView])
 
     return (
       <div
+        ref={ref}
         className={`group relative bg-card rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-border overflow-hidden cursor-pointer ${
           size === "xlarge"
             ? "min-w-[420px] max-w-[420px]"
@@ -71,7 +87,7 @@ const ImageCard = React.memo(
                 : "aspect-video h-[140px]"
           } overflow-hidden`}
         >
-          {isLoading && (
+          {(isLoading || !inView) && (
             <div className="absolute inset-0 flex items-center justify-center bg-muted/20">
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
@@ -106,8 +122,18 @@ const ImageCard = React.memo(
             </Badge>
             <span className="text-sm font-bold text-emerald-500">${image.price}</span>
           </div>
+          <Button onClick={() => onQuickPreview(image)} variant="outline" size="sm">
+            Quick Preview
+          </Button>
         </div>
       </div>
+    )
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.image.id === nextProps.image.id &&
+      prevProps.image.title === nextProps.image.title &&
+      prevProps.size === nextProps.size
     )
   },
 )
@@ -116,19 +142,44 @@ ImageCard.displayName = "ImageCard"
 
 export default function GalleryPage() {
   const router = useRouter()
+  const { showToast } = useToast()
   const [images, setImages] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const [quickPreviewImage, setQuickPreviewImage] = useState<any>(null)
+  const [isQuickPreviewOpen, setIsQuickPreviewOpen] = useState(false)
+  const pageSize = 20
+
+  const fetchImages = useCallback(
+    async (page = 1, append = false) => {
+      if (!append) setLoading(true)
+
+      try {
+        const result = await getImagesPaginated(page, pageSize)
+        const fetchedData = result.success ? result.data : { images: [], pagination: { totalPages: 1 } }
+
+        if (append) {
+          setImages((prev) => [...prev, ...fetchedData.images])
+        } else {
+          setImages(fetchedData.images)
+        }
+
+        setTotalPages(fetchedData.pagination?.totalPages || 1)
+        setHasMore(page < (fetchedData.pagination?.totalPages || 1))
+      } catch (error) {
+        console.error("[v0] Error fetching images:", error)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [pageSize],
+  )
 
   useEffect(() => {
-    const fetchImages = async () => {
-      setLoading(true)
-      const result = await getImages()
-      const fetchedImages = result.success ? result.data : []
-      setImages(fetchedImages)
-      setLoading(false)
-    }
-    fetchImages()
-  }, [])
+    fetchImages(1, false)
+  }, [fetchImages])
 
   const transformedImages = useMemo(
     () =>
@@ -151,15 +202,11 @@ export default function GalleryPage() {
     [images],
   )
 
-  const equirectangularImages = useMemo(
-    () => transformedImages.filter((img) => img.category === "equirectangular"),
-    [transformedImages],
-  )
-
-  const fisheyeImages = useMemo(
-    () => transformedImages.filter((img) => img.category === "fisheye"),
-    [transformedImages],
-  )
+  const { equirectangularImages, fisheyeImages } = useMemo(() => {
+    const equirectangular = transformedImages.filter((img) => img.category === "equirectangular")
+    const fisheye = transformedImages.filter((img) => img.category === "fisheye")
+    return { equirectangularImages: equirectangular, fisheyeImages: fisheye }
+  }, [transformedImages])
 
   const handleImageSelect = useCallback(
     async (image: GalleryImage) => {
@@ -168,6 +215,11 @@ export default function GalleryPage() {
     },
     [router],
   )
+
+  const handleQuickPreview = useCallback((image: GalleryImage) => {
+    setQuickPreviewImage(image)
+    setIsQuickPreviewOpen(true)
+  }, [])
 
   const scrollSection = useCallback((direction: "left" | "right", sectionId: string) => {
     const section = document.getElementById(sectionId)
@@ -180,7 +232,24 @@ export default function GalleryPage() {
     }
   }, [])
 
-  if (loading) {
+  const loadMore = useCallback(() => {
+    if (hasMore && !loading) {
+      const nextPage = currentPage + 1
+      setCurrentPage(nextPage)
+      fetchImages(nextPage, true)
+    }
+  }, [hasMore, loading, currentPage, fetchImages])
+
+  const { ref: loadMoreRef } = useInView({
+    threshold: 0.1,
+    onChange: (inView) => {
+      if (inView && hasMore && !loading) {
+        loadMore()
+      }
+    },
+  })
+
+  if (loading && images.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
@@ -220,6 +289,10 @@ export default function GalleryPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4">
+        <BreadcrumbNav />
+      </div>
+
       {/* Hero Section */}
       <section className="relative py-16 bg-gradient-to-b from-muted/30 to-background overflow-hidden">
         <div className="absolute inset-0">
@@ -294,7 +367,13 @@ export default function GalleryPage() {
                 equirectangularImages
                   .slice(0, 6)
                   .map((image) => (
-                    <ImageCard key={image.id} image={image} size="xlarge" onImageSelect={handleImageSelect} />
+                    <ImageCard
+                      key={image.id}
+                      image={image}
+                      size="xlarge"
+                      onImageSelect={handleImageSelect}
+                      onQuickPreview={handleQuickPreview}
+                    />
                   ))
               ) : (
                 <div className="text-center py-8 w-full">
@@ -340,7 +419,13 @@ export default function GalleryPage() {
                 fisheyeImages
                   .slice(0, 6)
                   .map((image) => (
-                    <ImageCard key={image.id} image={image} size="xlarge" onImageSelect={handleImageSelect} />
+                    <ImageCard
+                      key={image.id}
+                      image={image}
+                      size="xlarge"
+                      onImageSelect={handleImageSelect}
+                      onQuickPreview={handleQuickPreview}
+                    />
                   ))
               ) : (
                 <div className="text-center py-8 w-full">
@@ -358,32 +443,49 @@ export default function GalleryPage() {
             </div>
 
             {transformedImages.length > 0 ? (
-              <div className="grid grid-cols-5 lg:grid-cols-10 gap-3">
-                {transformedImages.map((image) => (
-                  <div
-                    key={image.id}
-                    className="group relative cursor-pointer hover:scale-105 transition-transform duration-200"
-                    onClick={() => handleImageSelect(image)}
-                  >
-                    <div className="relative aspect-square overflow-hidden rounded-lg">
-                      <NextImage
-                        src={image.preview_url}
-                        alt={image.title}
-                        fill
-                        className="object-contain bg-muted/10"
-                        loading="lazy"
-                        onError={(e) => {
-                          console.log("[v0] Grid image failed to load:", image.preview_url)
-                          e.currentTarget.src = "/placeholder.svg?height=200&width=200&text=Error"
-                        }}
-                        placeholder="blur"
-                        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
-                      />
-                      <div className="absolute top-1 right-1 w-2 h-2 bg-yellow-400 rounded-full opacity-60" />
+              <>
+                <div className="grid grid-cols-5 lg:grid-cols-10 gap-3">
+                  {transformedImages.map((image) => (
+                    <div
+                      key={image.id}
+                      className="group relative cursor-pointer hover:scale-105 transition-transform duration-200"
+                      onClick={() => handleImageSelect(image)}
+                    >
+                      <div className="relative aspect-square overflow-hidden rounded-lg">
+                        <NextImage
+                          src={image.preview_url}
+                          alt={image.title}
+                          fill
+                          className="object-contain bg-muted/10"
+                          loading="lazy"
+                          onError={(e) => {
+                            console.log("[v0] Grid image failed to load:", image.preview_url)
+                            e.currentTarget.src = "/placeholder.svg?height=200&width=200&text=Error"
+                          }}
+                          placeholder="blur"
+                          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+                        />
+                        <div className="absolute top-1 right-1 w-2 h-2 bg-yellow-400 rounded-full opacity-60" />
+                      </div>
                     </div>
+                  ))}
+                </div>
+
+                {hasMore && (
+                  <div ref={loadMoreRef} className="flex justify-center py-8">
+                    {loading ? (
+                      <div className="flex items-center space-x-2">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span className="text-muted-foreground">Loading more images...</span>
+                      </div>
+                    ) : (
+                      <Button onClick={loadMore} variant="outline">
+                        Load More Images
+                      </Button>
+                    )}
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             ) : (
               <div className="text-center py-16">
                 <h3 className="text-lg font-semibold mb-2 text-foreground">No images available</h3>
@@ -393,6 +495,13 @@ export default function GalleryPage() {
           </div>
         </div>
       </section>
+
+      <QuickPreviewModal
+        image={quickPreviewImage}
+        isOpen={isQuickPreviewOpen}
+        onClose={() => setIsQuickPreviewOpen(false)}
+        onViewFull={handleImageSelect}
+      />
     </div>
   )
 }

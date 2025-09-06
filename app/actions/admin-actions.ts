@@ -1,12 +1,10 @@
 "use server"
 
 import { createNeonClient } from "@/lib/neon/client"
-import { revalidatePath } from "next/cache"
 import { unstable_cache } from "next/cache"
-import { File } from "formdata-node"
+import { revalidatePath, revalidateTag } from "next/cache" // Added revalidateTag import
 import { put } from "@vercel/blob"
-
-import { BackblazeAuth } from "@/lib/backblaze-auth"
+import { BackblazeStorage } from "@/lib/backblaze-auth"
 import { ImageCompressor } from "@/lib/storage/image-compression"
 import { DropboxStorage } from "@/lib/storage/dropbox"
 
@@ -366,8 +364,9 @@ function handleDatabaseError(error: any, functionName?: string): { success: fals
 
 function invalidateCache(tags: string[]) {
   tags.forEach((tag) => {
-    revalidatePath("/", "layout")
+    revalidateTag(tag)
   })
+  revalidatePath("/", "layout") // Keep this for additional cache clearing
 }
 
 export async function createImageWithCategory(formData: FormData) {
@@ -590,6 +589,30 @@ export async function getImages() {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
       data: [], // Added data field to ensure consistent response structure
+    }
+  }
+}
+
+export async function getImagesPaginated(page = 1, limit = 20, category?: string) {
+  try {
+    const startTime = Date.now()
+    const data = await getCachedImagesPaginated(page, limit, category)
+
+    logQueryPerformance("getImagesPaginated", startTime, data.images.length)
+
+    return {
+      success: true,
+      data: {
+        images: Array.isArray(data.images) ? data.images : [],
+        pagination: data.pagination,
+      },
+    }
+  } catch (error) {
+    console.error("[v0] Get paginated images error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+      data: { images: [], pagination: { page: 1, limit, total: 0, totalPages: 1 } },
     }
   }
 }
@@ -1412,7 +1435,7 @@ export async function uploadToBackblaze(file: File): Promise<{ success: boolean;
     console.log("[v0] Backblaze env check - applicationKey exists:", !!process.env.BACKBLAZE_APPLICATION_KEY)
     console.log("[v0] Backblaze env check - bucketName:", process.env.BACKBLAZE_BUCKET_NAME)
 
-    const backblaze = new BackblazeAuth()
+    const backblaze = new BackblazeStorage()
 
     let fileToUpload = file
     const fileSizeMB = file.size / (1024 * 1024)

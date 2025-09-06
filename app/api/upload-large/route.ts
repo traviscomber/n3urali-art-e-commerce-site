@@ -8,7 +8,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing filename or fileSize" }, { status: 400 })
     }
 
-    const token = "vercel_blob_rw_0NpI635IzSq52HgK_O1tlS1gUX6IpzKF3SnhJP3P05phXU4"
+    const token = process.env.BLOB_READ_WRITE_TOKEN
+
+    if (!token) {
+      return NextResponse.json({ error: "Blob storage not configured" }, { status: 500 })
+    }
 
     // Generate presigned URL for direct client upload
     const originalFilename = `original-${Date.now()}-${filename}`

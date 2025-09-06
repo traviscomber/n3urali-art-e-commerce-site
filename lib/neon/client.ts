@@ -7,5 +7,7 @@ export function createNeonClient() {
     throw new Error("DATABASE_URL environment variable is required")
   }
 
-  return neon(databaseUrl)
+  return neon(databaseUrl, {
+    disableWarningInBrowsers: true,
+  })
 }

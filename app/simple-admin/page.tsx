@@ -10,7 +10,20 @@ import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
-import { Loader2, Upload, Eye, Trash2, Database, BarChart3, Crown, Edit2, Check, X } from "lucide-react"
+import {
+  Loader2,
+  Upload,
+  Eye,
+  Trash2,
+  Database,
+  BarChart3,
+  Crown,
+  Edit2,
+  Check,
+  X,
+  HardDrive,
+  Cloud,
+} from "lucide-react"
 
 interface Image {
   id: string
@@ -73,6 +86,7 @@ export default function SimpleAdminPage() {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [cleaning, setCleaning] = useState(false)
+  const [migrating, setMigrating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const [editingImage, setEditingImage] = useState<string | null>(null)
@@ -94,9 +108,15 @@ export default function SimpleAdminPage() {
   })
 
   useEffect(() => {
-    console.log("[v0] SimpleAdmin: Clearing any existing auth and forcing login")
-    localStorage.removeItem("simple_admin_auth")
-    setIsAuthenticated(false)
+    const existingAuth = localStorage.getItem("simple_admin_auth")
+    if (existingAuth === "true") {
+      console.log("[v0] SimpleAdmin: Found existing authentication, logging in automatically")
+      setIsAuthenticated(true)
+      loadInitialData()
+    } else {
+      console.log("[v0] SimpleAdmin: No existing authentication found")
+      setIsAuthenticated(false)
+    }
   }, [])
 
   const getCategoryDisplayName = (category: Category) => {
@@ -112,16 +132,19 @@ export default function SimpleAdminPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     console.log("[v0] SimpleAdmin: Login attempt")
+    setError(null)
 
     if (password === "C4rlit0s") {
       console.log("[v0] SimpleAdmin: Login successful")
       setIsAuthenticated(true)
       localStorage.setItem("simple_admin_auth", "true")
+      setPassword("")
       await loadInitialData()
     } else {
       console.log("[v0] SimpleAdmin: Login failed")
       setError("Invalid password")
       toast.error("Invalid password. Use: C4rlit0s")
+      setPassword("")
     }
   }
 
@@ -199,6 +222,37 @@ export default function SimpleAdminPage() {
     }
   }
 
+  const handleMigrateFiles = async () => {
+    if (
+      !confirm(
+        "This will move files under 40MB from Blob storage to database storage for better organization. Continue?",
+      )
+    ) {
+      return
+    }
+
+    setMigrating(true)
+    try {
+      const { migrateFilesToOptimalStorage } = await import("@/app/actions/admin-actions")
+      const result = await migrateFilesToOptimalStorage()
+
+      if (result.success) {
+        const { migrated, skipped, errors, total } = result.data
+        toast.success(
+          `Migration completed: ${migrated} files moved to database, ${skipped} skipped, ${errors} errors out of ${total} total files`,
+        )
+        await loadInitialData()
+      } else {
+        toast.error("Failed to migrate files: " + result.error)
+      }
+    } catch (error) {
+      console.error("[v0] SimpleAdmin: Migration error:", error)
+      toast.error("Failed to migrate files")
+    } finally {
+      setMigrating(false)
+    }
+  }
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -256,60 +310,22 @@ export default function SimpleAdminPage() {
     try {
       console.log("[v0] Starting image upload process...")
 
-      const originalDataUrl = await new Promise<string>((resolve) => {
-        const reader = new FileReader()
-        reader.onload = (e) => resolve(e.target?.result as string)
-        reader.readAsDataURL(newImage.file!)
-      })
-
-      // Create thumbnail
-      const thumbnailCanvas = document.createElement("canvas")
-      const thumbnailCtx = thumbnailCanvas.getContext("2d")!
-      const img = new Image()
-
-      const thumbnailDataUrl = await new Promise<string>((resolve) => {
-        img.onload = () => {
-          const maxThumbnailSize = 600
-          const ratio = Math.min(maxThumbnailSize / img.width, maxThumbnailSize / img.height)
-
-          thumbnailCanvas.width = img.width * ratio
-          thumbnailCanvas.height = img.height * ratio
-
-          thumbnailCtx.drawImage(img, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height)
-          thumbnailCanvas.toBlob(
-            (blob) => {
-              const reader = new FileReader()
-              reader.onload = (e) => resolve(e.target?.result as string)
-              reader.readAsDataURL(blob!)
-            },
-            "image/jpeg",
-            0.95,
-          )
-        }
-        img.src = originalDataUrl
-      })
-
-      console.log("[v0] Images converted to base64, saving to database...")
-
       const imageData = {
         title: newImage.title,
         description: newImage.description,
         category_name: newImage.category,
         rights_type: newImage.rightsType,
         price: Number.parseFloat(newImage.price) || 0,
-        image_url: originalDataUrl,
-        thumbnail_url: thumbnailDataUrl,
-        original_file_size: newImage.file.size,
       }
 
-      // Use chunked upload system that automatically handles large files
-      const result = await createImageWithCategoryObjectChunked(imageData)
+      // Use hybrid storage system that automatically chooses Blob or Database
+      const result = await createImageWithHybridStorage(newImage.file, imageData)
 
       if (!result.success) {
         throw new Error(result.error || "Failed to save image")
       }
 
-      console.log("[v0] Image saved successfully to database")
+      console.log("[v0] Image saved successfully with hybrid storage")
       setNewImage({
         title: "",
         description: "",
@@ -475,7 +491,7 @@ export default function SimpleAdminPage() {
         )}
 
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2">
@@ -526,6 +542,28 @@ export default function SimpleAdminPage() {
                     <>
                       <Trash2 className="mr-2 h-4 w-4" />
                       Cleanup Samples
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <Button
+                  onClick={handleMigrateFiles}
+                  disabled={migrating}
+                  variant="outline"
+                  className="w-full h-full border-orange-200 hover:bg-orange-50 bg-transparent"
+                >
+                  {migrating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Migrating...
+                    </>
+                  ) : (
+                    <>
+                      <HardDrive className="mr-2 h-4 w-4" />
+                      Organize Files
                     </>
                   )}
                 </Button>
@@ -693,19 +731,40 @@ export default function SimpleAdminPage() {
                         <p className="text-lg font-medium text-green-700">{newImage.file.name}</p>
                         <p className="text-sm text-gray-500">{(newImage.file.size / (1024 * 1024)).toFixed(2)} MB</p>
                         <p className="text-sm text-gray-500">Click or drag to replace</p>
+                        <div className="flex items-center justify-center gap-2 mt-2">
+                          {newImage.file.size > 40 * 1024 * 1024 ? (
+                            <>
+                              <Cloud className="h-4 w-4 text-blue-600" />
+                              <span className="text-sm text-blue-600 font-medium">
+                                Will use Backblaze B2 storage (Large file:{" "}
+                                {(newImage.file.size / (1024 * 1024)).toFixed(1)}MB)
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <Database className="h-4 w-4 text-green-600" />
+                              <span className="text-sm text-green-600 font-medium">
+                                Will use database storage (Small file: {(newImage.file.size / (1024 * 1024)).toFixed(1)}
+                                MB)
+                              </span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     ) : (
                       <div className="space-y-2">
                         <div className="flex items-center justify-center">
                           <Upload className={`h-8 w-8 ${isDragOver ? "text-orange-600" : "text-gray-400"}`} />
                         </div>
-                        <p className={`text-lg font-medium ${isDragOver ? "text-orange-700" : "text-gray-700"}`}>
+                        <p className={`text-lg font-medium ${isDragOver ? "text-orange-700" : "text-white"}`}>
                           {isDragOver ? "Drop your HQ image here" : "Drag & drop your HQ image here (4K-16K)"}
                         </p>
-                        <p className="text-sm text-gray-500">or click to browse files</p>
-                        <p className="text-xs text-gray-400">
-                          High Quality Only: JPG, PNG, WebP (Max: 60MB with chunked upload)
-                        </p>
+                        <p className="text-sm text-gray-300">or click to browse files</p>
+                        <div className="text-xs text-gray-300 space-y-1">
+                          <p>High Quality Only: JPG, PNG, WebP</p>
+                          <p>• Files &lt;40MB: Database storage (fast access)</p>
+                          <p>• Files &gt;40MB: Backblaze B2 storage (unlimited, cost-effective)</p>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -755,7 +814,17 @@ export default function SimpleAdminPage() {
                   disabled={uploading}
                   className="w-full bg-orange-600 hover:bg-orange-700 text-lg h-12"
                 >
-                  {uploading ? "Uploading Original Quality..." : "Upload Original Quality Image"}
+                  {uploading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Uploading with Backblaze B2...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload with Backblaze B2
+                    </>
+                  )}
                 </Button>
               </div>
             </CardContent>
@@ -914,12 +983,7 @@ export default function SimpleAdminPage() {
   )
 }
 
-const createImageWithCategoryObject = async (imageData: any) => {
-  const { createImageWithCategoryObject: actualFunction } = await import("@/app/actions/admin-actions")
-  return actualFunction(imageData)
-}
-
-const createImageWithCategoryObjectChunked = async (imageData: any) => {
-  const { createImageWithCategoryObjectChunked: actualFunction } = await import("@/app/actions/admin-actions")
-  return actualFunction(imageData)
+const createImageWithHybridStorage = async (file: File, imageData: any) => {
+  const { createImageWithHybridStorage: actualFunction } = await import("@/app/actions/admin-actions")
+  return actualFunction(file, imageData)
 }

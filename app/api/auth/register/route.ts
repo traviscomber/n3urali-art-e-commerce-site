@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createNeonClient } from "@/lib/neon/client"
+import { PasswordManager } from "@/lib/auth/password"
 
 export async function POST(request: NextRequest) {
   try {
@@ -7,6 +8,17 @@ export async function POST(request: NextRequest) {
 
     if (!email || !password || !fullName) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 })
+    }
+
+    const passwordValidation = PasswordManager.isStrongPassword(password)
+    if (!passwordValidation.isValid) {
+      return NextResponse.json(
+        {
+          error: "Password does not meet requirements",
+          details: passwordValidation.errors,
+        },
+        { status: 400 },
+      )
     }
 
     const sql = createNeonClient()
@@ -21,9 +33,11 @@ export async function POST(request: NextRequest) {
 
     const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
+    const hashedPassword = await PasswordManager.hashPassword(password)
+
     await sql`
       INSERT INTO auth.users (id, email, encrypted_password, created_at, updated_at)
-      VALUES (${userId}, ${email}, 'hashed_password_placeholder', NOW(), NOW())
+      VALUES (${userId}, ${email}, ${hashedPassword}, NOW(), NOW())
     `
 
     await sql`

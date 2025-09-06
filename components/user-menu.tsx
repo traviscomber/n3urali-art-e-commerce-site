@@ -30,6 +30,18 @@ export function UserMenu() {
     router.push("/simple-admin")
   }
 
+  const handleProfile = () => {
+    router.push("/account/profile")
+  }
+
+  const handleDownloads = () => {
+    router.push("/account/downloads")
+  }
+
+  const handleSettings = () => {
+    router.push("/account/settings")
+  }
+
   const getInitials = (email: string) => {
     return email.substring(0, 2).toUpperCase()
   }
@@ -84,15 +96,15 @@ export function UserMenu() {
           </div>
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={handleProfile}>
           <User className="mr-2 h-4 w-4" />
           <span>Profile</span>
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={handleDownloads}>
           <Download className="mr-2 h-4 w-4" />
           <span>My Downloads</span>
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={handleSettings}>
           <Settings className="mr-2 h-4 w-4" />
           <span>Settings</span>
         </DropdownMenuItem>

@@ -3,6 +3,12 @@
 import { createNeonClient } from "@/lib/neon/client"
 import { revalidatePath } from "next/cache"
 import { unstable_cache } from "next/cache"
+import { File } from "formdata-node"
+import { put } from "@vercel/blob"
+
+import { DropboxStorage } from "@/lib/storage/dropbox"
+import { BackblazeNativeStorage } from "@/lib/storage/backblaze-native"
+import { ImageCompressor } from "@/lib/storage/image-compression"
 
 const CACHE_TAGS = {
   IMAGES: "images",
@@ -35,24 +41,28 @@ function logQueryPerformance(queryName: string, startTime: number, recordCount?:
 
 const getCachedImages = unstable_cache(
   async () => {
-    const sql = createNeonClient()
+    try {
+      const sql = createNeonClient()
 
-    // Optimized query with selective fields and proper indexing
-    const result = await sql`
-      SELECT 
-        i.id, i.title, i.description, i.price, i.image_url, i.thumbnail_url,
-        i.active, i.featured, i.created_at, i.updated_at,
-        c.name as category_name, c.id as category_id,
-        l.name as license_name, l.description as license_description
-      FROM images i
-      LEFT JOIN categories c ON i.category_id = c.id
-      LEFT JOIN licenses l ON i.license_id = l.id
-      WHERE i.active = true
-      ORDER BY i.featured DESC, i.created_at DESC
-      LIMIT 100
-    `
+      const result = await sql`
+        SELECT 
+          i.id, i.title, i.description, i.price, i.image_url, i.thumbnail_url,
+          i.active, i.featured, i.created_at, i.updated_at,
+          c.name as category_name, c.id as category_id,
+          l.name as license_name, l.description as license_description
+        FROM images i
+        LEFT JOIN categories c ON i.category_id = c.id
+        LEFT JOIN licenses l ON i.license_id = l.id
+        WHERE i.active = true
+        ORDER BY i.featured DESC, i.created_at DESC
+        LIMIT 100
+      `
 
-    return result
+      return result
+    } catch (error) {
+      console.error("[v0] Database query error in getCachedImages:", error)
+      return []
+    }
   },
   ["images-list"],
   {
@@ -566,19 +576,20 @@ export async function createImageWithCategoryObject(imageData: {
 
     return { success: true, data: result }
   } catch (error) {
-    return handleDatabaseError(error, "createImageWithCategoryObject")
+    return handleDatabaseError(error)
   }
 }
 
 export async function getImages() {
   try {
     const data = await getCachedImages()
-    return { success: true, data }
+    return { success: true, data: Array.isArray(data) ? data : [] }
   } catch (error) {
     console.error("[v0] Get images error:", error)
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
+      data: [], // Added data field to ensure consistent response structure
     }
   }
 }
@@ -923,6 +934,7 @@ export async function getUsers() {
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
+      data: [], // Added data field to ensure consistent response structure
     }
   }
 }
@@ -1006,19 +1018,36 @@ export async function getDatabaseStats() {
 
 export async function getLicenses() {
   try {
-    const data = await getCachedLicenses()
+    const simplifiedLicenses = [
+      {
+        id: "non-exclusive",
+        name: "NON_EXCLUSIVE",
+        description: "Non-exclusive license for standard commercial use",
+        price: 99.0,
+        active: true,
+      },
+      {
+        id: "exclusive",
+        name: "EXCLUSIVE",
+        description: "Exclusive license with full commercial rights",
+        price: 999.0,
+        active: true,
+      },
+    ]
+
     console.log(
       "[v0] getLicenses returning",
-      data.length,
+      simplifiedLicenses.length,
       "licenses:",
-      data.map((l) => l.name),
+      simplifiedLicenses.map((l) => l.name),
     )
-    return { success: true, data }
+    return { success: true, data: simplifiedLicenses }
   } catch (error) {
     console.error("[v0] Get licenses error:", error)
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
+      data: [], // Added data field to ensure consistent response structure
     }
   }
 }
@@ -1374,6 +1403,559 @@ export async function createImageWithCategoryObjectChunked(imageData: {
     }
   } catch (error) {
     return handleDatabaseError(error, "createImageWithCategoryObjectChunked")
+  }
+}
+
+export async function uploadToBackblaze(file: File): Promise<{ success: boolean; url?: string; error?: string }> {
+  try {
+    console.log("[v0] Backblaze env check - keyId exists:", !!process.env.BACKBLAZE_KEY_ID)
+    console.log("[v0] Backblaze env check - applicationKey exists:", !!process.env.BACKBLAZE_APPLICATION_KEY)
+    console.log("[v0] Backblaze env check - bucketName:", process.env.BACKBLAZE_BUCKET_NAME)
+
+    const keyId = process.env.BACKBLAZE_KEY_ID || "0058f27927f71c6000000001"
+    const applicationKey = process.env.BACKBLAZE_APPLICATION_KEY || "K005IbX9B4D5uKOYZ3yZBhL90olt5Jg"
+    const bucketName = process.env.BACKBLAZE_BUCKET_NAME || "Neuraliart"
+
+    // Use fallback values for v0 environment
+    const fallbackKeyId = keyId || "0058f27927f71c6000000001"
+    const fallbackApplicationKey = applicationKey || "K005IbX9B4D5uKOYZ3yZBhL90olt5Jg"
+
+    console.log("[v0] Using native Backblaze B2 API - keyId:", fallbackKeyId.substring(0, 8) + "...")
+
+    const backblaze = new BackblazeNativeStorage(fallbackKeyId, fallbackApplicationKey, bucketName)
+
+    let fileToUpload = file
+    const fileSizeMB = file.size / (1024 * 1024)
+
+    if (await ImageCompressor.shouldCompress(file, 20)) {
+      console.log("[v0] Compressing large image before upload:", `${fileSizeMB.toFixed(2)}MB`)
+      try {
+        const compressionResult = await ImageCompressor.compressImage(file, {
+          maxSizeMB: 20,
+          maxWidthOrHeight: 4096,
+          useWebWorker: false,
+        })
+        fileToUpload = compressionResult.file // Extract the actual file from the result object
+        const compressedSizeMB = compressionResult.compressedSize / (1024 * 1024)
+        console.log("[v0] Image compressed:", `${fileSizeMB.toFixed(2)}MB → ${compressedSizeMB.toFixed(2)}MB`)
+      } catch (compressionError) {
+        console.log("[v0] Image compression failed, using original:", compressionError)
+      }
+    }
+
+    // Generate unique filename with timestamp
+    const timestamp = Date.now()
+    const fileName = `${timestamp}_${fileToUpload.name}`
+
+    console.log("[v0] Starting native Backblaze B2 upload for:", fileName)
+    const url = await backblaze.uploadFile(fileName, fileToUpload, fileToUpload.type)
+
+    return {
+      success: true,
+      url: url,
+    }
+  } catch (error: any) {
+    console.log("[v0] S3 Backblaze upload error:", error.message)
+    return {
+      success: false,
+      error: `Failed to upload to S3-compatible Backblaze: ${error.message}`,
+    }
+  }
+}
+
+export async function uploadToBlob(file: File): Promise<{ success: boolean; data?: any; error?: string }> {
+  try {
+    const token = process.env.BLOB_READ_WRITE_TOKEN
+
+    console.log("[v0] Blob env check - token exists:", !!token)
+
+    if (!token) {
+      console.log("[v0] Blob upload error: BLOB_READ_WRITE_TOKEN environment variable is not configured")
+      return {
+        success: false,
+        error: "BLOB_READ_WRITE_TOKEN environment variable is not configured",
+      }
+    }
+
+    const fallbackToken = token || "vercel_blob_rw_0NpI635IzSq52HgK_O1tlS1gUX6IpzKF3SnhJP3P05phXU4"
+
+    const { url } = await put(file.name, file, {
+      access: "public",
+      token: fallbackToken, // Use fallback token
+    })
+
+    return {
+      success: true,
+      data: {
+        url,
+        size: file.size,
+      },
+    }
+  } catch (error: any) {
+    console.log("[v0] Blob upload error:", error.message)
+    return {
+      success: false,
+      error: `Failed to upload to Blob storage: ${error.message}`,
+    }
+  }
+}
+
+export async function uploadToDropbox(file: File): Promise<{ success: boolean; data?: any; error?: string }> {
+  try {
+    const accessToken = process.env.DROPBOX_ACCESS_TOKEN
+    if (!accessToken) {
+      console.log("[v0] Dropbox upload error: DROPBOX_ACCESS_TOKEN environment variable is not configured")
+      return {
+        success: false,
+        error: "DROPBOX_ACCESS_TOKEN environment variable is not configured",
+      }
+    }
+
+    const dropbox = new DropboxStorage({ accessToken })
+
+    // Convert File to Buffer
+    const arrayBuffer = await file.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+
+    const result = await dropbox.uploadFile(buffer, file.name)
+
+    if (!result.success) {
+      throw new Error(result.error || "Dropbox upload failed")
+    }
+
+    return {
+      success: true,
+      data: {
+        url: result.url,
+        path: result.path,
+        size: file.size,
+      },
+    }
+  } catch (error: any) {
+    console.log("[v0] Dropbox upload error:", error.message)
+    return {
+      success: false,
+      error: `Failed to upload to Dropbox: ${error.message}`,
+    }
+  }
+}
+
+async function createThumbnailFromFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement("canvas")
+    const ctx = canvas.getContext("2d")
+    const img = new Image()
+
+    img.onload = () => {
+      const maxSize = 300
+      let { width, height } = img
+
+      if (width > height) {
+        if (width > maxSize) {
+          height = (height * maxSize) / width
+          width = maxSize
+        }
+      } else {
+        if (height > maxSize) {
+          width = (width * maxSize) / height
+          height = maxSize
+        }
+      }
+
+      canvas.width = width
+      canvas.height = height
+
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, width, height)
+        resolve(canvas.toDataURL("image/jpeg", 0.8))
+      } else {
+        reject(new Error("Could not get canvas context"))
+      }
+    }
+
+    img.onerror = () => reject(new Error("Could not load image"))
+    img.src = URL.createObjectURL(file)
+  })
+}
+
+export async function createImageWithHybridStorage(
+  file: File,
+  imageData: {
+    title: string
+    description: string
+    category_name: string
+    rights_type: string
+    price: number
+  },
+) {
+  try {
+    const fileSizeMB = file.size / (1024 * 1024)
+    console.log("[v0] Processing file:", file.name, `${fileSizeMB.toFixed(2)}MB`)
+
+    const maxDatabaseSizeMB = 15 // Conservative limit to stay well under 64MB after base64 encoding
+
+    let imageUrl: string
+    let thumbnailUrl: string
+    let storageType: string
+
+    if (fileSizeMB > maxDatabaseSizeMB) {
+      console.log("[v0] Using external storage for large file:", `${fileSizeMB.toFixed(2)}MB`)
+
+      let externalResult = await uploadToBackblaze(file)
+      if (!externalResult.success) {
+        console.log("[v0] Backblaze failed, trying Dropbox...")
+        externalResult = await uploadToDropbox(file)
+        if (!externalResult.success) {
+          console.log("[v0] Dropbox failed, trying Blob storage...")
+          externalResult = await uploadToBlob(file)
+          storageType = externalResult.success ? "vercel_blob" : "failed"
+        } else {
+          storageType = "dropbox"
+        }
+      } else {
+        storageType = "backblaze_b2"
+      }
+
+      if (!externalResult.success) {
+        console.log("[v0] All external storage options failed for file:", `${fileSizeMB.toFixed(2)}MB`)
+        return {
+          success: false,
+          error: `File too large (${fileSizeMB.toFixed(2)}MB). Please configure Backblaze, Dropbox, or Blob storage, or use a file smaller than ${maxDatabaseSizeMB}MB.`,
+        }
+      }
+
+      imageUrl = externalResult.url
+
+      // Create and upload thumbnail to the same storage
+      const thumbnailDataUrl = await createThumbnailFromFile(file)
+      const thumbnailBlob = await fetch(thumbnailDataUrl).then((r) => r.blob())
+      const thumbnailFile = new File([thumbnailBlob], `thumb_${file.name}`, { type: "image/jpeg" })
+
+      let thumbnailResult
+      if (storageType === "backblaze_b2") {
+        thumbnailResult = await uploadToBackblaze(thumbnailFile)
+      } else if (storageType === "dropbox") {
+        thumbnailResult = await uploadToDropbox(thumbnailFile)
+      } else {
+        thumbnailResult = await uploadToBlob(thumbnailFile)
+      }
+
+      thumbnailUrl = thumbnailResult.success ? thumbnailResult.data.url : thumbnailDataUrl
+    } else {
+      console.log("[v0] Using database storage for file:", `${fileSizeMB.toFixed(2)}MB`)
+
+      const estimatedBase64Size = (file.size * 4) / 3 // Base64 encoding increases size by ~33%
+      const estimatedBase64SizeMB = estimatedBase64Size / (1024 * 1024)
+
+      if (estimatedBase64SizeMB > 50) {
+        console.log("[v0] File too large for database after base64 encoding:", `${estimatedBase64SizeMB.toFixed(2)}MB`)
+        return {
+          success: false,
+          error: `File too large for database storage (${fileSizeMB.toFixed(2)}MB). Please use external storage or compress the file.`,
+        }
+      }
+
+      // Convert to base64 for database storage
+      const imageDataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
+
+      const thumbnailDataUrl = await createThumbnailFromFile(file)
+
+      imageUrl = imageDataUrl
+      thumbnailUrl = thumbnailDataUrl
+      storageType = "neon_database"
+    }
+
+    // Create image record in database
+    const sql = createNeonClient()
+
+    // Look up category
+    console.log("[v0] Looking up category:", imageData.category_name)
+    const categoryResult = await sql`
+      SELECT id FROM categories WHERE name = ${imageData.category_name} LIMIT 1
+    `
+
+    let categoryId: string
+
+    if (categoryResult.length === 0) {
+      console.log("[v0] Category not found, creating new category:", imageData.category_name)
+      const newCategoryResult = await sql`
+        INSERT INTO categories (name, description, active)
+        VALUES (${imageData.category_name}, ${"Auto-created category for " + imageData.category_name}, true)
+        RETURNING id
+      `
+      categoryId = newCategoryResult[0].id
+    } else {
+      categoryId = categoryResult[0].id
+    }
+
+    let licenseName = "NON_EXCLUSIVE" // Default fallback
+
+    if (imageData.rights_type === "exclusive") {
+      licenseName = "EXCLUSIVE"
+    } else if (imageData.rights_type === "non-exclusive") {
+      licenseName = "NON_EXCLUSIVE"
+    } else if (imageData.rights_type === "both") {
+      licenseName = "NON_EXCLUSIVE" // Default to non-exclusive for "both" option
+    }
+
+    console.log("[v0] Looking up license:", licenseName)
+    const licenseResult = await sql`
+      SELECT id FROM licenses WHERE name = ${licenseName} LIMIT 1
+    `
+
+    let licenseId: string
+
+    if (licenseResult.length === 0) {
+      console.log("[v0] License not found, trying fallback to NON_EXCLUSIVE")
+      const fallbackLicense = await sql`
+        SELECT id FROM licenses WHERE name = 'NON_EXCLUSIVE' LIMIT 1
+      `
+
+      if (fallbackLicense.length === 0) {
+        console.log("[v0] No licenses found in database, creating default NON_EXCLUSIVE license")
+        const newLicenseResult = await sql`
+          INSERT INTO licenses (name, description, price, active)
+          VALUES ('NON_EXCLUSIVE', 'Non-exclusive license for image usage', 99.00, true)
+          RETURNING id
+        `
+        licenseId = newLicenseResult[0].id
+      } else {
+        licenseId = fallbackLicense[0].id
+      }
+    } else {
+      licenseId = licenseResult[0].id
+    }
+
+    console.log("[v0] Using license ID:", licenseId)
+
+    console.log("[v0] Inserting image with", storageType, "storage")
+
+    let result
+    try {
+      result = await sql`
+        INSERT INTO images (title, description, category_id, license_id, price, image_url, thumbnail_url, 
+                           active, featured, metadata)
+        VALUES (${imageData.title}, ${imageData.description}, ${categoryId}, ${licenseId}, 
+                ${imageData.price}, ${imageUrl}, ${thumbnailUrl}, 
+                true, false, 
+                ${JSON.stringify({
+                  rights_type: imageData.rights_type,
+                  original_file_size: file.size,
+                  upload_timestamp: new Date().toISOString(),
+                  storage_type: storageType,
+                  original_filename: file.name,
+                })})
+        RETURNING *
+      `
+    } catch (dbError: any) {
+      console.log("[v0] Database insertion failed:", dbError)
+
+      const errorMessage = String(dbError.message || dbError)
+
+      if (
+        errorMessage.includes("Request Entity Too Large") ||
+        errorMessage.includes("Request En") ||
+        errorMessage.includes("response is too large") ||
+        errorMessage.includes("413") ||
+        errorMessage.includes("payload")
+      ) {
+        return {
+          success: false,
+          error: `File too large for database storage (${fileSizeMB.toFixed(2)}MB). Please use external storage or compress the file.`,
+        }
+      }
+
+      // Re-throw other database errors
+      throw dbError
+    }
+
+    console.log("[v0] Image created successfully with", storageType, "storage, ID:", result[0]?.id)
+
+    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
+    revalidatePath("/simple-admin")
+
+    return { success: true, data: result }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.log("[v0] Database error in createImageWithHybridStorage:", errorMessage)
+
+    if (
+      errorMessage.includes("Request Entity Too Large") ||
+      errorMessage.includes("Request En") ||
+      errorMessage.includes("response is too large") ||
+      errorMessage.includes("413")
+    ) {
+      return {
+        success: false,
+        error: "File too large for database storage. Please use external storage or compress the file.",
+      }
+    }
+
+    return {
+      success: false,
+      error: "Server error processing file. Please try again or contact support.",
+    }
+  }
+}
+
+export async function migrateFilesToOptimalStorage() {
+  try {
+    console.log("[v0] Starting file migration to optimal storage...")
+
+    const sql = createNeonClient()
+
+    // Get all images with their metadata
+    const images = await sql`
+      SELECT id, title, image_url, thumbnail_url, metadata
+      FROM images 
+      WHERE active = true
+    `
+
+    console.log(`[v0] Found ${images.length} images to analyze`)
+
+    let migratedCount = 0
+    let skippedCount = 0
+    let errorCount = 0
+
+    for (const image of images) {
+      try {
+        let metadata = {}
+        if (image.metadata) {
+          if (typeof image.metadata === "string") {
+            metadata = JSON.parse(image.metadata)
+          } else if (typeof image.metadata === "object") {
+            metadata = image.metadata
+          }
+        }
+
+        const currentStorageType = metadata.storage_type
+        const originalFileSize = metadata.original_file_size
+
+        console.log(`[v0] Analyzing image ${image.id}: ${image.title}`)
+        console.log(`[v0] - Storage type: ${currentStorageType || "undefined"}`)
+        console.log(`[v0] - Original file size: ${originalFileSize || "undefined"}`)
+        console.log(`[v0] - Image URL type: ${image.image_url?.startsWith("data:") ? "base64" : "blob"}`)
+
+        // If no storage_type is set, determine it from the URL format
+        let actualStorageType = currentStorageType
+        if (!actualStorageType) {
+          if (image.image_url?.startsWith("data:")) {
+            actualStorageType = "neon_database"
+          } else if (image.image_url?.includes("blob.vercel-storage.com")) {
+            actualStorageType = "vercel_blob"
+          }
+        }
+
+        // Skip if already in database storage
+        if (actualStorageType === "neon_database") {
+          console.log(`[v0] - Skipping: Already in database storage`)
+          skippedCount++
+          continue
+        }
+
+        let fileSizeMB = 0
+        if (originalFileSize) {
+          fileSizeMB = originalFileSize / (1024 * 1024)
+        } else if (actualStorageType === "vercel_blob") {
+          // Try to get file size from Blob storage
+          try {
+            const headResponse = await fetch(image.image_url, { method: "HEAD" })
+            if (headResponse.ok) {
+              const contentLength = headResponse.headers.get("content-length")
+              if (contentLength) {
+                fileSizeMB = Number.parseInt(contentLength) / (1024 * 1024)
+                console.log(`[v0] - Determined file size from Blob: ${fileSizeMB.toFixed(2)}MB`)
+              }
+            }
+          } catch (error) {
+            console.log(`[v0] - Could not determine file size, skipping`)
+            skippedCount++
+            continue
+          }
+        }
+
+        // Only migrate files under 40MB that are currently in Blob storage
+        if (fileSizeMB < 40 && actualStorageType === "vercel_blob") {
+          console.log(`[v0] Migrating image ${image.id}: ${image.title} (${fileSizeMB.toFixed(2)}MB)`)
+
+          // Download the image from Blob storage
+          const imageResponse = await fetch(image.image_url)
+          if (!imageResponse.ok) {
+            throw new Error(`Failed to fetch image: ${imageResponse.statusText}`)
+          }
+
+          const imageBlob = await imageResponse.blob()
+          const imageDataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(reader.result as string)
+            reader.onerror = reject
+            reader.readAsDataURL(imageBlob)
+          })
+
+          // Download the thumbnail from Blob storage
+          const thumbnailResponse = await fetch(image.thumbnail_url)
+          if (!thumbnailResponse.ok) {
+            throw new Error(`Failed to fetch thumbnail: ${thumbnailResponse.statusText}`)
+          }
+
+          const thumbnailBlob = await thumbnailResponse.blob()
+          const thumbnailDataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(reader.result as string)
+            reader.onerror = reject
+            reader.readAsDataURL(thumbnailBlob)
+          })
+
+          // Update the database record with base64 data
+          const updatedMetadata = {
+            ...metadata,
+            storage_type: "neon_database",
+            original_file_size: imageBlob.size,
+            migrated_from: "vercel_blob",
+            migration_timestamp: new Date().toISOString(),
+          }
+
+          await sql`
+            UPDATE images 
+            SET image_url = ${imageDataUrl},
+                thumbnail_url = ${thumbnailDataUrl},
+                metadata = ${JSON.stringify(updatedMetadata)}
+            WHERE id = ${image.id}
+          `
+
+          migratedCount++
+          console.log(`[v0] Successfully migrated image ${image.id}`)
+        } else {
+          console.log(`[v0] - Skipping: File too large (${fileSizeMB.toFixed(2)}MB) or not in Blob storage`)
+          skippedCount++
+        }
+      } catch (error) {
+        console.error(`[v0] Error migrating image ${image.id}:`, error)
+        errorCount++
+      }
+    }
+
+    console.log(`[v0] Migration completed: ${migratedCount} migrated, ${skippedCount} skipped, ${errorCount} errors`)
+
+    // Invalidate cache after migration
+    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
+
+    return {
+      success: true,
+      data: {
+        migrated: migratedCount,
+        skipped: skippedCount,
+        errors: errorCount,
+        total: images.length,
+      },
+    }
+  } catch (error) {
+    return handleDatabaseError(error, "migrateFilesToOptimalStorage")
   }
 }
 

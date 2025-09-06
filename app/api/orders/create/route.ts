@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createNeonClient } from "@/lib/neon/client"
-import { v4 as uuidv4 } from "uuid"
 
 interface CartItem {
   id: string
@@ -20,24 +19,36 @@ interface OrderRequest {
     email: string
     firstName: string
     lastName: string
-    billingAddress: string
-    city: string
-    zipCode: string
-    country: string
+    billingAddress?: string
+    city?: string
+    zipCode?: string
+    country?: string
   }
-  paymentInfo: {
-    cardNumber: string
-    expiryDate: string
-    cvv: string
+  paymentMethod?: "crypto" | "stripe"
+  paymentIntentId?: string
+  cryptoDetails?: {
+    currency: string
+    amount: string
+    transactionHash: string
+    address: string
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: OrderRequest = await request.json()
-    const { items, total, customerInfo, paymentInfo } = body
+    const { items, total, customerInfo, paymentMethod = "crypto", paymentIntentId, cryptoDetails } = body
 
-    console.log("[v0] Creating order for:", customerInfo.email, "Total:", total, "Items:", items.length)
+    console.log(
+      "[v0] Creating order for:",
+      customerInfo.email,
+      "Total:",
+      total,
+      "Items:",
+      items.length,
+      "Payment method:",
+      paymentMethod,
+    )
 
     if (!items || items.length === 0) {
       return NextResponse.json({ success: false, error: "No items in cart" }, { status: 400 })
@@ -47,14 +58,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Customer email is required" }, { status: 400 })
     }
 
+    if (paymentMethod === "crypto") {
+      if (!cryptoDetails || !cryptoDetails.transactionHash) {
+        return NextResponse.json(
+          { success: false, error: "Transaction hash is required for crypto payments" },
+          { status: 400 },
+        )
+      }
+
+      // In a real implementation, you would verify the transaction on the blockchain
+      console.log(
+        "[v0] Processing crypto payment:",
+        cryptoDetails.currency,
+        cryptoDetails.amount,
+        cryptoDetails.transactionHash,
+      )
+    }
+
     const sql = createNeonClient()
 
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
-
-    // In a real implementation, you would process payment with Stripe here
-    // For now, we'll simulate successful payment processing
-    const paymentStatus = "completed" // This would come from Stripe
-    const stripePaymentIntentId = `pi_${uuidv4().replace(/-/g, "")}` // This would come from Stripe
 
     console.log("[v0] Creating order with number:", orderNumber)
 
@@ -72,18 +95,26 @@ export async function POST(request: NextRequest) {
       VALUES (
         ${orderNumber},
         ${customerInfo.email},
-        ${total * 1.03}, -- Include processing fee
-        ${paymentStatus},
-        'credit_card',
+        ${total * 1.03},
+        'completed',
+        ${paymentMethod === "crypto" ? "cryptocurrency" : "credit_card"},
         ${customerInfo.email},
-        ${stripePaymentIntentId},
+        ${paymentMethod === "crypto" ? cryptoDetails?.transactionHash : paymentIntentId},
         ${JSON.stringify({
           firstName: customerInfo.firstName,
           lastName: customerInfo.lastName,
-          address: customerInfo.billingAddress,
-          city: customerInfo.city,
-          zipCode: customerInfo.zipCode,
-          country: customerInfo.country,
+          address: customerInfo.billingAddress || "",
+          city: customerInfo.city || "",
+          zipCode: customerInfo.zipCode || "",
+          country: customerInfo.country || "",
+          ...(paymentMethod === "crypto" && cryptoDetails
+            ? {
+                cryptoCurrency: cryptoDetails.currency,
+                cryptoAmount: cryptoDetails.amount,
+                cryptoAddress: cryptoDetails.address,
+                transactionHash: cryptoDetails.transactionHash,
+              }
+            : {}),
         })}
       )
       RETURNING id, order_number
@@ -95,9 +126,8 @@ export async function POST(request: NextRequest) {
     for (const item of items) {
       console.log("[v0] Creating order item for image:", item.imageId, "License:", item.licenseType)
 
-      // Get the default license ID (we'll use PRO license for all items)
       const licenseResult = await sql`
-        SELECT id FROM licenses WHERE name = 'PRO' LIMIT 1
+        SELECT id FROM licenses WHERE name = 'NON_EXCLUSIVE' LIMIT 1
       `
 
       const licenseId = licenseResult.length > 0 ? licenseResult[0].id : null
@@ -134,8 +164,18 @@ export async function POST(request: NextRequest) {
       data: {
         orderId: orderId,
         orderNumber: orderNumber,
-        paymentStatus: paymentStatus,
+        paymentStatus: "completed",
         total: total * 1.03,
+        paymentMethod: paymentMethod,
+        ...(paymentMethod === "crypto" && cryptoDetails
+          ? {
+              cryptoDetails: {
+                currency: cryptoDetails.currency,
+                amount: cryptoDetails.amount,
+                transactionHash: cryptoDetails.transactionHash,
+              },
+            }
+          : {}),
       },
     })
   } catch (error) {

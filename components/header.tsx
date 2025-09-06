@@ -8,6 +8,7 @@ import { ShoppingCart, Menu, X } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
 import { UserMenu } from "./user-menu"
 import { ThemeToggle } from "./theme-toggle"
+import Image from "next/image"
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -21,14 +22,21 @@ export function Header() {
         <div className="flex h-20 items-center justify-between">
           <Link href="/" className="flex items-center group">
             <div className="relative h-16 w-auto">
-              <video
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/animation-k2Hwobx4MK9u7fWbxRlyofypb2ydN2.mp4"
-                autoPlay
-                loop
-                muted
-                playsInline
+              {/* Animated overlay positioned over the neuralia text part of the logo */}
+              <div className="absolute top-0 left-0 w-48 h-16 flex items-center justify-center pointer-events-none">
+                <div className="w-40 h-12 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 animate-neuralia-pulse opacity-40" />
+              </div>
+              {/* Animated overlay positioned over the 360° part of the logo */}
+              <div className="absolute top-0 right-0 w-12 h-16 flex items-center justify-center pointer-events-none">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 animate-gentle-pulse opacity-60" />
+              </div>
+              <Image
+                src="/images/n3uralia-logo.png"
+                alt="n3uralia 360°"
+                width={320}
+                height={64}
                 className="h-16 w-auto object-contain group-hover:opacity-80 transition-opacity duration-300"
-                style={{ maxWidth: "320px" }}
+                priority
               />
             </div>
           </Link>

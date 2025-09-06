@@ -3,7 +3,9 @@
 import { neon } from "@neondatabase/serverless"
 import { revalidatePath } from "next/cache"
 
-const sql = neon(process.env.DATABASE_URL!)
+const sql = neon(process.env.DATABASE_URL!, {
+  disableWarningInBrowsers: true,
+})
 
 export interface ImageData {
   title: string

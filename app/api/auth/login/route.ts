@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createNeonClient } from "@/lib/neon/client"
+import { PasswordManager } from "@/lib/auth/password"
 import { cookies } from "next/headers"
 
 export async function POST(request: NextRequest) {
@@ -13,7 +14,7 @@ export async function POST(request: NextRequest) {
     const sql = createNeonClient()
 
     const userResult = await sql`
-      SELECT up.*, u.email 
+      SELECT up.*, u.email, u.encrypted_password 
       FROM user_profiles up
       JOIN auth.users u ON up.id = u.id
       WHERE u.email = ${email}
@@ -25,6 +26,12 @@ export async function POST(request: NextRequest) {
     }
 
     const user = userResult[0]
+
+    const isValidPassword = await PasswordManager.verifyPassword(password, user.encrypted_password)
+
+    if (!isValidPassword) {
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
+    }
 
     const sessionToken = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 

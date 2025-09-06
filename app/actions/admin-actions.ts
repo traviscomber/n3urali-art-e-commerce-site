@@ -6,9 +6,9 @@ import { unstable_cache } from "next/cache"
 import { File } from "formdata-node"
 import { put } from "@vercel/blob"
 
-import { DropboxStorage } from "@/lib/storage/dropbox"
-import { BackblazeNativeStorage } from "@/lib/storage/backblaze-native"
+import { BackblazeAuth } from "@/lib/backblaze-auth"
 import { ImageCompressor } from "@/lib/storage/image-compression"
+import { DropboxStorage } from "@/lib/storage/dropbox"
 
 const CACHE_TAGS = {
   IMAGES: "images",
@@ -1412,17 +1412,7 @@ export async function uploadToBackblaze(file: File): Promise<{ success: boolean;
     console.log("[v0] Backblaze env check - applicationKey exists:", !!process.env.BACKBLAZE_APPLICATION_KEY)
     console.log("[v0] Backblaze env check - bucketName:", process.env.BACKBLAZE_BUCKET_NAME)
 
-    const keyId = process.env.BACKBLAZE_KEY_ID || "0058f27927f71c6000000001"
-    const applicationKey = process.env.BACKBLAZE_APPLICATION_KEY || "K005IbX9B4D5uKOYZ3yZBhL90olt5Jg"
-    const bucketName = process.env.BACKBLAZE_BUCKET_NAME || "Neuraliart"
-
-    // Use fallback values for v0 environment
-    const fallbackKeyId = keyId || "0058f27927f71c6000000001"
-    const fallbackApplicationKey = applicationKey || "K005IbX9B4D5uKOYZ3yZBhL90olt5Jg"
-
-    console.log("[v0] Using native Backblaze B2 API - keyId:", fallbackKeyId.substring(0, 8) + "...")
-
-    const backblaze = new BackblazeNativeStorage(fallbackKeyId, fallbackApplicationKey, bucketName)
+    const backblaze = new BackblazeAuth()
 
     let fileToUpload = file
     const fileSizeMB = file.size / (1024 * 1024)
@@ -1435,7 +1425,7 @@ export async function uploadToBackblaze(file: File): Promise<{ success: boolean;
           maxWidthOrHeight: 4096,
           useWebWorker: false,
         })
-        fileToUpload = compressionResult.file // Extract the actual file from the result object
+        fileToUpload = compressionResult.file
         const compressedSizeMB = compressionResult.compressedSize / (1024 * 1024)
         console.log("[v0] Image compressed:", `${fileSizeMB.toFixed(2)}MB → ${compressedSizeMB.toFixed(2)}MB`)
       } catch (compressionError) {
@@ -1446,19 +1436,40 @@ export async function uploadToBackblaze(file: File): Promise<{ success: boolean;
     // Generate unique filename with timestamp
     const timestamp = Date.now()
     const fileName = `${timestamp}_${fileToUpload.name}`
+    const key = `uploads/${crypto.randomUUID()}-${fileName}`
 
-    console.log("[v0] Starting native Backblaze B2 upload for:", fileName)
-    const url = await backblaze.uploadFile(fileName, fileToUpload, fileToUpload.type)
+    console.log("[v0] Starting Backblaze upload for:", fileName)
 
+    const presignedUrl = await backblaze.generatePresignedUrl(key, fileToUpload.type || "application/octet-stream")
+    console.log("[v0] Generated presigned URL, uploading to Backblaze...")
+
+    const uploadResponse = await fetch(presignedUrl, {
+      method: "PUT",
+      body: fileToUpload,
+      headers: {
+        "Content-Type": fileToUpload.type || "application/octet-stream",
+      },
+    })
+
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text()
+      console.log("[v0] Backblaze upload error:", uploadResponse.status, errorText)
+      throw new Error(`Upload failed: ${uploadResponse.status} ${errorText}`)
+    }
+
+    const config = backblaze.getConfig()
+    const publicUrl = `${config.endpoint}/${config.bucket}/${key}`
+
+    console.log("[v0] Backblaze upload successful:", publicUrl)
     return {
       success: true,
-      url: url,
+      url: publicUrl,
     }
   } catch (error: any) {
-    console.log("[v0] S3 Backblaze upload error:", error.message)
+    console.log("[v0] Backblaze upload error:", error.message)
     return {
       success: false,
-      error: `Failed to upload to S3-compatible Backblaze: ${error.message}`,
+      error: `Failed to upload to Backblaze: ${error.message}`,
     }
   }
 }
@@ -1592,66 +1603,45 @@ export async function createImageWithHybridStorage(
     const fileSizeMB = file.size / (1024 * 1024)
     console.log("[v0] Processing file:", file.name, `${fileSizeMB.toFixed(2)}MB`)
 
-    const maxDatabaseSizeMB = 15 // Conservative limit to stay well under 64MB after base64 encoding
+    const maxDatabaseSizeMB = 10
 
     let imageUrl: string
     let thumbnailUrl: string
     let storageType: string
 
     if (fileSizeMB > maxDatabaseSizeMB) {
-      console.log("[v0] Using external storage for large file:", `${fileSizeMB.toFixed(2)}MB`)
+      console.log("[v0] Using Backblaze storage for large file:", `${fileSizeMB.toFixed(2)}MB`)
 
-      let externalResult = await uploadToBackblaze(file)
-      if (!externalResult.success) {
-        console.log("[v0] Backblaze failed, trying Dropbox...")
-        externalResult = await uploadToDropbox(file)
-        if (!externalResult.success) {
-          console.log("[v0] Dropbox failed, trying Blob storage...")
-          externalResult = await uploadToBlob(file)
-          storageType = externalResult.success ? "vercel_blob" : "failed"
-        } else {
-          storageType = "dropbox"
-        }
-      } else {
-        storageType = "backblaze_b2"
-      }
+      const backblazeResult = await uploadToBackblaze(file)
 
-      if (!externalResult.success) {
-        console.log("[v0] All external storage options failed for file:", `${fileSizeMB.toFixed(2)}MB`)
+      if (!backblazeResult.success) {
+        console.log("[v0] Backblaze upload failed:", backblazeResult.error)
         return {
           success: false,
-          error: `File too large (${fileSizeMB.toFixed(2)}MB). Please configure Backblaze, Dropbox, or Blob storage, or use a file smaller than ${maxDatabaseSizeMB}MB.`,
+          error: `Failed to upload to Backblaze: ${backblazeResult.error}. Please check your Backblaze configuration.`,
         }
       }
 
-      imageUrl = externalResult.url
+      imageUrl = backblazeResult.url!
+      storageType = "backblaze_b2"
 
-      // Create and upload thumbnail to the same storage
       const thumbnailDataUrl = await createThumbnailFromFile(file)
       const thumbnailBlob = await fetch(thumbnailDataUrl).then((r) => r.blob())
       const thumbnailFile = new File([thumbnailBlob], `thumb_${file.name}`, { type: "image/jpeg" })
 
-      let thumbnailResult
-      if (storageType === "backblaze_b2") {
-        thumbnailResult = await uploadToBackblaze(thumbnailFile)
-      } else if (storageType === "dropbox") {
-        thumbnailResult = await uploadToDropbox(thumbnailFile)
-      } else {
-        thumbnailResult = await uploadToBlob(thumbnailFile)
-      }
-
-      thumbnailUrl = thumbnailResult.success ? thumbnailResult.data.url : thumbnailDataUrl
+      const thumbnailResult = await uploadToBackblaze(thumbnailFile)
+      thumbnailUrl = thumbnailResult.success ? thumbnailResult.url! : thumbnailDataUrl
     } else {
       console.log("[v0] Using database storage for file:", `${fileSizeMB.toFixed(2)}MB`)
 
-      const estimatedBase64Size = (file.size * 4) / 3 // Base64 encoding increases size by ~33%
+      const estimatedBase64Size = (file.size * 4) / 3
       const estimatedBase64SizeMB = estimatedBase64Size / (1024 * 1024)
 
-      if (estimatedBase64SizeMB > 50) {
+      if (estimatedBase64SizeMB > 40) {
         console.log("[v0] File too large for database after base64 encoding:", `${estimatedBase64SizeMB.toFixed(2)}MB`)
         return {
           success: false,
-          error: `File too large for database storage (${fileSizeMB.toFixed(2)}MB). Please use external storage or compress the file.`,
+          error: `File too large for database storage (${fileSizeMB.toFixed(2)}MB). File will be uploaded to Backblaze instead.`,
         }
       }
 
@@ -1670,7 +1660,6 @@ export async function createImageWithHybridStorage(
       storageType = "neon_database"
     }
 
-    // Create image record in database
     const sql = createNeonClient()
 
     // Look up category
@@ -1693,15 +1682,7 @@ export async function createImageWithHybridStorage(
       categoryId = categoryResult[0].id
     }
 
-    let licenseName = "NON_EXCLUSIVE" // Default fallback
-
-    if (imageData.rights_type === "exclusive") {
-      licenseName = "EXCLUSIVE"
-    } else if (imageData.rights_type === "non-exclusive") {
-      licenseName = "NON_EXCLUSIVE"
-    } else if (imageData.rights_type === "both") {
-      licenseName = "NON_EXCLUSIVE" // Default to non-exclusive for "both" option
-    }
+    const licenseName = imageData.rights_type === "exclusive" ? "EXCLUSIVE" : "NON_EXCLUSIVE"
 
     console.log("[v0] Looking up license:", licenseName)
     const licenseResult = await sql`
@@ -1711,13 +1692,13 @@ export async function createImageWithHybridStorage(
     let licenseId: string
 
     if (licenseResult.length === 0) {
-      console.log("[v0] License not found, trying fallback to NON_EXCLUSIVE")
+      console.log("[v0] License not found, using fallback NON_EXCLUSIVE")
       const fallbackLicense = await sql`
         SELECT id FROM licenses WHERE name = 'NON_EXCLUSIVE' LIMIT 1
       `
 
       if (fallbackLicense.length === 0) {
-        console.log("[v0] No licenses found in database, creating default NON_EXCLUSIVE license")
+        console.log("[v0] Creating default NON_EXCLUSIVE license")
         const newLicenseResult = await sql`
           INSERT INTO licenses (name, description, price, active)
           VALUES ('NON_EXCLUSIVE', 'Non-exclusive license for image usage', 99.00, true)
@@ -1766,11 +1747,10 @@ export async function createImageWithHybridStorage(
       ) {
         return {
           success: false,
-          error: `File too large for database storage (${fileSizeMB.toFixed(2)}MB). Please use external storage or compress the file.`,
+          error: `File too large for database storage (${fileSizeMB.toFixed(2)}MB). Please use Backblaze storage for large files.`,
         }
       }
 
-      // Re-throw other database errors
       throw dbError
     }
 
@@ -1782,23 +1762,11 @@ export async function createImageWithHybridStorage(
     return { success: true, data: result }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    console.log("[v0] Database error in createImageWithHybridStorage:", errorMessage)
-
-    if (
-      errorMessage.includes("Request Entity Too Large") ||
-      errorMessage.includes("Request En") ||
-      errorMessage.includes("response is too large") ||
-      errorMessage.includes("413")
-    ) {
-      return {
-        success: false,
-        error: "File too large for database storage. Please use external storage or compress the file.",
-      }
-    }
+    console.log("[v0] Error in createImageWithHybridStorage:", errorMessage)
 
     return {
       success: false,
-      error: "Server error processing file. Please try again or contact support.",
+      error: `Upload failed: ${errorMessage}`,
     }
   }
 }

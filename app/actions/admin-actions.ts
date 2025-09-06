@@ -4,7 +4,6 @@ import { createNeonClient } from "@/lib/neon/client"
 import { unstable_cache } from "next/cache"
 import { revalidatePath, revalidateTag } from "next/cache" // Added revalidateTag import
 import { put } from "@vercel/blob"
-import { ImageCompressor } from "@/lib/storage/image-compression"
 import { DropboxStorage } from "@/lib/storage/dropbox"
 
 import { WorkingBackblazeStorage } from "@/lib/backblaze-working"
@@ -1430,7 +1429,11 @@ export async function createImageWithCategoryObjectChunked(imageData: {
   }
 }
 
-export async function uploadToBackblaze(file: File): Promise<{ success: boolean; url?: string; error?: string }> {
+export async function uploadToBackblaze(
+  file: File,
+  imageType: "full" | "thumbnail" = "full",
+  category?: string,
+): Promise<{ success: boolean; url?: string; error?: string }> {
   try {
     console.log("[v0] Backblaze env check - keyId exists:", !!process.env.BACKBLAZE_API_KEY)
     console.log("[v0] Backblaze env check - applicationKey exists:", !!process.env.BACKBLAZE_APPLICATION_KEY)
@@ -1438,33 +1441,22 @@ export async function uploadToBackblaze(file: File): Promise<{ success: boolean;
 
     const backblaze = new WorkingBackblazeStorage()
 
-    let fileToUpload = file
     const fileSizeMB = file.size / (1024 * 1024)
+    console.log(`[v0] Uploading ${imageType} image to Backblaze:`, `${fileSizeMB.toFixed(2)}MB`)
 
-    if (await ImageCompressor.shouldCompress(file, 20)) {
-      console.log("[v0] Compressing large image before upload:", `${fileSizeMB.toFixed(2)}MB`)
-      try {
-        const compressionResult = await ImageCompressor.compressImage(file, {
-          maxSizeMB: 20,
-          maxWidthOrHeight: 4096,
-          useWebWorker: false,
-        })
-        fileToUpload = compressionResult.file
-        const compressedSizeMB = compressionResult.compressedSize / (1024 * 1024)
-        console.log("[v0] Image compressed:", `${fileSizeMB.toFixed(2)}MB → ${compressedSizeMB.toFixed(2)}MB`)
-      } catch (compressionError) {
-        console.log("[v0] Image compression failed, using original:", compressionError)
-      }
-    }
-
-    // Generate unique filename with timestamp
+    // Generate organized folder structure
     const timestamp = Date.now()
-    const fileName = `${timestamp}_${fileToUpload.name}`
-    const key = `uploads/${crypto.randomUUID()}-${fileName}`
+    const uuid = crypto.randomUUID()
+    const fileName = `${uuid}-${timestamp}_${file.name}`
 
-    console.log("[v0] Starting Backblaze upload for:", fileName)
+    const baseFolder = imageType === "full" ? "full-images" : "thumbnails"
+    const categoryFolder = category ? category.toLowerCase().replace(/[^a-z0-9]/g, "-") : "uncategorized"
+    const folderPath = `${baseFolder}/${categoryFolder}`
+    const key = `${folderPath}/${fileName}`
 
-    const publicUrl = await backblaze.uploadFile(fileToUpload, key)
+    console.log("[v0] Starting Backblaze upload for:", fileName, "in folder:", folderPath)
+
+    const publicUrl = await backblaze.uploadFile(file, key)
 
     console.log("[v0] Backblaze upload successful:", publicUrl)
     return {
@@ -1478,6 +1470,58 @@ export async function uploadToBackblaze(file: File): Promise<{ success: boolean;
       error: `Failed to upload to Backblaze: ${error.message}`,
     }
   }
+}
+
+async function createThumbnailFile(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement("canvas")
+    const ctx = canvas.getContext("2d")
+    const img = new Image()
+
+    img.onload = () => {
+      const maxSize = 400 // Slightly larger thumbnail for better quality
+      let { width, height } = img
+
+      if (width > height) {
+        if (width > maxSize) {
+          height = (height * maxSize) / width
+          width = maxSize
+        }
+      } else {
+        if (height > maxSize) {
+          width = (width * maxSize) / height
+          height = maxSize
+        }
+      }
+
+      canvas.width = width
+      canvas.height = height
+
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, width, height)
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const thumbnailFile = new File([blob], `thumb_${file.name}`, {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              })
+              resolve(thumbnailFile)
+            } else {
+              reject(new Error("Could not create thumbnail blob"))
+            }
+          },
+          "image/jpeg",
+          0.85,
+        )
+      } else {
+        reject(new Error("Could not get canvas context"))
+      }
+    }
+
+    img.onerror = () => reject(new Error("Could not load image"))
+    img.src = URL.createObjectURL(file)
+  })
 }
 
 export async function uploadToBlob(file: File): Promise<{ success: boolean; data?: any; error?: string }> {
@@ -1595,184 +1639,147 @@ async function createThumbnailFromFile(file: File): Promise<string> {
   })
 }
 
-export async function createImageWithHybridStorage(
-  file: File,
-  imageData: {
-    title: string
-    description: string
-    category_name: string
-    rights_type: string
-    price: number
-  },
-) {
+export async function createImageWithHybridStorage(formData: FormData) {
   try {
+    const file = formData.get("file") as File
+    const title = formData.get("title") as string
+    const description = formData.get("description") as string
+    const category = formData.get("category") as string
+    const licenseId = formData.get("license_id") as string
+
+    // Determine storage method based on file size
     const fileSizeMB = file.size / (1024 * 1024)
-    console.log("[v0] Processing file:", file.name, `${fileSizeMB.toFixed(2)}MB`)
-
-    const maxDatabaseSizeMB = 2
-
-    let imageUrl: string
-    let thumbnailUrl: string
-    let storageType: string
+    const maxDatabaseSizeMB = 2 // Reduced threshold for database storage
 
     if (fileSizeMB > maxDatabaseSizeMB) {
-      console.log("[v0] Using Backblaze storage for large file:", `${fileSizeMB.toFixed(2)}MB`)
+      console.log(`[v0] Using Backblaze storage for large file: ${fileSizeMB.toFixed(2)}MB`)
 
-      const backblazeResult = await uploadToBackblaze(file)
+      const fullImageResult = await uploadToBackblaze(file, "full", category)
+      if (!fullImageResult.success) {
+        return { success: false, error: fullImageResult.error }
+      }
 
-      if (!backblazeResult.success) {
-        console.log("[v0] Backblaze upload failed:", backblazeResult.error)
-        return {
-          success: false,
-          error: `Failed to upload to Backblaze: ${backblazeResult.error}. Please check your Backblaze configuration.`,
+      // Create and upload thumbnail with category
+      const thumbnailFile = await createThumbnailFile(file)
+      const thumbnailResult = await uploadToBackblaze(thumbnailFile, "thumbnail", category)
+      if (!thumbnailResult.success) {
+        return { success: false, error: thumbnailResult.error }
+      }
+
+      // Look up category and license IDs
+      const sql = createNeonClient()
+
+      async function getCategoryByName(categoryName: string): Promise<{ success: boolean; category?: any }> {
+        try {
+          const categoryResult = await sql`
+            SELECT id FROM categories WHERE name = ${categoryName} LIMIT 1
+          `
+          if (categoryResult.length === 0) {
+            return { success: false }
+          }
+          return { success: true, category: { id: categoryResult[0].id } }
+        } catch (error) {
+          console.error("Error looking up category:", error)
+          return { success: false }
         }
       }
 
-      imageUrl = backblazeResult.url!
-      storageType = "backblaze_b2"
-
-      const thumbnailDataUrl = await createThumbnailFromFile(file)
-      const thumbnailBlob = await fetch(thumbnailDataUrl).then((r) => r.blob())
-      const thumbnailFile = new File([thumbnailBlob], `thumb_${file.name}`, { type: "image/jpeg" })
-
-      const thumbnailResult = await uploadToBackblaze(thumbnailFile)
-      thumbnailUrl = thumbnailResult.success ? thumbnailResult.url! : thumbnailDataUrl
-    } else {
-      console.log("[v0] Using database storage for file:", `${fileSizeMB.toFixed(2)}MB`)
-
-      const estimatedBase64Size = (file.size * 4) / 3
-      const estimatedBase64SizeMB = estimatedBase64Size / (1024 * 1024)
-
-      if (estimatedBase64SizeMB > 8) {
-        console.log("[v0] File too large for database after base64 encoding:", `${estimatedBase64SizeMB.toFixed(2)}MB`)
-        return {
-          success: false,
-          error: `File too large for database storage (${fileSizeMB.toFixed(2)}MB). File will be uploaded to Backblaze instead.`,
+      async function getLicenseById(licenseId: string): Promise<{ success: boolean; license?: any }> {
+        try {
+          const licenseResult = await sql`
+            SELECT id FROM licenses WHERE id = ${licenseId} LIMIT 1
+          `
+          if (licenseResult.length === 0) {
+            return { success: false }
+          }
+          return { success: true, license: { id: licenseResult[0].id } }
+        } catch (error) {
+          console.error("Error looking up license:", error)
+          return { success: false }
         }
       }
 
-      // Convert to base64 for database storage
-      const imageDataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = () => resolve(reader.result as string)
-        reader.onerror = reject
-        reader.readAsDataURL(file)
-      })
+      const categoryResult = await getCategoryByName(category)
+      if (!categoryResult.success) {
+        return { success: false, error: `Category not found: ${category}` }
+      }
 
-      const thumbnailDataUrl = await createThumbnailFromFile(file)
+      const licenseResult = await getLicenseById(licenseId)
+      if (!licenseResult.success) {
+        return { success: false, error: `License not found: ${licenseId}` }
+      }
 
-      imageUrl = imageDataUrl
-      thumbnailUrl = thumbnailDataUrl
-      storageType = "neon_database"
-    }
+      console.log("[v0] Using license ID:", licenseResult.license?.id)
 
-    const sql = createNeonClient()
+      const imageData = {
+        title,
+        description,
+        price: 99, // TODO: Get price from license
+        category_id: categoryResult.category!.id,
+        license_id: licenseResult.license!.id,
+        tags: [], // TODO: Add tags
+        storage_type: "backblaze_b2" as const,
+        file_url: fullImageResult.url!, // Original full-resolution file in full-images/
+        thumbnail_url: thumbnailResult.url!, // Thumbnail in thumbnails/
+        file_size: file.size,
+        file_type: file.type,
+        width: null,
+        height: null,
+      }
 
-    // Look up category
-    console.log("[v0] Looking up category:", imageData.category_name)
-    const categoryResult = await sql`
-      SELECT id FROM categories WHERE name = ${imageData.category_name} LIMIT 1
-    `
+      async function createImageInDatabase(
+        imageData: any,
+      ): Promise<{ success: boolean; message: string; imageId?: string }> {
+        try {
+          const tagsString = JSON.stringify(imageData.tags)
+          const result = await sql`
+            INSERT INTO images (title, description, category_id, license_id, price, image_url, thumbnail_url, 
+                               active, featured, metadata, file_size, file_type, width, height, tags)
+            VALUES (
+              ${imageData.title}, ${imageData.description}, ${imageData.category_id}, ${imageData.license_id}, 
+              ${imageData.price}, ${imageData.file_url}, ${imageData.thumbnail_url},
+              true, false, 
+              ${JSON.stringify({
+                storage_type: imageData.storage_type,
+                folder_structure: {
+                  full_image: "full-images/",
+                  thumbnail: "thumbnails/",
+                },
+              })},
+              ${imageData.file_size}, ${imageData.file_type}, ${imageData.width}, ${imageData.height}, ${tagsString}
+            )
+            RETURNING id
+          `
+          return { success: true, message: "Image created successfully", imageId: result[0].id }
+        } catch (dbError: any) {
+          console.error("Database insertion failed:", dbError)
+          return { success: false, message: dbError.message || "Database error" }
+        }
+      }
 
-    let categoryId: string
+      console.log("[v0] Inserting image with organized Backblaze storage")
+      const result = await createImageInDatabase(imageData)
 
-    if (categoryResult.length === 0) {
-      console.log("[v0] Category not found, creating new category:", imageData.category_name)
-      const newCategoryResult = await sql`
-        INSERT INTO categories (name, description, active)
-        VALUES (${imageData.category_name}, ${"Auto-created category for " + imageData.category_name}, true)
-        RETURNING id
-      `
-      categoryId = newCategoryResult[0].id
-    } else {
-      categoryId = categoryResult[0].id
-    }
-
-    const licenseName = imageData.rights_type === "exclusive" ? "EXCLUSIVE" : "NON_EXCLUSIVE"
-
-    console.log("[v0] Looking up license:", licenseName)
-    const licenseResult = await sql`
-      SELECT id FROM licenses WHERE name = ${licenseName} LIMIT 1
-    `
-
-    let licenseId: string
-
-    if (licenseResult.length === 0) {
-      console.log("[v0] License not found, using fallback NON_EXCLUSIVE")
-      const fallbackLicense = await sql`
-        SELECT id FROM licenses WHERE name = 'NON_EXCLUSIVE' LIMIT 1
-      `
-
-      if (fallbackLicense.length === 0) {
-        console.log("[v0] Creating default NON_EXCLUSIVE license")
-        const newLicenseResult = await sql`
-          INSERT INTO licenses (name, description, price, active)
-          VALUES ('NON_EXCLUSIVE', 'Non-exclusive license for image usage', 99.00, true)
-          RETURNING id
-        `
-        licenseId = newLicenseResult[0].id
+      if (result.success) {
+        console.log("[v0] Image created successfully with organized storage, ID:", result.imageId)
+        invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
+        revalidatePath("/simple-admin")
+        return {
+          success: true,
+          message: "Image uploaded successfully with organized folder structure!",
+          imageId: result.imageId,
+        }
       } else {
-        licenseId = fallbackLicense[0].id
+        return { success: false, error: result.message }
       }
     } else {
-      licenseId = licenseResult[0].id
+      return { success: false, error: "Database storage not yet implemented" }
     }
-
-    console.log("[v0] Using license ID:", licenseId)
-
-    console.log("[v0] Inserting image with", storageType, "storage")
-
-    let result
-    try {
-      result = await sql`
-        INSERT INTO images (title, description, category_id, license_id, price, image_url, thumbnail_url, 
-                           active, featured, metadata)
-        VALUES (${imageData.title}, ${imageData.description}, ${categoryId}, ${licenseId}, 
-                ${imageData.price}, ${imageUrl}, ${thumbnailUrl}, 
-                true, false, 
-                ${JSON.stringify({
-                  rights_type: imageData.rights_type,
-                  original_file_size: file.size,
-                  upload_timestamp: new Date().toISOString(),
-                  storage_type: storageType,
-                  original_filename: file.name,
-                })})
-        RETURNING *
-      `
-    } catch (dbError: any) {
-      console.log("[v0] Database insertion failed:", dbError)
-
-      const errorMessage = String(dbError.message || dbError)
-
-      if (
-        errorMessage.includes("Request Entity Too Large") ||
-        errorMessage.includes("Request En") ||
-        errorMessage.includes("response is too large") ||
-        errorMessage.includes("413") ||
-        errorMessage.includes("payload")
-      ) {
-        return {
-          success: false,
-          error: `File too large for database storage (${fileSizeMB.toFixed(2)}MB). Please use Backblaze storage for large files.`,
-        }
-      }
-
-      throw dbError
-    }
-
-    console.log("[v0] Image created successfully with", storageType, "storage, ID:", result[0]?.id)
-
-    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
-    revalidatePath("/simple-admin")
-
-    return { success: true, data: result }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    console.log("[v0] Error in createImageWithHybridStorage:", errorMessage)
-
+  } catch (error: any) {
+    console.error("[v0] Upload error:", error.message)
     return {
       success: false,
-      error: `Upload failed: ${errorMessage}`,
+      error: error.message || "Upload failed",
     }
   }
 }

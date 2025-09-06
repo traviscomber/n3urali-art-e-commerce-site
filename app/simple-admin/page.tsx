@@ -311,7 +311,7 @@ export default function SimpleAdminPage() {
       }
 
       // Use hybrid storage system that automatically chooses Blob or Database
-      const result = await createImageWithHybridStorage(newImage.file, imageData)
+      const result = await createImageWithHybridStorage(newImage.file, imageData, licenses)
 
       if (!result.success) {
         throw new Error(result.error || "Failed to save image")
@@ -975,7 +975,30 @@ export default function SimpleAdminPage() {
   )
 }
 
-const createImageWithHybridStorage = async (file: File, imageData: any) => {
+const createImageWithHybridStorage = async (file: File, imageData: any, licenses: License[]) => {
+  const formData = new FormData()
+  formData.append("file", file)
+  formData.append("title", imageData.title || "")
+  formData.append("description", imageData.description || "")
+  formData.append("category", imageData.category_name || "")
+
+  let licenseId = ""
+  if (imageData.rights_type === "exclusive") {
+    // Find the exclusive license ID
+    const exclusiveLicense = licenses.find((license) => license.name === "EXCLUSIVE")
+    licenseId = exclusiveLicense?.id || ""
+  } else if (imageData.rights_type === "non-exclusive") {
+    // Find the non-exclusive license ID
+    const nonExclusiveLicense = licenses.find((license) => license.name === "NON_EXCLUSIVE")
+    licenseId = nonExclusiveLicense?.id || ""
+  } else {
+    // For "both", default to non-exclusive license
+    const nonExclusiveLicense = licenses.find((license) => license.name === "NON_EXCLUSIVE")
+    licenseId = nonExclusiveLicense?.id || ""
+  }
+
+  formData.append("license_id", licenseId)
+
   const { createImageWithHybridStorage: actualFunction } = await import("@/app/actions/admin-actions")
-  return actualFunction(file, imageData)
+  return actualFunction(formData)
 }

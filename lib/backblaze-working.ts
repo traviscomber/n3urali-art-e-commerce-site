@@ -28,6 +28,23 @@ interface B2UploadUrlResponse {
   bucketId: string
   uploadUrl: string
   authorizationToken: string
+  downloadUrl: string // Added downloadUrl to the response interface
+}
+
+interface B2StartLargeFileResponse {
+  fileId: string
+}
+
+interface B2GetUploadPartUrlResponse {
+  fileId: string
+  uploadUrl: string
+  authorizationToken: string
+}
+
+interface B2FinishLargeFileResponse {
+  fileId: string
+  fileName: string
+  downloadUrl: string
 }
 
 export class WorkingBackblazeStorage {
@@ -203,10 +220,160 @@ export class WorkingBackblazeStorage {
     return hashHex
   }
 
+  private async uploadLargeFile(file: File, key: string): Promise<string> {
+    try {
+      console.log("[v0] Starting multipart upload for large file:", key)
+
+      if (!this.authToken || !this.apiUrl) {
+        await this.authenticate()
+      }
+
+      const bucketId = await this.getBucketId()
+
+      // Step 1: Start large file upload
+      console.log("[v0] Starting large file upload...")
+      const startResponse = await fetch(`${this.apiUrl}/b2api/v3/b2_start_large_file`, {
+        method: "POST",
+        headers: {
+          Authorization: this.authToken!,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bucketId: bucketId,
+          fileName: key,
+          contentType: file.type || "application/octet-stream",
+        }),
+      })
+
+      if (!startResponse.ok) {
+        const errorText = await startResponse.text()
+        throw new Error(`Failed to start large file upload: ${startResponse.status} - ${errorText}`)
+      }
+
+      const startData: B2StartLargeFileResponse = await startResponse.json()
+      const fileId = startData.fileId
+      console.log("[v0] Large file upload started, fileId:", fileId)
+
+      // Step 2: Upload parts (10MB chunks)
+      const chunkSize = 10 * 1024 * 1024 // 10MB chunks
+      const totalChunks = Math.ceil(file.size / chunkSize)
+      const partSha1Array: string[] = []
+      const uploadedParts: { partNumber: number; sha1: string }[] = []
+
+      console.log("[v0] Uploading", totalChunks, "parts of", chunkSize / 1024 / 1024, "MB each")
+
+      for (let partNumber = 1; partNumber <= totalChunks; partNumber++) {
+        const start = (partNumber - 1) * chunkSize
+        const end = Math.min(start + chunkSize, file.size)
+        const chunk = file.slice(start, end)
+
+        console.log(`[v0] Uploading part ${partNumber}/${totalChunks} (${(chunk.size / 1024 / 1024).toFixed(2)}MB)`)
+
+        // Get upload URL for this part
+        const partUrlResponse = await fetch(`${this.apiUrl}/b2api/v3/b2_get_upload_part_url`, {
+          method: "POST",
+          headers: {
+            Authorization: this.authToken!,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fileId: fileId,
+          }),
+        })
+
+        if (!partUrlResponse.ok) {
+          const errorText = await partUrlResponse.text()
+          throw new Error(`Failed to get upload part URL: ${partUrlResponse.status} - ${errorText}`)
+        }
+
+        const partUrlData: B2GetUploadPartUrlResponse = await partUrlResponse.json()
+
+        // Calculate SHA1 for this part
+        const partArrayBuffer = await chunk.arrayBuffer()
+        const partHashBuffer = await crypto.subtle.digest("SHA-1", partArrayBuffer)
+        const partHashArray = Array.from(new Uint8Array(partHashBuffer))
+        const partSha1 = partHashArray.map((b) => b.toString(16).padStart(2, "0")).join("")
+
+        partSha1Array[partNumber - 1] = partSha1
+        uploadedParts.push({ partNumber, sha1: partSha1 })
+
+        console.log(`[v0] Part ${partNumber} SHA1:`, partSha1)
+
+        // Upload the part
+        const partResponse = await fetch(partUrlData.uploadUrl, {
+          method: "POST",
+          headers: {
+            Authorization: partUrlData.authorizationToken,
+            "X-Bz-Part-Number": partNumber.toString(),
+            "X-Bz-Content-Sha1": partSha1,
+          },
+          body: chunk,
+        })
+
+        if (!partResponse.ok) {
+          const errorText = await partResponse.text()
+          throw new Error(`Failed to upload part ${partNumber}: ${partResponse.status} - ${errorText}`)
+        }
+
+        const partResult = await partResponse.json()
+        console.log(`[v0] Part ${partNumber}/${totalChunks} uploaded successfully, response:`, Object.keys(partResult))
+      }
+
+      console.log(
+        "[v0] Uploaded parts summary:",
+        uploadedParts.map((p) => `Part ${p.partNumber}: ${p.sha1.substring(0, 8)}...`),
+      )
+      console.log("[v0] Final partSha1Array length:", partSha1Array.length)
+      console.log(
+        "[v0] Final partSha1Array:",
+        partSha1Array.map((sha, i) => `${i + 1}: ${sha?.substring(0, 8)}...`),
+      )
+
+      // Step 3: Finish large file upload
+      console.log("[v0] Finishing large file upload...")
+      const finishResponse = await fetch(`${this.apiUrl}/b2api/v3/b2_finish_large_file`, {
+        method: "POST",
+        headers: {
+          Authorization: this.authToken!,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fileId: fileId,
+          partSha1Array: partSha1Array,
+        }),
+      })
+
+      if (!finishResponse.ok) {
+        const errorText = await finishResponse.text()
+        console.error("[v0] Finish large file failed with status:", finishResponse.status)
+        console.error("[v0] Finish large file error response:", errorText)
+        console.error("[v0] FileId used:", fileId)
+        console.error("[v0] PartSha1Array sent:", partSha1Array)
+        throw new Error(`Failed to finish large file upload: ${finishResponse.status} - ${errorText}`)
+      }
+
+      const finishData: B2FinishLargeFileResponse = await finishResponse.json()
+      const publicUrl = this.getPublicUrl(key)
+
+      console.log("[v0] Multipart upload completed successfully:", publicUrl)
+      return publicUrl
+    } catch (error: any) {
+      console.error("[v0] Multipart upload failed:", error)
+      throw new Error(`Multipart upload failed: ${error.message}`)
+    }
+  }
+
   async uploadFile(file: File, key: string): Promise<string> {
     try {
       console.log("[v0] Starting native B2 upload:", key)
 
+      const fileSizeMB = file.size / (1024 * 1024)
+      if (fileSizeMB > 50) {
+        console.log(`[v0] File is ${fileSizeMB.toFixed(2)}MB, using multipart upload`)
+        return await this.uploadLargeFile(file, key)
+      }
+
+      console.log(`[v0] File is ${fileSizeMB.toFixed(2)}MB, using single upload`)
       const uploadInfo = await this.getUploadUrl()
 
       console.log("[v0] Calculating SHA1 hash for file...")
@@ -226,13 +393,37 @@ export class WorkingBackblazeStorage {
 
       if (!response.ok) {
         const errorText = await response.text()
+        console.error("[v0] B2 upload failed with status:", response.status)
+        console.error("[v0] B2 error response:", errorText)
+
+        if (response.status === 413 || errorText.includes("Request Entity Too Large")) {
+          console.log("[v0] File too large for single upload, switching to multipart...")
+          return await this.uploadLargeFile(file, key)
+        }
+
         throw new Error(`HTTP ${response.status}: ${errorText}`)
       }
 
+      const contentType = response.headers.get("content-type")
+      if (!contentType || !contentType.includes("application/json")) {
+        const responseText = await response.text()
+        console.error("[v0] B2 returned non-JSON response:", responseText)
+
+        if (responseText.includes("FUNCTION_PAYLOAD_TOO_LARGE") || responseText.includes("Request Entity Too Large")) {
+          console.log("[v0] Function payload too large, switching to multipart upload...")
+          return await this.uploadLargeFile(file, key)
+        }
+
+        throw new Error(
+          `Expected JSON response but got: ${contentType}. Response: ${responseText.substring(0, 200)}...`,
+        )
+      }
+
       const result = await response.json()
-      const publicUrl = `${this.downloadUrl}/file/${this.config.bucketName}/${key}`
+      const publicUrl = result.downloadUrl || this.getPublicUrl(key)
 
       console.log("[v0] B2 upload successful:", publicUrl)
+      console.log("[v0] Upload result keys:", Object.keys(result))
       return publicUrl
     } catch (error: any) {
       console.error("[v0] B2 upload failed:", error)
@@ -252,8 +443,20 @@ export class WorkingBackblazeStorage {
   }
 
   getPublicUrl(key: string): string {
+    if (!this.downloadUrl) {
+      console.warn("[v0] Download URL not set, using fallback. This may cause 404 errors.")
+      console.log("[v0] Current downloadUrl:", this.downloadUrl)
+      console.log("[v0] Auth token exists:", !!this.authToken)
+    }
+
     const baseUrl = this.downloadUrl || "https://f005.backblazeb2.com"
-    return `${baseUrl}/file/${this.config.bucketName}/${key}`
+    const publicUrl = `${baseUrl}/file/${this.config.bucketName}/${key}`
+
+    console.log("[v0] Constructed public URL:", publicUrl)
+    console.log("[v0] Using base URL:", baseUrl)
+    console.log("[v0] Download URL from auth:", this.downloadUrl)
+
+    return publicUrl
   }
 
   getConfig() {

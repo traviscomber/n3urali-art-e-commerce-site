@@ -18,7 +18,6 @@ interface B2Bucket {
   bucketId: string
   bucketName: string
   bucketType: string
-  corsRules?: any[]
 }
 
 interface B2ListBucketsResponse {
@@ -481,120 +480,5 @@ export class WorkingBackblazeStorage {
 
   async getPublicBucketId(): Promise<string> {
     return await this.getBucketId()
-  }
-
-  async configureBucketCORS(): Promise<{ success: boolean; message: string }> {
-    try {
-      if (!this.authToken || !this.apiUrl) {
-        await this.authenticate()
-      }
-
-      const bucketId = await this.getBucketId()
-
-      console.log("[v0] Configuring CORS for bucket:", this.config.bucketName)
-
-      const corsRules = [
-        {
-          corsRuleName: "allowBrowserAccess",
-          allowedOrigins: [
-            "https://n3uralia360.art",
-            "https://*.vercel.app",
-            "http://localhost:3000",
-            "https://localhost:3000",
-          ],
-          allowedHeaders: ["*"],
-          allowedOperations: ["b2_download_file_by_name", "b2_download_file_by_id"],
-          exposeHeaders: ["x-bz-content-sha1"],
-          maxAgeSeconds: 3600,
-        },
-      ]
-
-      const response = await fetch(`${this.apiUrl}/b2api/v3/b2_update_bucket`, {
-        method: "POST",
-        headers: {
-          Authorization: this.authToken!,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          accountId: this.config.keyId,
-          bucketId: bucketId,
-          corsRules: corsRules,
-        }),
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error("[v0] CORS configuration failed:", errorText)
-        return {
-          success: false,
-          message: `Failed to configure CORS: ${response.status} - ${errorText}`,
-        }
-      }
-
-      const result = await response.json()
-      console.log("[v0] CORS configured successfully for bucket:", this.config.bucketName)
-
-      return {
-        success: true,
-        message: "CORS configured successfully. Browser access to images is now enabled.",
-      }
-    } catch (error: any) {
-      console.error("[v0] CORS configuration error:", error)
-      return {
-        success: false,
-        message: `CORS configuration failed: ${error.message}`,
-      }
-    }
-  }
-
-  async getBucketCORS(): Promise<{ success: boolean; corsRules?: any[]; message: string }> {
-    try {
-      if (!this.authToken || !this.apiUrl) {
-        await this.authenticate()
-      }
-
-      const bucketId = await this.getBucketId()
-
-      const response = await fetch(`${this.apiUrl}/b2api/v3/b2_list_buckets`, {
-        method: "POST",
-        headers: {
-          Authorization: this.authToken!,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          accountId: this.config.keyId,
-        }),
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        return {
-          success: false,
-          message: `Failed to get bucket info: ${response.status} - ${errorText}`,
-        }
-      }
-
-      const data = await response.json()
-      const bucket = data.buckets.find((b: any) => b.bucketId === bucketId)
-
-      if (!bucket) {
-        return {
-          success: false,
-          message: "Bucket not found",
-        }
-      }
-
-      return {
-        success: true,
-        corsRules: bucket.corsRules || [],
-        message: bucket.corsRules?.length > 0 ? "CORS is configured" : "CORS is not configured",
-      }
-    } catch (error: any) {
-      console.error("[v0] Get CORS error:", error)
-      return {
-        success: false,
-        message: `Failed to get CORS info: ${error.message}`,
-      }
-    }
   }
 }

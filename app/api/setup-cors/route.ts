@@ -1,12 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { WorkingBackblazeStorage } from "@/lib/backblaze-working"
+import { BackblazeCorsManager } from "@/lib/backblaze-cors-setup"
 
 export async function POST(request: NextRequest) {
   try {
     const { allowedDomains } = await request.json()
 
-    const storage = new WorkingBackblazeStorage()
-    const result = await storage.configureBucketCORS()
+    const corsManager = new BackblazeCorsManager()
+
+    const domains = allowedDomains || ["https://*", "http://localhost:*"]
+    const result = await corsManager.setupCorsForImageAccess(domains)
 
     return NextResponse.json(result)
   } catch (error) {
@@ -23,8 +25,8 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const storage = new WorkingBackblazeStorage()
-    const result = await storage.getBucketCORS()
+    const corsManager = new BackblazeCorsManager()
+    const result = await corsManager.getCurrentCorsRules()
 
     return NextResponse.json(result)
   } catch (error) {

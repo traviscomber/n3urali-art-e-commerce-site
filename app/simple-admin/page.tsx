@@ -564,7 +564,7 @@ export default function SimpleAdminPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
           {/* Upload Section */}
           <Card>
             <CardHeader>
@@ -769,9 +769,14 @@ export default function SimpleAdminPage() {
                       <div className="flex flex-col sm:flex-row gap-4">
                         <div className="flex-shrink-0">
                           <img
-                            src={newImage.preview || "/placeholder.svg"}
+                            src={newImage.preview || "/placeholder.svg?height=128&width=128&text=Preview"}
                             alt="Preview"
                             className="w-full sm:w-32 h-32 object-cover rounded border shadow-sm"
+                            crossOrigin="anonymous"
+                            onError={(e) => {
+                              console.log("[v0] Preview image failed to load:", newImage.preview)
+                              e.currentTarget.src = "/placeholder.svg?height=128&width=128&text=Preview+Error"
+                            }}
                           />
                         </div>
                         <div className="flex-1 space-y-2">
@@ -823,7 +828,7 @@ export default function SimpleAdminPage() {
           </Card>
 
           {/* Images List */}
-          <Card>
+          <Card className="flex flex-col">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-2xl">
                 <Eye className="h-6 w-6" />
@@ -833,7 +838,7 @@ export default function SimpleAdminPage() {
                 Manage your full resolution premium collection (4K-16K)
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-1 flex flex-col">
               {loading ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin mr-2" />
@@ -842,13 +847,23 @@ export default function SimpleAdminPage() {
               ) : images.length === 0 ? (
                 <div className="text-center py-8 text-gray-500 text-lg">No images uploaded yet</div>
               ) : (
-                <div className="space-y-4 max-h-96 overflow-y-auto">
+                <div className="space-y-4 flex-1 overflow-y-auto min-h-0">
                   {images.map((image) => (
                     <div key={image.id} className="flex items-center gap-4 p-3 border rounded-lg">
                       <img
-                        src={image.thumbnail_url || image.image_url}
+                        src={
+                          image.thumbnail_url || image.image_url || "/placeholder.svg?height=64&width=64&text=No+Image"
+                        }
                         alt={image.title}
                         className="w-16 h-16 object-cover rounded"
+                        crossOrigin="anonymous"
+                        onError={(e) => {
+                          console.log("[v0] Image failed to load:", image.thumbnail_url || image.image_url)
+                          e.currentTarget.src = "/placeholder.svg?height=64&width=64&text=Error"
+                        }}
+                        onLoad={() => {
+                          console.log("[v0] Image loaded successfully:", image.thumbnail_url || image.image_url)
+                        }}
                       />
                       <div className="flex-1 min-w-0">
                         {editingImage === image.id ? (

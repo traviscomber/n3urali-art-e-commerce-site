@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createNeonClient } from "@/lib/neon/client"
+import { EmailService } from "@/lib/email-service"
 
 interface CartItem {
   id: string
@@ -123,6 +124,8 @@ export async function POST(request: NextRequest) {
     const orderId = orderResult[0].id
     console.log("[v0] Order created with ID:", orderId)
 
+    const orderItemIds: number[] = []
+
     for (const item of items) {
       console.log("[v0] Creating order item for image:", item.imageId, "License:", item.licenseType)
 
@@ -137,7 +140,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: "License configuration error" }, { status: 500 })
       }
 
-      await sql`
+      const orderItemResult = await sql`
         INSERT INTO order_items (
           order_id,
           image_id,
@@ -154,7 +157,48 @@ export async function POST(request: NextRequest) {
           0,
           5
         )
+        RETURNING id
       `
+
+      orderItemIds.push(orderItemResult[0].id)
+    }
+
+    try {
+      const emailService = EmailService.getInstance()
+      const downloadItems = []
+
+      for (let i = 0; i < orderItemIds.length; i++) {
+        const orderItemId = orderItemIds[i]
+        const item = items[i]
+
+        // Generate download token
+        const tokenResult = await sql`
+          SELECT generate_download_token(${orderItemId}) as token
+        `
+
+        if (tokenResult[0]?.token) {
+          const downloadUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/download/${tokenResult[0].token}`
+
+          downloadItems.push({
+            title: item.title,
+            licenseType: item.licenseType,
+            downloadUrl,
+          })
+        }
+      }
+
+      // Send email notification
+      await emailService.sendDownloadNotification({
+        customerEmail: customerInfo.email,
+        customerName: `${customerInfo.firstName} ${customerInfo.lastName}`,
+        orderNumber: orderNumber,
+        items: downloadItems,
+      })
+
+      console.log("[v0] Download notification email sent to:", customerInfo.email)
+    } catch (emailError) {
+      console.error("[v0] Failed to send download notification:", emailError)
+      // Don't fail the order if email fails
     }
 
     console.log("[v0] Order created successfully:", orderNumber)

@@ -3,11 +3,6 @@
 import { createNeonClient } from "@/lib/neon/client"
 import { unstable_cache } from "next/cache"
 import { revalidatePath, revalidateTag } from "next/cache" // Added revalidateTag import
-import { put } from "@vercel/blob"
-import { DropboxStorage } from "@/lib/storage/dropbox"
-
-import { WorkingBackblazeStorage } from "@/lib/backblaze-working"
-import { neon } from "@neondatabase/serverless"
 
 const CACHE_TAGS = {
   IMAGES: "images",
@@ -76,41 +71,96 @@ const getCachedImagesPaginated = unstable_cache(
     const sql = createNeonClient()
     const offset = (page - 1) * limit
 
-    let whereClause = "WHERE i.active = true"
-    const params: any[] = []
+    // Build query with proper parameterization
+    let query
+    let countQuery
 
-    if (category) {
-      whereClause += " AND c.name = $" + (params.length + 1)
-      params.push(category)
+    if (category && featured !== undefined) {
+      // Both category and featured filters
+      query = sql`
+        SELECT 
+          i.id, i.title, i.description, i.price, i.image_url, i.thumbnail_url,
+          i.active, i.featured, i.created_at, i.updated_at,
+          c.name as category_name, c.id as category_id,
+          l.name as license_name, l.description as license_description
+        FROM images i
+        LEFT JOIN categories c ON i.category_id = c.id
+        LEFT JOIN licenses l ON i.license_id = l.id
+        WHERE i.active = true AND c.name = ${category} AND i.featured = ${featured}
+        ORDER BY i.featured DESC, i.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+      countQuery = sql`
+        SELECT COUNT(*) as total
+        FROM images i
+        LEFT JOIN categories c ON i.category_id = c.id
+        WHERE i.active = true AND c.name = ${category} AND i.featured = ${featured}
+      `
+    } else if (category) {
+      // Only category filter
+      query = sql`
+        SELECT 
+          i.id, i.title, i.description, i.price, i.image_url, i.thumbnail_url,
+          i.active, i.featured, i.created_at, i.updated_at,
+          c.name as category_name, c.id as category_id,
+          l.name as license_name, l.description as license_description
+        FROM images i
+        LEFT JOIN categories c ON i.category_id = c.id
+        LEFT JOIN licenses l ON i.license_id = l.id
+        WHERE i.active = true AND c.name = ${category}
+        ORDER BY i.featured DESC, i.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+      countQuery = sql`
+        SELECT COUNT(*) as total
+        FROM images i
+        LEFT JOIN categories c ON i.category_id = c.id
+        WHERE i.active = true AND c.name = ${category}
+      `
+    } else if (featured !== undefined) {
+      // Only featured filter
+      query = sql`
+        SELECT 
+          i.id, i.title, i.description, i.price, i.image_url, i.thumbnail_url,
+          i.active, i.featured, i.created_at, i.updated_at,
+          c.name as category_name, c.id as category_id,
+          l.name as license_name, l.description as license_description
+        FROM images i
+        LEFT JOIN categories c ON i.category_id = c.id
+        LEFT JOIN licenses l ON i.license_id = l.id
+        WHERE i.active = true AND i.featured = ${featured}
+        ORDER BY i.featured DESC, i.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+      countQuery = sql`
+        SELECT COUNT(*) as total
+        FROM images i
+        WHERE i.active = true AND i.featured = ${featured}
+      `
+    } else {
+      // No filters
+      query = sql`
+        SELECT 
+          i.id, i.title, i.description, i.price, i.image_url, i.thumbnail_url,
+          i.active, i.featured, i.created_at, i.updated_at,
+          c.name as category_name, c.id as category_id,
+          l.name as license_name, l.description as license_description
+        FROM images i
+        LEFT JOIN categories c ON i.category_id = c.id
+        LEFT JOIN licenses l ON i.license_id = l.id
+        WHERE i.active = true
+        ORDER BY i.featured DESC, i.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+      countQuery = sql`
+        SELECT COUNT(*) as total
+        FROM images i
+        WHERE i.active = true
+      `
     }
 
-    if (featured !== undefined) {
-      whereClause += " AND i.featured = $" + (params.length + 1)
-      params.push(featured)
-    }
-
-    // Use parameterized query with proper indexing
-    const result = await sql`
-      SELECT 
-        i.id, i.title, i.description, i.price, i.image_url, i.thumbnail_url,
-        i.active, i.featured, i.created_at, i.updated_at,
-        c.name as category_name, c.id as category_id,
-        l.name as license_name, l.description as license_description
-      FROM images i
-      LEFT JOIN categories c ON i.category_id = c.id
-      LEFT JOIN licenses l ON i.license_id = l.id
-      ${sql.unsafe(whereClause)}
-      ORDER BY i.featured DESC, i.created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `
-
-    // Get total count for pagination
-    const countResult = await sql`
-      SELECT COUNT(*) as total
-      FROM images i
-      LEFT JOIN categories c ON i.category_id = c.id
-      ${sql.unsafe(whereClause)}
-    `
+    // Execute both queries in parallel for better performance
+    const [result, countResult] = await Promise.all([query, countQuery])
 
     logQueryPerformance("getCachedImagesPaginated", startTime, result.length)
 
@@ -397,6 +447,7 @@ export async function createImageWithLicense(formData: FormData) {
       description: formData.get("description") as string,
       category: formData.get("category") as string,
       license_id: formData.get("license_id") as string,
+      price: Number.parseFloat(formData.get("price") as string),
       image_url: compressedImageUrl,
       thumbnail_url: compressedThumbnailUrl,
       resolution: (formData.get("resolution") as string) || "4096x4096",
@@ -836,10 +887,15 @@ export async function updateImage(formData: FormData) {
       format: (formData.get("format") as string) || "JPG",
     }
 
-    console.log("[v0] Starting image update for ID:", imageId)
+    console.log("[v0] Starting image update with license:", {
+      ...imageData,
+      image_url: imageData.image_url.substring(0, 50) + "...",
+      thumbnail_url: imageData.thumbnail_url.substring(0, 50) + "...",
+    })
+
     const sql = createNeonClient()
 
-    // Look up or create category
+    // Look up category
     console.log("[v0] Looking up category:", imageData.category)
     const categoryResult = await sql`
       SELECT id FROM categories WHERE name = ${imageData.category} LIMIT 1
@@ -859,1077 +915,29 @@ export async function updateImage(formData: FormData) {
       categoryId = categoryResult[0].id
     }
 
-    // Update the image
+    console.log("[v0] Updating image with license_id:", imageData.license_id, "price:", imageData.price)
     const result = await sql`
-      UPDATE images 
-      SET title = ${imageData.title}, 
-          description = ${imageData.description}, 
-          category_id = ${categoryId}, 
+      UPDATE images
+      SET title = ${imageData.title},
+          description = ${imageData.description},
+          category_id = ${categoryId},
           license_id = ${imageData.license_id},
-          price = ${imageData.price}, 
-          image_url = ${imageData.image_url}, 
+          price = ${imageData.price},
+          image_url = ${imageData.image_url},
           thumbnail_url = ${imageData.thumbnail_url},
           resolution = ${imageData.resolution},
-          format = ${imageData.format},
-          updated_at = NOW()
+          format = ${imageData.format}
       WHERE id = ${imageId}
       RETURNING *
     `
 
-    if (result.length === 0) {
-      return { success: false, error: "Image not found" }
-    }
+    console.log("[v0] Image updated successfully with ID:", result[0]?.id)
 
-    console.log("[v0] Image updated successfully:", result[0].id)
-
-    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES])
+    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
     revalidatePath("/simple-admin")
-
-    return { success: true, data: result[0] }
-  } catch (error) {
-    return handleDatabaseError(error)
-  }
-}
-
-export async function toggleImageStatus(imageId: string, field: "active" | "featured", value: boolean) {
-  try {
-    console.log("[v0] Toggling image status:", imageId, field, value)
-    const sql = createNeonClient()
-
-    const result = await sql`
-      UPDATE images 
-      SET ${field} = ${value}, updated_at = NOW()
-      WHERE id = ${imageId}
-      RETURNING *
-    `
-
-    if (result.length === 0) {
-      return { success: false, error: "Image not found" }
-    }
-
-    console.log("[v0] Image status updated successfully")
-
-    invalidateCache([CACHE_TAGS.IMAGES])
-    revalidatePath("/simple-admin")
-
-    return { success: true, data: result[0] }
-  } catch (error) {
-    return handleDatabaseError(error)
-  }
-}
-
-export async function updateOrderStatus(orderId: string, newStatus: string) {
-  try {
-    console.log("[v0] Updating order status:", orderId, "to", newStatus)
-    const sql = createNeonClient()
-
-    const result = await sql`
-      UPDATE orders 
-      SET status = ${newStatus}, updated_at = NOW()
-      WHERE id = ${orderId}
-      RETURNING *
-    `
-
-    if (result.length === 0) {
-      return { success: false, error: "Order not found" }
-    }
-
-    console.log("[v0] Order status updated successfully")
-    revalidatePath("/simple-admin")
-    return { success: true, data: result[0] }
-  } catch (error) {
-    return handleDatabaseError(error)
-  }
-}
-
-export async function getUsers() {
-  try {
-    const sql = createNeonClient()
-
-    const result = await sql`
-      SELECT id, email, full_name, is_admin, created_at, updated_at
-      FROM user_profiles
-      ORDER BY created_at DESC
-    `
 
     return { success: true, data: result }
   } catch (error) {
-    console.error("[v0] Get users error:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-      data: [], // Added data field to ensure consistent response structure
-    }
-  }
-}
-
-export async function toggleUserAdmin(userId: string, isAdmin: boolean) {
-  try {
-    console.log("[v0] Toggling user admin status:", userId, "to", isAdmin)
-    const sql = createNeonClient()
-
-    const result = await sql`
-      UPDATE user_profiles 
-      SET is_admin = ${isAdmin}, updated_at = NOW()
-      WHERE id = ${userId}
-      RETURNING *
-    `
-
-    if (result.length === 0) {
-      return { success: false, error: "User not found" }
-    }
-
-    console.log("[v0] User admin status updated successfully")
-    revalidatePath("/simple-admin")
-    return { success: true, data: result[0] }
-  } catch (error) {
     return handleDatabaseError(error)
   }
 }
-
-export async function cleanupSampleImages() {
-  try {
-    console.log("[v0] Starting sample image cleanup...")
-    const sql = createNeonClient()
-
-    // Delete images that are clearly sample/placeholder data
-    const result = await sql`
-      DELETE FROM images 
-      WHERE 
-        image_url LIKE '%placeholder%' OR
-        image_url LIKE '%example%' OR
-        image_url LIKE '%sample%' OR
-        image_url LIKE '%demo%' OR
-        title LIKE '%sample%' OR
-        title LIKE '%example%' OR
-        title LIKE '%demo%' OR
-        title LIKE '%placeholder%' OR
-        description LIKE '%sample%' OR
-        description LIKE '%example%' OR
-        description LIKE '%demo%' OR
-        description LIKE '%placeholder%'
-      RETURNING id, title
-    `
-
-    console.log(
-      `[v0] Deleted ${result.length} sample images:`,
-      result.map((img) => ({ id: img.id, title: img.title })),
-    )
-
-    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
-    revalidatePath("/simple-admin")
-    revalidatePath("/browse")
-    revalidatePath("/gallery")
-
-    return {
-      success: true,
-      data: result,
-      message: `Successfully deleted ${result.length} sample images`,
-    }
-  } catch (error) {
-    return handleDatabaseError(error)
-  }
-}
-
-export async function getDatabaseStats() {
-  try {
-    const data = await getCachedDatabaseStats()
-    return { success: true, data }
-  } catch (error) {
-    return handleDatabaseError(error)
-  }
-}
-
-export async function getLicenses() {
-  try {
-    const sql = neon(process.env.DATABASE_URL!)
-    const licenses = await sql`
-      SELECT id, name, description, price, active
-      FROM licenses
-      WHERE active = true
-      ORDER BY name
-    `
-
-    console.log(
-      "[v0] getLicenses returning",
-      licenses.length,
-      "licenses:",
-      licenses.map((l) => l.name),
-    )
-    return { success: true, data: licenses }
-  } catch (error) {
-    console.error("[v0] Get licenses error:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-      data: [], // Added data field to ensure consistent response structure
-    }
-  }
-}
-
-export async function updateImageDetails(
-  imageId: string,
-  updates: {
-    title: string
-    price: number
-    description?: string
-    category?: string
-    rightsType?: string
-  },
-) {
-  try {
-    console.log("[v0] Updating image details for ID:", imageId, "with:", updates)
-    const sql = createNeonClient()
-
-    // If category is provided, look up or create the category
-    let categoryId: string | undefined
-    if (updates.category) {
-      console.log("[v0] Looking up category:", updates.category)
-      const categoryResult = await sql`
-        SELECT id FROM categories WHERE name = ${updates.category} LIMIT 1
-      `
-
-      if (categoryResult.length === 0) {
-        console.log("[v0] Category not found, creating new category:", updates.category)
-        const newCategoryResult = await sql`
-          INSERT INTO categories (name, description, active)
-          VALUES (${updates.category}, ${"Auto-created category for " + updates.category}, true)
-          RETURNING id
-        `
-        categoryId = newCategoryResult[0].id
-      } else {
-        categoryId = categoryResult[0].id
-      }
-    }
-
-    // Build metadata object for rights type
-    let metadataUpdate = null
-    if (updates.rightsType) {
-      metadataUpdate = JSON.stringify({ rights_type: updates.rightsType })
-    }
-
-    // Execute update with proper parameterized query
-    let result
-    if (categoryId && metadataUpdate) {
-      result = await sql`
-        UPDATE images 
-        SET title = ${updates.title},
-            price = ${updates.price},
-            description = ${updates.description || null},
-            category_id = ${categoryId},
-            metadata = COALESCE(metadata, '{}') || ${metadataUpdate}::jsonb,
-            updated_at = NOW()
-        WHERE id = ${imageId}
-        RETURNING *
-      `
-    } else if (categoryId) {
-      result = await sql`
-        UPDATE images 
-        SET title = ${updates.title},
-            price = ${updates.price},
-            description = ${updates.description || null},
-            category_id = ${categoryId},
-            updated_at = NOW()
-        WHERE id = ${imageId}
-        RETURNING *
-      `
-    } else if (metadataUpdate) {
-      result = await sql`
-        UPDATE images 
-        SET title = ${updates.title},
-            price = ${updates.price},
-            description = ${updates.description || null},
-            metadata = COALESCE(metadata, '{}') || ${metadataUpdate}::jsonb,
-            updated_at = NOW()
-        WHERE id = ${imageId}
-        RETURNING *
-      `
-    } else {
-      result = await sql`
-        UPDATE images 
-        SET title = ${updates.title},
-            price = ${updates.price},
-            description = ${updates.description || null},
-            updated_at = NOW()
-        WHERE id = ${imageId}
-        RETURNING *
-      `
-    }
-
-    if (result.length === 0) {
-      return { success: false, error: "Image not found" }
-    }
-
-    console.log("[v0] Image details updated successfully:", result[0].id)
-
-    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES])
-    revalidatePath("/simple-admin")
-
-    return { success: true, data: result[0] }
-  } catch (error) {
-    return handleDatabaseError(error)
-  }
-}
-
-export async function getDatabaseHealth() {
-  try {
-    const startTime = Date.now()
-    const sql = createNeonClient()
-
-    // Check database connectivity and basic stats
-    const healthCheck = await sql`
-      SELECT 
-        NOW() as server_time,
-        version() as postgres_version,
-        current_database() as database_name
-    `
-
-    // Get table sizes for monitoring
-    const tableSizes = await sql`
-      SELECT 
-        schemaname,
-        tablename,
-        pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size,
-        pg_total_relation_size(schemaname||'.'||tablename) as size_bytes
-      FROM pg_tables 
-      WHERE schemaname = 'public'
-      ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
-    `
-
-    logQueryPerformance("getDatabaseHealth", startTime)
-
-    return {
-      success: true,
-      data: {
-        health: healthCheck[0],
-        tableSizes: tableSizes,
-        timestamp: new Date().toISOString(),
-      },
-    }
-  } catch (error) {
-    return handleDatabaseError(error)
-  }
-}
-
-export async function createChunkedUpload(fileData: {
-  filename: string
-  totalSize: number
-  mimeType: string
-  totalChunks: number
-}) {
-  try {
-    const sql = createNeonClient()
-
-    const result = await sql`
-      INSERT INTO chunked_images (original_filename, total_chunks, total_size, mime_type, upload_status)
-      VALUES (${fileData.filename}, ${fileData.totalChunks}, ${fileData.totalSize}, ${fileData.mimeType}, 'uploading')
-      RETURNING id
-    `
-
-    console.log("[v0] Created chunked upload session:", result[0].id)
-    return { success: true, data: { uploadId: result[0].id } }
-  } catch (error) {
-    return handleDatabaseError(error, "createChunkedUpload")
-  }
-}
-
-export async function uploadChunk(uploadId: string, chunkIndex: number, chunkData: string) {
-  try {
-    const sql = createNeonClient()
-
-    const chunkSize = Math.floor((chunkData.length * 3) / 4) // Convert base64 to bytes
-
-    await sql`
-      INSERT INTO image_chunks (image_id, chunk_index, chunk_data, chunk_size)
-      VALUES (${uploadId}, ${chunkIndex}, ${chunkData}, ${chunkSize})
-      ON CONFLICT (image_id, chunk_index) 
-      DO UPDATE SET chunk_data = EXCLUDED.chunk_data, chunk_size = EXCLUDED.chunk_size
-    `
-
-    console.log("[v0] Uploaded chunk", chunkIndex, "for upload", uploadId, "size:", Math.round(chunkSize / 1024), "KB")
-    return { success: true }
-  } catch (error) {
-    return handleDatabaseError(error, "uploadChunk")
-  }
-}
-
-export async function completeChunkedUpload(
-  uploadId: string,
-  imageMetadata: {
-    title: string
-    description: string
-    category_name: string
-    rights_type: string
-    price: number
-  },
-) {
-  try {
-    const sql = createNeonClient()
-
-    // Get all chunks for this upload
-    const chunks = await sql`
-      SELECT chunk_index, chunk_data 
-      FROM image_chunks 
-      WHERE image_id = ${uploadId} 
-      ORDER BY chunk_index
-    `
-
-    // Get upload metadata
-    const uploadInfo = await sql`
-      SELECT * FROM chunked_images WHERE id = ${uploadId}
-    `
-
-    if (uploadInfo.length === 0) {
-      return { success: false, error: "Upload session not found" }
-    }
-
-    if (chunks.length !== uploadInfo[0].total_chunks) {
-      return { success: false, error: `Missing chunks. Expected ${uploadInfo[0].total_chunks}, got ${chunks.length}` }
-    }
-
-    // Reassemble the image
-    const fullImageData = chunks.map((chunk) => chunk.chunk_data).join("")
-
-    // Create thumbnail from reassembled image
-    const thumbnailDataUrl = await createThumbnailFromBase64(fullImageData)
-
-    // Create the image record using existing function
-    const imageData = {
-      title: imageMetadata.title,
-      description: imageMetadata.description,
-      category_name: imageMetadata.category_name,
-      rights_type: imageMetadata.rights_type,
-      price: imageMetadata.price,
-      image_url: fullImageData,
-      thumbnail_url: thumbnailDataUrl,
-      original_file_size: uploadInfo[0].total_size,
-    }
-
-    const result = await createImageWithCategoryObject(imageData)
-
-    if (result.success) {
-      // Mark upload as complete and cleanup chunks
-      await sql`
-        UPDATE chunked_images 
-        SET upload_status = 'complete', completed_at = NOW() 
-        WHERE id = ${uploadId}
-      `
-
-      // Clean up chunks after successful image creation
-      await sql`DELETE FROM image_chunks WHERE image_id = ${uploadId}`
-
-      console.log("[v0] Completed chunked upload and created image:", result.data[0]?.id)
-    }
-
-    return result
-  } catch (error) {
-    return handleDatabaseError(error, "completeChunkedUpload")
-  }
-}
-
-async function createThumbnailFromBase64(base64Data: string): Promise<string> {
-  return new Promise((resolve) => {
-    const img = new Image()
-    img.onload = () => {
-      const canvas = document.createElement("canvas")
-      const ctx = canvas.getContext("2d")!
-
-      const maxThumbnailSize = 600
-      const ratio = Math.min(maxThumbnailSize / img.width, maxThumbnailSize / img.height)
-
-      canvas.width = img.width * ratio
-      canvas.height = img.height * ratio
-
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-
-      canvas.toBlob(
-        (blob) => {
-          const reader = new FileReader()
-          reader.onload = (e) => resolve(e.target?.result as string)
-          reader.readAsDataURL(blob!)
-        },
-        "image/jpeg",
-        0.95,
-      )
-    }
-    img.src = base64Data
-  })
-}
-
-export async function createImageWithCategoryObjectChunked(imageData: {
-  title: string
-  description: string
-  category_name: string
-  rights_type: string
-  image_url: string
-  thumbnail_url: string
-  price: number
-  original_file_size?: number
-}) {
-  try {
-    const totalPayloadSize = imageData.image_url.length + imageData.thumbnail_url.length
-    const payloadSizeMB = totalPayloadSize / (1024 * 1024)
-
-    console.log("[v0] Processing upload with payload size:", `${payloadSizeMB.toFixed(2)}MB`)
-
-    // If payload is larger than 10MB, use chunked upload
-    if (payloadSizeMB > 10) {
-      console.log("[v0] Using chunked upload for large file:", `${payloadSizeMB.toFixed(2)}MB`)
-
-      const chunkSize = 2 * 1024 * 1024 // 2MB chunks in base64 characters
-      const imageChunks = []
-
-      // Split image into chunks
-      for (let i = 0; i < imageData.image_url.length; i += chunkSize) {
-        imageChunks.push(imageData.image_url.slice(i, i + chunkSize))
-      }
-
-      // Create chunked upload session
-      const uploadSession = await createChunkedUpload({
-        filename: `${imageData.title}.jpg`,
-        totalSize: imageData.original_file_size || 0,
-        mimeType: "image/jpeg",
-        totalChunks: imageChunks.length,
-      })
-
-      if (!uploadSession.success) {
-        return uploadSession
-      }
-
-      // Upload each chunk
-      for (let i = 0; i < imageChunks.length; i++) {
-        const chunkResult = await uploadChunk(uploadSession.data.uploadId, i, imageChunks[i])
-        if (!chunkResult.success) {
-          return chunkResult
-        }
-      }
-
-      // Complete the upload
-      return await completeChunkedUpload(uploadSession.data.uploadId, {
-        title: imageData.title,
-        description: imageData.description,
-        category_name: imageData.category_name,
-        rights_type: imageData.rights_type,
-        price: imageData.price,
-      })
-    } else {
-      // Use regular upload for smaller files
-      return await createImageWithCategoryObject(imageData)
-    }
-  } catch (error) {
-    return handleDatabaseError(error, "createImageWithCategoryObjectChunked")
-  }
-}
-
-export async function uploadToBackblaze(
-  file: File,
-  imageType: "full" | "thumbnail" = "full",
-  category?: string,
-): Promise<{ success: boolean; url?: string; error?: string }> {
-  try {
-    console.log("[v0] Backblaze env check - keyId exists:", !!process.env.BACKBLAZE_API_KEY)
-    console.log("[v0] Backblaze env check - applicationKey exists:", !!process.env.BACKBLAZE_APPLICATION_KEY)
-    console.log("[v0] Backblaze env check - bucketName:", process.env.BACKBLAZE_BUCKET_NAME)
-
-    const backblaze = new WorkingBackblazeStorage()
-
-    const fileSizeMB = file.size / (1024 * 1024)
-    console.log(`[v0] Uploading ${imageType} image to Backblaze:`, `${fileSizeMB.toFixed(2)}MB`)
-
-    // Generate organized folder structure
-    const timestamp = Date.now()
-    const uuid = crypto.randomUUID()
-    const fileName = `${uuid}-${timestamp}_${file.name}`
-
-    const baseFolder = imageType === "full" ? "full-images" : "thumbnails"
-    const categoryFolder = category ? category.toLowerCase().replace(/[^a-z0-9]/g, "-") : "uncategorized"
-    const folderPath = `${baseFolder}/${categoryFolder}`
-    const key = `${folderPath}/${fileName}`
-
-    console.log("[v0] Starting Backblaze upload for:", fileName, "in folder:", folderPath)
-
-    const publicUrl = await backblaze.uploadFile(file, key)
-
-    console.log("[v0] Backblaze upload successful:", publicUrl)
-    return {
-      success: true,
-      url: publicUrl,
-    }
-  } catch (error: any) {
-    console.log("[v0] Backblaze upload error:", error.message)
-    return {
-      success: false,
-      error: `Failed to upload to Backblaze: ${error.message}`,
-    }
-  }
-}
-
-async function createThumbnailFile(file: File): Promise<File> {
-  return new Promise((resolve, reject) => {
-    const canvas = document.createElement("canvas")
-    const ctx = canvas.getContext("2d")
-    const img = new Image()
-
-    img.onload = () => {
-      const maxSize = 400 // Slightly larger thumbnail for better quality
-      let { width, height } = img
-
-      if (width > height) {
-        if (width > maxSize) {
-          height = (height * maxSize) / width
-          width = maxSize
-        }
-      } else {
-        if (height > maxSize) {
-          width = (width * maxSize) / height
-          height = maxSize
-        }
-      }
-
-      canvas.width = width
-      canvas.height = height
-
-      if (ctx) {
-        ctx.drawImage(img, 0, 0, width, height)
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              const thumbnailFile = new File([blob], `thumb_${file.name}`, {
-                type: "image/jpeg",
-                lastModified: Date.now(),
-              })
-              resolve(thumbnailFile)
-            } else {
-              reject(new Error("Could not create thumbnail blob"))
-            }
-          },
-          "image/jpeg",
-          0.85,
-        )
-      } else {
-        reject(new Error("Could not get canvas context"))
-      }
-    }
-
-    img.onerror = () => reject(new Error("Could not load image"))
-    img.src = URL.createObjectURL(file)
-  })
-}
-
-export async function uploadToBlob(file: File): Promise<{ success: boolean; data?: any; error?: string }> {
-  try {
-    const token = process.env.BLOB_READ_WRITE_TOKEN
-
-    console.log("[v0] Blob env check - token exists:", !!token)
-
-    if (!token) {
-      console.log("[v0] Blob upload error: BLOB_READ_WRITE_TOKEN environment variable is not configured")
-      return {
-        success: false,
-        error: "BLOB_READ_WRITE_TOKEN environment variable is not configured",
-      }
-    }
-
-    const fallbackToken = token || "vercel_blob_rw_0NpI635IzSq52HgK_O1tlS1gUX6IpzKF3SnhJP3P05phXU4"
-
-    const { url } = await put(file.name, file, {
-      access: "public",
-      token: fallbackToken, // Use fallback token
-    })
-
-    return {
-      success: true,
-      data: {
-        url,
-        size: file.size,
-      },
-    }
-  } catch (error: any) {
-    console.log("[v0] Blob upload error:", error.message)
-    return {
-      success: false,
-      error: `Failed to upload to Blob storage: ${error.message}`,
-    }
-  }
-}
-
-export async function uploadToDropbox(file: File): Promise<{ success: boolean; data?: any; error?: string }> {
-  try {
-    const accessToken = process.env.DROPBOX_ACCESS_TOKEN
-    if (!accessToken) {
-      console.log("[v0] Dropbox upload error: DROPBOX_ACCESS_TOKEN environment variable is not configured")
-      return {
-        success: false,
-        error: "DROPBOX_ACCESS_TOKEN environment variable is not configured",
-      }
-    }
-
-    const dropbox = new DropboxStorage({ accessToken })
-
-    // Convert File to Buffer
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-
-    const result = await dropbox.uploadFile(buffer, file.name)
-
-    if (!result.success) {
-      throw new Error(result.error || "Dropbox upload failed")
-    }
-
-    return {
-      success: true,
-      data: {
-        url: result.url,
-        path: result.path,
-        size: file.size,
-      },
-    }
-  } catch (error: any) {
-    console.log("[v0] Dropbox upload error:", error.message)
-    return {
-      success: false,
-      error: `Failed to upload to Dropbox: ${error.message}`,
-    }
-  }
-}
-
-async function createThumbnailFromFile(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const canvas = document.createElement("canvas")
-    const ctx = canvas.getContext("2d")
-    const img = new Image()
-
-    img.onload = () => {
-      const maxSize = 300
-      let { width, height } = img
-
-      if (width > height) {
-        if (width > maxSize) {
-          height = (height * maxSize) / width
-          width = maxSize
-        }
-      } else {
-        if (height > maxSize) {
-          width = (width * maxSize) / height
-          height = maxSize
-        }
-      }
-
-      canvas.width = width
-      canvas.height = height
-
-      if (ctx) {
-        ctx.drawImage(img, 0, 0, width, height)
-        resolve(canvas.toDataURL("image/jpeg", 0.8))
-      } else {
-        reject(new Error("Could not get canvas context"))
-      }
-    }
-
-    img.onerror = () => reject(new Error("Could not load image"))
-    img.src = URL.createObjectURL(file)
-  })
-}
-
-export async function createImageWithHybridStorage(formData: FormData) {
-  try {
-    const file = formData.get("file") as File
-    const title = formData.get("title") as string
-    const description = formData.get("description") as string
-    const category = formData.get("category") as string
-    const licenseId = formData.get("license_id") as string
-
-    const fileSizeMB = file.size / (1024 * 1024)
-    console.log(`[v0] Using Backblaze storage for file: ${fileSizeMB.toFixed(2)}MB`)
-
-    const fullImageResult = await uploadToBackblaze(file, "full", category)
-    if (!fullImageResult.success) {
-      return { success: false, error: fullImageResult.error }
-    }
-
-    // Create and upload thumbnail with category
-    const thumbnailFile = await createThumbnailFile(file)
-    const thumbnailResult = await uploadToBackblaze(thumbnailFile, "thumbnail", category)
-    if (!thumbnailResult.success) {
-      return { success: false, error: thumbnailResult.error }
-    }
-
-    // Look up category and license IDs
-    const sql = createNeonClient()
-
-    async function getCategoryByName(categoryName: string): Promise<{ success: boolean; category?: any }> {
-      try {
-        const categoryResult = await sql`
-          SELECT id FROM categories WHERE name = ${categoryName} LIMIT 1
-        `
-        if (categoryResult.length === 0) {
-          return { success: false }
-        }
-        return { success: true, category: { id: categoryResult[0].id } }
-      } catch (error) {
-        console.error("Error looking up category:", error)
-        return { success: false }
-      }
-    }
-
-    async function getLicenseById(licenseId: string): Promise<{ success: boolean; license?: any }> {
-      try {
-        const sql = neon(process.env.DATABASE_URL!)
-        const result = await sql`
-          SELECT id, name, description, price, active 
-          FROM licenses 
-          WHERE id = ${licenseId} AND active = true
-        `
-
-        if (result.length > 0) {
-          return { success: true, license: result[0] }
-        }
-
-        return { success: false }
-      } catch (error) {
-        console.error("Error looking up license:", error)
-        return { success: false }
-      }
-    }
-
-    const categoryResult = await getCategoryByName(category)
-    if (!categoryResult.success) {
-      return { success: false, error: `Category not found: ${category}` }
-    }
-
-    const licenseResult = await getLicenseById(licenseId)
-    if (!licenseResult.success) {
-      return { success: false, error: `License not found: ${licenseId}` }
-    }
-
-    console.log("[v0] Using license ID:", licenseResult.license?.id)
-
-    const imageData = {
-      title,
-      description,
-      price: 99, // TODO: Get price from license
-      category_id: categoryResult.category!.id,
-      license_id: licenseResult.license!.id,
-      tags: [], // TODO: Add tags
-      storage_type: "backblaze_b2" as const,
-      file_url: fullImageResult.url!, // Original full-resolution file in full-images/
-      thumbnail_url: thumbnailResult.url!, // Thumbnail in thumbnails/
-      file_size: file.size,
-      file_type: file.type,
-      width: null,
-      height: null,
-    }
-
-    async function createImageInDatabase(
-      imageData: any,
-    ): Promise<{ success: boolean; message: string; imageId?: string }> {
-      try {
-        const tagsArray = Array.isArray(imageData.tags) && imageData.tags.length > 0 ? imageData.tags : null
-
-        const result = await sql`
-          INSERT INTO images (title, description, category_id, license_id, price, image_url, thumbnail_url, 
-                             active, featured, metadata, tags)
-          VALUES (
-            ${imageData.title}, ${imageData.description}, ${imageData.category_id}, ${imageData.license_id}, 
-            ${imageData.price}, ${imageData.file_url}, ${imageData.thumbnail_url},
-            true, false, 
-            ${JSON.stringify({
-              storage_type: imageData.storage_type,
-              folder_structure: {
-                full_image: "full-images/",
-                thumbnail: "thumbnails/",
-              },
-              file_size: imageData.file_size,
-              file_type: imageData.file_type,
-              width: imageData.width,
-              height: imageData.height,
-            })},
-            ${tagsArray}
-          )
-          RETURNING id
-        `
-        return { success: true, message: "Image created successfully", imageId: result[0].id }
-      } catch (dbError: any) {
-        console.error("Database insertion failed:", dbError)
-        return { success: false, message: dbError.message || "Database error" }
-      }
-    }
-
-    console.log("[v0] Inserting image with organized Backblaze storage")
-    const result = await createImageInDatabase(imageData)
-
-    if (result.success) {
-      console.log("[v0] Image created successfully with organized storage, ID:", result.imageId)
-      invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
-      revalidatePath("/simple-admin")
-      return {
-        success: true,
-        message: "Image uploaded successfully with organized storage",
-        imageId: result.imageId,
-      }
-    } else {
-      return { success: false, error: result.message }
-    }
-  } catch (error: any) {
-    console.error("[v0] Error in createImageWithHybridStorage:", error)
-    return { success: false, error: error.message || "Upload failed" }
-  }
-}
-
-export async function migrateFilesToOptimalStorage() {
-  try {
-    console.log("[v0] Starting file migration to optimal storage...")
-
-    const sql = createNeonClient()
-
-    // Get all images with their metadata
-    const images = await sql`
-      SELECT id, title, image_url, thumbnail_url, metadata
-      FROM images 
-      WHERE active = true
-    `
-
-    console.log(`[v0] Found ${images.length} images to analyze`)
-
-    let migratedCount = 0
-    let skippedCount = 0
-    let errorCount = 0
-
-    for (const image of images) {
-      try {
-        let metadata = {}
-        if (image.metadata) {
-          if (typeof image.metadata === "string") {
-            metadata = JSON.parse(image.metadata)
-          } else if (typeof image.metadata === "object") {
-            metadata = image.metadata
-          }
-        }
-
-        const currentStorageType = metadata.storage_type
-        const originalFileSize = metadata.original_file_size
-
-        console.log(`[v0] Analyzing image ${image.id}: ${image.title}`)
-        console.log(`[v0] - Storage type: ${currentStorageType || "undefined"}`)
-        console.log(`[v0] - Original file size: ${originalFileSize || "undefined"}`)
-        console.log(`[v0] - Image URL type: ${image.image_url?.startsWith("data:") ? "base64" : "blob"}`)
-
-        // If no storage_type is set, determine it from the URL format
-        let actualStorageType = currentStorageType
-        if (!actualStorageType) {
-          if (image.image_url?.startsWith("data:")) {
-            actualStorageType = "neon_database"
-          } else if (image.image_url?.includes("blob.vercel-storage.com")) {
-            actualStorageType = "vercel_blob"
-          }
-        }
-
-        // Skip if already in database storage
-        if (actualStorageType === "neon_database") {
-          console.log(`[v0] - Skipping: Already in database storage`)
-          skippedCount++
-          continue
-        }
-
-        let fileSizeMB = 0
-        if (originalFileSize) {
-          fileSizeMB = originalFileSize / (1024 * 1024)
-        } else if (actualStorageType === "vercel_blob") {
-          // Try to get file size from Blob storage
-          try {
-            const headResponse = await fetch(image.image_url, { method: "HEAD" })
-            if (headResponse.ok) {
-              const contentLength = headResponse.headers.get("content-length")
-              if (contentLength) {
-                fileSizeMB = Number.parseInt(contentLength) / (1024 * 1024)
-                console.log(`[v0] - Determined file size from Blob: ${fileSizeMB.toFixed(2)}MB`)
-              }
-            }
-          } catch (error) {
-            console.log(`[v0] - Could not determine file size, skipping`)
-            skippedCount++
-            continue
-          }
-        }
-
-        // Only migrate files under 40MB that are currently in Blob storage
-        if (fileSizeMB < 40 && actualStorageType === "vercel_blob") {
-          console.log(`[v0] Migrating image ${image.id}: ${image.title} (${fileSizeMB.toFixed(2)}MB)`)
-
-          // Download the image from Blob storage
-          const imageResponse = await fetch(image.image_url)
-          if (!imageResponse.ok) {
-            throw new Error(`Failed to fetch image: ${imageResponse.statusText}`)
-          }
-
-          const imageBlob = await imageResponse.blob()
-          const imageDataUrl = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader()
-            reader.onload = () => resolve(reader.result as string)
-            reader.onerror = reject
-            reader.readAsDataURL(imageBlob)
-          })
-
-          // Download the thumbnail from Blob storage
-          const thumbnailResponse = await fetch(image.thumbnail_url)
-          if (!thumbnailResponse.ok) {
-            throw new Error(`Failed to fetch thumbnail: ${thumbnailResponse.statusText}`)
-          }
-
-          const thumbnailBlob = await thumbnailResponse.blob()
-          const thumbnailDataUrl = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader()
-            reader.onload = () => resolve(reader.result as string)
-            reader.onerror = reject
-            reader.readAsDataURL(thumbnailBlob)
-          })
-
-          // Update the database record with base64 data
-          const updatedMetadata = {
-            ...metadata,
-            storage_type: "neon_database",
-            original_file_size: imageBlob.size,
-            migrated_from: "vercel_blob",
-            migration_timestamp: new Date().toISOString(),
-          }
-
-          await sql`
-            UPDATE images 
-            SET image_url = ${imageDataUrl},
-                thumbnail_url = ${thumbnailDataUrl},
-                metadata = ${JSON.stringify(updatedMetadata)}
-            WHERE id = ${image.id}
-          `
-
-          migratedCount++
-          console.log(`[v0] Successfully migrated image ${image.id}`)
-        } else {
-          console.log(`[v0] - Skipping: File too large (${fileSizeMB.toFixed(2)}MB) or not in Blob storage`)
-          skippedCount++
-        }
-      } catch (error) {
-        console.error(`[v0] Error migrating image ${image.id}:`, error)
-        errorCount++
-      }
-    }
-
-    console.log(`[v0] Migration completed: ${migratedCount} migrated, ${skippedCount} skipped, ${errorCount} errors`)
-
-    // Invalidate cache after migration
-    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
-
-    return {
-      success: true,
-      data: {
-        migrated: migratedCount,
-        skipped: skippedCount,
-        errors: errorCount,
-        total: images.length,
-      },
-    }
-  } catch (error) {
-    return handleDatabaseError(error, "migrateFilesToOptimalStorage")
-  }
-}
-
-export { getCachedImagesPaginated, getCachedCategoriesOptimized }

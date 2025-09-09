@@ -18,14 +18,27 @@ export async function POST(request: NextRequest) {
     const bucketId = await storage.getBucketIdPublic()
     console.log("[v0] Got bucket ID:", bucketId)
 
-    // Configure CORS rules for image access
     const corsRules = [
       {
         corsRuleName: "allowImageAccess",
-        allowedOrigins: ["*"], // Allow all origins for now
-        allowedHeaders: ["range", "authorization", "x-bz-content-sha1"],
+        allowedOrigins: [
+          "https://n3uralia360.art",
+          "https://*.vercel.app",
+          "https://*.v0.app",
+          "http://localhost:3000",
+          "https://localhost:3000",
+        ],
+        allowedHeaders: ["range", "authorization", "x-bz-content-sha1", "content-type"],
         allowedOperations: ["b2_download_file_by_name", "b2_download_file_by_id"],
-        exposeHeaders: ["x-bz-content-sha1", "x-bz-file-name"],
+        exposeHeaders: ["x-bz-content-sha1", "x-bz-file-name", "content-length", "content-type"],
+        maxAgeSeconds: 86400, // 24 hours
+      },
+      {
+        corsRuleName: "allowAllForDevelopment",
+        allowedOrigins: ["*"],
+        allowedHeaders: ["*"],
+        allowedOperations: ["b2_download_file_by_name", "b2_download_file_by_id"],
+        exposeHeaders: ["*"],
         maxAgeSeconds: 3600,
       },
     ]
@@ -59,6 +72,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: "CORS configuration updated successfully",
       corsRules: result.corsRules,
+      bucketName: result.bucketName,
     })
   } catch (error) {
     console.error("[v0] CORS setup error:", error)

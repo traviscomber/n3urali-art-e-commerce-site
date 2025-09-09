@@ -6,7 +6,11 @@ export default async function DebugImagesPage() {
 
   try {
     const result = await getImagesPaginated(1, 50) // Get first 50 images
-    images = result.images || []
+    if (result.success) {
+      images = result.data.images || []
+    } else {
+      error = result.error
+    }
   } catch (e) {
     error = e.message
   }

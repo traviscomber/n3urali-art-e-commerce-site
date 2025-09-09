@@ -146,7 +146,19 @@ export default function SimpleAdminPage() {
     setError(null)
 
     try {
-      const { getImages, getCategories, getLicenses, getDatabaseStats } = await import("@/app/actions/admin-actions")
+      let adminActions
+      try {
+        adminActions = await import("@/app/actions/admin-actions")
+      } catch (importError) {
+        console.error("[v0] SimpleAdmin: Failed to import admin actions:", importError)
+        throw new Error("Failed to load admin functions. Please refresh the page.")
+      }
+
+      const { getImages, getCategories, getLicenses, getDatabaseStats } = adminActions
+
+      if (!getImages || !getCategories || !getLicenses || !getDatabaseStats) {
+        throw new Error("Required admin functions are not available. Please refresh the page.")
+      }
 
       const [imagesResult, categoriesResult, licensesResult, statsResult] = await Promise.all([
         getImages(),
@@ -155,37 +167,45 @@ export default function SimpleAdminPage() {
         getDatabaseStats(),
       ])
 
-      if (imagesResult.success) {
+      if (imagesResult?.success && Array.isArray(imagesResult.data)) {
         setImages(imagesResult.data)
         console.log("[v0] SimpleAdmin: Loaded", imagesResult.data.length, "images")
       } else {
-        console.error("[v0] SimpleAdmin: Failed to load images:", imagesResult.error)
+        console.error("[v0] SimpleAdmin: Failed to load images:", imagesResult?.error)
+        setImages([]) // Set empty array as fallback
       }
 
-      if (categoriesResult.success) {
+      if (categoriesResult?.success && Array.isArray(categoriesResult.data)) {
         setCategories(categoriesResult.data)
         console.log("[v0] SimpleAdmin: Loaded", categoriesResult.data.length, "categories:", categoriesResult.data)
       } else {
-        console.error("[v0] SimpleAdmin: Failed to load categories:", categoriesResult.error)
+        console.error("[v0] SimpleAdmin: Failed to load categories:", categoriesResult?.error)
+        setCategories([]) // Set empty array as fallback
         setError("Failed to load categories")
       }
 
-      if (licensesResult.success) {
+      if (licensesResult?.success && Array.isArray(licensesResult.data)) {
         setLicenses(licensesResult.data)
         console.log("[v0] SimpleAdmin: Loaded", licensesResult.data.length, "licenses")
       } else {
-        console.error("[v0] SimpleAdmin: Failed to load licenses:", licensesResult.error)
+        console.error("[v0] SimpleAdmin: Failed to load licenses:", licensesResult?.error)
+        setLicenses([]) // Set empty array as fallback
       }
 
-      if (statsResult.success) {
+      if (statsResult?.success && statsResult.data) {
         setStats(statsResult.data)
         console.log("[v0] SimpleAdmin: Loaded database stats:", statsResult.data)
       } else {
-        console.error("[v0] SimpleAdmin: Failed to load stats:", statsResult.error)
+        console.error("[v0] SimpleAdmin: Failed to load stats:", statsResult?.error)
+        setStats({ totalImages: 0, totalCategories: 0, totalLicenses: 0 }) // Set default stats
       }
     } catch (error) {
       console.error("[v0] SimpleAdmin: Error loading data:", error)
-      setError("Failed to load data")
+      setError(error instanceof Error ? error.message : "Failed to load data")
+      setImages([])
+      setCategories([])
+      setLicenses([])
+      setStats({ totalImages: 0, totalCategories: 0, totalLicenses: 0 })
     } finally {
       setLoading(false)
     }
@@ -253,10 +273,21 @@ export default function SimpleAdminPage() {
     console.log("[v0] SimpleAdmin: File selected:", file.name, (file.size / (1024 * 1024)).toFixed(2), "MB")
 
     try {
+      if (!file.type.startsWith("image/")) {
+        toast.error("Please select an image file")
+        return
+      }
+
       const reader = new FileReader()
       const previewPromise = new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string)
-        reader.onerror = reject
+        reader.onload = () => {
+          if (typeof reader.result === "string") {
+            resolve(reader.result)
+          } else {
+            reject(new Error("Failed to read file as data URL"))
+          }
+        }
+        reader.onerror = () => reject(new Error("Failed to read file"))
         reader.readAsDataURL(file)
       })
 
@@ -1014,25 +1045,30 @@ const createImageWithHybridStorage = async (file: File, imageData: any, licenses
     throw new Error("Licenses data is not available. Please refresh the page and try again.")
   }
 
+  if (licenses.length === 0) {
+    console.error("[v0] License mapping error - no licenses available")
+    throw new Error("No licenses are configured. Please contact administrator.")
+  }
+
   console.log(
     "[v0] License mapping debug - available licenses:",
-    licenses.map((l) => ({ id: l.id, name: l.name })),
+    licenses.map((l) => ({ id: l?.id, name: l?.name })),
   )
 
   let licenseId = ""
   if (imageData.rights_type === "exclusive") {
     // Find the exclusive license ID
-    const exclusiveLicense = licenses.find((license) => license.name === "EXCLUSIVE")
+    const exclusiveLicense = licenses.find((license) => license?.name === "EXCLUSIVE")
     console.log("[v0] License mapping debug - found exclusive license:", exclusiveLicense)
     licenseId = exclusiveLicense?.id || ""
   } else if (imageData.rights_type === "non-exclusive") {
     // Find the non-exclusive license ID
-    const nonExclusiveLicense = licenses.find((license) => license.name === "NON_EXCLUSIVE")
+    const nonExclusiveLicense = licenses.find((license) => license?.name === "NON_EXCLUSIVE")
     console.log("[v0] License mapping debug - found non-exclusive license:", nonExclusiveLicense)
     licenseId = nonExclusiveLicense?.id || ""
   } else {
     // For "both", default to non-exclusive license
-    const nonExclusiveLicense = licenses.find((license) => license.name === "NON_EXCLUSIVE")
+    const nonExclusiveLicense = licenses.find((license) => license?.name === "NON_EXCLUSIVE")
     console.log("[v0] License mapping debug - found non-exclusive license (both case):", nonExclusiveLicense)
     licenseId = nonExclusiveLicense?.id || ""
   }
@@ -1040,7 +1076,9 @@ const createImageWithHybridStorage = async (file: File, imageData: any, licenses
   console.log("[v0] License mapping debug - final licenseId:", licenseId)
 
   if (!licenseId) {
-    const availableLicenseNames = Array.isArray(licenses) ? licenses.map((l) => l.name).join(", ") : "none"
+    const availableLicenseNames = Array.isArray(licenses)
+      ? licenses.map((l) => l?.name || "unnamed").join(", ")
+      : "none"
     throw new Error(
       `License not found for rights_type: ${imageData.rights_type}. Available licenses: ${availableLicenseNames}`,
     )

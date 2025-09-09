@@ -164,9 +164,10 @@ export default function SimpleAdminPage() {
 
       if (categoriesResult.success) {
         setCategories(categoriesResult.data)
-        console.log("[v0] SimpleAdmin: Loaded", categoriesResult.data.length, "categories")
+        console.log("[v0] SimpleAdmin: Loaded", categoriesResult.data.length, "categories:", categoriesResult.data)
       } else {
         console.error("[v0] SimpleAdmin: Failed to load categories:", categoriesResult.error)
+        setError("Failed to load categories")
       }
 
       if (licensesResult.success) {
@@ -612,18 +613,27 @@ export default function SimpleAdminPage() {
                   </Label>
                   <Select
                     value={newImage.category}
-                    onValueChange={(value) => setNewImage((prev) => ({ ...prev, category: value }))}
+                    onValueChange={(value) => {
+                      console.log("[v0] Category selected:", value)
+                      setNewImage((prev) => ({ ...prev, category: value }))
+                    }}
                     required
                   >
                     <SelectTrigger className="h-12 text-lg">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.name} className="text-lg">
-                          {getCategoryDisplayName(cat)}
+                      {categories.length === 0 ? (
+                        <SelectItem value="" disabled>
+                          No categories available
                         </SelectItem>
-                      ))}
+                      ) : (
+                        categories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.name} className="text-lg">
+                            {getCategoryDisplayName(cat)}
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

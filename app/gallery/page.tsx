@@ -184,56 +184,8 @@ export default function GalleryPage() {
   const transformedImages = useMemo(
     () =>
       images.map((image: any) => {
-        let preview_url = "/placeholder.svg?height=400&width=400&text=No+Image"
-
-        const thumbnail_url = image.thumbnail_url
-        const image_url = image.image_url
-
-        // Check for valid URLs in priority order
-        if (thumbnail_url) {
-          // Allow Vercel Blob URLs
-          if (
-            thumbnail_url.includes("vercel-storage.com") ||
-            thumbnail_url.includes("public.blob.vercel-storage.com")
-          ) {
-            preview_url = thumbnail_url
-          }
-          // Allow Backblaze URLs (but not old /uploads/ structure)
-          else if (thumbnail_url.includes("f005.backblazeb2.com") && !thumbnail_url.includes("/uploads/")) {
-            preview_url = thumbnail_url
-          }
-          // Allow data URLs (base64 images)
-          else if (thumbnail_url.startsWith("data:image/")) {
-            preview_url = thumbnail_url
-          }
-          // Only reject URLs that contain the old broken /uploads/ structure
-          else if (thumbnail_url.includes("/uploads/")) {
-            console.log("[v0] Rejecting broken /uploads/ URL:", thumbnail_url)
-          }
-          // Allow any other valid-looking URLs
-          else if (thumbnail_url.startsWith("http")) {
-            preview_url = thumbnail_url
-          }
-        }
-        // Fallback to image_url with same validation
-        else if (image_url) {
-          if (image_url.includes("vercel-storage.com") || image_url.includes("public.blob.vercel-storage.com")) {
-            preview_url = image_url
-          } else if (image_url.includes("f005.backblazeb2.com") && !image_url.includes("/uploads/")) {
-            preview_url = image_url
-          } else if (image_url.startsWith("data:image/")) {
-            preview_url = image_url
-          } else if (image_url.includes("/uploads/")) {
-            console.log("[v0] Rejecting broken /uploads/ URL:", image_url)
-          } else if (image_url.startsWith("http")) {
-            preview_url = image_url
-          }
-        }
-
-        // Only log when actually using placeholder due to missing/invalid URLs
-        if (preview_url === "/placeholder.svg?height=400&width=400&text=No+Image") {
-          console.log("[v0] No valid URL found, using placeholder:", { thumbnail_url, image_url, title: image.title })
-        }
+        const preview_url =
+          image.thumbnail_url || image.image_url || "/placeholder.svg?height=400&width=400&text=No+Image"
 
         return {
           id: image.id,

@@ -61,9 +61,9 @@ interface License {
 }
 
 interface DatabaseStats {
-  totalImages: number
-  totalCategories: number
-  totalLicenses: number
+  images: number
+  categories: number
+  orders: number
 }
 
 interface NewImage {
@@ -146,19 +146,7 @@ export default function SimpleAdminPage() {
     setError(null)
 
     try {
-      let adminActions
-      try {
-        adminActions = await import("@/app/actions/admin-actions")
-      } catch (importError) {
-        console.error("[v0] SimpleAdmin: Failed to import admin actions:", importError)
-        throw new Error("Failed to load admin functions. Please refresh the page.")
-      }
-
-      const { getImages, getCategories, getLicenses, getDatabaseStats } = adminActions
-
-      if (!getImages || !getCategories || !getLicenses || !getDatabaseStats) {
-        throw new Error("Required admin functions are not available. Please refresh the page.")
-      }
+      const { getImages, getCategories, getLicenses, getDatabaseStats } = await import("@/app/actions/admin-actions")
 
       const [imagesResult, categoriesResult, licensesResult, statsResult] = await Promise.all([
         getImages(),
@@ -167,47 +155,36 @@ export default function SimpleAdminPage() {
         getDatabaseStats(),
       ])
 
-      if (imagesResult?.success && Array.isArray(imagesResult.data)) {
+      if (imagesResult.success) {
         setImages(imagesResult.data)
         console.log("[v0] SimpleAdmin: Loaded", imagesResult.data.length, "images")
       } else {
-        console.error("[v0] SimpleAdmin: Failed to load images:", imagesResult?.error)
-        setImages([]) // Set empty array as fallback
+        console.error("[v0] SimpleAdmin: Failed to load images:", imagesResult.error)
       }
 
-      if (categoriesResult?.success && Array.isArray(categoriesResult.data)) {
+      if (categoriesResult.success) {
         setCategories(categoriesResult.data)
-        console.log("[v0] SimpleAdmin: Loaded", categoriesResult.data.length, "categories:", categoriesResult.data)
+        console.log("[v0] SimpleAdmin: Loaded", categoriesResult.data.length, "categories")
       } else {
-        console.error("[v0] SimpleAdmin: Failed to load categories:", categoriesResult?.error)
-        setCategories([]) // Set empty array as fallback
-        setError("Failed to load categories")
+        console.error("[v0] SimpleAdmin: Failed to load categories:", categoriesResult.error)
       }
 
-      if (licensesResult?.success && Array.isArray(licensesResult.data)) {
+      if (licensesResult.success) {
         setLicenses(licensesResult.data)
         console.log("[v0] SimpleAdmin: Loaded", licensesResult.data.length, "licenses")
       } else {
-        console.error("[v0] SimpleAdmin: Failed to load licenses:", licensesResult?.error)
-        setLicenses([]) // Set empty array as fallback
+        console.error("[v0] SimpleAdmin: Failed to load licenses:", licensesResult.error)
       }
 
-      if (statsResult?.success && statsResult.data) {
-        setStats({
-          totalImages: statsResult.data.images || 0,
-          totalCategories: statsResult.data.categories || 0,
-          totalLicenses: statsResult.data.licenses || 0,
-        })
+      if (statsResult.success) {
+        setStats(statsResult.data)
+        console.log("[v0] SimpleAdmin: Loaded database stats:", statsResult.data)
       } else {
-        setStats({ totalImages: 0, totalCategories: 0, totalLicenses: 0 })
+        console.error("[v0] SimpleAdmin: Failed to load stats:", statsResult.error)
       }
     } catch (error) {
-      console.error("Error loading data:", error)
+      console.error("[v0] SimpleAdmin: Error loading data:", error)
       setError("Failed to load data")
-      setImages([])
-      setCategories([])
-      setLicenses([])
-      setStats({ totalImages: 0, totalCategories: 0, totalLicenses: 0 })
     } finally {
       setLoading(false)
     }
@@ -275,21 +252,10 @@ export default function SimpleAdminPage() {
     console.log("[v0] SimpleAdmin: File selected:", file.name, (file.size / (1024 * 1024)).toFixed(2), "MB")
 
     try {
-      if (!file.type.startsWith("image/")) {
-        toast.error("Please select an image file")
-        return
-      }
-
       const reader = new FileReader()
       const previewPromise = new Promise<string>((resolve, reject) => {
-        reader.onload = () => {
-          if (typeof reader.result === "string") {
-            resolve(reader.result)
-          } else {
-            reject(new Error("Failed to read file as data URL"))
-          }
-        }
-        reader.onerror = () => reject(new Error("Failed to read file"))
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = reject
         reader.readAsDataURL(file)
       })
 
@@ -524,7 +490,7 @@ export default function SimpleAdminPage() {
                   <BarChart3 className="h-5 w-5 text-blue-600" />
                   <div>
                     <p className="text-sm text-gray-600">Total Images</p>
-                    <p className="text-2xl font-bold">{stats.totalImages}</p>
+                    <p className="text-2xl font-bold">{stats.images}</p>
                   </div>
                 </div>
               </CardContent>
@@ -535,7 +501,7 @@ export default function SimpleAdminPage() {
                   <Database className="h-5 w-5 text-green-600" />
                   <div>
                     <p className="text-sm text-gray-600">Categories</p>
-                    <p className="text-2xl font-bold">{stats.totalCategories}</p>
+                    <p className="text-2xl font-bold">{stats.categories}</p>
                   </div>
                 </div>
               </CardContent>
@@ -546,7 +512,7 @@ export default function SimpleAdminPage() {
                   <Eye className="h-5 w-5 text-purple-600" />
                   <div>
                     <p className="text-sm text-gray-600">Orders</p>
-                    <p className="text-2xl font-bold">{stats.totalLicenses}</p>
+                    <p className="text-2xl font-bold">{stats.orders}</p>
                   </div>
                 </div>
               </CardContent>
@@ -598,7 +564,7 @@ export default function SimpleAdminPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Upload Section */}
           <Card>
             <CardHeader>
@@ -646,27 +612,18 @@ export default function SimpleAdminPage() {
                   </Label>
                   <Select
                     value={newImage.category}
-                    onValueChange={(value) => {
-                      console.log("[v0] Category selected:", value)
-                      setNewImage((prev) => ({ ...prev, category: value }))
-                    }}
+                    onValueChange={(value) => setNewImage((prev) => ({ ...prev, category: value }))}
                     required
                   >
                     <SelectTrigger className="h-12 text-lg">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.length === 0 ? (
-                        <SelectItem value="" disabled>
-                          No categories available
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.name} className="text-lg">
+                          {getCategoryDisplayName(cat)}
                         </SelectItem>
-                      ) : (
-                        categories.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.name} className="text-lg">
-                            {getCategoryDisplayName(cat)}
-                          </SelectItem>
-                        ))
-                      )}
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -812,14 +769,9 @@ export default function SimpleAdminPage() {
                       <div className="flex flex-col sm:flex-row gap-4">
                         <div className="flex-shrink-0">
                           <img
-                            src={newImage.preview || "/placeholder.svg?height=128&width=128&text=Preview"}
+                            src={newImage.preview || "/placeholder.svg"}
                             alt="Preview"
                             className="w-full sm:w-32 h-32 object-cover rounded border shadow-sm"
-                            crossOrigin="anonymous"
-                            onError={(e) => {
-                              console.log("[v0] Preview image failed to load:", newImage.preview)
-                              e.currentTarget.src = "/placeholder.svg?height=128&width=128&text=Preview+Error"
-                            }}
                           />
                         </div>
                         <div className="flex-1 space-y-2">
@@ -871,7 +823,7 @@ export default function SimpleAdminPage() {
           </Card>
 
           {/* Images List */}
-          <Card className="flex flex-col">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-2xl">
                 <Eye className="h-6 w-6" />
@@ -881,7 +833,7 @@ export default function SimpleAdminPage() {
                 Manage your full resolution premium collection (4K-16K)
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col">
+            <CardContent>
               {loading ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin mr-2" />
@@ -890,23 +842,13 @@ export default function SimpleAdminPage() {
               ) : images.length === 0 ? (
                 <div className="text-center py-8 text-gray-500 text-lg">No images uploaded yet</div>
               ) : (
-                <div className="space-y-4 flex-1 overflow-y-auto min-h-0">
+                <div className="space-y-4 max-h-96 overflow-y-auto">
                   {images.map((image) => (
                     <div key={image.id} className="flex items-center gap-4 p-3 border rounded-lg">
                       <img
-                        src={
-                          image.thumbnail_url || image.image_url || "/placeholder.svg?height=64&width=64&text=No+Image"
-                        }
+                        src={image.thumbnail_url || image.image_url}
                         alt={image.title}
                         className="w-16 h-16 object-cover rounded"
-                        crossOrigin="anonymous"
-                        onError={(e) => {
-                          console.log("[v0] Image failed to load:", image.thumbnail_url || image.image_url)
-                          e.currentTarget.src = "/placeholder.svg?height=64&width=64&text=Error"
-                        }}
-                        onLoad={() => {
-                          console.log("[v0] Image loaded successfully:", image.thumbnail_url || image.image_url)
-                        }}
                       />
                       <div className="flex-1 min-w-0">
                         {editingImage === image.id ? (
@@ -1040,25 +982,40 @@ const createImageWithHybridStorage = async (file: File, imageData: any, licenses
   formData.append("description", imageData.description || "")
   formData.append("category", imageData.category_name || "")
 
-  // Simple license mapping
+  console.log("[v0] License mapping debug - rights_type:", imageData.rights_type)
+  console.log(
+    "[v0] License mapping debug - available licenses:",
+    licenses.map((l) => ({ id: l.id, name: l.name })),
+  )
+
   let licenseId = ""
-  if (licenses && licenses.length > 0) {
-    if (imageData.rights_type === "exclusive") {
-      const exclusiveLicense = licenses.find((license) => license.name === "EXCLUSIVE")
-      licenseId = exclusiveLicense?.id || licenses[0].id
-    } else {
-      const nonExclusiveLicense = licenses.find((license) => license.name === "NON_EXCLUSIVE")
-      licenseId = nonExclusiveLicense?.id || licenses[0].id
-    }
+  if (imageData.rights_type === "exclusive") {
+    // Find the exclusive license ID
+    const exclusiveLicense = licenses.find((license) => license.name === "EXCLUSIVE")
+    console.log("[v0] License mapping debug - found exclusive license:", exclusiveLicense)
+    licenseId = exclusiveLicense?.id || ""
+  } else if (imageData.rights_type === "non-exclusive") {
+    // Find the non-exclusive license ID
+    const nonExclusiveLicense = licenses.find((license) => license.name === "NON_EXCLUSIVE")
+    console.log("[v0] License mapping debug - found non-exclusive license:", nonExclusiveLicense)
+    licenseId = nonExclusiveLicense?.id || ""
+  } else {
+    // For "both", default to non-exclusive license
+    const nonExclusiveLicense = licenses.find((license) => license.name === "NON_EXCLUSIVE")
+    console.log("[v0] License mapping debug - found non-exclusive license (both case):", nonExclusiveLicense)
+    licenseId = nonExclusiveLicense?.id || ""
   }
 
-  if (!licenseId && licenses.length > 0) {
-    licenseId = licenses[0].id // Fallback to first license
+  console.log("[v0] License mapping debug - final licenseId:", licenseId)
+
+  if (!licenseId) {
+    throw new Error(
+      `License not found for rights_type: ${imageData.rights_type}. Available licenses: ${licenses.map((l) => l.name).join(", ")}`,
+    )
   }
 
   formData.append("license_id", licenseId)
 
-  // Direct import instead of dynamic import
-  const { createImageWithHybridStorage: actualFunction } = require("@/app/actions/admin-actions")
+  const { createImageWithHybridStorage: actualFunction } = await import("@/app/actions/admin-actions")
   return actualFunction(formData)
 }

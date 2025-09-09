@@ -998,6 +998,12 @@ const createImageWithHybridStorage = async (file: File, imageData: any, licenses
   formData.append("category", imageData.category_name || "")
 
   console.log("[v0] License mapping debug - rights_type:", imageData.rights_type)
+
+  if (!Array.isArray(licenses)) {
+    console.error("[v0] License mapping error - licenses is not an array:", licenses)
+    throw new Error("Licenses data is not available. Please refresh the page and try again.")
+  }
+
   console.log(
     "[v0] License mapping debug - available licenses:",
     licenses.map((l) => ({ id: l.id, name: l.name })),
@@ -1024,8 +1030,9 @@ const createImageWithHybridStorage = async (file: File, imageData: any, licenses
   console.log("[v0] License mapping debug - final licenseId:", licenseId)
 
   if (!licenseId) {
+    const availableLicenseNames = Array.isArray(licenses) ? licenses.map((l) => l.name).join(", ") : "none"
     throw new Error(
-      `License not found for rights_type: ${imageData.rights_type}. Available licenses: ${licenses.map((l) => l.name).join(", ")}`,
+      `License not found for rights_type: ${imageData.rights_type}. Available licenses: ${availableLicenseNames}`,
     )
   }
 

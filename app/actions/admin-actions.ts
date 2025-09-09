@@ -941,3 +941,36 @@ export async function updateImage(formData: FormData) {
     return handleDatabaseError(error)
   }
 }
+
+export async function getLicenses() {
+  try {
+    const data = await getCachedLicenses()
+    console.log(
+      "[v0] getLicenses returning",
+      data.length,
+      "licenses:",
+      data.map((l) => l.name),
+    )
+    return { success: true, data }
+  } catch (error) {
+    console.error("[v0] Get licenses error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
+
+export async function getDatabaseStats() {
+  try {
+    const data = await getCachedDatabaseStats()
+    console.log("[v0] getDatabaseStats returning:", data)
+    return { success: true, data }
+  } catch (error) {
+    console.error("[v0] Get database stats error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}

@@ -1,18 +1,40 @@
-export default async function DebugImagesPage() {
-  const { getImagesPaginated } = await import("../actions/admin-actions")
+"use client"
 
-  let images = []
-  let error = null
+import { useState, useEffect } from "react"
 
-  try {
-    const result = await getImagesPaginated(1, 50) // Get first 50 images
-    if (result.success) {
-      images = result.data.images || []
-    } else {
-      error = result.error
+export default function DebugImagesPage() {
+  const [images, setImages] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    async function loadImages() {
+      try {
+        const { getImagesPaginated } = await import("../actions/admin-actions")
+        const result = await getImagesPaginated(1, 50) // Get first 50 images
+
+        if (result.success) {
+          setImages(result.data.images || [])
+        } else {
+          setError(result.error)
+        }
+      } catch (e) {
+        setError(e.message)
+      } finally {
+        setLoading(false)
+      }
     }
-  } catch (e) {
-    error = e.message
+
+    loadImages()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="p-8 max-w-6xl mx-auto">
+        <h1 className="text-2xl font-bold mb-6">Image Status Diagnostics</h1>
+        <div className="text-center py-8">Loading images...</div>
+      </div>
+    )
   }
 
   return (

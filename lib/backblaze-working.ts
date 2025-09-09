@@ -465,4 +465,85 @@ export class WorkingBackblazeStorage {
       keyId: this.config.keyId,
     }
   }
+
+  async configureBucketCORS(allowedOrigins: string[] = ["*"]): Promise<void> {
+    try {
+      if (!this.authToken || !this.apiUrl) {
+        await this.authenticate()
+      }
+
+      const bucketId = await this.getBucketId()
+
+      console.log("[v0] Configuring CORS for bucket:", this.config.bucketName)
+
+      const corsRules = [
+        {
+          corsRuleName: "allowImageAccess",
+          allowedOrigins: allowedOrigins,
+          allowedHeaders: ["range", "authorization", "x-bz-content-sha1"],
+          allowedOperations: ["b2_download_file_by_id", "b2_download_file_by_name"],
+          exposeHeaders: ["x-bz-content-sha1"],
+          maxAgeSeconds: 3600,
+        },
+      ]
+
+      const response = await fetch(`${this.apiUrl}/b2api/v3/b2_update_bucket`, {
+        method: "POST",
+        headers: {
+          Authorization: this.authToken!,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          accountId: this.config.keyId,
+          bucketId: bucketId,
+          corsRules: corsRules,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to configure CORS: ${response.status} - ${errorText}`)
+      }
+
+      const result = await response.json()
+      console.log("[v0] CORS configuration successful:", result.corsRules?.length || 0, "rules applied")
+    } catch (error: any) {
+      console.error("[v0] CORS configuration failed:", error)
+      throw new Error(`Failed to configure CORS: ${error.message}`)
+    }
+  }
+
+  async getBucketCORS(): Promise<any> {
+    try {
+      if (!this.authToken || !this.apiUrl) {
+        await this.authenticate()
+      }
+
+      const bucketId = await this.getBucketId()
+
+      const response = await fetch(`${this.apiUrl}/b2api/v3/b2_list_buckets`, {
+        method: "POST",
+        headers: {
+          Authorization: this.authToken!,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          accountId: this.config.keyId,
+          bucketId: bucketId,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to get bucket info: ${response.status} - ${errorText}`)
+      }
+
+      const data = await response.json()
+      const bucket = data.buckets?.find((b: any) => b.bucketId === bucketId)
+      return bucket?.corsRules || []
+    } catch (error: any) {
+      console.error("[v0] Failed to get CORS configuration:", error)
+      throw new Error(`Failed to get CORS configuration: ${error.message}`)
+    }
+  }
 }

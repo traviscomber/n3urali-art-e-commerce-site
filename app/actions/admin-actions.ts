@@ -1639,8 +1639,6 @@ export async function createImageWithHybridStorage(formData: FormData) {
     const category = formData.get("category") as string
     const licenseId = formData.get("license_id") as string
 
-    console.log("[v0] Upload request - category:", category, "licenseId:", licenseId)
-
     const fileSizeMB = file.size / (1024 * 1024)
     console.log(`[v0] Using Backblaze storage for file: ${fileSizeMB.toFixed(2)}MB`)
 
@@ -1656,34 +1654,32 @@ export async function createImageWithHybridStorage(formData: FormData) {
       return { success: false, error: thumbnailResult.error }
     }
 
+    // Look up category and license IDs
     const sql = createNeonClient()
 
     async function getCategoryByName(categoryName: string): Promise<{ success: boolean; category?: any }> {
       try {
-        console.log("[v0] Looking up category:", categoryName)
         const categoryResult = await sql`
           SELECT id FROM categories WHERE name = ${categoryName} LIMIT 1
         `
-        console.log("[v0] Category lookup result:", categoryResult)
         if (categoryResult.length === 0) {
           return { success: false }
         }
         return { success: true, category: { id: categoryResult[0].id } }
       } catch (error) {
-        console.error("[v0] Error looking up category:", error)
+        console.error("Error looking up category:", error)
         return { success: false }
       }
     }
 
     async function getLicenseById(licenseId: string): Promise<{ success: boolean; license?: any }> {
       try {
-        console.log("[v0] Looking up license:", licenseId)
+        const sql = neon(process.env.DATABASE_URL!)
         const result = await sql`
           SELECT id, name, description, price, active 
           FROM licenses 
           WHERE id = ${licenseId} AND active = true
         `
-        console.log("[v0] License lookup result:", result)
 
         if (result.length > 0) {
           return { success: true, license: result[0] }
@@ -1691,20 +1687,18 @@ export async function createImageWithHybridStorage(formData: FormData) {
 
         return { success: false }
       } catch (error) {
-        console.error("[v0] Error looking up license:", error)
+        console.error("Error looking up license:", error)
         return { success: false }
       }
     }
 
     const categoryResult = await getCategoryByName(category)
     if (!categoryResult.success) {
-      console.log("[v0] Category lookup failed for:", category)
       return { success: false, error: `Category not found: ${category}` }
     }
 
     const licenseResult = await getLicenseById(licenseId)
     if (!licenseResult.success) {
-      console.log("[v0] License lookup failed for:", licenseId)
       return { success: false, error: `License not found: ${licenseId}` }
     }
 
@@ -1732,7 +1726,6 @@ export async function createImageWithHybridStorage(formData: FormData) {
       try {
         const tagsArray = Array.isArray(imageData.tags) && imageData.tags.length > 0 ? imageData.tags : null
 
-        console.log("[v0] Inserting image into database...")
         const result = await sql`
           INSERT INTO images (title, description, category_id, license_id, price, image_url, thumbnail_url, 
                              active, featured, metadata, tags)
@@ -1755,10 +1748,9 @@ export async function createImageWithHybridStorage(formData: FormData) {
           )
           RETURNING id
         `
-        console.log("[v0] Database insert successful, ID:", result[0].id)
         return { success: true, message: "Image created successfully", imageId: result[0].id }
       } catch (dbError: any) {
-        console.error("[v0] Database insertion failed:", dbError)
+        console.error("Database insertion failed:", dbError)
         return { success: false, message: dbError.message || "Database error" }
       }
     }
@@ -1780,10 +1772,7 @@ export async function createImageWithHybridStorage(formData: FormData) {
     }
   } catch (error: any) {
     console.error("[v0] Error in createImageWithHybridStorage:", error)
-    return {
-      success: false,
-      error: `Upload failed: ${error.message || error.toString()}`,
-    }
+    return { success: false, error: error.message || "Upload failed" }
   }
 }
 

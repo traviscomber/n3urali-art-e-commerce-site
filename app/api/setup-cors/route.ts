@@ -3,42 +3,38 @@ import { WorkingBackblazeStorage } from "@/lib/backblaze-working"
 
 export async function POST(request: NextRequest) {
   try {
-    const { origins } = await request.json()
+    const { allowedDomains } = await request.json()
 
     const storage = new WorkingBackblazeStorage()
+    const result = await storage.configureBucketCORS()
 
-    // Default origins if none provided
-    const allowedOrigins = origins || [
-      "https://n3uralia360.art",
-      "https://*.n3uralia360.art",
-      "http://localhost:3000",
-      "https://*.vercel.app",
-    ]
-
-    await storage.configureBucketCORS(allowedOrigins)
-
-    return NextResponse.json({
-      success: true,
-      message: "CORS configured successfully",
-      origins: allowedOrigins,
-    })
-  } catch (error: any) {
-    console.error("[v0] CORS setup failed:", error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json(result)
+  } catch (error) {
+    console.error("[v0] CORS setup API error:", error)
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    )
   }
 }
 
 export async function GET() {
   try {
     const storage = new WorkingBackblazeStorage()
-    const corsRules = await storage.getBucketCORS()
+    const result = await storage.getBucketCORS()
 
-    return NextResponse.json({
-      success: true,
-      corsRules,
-    })
-  } catch (error: any) {
-    console.error("[v0] Failed to get CORS config:", error)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json(result)
+  } catch (error) {
+    console.error("[v0] CORS check API error:", error)
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    )
   }
 }

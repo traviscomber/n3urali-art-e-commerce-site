@@ -1,16 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { BackblazeCorsManager } from "@/lib/backblaze-cors-setup"
+import { WorkingBackblazeStorage } from "@/lib/backblaze-working"
 
 export async function POST(request: NextRequest) {
   try {
     const { allowedDomains } = await request.json()
 
-    const corsManager = new BackblazeCorsManager()
+    const storage = new WorkingBackblazeStorage()
 
-    const domains = allowedDomains || ["https://*", "http://localhost:*"]
-    const result = await corsManager.setupCorsForImageAccess(domains)
+    await storage.configureBucketCORS()
 
-    return NextResponse.json(result)
+    return NextResponse.json({
+      success: true,
+      message: "CORS configuration updated successfully for thumbnail access",
+    })
   } catch (error) {
     console.error("[v0] CORS setup API error:", error)
     return NextResponse.json(
@@ -25,10 +27,13 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const corsManager = new BackblazeCorsManager()
-    const result = await corsManager.getCurrentCorsRules()
+    const storage = new WorkingBackblazeStorage()
+    const corsRules = await storage.getBucketCORS()
 
-    return NextResponse.json(result)
+    return NextResponse.json({
+      success: true,
+      corsRules: corsRules,
+    })
   } catch (error) {
     console.error("[v0] CORS check API error:", error)
     return NextResponse.json(

@@ -263,19 +263,54 @@ export default function BrowsePage() {
         ],
       }
 
-      // Here you would integrate with your payment system
-      // For now, we'll simulate a successful purchase
       const confirmed = confirm(`Purchase "${image.title}" for $${image.price}?`)
 
       if (confirmed) {
-        // Simulate successful purchase
-        alert(`Thank you! Your purchase of "${image.title}" is complete. Check your email for download instructions.`)
+        // Create actual order in database
+        const orderResponse = await fetch("/api/orders/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            items: [
+              {
+                id: `${image.id}-standard`,
+                imageId: image.id,
+                title: image.title,
+                price: image.price,
+                licenseType: "standard",
+                previewUrl: image.thumbnail_url || image.image_url,
+                category: image.category_name === "equirectangular" ? "equirectangular" : "fisheye",
+                quantity: 1,
+              },
+            ],
+            total: image.price,
+            customerInfo: {
+              email: user.email,
+              firstName: user.user_metadata?.full_name?.split(" ")[0] || "Customer",
+              lastName: user.user_metadata?.full_name?.split(" ").slice(1).join(" ") || "",
+            },
+            paymentMethod: "demo", // Demo payment for direct purchases
+          }),
+        })
 
-        // Close preview modal if open
-        setPreviewImage(null)
+        const orderResult = await orderResponse.json()
 
-        // You could redirect to orders page or show download link
-        // window.location.href = '/account/orders'
+        if (orderResult.success) {
+          alert(
+            `Thank you! Your purchase of "${image.title}" is complete. Order #${orderResult.data.orderNumber} created. Check your account for download links.`,
+          )
+
+          // Close preview modal if open
+          setPreviewImage(null)
+
+          // Redirect to orders page to show the new order
+          window.location.href = "/account/orders"
+        } else {
+          console.error("[v0] Order creation failed:", orderResult.error)
+          alert(`Purchase failed: ${orderResult.error}. Please try again.`)
+        }
       }
     } catch (error) {
       console.error("Purchase error:", error)

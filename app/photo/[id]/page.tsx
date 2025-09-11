@@ -331,16 +331,52 @@ export default function PhotoDetailPage() {
 
     setPurchasing(true)
     try {
-      // Simulate purchase process
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const orderResponse = await fetch("/api/orders/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items: [
+            {
+              id: `${image.id}-standard`,
+              imageId: image.id,
+              title: image.title,
+              price: image.price,
+              licenseType: "standard",
+              previewUrl: image.thumbnail_url || image.image_url,
+              category: image.category_name === "equirectangular" ? "equirectangular" : "fisheye",
+              quantity: 1,
+            },
+          ],
+          total: image.price,
+          customerInfo: {
+            email: user.email,
+            firstName: user.user_metadata?.full_name?.split(" ")[0] || "Customer",
+            lastName: user.user_metadata?.full_name?.split(" ").slice(1).join(" ") || "",
+          },
+          paymentMethod: "demo", // Demo payment for direct purchases
+        }),
+      })
 
-      // In a real implementation, this would create an order and process payment
-      console.log("[v0] Purchase completed for image:", image?.id)
+      const orderResult = await orderResponse.json()
 
-      // Redirect to orders page or show success message
-      router.push("/account/orders")
+      if (orderResult.success) {
+        console.log("[v0] Purchase completed for image:", image?.id)
+        console.log("[v0] Order created:", orderResult.data.orderNumber)
+
+        // Show success message and redirect to orders page
+        alert(
+          `Thank you! Your purchase of "${image.title}" is complete. Order #${orderResult.data.orderNumber} created. Check your account for download links.`,
+        )
+        router.push("/account/orders")
+      } else {
+        console.error("[v0] Order creation failed:", orderResult.error)
+        alert(`Purchase failed: ${orderResult.error}. Please try again.`)
+      }
     } catch (error) {
       console.error("[v0] Purchase error:", error)
+      alert("There was an error processing your purchase. Please try again.")
     } finally {
       setPurchasing(false)
     }

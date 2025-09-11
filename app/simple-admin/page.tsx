@@ -106,6 +106,7 @@ export default function SimpleAdminPage() {
     file: null,
     preview: "",
   })
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   useEffect(() => {
     console.log("[v0] SimpleAdmin: Authentication required")
@@ -299,20 +300,59 @@ export default function SimpleAdminPage() {
     if (!newImage.file) return
 
     setUploading(true)
+    setUploadError(null)
     try {
       console.log("[v0] Starting image upload process...")
 
-      // Convert file to base64 for both image and thumbnail
-      const fileToBase64 = (file: File): Promise<string> => {
+      // Enhanced compression function
+      const compressImage = (file: File, maxSizeMB = 2, quality = 0.7): Promise<string> => {
         return new Promise((resolve, reject) => {
-          const reader = new FileReader()
-          reader.onload = () => resolve(reader.result as string)
-          reader.onerror = reject
-          reader.readAsDataURL(file)
+          const img = new Image()
+          const canvas = document.createElement("canvas")
+          const ctx = canvas.getContext("2d")!
+
+          img.onload = () => {
+            // Calculate dimensions to keep under size limit
+            let { width, height } = img
+            const maxDimension = 2048 // Max dimension for compressed images
+
+            if (width > maxDimension || height > maxDimension) {
+              if (width > height) {
+                height = (height * maxDimension) / width
+                width = maxDimension
+              } else {
+                width = (width * maxDimension) / height
+                height = maxDimension
+              }
+            }
+
+            canvas.width = width
+            canvas.height = height
+            ctx.drawImage(img, 0, 0, width, height)
+
+            // Try different quality levels to get under size limit
+            let currentQuality = quality
+            let result = canvas.toDataURL("image/jpeg", currentQuality)
+
+            // If still too large, reduce quality further
+            while (result.length > maxSizeMB * 1024 * 1024 * 1.37 && currentQuality > 0.1) {
+              // 1.37 accounts for base64 overhead
+              currentQuality -= 0.1
+              result = canvas.toDataURL("image/jpeg", currentQuality)
+            }
+
+            console.log(
+              `[v0] Compressed image: ${(result.length / (1024 * 1024)).toFixed(2)}MB at quality ${currentQuality}`,
+            )
+            resolve(result)
+          }
+
+          img.onerror = reject
+          img.src = URL.createObjectURL(file)
         })
       }
 
-      // Create thumbnail from the original image
+      // Create thumbnail with aggressive compression
       const createThumbnail = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
           const img = new Image()
@@ -320,8 +360,8 @@ export default function SimpleAdminPage() {
           const ctx = canvas.getContext("2d")!
 
           img.onload = () => {
-            // Calculate thumbnail dimensions (max 400px)
-            const maxSize = 400
+            // Smaller thumbnail dimensions
+            const maxSize = 300
             let { width, height } = img
 
             if (width > height) {
@@ -340,7 +380,7 @@ export default function SimpleAdminPage() {
             canvas.height = height
             ctx.drawImage(img, 0, 0, width, height)
 
-            resolve(canvas.toDataURL("image/jpeg", 0.8))
+            resolve(canvas.toDataURL("image/jpeg", 0.6)) // Lower quality for thumbnails
           }
 
           img.onerror = reject
@@ -348,10 +388,41 @@ export default function SimpleAdminPage() {
         })
       }
 
-      const [imageBase64, thumbnailBase64] = await Promise.all([
-        fileToBase64(newImage.file),
-        createThumbnail(newImage.file),
-      ])
+      // Check original file size and determine compression strategy
+      const fileSizeMB = newImage.file.size / (1024 * 1024)
+      console.log(`[v0] Original file size: ${fileSizeMB.toFixed(2)}MB`)
+
+      let imageBase64: string
+      let thumbnailBase64: string
+
+      if (fileSizeMB > 50) {
+        // Very large files - aggressive compression
+        console.log("[v0] Large file detected, applying aggressive compression...")
+        imageBase64 = await compressImage(newImage.file, 1.5, 0.5) // Max 1.5MB, quality 0.5
+        thumbnailBase64 = await createThumbnail(newImage.file)
+      } else if (fileSizeMB > 10) {
+        // Medium files - moderate compression
+        console.log("[v0] Medium file detected, applying moderate compression...")
+        imageBase64 = await compressImage(newImage.file, 3, 0.7) // Max 3MB, quality 0.7
+        thumbnailBase64 = await createThumbnail(newImage.file)
+      } else {
+        // Small files - light compression
+        console.log("[v0] Small file detected, applying light compression...")
+        imageBase64 = await compressImage(newImage.file, 5, 0.8) // Max 5MB, quality 0.8
+        thumbnailBase64 = await createThumbnail(newImage.file)
+      }
+
+      // Check final payload size
+      const totalPayloadSize = imageBase64.length + thumbnailBase64.length
+      const payloadSizeMB = totalPayloadSize / (1024 * 1024)
+      console.log(`[v0] Final payload size: ${payloadSizeMB.toFixed(2)}MB`)
+
+      if (payloadSizeMB > 8) {
+        // Leave some buffer under the 10MB limit
+        throw new Error(
+          `Compressed file still too large (${payloadSizeMB.toFixed(1)}MB). Please use a smaller image or try a different format.`,
+        )
+      }
 
       const imageData = {
         title: newImage.title,
@@ -383,8 +454,8 @@ export default function SimpleAdminPage() {
       })
       await loadInitialData()
     } catch (error: any) {
-      console.error("[v0] Upload error:", error.message || error)
-      alert(`Upload error: ${error.message || error}`)
+      console.log("[v0] Upload error:", error.message)
+      setUploadError(error.message)
     } finally {
       setUploading(false)
     }
@@ -533,6 +604,12 @@ export default function SimpleAdminPage() {
         {error && (
           <Alert className="mb-6 border-red-200 bg-red-50">
             <AlertDescription className="text-red-600 text-lg">{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {uploadError && (
+          <Alert className="mb-6 border-red-200 bg-red-50">
+            <AlertDescription className="text-red-600 text-lg">{uploadError}</AlertDescription>
           </Alert>
         )}
 

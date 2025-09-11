@@ -37,12 +37,14 @@ ON order_items (order_id, image_id);
 -- Step 2: Fix broken image URLs that are causing "Image Unavailable"
 -- Based on the failing URL pattern from debug logs
 
+-- Fixed shell syntax error and simplified table name
 -- Create backup of current URLs before fixing
-CREATE TABLE IF NOT EXISTS images_url_backup_$(date +%Y%m%d) AS 
+CREATE TABLE IF NOT EXISTS images_url_backup AS 
 SELECT id, image_url, thumbnail_url, created_at 
 FROM images 
 WHERE image_url LIKE '%backblazeb2.com%' OR thumbnail_url LIKE '%backblazeb2.com%';
 
+-- Simplified URL replacement logic to avoid syntax issues
 -- Fix URLs that point to non-existent files
 -- Replace broken Backblaze URLs with placeholder images temporarily
 UPDATE images 
@@ -51,13 +53,13 @@ SET
     -- If URL contains the failing pattern, replace with category-specific placeholder
     WHEN image_url LIKE '%backblazeb2.com/file/Neuraliart/thumbnails/%' 
     THEN '/placeholder.svg?height=800&width=800&text=' || COALESCE(
-      (SELECT REPLACE(UPPER(name), ' ', '+') FROM categories WHERE id = images.category_id), 
+      (SELECT UPPER(name) FROM categories WHERE id = images.category_id), 
       'IMAGE'
     )
     -- If URL contains old uploads structure, replace with placeholder
     WHEN image_url LIKE '%/uploads/%' 
     THEN '/placeholder.svg?height=800&width=800&text=' || COALESCE(
-      (SELECT REPLACE(UPPER(name), ' ', '+') FROM categories WHERE id = images.category_id), 
+      (SELECT UPPER(name) FROM categories WHERE id = images.category_id), 
       'IMAGE'
     )
     ELSE image_url
@@ -66,13 +68,13 @@ SET
     -- Fix thumbnail URLs that are causing failures
     WHEN thumbnail_url LIKE '%backblazeb2.com/file/Neuraliart/thumbnails/%' 
     THEN '/placeholder.svg?height=400&width=400&text=' || COALESCE(
-      (SELECT REPLACE(UPPER(name), ' ', '+') FROM categories WHERE id = images.category_id), 
+      (SELECT UPPER(name) FROM categories WHERE id = images.category_id), 
       'THUMBNAIL'
     )
     -- Fix old uploads structure
     WHEN thumbnail_url LIKE '%/uploads/%' 
     THEN '/placeholder.svg?height=400&width=400&text=' || COALESCE(
-      (SELECT REPLACE(UPPER(name), ' ', '+') FROM categories WHERE id = images.category_id), 
+      (SELECT UPPER(name) FROM categories WHERE id = images.category_id), 
       'THUMBNAIL'
     )
     ELSE thumbnail_url

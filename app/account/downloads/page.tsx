@@ -28,13 +28,21 @@ export default function DownloadsPage() {
 
   const fetchDownloads = async () => {
     try {
+      console.log("[v0] Fetching user downloads...")
       const response = await fetch("/api/downloads/user")
-      if (!response.ok) throw new Error("Failed to fetch downloads")
+      console.log("[v0] Downloads response status:", response.status)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("[v0] Downloads fetch failed:", errorText)
+        throw new Error("Failed to fetch downloads")
+      }
 
       const data = await response.json()
+      console.log("[v0] Downloads data:", data)
       setDownloads(data.downloads)
     } catch (error) {
-      console.error("Error fetching downloads:", error)
+      console.error("[v0] Error fetching downloads:", error)
       toast.error("Failed to load downloads")
     } finally {
       setLoading(false)
@@ -42,9 +50,11 @@ export default function DownloadsPage() {
   }
 
   const handleDownload = async (orderItemId: number, imageTitle: string) => {
+    console.log("[v0] Starting download for order item:", orderItemId)
     setDownloadingIds((prev) => new Set(prev).add(orderItemId))
 
     try {
+      console.log("[v0] Generating download token...")
       // Generate download token
       const response = await fetch("/api/download/generate", {
         method: "POST",
@@ -52,18 +62,27 @@ export default function DownloadsPage() {
         body: JSON.stringify({ orderItemId }),
       })
 
-      if (!response.ok) throw new Error("Failed to generate download link")
+      console.log("[v0] Generate token response status:", response.status)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("[v0] Token generation failed:", errorText)
+        throw new Error("Failed to generate download link")
+      }
 
       const data = await response.json()
+      console.log("[v0] Token generation successful:", data)
 
       // Open download in new tab
+      console.log("[v0] Opening download URL:", data.downloadUrl)
       window.open(data.downloadUrl, "_blank")
       toast.success(`Download started for ${imageTitle}`)
 
       // Refresh downloads to update counts
       setTimeout(fetchDownloads, 1000)
     } catch (error) {
-      console.error("Download error:", error)
+      console.error("[v0] Download error:", error)
+      console.error("[v0] Download error details:", error instanceof Error ? error.message : String(error))
       toast.error("Failed to start download")
     } finally {
       setDownloadingIds((prev) => {

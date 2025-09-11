@@ -302,22 +302,76 @@ export default function SimpleAdminPage() {
     try {
       console.log("[v0] Starting image upload process...")
 
+      // Convert file to base64 for both image and thumbnail
+      const fileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.onerror = reject
+          reader.readAsDataURL(file)
+        })
+      }
+
+      // Create thumbnail from the original image
+      const createThumbnail = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const img = new Image()
+          const canvas = document.createElement("canvas")
+          const ctx = canvas.getContext("2d")!
+
+          img.onload = () => {
+            // Calculate thumbnail dimensions (max 400px)
+            const maxSize = 400
+            let { width, height } = img
+
+            if (width > height) {
+              if (width > maxSize) {
+                height = (height * maxSize) / width
+                width = maxSize
+              }
+            } else {
+              if (height > maxSize) {
+                width = (width * maxSize) / height
+                height = maxSize
+              }
+            }
+
+            canvas.width = width
+            canvas.height = height
+            ctx.drawImage(img, 0, 0, width, height)
+
+            resolve(canvas.toDataURL("image/jpeg", 0.8))
+          }
+
+          img.onerror = reject
+          img.src = URL.createObjectURL(file)
+        })
+      }
+
+      const [imageBase64, thumbnailBase64] = await Promise.all([
+        fileToBase64(newImage.file),
+        createThumbnail(newImage.file),
+      ])
+
       const imageData = {
         title: newImage.title,
         description: newImage.description,
         category_name: newImage.category,
         rights_type: newImage.rightsType,
         price: Number.parseFloat(newImage.price) || 0,
+        image_url: imageBase64,
+        thumbnail_url: thumbnailBase64,
+        original_file_size: newImage.file.size,
       }
 
-      // Use hybrid storage system that automatically chooses Blob or Database
-      const result = await createImageWithHybridStorage(newImage.file, imageData, licenses)
+      // Use the correct function name from admin-actions
+      const result = await createImageWithCategoryObject(imageData)
 
       if (!result.success) {
         throw new Error(result.error || "Failed to save image")
       }
 
-      console.log("[v0] Image saved successfully with hybrid storage")
+      console.log("[v0] Image saved successfully")
       setNewImage({
         title: "",
         description: "",
@@ -990,47 +1044,7 @@ export default function SimpleAdminPage() {
   )
 }
 
-const createImageWithHybridStorage = async (file: File, imageData: any, licenses: License[]) => {
-  const formData = new FormData()
-  formData.append("file", file)
-  formData.append("title", imageData.title || "")
-  formData.append("description", imageData.description || "")
-  formData.append("category", imageData.category_name || "")
-
-  console.log("[v0] License mapping debug - rights_type:", imageData.rights_type)
-  console.log(
-    "[v0] License mapping debug - available licenses:",
-    licenses.map((l) => ({ id: l.id, name: l.name })),
-  )
-
-  let licenseId = ""
-  if (imageData.rights_type === "exclusive") {
-    // Find the exclusive license ID
-    const exclusiveLicense = licenses.find((license) => license.name === "EXCLUSIVE")
-    console.log("[v0] License mapping debug - found exclusive license:", exclusiveLicense)
-    licenseId = exclusiveLicense?.id || ""
-  } else if (imageData.rights_type === "non-exclusive") {
-    // Find the non-exclusive license ID
-    const nonExclusiveLicense = licenses.find((license) => license.name === "NON_EXCLUSIVE")
-    console.log("[v0] License mapping debug - found non-exclusive license:", nonExclusiveLicense)
-    licenseId = nonExclusiveLicense?.id || ""
-  } else {
-    // For "both", default to non-exclusive license
-    const nonExclusiveLicense = licenses.find((license) => license.name === "NON_EXCLUSIVE")
-    console.log("[v0] License mapping debug - found non-exclusive license (both case):", nonExclusiveLicense)
-    licenseId = nonExclusiveLicense?.id || ""
-  }
-
-  console.log("[v0] License mapping debug - final licenseId:", licenseId)
-
-  if (!licenseId) {
-    throw new Error(
-      `License not found for rights_type: ${imageData.rights_type}. Available licenses: ${licenses.map((l) => l.name).join(", ")}`,
-    )
-  }
-
-  formData.append("license_id", licenseId)
-
-  const { createImageWithHybridStorage: actualFunction } = await import("@/app/actions/admin-actions")
-  return actualFunction(formData)
+const createImageWithCategoryObject = async (imageData: any) => {
+  const { createImageWithCategoryObject: actualFunction } = await import("@/app/actions/admin-actions")
+  return actualFunction(imageData)
 }

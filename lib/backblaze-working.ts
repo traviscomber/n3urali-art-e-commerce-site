@@ -112,7 +112,21 @@ export class WorkingBackblazeStorage {
         throw new Error(`Authentication failed: ${response.status} - ${responseText}`)
       }
 
-      const data = JSON.parse(responseText)
+      let data
+      try {
+        data = JSON.parse(responseText)
+      } catch (parseError) {
+        // Check if this is a server error response
+        if (
+          responseText.includes("A server error has occurred") ||
+          responseText.includes("INTERNAL_FUNCTION_INVOCATION_FAILED")
+        ) {
+          console.warn("[v0] Backblaze server error detected, retrying authentication...")
+          throw new Error("Backblaze server temporarily unavailable - please try again")
+        }
+        throw new Error(`Invalid JSON response from Backblaze: ${responseText.substring(0, 100)}...`)
+      }
+
       console.log("[v0] B2 authentication successful, response keys:", Object.keys(data))
 
       this.authToken = data.authorizationToken
@@ -508,13 +522,14 @@ export class WorkingBackblazeStorage {
         },
       ]
 
-      const response = await fetch(`${this.apiUrl}/b2api/v3/b2_put_bucket_cors`, {
+      const response = await fetch(`${this.apiUrl}/b2api/v3/b2_update_bucket`, {
         method: "POST",
         headers: {
           Authorization: this.authToken!,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          accountId: this.config.keyId,
           bucketId: bucketId,
           corsRules: corsRules,
         }),
@@ -552,17 +567,81 @@ export class WorkingBackblazeStorage {
         }),
       })
 
+      const responseText = await response.text()
+
       if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`Failed to get bucket CORS: ${response.status} - ${errorText}`)
+        if (response.status === 404 || responseText.includes("not_found")) {
+          console.log("[v0] No CORS configuration found, returning empty array")
+          return []
+        }
+        throw new Error(`Failed to get bucket CORS: ${response.status} - ${responseText}`)
       }
 
-      const result = await response.json()
+      let result
+      try {
+        result = JSON.parse(responseText)
+      } catch (parseError) {
+        // Check if this is a server error response
+        if (
+          responseText.includes("A server error has occurred") ||
+          responseText.includes("INTERNAL_FUNCTION_INVOCATION_FAILED")
+        ) {
+          console.warn("[v0] Backblaze server error during CORS check, returning empty array")
+          return []
+        }
+        throw new Error(`Invalid JSON response from Backblaze: ${responseText.substring(0, 100)}...`)
+      }
+
       console.log("[v0] Current CORS configuration:", result.corsRules)
       return result.corsRules || []
     } catch (error: any) {
       console.error("[v0] Failed to get CORS configuration:", error)
+      if (
+        error.message.includes("not_found") ||
+        error.message.includes("404") ||
+        error.message.includes("server temporarily unavailable")
+      ) {
+        console.log("[v0] CORS not configured yet or server error, returning empty array")
+        return []
+      }
       throw new Error(`Failed to get CORS configuration: ${error.message}`)
+    }
+  }
+
+  async getAuthenticatedDownloadUrl(fileName: string): Promise<string> {
+    try {
+      if (!this.authToken || !this.downloadUrl) {
+        await this.authenticate()
+      }
+
+      // For private buckets, we need to use the authenticated download URL
+      // This includes the authorization token in the URL
+      const authenticatedUrl = `${this.downloadUrl}/file/${this.config.bucketName}/${fileName}?Authorization=${this.authToken}`
+
+      console.log("[v0] Generated authenticated download URL for:", fileName)
+      return authenticatedUrl
+    } catch (error: any) {
+      console.error("[v0] Failed to generate authenticated download URL:", error)
+      throw new Error(`Failed to generate authenticated download URL: ${error.message}`)
+    }
+  }
+
+  convertToProxyUrl(originalUrl: string): string {
+    try {
+      // Extract the file path from the original Backblaze URL
+      const urlPattern = /https:\/\/f\d+\.backblazeb2\.com\/file\/[^/]+\/(.+)/
+      const match = originalUrl.match(urlPattern)
+
+      if (match && match[1]) {
+        const filePath = match[1]
+        return `/api/image-proxy/${filePath}`
+      }
+
+      // If it's already a proxy URL or doesn't match the pattern, return as-is
+      return originalUrl
+    } catch (error) {
+      console.error("[v0] Failed to convert URL to proxy:", error)
+      return originalUrl
     }
   }
 }

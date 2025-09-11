@@ -384,7 +384,7 @@ function handleDatabaseError(error: any, functionName?: string): { success: fals
   }
 
   // Handle Next.js server action body size limits
-  if (error.message && error.message.includes("Body exceeded")) {
+  if (error?.message && error.message.includes("Body exceeded")) {
     return {
       success: false,
       error: "Upload payload too large. Please use a smaller image or contact support.",
@@ -392,7 +392,7 @@ function handleDatabaseError(error: any, functionName?: string): { success: fals
   }
 
   // Handle JSON parsing errors from large payloads
-  if (error.message && error.message.includes("Unexpected token")) {
+  if (error?.message && error.message.includes("Unexpected token")) {
     return {
       success: false,
       error: "Server error processing large file. Please try a smaller image or contact support.",
@@ -400,16 +400,19 @@ function handleDatabaseError(error: any, functionName?: string): { success: fals
   }
 
   // Handle network errors
-  if (error.message && (error.message.includes("fetch") || error.message.includes("network"))) {
+  if (error?.message && (error.message.includes("fetch") || error.message.includes("network"))) {
     return {
       success: false,
       error: "Network error during upload. Please check your connection and try again.",
     }
   }
 
+  const errorMessage =
+    error instanceof Error ? error.message : typeof error === "string" ? error : "Database operation failed"
+
   return {
     success: false,
-    error: error instanceof Error ? error.message : "Database operation failed",
+    error: errorMessage,
   }
 }
 
@@ -525,19 +528,31 @@ export async function createImageWithCategoryObject(imageData: {
   original_file_size?: number
 }) {
   try {
+    const imageUrlPreview = imageData.image_url
+      ? `${imageData.image_url.substring(0, 50)}... (${Math.round(imageData.image_url.length / 1024)}KB)`
+      : "No image URL"
+    const thumbnailUrlPreview = imageData.thumbnail_url
+      ? `${imageData.thumbnail_url.substring(0, 50)}... (${Math.round(imageData.thumbnail_url.length / 1024)}KB)`
+      : "No thumbnail URL"
+
     console.log("[v0] Processing upload with data:", {
       ...imageData,
-      image_url: `${imageData.image_url.substring(0, 50)}... (${Math.round(imageData.image_url.length / 1024)}KB)`,
-      thumbnail_url: `${imageData.thumbnail_url.substring(0, 50)}... (${Math.round(imageData.thumbnail_url.length / 1024)}KB)`,
+      image_url: imageUrlPreview,
+      thumbnail_url: thumbnailUrlPreview,
       original_file_size: imageData.original_file_size
         ? `${(imageData.original_file_size / (1024 * 1024)).toFixed(2)}MB`
         : "unknown",
     })
 
+    if (!imageData.image_url || !imageData.thumbnail_url) {
+      return {
+        success: false,
+        error: "Missing required image data. Please ensure both image and thumbnail are provided.",
+      }
+    }
+
     const totalPayloadSize = imageData.image_url.length + imageData.thumbnail_url.length
     const payloadSizeMB = totalPayloadSize / (1024 * 1024)
-
-    console.log("[v0] Total payload size:", `${payloadSizeMB.toFixed(2)}MB`)
 
     if (payloadSizeMB > 10) {
       console.log("[v0] Payload too large for database:", `${payloadSizeMB.toFixed(2)}MB`)
@@ -569,18 +584,37 @@ export async function createImageWithCategoryObject(imageData: {
       categoryId = categoryResult[0].id
     }
 
-    // Get default PRO license
-    const defaultLicense = await sql`
-      SELECT id FROM licenses WHERE name = 'PRO' LIMIT 1
+    console.log("[v0] Looking up default license...")
+
+    // First try to find PRO license
+    let defaultLicense = await sql`
+      SELECT id FROM licenses WHERE name = 'PRO' AND active = true LIMIT 1
     `
+
+    // If no PRO license, try other common names
+    if (defaultLicense.length === 0) {
+      console.log("[v0] No PRO license found, trying Standard...")
+      defaultLicense = await sql`
+        SELECT id FROM licenses WHERE name ILIKE '%standard%' AND active = true LIMIT 1
+      `
+    }
+
+    // If still no license, get the first active license
+    if (defaultLicense.length === 0) {
+      console.log("[v0] No Standard license found, getting first active license...")
+      defaultLicense = await sql`
+        SELECT id FROM licenses WHERE active = true ORDER BY price ASC LIMIT 1
+      `
+    }
 
     const licenseId = defaultLicense.length > 0 ? defaultLicense[0].id : null
 
     if (!licenseId) {
-      return { success: false, error: "No default license found" }
+      console.log("[v0] No active licenses found in database")
+      return { success: false, error: "No active licenses found. Please add at least one license to the system." }
     }
 
-    console.log("[v0] Inserting image, license_id:", licenseId, "price:", imageData.price)
+    console.log("[v0] Using license_id:", licenseId, "for upload")
 
     let result
     try {
@@ -627,7 +661,7 @@ export async function createImageWithCategoryObject(imageData: {
 
     return { success: true, data: result }
   } catch (error) {
-    return handleDatabaseError(error)
+    return handleDatabaseError(error, "createImageWithCategoryObject")
   }
 }
 
@@ -828,6 +862,34 @@ export async function getCategoriesOptimized() {
     return { success: true, data }
   } catch (error) {
     console.error("[v0] Get categories error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
+
+export async function getLicenses() {
+  try {
+    const data = await getCachedLicenses()
+    console.log("[v0] getLicenses returning", data.length, "licenses")
+    return { success: true, data }
+  } catch (error) {
+    console.error("[v0] Get licenses error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
+
+export async function getDatabaseStats() {
+  try {
+    const data = await getCachedDatabaseStats()
+    console.log("[v0] getDatabaseStats returning stats:", data)
+    return { success: true, data }
+  } catch (error) {
+    console.error("[v0] Get database stats error:", error)
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",

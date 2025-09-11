@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -33,8 +33,17 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
   const [filteredImages, setFilteredImages] = useState<GalleryImage[]>(images)
   const { addItem } = useCart()
 
+  const transformedImages = useMemo(() => {
+    return images.map((image) => ({
+      ...image,
+      preview_url: image.preview_url.includes("backblazeb2.com")
+        ? `/api/image-proxy/${image.preview_url.split("/file/")[1]?.split("/").slice(1).join("/")}`
+        : image.preview_url,
+    }))
+  }, [images])
+
   useEffect(() => {
-    let filtered = images
+    let filtered = transformedImages
 
     if (searchTerm) {
       filtered = filtered.filter(
@@ -49,7 +58,7 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
     }
 
     setFilteredImages(filtered)
-  }, [images, searchTerm, categoryFilter])
+  }, [transformedImages, searchTerm, categoryFilter])
 
   const handleAddToCart = (image: GalleryImage) => {
     addItem({

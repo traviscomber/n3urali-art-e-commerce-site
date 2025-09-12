@@ -8,7 +8,9 @@ export interface CartItem {
   imageId: string
   title: string
   price: number
-  licenseType: "standard" | "extended" | "commercial"
+  licenseId: string
+  licenseName: string
+  licensePrice: number
   previewUrl: string
   category: "equirectangular" | "fisheye"
   quantity: number
@@ -45,12 +47,12 @@ function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "ADD_ITEM":
       const existingItem = state.items.find(
-        (item) => item.imageId === action.payload.imageId && item.licenseType === action.payload.licenseType,
+        (item) => item.imageId === action.payload.imageId && item.licenseId === action.payload.licenseId,
       )
 
       if (existingItem) {
         const updatedItems = state.items.map((item) =>
-          item.imageId === action.payload.imageId && item.licenseType === action.payload.licenseType
+          item.imageId === action.payload.imageId && item.licenseId === action.payload.licenseId
             ? { ...item, quantity: item.quantity + 1 }
             : item,
         )

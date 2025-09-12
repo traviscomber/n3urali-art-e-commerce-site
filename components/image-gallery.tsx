@@ -10,6 +10,8 @@ import { Search, Filter, Grid3X3, List, Eye, Download } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
 import NextImage from "next/image"
 import { ImageUrlHandler } from "@/lib/image-url-handler"
+import { LicenseSelector } from "@/components/license-selector"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 interface GalleryImage {
   id: string
@@ -32,6 +34,7 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [filteredImages, setFilteredImages] = useState<GalleryImage[]>(images)
+  const [selectedImageForLicense, setSelectedImageForLicense] = useState<GalleryImage | null>(null)
   const { addItem } = useCart()
 
   const transformedImages = useMemo(() => {
@@ -60,16 +63,26 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
   }, [transformedImages, searchTerm, categoryFilter])
 
   const handleAddToCart = (image: GalleryImage) => {
+    setSelectedImageForLicense(image)
+  }
+
+  const handleLicenseSelect = (license: any, totalPrice: number) => {
+    if (!selectedImageForLicense) return
+
     addItem({
-      id: image.id,
-      imageId: image.id,
-      title: image.title,
-      price: image.price,
-      licenseType: "standard",
-      previewUrl: image.preview_url,
-      category: image.category,
+      id: `${selectedImageForLicense.id}-${license.id}`,
+      imageId: selectedImageForLicense.id,
+      title: selectedImageForLicense.title,
+      price: totalPrice,
+      licenseId: license.id,
+      licenseName: license.name,
+      licensePrice: license.price,
+      previewUrl: selectedImageForLicense.preview_url,
+      category: selectedImageForLicense.category,
       quantity: 1,
     })
+
+    setSelectedImageForLicense(null)
   }
 
   return (
@@ -209,6 +222,31 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
           <p className="text-muted-foreground">Try adjusting your search or filter criteria.</p>
         </div>
       )}
+
+      {/* License Selection Dialog */}
+      <Dialog open={!!selectedImageForLicense} onOpenChange={(open) => !open && setSelectedImageForLicense(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Choose License</DialogTitle>
+          </DialogHeader>
+          {selectedImageForLicense && (
+            <div className="space-y-4">
+              <div className="text-center">
+                <h3 className="font-semibold">{selectedImageForLicense.title}</h3>
+                <p className="text-sm text-muted-foreground">Base price: ${selectedImageForLicense.price}</p>
+              </div>
+
+              <LicenseSelector basePrice={selectedImageForLicense.price} onLicenseSelect={handleLicenseSelect} />
+
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setSelectedImageForLicense(null)} className="flex-1">
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

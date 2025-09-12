@@ -4,13 +4,15 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Download, Eye, Clock, CheckCircle } from "lucide-react"
+import { Progress } from "@/components/ui/progress"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Download, Eye, Clock, CheckCircle, AlertTriangle, Ban } from "lucide-react"
 import { toast } from "sonner"
 
 interface UserDownload {
-  order_id: number
+  order_item_id: string
   image_title: string
-  license_type: string
+  license_name: string
   download_count: number
   download_limit: number
   order_date: string
@@ -20,7 +22,7 @@ interface UserDownload {
 export default function DownloadsPage() {
   const [downloads, setDownloads] = useState<UserDownload[]>([])
   const [loading, setLoading] = useState(true)
-  const [downloadingIds, setDownloadingIds] = useState<Set<number>>(new Set())
+  const [downloadingIds, setDownloadingIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     fetchDownloads()
@@ -49,13 +51,27 @@ export default function DownloadsPage() {
     }
   }
 
-  const handleDownload = async (orderItemId: number, imageTitle: string) => {
+  const handleDownload = async (
+    orderItemId: string,
+    imageTitle: string,
+    canDownload: boolean,
+    downloadCount: number,
+    downloadLimit: number,
+  ) => {
+    if (!canDownload) {
+      if (downloadCount >= downloadLimit) {
+        toast.error(`Download limit reached for ${imageTitle}. You have used all ${downloadLimit} downloads.`)
+      } else {
+        toast.error("Download not available. Please check your order status.")
+      }
+      return
+    }
+
     console.log("[v0] Starting download for order item:", orderItemId)
     setDownloadingIds((prev) => new Set(prev).add(orderItemId))
 
     try {
       console.log("[v0] Generating download token...")
-      // Generate download token
       const response = await fetch("/api/download/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,7 +83,15 @@ export default function DownloadsPage() {
       if (!response.ok) {
         const errorText = await response.text()
         console.error("[v0] Token generation failed:", errorText)
-        throw new Error("Failed to generate download link")
+
+        if (response.status === 403) {
+          toast.error("Download limit exceeded or order not found")
+        } else if (response.status === 404) {
+          toast.error("Image not found")
+        } else {
+          toast.error("Failed to generate download link")
+        }
+        return
       }
 
       const data = await response.json()
@@ -76,7 +100,13 @@ export default function DownloadsPage() {
       // Open download in new tab
       console.log("[v0] Opening download URL:", data.downloadUrl)
       window.open(data.downloadUrl, "_blank")
-      toast.success(`Download started for ${imageTitle}`)
+
+      const remainingDownloads = downloadLimit - downloadCount - 1
+      if (remainingDownloads > 0) {
+        toast.success(`Download started for ${imageTitle}. ${remainingDownloads} downloads remaining.`)
+      } else {
+        toast.success(`Download started for ${imageTitle}. This was your final download.`)
+      }
 
       // Refresh downloads to update counts
       setTimeout(fetchDownloads, 1000)
@@ -93,16 +123,23 @@ export default function DownloadsPage() {
     }
   }
 
-  const getLicenseBadgeColor = (license: string) => {
-    switch (license) {
-      case "standard":
-        return "bg-secondary text-secondary-foreground"
-      case "extended":
-        return "bg-primary text-primary-foreground"
-      case "commercial":
-        return "bg-accent text-accent-foreground"
-      default:
-        return "bg-muted text-muted-foreground"
+  const getLicenseBadgeColor = (licenseName: string) => {
+    const name = licenseName.toLowerCase()
+    if (name.includes("standard")) return "bg-secondary text-secondary-foreground"
+    if (name.includes("extended")) return "bg-primary text-primary-foreground"
+    if (name.includes("commercial")) return "bg-accent text-accent-foreground"
+    return "bg-muted text-muted-foreground"
+  }
+
+  const getDownloadStatus = (download: UserDownload) => {
+    const usagePercent = (download.download_count / download.download_limit) * 100
+
+    if (download.download_count >= download.download_limit) {
+      return { status: "exhausted", color: "text-red-600", icon: Ban }
+    } else if (usagePercent >= 80) {
+      return { status: "warning", color: "text-yellow-600", icon: AlertTriangle }
+    } else {
+      return { status: "available", color: "text-green-600", icon: CheckCircle }
     }
   }
 
@@ -146,54 +183,93 @@ export default function DownloadsPage() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {downloads.map((download) => (
-            <Card key={`${download.order_id}-${download.image_title}`}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-lg">{download.image_title}</CardTitle>
-                    <CardDescription className="flex items-center gap-2 mt-1">
-                      <Clock className="h-4 w-4" />
-                      Purchased {new Date(download.order_date).toLocaleDateString()}
-                    </CardDescription>
+          {downloads.map((download) => {
+            const downloadStatus = getDownloadStatus(download)
+            const StatusIcon = downloadStatus.icon
+            const usagePercent = (download.download_count / download.download_limit) * 100
+
+            return (
+              <Card key={download.order_item_id}>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-lg">{download.image_title}</CardTitle>
+                      <CardDescription className="flex items-center gap-2 mt-1">
+                        <Clock className="h-4 w-4" />
+                        Purchased {new Date(download.order_date).toLocaleDateString()}
+                      </CardDescription>
+                    </div>
+                    <Badge className={getLicenseBadgeColor(download.license_name)}>{download.license_name}</Badge>
                   </div>
-                  <Badge className={getLicenseBadgeColor(download.license_type)}>
-                    {download.license_type.charAt(0).toUpperCase() + download.license_type.slice(1)} License
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Download className="h-4 w-4" />
-                      {download.download_count}/{download.download_limit} downloads used
-                    </span>
-                    {download.can_download && (
-                      <span className="flex items-center gap-1 text-green-600">
-                        <CheckCircle className="h-4 w-4" />
-                        Available
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-2">
+                        <Download className="h-4 w-4" />
+                        Downloads Used: {download.download_count}/{download.download_limit}
                       </span>
-                    )}
+                      <span className={`flex items-center gap-1 ${downloadStatus.color}`}>
+                        <StatusIcon className="h-4 w-4" />
+                        {downloadStatus.status === "exhausted" && "Limit Reached"}
+                        {downloadStatus.status === "warning" && "Almost Full"}
+                        {downloadStatus.status === "available" && "Available"}
+                      </span>
+                    </div>
+                    <Progress value={usagePercent} className="h-2" />
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <Eye className="h-4 w-4 mr-2" />
-                      Preview
-                    </Button>
-                    <Button
-                      onClick={() => handleDownload(download.order_id, download.image_title)}
-                      disabled={!download.can_download || downloadingIds.has(download.order_id)}
-                      size="sm"
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      {downloadingIds.has(download.order_id) ? "Generating..." : "Download"}
-                    </Button>
+
+                  {downloadStatus.status === "warning" && (
+                    <Alert>
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>
+                        You have {download.download_limit - download.download_count} downloads remaining for this image.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {downloadStatus.status === "exhausted" && (
+                    <Alert variant="destructive">
+                      <Ban className="h-4 w-4" />
+                      <AlertDescription>
+                        Download limit reached. Contact support if you need additional downloads.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">
+                        <Eye className="h-4 w-4 mr-2" />
+                        Preview
+                      </Button>
+                      <Button
+                        onClick={() =>
+                          handleDownload(
+                            download.order_item_id,
+                            download.image_title,
+                            download.can_download,
+                            download.download_count,
+                            download.download_limit,
+                          )
+                        }
+                        disabled={!download.can_download || downloadingIds.has(download.order_item_id)}
+                        size="sm"
+                        variant={download.can_download ? "default" : "secondary"}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        {downloadingIds.has(download.order_item_id)
+                          ? "Generating..."
+                          : download.can_download
+                            ? "Download"
+                            : "Unavailable"}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
       )}
     </div>

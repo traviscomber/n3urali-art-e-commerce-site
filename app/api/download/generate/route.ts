@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     console.log("[v0] Calling generate_download_token function...")
     const result = await sql`
-      SELECT generate_download_token(${orderItemId}) as token
+      SELECT generate_download_token(${orderItemId}::uuid) as token
     `
     console.log("[v0] Database result:", result)
 

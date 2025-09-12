@@ -902,6 +902,22 @@ export async function deleteImage(imageId: string) {
     console.log("[v0] Starting image deletion for ID:", imageId)
     const sql = createNeonClient()
 
+    const orderItemsCheck = await sql`
+      SELECT COUNT(*) as count 
+      FROM order_items 
+      WHERE image_id = ${imageId}
+    `
+
+    const orderItemCount = Number.parseInt(orderItemsCheck[0].count)
+
+    if (orderItemCount > 0) {
+      console.log(`[v0] Cannot delete image ${imageId}: referenced by ${orderItemCount} order items`)
+      return {
+        success: false,
+        error: `Cannot delete image: it is referenced by ${orderItemCount} order(s). Images that have been purchased cannot be deleted.`,
+      }
+    }
+
     // Delete the image from the database
     const result = await sql`
       DELETE FROM images 

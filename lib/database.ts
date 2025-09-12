@@ -42,15 +42,20 @@ export type DownloadLog = {
 
 // License type definitions
 export const LICENSE_TYPES = {
-  NON_EXCLUSIVE: {
-    name: "Non-Exclusive License",
-    description: "Standard commercial license for personal and commercial use. Non-exclusive rights.",
+  standard: {
+    name: "Standard License",
+    description: "Personal and commercial use, single project",
     multiplier: 1,
   },
-  EXCLUSIVE: {
-    name: "Exclusive License",
-    description: "Exclusive license with full rights including resale and NFT minting. Complete buyout.",
-    multiplier: 7.5, // 750/99 ratio
+  extended: {
+    name: "Extended License",
+    description: "Multiple projects, resale rights",
+    multiplier: 2,
+  },
+  commercial: {
+    name: "Commercial License",
+    description: "Unlimited commercial use",
+    multiplier: 3,
   },
 } as const
 

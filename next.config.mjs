@@ -14,12 +14,6 @@ const nextConfig = {
       bodySizeLimit: '2mb', // Conservative limit to ensure reliable uploads with compression
     },
   },
-  api: {
-    bodyParser: {
-      sizeLimit: '100mb',
-    },
-    responseLimit: false,
-  },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },

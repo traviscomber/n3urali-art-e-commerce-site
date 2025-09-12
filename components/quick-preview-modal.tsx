@@ -8,6 +8,7 @@ import { ShoppingCart, Eye, X } from "lucide-react"
 import NextImage from "next/image"
 import { useCart } from "@/lib/contexts/cart-context"
 import { useToast } from "./toast-notifications"
+import { ImageUrlHandler } from "@/lib/image-url-handler"
 
 interface QuickPreviewModalProps {
   image: {
@@ -31,6 +32,8 @@ export function QuickPreviewModal({ image, isOpen, onClose, onViewFull }: QuickP
   const [imageLoading, setImageLoading] = useState(true)
 
   if (!image) return null
+
+  const displayUrl = ImageUrlHandler.convertToDisplayUrl(image.preview_url, { useProxy: true })
 
   const handleAddToCart = () => {
     addItem({
@@ -85,7 +88,7 @@ export function QuickPreviewModal({ image, isOpen, onClose, onViewFull }: QuickP
               </div>
             )}
             <NextImage
-              src={image.preview_url}
+              src={displayUrl}
               alt={image.title}
               fill
               className="object-contain"

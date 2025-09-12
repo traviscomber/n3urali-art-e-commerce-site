@@ -24,7 +24,7 @@ interface OrderRequest {
     zipCode?: string
     country?: string
   }
-  paymentMethod?: "crypto" | "stripe"
+  paymentMethod?: "crypto" | "stripe" | "demo"
   paymentIntentId?: string
   cryptoDetails?: {
     currency: string
@@ -37,7 +37,7 @@ interface OrderRequest {
 export async function POST(request: NextRequest) {
   try {
     const body: OrderRequest = await request.json()
-    const { items, total, customerInfo, paymentMethod = "crypto", paymentIntentId, cryptoDetails } = body
+    const { items, total, customerInfo, paymentMethod = "demo", paymentIntentId, cryptoDetails } = body
 
     console.log(
       "[v0] Creating order for:",
@@ -83,41 +83,22 @@ export async function POST(request: NextRequest) {
 
     const orderResult = await sql`
       INSERT INTO orders (
-        order_number, 
         user_email, 
+        user_name,
         total_amount, 
-        payment_status, 
+        status, 
         payment_method,
-        billing_email,
-        stripe_payment_intent_id,
-        billing_details
+        payment_id
       )
       VALUES (
-        ${orderNumber},
         ${customerInfo.email},
-        ${total * 1.03},
+        ${customerInfo.firstName + " " + customerInfo.lastName},
+        ${total},
         'completed',
-        ${paymentMethod === "crypto" ? "cryptocurrency" : "credit_card"},
-        ${customerInfo.email},
-        ${paymentMethod === "crypto" ? cryptoDetails?.transactionHash : paymentIntentId},
-        ${JSON.stringify({
-          firstName: customerInfo.firstName,
-          lastName: customerInfo.lastName,
-          address: customerInfo.billingAddress || "",
-          city: customerInfo.city || "",
-          zipCode: customerInfo.zipCode || "",
-          country: customerInfo.country || "",
-          ...(paymentMethod === "crypto" && cryptoDetails
-            ? {
-                cryptoCurrency: cryptoDetails.currency,
-                cryptoAmount: cryptoDetails.amount,
-                cryptoAddress: cryptoDetails.address,
-                transactionHash: cryptoDetails.transactionHash,
-              }
-            : {}),
-        })}
+        ${paymentMethod === "crypto" ? "cryptocurrency" : paymentMethod},
+        ${paymentMethod === "crypto" ? cryptoDetails?.transactionHash : paymentIntentId || orderNumber}
       )
-      RETURNING id, order_number
+      RETURNING id
     `
 
     const orderId = orderResult[0].id
@@ -127,7 +108,7 @@ export async function POST(request: NextRequest) {
       console.log("[v0] Creating order item for image:", item.imageId, "License:", item.licenseType)
 
       const licenseResult = await sql`
-        SELECT id FROM licenses WHERE name = 'NON_EXCLUSIVE' LIMIT 1
+        SELECT id FROM licenses WHERE active = true ORDER BY price ASC LIMIT 1
       `
 
       const licenseId = licenseResult.length > 0 ? licenseResult[0].id : null
@@ -142,17 +123,13 @@ export async function POST(request: NextRequest) {
           order_id,
           image_id,
           license_id,
-          price,
-          download_count,
-          download_limit
+          price
         )
         VALUES (
           ${orderId},
           ${item.imageId},
           ${licenseId},
-          ${item.price * item.quantity},
-          0,
-          5
+          ${item.price * item.quantity}
         )
       `
     }
@@ -165,7 +142,7 @@ export async function POST(request: NextRequest) {
         orderId: orderId,
         orderNumber: orderNumber,
         paymentStatus: "completed",
-        total: total * 1.03,
+        total: total,
         paymentMethod: paymentMethod,
         ...(paymentMethod === "crypto" && cryptoDetails
           ? {

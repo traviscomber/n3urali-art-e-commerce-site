@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to generate download token" }, { status: 500 })
     }
 
-    const downloadUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/download/${result[0].token}`
+    const downloadUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/download/by-token/${result[0].token}`
     console.log("[v0] Generated download URL:", downloadUrl)
 
     return NextResponse.json({

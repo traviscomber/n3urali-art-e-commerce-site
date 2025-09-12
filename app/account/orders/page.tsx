@@ -25,12 +25,15 @@ interface OrderItem {
 interface Order {
   id: string
   order_number: string
-  payment_status: string
-  total_amount: number
+  status: string
+  total_amount: string | number
   created_at: string
   order_items: OrderItem[]
   payment_method: string
-  billing_email: string
+  payment_id?: string
+  user_email?: string
+  user_name?: string
+  updated_at?: string
 }
 
 export default function OrdersPage() {
@@ -106,9 +109,64 @@ export default function OrdersPage() {
     }
   }
 
-  const handleDownload = (item: OrderItem) => {
-    toast.success(`Download started for ${item.images.title}`)
-    // In a real app, this would generate a download link
+  const handleDownload = async (item: OrderItem) => {
+    try {
+      console.log("[v0] Starting download for item:", item.id)
+
+      const response = await fetch(`/api/download/${item.image_id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          order_item_id: item.id,
+          license_id: item.license_id,
+        }),
+      })
+
+      console.log("[v0] Download response status:", response.status)
+      console.log("[v0] Download response ok:", response.ok)
+      console.log("[v0] Download response headers:", Object.fromEntries(response.headers.entries()))
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("[v0] Download API error response:", errorText)
+        throw new Error(`Download failed: ${response.status} - ${errorText}`)
+      }
+
+      const contentType = response.headers.get("content-type")
+      console.log("[v0] Response content type:", contentType)
+
+      const blob = await response.blob()
+      console.log("[v0] Blob size:", blob.size, "bytes")
+      console.log("[v0] Blob type:", blob.type)
+
+      if (blob.size === 0) {
+        throw new Error("Downloaded file is empty")
+      }
+
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.style.display = "none"
+      a.href = url
+      a.download = `${item.images.title}.jpg`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      toast.success(`Downloaded ${item.images.title}`)
+      console.log("[v0] Download completed for:", item.images.title)
+    } catch (error) {
+      console.error("[v0] Download error:", error)
+      toast.error("Download failed. Please try again.")
+    }
+  }
+
+  const handlePreview = (item: OrderItem) => {
+    console.log("[v0] Opening preview for item:", item.id)
+    // Open the image detail page in a new tab for preview
+    window.open(`/photo/${item.image_id}`, "_blank")
   }
 
   const handleViewOrder = (orderId: string) => {
@@ -193,12 +251,17 @@ export default function OrdersPage() {
                         <CreditCard className="h-4 w-4" />
                         {order.payment_method || "Credit Card"}
                       </span>
-                      <span className="font-semibold">${order.total_amount.toFixed(2)}</span>
+                      <span className="font-semibold">
+                        $
+                        {typeof order.total_amount === "string"
+                          ? Number.parseFloat(order.total_amount).toFixed(2)
+                          : order.total_amount.toFixed(2)}
+                      </span>
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge className={getStatusBadgeColor(order.payment_status)}>
-                      {order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1)}
+                    <Badge className={getStatusBadgeColor(order.status || "pending")}>
+                      {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : "Pending"}
                     </Badge>
                     <Button variant="outline" size="sm" onClick={() => handleViewOrder(order.id)}>
                       View Details
@@ -229,11 +292,11 @@ export default function OrdersPage() {
                       <div className="text-right">
                         <div className="font-semibold">${item.price.toFixed(2)}</div>
                         <div className="flex gap-2 mt-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handlePreview(item)}>
                             <Eye className="h-4 w-4 mr-1" />
                             Preview
                           </Button>
-                          {order.payment_status === "completed" && (
+                          {order.status === "completed" && (
                             <Button
                               size="sm"
                               onClick={() => handleDownload(item)}

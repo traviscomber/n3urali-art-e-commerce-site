@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Filter, Grid3X3, List, Eye, Download } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
 import NextImage from "next/image"
+import { ImageUrlHandler } from "@/lib/image-url-handler"
 
 interface GalleryImage {
   id: string
@@ -36,9 +37,7 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
   const transformedImages = useMemo(() => {
     return images.map((image) => ({
       ...image,
-      preview_url: image.preview_url.includes("backblazeb2.com")
-        ? `/api/image-proxy/${image.preview_url.split("/file/")[1]?.split("/").slice(1).join("/")}`
-        : image.preview_url,
+      preview_url: ImageUrlHandler.convertToDisplayUrl(image.preview_url, { useProxy: true }),
     }))
   }, [images])
 

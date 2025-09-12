@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Trash2, ShoppingCart } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { ImageUrlHandler } from "@/lib/image-url-handler"
 
 export function CartSidebar() {
   const { state, removeItem, closeCart } = useCart()
@@ -57,7 +58,10 @@ export function CartSidebar() {
                     <div key={item.id} className="flex gap-4 p-4 border rounded-lg">
                       <div className="relative w-16 h-16 flex-shrink-0">
                         <Image
-                          src={item.previewUrl || "/placeholder.svg"}
+                          src={
+                            ImageUrlHandler.convertToDisplayUrl(item.previewUrl || "", { useProxy: true }) ||
+                            "/placeholder.svg"
+                          }
                           alt={item.title}
                           fill
                           className="object-cover rounded"

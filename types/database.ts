@@ -97,7 +97,7 @@ export interface Database {
           id: string
           order_id: string
           image_id: string
-          license_type: "standard" | "extended" | "commercial"
+          license_type: "NON_EXCLUSIVE" | "EXCLUSIVE"
           price: number
           download_count: number
           download_expires_at: string | null
@@ -107,7 +107,7 @@ export interface Database {
           id?: string
           order_id: string
           image_id: string
-          license_type?: "standard" | "extended" | "commercial"
+          license_type?: "NON_EXCLUSIVE" | "EXCLUSIVE"
           price: number
           download_count?: number
           download_expires_at?: string | null
@@ -117,7 +117,7 @@ export interface Database {
           id?: string
           order_id?: string
           image_id?: string
-          license_type?: "standard" | "extended" | "commercial"
+          license_type?: "NON_EXCLUSIVE" | "EXCLUSIVE"
           price?: number
           download_count?: number
           download_expires_at?: string | null

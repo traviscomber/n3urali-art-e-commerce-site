@@ -185,9 +185,14 @@ export default function GalleryPage() {
     () =>
       images.map((image: any) => {
         const preview_url =
-          image.thumbnail_url || image.image_url || "/placeholder.svg?height=400&width=400&text=No+Image"
+          image.thumbnail_medium_url ||
+          image.thumbnail_small_url ||
+          image.thumbnail_large_url ||
+          image.original_url ||
+          "/placeholder.svg?height=400&width=400&text=No+Image"
 
-        const proxyPreviewUrl = preview_url.includes("backblazeb2.com")
+        const shouldUseProxy = preview_url.includes("backblazeb2.com")
+        const finalPreviewUrl = shouldUseProxy
           ? `/api/image-proxy/${preview_url.split("/file/")[1]?.split("/").slice(1).join("/")}`
           : preview_url
 
@@ -197,7 +202,7 @@ export default function GalleryPage() {
           category:
             image.category_name?.toLowerCase() === "fisheye" ? ("fisheye" as const) : ("equirectangular" as const),
           price: Number.parseFloat(image.price) || 0,
-          preview_url: proxyPreviewUrl,
+          preview_url: finalPreviewUrl,
           dimensions: "4096x4096",
           file_size: 20000000,
           description: image.description || "",
@@ -463,7 +468,6 @@ export default function GalleryPage() {
                           className="object-contain bg-muted/10"
                           loading="lazy"
                           onError={(e) => {
-                            console.log("[v0] Grid image failed to load:", image.preview_url)
                             e.currentTarget.src = "/placeholder.svg?height=200&width=200&text=Error"
                           }}
                           placeholder="blur"

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createNeonClient } from "@/lib/neon/client"
+import { createSupabaseServerClient } from "@/lib/database"
 
 interface CartItem {
   id: string
@@ -78,33 +78,31 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const sql = createNeonClient()
+    const supabase = createSupabaseServerClient()
 
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
 
     console.log("[v0] Creating order with number:", orderNumber)
 
-    const orderResult = await sql`
-      INSERT INTO orders (
-        user_email, 
-        user_name,
-        total_amount, 
-        status, 
-        payment_method,
-        payment_intent_id
-      )
-      VALUES (
-        ${customerInfo.email},
-        ${customerInfo.firstName + " " + customerInfo.lastName},
-        ${total},
-        'completed',
-        ${paymentMethod === "crypto" ? "cryptocurrency" : paymentMethod},
-        ${paymentMethod === "crypto" ? cryptoDetails?.transactionHash : paymentIntentId || orderNumber}
-      )
-      RETURNING id
-    `
+    const { data: orderResult, error: orderError } = await supabase
+      .from("orders")
+      .insert({
+        user_email: customerInfo.email,
+        user_name: customerInfo.firstName + " " + customerInfo.lastName,
+        total_amount: total,
+        status: "completed",
+        payment_method: paymentMethod === "crypto" ? "cryptocurrency" : paymentMethod,
+        payment_intent_id: paymentMethod === "crypto" ? cryptoDetails?.transactionHash : paymentIntentId || orderNumber,
+      })
+      .select()
+      .single()
 
-    const orderId = orderResult[0].id
+    if (orderError || !orderResult) {
+      console.error("[v0] Order creation error:", orderError)
+      return NextResponse.json({ success: false, error: "Failed to create order" }, { status: 500 })
+    }
+
+    const orderId = orderResult.id
     console.log("[v0] Order created with ID:", orderId)
 
     const orderItemIds: string[] = []
@@ -117,10 +115,15 @@ export async function POST(request: NextRequest) {
 
       // Fallback to finding a license if not provided
       if (!licenseId) {
-        const licenseResult = await sql`
-          SELECT id FROM licenses WHERE active = true ORDER BY price ASC LIMIT 1
-        `
-        licenseId = licenseResult.length > 0 ? licenseResult[0].id : null
+        const { data: licenseResult } = await supabase
+          .from("licenses")
+          .select("id")
+          .eq("active", true)
+          .order("price", { ascending: true })
+          .limit(1)
+          .single()
+
+        licenseId = licenseResult?.id || null
       }
 
       if (!licenseId) {
@@ -128,34 +131,48 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: "License configuration error" }, { status: 500 })
       }
 
-      const orderItemResult = await sql`
-        INSERT INTO order_items (
-          order_id,
-          image_id,
-          license_id,
-          price
-        )
-        VALUES (
-          ${orderId},
-          ${item.imageId},
-          ${licenseId},
-          ${item.price * item.quantity}
-        )
-        RETURNING id
-      `
+      const { data: orderItemResult, error: orderItemError } = await supabase
+        .from("order_items")
+        .insert({
+          order_id: orderId,
+          image_id: item.imageId,
+          license_id: licenseId,
+          price: item.price * item.quantity,
+        })
+        .select()
+        .single()
 
-      orderItemIds.push(orderItemResult[0].id)
+      if (orderItemError || !orderItemResult) {
+        console.error("[v0] Order item creation error:", orderItemError)
+        return NextResponse.json({ success: false, error: "Failed to create order item" }, { status: 500 })
+      }
+
+      orderItemIds.push(orderItemResult.id)
     }
 
     console.log("[v0] Generating download tokens for order items...")
     const downloadTokens = []
 
     try {
-      const tokenResult = await sql`
-        SELECT * FROM create_download_tokens_for_order(${orderId}::uuid)
-      `
+      for (const orderItemId of orderItemIds) {
+        const downloadToken = `dl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-      downloadTokens.push(...tokenResult)
+        const { data: downloadResult, error: downloadError } = await supabase
+          .from("downloads")
+          .insert({
+            order_item_id: orderItemId,
+            download_token: downloadToken,
+            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+            download_count: 0,
+          })
+          .select()
+          .single()
+
+        if (!downloadError && downloadResult) {
+          downloadTokens.push(downloadResult)
+        }
+      }
+
       console.log("[v0] Generated", downloadTokens.length, "download tokens")
     } catch (tokenError) {
       console.error("[v0] Error generating download tokens:", tokenError)

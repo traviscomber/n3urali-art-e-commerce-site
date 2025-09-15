@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createNeonClient } from "@/lib/neon/client"
+import { createSupabaseServerClient } from "@/lib/database"
 import { PasswordManager } from "@/lib/auth/password"
 
 export async function POST(request: NextRequest) {
@@ -21,29 +21,40 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const sql = createNeonClient()
+    const supabase = createSupabaseServerClient()
 
-    const existingUser = await sql`
-      SELECT id FROM auth.users WHERE email = ${email} LIMIT 1
-    `
+    const { data: existingUser } = await supabase.from("auth_users").select("id").eq("email", email).single()
 
-    if (existingUser.length > 0) {
+    if (existingUser) {
       return NextResponse.json({ error: "User already exists" }, { status: 409 })
     }
 
     const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-
     const hashedPassword = await PasswordManager.hashPassword(password)
 
-    await sql`
-      INSERT INTO auth.users (id, email, encrypted_password, created_at, updated_at)
-      VALUES (${userId}, ${email}, ${hashedPassword}, NOW(), NOW())
-    `
+    // Insert into auth_users table
+    const { error: authError } = await supabase.from("auth_users").insert({
+      id: userId,
+      email: email,
+      encrypted_password: hashedPassword,
+    })
 
-    await sql`
-      INSERT INTO user_profiles (id, full_name, is_admin, created_at, updated_at)
-      VALUES (${userId}, ${fullName}, false, NOW(), NOW())
-    `
+    if (authError) {
+      console.error("Auth user creation error:", authError)
+      return NextResponse.json({ error: "Failed to create user" }, { status: 500 })
+    }
+
+    // Insert into user_profiles table
+    const { error: profileError } = await supabase.from("user_profiles").insert({
+      id: userId,
+      full_name: fullName,
+      is_admin: false,
+    })
+
+    if (profileError) {
+      console.error("User profile creation error:", profileError)
+      return NextResponse.json({ error: "Failed to create user profile" }, { status: 500 })
+    }
 
     return NextResponse.json({
       message: "User created successfully",

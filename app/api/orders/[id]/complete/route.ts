@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createNeonClient } from "@/lib/neon/client"
+import { createSupabaseServerClient } from "@/lib/database"
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -10,25 +10,50 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ success: false, error: "Order ID is required" }, { status: 400 })
     }
 
-    const sql = createNeonClient()
+    const supabase = createSupabaseServerClient()
 
     // Update order status to completed
-    const orderResult = await sql`
-      UPDATE orders 
-      SET status = 'completed', updated_at = NOW()
-      WHERE id = ${orderId} AND status != 'completed'
-      RETURNING *
-    `
+    const { data: orderResult, error: orderError } = await supabase
+      .from("orders")
+      .update({
+        status: "completed",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", orderId)
+      .neq("status", "completed")
+      .select()
 
-    if (orderResult.length === 0) {
+    if (orderError || !orderResult || orderResult.length === 0) {
       return NextResponse.json({ success: false, error: "Order not found or already completed" }, { status: 404 })
     }
 
     // Generate download tokens for the completed order
     console.log("[v0] Generating download tokens for completed order...")
-    const downloadTokens = await sql`
-      SELECT * FROM create_download_tokens_for_order(${orderId}::uuid)
-    `
+
+    const { data: orderItems } = await supabase.from("order_items").select("id").eq("order_id", orderId)
+
+    const downloadTokens = []
+
+    if (orderItems) {
+      for (const orderItem of orderItems) {
+        const downloadToken = `dl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
+        const { data: downloadResult, error: downloadError } = await supabase
+          .from("downloads")
+          .insert({
+            order_item_id: orderItem.id,
+            download_token: downloadToken,
+            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+            download_count: 0,
+          })
+          .select()
+          .single()
+
+        if (!downloadError && downloadResult) {
+          downloadTokens.push(downloadResult)
+        }
+      }
+    }
 
     console.log("[v0] Order completed successfully with", downloadTokens.length, "download tokens generated")
 

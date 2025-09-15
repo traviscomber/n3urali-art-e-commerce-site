@@ -1,32 +1,50 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { createNeonClient } from "@/lib/neon/client"
+import { createSupabaseServerClient } from "@/lib/database"
 
 export async function GET() {
   try {
     console.log("[v0] Fetching all licenses for admin...")
-    const sql = createNeonClient()
+    const supabase = createSupabaseServerClient()
 
-    const licenses = await sql`
-      SELECT 
-        l.id, 
-        l.name, 
-        l.description, 
-        l.price, 
-        l.active, 
-        l.created_at, 
-        l.updated_at,
-        COUNT(oi.id) as usage_count
-      FROM licenses l
-      LEFT JOIN order_items oi ON oi.license_id = l.id
-      GROUP BY l.id, l.name, l.description, l.price, l.active, l.created_at, l.updated_at
-      ORDER BY l.created_at DESC
-    `
+    const { data: licenses, error } = await supabase
+      .from("licenses")
+      .select(`
+        id, 
+        name, 
+        description, 
+        price, 
+        active, 
+        created_at, 
+        updated_at,
+        order_items(count)
+      `)
+      .order("created_at", { ascending: false })
 
-    console.log("[v0] Found", licenses.length, "total licenses")
+    if (error) {
+      console.error("[v0] Error fetching admin licenses:", error)
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Failed to fetch licenses",
+          licenses: [],
+        },
+        { status: 500 },
+      )
+    }
+
+    // Transform the data to include usage_count
+    const transformedLicenses =
+      licenses?.map((license) => ({
+        ...license,
+        usage_count: license.order_items?.length || 0,
+        order_items: undefined, // Remove the nested data
+      })) || []
+
+    console.log("[v0] Found", transformedLicenses.length, "total licenses")
 
     return NextResponse.json({
       success: true,
-      licenses: licenses,
+      licenses: transformedLicenses,
     })
   } catch (error) {
     console.error("[v0] Error fetching admin licenses:", error)
@@ -51,14 +69,20 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: "License ID is required" }, { status: 400 })
     }
 
-    const sql = createNeonClient()
+    const supabase = createSupabaseServerClient()
 
     // Check if license is being used in any orders
-    const usageCheck = await sql`
-      SELECT COUNT(*) as count FROM order_items WHERE license_id = ${licenseId}
-    `
+    const { count: usageCount, error: countError } = await supabase
+      .from("order_items")
+      .select("*", { count: "exact", head: true })
+      .eq("license_id", licenseId)
 
-    if (Number.parseInt(usageCheck[0].count) > 0) {
+    if (countError) {
+      console.error("[v0] Error checking license usage:", countError)
+      return NextResponse.json({ success: false, error: "Failed to check license usage" }, { status: 500 })
+    }
+
+    if ((usageCount || 0) > 0) {
       return NextResponse.json(
         {
           success: false,
@@ -68,16 +92,13 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const result = await sql`
-      DELETE FROM licenses WHERE id = ${licenseId}
-      RETURNING *
-    `
+    const { data: result, error } = await supabase.from("licenses").delete().eq("id", licenseId).select().single()
 
-    if (result.length === 0) {
+    if (error || !result) {
       return NextResponse.json({ success: false, error: "License not found" }, { status: 404 })
     }
 
-    console.log("[v0] License deleted successfully:", result[0])
+    console.log("[v0] License deleted successfully:", result)
 
     return NextResponse.json({
       success: true,

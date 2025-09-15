@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createNeonClient } from "@/lib/neon/client"
+import { createSupabaseServerClient } from "@/lib/database"
 import { PasswordManager } from "@/lib/auth/password"
 import { cookies } from "next/headers"
 
@@ -11,23 +11,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 })
     }
 
-    const sql = createNeonClient()
+    const supabase = createSupabaseServerClient()
 
-    const userResult = await sql`
-      SELECT up.*, u.email, u.encrypted_password 
-      FROM user_profiles up
-      JOIN auth.users u ON up.id = u.id
-      WHERE u.email = ${email}
-      LIMIT 1
-    `
+    const { data: userResult, error } = await supabase
+      .from("user_profiles")
+      .select(`
+        *,
+        auth_users!inner(email, encrypted_password)
+      `)
+      .eq("auth_users.email", email)
+      .single()
 
-    if (userResult.length === 0) {
+    if (error || !userResult) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
     }
 
-    const user = userResult[0]
-
-    const isValidPassword = await PasswordManager.verifyPassword(password, user.encrypted_password)
+    const isValidPassword = await PasswordManager.verifyPassword(password, userResult.auth_users.encrypted_password)
 
     if (!isValidPassword) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
@@ -35,10 +34,16 @@ export async function POST(request: NextRequest) {
 
     const sessionToken = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-    await sql`
-      INSERT INTO user_sessions (user_id, session_token, expires_at)
-      VALUES (${user.id}, ${sessionToken}, NOW() + INTERVAL '7 days')
-    `
+    const { error: sessionError } = await supabase.from("user_sessions").insert({
+      user_id: userResult.id,
+      session_token: sessionToken,
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
+    })
+
+    if (sessionError) {
+      console.error("Session creation error:", sessionError)
+      return NextResponse.json({ error: "Failed to create session" }, { status: 500 })
+    }
 
     const cookieStore = cookies()
     cookieStore.set("session_token", sessionToken, {
@@ -50,11 +55,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       user: {
-        id: user.id,
-        email: user.email,
+        id: userResult.id,
+        email: userResult.auth_users.email,
         user_metadata: {
-          full_name: user.full_name,
-          is_admin: user.is_admin,
+          full_name: userResult.full_name,
+          is_admin: userResult.is_admin,
         },
       },
     })

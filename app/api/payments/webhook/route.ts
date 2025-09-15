@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createNeonClient } from "@/lib/neon/client"
+import { createSupabaseServerClient } from "@/lib/database"
 
 // Webhook handler for payment processing services (Stripe, crypto payment processors, etc.)
 export async function POST(request: NextRequest) {
@@ -13,30 +13,51 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Missing required webhook data" }, { status: 400 })
     }
 
-    const sql = createNeonClient()
+    const supabase = createSupabaseServerClient()
 
     console.log("[v0] Processing payment webhook for order:", orderId, "Status:", paymentStatus)
 
     if (paymentStatus === "completed" || paymentStatus === "succeeded") {
       // Update order status
-      const orderResult = await sql`
-        UPDATE orders 
-        SET 
-          status = 'completed',
-          payment_intent_id = COALESCE(${transactionId}, payment_intent_id),
-          updated_at = NOW()
-        WHERE id = ${orderId}
-        RETURNING *
-      `
+      const { data: orderResult, error: orderError } = await supabase
+        .from("orders")
+        .update({
+          status: "completed",
+          payment_intent_id: transactionId || undefined,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", orderId)
+        .select()
 
-      if (orderResult.length === 0) {
+      if (orderError || !orderResult || orderResult.length === 0) {
         return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 })
       }
 
       // Generate download tokens
-      const downloadTokens = await sql`
-        SELECT * FROM create_download_tokens_for_order(${orderId}::uuid)
-      `
+      const { data: orderItems } = await supabase.from("order_items").select("id").eq("order_id", orderId)
+
+      const downloadTokens = []
+
+      if (orderItems) {
+        for (const orderItem of orderItems) {
+          const downloadToken = `dl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
+          const { data: downloadResult, error: downloadError } = await supabase
+            .from("downloads")
+            .insert({
+              order_item_id: orderItem.id,
+              download_token: downloadToken,
+              expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+              download_count: 0,
+            })
+            .select()
+            .single()
+
+          if (!downloadError && downloadResult) {
+            downloadTokens.push(downloadResult)
+          }
+        }
+      }
 
       console.log("[v0] Payment completed, generated", downloadTokens.length, "download tokens")
 
@@ -50,11 +71,13 @@ export async function POST(request: NextRequest) {
       })
     } else if (paymentStatus === "failed" || paymentStatus === "cancelled") {
       // Update order status to failed
-      await sql`
-        UPDATE orders 
-        SET status = 'failed', updated_at = NOW()
-        WHERE id = ${orderId}
-      `
+      await supabase
+        .from("orders")
+        .update({
+          status: "failed",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", orderId)
 
       console.log("[v0] Payment failed for order:", orderId)
 

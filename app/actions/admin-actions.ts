@@ -41,42 +41,35 @@ const getCachedImages = unstable_cache(
         .from("images")
         .select(`
           id, title, description, price, file_path,
-          is_featured, created_at, updated_at, category_id, license_id
+          thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url, original_url,
+          is_featured, created_at, updated_at, category_id, license_id,
+          categories:category_id(id, name),
+          licenses:license_id(id, name, description)
         `)
         .order("created_at", { ascending: false })
 
       if (imagesError) {
         console.error("[v0] Database error in getCachedImages:", imagesError)
         if (imagesError.message.includes("does not exist") || imagesError.message.includes("schema cache")) {
-          console.log("[v0] Database tables not found, returning empty array")
           return []
         }
         throw new Error(imagesError.message)
       }
 
-      // Get categories and licenses separately
-      const { data: categories } = await supabase.from("categories").select("id, name")
-      const { data: licenses } = await supabase.from("licenses").select("id, name, description")
-
-      // Create lookup maps
-      const categoryMap = new Map(categories?.map((c) => [c.id, c]) || [])
-      const licenseMap = new Map(licenses?.map((l) => [l.id, l]) || [])
-
       const transformedData =
         images?.map((item) => ({
           ...item,
-          image_url: item.file_path,
-          thumbnail_url: item.file_path,
-          active: true, // Default to active since we don't have this column
+          image_url: item.original_url || item.file_path,
+          thumbnail_url: item.thumbnail_medium_url || item.thumbnail_small_url || item.original_url || item.file_path,
+          active: true,
           featured: item.is_featured,
-          categories: categoryMap.get(item.category_id),
-          licenses: licenseMap.get(item.license_id),
-          category_name: categoryMap.get(item.category_id)?.name,
-          license_name: licenseMap.get(item.license_id)?.name,
-          license_description: licenseMap.get(item.license_id)?.description,
+          categories: item.categories,
+          licenses: item.licenses,
+          category_name: item.categories?.name,
+          license_name: item.licenses?.name,
+          license_description: item.licenses?.description,
         })) || []
 
-      console.log(`[v0] getCachedImages: Retrieved ${transformedData.length} images`)
       return transformedData
     } catch (error) {
       console.error("[v0] Error in getCachedImages:", error)
@@ -97,22 +90,21 @@ const getCachedImagesPaginated = unstable_cache(
     const offset = (page - 1) * limit
 
     try {
+      // Build the main query with JOINs for better performance
       let query = supabase.from("images").select(
         `
           id, title, description, price, file_path,
-          is_featured, created_at, updated_at, category_id, license_id
+          thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url, original_url,
+          is_featured, created_at, updated_at, category_id, license_id,
+          categories:category_id(id, name),
+          licenses:license_id(id, name, description)
         `,
         { count: "exact" },
       )
 
-      // Handle category filtering by ID instead of name
+      // Handle category filtering by name with a subquery
       if (category) {
-        // First get the category ID
-        const { data: categoryData } = await supabase.from("categories").select("id").eq("name", category).single()
-
-        if (categoryData) {
-          query = query.eq("category_id", categoryData.id)
-        }
+        query = query.eq("categories.name", category)
       }
 
       if (featured !== undefined) {
@@ -128,7 +120,6 @@ const getCachedImagesPaginated = unstable_cache(
       if (error) {
         console.error("[v0] Database error in getCachedImagesPaginated:", error)
         if (error.message.includes("does not exist") || error.message.includes("schema cache")) {
-          console.log("[v0] Database tables not found, returning empty result")
           return {
             images: [],
             pagination: {
@@ -143,32 +134,28 @@ const getCachedImagesPaginated = unstable_cache(
         throw new Error(error.message)
       }
 
-      // Get categories and licenses separately
-      const { data: categories } = await supabase.from("categories").select("id, name")
-      const { data: licenses } = await supabase.from("licenses").select("id, name, description")
-
-      // Create lookup maps
-      const categoryMap = new Map(categories?.map((c) => [c.id, c]) || [])
-      const licenseMap = new Map(licenses?.map((l) => [l.id, l]) || [])
-
+      // Transform data with proper URL handling
       const transformedData =
         images?.map((item) => ({
           ...item,
-          image_url: item.file_path,
-          thumbnail_url: item.file_path,
-          active: true, // Default to active since we don't have this column
+          image_url: item.original_url || item.file_path,
+          thumbnail_url: item.thumbnail_medium_url || item.thumbnail_small_url || item.original_url || item.file_path,
+          active: true,
           featured: item.is_featured,
-          categories: categoryMap.get(item.category_id),
-          licenses: licenseMap.get(item.license_id),
-          category_name: categoryMap.get(item.category_id)?.name,
-          license_name: licenseMap.get(item.license_id)?.name,
-          license_description: licenseMap.get(item.license_id)?.description,
+          categories: item.categories,
+          licenses: item.licenses,
+          category_name: item.categories?.name,
+          license_name: item.licenses?.name,
+          license_description: item.licenses?.description,
         })) || []
 
       const totalCount = count || 0
       const totalPages = Math.ceil(totalCount / limit)
 
-      logQueryPerformance("getCachedImagesPaginated", startTime, transformedData.length)
+      const duration = Date.now() - startTime
+      if (duration > 500) {
+        console.warn(`[v0] Slow Query Alert: getCachedImagesPaginated took ${duration}ms`)
+      }
 
       return {
         images: transformedData,
@@ -637,6 +624,13 @@ export async function createImageWithCategoryObject(imageData: {
 
     if (categoryResult.data && categoryResult.data.length === 0) {
       console.log("[v0] Category not found, creating new category:", imageData.category_name)
+
+      const categoryName = imageData.category_name?.trim()
+      if (!categoryName) {
+        console.log("[v0] Empty category name provided, using default")
+        imageData.category_name = "Uncategorized"
+      }
+
       const newCategoryResult = await supabase
         .from("categories")
         .insert([
@@ -648,9 +642,32 @@ export async function createImageWithCategoryObject(imageData: {
         ])
         .select("id")
 
-      categoryId = newCategoryResult.data![0].id
+      if (newCategoryResult.error) {
+        console.error("[v0] Failed to create category:", newCategoryResult.error)
+        return {
+          success: false,
+          error: `Failed to create category "${imageData.category_name}": ${newCategoryResult.error.message}`,
+        }
+      }
+
+      if (!newCategoryResult.data || newCategoryResult.data.length === 0) {
+        console.error("[v0] Category creation returned no data")
+        return {
+          success: false,
+          error: `Failed to create category "${imageData.category_name}". Please try again.`,
+        }
+      }
+
+      categoryId = newCategoryResult.data[0].id
     } else {
-      categoryId = categoryResult.data![0].id
+      if (!categoryResult.data || categoryResult.data.length === 0) {
+        console.error("[v0] Category lookup failed")
+        return {
+          success: false,
+          error: "Failed to find or create category. Please try again.",
+        }
+      }
+      categoryId = categoryResult.data[0].id
     }
 
     console.log("[v0] Looking up default license...")
@@ -846,7 +863,10 @@ export async function getImagesPaginated(page = 1, limit = 20, category?: string
     const startTime = Date.now()
     const data = await getCachedImagesPaginated(page, limit, category)
 
-    logQueryPerformance("getImagesPaginated", startTime, data.images.length)
+    const duration = Date.now() - startTime
+    if (duration > 500) {
+      console.warn(`[v0] Slow Query Alert: getImagesPaginated took ${duration}ms`)
+    }
 
     return {
       success: true,
@@ -859,10 +879,16 @@ export async function getImagesPaginated(page = 1, limit = 20, category?: string
     console.error("[v0] Get paginated images error:", error)
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : "Failed to fetch images",
       data: {
         images: [],
-        pagination: { currentPage: 1, totalPages: 1, totalCount: 0, hasNextPage: false, hasPreviousPage: false },
+        pagination: {
+          currentPage: page,
+          totalPages: 0,
+          totalCount: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
       },
     }
   }
@@ -1088,6 +1114,13 @@ export async function updateImage(formData: FormData) {
 
     if (categoryResult.data && categoryResult.data.length === 0) {
       console.log("[v0] Category not found, creating new category:", imageData.category)
+
+      const categoryName = imageData.category?.trim()
+      if (!categoryName) {
+        console.log("[v0] Empty category name provided, using default")
+        imageData.category = "Uncategorized"
+      }
+
       const newCategoryResult = await supabase
         .from("categories")
         .insert([
@@ -1099,9 +1132,32 @@ export async function updateImage(formData: FormData) {
         ])
         .select("id")
 
-      categoryId = newCategoryResult.data![0].id
+      if (newCategoryResult.error) {
+        console.error("[v0] Failed to create category:", newCategoryResult.error)
+        return {
+          success: false,
+          error: `Failed to create category "${imageData.category}": ${newCategoryResult.error.message}`,
+        }
+      }
+
+      if (!newCategoryResult.data || newCategoryResult.data.length === 0) {
+        console.error("[v0] Category creation returned no data")
+        return {
+          success: false,
+          error: `Failed to create category "${imageData.category}". Please try again.`,
+        }
+      }
+
+      categoryId = newCategoryResult.data[0].id
     } else {
-      categoryId = categoryResult.data![0].id
+      if (!categoryResult.data || categoryResult.data.length === 0) {
+        console.error("[v0] Category lookup failed")
+        return {
+          success: false,
+          error: "Failed to find or create category. Please try again.",
+        }
+      }
+      categoryId = categoryResult.data[0].id
     }
 
     console.log("[v0] Updating image with license_id:", imageData.license_id, "price:", imageData.price)

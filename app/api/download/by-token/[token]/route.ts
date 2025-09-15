@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createNeonClient } from "@/lib/neon/client"
+import { createSupabaseServerClient } from "@/lib/database"
 import { ImageUrlHandler } from "@/lib/image-url-handler"
 
 export async function GET(request: NextRequest, { params }: { params: { token: string } }) {
@@ -13,19 +13,28 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
       return NextResponse.json({ error: "Download token is required" }, { status: 400 })
     }
 
-    console.log("[v0] Creating Neon client...")
-    const sql = createNeonClient()
-    console.log("[v0] Neon client created successfully")
+    console.log("[v0] Creating Supabase client...")
+    const supabase = createSupabaseServerClient()
+    console.log("[v0] Supabase client created successfully")
 
-    console.log("[v0] Calling verify_and_download function...")
-    const result = await sql`
-      SELECT * FROM verify_and_download(${token})
-    `
-    console.log("[v0] Verification result:", result)
+    console.log("[v0] Verifying download token...")
 
-    const downloadData = result[0]
+    const { data: downloadData, error } = await supabase
+      .from("downloads")
+      .select(`
+        *,
+        order_items!inner(
+          order_id,
+          orders!inner(status)
+        )
+      `)
+      .eq("download_token", token)
+      .gt("expires_at", new Date().toISOString())
+      .single()
 
-    if (!downloadData?.valid) {
+    console.log("[v0] Verification result:", downloadData)
+
+    if (error || !downloadData || downloadData.order_items.orders.status !== "completed") {
       console.log("[v0] Invalid or expired token")
       return NextResponse.json(
         {
@@ -36,21 +45,33 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
     }
 
     console.log("[v0] Fetching image data for ID:", downloadData.image_id)
-    const imageResult = await sql`
-      SELECT image_url, title FROM images WHERE id = ${downloadData.image_id}
-    `
+    const { data: imageResult, error: imageError } = await supabase
+      .from("images")
+      .select("original_url, title")
+      .eq("id", downloadData.image_id)
+      .single()
+
     console.log("[v0] Image result:", imageResult)
 
-    if (!imageResult[0]) {
+    if (imageError || !imageResult) {
       console.log("[v0] Image not found")
       return NextResponse.json({ error: "Image not found" }, { status: 404 })
     }
 
-    const originalImageUrl = imageResult[0].image_url
-    const imageTitle = imageResult[0].title
+    const originalImageUrl = imageResult.original_url
+    const imageTitle = imageResult.title
 
     const downloadUrl = ImageUrlHandler.convertToDownloadUrl(originalImageUrl)
     console.log("[v0] Converted URL for download:", downloadUrl)
+
+    // Update download count
+    await supabase
+      .from("downloads")
+      .update({
+        download_count: downloadData.download_count + 1,
+        last_downloaded_at: new Date().toISOString(),
+      })
+      .eq("id", downloadData.id)
 
     try {
       console.log("[v0] Fetching image from:", downloadUrl)

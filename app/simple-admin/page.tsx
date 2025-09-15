@@ -500,36 +500,64 @@ export default function SimpleAdminPage() {
       const img = new Image()
       img.crossOrigin = "anonymous"
 
-      await new Promise((resolve, reject) => {
-        img.onload = resolve
-        img.onerror = reject
-        img.src = imageUrl
-      })
+      try {
+        await new Promise((resolve, reject) => {
+          img.onload = resolve
+          img.onerror = (event) => {
+            console.log("[v0] Image failed to load for thumbnail generation:", event)
+            reject(new Error("Failed to load image for thumbnail generation"))
+          }
+          img.src = imageUrl
+        })
 
-      const canvas = document.createElement("canvas")
-      const ctx = canvas.getContext("2d")!
+        const canvas = document.createElement("canvas")
+        const ctx = canvas.getContext("2d")!
 
-      // Calculate thumbnail dimensions (max 400px)
-      const maxSize = 400
-      let { width, height } = img
-      if (width > height) {
-        if (width > maxSize) {
-          height = (height * maxSize) / width
-          width = maxSize
+        // Calculate thumbnail dimensions (max 400px)
+        const maxSize = 400
+        let { width, height } = img
+        if (width > height) {
+          if (width > maxSize) {
+            height = (height * maxSize) / width
+            width = maxSize
+          }
+        } else {
+          if (height > maxSize) {
+            width = (width * maxSize) / height
+            height = maxSize
+          }
         }
-      } else {
-        if (height > maxSize) {
-          width = (width * maxSize) / height
-          height = maxSize
-        }
+
+        canvas.width = width
+        canvas.height = height
+        ctx.drawImage(img, 0, 0, width, height)
+        thumbnailBase64 = canvas.toDataURL("image/jpeg", 0.8)
+
+        console.log("[v0] Thumbnail generated successfully")
+      } catch (thumbnailError) {
+        console.log("[v0] Thumbnail generation failed, creating placeholder:", thumbnailError)
+        // Create a simple placeholder thumbnail
+        const canvas = document.createElement("canvas")
+        const ctx = canvas.getContext("2d")!
+        canvas.width = 400
+        canvas.height = 300
+
+        // Fill with a gradient background
+        const gradient = ctx.createLinearGradient(0, 0, 400, 300)
+        gradient.addColorStop(0, "#f3f4f6")
+        gradient.addColorStop(1, "#e5e7eb")
+        ctx.fillStyle = gradient
+        ctx.fillRect(0, 0, 400, 300)
+
+        // Add placeholder text
+        ctx.fillStyle = "#6b7280"
+        ctx.font = "16px Arial"
+        ctx.textAlign = "center"
+        ctx.fillText("Image Preview", 200, 150)
+
+        thumbnailBase64 = canvas.toDataURL("image/jpeg", 0.8)
+        console.log("[v0] Placeholder thumbnail created")
       }
-
-      canvas.width = width
-      canvas.height = height
-      ctx.drawImage(img, 0, 0, width, height)
-      thumbnailBase64 = canvas.toDataURL("image/jpeg", 0.8)
-
-      console.log("[v0] Thumbnail generated successfully")
 
       const imageData = {
         title: newImage.title,

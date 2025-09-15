@@ -1,23 +1,34 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { createNeonClient } from "@/lib/neon/client"
+import { createSupabaseServerClient } from "@/lib/database"
 
 export async function GET() {
   try {
     console.log("[v0] Fetching licenses...")
-    const sql = createNeonClient()
+    const supabase = createSupabaseServerClient()
 
-    const licenses = await sql`
-      SELECT id, name, description, price, active, created_at, updated_at
-      FROM licenses 
-      WHERE active = true
-      ORDER BY price ASC
-    `
+    const { data: licenses, error } = await supabase
+      .from("licenses")
+      .select("id, name, description, price, active, created_at, updated_at")
+      .eq("active", true)
+      .order("price", { ascending: true })
 
-    console.log("[v0] Found", licenses.length, "active licenses")
+    if (error) {
+      console.error("[v0] Error fetching licenses:", error)
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Failed to fetch licenses",
+          licenses: [],
+        },
+        { status: 500 },
+      )
+    }
+
+    console.log("[v0] Found", licenses?.length || 0, "active licenses")
 
     return NextResponse.json({
       success: true,
-      licenses: licenses,
+      licenses: licenses || [],
     })
   } catch (error) {
     console.error("[v0] Error fetching licenses:", error)
@@ -41,19 +52,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Name, description, and price are required" }, { status: 400 })
     }
 
-    const sql = createNeonClient()
+    const supabase = createSupabaseServerClient()
 
-    const result = await sql`
-      INSERT INTO licenses (name, description, price, active)
-      VALUES (${name}, ${description}, ${price}, ${active})
-      RETURNING *
-    `
+    const { data: result, error } = await supabase
+      .from("licenses")
+      .insert({
+        name,
+        description,
+        price,
+        active,
+      })
+      .select()
+      .single()
 
-    console.log("[v0] License created successfully:", result[0])
+    if (error || !result) {
+      console.error("[v0] License creation error:", error)
+      return NextResponse.json({ success: false, error: "Failed to create license" }, { status: 500 })
+    }
+
+    console.log("[v0] License created successfully:", result)
 
     return NextResponse.json({
       success: true,
-      license: result[0],
+      license: result,
     })
   } catch (error) {
     console.error("[v0] Error creating license:", error)
@@ -70,29 +91,25 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, error: "License ID is required" }, { status: 400 })
     }
 
-    const sql = createNeonClient()
+    const supabase = createSupabaseServerClient()
 
-    const result = await sql`
-      UPDATE licenses 
-      SET 
-        name = COALESCE(${name}, name),
-        description = COALESCE(${description}, description),
-        price = COALESCE(${price}, price),
-        active = COALESCE(${active}, active),
-        updated_at = NOW()
-      WHERE id = ${id}
-      RETURNING *
-    `
+    const updateData: any = { updated_at: new Date().toISOString() }
+    if (name !== undefined) updateData.name = name
+    if (description !== undefined) updateData.description = description
+    if (price !== undefined) updateData.price = price
+    if (active !== undefined) updateData.active = active
 
-    if (result.length === 0) {
+    const { data: result, error } = await supabase.from("licenses").update(updateData).eq("id", id).select().single()
+
+    if (error || !result) {
       return NextResponse.json({ success: false, error: "License not found" }, { status: 404 })
     }
 
-    console.log("[v0] License updated successfully:", result[0])
+    console.log("[v0] License updated successfully:", result)
 
     return NextResponse.json({
       success: true,
-      license: result[0],
+      license: result,
     })
   } catch (error) {
     console.error("[v0] Error updating license:", error)

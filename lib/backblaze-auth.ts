@@ -272,8 +272,8 @@ export class BackblazeAuth {
       const fileId = startData.fileId
       console.log("[v0] uploadLargeFile: Got file ID:", fileId)
 
-      // Step 2: Upload parts (1MB chunks to avoid Vercel payload limits)
-      const chunkSize = 1 * 1024 * 1024 // 1MB - safe for Vercel serverless functions
+      // Step 2: Upload parts (5MB chunks minimum required by Backblaze)
+      const chunkSize = 5 * 1024 * 1024 // 5MB - minimum required by Backblaze for multipart uploads
       const totalChunks = Math.ceil(fileBuffer.length / chunkSize)
       const partSha1Array: string[] = []
 
@@ -452,8 +452,9 @@ export class BackblazeAuth {
       console.log("[v0] Starting upload to Backblaze B2...")
       console.log("[v0] File size:", fileBuffer.length, "bytes")
 
-      const fourMB = 4 * 1024 * 1024
-      if (fileBuffer.length > fourMB) {
+      // This ensures we have enough data to create proper 5MB chunks
+      const tenMB = 10 * 1024 * 1024
+      if (fileBuffer.length > tenMB) {
         console.log("[v0] Using multipart upload for large file...")
         return await this.uploadLargeFile(key, fileBuffer, contentType)
       } else {

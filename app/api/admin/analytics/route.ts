@@ -1,117 +1,162 @@
 import { NextResponse } from "next/server"
-import { createNeonClient } from "@/lib/neon/client"
+import { createSupabaseServerClient } from "@/lib/database"
 
 export async function GET() {
   try {
     console.log("[v0] Fetching analytics data...")
-    const sql = createNeonClient()
+    const supabase = createSupabaseServerClient()
 
     // Get overview statistics
-    const overviewQuery = await sql`
-      SELECT 
-        COALESCE(SUM(total_amount), 0) as total_revenue,
-        COUNT(*) as total_orders,
-        COALESCE(AVG(total_amount), 0) as average_order_value
-      FROM orders 
-      WHERE status = 'completed'
-    `
+    const { data: overviewData, error: overviewError } = await supabase
+      .from("orders")
+      .select("total_amount")
+      .eq("status", "completed")
 
-    const downloadsQuery = await sql`
-      SELECT COALESCE(SUM(download_count), 0) as total_downloads
-      FROM downloads
-    `
+    const totalRevenue = overviewData?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
+    const totalOrders = overviewData?.length || 0
+    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
+
+    const { count: totalDownloads } = await supabase.from("downloads").select("*", { count: "exact", head: true })
 
     // Get recent orders
-    const recentOrdersQuery = await sql`
-      SELECT 
-        o.id,
-        o.user_email,
-        o.total_amount,
-        o.status,
-        o.created_at,
-        COUNT(oi.id) as items_count
-      FROM orders o
-      LEFT JOIN order_items oi ON oi.order_id = o.id
-      GROUP BY o.id, o.user_email, o.total_amount, o.status, o.created_at
-      ORDER BY o.created_at DESC
-      LIMIT 10
-    `
+    const { data: recentOrders, error: recentOrdersError } = await supabase
+      .from("orders")
+      .select(`
+        id,
+        user_email,
+        total_amount,
+        status,
+        created_at,
+        order_items(count)
+      `)
+      .order("created_at", { ascending: false })
+      .limit(10)
+
+    // Transform recent orders data
+    const transformedRecentOrders =
+      recentOrders?.map((order) => ({
+        ...order,
+        items_count: order.order_items?.length || 0,
+        order_items: undefined,
+      })) || []
 
     // Get popular images
-    const popularImagesQuery = await sql`
-      SELECT 
-        i.id,
-        i.title,
-        i.category_name,
-        i.price,
-        COUNT(oi.id) as order_count,
-        COALESCE(SUM(oi.price), 0) as revenue
-      FROM images i
-      LEFT JOIN order_items oi ON oi.image_id = i.id
-      LEFT JOIN orders o ON o.id = oi.order_id AND o.status = 'completed'
-      GROUP BY i.id, i.title, i.category_name, i.price
-      HAVING COUNT(oi.id) > 0
-      ORDER BY revenue DESC, order_count DESC
-      LIMIT 10
-    `
+    const { data: popularImages, error: popularImagesError } = await supabase
+      .from("images")
+      .select(`
+        id,
+        title,
+        category_name,
+        price,
+        order_items!inner(
+          price,
+          orders!inner(status)
+        )
+      `)
+      .eq("order_items.orders.status", "completed")
+      .limit(10)
+
+    // Transform popular images data
+    const transformedPopularImages =
+      popularImages
+        ?.map((image) => {
+          const orderCount = image.order_items?.length || 0
+          const revenue = image.order_items?.reduce((sum, item) => sum + (item.price || 0), 0) || 0
+          return {
+            id: image.id,
+            title: image.title,
+            category_name: image.category_name,
+            price: image.price,
+            order_count: orderCount,
+            revenue: revenue,
+          }
+        })
+        .sort((a, b) => b.revenue - a.revenue) || []
 
     // Get category performance
-    const categoryPerformanceQuery = await sql`
-      SELECT 
-        i.category_name as category,
-        COUNT(DISTINCT oi.id) as orders,
-        COALESCE(SUM(oi.price), 0) as revenue,
-        COUNT(DISTINCT i.id) as images
-      FROM images i
-      LEFT JOIN order_items oi ON oi.image_id = i.id
-      LEFT JOIN orders o ON o.id = oi.order_id AND o.status = 'completed'
-      GROUP BY i.category_name
-      ORDER BY revenue DESC
-    `
+    const { data: categoryData, error: categoryError } = await supabase
+      .from("images")
+      .select(`
+        category_name,
+        order_items(
+          price,
+          orders!inner(status)
+        )
+      `)
+      .eq("order_items.orders.status", "completed")
+
+    // Transform category data
+    const categoryMap = new Map()
+    categoryData?.forEach((image) => {
+      const category = image.category_name
+      if (!categoryMap.has(category)) {
+        categoryMap.set(category, { orders: 0, revenue: 0, images: new Set() })
+      }
+      const categoryStats = categoryMap.get(category)
+      categoryStats.images.add(image)
+      if (image.order_items) {
+        categoryStats.orders += image.order_items.length
+        categoryStats.revenue += image.order_items.reduce((sum, item) => sum + (item.price || 0), 0)
+      }
+    })
+
+    const categoryPerformance = Array.from(categoryMap.entries())
+      .map(([category, stats]) => ({
+        category,
+        orders: stats.orders,
+        revenue: stats.revenue,
+        images: stats.images.size,
+      }))
+      .sort((a, b) => b.revenue - a.revenue)
 
     // Get monthly stats (last 6 months)
-    const monthlyStatsQuery = await sql`
-      SELECT 
-        TO_CHAR(o.created_at, 'YYYY-MM') as month,
-        COUNT(DISTINCT o.id) as orders,
-        COALESCE(SUM(o.total_amount), 0) as revenue,
-        COALESCE(SUM(d.download_count), 0) as downloads
-      FROM orders o
-      LEFT JOIN order_items oi ON oi.order_id = o.id
-      LEFT JOIN downloads d ON d.order_item_id = oi.id
-      WHERE o.status = 'completed' 
-        AND o.created_at >= NOW() - INTERVAL '6 months'
-      GROUP BY TO_CHAR(o.created_at, 'YYYY-MM')
-      ORDER BY month DESC
-    `
+    const sixMonthsAgo = new Date()
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
 
-    const [overview, downloads, recentOrders, popularImages, categoryPerformance, monthlyStats] = await Promise.all([
-      overviewQuery,
-      downloadsQuery,
-      recentOrdersQuery,
-      popularImagesQuery,
-      categoryPerformanceQuery,
-      monthlyStatsQuery,
-    ])
+    const { data: monthlyOrderData, error: monthlyError } = await supabase
+      .from("orders")
+      .select("created_at, total_amount")
+      .eq("status", "completed")
+      .gte("created_at", sixMonthsAgo.toISOString())
+
+    // Transform monthly data
+    const monthlyMap = new Map()
+    monthlyOrderData?.forEach((order) => {
+      const month = new Date(order.created_at).toISOString().substring(0, 7) // YYYY-MM format
+      if (!monthlyMap.has(month)) {
+        monthlyMap.set(month, { orders: 0, revenue: 0, downloads: 0 })
+      }
+      const monthStats = monthlyMap.get(month)
+      monthStats.orders += 1
+      monthStats.revenue += order.total_amount || 0
+    })
+
+    const monthlyStats = Array.from(monthlyMap.entries())
+      .map(([month, stats]) => ({
+        month,
+        orders: stats.orders,
+        revenue: stats.revenue,
+        downloads: stats.downloads, // Would need to join with downloads table for accurate count
+      }))
+      .sort((a, b) => b.month.localeCompare(a.month))
 
     // Calculate conversion rate (assuming we track page views somewhere)
-    const conversionRate =
-      overview[0].total_orders > 0 ? (overview[0].total_orders / Math.max(overview[0].total_orders * 10, 100)) * 100 : 0
+    const conversionRate = totalOrders > 0 ? (totalOrders / Math.max(totalOrders * 10, 100)) * 100 : 0
 
     const analyticsData = {
       overview: {
-        totalRevenue: Number(overview[0].total_revenue),
-        totalOrders: Number(overview[0].total_orders),
-        totalDownloads: Number(downloads[0].total_downloads),
+        totalRevenue: Number(totalRevenue),
+        totalOrders: Number(totalOrders),
+        totalDownloads: Number(totalDownloads || 0),
         conversionRate: conversionRate,
-        averageOrderValue: Number(overview[0].average_order_value),
+        averageOrderValue: Number(averageOrderValue),
       },
-      recentOrders: recentOrders.map((order) => ({
+      recentOrders: transformedRecentOrders.map((order) => ({
         ...order,
         total_amount: Number(order.total_amount),
         items_count: Number(order.items_count),
       })),
-      popularImages: popularImages.map((image) => ({
+      popularImages: transformedPopularImages.map((image) => ({
         ...image,
         price: Number(image.price),
         order_count: Number(image.order_count),

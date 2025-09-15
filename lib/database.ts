@@ -1,4 +1,5 @@
-import { createNeonClient } from "@/lib/neon/client"
+import { createBrowserClient, createServerClient } from "@supabase/ssr"
+import { cookies } from "next/headers"
 
 // Type definitions for database tables
 export type Image = {
@@ -7,8 +8,10 @@ export type Image = {
   description: string
   category_id: string
   price: number
-  image_url: string
-  thumbnail_url: string
+  original_url: string
+  thumbnail_small_url: string
+  thumbnail_medium_url: string
+  thumbnail_large_url: string
   active: boolean
   featured: boolean
   created_at: string
@@ -56,7 +59,18 @@ export const LICENSE_TYPES = {
 
 export type LicenseType = keyof typeof LICENSE_TYPES
 
-// Helper function to get Neon client
-export function getNeonClient() {
-  return createNeonClient()
+export function createSupabaseServerClient() {
+  const cookieStore = cookies()
+
+  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    cookies: {
+      get(name: string) {
+        return cookieStore.get(name)?.value
+      },
+    },
+  })
+}
+
+export function createSupabaseBrowserClient() {
+  return createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 }

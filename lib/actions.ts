@@ -1,11 +1,7 @@
 "use server"
 
-import { neon } from "@neondatabase/serverless"
+import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
-
-const sql = neon(process.env.DATABASE_URL!, {
-  disableWarningInBrowsers: true,
-})
 
 export interface ImageData {
   title: string
@@ -31,12 +27,18 @@ export interface ImageUpdateData {
 
 export async function testDatabaseConnection() {
   try {
-    console.log("[v0] Testing database connection...")
-    const result = await sql`SELECT 1 as test`
-    console.log("[v0] Database connection successful:", result)
+    console.log("[v0] Testing Supabase connection...")
+    const supabase = await createClient()
+    const { data: result, error } = await supabase.from("categories").select("count").limit(1)
+
+    if (error) {
+      throw error
+    }
+
+    console.log("[v0] Supabase connection successful:", result)
     return { success: true, data: result }
   } catch (error) {
-    console.error("[v0] Database connection failed:", error)
+    console.error("[v0] Supabase connection failed:", error)
     return { success: false, error: error instanceof Error ? error.message : "Connection failed" }
   }
 }
@@ -61,33 +63,42 @@ export async function createImage(imageData: ImageData) {
       }
     }
 
-    // First, get or create the category
+    const supabase = await createClient()
+
     let categoryId: string
 
     try {
-      // Try to find existing category
       console.log("[v0] Searching for category:", imageData.category)
-      const existingCategories = await sql`
-        SELECT id FROM categories WHERE name = ${imageData.category} LIMIT 1
-      `
+      const { data: existingCategories, error: categoryError } = await supabase
+        .from("categories")
+        .select("id")
+        .eq("name", imageData.category)
+        .limit(1)
 
-      if (existingCategories.length > 0) {
+      if (categoryError) {
+        throw categoryError
+      }
+
+      if (existingCategories && existingCategories.length > 0) {
         categoryId = existingCategories[0].id
         console.log("[v0] Found existing category:", categoryId)
       } else {
-        // Create new category
         console.log("[v0] Creating new category:", imageData.category)
-        const newCategories = await sql`
-          INSERT INTO categories (name, description, active, created_at, updated_at)
-          VALUES (
-            ${imageData.category},
-            ${"Auto-created category for " + imageData.category},
-            true,
-            NOW(),
-            NOW()
-          )
-          RETURNING id
-        `
+        const { data: newCategories, error: createError } = await supabase
+          .from("categories")
+          .insert([
+            {
+              name: imageData.category,
+              description: "Auto-created category for " + imageData.category,
+              active: true,
+            },
+          ])
+          .select("id")
+
+        if (createError) {
+          throw createError
+        }
+
         categoryId = newCategories[0].id
         console.log("[v0] Created new category:", categoryId)
       }
@@ -113,36 +124,27 @@ export async function createImage(imageData: ImageData) {
       }
     }
 
-    // Create the image record
     try {
       console.log("[v0] Inserting image into database...")
-      const images = await sql`
-        INSERT INTO images (
-          title, 
-          description, 
-          category_id, 
-          price, 
-          image_url, 
-          thumbnail_url, 
-          active, 
-          featured,
-          created_at,
-          updated_at
-        )
-        VALUES (
-          ${imageData.title},
-          ${imageData.description || null},
-          ${categoryId},
-          ${imageData.price},
-          ${imageData.file_url},
-          ${imageData.thumbnail_url || imageData.file_url},
-          true,
-          false,
-          NOW(),
-          NOW()
-        )
-        RETURNING *
-      `
+      const { data: images, error: insertError } = await supabase
+        .from("images")
+        .insert([
+          {
+            title: imageData.title,
+            description: imageData.description || null,
+            category_id: categoryId,
+            price: imageData.price,
+            image_url: imageData.file_url,
+            thumbnail_url: imageData.thumbnail_url || imageData.file_url,
+            active: true,
+            featured: false,
+          },
+        ])
+        .select("*")
+
+      if (insertError) {
+        throw insertError
+      }
 
       const createdImage = images[0]
       console.log("[v0] Successfully created image:", createdImage.id)
@@ -178,28 +180,39 @@ export async function getImages() {
   try {
     console.log("[v0] Starting getImages server action")
 
-    const images = await sql`
-      SELECT 
-        i.id,
-        i.title,
-        i.description,
-        i.price,
-        i.image_url as file_url,
-        i.thumbnail_url,
-        i.active,
-        i.featured,
-        i.created_at,
-        i.updated_at,
-        c.name as category
-      FROM images i
-      LEFT JOIN categories c ON i.category_id = c.id
-      ORDER BY i.created_at DESC
-    `
+    const supabase = await createClient()
+    const { data: images, error } = await supabase
+      .from("images")
+      .select(`
+        id,
+        title,
+        description,
+        price,
+        image_url,
+        thumbnail_url,
+        active,
+        featured,
+        created_at,
+        updated_at,
+        categories(name)
+      `)
+      .order("created_at", { ascending: false })
 
-    console.log("[v0] Successfully fetched", images.length, "images")
+    if (error) {
+      throw error
+    }
+
+    const transformedImages =
+      images?.map((image) => ({
+        ...image,
+        file_url: image.image_url,
+        category: image.categories?.name,
+      })) || []
+
+    console.log("[v0] Successfully fetched", transformedImages.length, "images")
     return {
       success: true,
-      data: images,
+      data: transformedImages,
       error: null,
     }
   } catch (error) {
@@ -219,27 +232,24 @@ export async function updateImage(imageId: string, updateData: ImageUpdateData) 
     let categoryId: string | undefined
 
     if (updateData.category) {
-      // Get or create the category
-      const existingCategories = await sql`
-        SELECT id FROM categories WHERE name = ${updateData.category} LIMIT 1
-      `
+      const supabase = await createClient()
+      const existingCategories = await supabase.from("categories").select("id").eq("name", updateData.category).limit(1)
 
-      if (existingCategories.length > 0) {
-        categoryId = existingCategories[0].id
+      if (existingCategories.data && existingCategories.data.length > 0) {
+        categoryId = existingCategories.data[0].id
       } else {
-        // Create new category
-        const newCategories = await sql`
-          INSERT INTO categories (name, description, active, created_at, updated_at)
-          VALUES (
-            ${updateData.category},
-            ${"Auto-created category for " + updateData.category},
-            true,
-            NOW(),
-            NOW()
-          )
-          RETURNING id
-        `
-        categoryId = newCategories[0].id
+        const newCategories = await supabase
+          .from("categories")
+          .insert([
+            {
+              name: updateData.category,
+              description: "Auto-created category for " + updateData.category,
+              active: true,
+            },
+          ])
+          .select("id")
+
+        categoryId = newCategories.data[0].id
       }
     }
 
@@ -279,11 +289,9 @@ export async function updateImage(imageId: string, updateData: ImageUpdateData) 
       updateValues.push(updateData.featured)
     }
 
-    // Always update the updated_at timestamp
     updateFields.push(`updated_at = NOW()`)
 
     if (updateFields.length === 1) {
-      // Only updated_at
       console.log("[v0] No fields to update")
       return {
         success: true,
@@ -300,7 +308,13 @@ export async function updateImage(imageId: string, updateData: ImageUpdateData) 
     `
     updateValues.push(imageId)
 
-    const updatedImages = await sql.unsafe(updateQuery, updateValues)
+    const supabase = await createClient()
+    const { data: updatedImages, error: updateError } = await supabase.unsafe(updateQuery, updateValues)
+
+    if (updateError) {
+      throw updateError
+    }
+
     const updatedImage = updatedImages[0]
 
     console.log("[v0] Successfully updated image:", updatedImage.id)
@@ -327,9 +341,12 @@ export async function deleteImage(imageId: string) {
   try {
     console.log("[v0] Starting deleteImage for:", imageId)
 
-    await sql`
-      DELETE FROM images WHERE id = ${imageId}
-    `
+    const supabase = await createClient()
+    const { error: deleteError } = await supabase.from("images").delete().eq("id", imageId)
+
+    if (deleteError) {
+      throw deleteError
+    }
 
     console.log("[v0] Successfully deleted image:", imageId)
 

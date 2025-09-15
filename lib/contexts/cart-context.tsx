@@ -14,6 +14,7 @@ export interface CartItem {
   previewUrl: string
   category: "equirectangular" | "fisheye"
   quantity: number
+  licenseType: "NON_EXCLUSIVE" | "EXCLUSIVE"
 }
 
 interface CartState {

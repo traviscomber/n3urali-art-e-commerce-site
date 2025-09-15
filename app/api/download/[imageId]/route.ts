@@ -1,8 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { neon } from "@neondatabase/serverless"
+import { createClient } from "@/lib/supabase/server"
 import { ImageUrlHandler } from "@/lib/image-url-handler"
-
-const sql = neon(process.env.DATABASE_URL!)
 
 export async function POST(request: NextRequest, { params }: { params: { imageId: string } }) {
   try {
@@ -11,29 +9,37 @@ export async function POST(request: NextRequest, { params }: { params: { imageId
     const body = await request.json()
     const { order_item_id, license_id } = body
 
-    const orderCheck = await sql`
-      SELECT oi.*, o.status, i.image_url, i.title, i.thumbnail_url
-      FROM order_items oi
-      JOIN orders o ON oi.order_id = o.id
-      JOIN images i ON oi.image_id = i.id
-      WHERE oi.id = ${order_item_id} 
-      AND oi.image_id = ${params.imageId}
-      AND o.status = 'completed'
-    `
+    const supabase = await createClient()
+    const { data: orderCheck, error } = await supabase
+      .from("order_items")
+      .select(`
+        *,
+        orders!inner(status),
+        images!inner(image_url, original_file_url, title, thumbnail_url)
+      `)
+      .eq("id", order_item_id)
+      .eq("image_id", params.imageId)
+      .eq("orders.status", "completed")
 
-    if (orderCheck.length === 0) {
+    if (error) {
+      throw error
+    }
+
+    if (!orderCheck || orderCheck.length === 0) {
       return NextResponse.json({ error: "Order not found or not completed" }, { status: 404 })
     }
 
     const orderItem = orderCheck[0]
-    console.log("[v0] Download prepared for:", orderItem.title)
+    console.log("[v0] Download prepared for:", orderItem.images.title)
 
-    if (orderItem.image_url) {
+    const downloadUrl = orderItem.images.original_file_url || orderItem.images.image_url
+
+    if (downloadUrl) {
       try {
-        const downloadUrl = ImageUrlHandler.convertToDownloadUrl(orderItem.image_url)
-        console.log("[v0] Attempting to download from URL:", downloadUrl)
+        const finalDownloadUrl = ImageUrlHandler.convertToDownloadUrl(downloadUrl)
+        console.log("[v0] Attempting to download from URL:", finalDownloadUrl)
 
-        const response = await fetch(downloadUrl)
+        const response = await fetch(finalDownloadUrl)
 
         if (!response.ok) {
           throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`)
@@ -41,26 +47,30 @@ export async function POST(request: NextRequest, { params }: { params: { imageId
 
         const imageBuffer = await response.arrayBuffer()
         const contentType =
-          response.headers.get("content-type") || (downloadUrl.includes(".png") ? "image/png" : "image/jpeg")
+          response.headers.get("content-type") || (finalDownloadUrl.includes(".png") ? "image/png" : "image/jpeg")
 
-        const cleanTitle = orderItem.title.replace(/[^a-zA-Z0-9\s-]/g, "").replace(/\s+/g, "_")
+        const cleanTitle = orderItem.images.title.replace(/[^a-zA-Z0-9\s-]/g, "").replace(/\s+/g, "_")
         const fileExtension = contentType.includes("png") ? "png" : "jpg"
 
-        console.log("[v0] Serving download:", `${cleanTitle}.${fileExtension}`)
+        const isOriginal =
+          orderItem.images.original_file_url && orderItem.images.original_file_url !== orderItem.images.image_url
+        const filename = isOriginal ? `${cleanTitle}_original.${fileExtension}` : `${cleanTitle}.${fileExtension}`
+
+        console.log("[v0] Serving download:", filename)
 
         return new NextResponse(imageBuffer, {
           headers: {
             "Content-Type": contentType,
-            "Content-Disposition": `attachment; filename="${cleanTitle}.${fileExtension}"`,
+            "Content-Disposition": `attachment; filename="${filename}"`,
             "Content-Length": imageBuffer.byteLength.toString(),
             "Cache-Control": "no-cache",
           },
         })
       } catch (imageError) {
-        console.error("[v0] Primary image download failed, trying thumbnail:", imageError)
+        console.error("[v0] Primary download failed, trying thumbnail:", imageError)
 
         try {
-          const thumbnailDownloadUrl = ImageUrlHandler.convertToDownloadUrl(orderItem.thumbnail_url)
+          const thumbnailDownloadUrl = ImageUrlHandler.convertToDownloadUrl(orderItem.images.thumbnail_url)
           const thumbnailResponse = await fetch(thumbnailDownloadUrl)
 
           if (!thumbnailResponse.ok) {
@@ -72,7 +82,7 @@ export async function POST(request: NextRequest, { params }: { params: { imageId
             thumbnailResponse.headers.get("content-type") ||
             (thumbnailDownloadUrl.includes(".png") ? "image/png" : "image/jpeg")
 
-          const cleanTitle = orderItem.title.replace(/[^a-zA-Z0-9\s-]/g, "").replace(/\s+/g, "_")
+          const cleanTitle = orderItem.images.title.replace(/[^a-zA-Z0-9\s-]/g, "").replace(/\s+/g, "_")
           const fileExtension = contentType.includes("png") ? "png" : "jpg"
 
           console.log("[v0] Serving thumbnail download as fallback")
@@ -80,7 +90,7 @@ export async function POST(request: NextRequest, { params }: { params: { imageId
           return new NextResponse(thumbnailBuffer, {
             headers: {
               "Content-Type": contentType,
-              "Content-Disposition": `attachment; filename="${cleanTitle}_thumbnail.${fileExtension}"`,
+              "Content-Disposition": `attachment; filename="${cleanTitle}_preview.${fileExtension}"`,
               "Content-Length": thumbnailBuffer.byteLength.toString(),
               "Cache-Control": "no-cache",
             },

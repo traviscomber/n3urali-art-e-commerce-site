@@ -10,20 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
-import {
-  Loader2,
-  Upload,
-  Eye,
-  Trash2,
-  Database,
-  BarChart3,
-  Crown,
-  Edit2,
-  Check,
-  X,
-  HardDrive,
-  Cloud,
-} from "lucide-react"
+import { Loader2, Upload, Eye, Trash2, Database, BarChart3, Crown, Edit2, Check, X, HardDrive } from "lucide-react"
 
 interface Image {
   id: string
@@ -74,6 +61,7 @@ interface NewImage {
   price: string
   file: File | null
   preview: string
+  originalFileUrl: string
 }
 
 export default function SimpleAdminPage() {
@@ -105,6 +93,7 @@ export default function SimpleAdminPage() {
     price: "",
     file: null,
     preview: "",
+    originalFileUrl: "",
   })
   const [uploadError, setUploadError] = useState<string | null>(null)
 
@@ -304,125 +293,68 @@ export default function SimpleAdminPage() {
     try {
       console.log("[v0] Starting image upload process...")
 
-      // Enhanced compression function
-      const compressImage = (file: File, maxSizeMB = 2, quality = 0.7): Promise<string> => {
-        return new Promise((resolve, reject) => {
-          const img = new Image()
-          const canvas = document.createElement("canvas")
-          const ctx = canvas.getContext("2d")!
-
-          img.onload = () => {
-            // Calculate dimensions to keep under size limit
-            let { width, height } = img
-            const maxDimension = 2048 // Max dimension for compressed images
-
-            if (width > maxDimension || height > maxDimension) {
-              if (width > height) {
-                height = (height * maxDimension) / width
-                width = maxDimension
-              } else {
-                width = (width * maxDimension) / height
-                height = maxDimension
-              }
-            }
-
-            canvas.width = width
-            canvas.height = height
-            ctx.drawImage(img, 0, 0, width, height)
-
-            // Try different quality levels to get under size limit
-            let currentQuality = quality
-            let result = canvas.toDataURL("image/jpeg", currentQuality)
-
-            // If still too large, reduce quality further
-            while (result.length > maxSizeMB * 1024 * 1024 * 1.37 && currentQuality > 0.1) {
-              // 1.37 accounts for base64 overhead
-              currentQuality -= 0.1
-              result = canvas.toDataURL("image/jpeg", currentQuality)
-            }
-
-            console.log(
-              `[v0] Compressed image: ${(result.length / (1024 * 1024)).toFixed(2)}MB at quality ${currentQuality}`,
-            )
-            resolve(result)
-          }
-
-          img.onerror = reject
-          img.src = URL.createObjectURL(file)
-        })
-      }
-
-      // Create thumbnail with aggressive compression
-      const createThumbnail = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-          const img = new Image()
-          const canvas = document.createElement("canvas")
-          const ctx = canvas.getContext("2d")!
-
-          img.onload = () => {
-            // Smaller thumbnail dimensions
-            const maxSize = 300
-            let { width, height } = img
-
-            if (width > height) {
-              if (width > maxSize) {
-                height = (height * maxSize) / width
-                width = maxSize
-              }
-            } else {
-              if (height > maxSize) {
-                width = (width * maxSize) / height
-                height = maxSize
-              }
-            }
-
-            canvas.width = width
-            canvas.height = height
-            ctx.drawImage(img, 0, 0, width, height)
-
-            resolve(canvas.toDataURL("image/jpeg", 0.6)) // Lower quality for thumbnails
-          }
-
-          img.onerror = reject
-          img.src = URL.createObjectURL(file)
-        })
-      }
-
-      // Check original file size and determine compression strategy
       const fileSizeMB = newImage.file.size / (1024 * 1024)
       console.log(`[v0] Original file size: ${fileSizeMB.toFixed(2)}MB`)
 
-      let imageBase64: string
+      let imageUrl: string
       let thumbnailBase64: string
 
-      if (fileSizeMB > 50) {
-        // Very large files - aggressive compression
-        console.log("[v0] Large file detected, applying aggressive compression...")
-        imageBase64 = await compressImage(newImage.file, 1.5, 0.5) // Max 1.5MB, quality 0.5
-        thumbnailBase64 = await createThumbnail(newImage.file)
-      } else if (fileSizeMB > 10) {
-        // Medium files - moderate compression
-        console.log("[v0] Medium file detected, applying moderate compression...")
-        imageBase64 = await compressImage(newImage.file, 3, 0.7) // Max 3MB, quality 0.7
-        thumbnailBase64 = await createThumbnail(newImage.file)
+      console.log("[v0] Using Backblaze B2 storage...")
+
+      // Upload to Backblaze B2
+      const formData = new FormData()
+      formData.append("file", newImage.file)
+
+      const uploadResponse = await fetch("/api/backblaze/upload", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text()
+        console.log("[v0] Upload response error:", errorText)
+        throw new Error("Failed to upload file to Backblaze")
+      }
+
+      const { url } = await uploadResponse.json()
+      imageUrl = url
+      console.log("[v0] File uploaded successfully to Backblaze:", imageUrl)
+
+      // Generate thumbnail from the uploaded image
+      console.log("[v0] Generating thumbnail...")
+      const img = new Image()
+      img.crossOrigin = "anonymous"
+
+      await new Promise((resolve, reject) => {
+        img.onload = resolve
+        img.onerror = reject
+        img.src = imageUrl
+      })
+
+      const canvas = document.createElement("canvas")
+      const ctx = canvas.getContext("2d")!
+
+      // Calculate thumbnail dimensions (max 400px)
+      const maxSize = 400
+      let { width, height } = img
+      if (width > height) {
+        if (width > maxSize) {
+          height = (height * maxSize) / width
+          width = maxSize
+        }
       } else {
-        // Small files - light compression
-        console.log("[v0] Small file detected, applying light compression...")
-        imageBase64 = await compressImage(newImage.file, 5, 0.8) // Max 5MB, quality 0.8
-        thumbnailBase64 = await createThumbnail(newImage.file)
+        if (height > maxSize) {
+          width = (width * maxSize) / height
+          height = maxSize
+        }
       }
 
-      // Check final payload size
-      const totalPayloadSize = imageBase64.length + thumbnailBase64.length
-      const payloadSizeMB = totalPayloadSize / (1024 * 1024)
-      console.log(`[v0] Final payload size: ${payloadSizeMB.toFixed(2)}MB`)
+      canvas.width = width
+      canvas.height = height
+      ctx.drawImage(img, 0, 0, width, height)
+      thumbnailBase64 = canvas.toDataURL("image/jpeg", 0.8)
 
-      if (payloadSizeMB > 8) {
-        // Leave some buffer under the 10MB limit
-        throw new Error(
-          `Compressed file still too large (${payloadSizeMB.toFixed(1)}MB). Please use a smaller image or try a different format.`,
-        )
-      }
+      console.log("[v0] Thumbnail generated successfully")
 
       const imageData = {
         title: newImage.title,
@@ -430,12 +362,11 @@ export default function SimpleAdminPage() {
         category_name: newImage.category,
         rights_type: newImage.rightsType,
         price: Number.parseFloat(newImage.price) || 0,
-        image_url: imageBase64,
+        image_url: imageUrl,
         thumbnail_url: thumbnailBase64,
         original_file_size: newImage.file.size,
       }
 
-      // Use the correct function name from admin-actions
       const result = await createImageWithCategoryObject(imageData)
 
       if (!result.success) {
@@ -451,11 +382,12 @@ export default function SimpleAdminPage() {
         price: "",
         file: null,
         preview: "",
+        originalFileUrl: "",
       })
       await loadInitialData()
-    } catch (error: any) {
-      console.log("[v0] Upload error:", error.message)
-      setUploadError(error.message)
+    } catch (error) {
+      console.error("[v0] Upload error:", error)
+      setUploadError(error instanceof Error ? error.message : "Upload failed")
     } finally {
       setUploading(false)
     }
@@ -540,6 +472,176 @@ export default function SimpleAdminPage() {
     } catch (error) {
       console.error("[v0] SimpleAdmin: Update error:", error)
       toast.error("Failed to update image")
+    }
+  }
+
+  const compressImage = (file: File, maxSizeMB = 2, quality = 0.7): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      const canvas = document.createElement("canvas")
+      const ctx = canvas.getContext("2d")!
+
+      img.onload = () => {
+        // Calculate dimensions to keep under size limit
+        let { width, height } = img
+        const maxDimension = 2048 // Max dimension for compressed images
+
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = (height * maxDimension) / width
+            width = maxDimension
+          } else {
+            width = (width * maxDimension) / height
+            height = maxDimension
+          }
+        }
+
+        canvas.width = width
+        canvas.height = height
+        ctx.drawImage(img, 0, 0, width, height)
+
+        // Try different quality levels to get under size limit
+        let currentQuality = quality
+        let result = canvas.toDataURL("image/jpeg", currentQuality)
+
+        // If still too large, reduce quality further
+        while (result.length > maxSizeMB * 1024 * 1024 * 1.37 && currentQuality > 0.1) {
+          // 1.37 accounts for base64 overhead
+          currentQuality -= 0.1
+          result = canvas.toDataURL("image/jpeg", currentQuality)
+        }
+
+        console.log(
+          `[v0] Compressed image: ${(result.length / (1024 * 1024)).toFixed(2)}MB at quality ${currentQuality}`,
+        )
+        resolve(result)
+      }
+
+      img.onerror = reject
+      img.src = URL.createObjectURL(file)
+    })
+  }
+
+  const createThumbnail = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      const canvas = document.createElement("canvas")
+      const ctx = canvas.getContext("2d")!
+
+      img.onload = () => {
+        // Smaller thumbnail dimensions
+        const maxSize = 300
+        let { width, height } = img
+
+        if (width > height) {
+          if (width > maxSize) {
+            height = (height * maxSize) / width
+            width = maxSize
+          }
+        } else {
+          if (height > maxSize) {
+            width = (width * maxSize) / height
+            height = maxSize
+          }
+        }
+
+        canvas.width = width
+        canvas.height = height
+        ctx.drawImage(img, 0, 0, width, height)
+
+        resolve(canvas.toDataURL("image/jpeg", 0.6)) // Lower quality for thumbnails
+      }
+
+      img.onerror = reject
+      img.src = URL.createObjectURL(file)
+    })
+  }
+
+  const handleUpload = async () => {
+    if (!newImage.file) {
+      setUploadError("Please select a file")
+      return
+    }
+
+    const MAX_FILE_SIZE = 15 * 1024 * 1024 // 15MB
+    if (newImage.file.size > MAX_FILE_SIZE) {
+      setUploadError(
+        `File size (${(newImage.file.size / 1024 / 1024).toFixed(1)}MB) exceeds 15MB limit. Please add the original file URL manually after upload.`,
+      )
+      return
+    }
+
+    if (!newImage.title || !newImage.category || !newImage.rightsType || !newImage.price) {
+      setUploadError("Please fill in all required fields")
+      return
+    }
+
+    setUploading(true)
+    setUploadError(null)
+
+    try {
+      console.log("[v0] Starting upload process...")
+
+      const formData = new FormData()
+      formData.append("file", newImage.file)
+
+      console.log("[v0] Uploading to Backblaze...")
+      const uploadResponse = await fetch("/api/backblaze/upload", {
+        method: "POST",
+        body: formData,
+      })
+
+      const uploadResult = await uploadResponse.json()
+      console.log("[v0] Upload result:", uploadResult)
+
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error || "Upload failed")
+      }
+
+      console.log("[v0] File uploaded successfully, saving to database...")
+
+      const imageData = {
+        title: newImage.title,
+        description: newImage.description,
+        category_id: newImage.category,
+        license_id: newImage.rightsType,
+        price: Number.parseFloat(newImage.price),
+        image_url: uploadResult.url,
+        thumbnail_url: uploadResult.url,
+        original_file_url: newImage.originalFileUrl || null,
+        active: true,
+        featured: false,
+      }
+
+      const result = await createImageWithCategoryObject(imageData)
+
+      if (result.success) {
+        toast.success("Image uploaded successfully!")
+        console.log("[v0] Image saved to database successfully")
+
+        // Reset form
+        setNewImage({
+          title: "",
+          description: "",
+          category: "",
+          rightsType: "both",
+          price: "",
+          file: null,
+          preview: "",
+          originalFileUrl: "",
+        })
+
+        // Refresh images list
+        await loadInitialData()
+      } else {
+        throw new Error(result.error || "Failed to save image")
+      }
+    } catch (error) {
+      console.error("[v0] Upload error:", error)
+      setUploadError(error instanceof Error ? error.message : "Upload failed")
+      toast.error("Upload failed")
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -855,23 +957,11 @@ export default function SimpleAdminPage() {
                         <p className="text-sm text-gray-500">{(newImage.file.size / (1024 * 1024)).toFixed(2)} MB</p>
                         <p className="text-sm text-gray-500">Click or drag to replace</p>
                         <div className="flex items-center justify-center gap-2 mt-2">
-                          {newImage.file.size > 40 * 1024 * 1024 ? (
-                            <>
-                              <Cloud className="h-4 w-4 text-blue-600" />
-                              <span className="text-sm text-blue-600 font-medium">
-                                Will use Backblaze B2 storage (Large file:{" "}
-                                {(newImage.file.size / (1024 * 1024)).toFixed(1)}MB)
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <Database className="h-4 w-4 text-green-600" />
-                              <span className="text-sm text-green-600 font-medium">
-                                Will use database storage (Small file: {(newImage.file.size / (1024 * 1024)).toFixed(1)}
-                                MB)
-                              </span>
-                            </>
-                          )}
+                          <Database className="h-4 w-4 text-green-600" />
+                          <span className="text-sm text-green-600 font-medium">
+                            Will use database storage (Small file: {(newImage.file.size / (1024 * 1024)).toFixed(1)}
+                            MB)
+                          </span>
                         </div>
                       </div>
                     ) : (

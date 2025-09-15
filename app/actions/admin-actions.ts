@@ -1,14 +1,13 @@
 "use server"
 
-import { createNeonClient } from "@/lib/neon/client"
+import { createClient } from "@/lib/supabase/server"
 import { unstable_cache } from "next/cache"
-import { revalidatePath, revalidateTag } from "next/cache" // Added revalidateTag import
+import { revalidatePath, revalidateTag } from "next/cache"
 
 const CACHE_TAGS = {
   IMAGES: "images",
   CATEGORIES: "categories",
   ORDERS: "orders",
-  USERS: "users",
   LICENSES: "licenses",
   STATS: "stats",
 } as const
@@ -36,259 +35,289 @@ function logQueryPerformance(queryName: string, startTime: number, recordCount?:
 const getCachedImages = unstable_cache(
   async () => {
     try {
-      const sql = createNeonClient()
+      const supabase = await createClient()
 
-      const result = await sql`
-        SELECT 
-          i.id, i.title, i.description, i.price, i.image_url, i.thumbnail_url,
-          i.active, i.featured, i.created_at, i.updated_at,
-          c.name as category_name, c.id as category_id,
-          l.name as license_name, l.description as license_description
-        FROM images i
-        LEFT JOIN categories c ON i.category_id = c.id
-        LEFT JOIN licenses l ON i.license_id = l.id
-        WHERE i.active = true
-        ORDER BY i.featured DESC, i.created_at DESC
-        LIMIT 100
-      `
+      const { data: images, error: imagesError } = await supabase
+        .from("images")
+        .select(`
+          id, title, description, price, file_path,
+          is_featured, created_at, updated_at, category_id, license_id
+        `)
+        .order("created_at", { ascending: false })
 
-      return result
+      if (imagesError) {
+        console.error("[v0] Database error in getCachedImages:", imagesError)
+        if (imagesError.message.includes("does not exist") || imagesError.message.includes("schema cache")) {
+          console.log("[v0] Database tables not found, returning empty array")
+          return []
+        }
+        throw new Error(imagesError.message)
+      }
+
+      // Get categories and licenses separately
+      const { data: categories } = await supabase.from("categories").select("id, name")
+      const { data: licenses } = await supabase.from("licenses").select("id, name, description")
+
+      // Create lookup maps
+      const categoryMap = new Map(categories?.map((c) => [c.id, c]) || [])
+      const licenseMap = new Map(licenses?.map((l) => [l.id, l]) || [])
+
+      const transformedData =
+        images?.map((item) => ({
+          ...item,
+          image_url: item.file_path,
+          thumbnail_url: item.file_path,
+          active: true, // Default to active since we don't have this column
+          featured: item.is_featured,
+          categories: categoryMap.get(item.category_id),
+          licenses: licenseMap.get(item.license_id),
+          category_name: categoryMap.get(item.category_id)?.name,
+          license_name: licenseMap.get(item.license_id)?.name,
+          license_description: licenseMap.get(item.license_id)?.description,
+        })) || []
+
+      console.log(`[v0] getCachedImages: Retrieved ${transformedData.length} images`)
+      return transformedData
     } catch (error) {
-      console.error("[v0] Database query error in getCachedImages:", error)
+      console.error("[v0] Error in getCachedImages:", error)
       return []
     }
   },
-  ["images-list"],
+  ["images"],
   {
-    revalidate: CACHE_REVALIDATE.IMAGES,
     tags: [CACHE_TAGS.IMAGES],
+    revalidate: 300, // 5 minutes
   },
 )
 
 const getCachedImagesPaginated = unstable_cache(
   async (page = 1, limit = 50, category?: string, featured?: boolean) => {
     const startTime = Date.now()
-    const sql = createNeonClient()
+    const supabase = await createClient()
     const offset = (page - 1) * limit
 
-    // Build query with proper parameterization
-    let query
-    let countQuery
+    try {
+      let query = supabase.from("images").select(
+        `
+          id, title, description, price, file_path,
+          is_featured, created_at, updated_at, category_id, license_id
+        `,
+        { count: "exact" },
+      )
 
-    if (category && featured !== undefined) {
-      // Both category and featured filters
-      query = sql`
-        SELECT 
-          i.id, i.title, i.description, i.price, i.image_url, i.thumbnail_url,
-          i.active, i.featured, i.created_at, i.updated_at,
-          c.name as category_name, c.id as category_id,
-          l.name as license_name, l.description as license_description
-        FROM images i
-        LEFT JOIN categories c ON i.category_id = c.id
-        LEFT JOIN licenses l ON i.license_id = l.id
-        WHERE i.active = true AND c.name = ${category} AND i.featured = ${featured}
-        ORDER BY i.featured DESC, i.created_at DESC
-        LIMIT ${limit} OFFSET ${offset}
-      `
-      countQuery = sql`
-        SELECT COUNT(*) as total
-        FROM images i
-        LEFT JOIN categories c ON i.category_id = c.id
-        WHERE i.active = true AND c.name = ${category} AND i.featured = ${featured}
-      `
-    } else if (category) {
-      // Only category filter
-      query = sql`
-        SELECT 
-          i.id, i.title, i.description, i.price, i.image_url, i.thumbnail_url,
-          i.active, i.featured, i.created_at, i.updated_at,
-          c.name as category_name, c.id as category_id,
-          l.name as license_name, l.description as license_description
-        FROM images i
-        LEFT JOIN categories c ON i.category_id = c.id
-        LEFT JOIN licenses l ON i.license_id = l.id
-        WHERE i.active = true AND c.name = ${category}
-        ORDER BY i.featured DESC, i.created_at DESC
-        LIMIT ${limit} OFFSET ${offset}
-      `
-      countQuery = sql`
-        SELECT COUNT(*) as total
-        FROM images i
-        LEFT JOIN categories c ON i.category_id = c.id
-        WHERE i.active = true AND c.name = ${category}
-      `
-    } else if (featured !== undefined) {
-      // Only featured filter
-      query = sql`
-        SELECT 
-          i.id, i.title, i.description, i.price, i.image_url, i.thumbnail_url,
-          i.active, i.featured, i.created_at, i.updated_at,
-          c.name as category_name, c.id as category_id,
-          l.name as license_name, l.description as license_description
-        FROM images i
-        LEFT JOIN categories c ON i.category_id = c.id
-        LEFT JOIN licenses l ON i.license_id = l.id
-        WHERE i.active = true AND i.featured = ${featured}
-        ORDER BY i.featured DESC, i.created_at DESC
-        LIMIT ${limit} OFFSET ${offset}
-      `
-      countQuery = sql`
-        SELECT COUNT(*) as total
-        FROM images i
-        WHERE i.active = true AND i.featured = ${featured}
-      `
-    } else {
-      // No filters
-      query = sql`
-        SELECT 
-          i.id, i.title, i.description, i.price, i.image_url, i.thumbnail_url,
-          i.active, i.featured, i.created_at, i.updated_at,
-          c.name as category_name, c.id as category_id,
-          l.name as license_name, l.description as license_description
-        FROM images i
-        LEFT JOIN categories c ON i.category_id = c.id
-        LEFT JOIN licenses l ON i.license_id = l.id
-        WHERE i.active = true
-        ORDER BY i.featured DESC, i.created_at DESC
-        LIMIT ${limit} OFFSET ${offset}
-      `
-      countQuery = sql`
-        SELECT COUNT(*) as total
-        FROM images i
-        WHERE i.active = true
-      `
-    }
+      // Handle category filtering by ID instead of name
+      if (category) {
+        // First get the category ID
+        const { data: categoryData } = await supabase.from("categories").select("id").eq("name", category).single()
 
-    // Execute both queries in parallel for better performance
-    const [result, countResult] = await Promise.all([query, countQuery])
+        if (categoryData) {
+          query = query.eq("category_id", categoryData.id)
+        }
+      }
 
-    logQueryPerformance("getCachedImagesPaginated", startTime, result.length)
+      if (featured !== undefined) {
+        query = query.eq("is_featured", featured)
+      }
 
-    return {
-      images: result,
-      pagination: {
-        page,
-        limit,
-        total: Number.parseInt(countResult[0].total),
-        totalPages: Math.ceil(Number.parseInt(countResult[0].total) / limit),
-      },
+      const {
+        data: images,
+        error,
+        count,
+      } = await query.order("created_at", { ascending: false }).range(offset, offset + limit - 1)
+
+      if (error) {
+        console.error("[v0] Database error in getCachedImagesPaginated:", error)
+        if (error.message.includes("does not exist") || error.message.includes("schema cache")) {
+          console.log("[v0] Database tables not found, returning empty result")
+          return {
+            images: [],
+            pagination: {
+              currentPage: page,
+              totalPages: 0,
+              totalCount: 0,
+              hasNextPage: false,
+              hasPreviousPage: false,
+            },
+          }
+        }
+        throw new Error(error.message)
+      }
+
+      // Get categories and licenses separately
+      const { data: categories } = await supabase.from("categories").select("id, name")
+      const { data: licenses } = await supabase.from("licenses").select("id, name, description")
+
+      // Create lookup maps
+      const categoryMap = new Map(categories?.map((c) => [c.id, c]) || [])
+      const licenseMap = new Map(licenses?.map((l) => [l.id, l]) || [])
+
+      const transformedData =
+        images?.map((item) => ({
+          ...item,
+          image_url: item.file_path,
+          thumbnail_url: item.file_path,
+          active: true, // Default to active since we don't have this column
+          featured: item.is_featured,
+          categories: categoryMap.get(item.category_id),
+          licenses: licenseMap.get(item.license_id),
+          category_name: categoryMap.get(item.category_id)?.name,
+          license_name: licenseMap.get(item.license_id)?.name,
+          license_description: licenseMap.get(item.license_id)?.description,
+        })) || []
+
+      const totalCount = count || 0
+      const totalPages = Math.ceil(totalCount / limit)
+
+      logQueryPerformance("getCachedImagesPaginated", startTime, transformedData.length)
+
+      return {
+        images: transformedData,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalCount,
+          hasNextPage: page < totalPages,
+          hasPreviousPage: page > 1,
+        },
+      }
+    } catch (error) {
+      console.error("[v0] Error in getCachedImagesPaginated:", error)
+      return {
+        images: [],
+        pagination: {
+          currentPage: page,
+          totalPages: 0,
+          totalCount: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      }
     }
   },
   ["images-paginated"],
   {
-    revalidate: CACHE_REVALIDATE.IMAGES,
     tags: [CACHE_TAGS.IMAGES],
+    revalidate: 300,
   },
 )
 
 const getCachedCategories = unstable_cache(
   async () => {
-    const sql = createNeonClient()
+    try {
+      const supabase = await createClient()
 
-    const result = await sql`
-      SELECT c.id, c.name, c.description, c.active,
-             COUNT(i.id) as image_count
-      FROM categories c
-      LEFT JOIN images i ON c.id = i.category_id AND i.active = true
-      WHERE c.active = true
-      GROUP BY c.id, c.name, c.description, c.active
-      ORDER BY c.name
-    `
+      const { data: result, error } = await supabase.from("categories").select("*").order("name")
 
-    return result.map((category) => ({
-      ...category,
-      display_name:
-        category.name === "equirectangular" ? "360 images" : category.name === "fisheye" ? "180 images" : category.name,
-    }))
+      if (error) {
+        console.error("[v0] Database error in getCachedCategories:", error)
+        throw new Error(error.message)
+      }
+
+      console.log(`[v0] getCachedCategories: Retrieved ${result?.length || 0} categories`)
+      return result || []
+    } catch (error) {
+      console.error("[v0] Error in getCachedCategories:", error)
+      throw error
+    }
   },
-  ["categories-list"],
+  ["categories"],
   {
-    revalidate: CACHE_REVALIDATE.CATEGORIES,
     tags: [CACHE_TAGS.CATEGORIES],
+    revalidate: 3600, // 1 hour
   },
 )
 
 const getCachedCategoriesOptimized = unstable_cache(
   async () => {
     const startTime = Date.now()
-    const sql = createNeonClient()
+    const supabase = await createClient()
 
-    // Optimized query using proper indexes
-    const result = await sql`
-      SELECT 
-        c.id, c.name, c.description, c.active,
-        COALESCE(img_counts.image_count, 0) as image_count
-      FROM categories c
-      LEFT JOIN (
-        SELECT category_id, COUNT(*) as image_count
-        FROM images 
-        WHERE active = true
-        GROUP BY category_id
-      ) img_counts ON c.id = img_counts.category_id
-      WHERE c.active = true
-      ORDER BY c.name
-    `
+    const { data: categories, error: categoriesError } = await supabase
+      .from("categories")
+      .select("id, name, description, active")
+      .order("name")
+
+    if (categoriesError) {
+      console.error("[v0] Database error in getCachedCategoriesOptimized:", categoriesError)
+      throw new Error(categoriesError.message)
+    }
+
+    // Get image counts separately
+    const { data: imageCounts } = await supabase.from("images").select("category_id").eq("active", true)
+
+    // Count images per category
+    const countMap = new Map()
+    imageCounts?.forEach((img) => {
+      const count = countMap.get(img.category_id) || 0
+      countMap.set(img.category_id, count + 1)
+    })
+
+    const result =
+      categories?.map((category) => ({
+        ...category,
+        image_count: countMap.get(category.id) || 0,
+        display_name:
+          category.name === "equirectangular"
+            ? "360 images"
+            : category.name === "fisheye"
+              ? "180 images"
+              : category.name,
+      })) || []
 
     logQueryPerformance("getCachedCategoriesOptimized", startTime, result.length)
 
-    return result.map((category) => ({
-      ...category,
-      display_name:
-        category.name === "equirectangular" ? "360 images" : category.name === "fisheye" ? "180 images" : category.name,
-    }))
+    return result
   },
   ["categories-optimized"],
   {
-    revalidate: CACHE_REVALIDATE.CATEGORIES,
     tags: [CACHE_TAGS.CATEGORIES],
+    revalidate: 3600,
   },
 )
 
 const getCachedLicenses = unstable_cache(
   async () => {
-    const sql = createNeonClient()
+    const supabase = await createClient()
 
-    const result = await sql`
-      SELECT id, name, description, price, active
-      FROM licenses
-      WHERE active = true
-      ORDER BY price ASC
-    `
+    const { data: result, error } = await supabase.from("licenses").select("*").eq("active", true).order("price")
 
-    return result
+    if (error) {
+      console.error("[v0] Database error in getCachedLicenses:", error)
+      throw new Error(error.message)
+    }
+
+    return result || []
   },
   ["licenses-list"],
   {
-    revalidate: CACHE_REVALIDATE.STATIC,
     tags: [CACHE_TAGS.LICENSES],
+    revalidate: CACHE_REVALIDATE.STATIC,
   },
 )
 
 const getCachedDatabaseStats = unstable_cache(
   async () => {
-    const sql = createNeonClient()
+    const supabase = await createClient()
 
-    // Use a single query with subqueries for better performance
-    const result = await sql`
-      SELECT 
-        (SELECT COUNT(*) FROM images WHERE active = true) as images,
-        (SELECT COUNT(*) FROM categories WHERE active = true) as categories,
-        (SELECT COUNT(*) FROM orders) as orders
-    `
+    const { data: result, error } = await supabase.rpc("get_database_stats")
+
+    if (error) {
+      console.error("[v0] Database error in getCachedDatabaseStats:", error)
+      throw new Error(error.message)
+    }
 
     return result[0]
   },
   ["database-stats"],
   {
-    revalidate: CACHE_REVALIDATE.IMAGES,
     tags: [CACHE_TAGS.STATS],
+    revalidate: CACHE_REVALIDATE.IMAGES,
   },
 )
 
 function compressBase64Image(base64String: string, maxSizeKB = 2000, preserveQuality = false): Promise<string> {
   return new Promise((resolve) => {
     try {
-      // If it's already a placeholder or external URL, return as-is
       if (!base64String.startsWith("data:image/")) {
         resolve(base64String)
         return
@@ -303,16 +332,13 @@ function compressBase64Image(base64String: string, maxSizeKB = 2000, preserveQua
         return
       }
 
-      // If image is already small enough, return as-is
       if (sizeInKB <= maxSizeKB) {
         resolve(base64String)
         return
       }
 
-      // Create image element to get dimensions
       const img = new Image()
       img.onload = () => {
-        // Create canvas for compression
         const canvas = document.createElement("canvas")
         const ctx = canvas.getContext("2d")!
 
@@ -326,7 +352,6 @@ function compressBase64Image(base64String: string, maxSizeKB = 2000, preserveQua
         canvas.width = newWidth
         canvas.height = newHeight
 
-        // Draw and compress
         ctx.drawImage(img, 0, 0, newWidth, newHeight)
 
         let quality = preserveQuality ? 0.95 : 0.8
@@ -348,13 +373,13 @@ function compressBase64Image(base64String: string, maxSizeKB = 2000, preserveQua
 
       img.onerror = () => {
         console.error("[v0] Error loading image for compression")
-        resolve(base64String) // Return original if compression fails
+        resolve(base64String)
       }
 
       img.src = base64String
     } catch (error) {
       console.error("[v0] Error compressing image:", error)
-      resolve(base64String) // Return original if compression fails
+      resolve(base64String)
     }
   })
 }
@@ -362,7 +387,6 @@ function compressBase64Image(base64String: string, maxSizeKB = 2000, preserveQua
 function handleDatabaseError(error: any, functionName?: string): { success: false; error: string } {
   console.error(`[v0] Database error in ${functionName || "unknown function"}:`, error)
 
-  // Handle Vercel serverless function payload limits
   if (typeof error === "string") {
     if (
       error.includes("Request Entity Too Large") ||
@@ -383,7 +407,6 @@ function handleDatabaseError(error: any, functionName?: string): { success: fals
     }
   }
 
-  // Handle Next.js server action body size limits
   if (error?.message && error.message.includes("Body exceeded")) {
     return {
       success: false,
@@ -391,7 +414,6 @@ function handleDatabaseError(error: any, functionName?: string): { success: fals
     }
   }
 
-  // Handle JSON parsing errors from large payloads
   if (error?.message && error.message.includes("Unexpected token")) {
     return {
       success: false,
@@ -399,7 +421,6 @@ function handleDatabaseError(error: any, functionName?: string): { success: fals
     }
   }
 
-  // Handle network errors
   if (error?.message && (error.message.includes("fetch") || error.message.includes("network"))) {
     return {
       success: false,
@@ -420,18 +441,15 @@ function invalidateCache(tags: string[]) {
   tags.forEach((tag) => {
     revalidateTag(tag)
   })
-  revalidatePath("/", "layout") // Keep this for additional cache clearing
+  revalidatePath("/", "layout")
 }
 
 export async function createImageWithCategory(formData: FormData) {
-  // Get default PRO license
-  const sql = createNeonClient()
-  const defaultLicense = await sql`
-    SELECT id FROM licenses WHERE name = 'PRO' LIMIT 1
-  `
+  const supabase = await createClient()
+  const defaultLicense = await supabase.from("licenses").select("id").eq("name", "PRO").limit(1)
 
-  if (defaultLicense.length > 0) {
-    formData.set("license_id", defaultLicense[0].id)
+  if (defaultLicense.data && defaultLicense.data.length > 0) {
+    formData.set("license_id", defaultLicense.data[0].id)
   }
 
   return createImageWithLicense(formData)
@@ -463,48 +481,62 @@ export async function createImageWithLicense(formData: FormData) {
       thumbnail_url: imageData.thumbnail_url.substring(0, 50) + "...",
     })
 
-    const sql = createNeonClient()
+    const supabase = await createClient()
 
-    // Look up category
-    console.log("[v0] Looking up category:", imageData.category)
-    const categoryResult = await sql`
-      SELECT id FROM categories WHERE name = ${imageData.category} LIMIT 1
-    `
+    const categoryResult = await supabase.from("categories").select("id").eq("name", imageData.category).limit(1)
 
     let categoryId: string
 
-    if (categoryResult.length === 0) {
+    if (categoryResult.data && categoryResult.data.length === 0) {
       console.log("[v0] Category not found, creating new category:", imageData.category)
-      const newCategoryResult = await sql`
-        INSERT INTO categories (name, description, active)
-        VALUES (${imageData.category}, ${"Auto-created category for " + imageData.category}, true)
-        RETURNING id
-      `
-      categoryId = newCategoryResult[0].id
+      const newCategoryResult = await supabase
+        .from("categories")
+        .insert([
+          {
+            name: imageData.category,
+            description: "Auto-created category for " + imageData.category,
+            active: true,
+          },
+        ])
+        .select("id")
+
+      categoryId = newCategoryResult.data[0].id
     } else {
-      categoryId = categoryResult[0].id
+      categoryId = categoryResult.data[0].id
     }
 
-    // Get license price
-    const licenseResult = await sql`
-      SELECT price FROM licenses WHERE id = ${imageData.license_id} LIMIT 1
-    `
+    const licenseResult = await supabase.from("licenses").select("price").eq("id", imageData.license_id).limit(1)
 
-    if (licenseResult.length === 0) {
+    if (!licenseResult.data || licenseResult.data.length === 0) {
       return { success: false, error: "Invalid license selected" }
     }
 
-    const price = licenseResult[0].price
+    const price = licenseResult.data[0].price
 
     console.log("[v0] Inserting image with license_id:", imageData.license_id, "price:", price)
-    const result = await sql`
-      INSERT INTO images (title, description, category_id, license_id, price, image_url, thumbnail_url, 
-                         resolution, format, active, featured)
-      VALUES (${imageData.title}, ${imageData.description}, ${categoryId}, ${imageData.license_id}, 
-              ${price}, ${imageData.image_url}, ${imageData.thumbnail_url}, 
-              ${imageData.resolution}, ${imageData.format}, true, false)
-      RETURNING *
-    `
+    const { data: result, error } = await supabase
+      .from("images")
+      .insert([
+        {
+          title: imageData.title,
+          description: imageData.description,
+          category_id: categoryId,
+          license_id: imageData.license_id,
+          price: price,
+          image_url: imageData.image_url,
+          thumbnail_url: imageData.thumbnail_url,
+          resolution: imageData.resolution,
+          format: imageData.format,
+          active: true,
+          featured: false,
+        },
+      ])
+      .select("*")
+
+    if (error) {
+      console.error("[v0] Database error in createImageWithLicense:", error)
+      throw new Error(error.message)
+    }
 
     console.log("[v0] Image created successfully with ID:", result[0]?.id)
 
@@ -562,52 +594,50 @@ export async function createImageWithCategoryObject(imageData: {
       }
     }
 
-    const sql = createNeonClient()
+    const supabase = await createClient()
 
-    // Look up category
-    console.log("[v0] Looking up category:", imageData.category_name)
-    const categoryResult = await sql`
-      SELECT id FROM categories WHERE name = ${imageData.category_name} LIMIT 1
-    `
+    const categoryResult = await supabase.from("categories").select("id").eq("name", imageData.category_name).limit(1)
 
     let categoryId: string
 
-    if (categoryResult.length === 0) {
+    if (categoryResult.data && categoryResult.data.length === 0) {
       console.log("[v0] Category not found, creating new category:", imageData.category_name)
-      const newCategoryResult = await sql`
-        INSERT INTO categories (name, description, active)
-        VALUES (${imageData.category_name}, ${"Auto-created category for " + imageData.category_name}, true)
-        RETURNING id
-      `
-      categoryId = newCategoryResult[0].id
+      const newCategoryResult = await supabase
+        .from("categories")
+        .insert([
+          {
+            name: imageData.category_name,
+            description: "Auto-created category for " + imageData.category_name,
+            active: true,
+          },
+        ])
+        .select("id")
+
+      categoryId = newCategoryResult.data[0].id
     } else {
-      categoryId = categoryResult[0].id
+      categoryId = categoryResult.data[0].id
     }
 
     console.log("[v0] Looking up default license...")
 
-    // First try to find PRO license
-    let defaultLicense = await sql`
-      SELECT id FROM licenses WHERE name = 'PRO' AND active = true LIMIT 1
-    `
+    let defaultLicense = await supabase.from("licenses").select("id").eq("name", "PRO").eq("active", true).limit(1)
 
-    // If no PRO license, try other common names
-    if (defaultLicense.length === 0) {
+    if (!defaultLicense.data || defaultLicense.data.length === 0) {
       console.log("[v0] No PRO license found, trying Standard...")
-      defaultLicense = await sql`
-        SELECT id FROM licenses WHERE name ILIKE '%standard%' AND active = true LIMIT 1
-      `
+      defaultLicense = await supabase
+        .from("licenses")
+        .select("id")
+        .ilike("name", "%standard%")
+        .eq("active", true)
+        .limit(1)
     }
 
-    // If still no license, get the first active license
-    if (defaultLicense.length === 0) {
+    if (!defaultLicense.data || defaultLicense.data.length === 0) {
       console.log("[v0] No Standard license found, getting first active license...")
-      defaultLicense = await sql`
-        SELECT id FROM licenses WHERE active = true ORDER BY price ASC LIMIT 1
-      `
+      defaultLicense = await supabase.from("licenses").select("id").eq("active", true).order("price").limit(1)
     }
 
-    const licenseId = defaultLicense.length > 0 ? defaultLicense[0].id : null
+    const licenseId = defaultLicense.data ? defaultLicense.data[0].id : null
 
     if (!licenseId) {
       console.log("[v0] No active licenses found in database")
@@ -616,42 +646,32 @@ export async function createImageWithCategoryObject(imageData: {
 
     console.log("[v0] Using license_id:", licenseId, "for upload")
 
-    let result
-    try {
-      result = await sql`
-        INSERT INTO images (title, description, category_id, license_id, price, image_url, thumbnail_url, 
-                           active, featured, metadata)
-        VALUES (${imageData.title}, ${imageData.description}, ${categoryId}, ${licenseId}, 
-                ${imageData.price}, ${imageData.image_url}, ${imageData.thumbnail_url}, 
-                true, false, 
-                ${JSON.stringify({
-                  rights_type: imageData.rights_type,
-                  original_file_size: imageData.original_file_size,
-                  upload_timestamp: new Date().toISOString(),
-                  storage_type: "neon_database", // Updated storage type to reflect Neon database storage
-                })})
-        RETURNING *
-      `
-    } catch (dbError: any) {
-      console.log("[v0] Database insertion failed:", dbError.message || dbError)
+    const { data: result, error } = await supabase
+      .from("images")
+      .insert([
+        {
+          title: imageData.title,
+          description: imageData.description,
+          category_id: categoryId,
+          license_id: licenseId,
+          price: imageData.price,
+          image_url: imageData.image_url,
+          thumbnail_url: imageData.thumbnail_url,
+          active: true,
+          featured: false,
+          metadata: JSON.stringify({
+            rights_type: imageData.rights_type,
+            original_file_size: imageData.original_file_size,
+            upload_timestamp: new Date().toISOString(),
+            storage_type: "supabase_storage",
+          }),
+        },
+      ])
+      .select("*")
 
-      const errorMessage = dbError.message || String(dbError)
-
-      if (
-        errorMessage.includes("Request entity too large") ||
-        errorMessage.includes("413") ||
-        errorMessage.includes("payload") ||
-        errorMessage.includes("body size") ||
-        errorMessage.includes("Request En") ||
-        errorMessage.includes("Unexpected token")
-      ) {
-        return {
-          success: false,
-          error: `Image file too large for database storage (${payloadSizeMB.toFixed(1)}MB). Please use a smaller image (max: 10MB) or compress the file before uploading.`,
-        }
-      }
-
-      throw dbError // Re-throw if it's not a size-related error
+    if (error) {
+      console.error("[v0] Database error in createImageWithCategoryObject:", error)
+      throw new Error(error.message)
     }
 
     console.log("[v0] Image created successfully, ID:", result[0]?.id)
@@ -674,7 +694,7 @@ export async function getImages() {
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
-      data: [], // Added data field to ensure consistent response structure
+      data: [],
     }
   }
 }
@@ -698,63 +718,40 @@ export async function getImagesPaginated(page = 1, limit = 20, category?: string
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
-      data: { images: [], pagination: { page: 1, limit, total: 0, totalPages: 1 } },
+      data: {
+        images: [],
+        pagination: { currentPage: 1, totalPages: 1, totalCount: 0, hasNextPage: false, hasPreviousPage: false },
+      },
     }
   }
 }
 
 export async function getOrders(userEmail?: string) {
   try {
-    const sql = createNeonClient()
+    const supabase = await createClient()
 
     let result
     if (userEmail) {
-      result = await sql`
-        SELECT o.*, 
-               json_agg(
-                 json_build_object(
-                   'id', oi.id,
-                   'license_id', oi.license_id,
-                   'price', oi.price,
-                   'image_id', oi.image_id,
-                   'images', json_build_object(
-                     'title', i.title,
-                     'thumbnail_url', i.thumbnail_url
-                   )
-                 )
-               ) as order_items
-        FROM orders o
-        LEFT JOIN order_items oi ON o.id = oi.order_id
-        LEFT JOIN images i ON oi.image_id = i.id
-        WHERE o.user_email = ${userEmail}
-        GROUP BY o.id
-        ORDER BY o.created_at DESC
-      `
+      result = await supabase
+        .from("orders")
+        .select(`
+          *, 
+          order_items!inner(id, license_id, price, image_id, images(title, thumbnail_url))
+        `)
+        .eq("user_email", userEmail)
+        .order("created_at", { ascending: false })
     } else {
-      result = await sql`
-        SELECT o.*, 
-               json_agg(
-                 json_build_object(
-                   'id', oi.id,
-                   'license_id', oi.license_id,
-                   'price', oi.price,
-                   'image_id', oi.image_id,
-                   'images', json_build_object(
-                     'title', i.title,
-                     'thumbnail_url', i.thumbnail_url
-                   )
-                 )
-               ) as order_items
-        FROM orders o
-        LEFT JOIN order_items oi ON o.id = oi.order_id
-        LEFT JOIN images i ON oi.image_id = i.id
-        GROUP BY o.id
-        ORDER BY o.created_at DESC
-      `
+      result = await supabase
+        .from("orders")
+        .select(`
+          *, 
+          order_items!inner(id, license_id, price, image_id, images(title, thumbnail_url))
+        `)
+        .order("created_at", { ascending: false })
     }
 
-    console.log("[v0] getOrders found", result.length, "orders for user:", userEmail || "all users")
-    return { success: true, data: result }
+    console.log("[v0] getOrders found", result.data?.length || 0, "orders for user:", userEmail || "all users")
+    return { success: true, data: result.data || [] }
   } catch (error) {
     console.error("[v0] Get orders error:", error)
     return {
@@ -767,61 +764,35 @@ export async function getOrders(userEmail?: string) {
 export async function getOrdersOptimized(userEmail?: string, page = 1, limit = 20) {
   try {
     const startTime = Date.now()
-    const sql = createNeonClient()
+    const supabase = await createClient()
     const offset = (page - 1) * limit
 
     let result
     if (userEmail) {
-      result = await sql`
-        SELECT o.*, 
-               json_agg(
-                 json_build_object(
-                   'id', oi.id,
-                   'license_id', oi.license_id,
-                   'price', oi.price,
-                   'image_id', oi.image_id,
-                   'images', json_build_object(
-                     'title', i.title,
-                     'thumbnail_url', i.thumbnail_url
-                   )
-                 ) ORDER BY oi.created_at
-               ) FILTER (WHERE oi.id IS NOT NULL) as order_items
-        FROM orders o
-        LEFT JOIN order_items oi ON o.id = oi.order_id
-        LEFT JOIN images i ON oi.image_id = i.id
-        WHERE o.user_email = ${userEmail}
-        GROUP BY o.id
-        ORDER BY o.created_at DESC
-        LIMIT ${limit} OFFSET ${offset}
-      `
+      result = await supabase
+        .from("orders")
+        .select(`
+          *, 
+          order_items!inner(id, license_id, price, image_id, images(title, thumbnail_url))
+        `)
+        .eq("user_email", userEmail)
+        .order("created_at", { ascending: false })
+        .range(offset, offset + limit - 1)
     } else {
-      result = await sql`
-        SELECT o.*, 
-               json_agg(
-                 json_build_object(
-                   'id', oi.id,
-                   'license_id', oi.license_id,
-                   'price', oi.price,
-                   'image_id', oi.image_id,
-                   'images', json_build_object(
-                     'title', i.title,
-                     'thumbnail_url', i.thumbnail_url
-                   )
-                 ) ORDER BY oi.created_at
-               ) FILTER (WHERE oi.id IS NOT NULL) as order_items
-        FROM orders o
-        LEFT JOIN order_items oi ON o.id = oi.order_id
-        LEFT JOIN images i ON oi.image_id = i.id
-        GROUP BY o.id
-        ORDER BY o.created_at DESC
-        LIMIT ${limit} OFFSET ${offset}
-      `
+      result = await supabase
+        .from("orders")
+        .select(`
+          *, 
+          order_items!inner(id, license_id, price, image_id, images(title, thumbnail_url))
+        `)
+        .order("created_at", { ascending: false })
+        .range(offset, offset + limit - 1)
     }
 
-    logQueryPerformance("getOrdersOptimized", startTime, result.length)
+    logQueryPerformance("getOrdersOptimized", startTime, result.data?.length || 0)
 
-    console.log("[v0] getOrdersOptimized found", result.length, "orders for user:", userEmail || "all users")
-    return { success: true, data: result }
+    console.log("[v0] getOrdersOptimized found", result.data?.length || 0, "orders for user:", userEmail || "all users")
+    return { success: true, data: result.data || [] }
   } catch (error) {
     console.error("[v0] Get orders error:", error)
     return {
@@ -900,15 +871,11 @@ export async function getDatabaseStats() {
 export async function deleteImage(imageId: string) {
   try {
     console.log("[v0] Starting image deletion for ID:", imageId)
-    const sql = createNeonClient()
+    const supabase = await createClient()
 
-    const orderItemsCheck = await sql`
-      SELECT COUNT(*) as count 
-      FROM order_items 
-      WHERE image_id = ${imageId}
-    `
+    const orderItemsCheck = await supabase.from("order_items").select("count").eq("image_id", imageId).single()
 
-    const orderItemCount = Number.parseInt(orderItemsCheck[0].count)
+    const orderItemCount = Number.parseInt(orderItemsCheck.data?.count || "0")
 
     if (orderItemCount > 0) {
       console.log(`[v0] Cannot delete image ${imageId}: referenced by ${orderItemCount} order items`)
@@ -918,14 +885,14 @@ export async function deleteImage(imageId: string) {
       }
     }
 
-    // Delete the image from the database
-    const result = await sql`
-      DELETE FROM images 
-      WHERE id = ${imageId}
-      RETURNING *
-    `
+    const { data: result, error } = await supabase.from("images").delete().eq("id", imageId).select("*")
 
-    if (result.length === 0) {
+    if (error) {
+      console.error("[v0] Database error in deleteImage:", error)
+      throw new Error(error.message)
+    }
+
+    if (!result || result.length === 0) {
       console.log("[v0] No image found with ID:", imageId)
       return {
         success: false,
@@ -971,43 +938,51 @@ export async function updateImage(formData: FormData) {
       thumbnail_url: imageData.thumbnail_url.substring(0, 50) + "...",
     })
 
-    const sql = createNeonClient()
+    const supabase = await createClient()
 
-    // Look up category
-    console.log("[v0] Looking up category:", imageData.category)
-    const categoryResult = await sql`
-      SELECT id FROM categories WHERE name = ${imageData.category} LIMIT 1
-    `
+    const categoryResult = await supabase.from("categories").select("id").eq("name", imageData.category).limit(1)
 
     let categoryId: string
 
-    if (categoryResult.length === 0) {
+    if (categoryResult.data && categoryResult.data.length === 0) {
       console.log("[v0] Category not found, creating new category:", imageData.category)
-      const newCategoryResult = await sql`
-        INSERT INTO categories (name, description, active)
-        VALUES (${imageData.category}, ${"Auto-created category for " + imageData.category}, true)
-        RETURNING id
-      `
-      categoryId = newCategoryResult[0].id
+      const newCategoryResult = await supabase
+        .from("categories")
+        .insert([
+          {
+            name: imageData.category,
+            description: "Auto-created category for " + imageData.category,
+            active: true,
+          },
+        ])
+        .select("id")
+
+      categoryId = newCategoryResult.data[0].id
     } else {
-      categoryId = categoryResult[0].id
+      categoryId = categoryResult.data[0].id
     }
 
     console.log("[v0] Updating image with license_id:", imageData.license_id, "price:", imageData.price)
-    const result = await sql`
-      UPDATE images
-      SET title = ${imageData.title},
-          description = ${imageData.description},
-          category_id = ${categoryId},
-          license_id = ${imageData.license_id},
-          price = ${imageData.price},
-          image_url = ${imageData.image_url},
-          thumbnail_url = ${imageData.thumbnail_url},
-          resolution = ${imageData.resolution},
-          format = ${imageData.format}
-      WHERE id = ${imageId}
-      RETURNING *
-    `
+    const { data: result, error } = await supabase
+      .from("images")
+      .update({
+        title: imageData.title,
+        description: imageData.description,
+        category_id: categoryId,
+        license_id: imageData.license_id,
+        price: imageData.price,
+        image_url: imageData.image_url,
+        thumbnail_url: imageData.thumbnail_url,
+        resolution: imageData.resolution,
+        format: imageData.format,
+      })
+      .eq("id", imageId)
+      .select("*")
+
+    if (error) {
+      console.error("[v0] Database error in updateImage:", error)
+      throw new Error(error.message)
+    }
 
     console.log("[v0] Image updated successfully with ID:", result[0]?.id)
 

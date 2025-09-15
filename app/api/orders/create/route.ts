@@ -6,10 +6,13 @@ interface CartItem {
   imageId: string
   title: string
   price: number
-  licenseType: "standard" | "extended" | "commercial"
+  licenseId: string
+  licenseName: string
+  licensePrice: number
   previewUrl: string
   category: "equirectangular" | "fisheye"
   quantity: number
+  licenseType: "NON_EXCLUSIVE" | "EXCLUSIVE"
 }
 
 interface OrderRequest {
@@ -88,7 +91,7 @@ export async function POST(request: NextRequest) {
         total_amount, 
         status, 
         payment_method,
-        payment_id
+        payment_intent_id
       )
       VALUES (
         ${customerInfo.email},
@@ -104,21 +107,28 @@ export async function POST(request: NextRequest) {
     const orderId = orderResult[0].id
     console.log("[v0] Order created with ID:", orderId)
 
+    const orderItemIds: string[] = []
+
     for (const item of items) {
-      console.log("[v0] Creating order item for image:", item.imageId, "License:", item.licenseType)
+      console.log("[v0] Creating order item for image:", item.imageId, "License:", item.licenseId)
 
-      const licenseResult = await sql`
-        SELECT id FROM licenses WHERE active = true ORDER BY price ASC LIMIT 1
-      `
+      // Use the license ID from the cart item instead of finding a default
+      let licenseId = item.licenseId
 
-      const licenseId = licenseResult.length > 0 ? licenseResult[0].id : null
+      // Fallback to finding a license if not provided
+      if (!licenseId) {
+        const licenseResult = await sql`
+          SELECT id FROM licenses WHERE active = true ORDER BY price ASC LIMIT 1
+        `
+        licenseId = licenseResult.length > 0 ? licenseResult[0].id : null
+      }
 
       if (!licenseId) {
-        console.error("[v0] No default license found")
+        console.error("[v0] No license found for item:", item.imageId)
         return NextResponse.json({ success: false, error: "License configuration error" }, { status: 500 })
       }
 
-      await sql`
+      const orderItemResult = await sql`
         INSERT INTO order_items (
           order_id,
           image_id,
@@ -131,7 +141,25 @@ export async function POST(request: NextRequest) {
           ${licenseId},
           ${item.price * item.quantity}
         )
+        RETURNING id
       `
+
+      orderItemIds.push(orderItemResult[0].id)
+    }
+
+    console.log("[v0] Generating download tokens for order items...")
+    const downloadTokens = []
+
+    try {
+      const tokenResult = await sql`
+        SELECT * FROM create_download_tokens_for_order(${orderId}::uuid)
+      `
+
+      downloadTokens.push(...tokenResult)
+      console.log("[v0] Generated", downloadTokens.length, "download tokens")
+    } catch (tokenError) {
+      console.error("[v0] Error generating download tokens:", tokenError)
+      // Don't fail the order creation, but log the error
     }
 
     console.log("[v0] Order created successfully:", orderNumber)
@@ -144,6 +172,7 @@ export async function POST(request: NextRequest) {
         paymentStatus: "completed",
         total: total,
         paymentMethod: paymentMethod,
+        downloadTokensGenerated: downloadTokens.length,
         ...(paymentMethod === "crypto" && cryptoDetails
           ? {
               cryptoDetails: {

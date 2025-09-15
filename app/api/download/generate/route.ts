@@ -18,24 +18,38 @@ export async function POST(request: NextRequest) {
     console.log("[v0] Neon client created successfully")
 
     console.log("[v0] Calling generate_download_token function...")
-    const result = await sql`
-      SELECT generate_download_token(${orderItemId}::uuid) as token
-    `
-    console.log("[v0] Database result:", result)
+    try {
+      const result = await sql`
+        SELECT generate_download_token(${orderItemId}::uuid) as token
+      `
+      console.log("[v0] Database result:", result)
 
-    if (!result[0]?.token) {
-      console.log("[v0] No token returned from database")
-      return NextResponse.json({ error: "Failed to generate download token" }, { status: 500 })
+      if (!result[0]?.token) {
+        console.log("[v0] No token returned from database")
+        return NextResponse.json({ error: "Failed to generate download token" }, { status: 500 })
+      }
+
+      const downloadUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/download/by-token/${result[0].token}`
+      console.log("[v0] Generated download URL:", downloadUrl)
+
+      return NextResponse.json({
+        downloadUrl,
+        token: result[0].token,
+        expiresIn: "24 hours",
+      })
+    } catch (dbError: any) {
+      console.error("[v0] Database function error:", dbError)
+
+      if (dbError.message?.includes("Order item not found")) {
+        return NextResponse.json({ error: "Order item not found" }, { status: 404 })
+      }
+
+      if (dbError.message?.includes("Order not completed")) {
+        return NextResponse.json({ error: "Order not completed" }, { status: 403 })
+      }
+
+      throw dbError
     }
-
-    const downloadUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/download/by-token/${result[0].token}`
-    console.log("[v0] Generated download URL:", downloadUrl)
-
-    return NextResponse.json({
-      downloadUrl,
-      token: result[0].token,
-      expiresIn: "24 hours",
-    })
   } catch (error) {
     console.error("[v0] Download generation error:", error)
     console.error("[v0] Error stack:", error instanceof Error ? error.stack : "No stack trace")

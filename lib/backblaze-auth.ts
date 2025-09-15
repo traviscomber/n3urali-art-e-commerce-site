@@ -167,32 +167,67 @@ export class BackblazeAuth {
       // Calculate SHA1 hash
       const sha1Hash = await this.calculateSHA1(fileBuffer)
 
+      const fileArrayBuffer = fileBuffer.buffer.slice(
+        fileBuffer.byteOffset,
+        fileBuffer.byteOffset + fileBuffer.byteLength,
+      )
+
+      console.log("[v0] About to upload small file with fetch...")
+
+      const uploadHeaders: Record<string, string> = {
+        Authorization: uploadUrlData.authorizationToken,
+        "X-Bz-File-Name": encodeURIComponent(key),
+        "Content-Type": contentType,
+        "X-Bz-Content-Sha1": sha1Hash,
+      }
+
       // Upload file
       const uploadResponse = await fetch(uploadUrlData.uploadUrl, {
         method: "POST",
-        headers: {
-          Authorization: uploadUrlData.authorizationToken,
-          "X-Bz-File-Name": encodeURIComponent(key),
-          "Content-Type": contentType,
-          "Content-Length": fileBuffer.length.toString(),
-          "X-Bz-Content-Sha1": sha1Hash,
-        },
-        body: fileBuffer,
+        headers: uploadHeaders,
+        body: fileArrayBuffer,
       })
 
+      console.log("[v0] Small file upload fetch completed, status:", uploadResponse.status)
+
       if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text()
+        let errorText = "Unknown error"
+        try {
+          errorText = await uploadResponse.text()
+        } catch (textError) {
+          console.error("[v0] Could not read error response:", textError)
+          errorText = `HTTP ${uploadResponse.status} ${uploadResponse.statusText}`
+        }
         throw new Error(`Upload failed: ${uploadResponse.status} ${errorText}`)
       }
 
-      const uploadResult = await uploadResponse.json()
+      let uploadResult: any
+      try {
+        const responseText = await uploadResponse.text()
+        console.log("[v0] Small file upload response text:", responseText)
+
+        if (responseText.trim().startsWith("{")) {
+          // Looks like JSON, try to parse it
+          uploadResult = JSON.parse(responseText)
+          console.log("[v0] Small file upload response parsed as JSON:", uploadResult)
+        } else {
+          // Not JSON, this might be an error message
+          console.log("[v0] Small file upload response is not JSON:", responseText)
+          throw new Error(`Upload returned non-JSON response: ${responseText}`)
+        }
+      } catch (parseError) {
+        console.error("[v0] Failed to parse small file upload response:", parseError)
+        throw parseError
+      }
+
       const publicUrl = `${this.config.endpoint}/${this.config.bucket}/${key}`
 
       console.log("[v0] Small file uploaded successfully to:", publicUrl)
       return { success: true, url: publicUrl }
     } catch (error) {
       console.error("[v0] Small file upload error:", error)
-      return { success: false, error: error instanceof Error ? error.message : "Unknown error" }
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      return { success: false, error: errorMessage }
     }
   }
 
@@ -237,8 +272,8 @@ export class BackblazeAuth {
       const fileId = startData.fileId
       console.log("[v0] uploadLargeFile: Got file ID:", fileId)
 
-      // Step 2: Upload parts (5MB chunks)
-      const chunkSize = 5 * 1024 * 1024 // 5MB
+      // Step 2: Upload parts (1MB chunks to avoid Vercel payload limits)
+      const chunkSize = 1 * 1024 * 1024 // 1MB - safe for Vercel serverless functions
       const totalChunks = Math.ceil(fileBuffer.length / chunkSize)
       const partSha1Array: string[] = []
 
@@ -278,59 +313,85 @@ export class BackblazeAuth {
         // Calculate SHA1 for this part
         console.log(`[v0] uploadLargeFile: Calculating SHA1 for part ${partNumber}`)
         const partSha1 = await this.calculateSHA1(chunk)
-        partSha1Array.push(partSha1)
         console.log(`[v0] uploadLargeFile: SHA1 calculated for part ${partNumber}:`, partSha1)
 
-        // Upload part with improved error handling
         console.log(`[v0] uploadLargeFile: Uploading part ${partNumber}`)
 
-        let partResponse: Response
         try {
-          partResponse = await fetch(partUrlData.uploadUrl, {
+          console.log(`[v0] uploadLargeFile: About to fetch part upload URL for part ${partNumber}`)
+
+          const chunkArrayBuffer = chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.byteLength)
+
+          const partHeaders: Record<string, string> = {
+            Authorization: partUrlData.authorizationToken,
+            "X-Bz-Part-Number": partNumber.toString(),
+            "X-Bz-Content-Sha1": partSha1,
+          }
+
+          const partResponse = await fetch(partUrlData.uploadUrl, {
             method: "POST",
-            headers: {
-              Authorization: partUrlData.authorizationToken,
-              "X-Bz-Part-Number": partNumber.toString(),
-              "Content-Length": chunk.length.toString(),
-              "X-Bz-Content-Sha1": partSha1,
-            },
-            body: chunk,
+            headers: partHeaders,
+            body: chunkArrayBuffer,
           })
-        } catch (fetchError: unknown) {
-          console.log(`[v0] uploadLargeFile: Fetch error for part ${partNumber}:`, fetchError)
 
-          // Handle the error more safely to avoid getAll issues
-          let errorMessage = "Unknown network error"
-          if (fetchError instanceof Error) {
-            errorMessage = fetchError.message
-          } else if (typeof fetchError === "string") {
-            errorMessage = fetchError
-          } else if (fetchError && typeof fetchError === "object") {
-            // Safely extract error information without calling getAll
-            errorMessage = String(fetchError)
+          console.log(`[v0] uploadLargeFile: Part ${partNumber} fetch completed, status:`, partResponse.status)
+
+          if (!partResponse.ok) {
+            console.log(`[v0] uploadLargeFile: Upload part ${partNumber} failed:`, partResponse.status)
+            let errorText = "Unknown error"
+            try {
+              console.log(`[v0] uploadLargeFile: Attempting to read error response text for part ${partNumber}`)
+              errorText = await partResponse.text()
+              console.log(`[v0] uploadLargeFile: Error response text for part ${partNumber}:`, errorText)
+            } catch (textError) {
+              console.log(`[v0] uploadLargeFile: Could not read error text for part ${partNumber}:`, textError)
+            }
+            throw new Error(`Failed to upload part ${partNumber}: ${partResponse.status} - ${errorText}`)
           }
 
-          console.log(`[v0] uploadLargeFile: Processed error message:`, errorMessage)
-          throw new Error(`Network error uploading part ${partNumber}: ${errorMessage}`)
-        }
+          let partResponseData: any
+          let responseSha1: string
 
-        if (!partResponse.ok) {
-          console.log(`[v0] uploadLargeFile: Upload part ${partNumber} failed:`, partResponse.status)
-          let errorText = "Unknown error"
           try {
-            errorText = await partResponse.text()
-          } catch (textError) {
-            console.log(`[v0] uploadLargeFile: Could not read error text:`, textError)
-          }
-          console.log(`[v0] uploadLargeFile: Upload part ${partNumber} error text:`, errorText)
-          throw new Error(`Failed to upload part ${partNumber}: ${partResponse.status} - ${errorText}`)
-        }
+            // First try to parse as JSON
+            const responseText = await partResponse.text()
+            console.log(`[v0] uploadLargeFile: Part ${partNumber} response text:`, responseText)
 
-        console.log("[v0] Uploaded part", partNumber, "of", totalChunks)
+            if (responseText.trim().startsWith("{")) {
+              // Looks like JSON, try to parse it
+              partResponseData = JSON.parse(responseText)
+              responseSha1 = partResponseData.contentSha1
+              console.log(`[v0] uploadLargeFile: Part ${partNumber} response SHA1 from JSON:`, responseSha1)
+            } else {
+              // Not JSON, this might be an error message
+              console.log(`[v0] uploadLargeFile: Part ${partNumber} response is not JSON:`, responseText)
+              throw new Error(`Part upload returned non-JSON response: ${responseText}`)
+            }
+          } catch (parseError) {
+            console.error(`[v0] uploadLargeFile: Failed to parse part ${partNumber} response:`, parseError)
+            // If we can't parse the response, use our calculated SHA1 as fallback
+            console.log(`[v0] uploadLargeFile: Using calculated SHA1 as fallback for part ${partNumber}:`, partSha1)
+            responseSha1 = partSha1
+          }
+
+          partSha1Array.push(responseSha1)
+          console.log("Uploaded part", partNumber, "of", totalChunks)
+        } catch (partError) {
+          console.error(`[v0] uploadLargeFile: Detailed error uploading part ${partNumber}:`)
+          console.error(`[v0] uploadLargeFile: Error type:`, typeof partError)
+          console.error(`[v0] uploadLargeFile: Error constructor:`, partError?.constructor?.name)
+          console.error(
+            `[v0] uploadLargeFile: Error message:`,
+            partError instanceof Error ? partError.message : String(partError),
+          )
+          console.error(`[v0] uploadLargeFile: Full error object:`, partError)
+          throw partError
+        }
       }
 
       // Step 3: Finish large file
       console.log("[v0] uploadLargeFile: Finishing large file upload")
+      console.log("[v0] uploadLargeFile: Using SHA1 array:", partSha1Array)
       const finishResponse = await fetch(`${this.apiUrl}/b2api/v2/b2_finish_large_file`, {
         method: "POST",
         headers: {
@@ -357,13 +418,17 @@ export class BackblazeAuth {
     } catch (error: unknown) {
       console.error("[v0] Large file upload error:", error)
 
+      console.error("[v0] Error type:", typeof error)
+      console.error("[v0] Error constructor:", error?.constructor?.name)
+      console.error("[v0] Error instanceof Error:", error instanceof Error)
+
       let errorMessage = "Unknown error"
       if (error instanceof Error) {
         errorMessage = error.message
+        console.error("[v0] Error stack:", error.stack)
       } else if (typeof error === "string") {
         errorMessage = error
-      } else if (error && typeof error === "object") {
-        // Safely convert error object to string without calling methods that might not exist
+      } else {
         errorMessage = String(error)
       }
 
@@ -387,13 +452,12 @@ export class BackblazeAuth {
       console.log("[v0] Starting upload to Backblaze B2...")
       console.log("[v0] File size:", fileBuffer.length, "bytes")
 
-      // Use multipart upload for files larger than 5MB
-      const fiveMB = 5 * 1024 * 1024
-      if (fileBuffer.length > fiveMB) {
+      const fourMB = 4 * 1024 * 1024
+      if (fileBuffer.length > fourMB) {
         console.log("[v0] Using multipart upload for large file...")
         return await this.uploadLargeFile(key, fileBuffer, contentType)
       } else {
-        console.log("[v0] Using single upload for small file...")
+        console.log("[v0] Using single upload for file...")
         return await this.uploadSmallFile(key, fileBuffer, contentType)
       }
     } catch (error) {
@@ -402,7 +466,15 @@ export class BackblazeAuth {
     }
   }
 
-  async generatePresignedUrl(key: string, contentType: string, expiresIn = 3600): Promise<string> {
+  async generatePresignedUrl(
+    key: string,
+    contentType: string,
+    expiresIn = 3600,
+  ): Promise<{
+    uploadUrl: string
+    authToken: string
+    bucketId: string
+  }> {
     console.log("[v0] Generating presigned URL for key:", key)
 
     try {
@@ -425,7 +497,12 @@ export class BackblazeAuth {
 
       const uploadUrlData: B2UploadUrlResponse = await uploadUrlResponse.json()
       console.log("[v0] Generated presigned URL successfully")
-      return uploadUrlData.uploadUrl
+
+      return {
+        uploadUrl: uploadUrlData.uploadUrl,
+        authToken: uploadUrlData.authorizationToken,
+        bucketId: uploadUrlData.bucketId,
+      }
     } catch (error) {
       console.error("[v0] Error generating presigned URL:", error)
       throw error

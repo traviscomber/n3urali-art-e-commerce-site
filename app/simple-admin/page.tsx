@@ -1,16 +1,22 @@
 "use client"
 
+import { Alert, AlertDescription } from "@/components/ui/alert"
+
 import type React from "react"
+
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
-import { Loader2, Upload, Eye, Trash2, Database, BarChart3, Crown, Edit2, Check, X, HardDrive } from "lucide-react"
+import { Upload, Loader2, Eye, Trash2, X, Database, AlertCircle, BarChart3, Crown, Check, Edit2 } from "lucide-react"
+import { createImageWithCategoryObject } from "@/app/actions/admin-actions"
+import { DirectUpload } from "@/components/direct-upload"
+
+import { EnhancedPhotoUpload } from "@/components/enhanced-photo-upload"
 
 interface Image {
   id: string
@@ -74,7 +80,7 @@ export default function SimpleAdminPage() {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [cleaning, setCleaning] = useState(false)
-  const [migrating, setMigrating] = useState(false)
+  // const [migrating, setMigrating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const [editingImage, setEditingImage] = useState<string | null>(null)
@@ -85,17 +91,19 @@ export default function SimpleAdminPage() {
     category: "",
     rightsType: "",
   })
-  const [newImage, setNewImage] = useState<NewImage>({
+  const [newImage, setNewImage] = useState({
     title: "",
     description: "",
     category: "",
     rightsType: "both",
     price: "",
-    file: null,
+    file: null as File | null,
     preview: "",
     originalFileUrl: "",
   })
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [useDirectUpload, setUseDirectUpload] = useState(true) // Added toggle for direct upload
+  const [uploadMethod, setUploadMethod] = useState("enhanced") // enhanced, direct, server
 
   useEffect(() => {
     console.log("[v0] SimpleAdmin: Authentication required")
@@ -204,36 +212,36 @@ export default function SimpleAdminPage() {
     }
   }
 
-  const handleMigrateFiles = async () => {
-    if (
-      !confirm(
-        "This will move files under 40MB from Blob storage to database storage for better organization. Continue?",
-      )
-    ) {
-      return
-    }
+  // const handleMigrateFiles = async () => {
+  //   if (
+  //     !confirm(
+  //       "This will move files under 40MB from Blob storage to database storage for better organization. Continue?",
+  //     )
+  //   ) {
+  //     return
+  //   }
 
-    setMigrating(true)
-    try {
-      const { migrateFilesToOptimalStorage } = await import("@/app/actions/admin-actions")
-      const result = await migrateFilesToOptimalStorage()
+  //   setMigrating(true)
+  //   try {
+  //     const { migrateFilesToOptimalStorage } = await import("@/app/actions/admin-actions")
+  //     const result = await migrateFilesToOptimalStorage()
 
-      if (result.success) {
-        const { migrated, skipped, errors, total } = result.data
-        toast.success(
-          `Migration completed: ${migrated} files moved to database, ${skipped} skipped, ${errors} errors out of ${total} total files`,
-        )
-        await loadInitialData()
-      } else {
-        toast.error("Failed to migrate files: " + result.error)
-      }
-    } catch (error) {
-      console.error("[v0] SimpleAdmin: Migration error:", error)
-      toast.error("Failed to migrate files")
-    } finally {
-      setMigrating(false)
-    }
-  }
+  //     if (result.success) {
+  //       const { migrated, skipped, errors, total } = result.data
+  //       toast.success(
+  //         `Migration completed: ${migrated} files moved to database, ${skipped} skipped, ${errors} errors out of ${total} total files`,
+  //       )
+  //       await loadInitialData()
+  //     } else {
+  //       toast.error("Failed to migrate files: " + result.error)
+  //     }
+  //   } catch (error) {
+  //     console.error("[v0] SimpleAdmin: Migration error:", error)
+  //     toast.error("Failed to migrate files")
+  //   } finally {
+  //     setMigrating(false)
+  //   }
+  // }
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -283,6 +291,173 @@ export default function SimpleAdminPage() {
     } else {
       toast.error("Please drop an image file")
     }
+  }
+
+  const handleDirectUploadComplete = async (result: { url: string; key: string; fileName: string }) => {
+    try {
+      console.log("[v0] Direct upload completed:", result)
+
+      // Generate thumbnail from the uploaded image
+      console.log("[v0] Generating thumbnail...")
+      const img = new Image()
+      img.crossOrigin = "anonymous"
+
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => {
+          console.log("[v0] Image loaded successfully for thumbnail generation")
+          resolve()
+        }
+        img.onerror = (event) => {
+          console.log("[v0] Image failed to load, using fallback thumbnail")
+          // Don't reject - just resolve and use a fallback approach
+          resolve()
+        }
+        img.src = result.url
+      })
+
+      let thumbnailBase64 = ""
+
+      if (img.complete && img.naturalWidth > 0) {
+        // Image loaded successfully, generate thumbnail
+        const canvas = document.createElement("canvas")
+        const ctx = canvas.getContext("2d")!
+
+        // Calculate thumbnail dimensions (max 400px)
+        const maxSize = 400
+        let { width, height } = img
+        if (width > height) {
+          if (width > maxSize) {
+            height = (height * maxSize) / width
+            width = maxSize
+          }
+        } else {
+          if (height > maxSize) {
+            width = (width * maxSize) / height
+            height = maxSize
+          }
+        }
+
+        canvas.width = width
+        canvas.height = height
+        ctx.drawImage(img, 0, 0, width, height)
+        thumbnailBase64 = canvas.toDataURL("image/jpeg", 0.8)
+        console.log("[v0] Thumbnail generated successfully")
+      } else {
+        // Image failed to load, create a placeholder thumbnail
+        const canvas = document.createElement("canvas")
+        const ctx = canvas.getContext("2d")!
+        canvas.width = 400
+        canvas.height = 300
+
+        // Create a simple placeholder
+        ctx.fillStyle = "#f3f4f6"
+        ctx.fillRect(0, 0, 400, 300)
+        ctx.fillStyle = "#6b7280"
+        ctx.font = "16px sans-serif"
+        ctx.textAlign = "center"
+        ctx.fillText("Image Preview", 200, 150)
+
+        thumbnailBase64 = canvas.toDataURL("image/jpeg", 0.8)
+        console.log("[v0] Generated placeholder thumbnail")
+      }
+
+      const imageData = {
+        title: newImage.title,
+        description: newImage.description,
+        category_name: newImage.category,
+        rights_type: newImage.rightsType,
+        price: Number.parseFloat(newImage.price) || 0,
+        image_url: result.url,
+        thumbnail_url: thumbnailBase64,
+        original_file_size: newImage.file?.size || 0,
+      }
+
+      const dbResult = await createImageWithCategoryObject(imageData)
+
+      if (!dbResult.success) {
+        throw new Error(dbResult.error || "Failed to save image")
+      }
+
+      console.log("[v0] Image saved successfully")
+      toast.success("Image uploaded and saved successfully!")
+
+      // Reset form
+      setNewImage({
+        title: "",
+        description: "",
+        category: "",
+        rightsType: "both",
+        price: "",
+        file: null,
+        preview: "",
+        originalFileUrl: "",
+      })
+
+      await loadInitialData()
+    } catch (error) {
+      console.error("[v0] Direct upload completion error:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to save image")
+    }
+  }
+
+  const handleEnhancedUploadComplete = async (result: {
+    url: string
+    thumbnails: { small: string; medium: string; large: string }
+    fileName: string
+    fileSize: number
+  }) => {
+    try {
+      console.log("[v0] Enhanced upload completed:", result)
+
+      const { createImageWithEnhancedThumbnails } = await import("@/app/actions/admin-actions")
+
+      const imageData = {
+        title: newImage.title,
+        description: newImage.description,
+        category_name: newImage.category,
+        rights_type: newImage.rightsType,
+        price: Number.parseFloat(newImage.price) || 0,
+        image_url: result.url,
+        thumbnail_url: result.thumbnails.medium, // Use medium as default
+        thumbnail_small_url: result.thumbnails.small,
+        thumbnail_medium_url: result.thumbnails.medium,
+        thumbnail_large_url: result.thumbnails.large,
+        original_file_url: result.url,
+        original_file_size: result.fileSize,
+      }
+
+      const dbResult = await createImageWithEnhancedThumbnails(imageData)
+
+      if (!dbResult.success) {
+        throw new Error(dbResult.error || "Failed to save image")
+      }
+
+      console.log("[v0] Enhanced image saved successfully")
+      toast.success("Photo uploaded with enhanced thumbnails!")
+
+      // Reset form
+      setNewImage({
+        title: "",
+        description: "",
+        category: "",
+        rightsType: "both",
+        price: "",
+        file: null,
+        preview: "",
+        originalFileUrl: "",
+      })
+
+      await loadInitialData()
+    } catch (error) {
+      console.error("[v0] Enhanced upload completion error:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to save image")
+    }
+  }
+
+  const handleDirectUploadError = (error: string) => {
+    console.error("[v0] Direct upload error:", error)
+    setUploadError(error)
+    toast.error(`Upload failed: ${error}`)
   }
 
   const handleImageUpload = async () => {
@@ -689,7 +864,7 @@ export default function SimpleAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100">
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div>
@@ -774,7 +949,7 @@ export default function SimpleAdminPage() {
             </Card>
             <Card>
               <CardContent className="p-4">
-                <Button
+                {/* <Button
                   onClick={handleMigrateFiles}
                   disabled={migrating}
                   variant="outline"
@@ -791,7 +966,7 @@ export default function SimpleAdminPage() {
                       Organize Files
                     </>
                   )}
-                </Button>
+                </Button> */}
               </CardContent>
             </Card>
           </div>
@@ -799,254 +974,292 @@ export default function SimpleAdminPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
           {/* Upload Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl">
-                <Upload className="h-6 w-6" />
-                Upload New Photo
-              </CardTitle>
-              <CardDescription className="text-lg">
-                Add a new full resolution image (4K-16K) to the premium gallery
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="title" className="text-lg font-medium">
-                    Title *
-                  </Label>
-                  <Input
-                    id="title"
-                    value={newImage.title}
-                    onChange={(e) => setNewImage((prev) => ({ ...prev, title: e.target.value }))}
-                    placeholder="Enter image title"
-                    className="text-lg h-12"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="description" className="text-lg font-medium">
-                    Description
-                  </Label>
-                  <Textarea
-                    id="description"
-                    value={newImage.description}
-                    onChange={(e) => setNewImage((prev) => ({ ...prev, description: e.target.value }))}
-                    placeholder="Enter image description"
-                    rows={3}
-                    className="text-lg"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="category" className="text-lg font-medium">
-                    Category *
-                  </Label>
-                  <Select
-                    value={newImage.category}
-                    onValueChange={(value) => setNewImage((prev) => ({ ...prev, category: value }))}
-                    required
-                  >
-                    <SelectTrigger className="h-12 text-lg">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.name} className="text-lg">
-                          {getCategoryDisplayName(cat)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="rightsType" className="text-lg font-medium">
-                    Rights Type *
-                  </Label>
-                  <Select
-                    value={newImage.rightsType}
-                    onValueChange={(value) => setNewImage((prev) => ({ ...prev, rightsType: value }))}
-                    required
-                  >
-                    <SelectTrigger className="h-12 text-lg">
-                      <SelectValue placeholder="Select rights type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="both" className="text-lg">
-                        <div>
-                          <div className="font-medium">Both Rights Available</div>
-                          <div className="text-sm text-gray-500">
-                            Exclusive & Non-Exclusive - Full HQ resolution (4K-16K)
-                          </div>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="exclusive" className="text-lg">
-                        <div className="flex items-center gap-2">
-                          <Crown className="h-4 w-4 text-yellow-500" />
-                          <div>
-                            <div className="font-medium">Exclusive Rights</div>
-                            <div className="text-sm text-gray-500">
-                              Full ownership - Complete HQ resolution (4K-16K)
-                            </div>
-                          </div>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="non-exclusive" className="text-lg">
-                        <div>
-                          <div className="font-medium">Non-Exclusive Rights</div>
-                          <div className="text-sm text-gray-500">Shared licensing - Full HQ resolution (4K-16K)</div>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-sm text-gray-500 mt-1">
-                    All images sold at full resolution (4K-16K). Pricing based on rights type and exclusivity.
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="price" className="text-lg font-medium">
-                    Price (USD) *
-                  </Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={newImage.price}
-                    onChange={(e) => setNewImage((prev) => ({ ...prev, price: e.target.value }))}
-                    placeholder="Enter price (e.g., 99.00)"
-                    className="text-lg h-12"
-                    required
-                  />
-                  <p className="text-sm text-gray-500 mt-1">
-                    Premium pricing for full HQ resolution (4K-16K). Starting from $99 for standard rights.
-                  </p>
-                </div>
-
-                <div>
-                  <Label className="text-lg font-medium">Image File * (Full HQ Resolution: 4K-16K)</Label>
-                  <div
-                    className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                      isDragOver
-                        ? "border-orange-500 bg-orange-50"
-                        : newImage.file
-                          ? "border-green-500 bg-green-50"
-                          : "border-gray-300 hover:border-gray-400"
-                    }`}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                  >
-                    <input
-                      id="file"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileSelect}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-
-                    {newImage.file ? (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-center">
-                          <Upload className="h-8 w-8 text-green-600" />
-                        </div>
-                        <p className="text-lg font-medium text-green-700">{newImage.file.name}</p>
-                        <p className="text-sm text-gray-500">{(newImage.file.size / (1024 * 1024)).toFixed(2)} MB</p>
-                        <p className="text-sm text-gray-500">Click or drag to replace</p>
-                        <div className="flex items-center justify-center gap-2 mt-2">
-                          <Database className="h-4 w-4 text-green-600" />
-                          <span className="text-sm text-green-600 font-medium">
-                            Will use database storage (Small file: {(newImage.file.size / (1024 * 1024)).toFixed(1)}
-                            MB)
-                          </span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-center">
-                          <Upload className={`h-8 w-8 ${isDragOver ? "text-orange-600" : "text-gray-400"}`} />
-                        </div>
-                        <p className={`text-lg font-medium ${isDragOver ? "text-orange-700" : "text-white"}`}>
-                          {isDragOver ? "Drop your HQ image here" : "Drag & drop your HQ image here (4K-16K)"}
-                        </p>
-                        <p className="text-sm text-gray-300">or click to browse files</p>
-                        <div className="text-xs text-gray-300 space-y-1">
-                          <p>High Quality Only: JPG, PNG, WebP</p>
-                          <p>• Files &lt;40MB: Database storage (fast access)</p>
-                          <p>• Files &gt;40MB: Backblaze B2 storage (unlimited, cost-effective)</p>
-                        </div>
-                      </div>
-                    )}
+          <div className="space-y-6">
+            <Card className="border-orange-200 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg">
+                <CardTitle className="text-2xl font-bold flex items-center">
+                  <Upload className="mr-3 h-6 w-6" />
+                  Upload New Image
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-6">
+                {/* Add enhanced upload component to the UI */}
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold">Upload Photos</h2>
+                    <div className="flex gap-2">
+                      <Button
+                        variant={uploadMethod === "enhanced" ? "default" : "outline"}
+                        onClick={() => setUploadMethod("enhanced")}
+                        size="sm"
+                      >
+                        Enhanced Upload
+                      </Button>
+                      <Button
+                        variant={uploadMethod === "direct" ? "default" : "outline"}
+                        onClick={() => setUploadMethod("direct")}
+                        size="sm"
+                      >
+                        Direct Upload
+                      </Button>
+                      <Button
+                        variant={uploadMethod === "server" ? "default" : "outline"}
+                        onClick={() => setUploadMethod("server")}
+                        size="sm"
+                      >
+                        Server Upload
+                      </Button>
+                    </div>
                   </div>
-                </div>
 
-                {newImage.preview && (
-                  <div className="space-y-3">
-                    <Label className="text-lg font-medium">Preview</Label>
-                    <div className="border rounded-lg p-4 bg-gray-50">
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="flex-shrink-0">
-                          <img
-                            src={newImage.preview || "/placeholder.svg?height=128&width=128&text=Preview"}
-                            alt="Preview"
-                            className="w-full sm:w-32 h-32 object-cover rounded border shadow-sm"
-                            crossOrigin="anonymous"
-                            onError={(e) => {
-                              console.log("[v0] Preview image failed to load:", newImage.preview)
-                              e.currentTarget.src = "/placeholder.svg?height=128&width=128&text=Preview+Error"
-                            }}
+                  {uploadMethod === "enhanced" && (
+                    <EnhancedPhotoUpload
+                      categories={categories}
+                      onUploadComplete={handleEnhancedUploadComplete}
+                      onUploadError={handleDirectUploadError}
+                    />
+                  )}
+
+                  {uploadMethod === "direct" && (
+                    <DirectUpload
+                      onUploadComplete={handleDirectUploadComplete}
+                      onUploadError={handleDirectUploadError}
+                    />
+                  )}
+
+                  {/* ... existing server upload form ... */}
+                  {uploadMethod === "server" && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="title" className="text-lg font-medium">
+                            Title *
+                          </Label>
+                          <Input
+                            id="title"
+                            value={newImage.title}
+                            onChange={(e) => setNewImage((prev) => ({ ...prev, title: e.target.value }))}
+                            placeholder="Enter image title"
+                            className="text-lg"
                           />
                         </div>
-                        <div className="flex-1 space-y-2">
-                          <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div>
-                              <span className="font-medium text-gray-600">File:</span>
-                              <p className="text-gray-800 truncate">{newImage.file?.name}</p>
-                            </div>
-                            <div>
-                              <span className="font-medium text-gray-600">Size:</span>
-                              <p className="text-gray-800">
-                                {newImage.file ? (newImage.file.size / (1024 * 1024)).toFixed(2) : "0"} MB
-                              </p>
-                            </div>
-                            <div>
-                              <span className="font-medium text-gray-600">Type:</span>
-                              <p className="text-gray-800">{newImage.file?.type}</p>
-                            </div>
-                            <div>
-                              <span className="font-medium text-gray-600">Status:</span>
-                              <p className="text-green-600 font-medium">Ready to upload</p>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="description" className="text-lg font-medium">
+                            Description *
+                          </Label>
+                          <Textarea
+                            id="description"
+                            value={newImage.description}
+                            onChange={(e) => setNewImage((prev) => ({ ...prev, description: e.target.value }))}
+                            placeholder="Enter image description"
+                            rows={4}
+                            className="text-lg"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="category" className="text-lg font-medium">
+                            Category *
+                          </Label>
+                          <Input
+                            id="category"
+                            value={newImage.category}
+                            onChange={(e) => setNewImage((prev) => ({ ...prev, category: e.target.value }))}
+                            placeholder="Enter category name"
+                            className="text-lg"
+                          />
+                        </div>
+
+                        {/* Updated rights type options in image upload form */}
+                        <Label htmlFor="rightsType" className="text-lg font-medium">
+                          Rights Type *
+                        </Label>
+                        <Select
+                          value={newImage.rightsType}
+                          onValueChange={(value) => setNewImage((prev) => ({ ...prev, rightsType: value }))}
+                        >
+                          <SelectTrigger className="text-lg">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="non-exclusive">Non-Exclusive (Multiple Sales)</SelectItem>
+                            <SelectItem value="exclusive">Exclusive (One-Time Sale)</SelectItem>
+                          </SelectContent>
+                        </Select>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="price" className="text-lg font-medium">
+                            Price (USD) *
+                          </Label>
+                          <Input
+                            id="price"
+                            type="number"
+                            step="0.01"
+                            value={newImage.price}
+                            onChange={(e) => setNewImage((prev) => ({ ...prev, price: e.target.value }))}
+                            placeholder="0.00"
+                            className="text-lg"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="originalFileUrl" className="text-lg font-medium">
+                            Original File URL (Optional)
+                          </Label>
+                          <Input
+                            id="originalFileUrl"
+                            value={newImage.originalFileUrl}
+                            onChange={(e) => setNewImage((prev) => ({ ...prev, originalFileUrl: e.target.value }))}
+                            placeholder="https://example.com/original-file.jpg"
+                            className="text-lg"
+                          />
+                          <p className="text-sm text-gray-500">
+                            For very large files (&gt;50MB), upload manually to Backblaze and paste the URL here
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="space-y-3">
+                          <Label className="text-lg font-medium">Image File * (Server Upload - 15MB limit)</Label>
+                          <div
+                            className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                              isDragOver
+                                ? "border-orange-500 bg-orange-50"
+                                : newImage.file
+                                  ? "border-green-500 bg-green-50"
+                                  : "border-gray-300 hover:border-gray-400"
+                            }`}
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
+                          >
+                            <input
+                              id="file"
+                              type="file"
+                              accept="image/*"
+                              onChange={handleFileSelect}
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            />
+
+                            {newImage.file ? (
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-center">
+                                  <Upload className="h-8 w-8 text-green-600" />
+                                </div>
+                                <p className="text-lg font-medium text-green-700">{newImage.file.name}</p>
+                                <p className="text-sm text-gray-500">
+                                  {(newImage.file.size / (1024 * 1024)).toFixed(2)} MB
+                                </p>
+                                <p className="text-sm text-gray-500">Click or drag to replace</p>
+                                <div className="flex items-center justify-center gap-2 mt-2">
+                                  <Database className="h-4 w-4 text-green-600" />
+                                  <span className="text-sm text-green-600 font-medium">Server upload (15MB limit)</span>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-center">
+                                  <Upload className={`h-8 w-8 ${isDragOver ? "text-orange-600" : "text-gray-400"}`} />
+                                </div>
+                                <p
+                                  className={`text-lg font-medium ${isDragOver ? "text-orange-700" : "text-gray-700"}`}
+                                >
+                                  {isDragOver ? "Drop your image here" : "Drag & drop your image here"}
+                                </p>
+                                <p className="text-sm text-gray-500">or click to browse files</p>
+                                <div className="text-xs text-gray-500 space-y-1">
+                                  <p>Supported: JPG, PNG, WebP</p>
+                                  <p>Maximum file size: 15MB</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {newImage.preview && (
+                          <div className="space-y-3">
+                            <Label className="text-lg font-medium">Preview</Label>
+                            <div className="border rounded-lg p-4 bg-gray-50">
+                              <div className="flex flex-col sm:flex-row gap-4">
+                                <div className="flex-shrink-0">
+                                  <img
+                                    src={newImage.preview || "/placeholder.svg?height=128&width=128&text=Preview"}
+                                    alt="Preview"
+                                    className="w-full sm:w-32 h-32 object-cover rounded border shadow-sm"
+                                    crossOrigin="anonymous"
+                                    onError={(e) => {
+                                      console.log("[v0] Preview image failed to load:", newImage.preview)
+                                      e.currentTarget.src = "/placeholder.svg?height=128&width=128&text=Preview+Error"
+                                    }}
+                                  />
+                                </div>
+                                <div className="flex-1 space-y-2">
+                                  <div className="grid grid-cols-2 gap-2 text-sm">
+                                    <div>
+                                      <span className="font-medium text-gray-600">File:</span>
+                                      <p className="text-gray-800 truncate">{newImage.file?.name}</p>
+                                    </div>
+                                    <div>
+                                      <span className="font-medium text-gray-600">Size:</span>
+                                      <p className="text-gray-800">
+                                        {newImage.file ? (newImage.file.size / (1024 * 1024)).toFixed(2) : "0"} MB
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <span className="font-medium text-gray-600">Type:</span>
+                                      <p className="text-gray-800">{newImage.file?.type}</p>
+                                    </div>
+                                    <div>
+                                      <span className="font-medium text-gray-600">Status:</span>
+                                      <p className="text-green-600 font-medium">Ready to upload</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </div>
+                        )}
+
+                        <Button
+                          onClick={handleImageUpload}
+                          disabled={
+                            uploading || !newImage.file || !newImage.title || !newImage.category || !newImage.price
+                          }
+                          className="w-full bg-orange-600 hover:bg-orange-700 text-lg h-12"
+                        >
+                          {uploading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Uploading via Server...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="mr-2 h-4 w-4" />
+                              Upload via Server (15MB limit)
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {uploadError && (
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="flex items-start">
+                        <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 mr-2 flex-shrink-0" />
+                        <div>
+                          <p className="text-red-800 font-medium">Upload Error</p>
+                          <p className="text-red-700 text-sm mt-1">{uploadError}</p>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
-
-                <Button
-                  onClick={handleImageUpload}
-                  disabled={uploading}
-                  className="w-full bg-orange-600 hover:bg-orange-700 text-lg h-12"
-                >
-                  {uploading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Uploading with Backblaze B2...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="mr-2 h-4 w-4" />
-                      Upload with Backblaze B2
-                    </>
                   )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Images List */}
           <Card className="flex flex-col">
@@ -1117,6 +1330,7 @@ export default function SimpleAdminPage() {
                                 ))}
                               </SelectContent>
                             </Select>
+                            {/* Updated rights type options in image edit form */}
                             <Select
                               value={editValues.rightsType}
                               onValueChange={(value) => setEditValues((prev) => ({ ...prev, rightsType: value }))}
@@ -1125,14 +1339,11 @@ export default function SimpleAdminPage() {
                                 <SelectValue placeholder="Select rights type" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="both" className="text-sm">
-                                  Both Rights Available
+                                <SelectItem value="non-exclusive" className="text-sm">
+                                  Non-Exclusive Rights
                                 </SelectItem>
                                 <SelectItem value="exclusive" className="text-sm">
                                   Exclusive Rights
-                                </SelectItem>
-                                <SelectItem value="non-exclusive" className="text-sm">
-                                  Non-Exclusive Rights
                                 </SelectItem>
                               </SelectContent>
                             </Select>
@@ -1209,9 +1420,4 @@ export default function SimpleAdminPage() {
       </div>
     </div>
   )
-}
-
-const createImageWithCategoryObject = async (imageData: any) => {
-  const { createImageWithCategoryObject: actualFunction } = await import("@/app/actions/admin-actions")
-  return actualFunction(imageData)
 }

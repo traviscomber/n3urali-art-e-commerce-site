@@ -7,7 +7,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Download, ShoppingCart, Eye, Crown, RotateCcw } from "lucide-react"
+import { ArrowLeft, Download, ShoppingCart, Eye, Crown, RotateCcw, Users } from "lucide-react"
 import { getImages } from "@/app/actions/admin-actions"
 import { useAuth } from "@/lib/contexts/auth-context"
 
@@ -385,11 +385,8 @@ export default function PhotoDetailPage() {
   const getRightsTypeDisplay = () => {
     const rightsType = image?.metadata?.rights_type
     if (rightsType === "exclusive")
-      return { text: "Exclusive Rights", icon: Crown, color: "bg-primary text-primary-foreground" }
-    if (rightsType === "non-exclusive")
-      return { text: "Non-Exclusive Rights", icon: Eye, color: "bg-blue-600 text-white" }
-    if (rightsType === "both") return { text: "Both Rights Available", icon: Crown, color: "bg-purple-600 text-white" }
-    return { text: "Standard License", icon: Eye, color: "bg-gray-600 text-white" }
+      return { text: "Exclusive Rights", icon: Crown, color: "bg-amber-100 text-amber-800 border-amber-200" }
+    return { text: "Non-Exclusive Rights", icon: Users, color: "bg-blue-100 text-blue-800 border-blue-200" }
   }
 
   const handleQualityPreviewToggle = () => {
@@ -686,7 +683,7 @@ export default function PhotoDetailPage() {
                 <Badge variant="outline" className="bg-card text-card-foreground border-border">
                   {image.category_name === "Fisheye" ? "180° Fisheye" : "360° Equirectangular"}
                 </Badge>
-                <Badge variant="secondary" className="bg-primary text-primary-foreground">
+                <Badge variant="secondary" className={rightsDisplay.color}>
                   <RightsIcon className="w-3 h-3 mr-1" />
                   {rightsDisplay.text}
                 </Badge>

@@ -35,9 +35,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      uploadUrl: uploadInfo,
+      uploadUrl: uploadInfo.uploadUrl, // Extract just the URL
       key,
       fileName,
+      authToken: uploadInfo.authToken, // Also provide auth token for headers
+      bucketId: uploadInfo.bucketId,
     })
   } catch (error) {
     console.error("[v0] Presigned URL API error:", error)

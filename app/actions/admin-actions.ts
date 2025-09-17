@@ -406,10 +406,10 @@ function compressBase64Image(base64String: string, maxSizeKB = 2000, preserveQua
   })
 }
 
-function handleDatabaseError(error: any, functionName?: string): { success: false; error: string } {
+function handleDatabaseError(error: any, functionName?: string) {
   console.error(`[v0] Database error in ${functionName || "unknown function"}:`, error)
 
-  if (typeof error === "string") {
+  if (typeof error === "string" && error) {
     if (
       error.includes("Request Entity Too Large") ||
       error.includes("413") ||
@@ -427,35 +427,52 @@ function handleDatabaseError(error: any, functionName?: string): { success: fals
         error: "Upload timeout. Large files may take longer. Please try again or use a smaller file.",
       }
     }
-  }
-
-  if (error?.message && error.message.includes("Body exceeded")) {
-    return {
-      success: false,
-      error: "Upload payload too large. Please use a smaller image or contact support.",
+    if (error.includes("CORS")) {
+      return {
+        success: false,
+        error: "CORS error. Please check your domain configuration.",
+      }
+    }
+    if (error.includes("413") || error.includes("Payload Too Large")) {
+      return {
+        success: false,
+        error: "File too large. Please use a smaller file.",
+      }
+    }
+    if (error.includes("Network")) {
+      return {
+        success: false,
+        error: "Network error. Please check your connection and try again.",
+      }
     }
   }
 
-  if (error?.message && error.message.includes("Unexpected token")) {
-    return {
-      success: false,
-      error: "Server error processing large file. Please try a smaller image or contact support.",
+  // Handle Error objects
+  if (error instanceof Error && error.message) {
+    const message = error.message
+    if (
+      message.includes("Request Entity Too Large") ||
+      message.includes("413") ||
+      message.includes("FUNCTION_PAYLOAD_TOO_LARGE")
+    ) {
+      return {
+        success: false,
+        error:
+          "File payload too large for serverless function. Maximum supported size is 10MB after compression. Please use a smaller image.",
+      }
+    }
+    if (message.includes("timeout") || message.includes("TIMEOUT")) {
+      return {
+        success: false,
+        error: "Upload timeout. Large files may take longer. Please try again or use a smaller file.",
+      }
     }
   }
 
-  if (error?.message && (error.message.includes("fetch") || error.message.includes("network"))) {
-    return {
-      success: false,
-      error: "Network error during upload. Please check your connection and try again.",
-    }
-  }
-
-  const errorMessage =
-    error instanceof Error ? error.message : typeof error === "string" ? error : "Database operation failed"
-
+  // Default error response
   return {
     success: false,
-    error: errorMessage,
+    error: error instanceof Error ? error.message : "An unexpected error occurred. Please try again.",
   }
 }
 

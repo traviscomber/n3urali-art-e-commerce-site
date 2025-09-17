@@ -137,7 +137,7 @@ export function DirectUpload({
           throw new Error(errorData.error || "Failed to get upload URL")
         }
 
-        const { uploadUrl, key, fileName } = await presignedResponse.json()
+        const { uploadUrl, key, fileName, authToken } = await presignedResponse.json()
         console.log("[v0] Got presigned URL, key:", key)
 
         setUploadState((prev) => ({
@@ -207,6 +207,7 @@ export function DirectUpload({
           xhr.setRequestHeader("X-Bz-File-Name", encodeURIComponent(key))
           xhr.setRequestHeader("Content-Type", fileToUpload.type || "application/octet-stream")
           xhr.setRequestHeader("X-Bz-Content-Sha1", sha1Hash)
+          xhr.setRequestHeader("Authorization", authToken)
           xhr.send(fileToUpload) // Send compressed file instead of original
         })
 

@@ -6,13 +6,12 @@ import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Upload, X, CheckCircle, AlertCircle, Clock, Zap } from "lucide-react"
-import { ImageCompressor } from "@/lib/storage/image-compression"
 
 interface DirectUploadProps {
   onUploadComplete: (result: { url: string; key: string; fileName: string }) => void
   onUploadError: (error: string) => void
   accept?: string
-  maxSize?: number // in bytes
+  maxSize?: number // in bytes - removed restrictions
   className?: string
 }
 
@@ -31,8 +30,8 @@ interface UploadState {
 export function DirectUpload({
   onUploadComplete,
   onUploadError,
-  accept = "image/*",
-  maxSize = 50 * 1024 * 1024, // 50MB default
+  accept = "*/*", // Accept all file types instead of just images
+  maxSize = 100 * 1024 * 1024, // Increased to 100MB as requested
   className = "",
 }: DirectUploadProps) {
   const [uploadState, setUploadState] = useState<UploadState>({
@@ -40,13 +39,6 @@ export function DirectUpload({
     progress: 0,
   })
   const [isDragOver, setIsDragOver] = useState(false)
-
-  const calculateSHA1 = async (file: File): Promise<string> => {
-    const arrayBuffer = await file.arrayBuffer()
-    const hashBuffer = await crypto.subtle.digest("SHA-1", arrayBuffer)
-    const hashArray = Array.from(new Uint8Array(hashBuffer))
-    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("")
-  }
 
   const formatBytes = (bytes: number): string => {
     if (bytes === 0) return "0 Bytes"
@@ -68,7 +60,7 @@ export function DirectUpload({
       const startTime = Date.now()
 
       try {
-        console.log("[v0] Starting direct upload for:", file.name, "size:", file.size)
+        console.log("[v0] Starting Supabase upload for:", file.name, "size:", file.size)
 
         setUploadState({
           status: "preparing",
@@ -78,56 +70,22 @@ export function DirectUpload({
           startTime,
         })
 
-        let fileToUpload = file
-        let compressionInfo = ""
+        const fileToUpload = file
 
-        // Check if file needs compression (images over 2MB)
-        if (file.type.startsWith("image/") && file.size > 2 * 1024 * 1024) {
-          console.log("[v0] File is large, compressing...")
-          setUploadState((prev) => ({
-            ...prev,
-            progress: 2,
-            stage: "Compressing image...",
-          }))
-
-          try {
-            const compressed = await ImageCompressor.compressImage(file, {
-              maxWidth: 2048,
-              maxHeight: 2048,
-              quality: 0.85,
-              format: file.type.includes("png") ? "png" : "jpeg",
-            })
-
-            fileToUpload = compressed.file
-            const compressionRatio = (((file.size - compressed.compressedSize) / file.size) * 100).toFixed(1)
-            compressionInfo = ` (compressed ${compressionRatio}% from ${formatBytes(file.size)})`
-
-            console.log("[v0] Image compressed:", {
-              original: file.size,
-              compressed: compressed.compressedSize,
-              ratio: compressionRatio + "%",
-            })
-          } catch (compressionError) {
-            console.warn("[v0] Image compression failed, uploading original:", compressionError)
-            // Continue with original file if compression fails
-          }
-        }
-
-        // Step 1: Get presigned URL from our API
-        console.log("[v0] Getting presigned URL...")
+        console.log("[v0] Getting Supabase presigned URL...")
         setUploadState((prev) => ({
           ...prev,
-          progress: 5,
+          progress: 10,
           stage: "Getting upload URL...",
         }))
 
-        const presignedResponse = await fetch("/api/backblaze/presigned-url", {
+        const presignedResponse = await fetch("/api/supabase/presigned-url", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            fileName: file.name, // Keep original filename
+            fileName: file.name,
             contentType: fileToUpload.type || "application/octet-stream",
           }),
         })
@@ -137,40 +95,26 @@ export function DirectUpload({
           throw new Error(errorData.error || "Failed to get upload URL")
         }
 
-        const { uploadUrl, key, fileName, authToken } = await presignedResponse.json()
-        console.log("[v0] Got presigned URL, key:", key)
+        const { uploadUrl, key, fileName } = await presignedResponse.json()
+        console.log("[v0] Got Supabase presigned URL, key:", key)
 
         setUploadState((prev) => ({
           ...prev,
-          progress: 10,
-          stage: "Calculating file hash...",
-        }))
-
-        // Step 2: Calculate SHA1 hash of the file to upload
-        console.log("[v0] Calculating SHA1 hash...")
-        const sha1Hash = await calculateSHA1(fileToUpload)
-        console.log("[v0] SHA1 calculated:", sha1Hash)
-
-        setUploadState((prev) => ({
-          ...prev,
-          progress: 15,
-          stage: `Starting upload${compressionInfo}...`,
+          progress: 20,
+          stage: "Starting upload...",
           status: "uploading",
         }))
 
-        // Step 3: Upload directly to Backblaze with progress tracking
-        console.log("[v0] Uploading directly to Backblaze...")
+        console.log("[v0] Uploading directly to Supabase...")
 
-        // Create a custom XMLHttpRequest for progress tracking
         const uploadPromise = new Promise<void>((resolve, reject) => {
           const xhr = new XMLHttpRequest()
 
           xhr.upload.addEventListener("progress", (event) => {
             if (event.lengthComputable) {
               const percentComplete = (event.loaded / event.total) * 100
-              const uploadProgress = 15 + percentComplete * 0.7 // 15% to 85%
+              const uploadProgress = 20 + percentComplete * 0.7 // 20% to 90%
 
-              // Calculate upload speed and time remaining
               const currentTime = Date.now()
               const elapsedTime = (currentTime - startTime) / 1000 // seconds
               const speed = event.loaded / elapsedTime // bytes per second
@@ -180,7 +124,7 @@ export function DirectUpload({
               setUploadState((prev) => ({
                 ...prev,
                 progress: Math.round(uploadProgress),
-                stage: `Uploading... ${formatBytes(event.loaded)} / ${formatBytes(event.total)}${compressionInfo}`,
+                stage: `Uploading... ${formatBytes(event.loaded)} / ${formatBytes(event.total)}`,
                 speed,
                 timeRemaining: timeRemaining > 0 ? timeRemaining : undefined,
               }))
@@ -204,26 +148,21 @@ export function DirectUpload({
           })
 
           xhr.open("POST", uploadUrl)
-          xhr.setRequestHeader("X-Bz-File-Name", encodeURIComponent(key))
           xhr.setRequestHeader("Content-Type", fileToUpload.type || "application/octet-stream")
-          xhr.setRequestHeader("X-Bz-Content-Sha1", sha1Hash)
-          xhr.setRequestHeader("Authorization", authToken)
-          xhr.send(fileToUpload) // Send compressed file instead of original
+          xhr.send(fileToUpload)
         })
 
         await uploadPromise
 
         setUploadState((prev) => ({
           ...prev,
-          progress: 90,
+          progress: 95,
           stage: "Finalizing upload...",
           status: "processing",
         }))
 
-        // Construct public URL
-        const publicUrl = `https://f005.backblazeb2.com/file/${process.env.NEXT_PUBLIC_BACKBLAZE_BUCKET_NAME || "n3urali-art"}/${key}`
-
-        console.log("[v0] Direct upload successful:", publicUrl)
+        const publicUrl = uploadUrl.split("?")[0] // Remove query parameters to get public URL
+        console.log("[v0] Supabase upload successful:", publicUrl)
 
         const totalTime = (Date.now() - startTime) / 1000
         const avgSpeed = fileToUpload.size / totalTime
@@ -233,18 +172,17 @@ export function DirectUpload({
           progress: 100,
           fileName: file.name,
           url: publicUrl,
-          stage: `Upload completed in ${formatTime(totalTime)}${compressionInfo}`,
+          stage: `Upload completed in ${formatTime(totalTime)}`,
           speed: avgSpeed,
         })
 
-        // Call success callback
         onUploadComplete({
           url: publicUrl,
           key,
           fileName: file.name,
         })
       } catch (error) {
-        console.error("[v0] Direct upload error:", error)
+        console.error("[v0] Supabase upload error:", error)
         const errorMessage = error instanceof Error ? error.message : "Upload failed"
 
         setUploadState({
@@ -267,24 +205,9 @@ export function DirectUpload({
 
       const file = files[0]
 
-      // Validate file size
-      if (file.size > maxSize) {
-        const maxSizeMB = maxSize / (1024 * 1024)
-        const errorMessage = `File size (${(file.size / 1024 / 1024).toFixed(1)}MB) exceeds maximum allowed size (${maxSizeMB}MB)`
-        setUploadState({
-          status: "error",
-          progress: 0,
-          fileName: file.name,
-          error: errorMessage,
-          stage: "File too large",
-        })
-        onUploadError(errorMessage)
-        return
-      }
-
       uploadFile(file)
     },
-    [uploadFile, maxSize, onUploadError],
+    [uploadFile],
   )
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -350,7 +273,7 @@ export function DirectUpload({
       case "error":
         return uploadState.error || "Upload failed"
       default:
-        return "Click to select file or drag and drop"
+        return "Click to select file or drag and drop - No size restrictions!"
     }
   }
 
@@ -408,10 +331,9 @@ export function DirectUpload({
             <p className="text-sm font-medium text-gray-900">{getStatusText()}</p>
 
             {uploadState.status === "idle" && (
-              <p className="text-xs text-gray-500">Maximum file size: {(maxSize / 1024 / 1024).toFixed(0)}MB</p>
+              <p className="text-xs text-gray-500">Upload any file type - No compression applied</p>
             )}
 
-            {/* Enhanced progress tracking */}
             {(uploadState.status === "preparing" ||
               uploadState.status === "uploading" ||
               uploadState.status === "processing") && (
@@ -437,7 +359,6 @@ export function DirectUpload({
               </div>
             )}
 
-            {/* Success details */}
             {uploadState.status === "success" && uploadState.speed && (
               <div className="text-xs text-green-600 space-y-1">
                 <p>Average speed: {formatBytes(uploadState.speed)}/s</p>
@@ -445,7 +366,6 @@ export function DirectUpload({
               </div>
             )}
 
-            {/* Error details */}
             {uploadState.status === "error" && uploadState.error && (
               <div className="text-xs text-red-600 bg-red-50 p-2 rounded border border-red-200">
                 <p className="font-medium">Error Details:</p>

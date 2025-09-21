@@ -128,13 +128,6 @@ export function EnhancedPhotoUpload({ categories, onUploadComplete, onUploadErro
         return
       }
 
-      // Validate file size (100MB limit)
-      const maxSize = 100 * 1024 * 1024
-      if (file.size > maxSize) {
-        toast.error("File size must be less than 100MB")
-        return
-      }
-
       setProcessingStep("Processing image...")
 
       try {
@@ -181,13 +174,11 @@ export function EnhancedPhotoUpload({ categories, onUploadComplete, onUploadErro
       setProcessingStep("Getting upload URL...")
       setUploadProgress(10)
 
-      // Get presigned URL
-      const response = await fetch("/api/backblaze/presigned-url", {
+      const response = await fetch("/api/supabase/presigned-url", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fileName: photoData.file.name,
-          fileSize: photoData.file.size,
           contentType: photoData.file.type,
         }),
       })
@@ -196,44 +187,32 @@ export function EnhancedPhotoUpload({ categories, onUploadComplete, onUploadErro
         throw new Error("Failed to get upload URL")
       }
 
-      const { uploadUrl, authToken, fileName } = await response.json()
+      const { uploadUrl, key, fileName } = await response.json()
 
       setProcessingStep("Uploading image...")
       setUploadProgress(30)
 
-      // Upload directly to Backblaze
       const uploadResponse = await fetch(uploadUrl, {
-        method: "POST",
+        method: "PUT",
         headers: {
-          Authorization: authToken,
-          "X-Bz-File-Name": fileName,
           "Content-Type": photoData.file.type,
-          "X-Bz-Content-Sha1": "unverified",
         },
         body: photoData.file,
       })
 
       if (!uploadResponse.ok) {
-        throw new Error("Upload failed")
+        console.error("[v0] Upload response:", uploadResponse.status, uploadResponse.statusText)
+        throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`)
       }
 
-      const uploadResult = await uploadResponse.json()
       setUploadProgress(80)
+      setProcessingStep("Finalizing...")
 
-      setProcessingStep("Saving to database...")
-
-      const bucketName = process.env.NEXT_PUBLIC_BACKBLAZE_BUCKET_NAME || process.env.BACKBLAZE_BUCKET_NAME
-      if (!bucketName) {
-        console.error("[v0] Missing bucket name environment variable")
-        throw new Error("Storage configuration error - please contact support")
-      }
-
-      const publicUrl = `https://f005.backblazeb2.com/file/${bucketName}/${fileName}`
+      const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/${key}`
 
       setUploadProgress(100)
       setProcessingStep("Complete!")
 
-      // Call completion handler
       onUploadComplete({
         url: publicUrl,
         thumbnails: photoData.thumbnails,
@@ -241,7 +220,6 @@ export function EnhancedPhotoUpload({ categories, onUploadComplete, onUploadErro
         fileSize: photoData.file.size,
       })
 
-      // Reset form
       setPhotoData({
         title: "",
         description: "",
@@ -290,7 +268,7 @@ export function EnhancedPhotoUpload({ categories, onUploadComplete, onUploadErro
             <label htmlFor="photo-upload" className="cursor-pointer">
               <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
               <p className="text-sm text-gray-600">Click to select or drag and drop</p>
-              <p className="text-xs text-gray-500 mt-1">Supports JPG, PNG, WebP up to 100MB</p>
+              <p className="text-xs text-gray-500 mt-1">Supports all image formats - No size restrictions!</p>
             </label>
           </div>
         </div>

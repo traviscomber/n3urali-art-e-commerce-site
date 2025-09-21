@@ -1,6 +1,6 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
+import { createSupabaseServerClient } from "@/lib/database"
 import { unstable_cache } from "next/cache"
 import { revalidatePath, revalidateTag } from "next/cache"
 
@@ -35,7 +35,7 @@ function logQueryPerformance(queryName: string, startTime: number, recordCount?:
 const getCachedImages = unstable_cache(
   async () => {
     try {
-      const supabase = await createClient()
+      const supabase = await createSupabaseServerClient()
 
       const { data: images, error: imagesError } = await supabase
         .from("images")
@@ -86,7 +86,7 @@ const getCachedImages = unstable_cache(
 const getCachedImagesPaginated = unstable_cache(
   async (page = 1, limit = 50, category?: string, featured?: boolean) => {
     const startTime = Date.now()
-    const supabase = await createClient()
+    const supabase = await createSupabaseServerClient()
     const offset = (page - 1) * limit
 
     try {
@@ -191,7 +191,7 @@ const getCachedImagesPaginated = unstable_cache(
 const getCachedCategories = unstable_cache(
   async () => {
     try {
-      const supabase = await createClient()
+      const supabase = await createSupabaseServerClient()
 
       const { data: result, error } = await supabase.from("categories").select("*").order("name")
 
@@ -217,7 +217,7 @@ const getCachedCategories = unstable_cache(
 const getCachedCategoriesOptimized = unstable_cache(
   async () => {
     const startTime = Date.now()
-    const supabase = await createClient()
+    const supabase = await createSupabaseServerClient()
 
     const { data: categories, error: categoriesError } = await supabase
       .from("categories")
@@ -264,7 +264,7 @@ const getCachedCategoriesOptimized = unstable_cache(
 
 const getCachedLicenses = unstable_cache(
   async () => {
-    const supabase = await createClient()
+    const supabase = await createSupabaseServerClient()
 
     const { data: result, error } = await supabase.from("licenses").select("*").order("name")
 
@@ -285,7 +285,7 @@ const getCachedLicenses = unstable_cache(
 const getCachedDatabaseStats = unstable_cache(
   async () => {
     try {
-      const supabase = await createClient()
+      const supabase = await createSupabaseServerClient()
 
       const [{ count: imageCount }, { count: categoryCount }, { count: licenseCount }, { count: orderCount }] =
         await Promise.all([
@@ -484,7 +484,7 @@ function invalidateCache(tags: string[]) {
 }
 
 export async function createImageWithCategory(formData: FormData) {
-  const supabase = await createClient()
+  const supabase = await createSupabaseServerClient()
   const defaultLicense = await supabase.from("licenses").select("id").eq("name", "PRO").limit(1)
 
   if (defaultLicense.data && defaultLicense.data.length > 0) {
@@ -520,7 +520,7 @@ export async function createImageWithLicense(formData: FormData) {
       thumbnail_url: imageData.thumbnail_url.substring(0, 50) + "...",
     })
 
-    const supabase = await createClient()
+    const supabase = await createSupabaseServerClient()
 
     const categoryResult = await supabase.from("categories").select("id").eq("name", imageData.category).limit(1)
 
@@ -633,7 +633,7 @@ export async function createImageWithCategoryObject(imageData: {
       }
     }
 
-    const supabase = await createClient()
+    const supabase = await createSupabaseServerClient()
 
     const categoryResult = await supabase.from("categories").select("id").eq("name", imageData.category_name).limit(1)
 
@@ -780,41 +780,87 @@ export async function createImageWithEnhancedThumbnails(imageData: {
         : "unknown",
     })
 
-    const supabase = await createClient()
+    const supabase = createSupabaseServerClient()
+
+    const categoryName = imageData.category_name?.trim() || "Uncategorized"
+    console.log("[v0] Using category name:", categoryName)
 
     // Get or create category
-    const categoryResult = await supabase.from("categories").select("id").eq("name", imageData.category_name).limit(1)
+    const categoryResult = await supabase.from("categories").select("id").eq("name", categoryName).limit(1)
 
     let categoryId: string
 
     if (categoryResult.data && categoryResult.data.length === 0) {
-      console.log("[v0] Category not found, creating new category:", imageData.category_name)
+      console.log("[v0] Category not found, creating new category:", categoryName)
       const newCategoryResult = await supabase
         .from("categories")
         .insert([
           {
-            name: imageData.category_name,
-            description: "Auto-created category for " + imageData.category_name,
+            name: categoryName,
+            description: "Auto-created category for " + categoryName,
+            active: true,
           },
         ])
         .select("id")
 
-      categoryId = newCategoryResult.data![0].id
+      if (!newCategoryResult.data || newCategoryResult.data.length === 0) {
+        console.error("[v0] Failed to create category:", newCategoryResult.error)
+        return {
+          success: false,
+          error: "Failed to create category: " + (newCategoryResult.error?.message || "Unknown error"),
+        }
+      }
+
+      categoryId = newCategoryResult.data[0].id
     } else {
-      categoryId = categoryResult.data![0].id
+      if (!categoryResult.data || categoryResult.data.length === 0) {
+        console.error("[v0] Category query returned null data")
+        return { success: false, error: "Failed to find or create category" }
+      }
+      categoryId = categoryResult.data[0].id
     }
 
-    // Get default license
-    let defaultLicense = await supabase.from("licenses").select("id").eq("name", "Personal").limit(1)
+    console.log("[v0] Looking up licenses...")
 
-    if (!defaultLicense.data || defaultLicense.data.length === 0) {
-      defaultLicense = await supabase.from("licenses").select("id").order("price").limit(1)
+    // First, get all available licenses to debug
+    const allLicensesResult = await supabase.from("licenses").select("id, name").order("created_at")
+    console.log("[v0] All available licenses:", allLicensesResult.data)
+
+    if (!allLicensesResult.data || allLicensesResult.data.length === 0) {
+      console.error("[v0] No licenses found in database")
+      return {
+        success: false,
+        error: "No licenses found. Please add at least one license to the system.",
+      }
     }
 
-    const licenseId = defaultLicense.data ? defaultLicense.data[0].id : null
+    // Try to find a "Personal" license first, then "Standard", then any license
+    let licenseId: string | null = null
+
+    const personalLicense = allLicensesResult.data.find((license) => license.name.toLowerCase().includes("personal"))
+
+    if (personalLicense) {
+      licenseId = personalLicense.id
+      console.log("[v0] Using Personal license:", personalLicense.name)
+    } else {
+      const standardLicense = allLicensesResult.data.find((license) => license.name.toLowerCase().includes("standard"))
+
+      if (standardLicense) {
+        licenseId = standardLicense.id
+        console.log("[v0] Using Standard license:", standardLicense.name)
+      } else {
+        // Use the first available license
+        licenseId = allLicensesResult.data[0].id
+        console.log("[v0] Using first available license:", allLicensesResult.data[0].name)
+      }
+    }
 
     if (!licenseId) {
-      return { success: false, error: "No licenses found. Please add at least one license to the system." }
+      console.error("[v0] Could not determine license ID")
+      return {
+        success: false,
+        error: "Could not determine license. Please check license configuration.",
+      }
     }
 
     const { data: result, error } = await supabase
@@ -827,20 +873,11 @@ export async function createImageWithEnhancedThumbnails(imageData: {
           license_id: licenseId,
           price: imageData.price,
           file_path: imageData.original_file_url || imageData.image_url,
+          original_url: imageData.original_file_url,
+          thumbnail_small_url: imageData.thumbnail_small_url,
+          thumbnail_medium_url: imageData.thumbnail_medium_url,
+          thumbnail_large_url: imageData.thumbnail_large_url,
           is_featured: false,
-          // Store all thumbnail URLs in metadata until columns are added
-          metadata: JSON.stringify({
-            rights_type: imageData.rights_type,
-            original_file_size: imageData.original_file_size,
-            upload_timestamp: new Date().toISOString(),
-            storage_type: "backblaze_direct",
-            thumbnail_generation: "enhanced_client_side",
-            thumbnail_small_url: imageData.thumbnail_small_url,
-            thumbnail_medium_url: imageData.thumbnail_medium_url,
-            thumbnail_large_url: imageData.thumbnail_large_url,
-            original_url: imageData.original_file_url,
-            main_thumbnail_url: imageData.thumbnail_url,
-          }),
         },
       ])
       .select("*")
@@ -850,14 +887,16 @@ export async function createImageWithEnhancedThumbnails(imageData: {
       throw new Error(error.message)
     }
 
-    console.log("[v0] Enhanced image created successfully, ID:", result[0]?.id)
+    if (!result || result.length === 0) {
+      console.error("[v0] Image creation returned no data")
+      return { success: false, error: "Failed to create image record" }
+    }
 
-    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
-    revalidatePath("/simple-admin")
-
-    return { success: true, data: result }
+    console.log("[v0] Enhanced thumbnails image created successfully:", result[0].id)
+    return { success: true, data: result[0] }
   } catch (error) {
-    return handleDatabaseError(error, "createImageWithEnhancedThumbnails")
+    console.error("[v0] Error in createImageWithEnhancedThumbnails:", error)
+    return { success: false, error: error instanceof Error ? error.message : "Unknown error" }
   }
 }
 
@@ -913,7 +952,7 @@ export async function getImagesPaginated(page = 1, limit = 20, category?: string
 
 export async function getOrders(userEmail?: string) {
   try {
-    const supabase = await createClient()
+    const supabase = await createSupabaseServerClient()
 
     let result
     if (userEmail) {
@@ -949,7 +988,7 @@ export async function getOrders(userEmail?: string) {
 export async function getOrdersOptimized(userEmail?: string, page = 1, limit = 20) {
   try {
     const startTime = Date.now()
-    const supabase = await createClient()
+    const supabase = await createSupabaseServerClient()
     const offset = (page - 1) * limit
 
     let result
@@ -1056,7 +1095,7 @@ export async function getDatabaseStats() {
 export async function deleteImage(imageId: string) {
   try {
     console.log("[v0] Starting image deletion for ID:", imageId)
-    const supabase = await createClient()
+    const supabase = await createSupabaseServerClient()
 
     const orderItemsCheck = await supabase.from("order_items").select("count").eq("image_id", imageId).single()
 
@@ -1123,7 +1162,7 @@ export async function updateImage(formData: FormData) {
       thumbnail_url: imageData.thumbnail_url.substring(0, 50) + "...",
     })
 
-    const supabase = await createClient()
+    const supabase = await createSupabaseServerClient()
 
     const categoryResult = await supabase.from("categories").select("id").eq("name", imageData.category).limit(1)
 

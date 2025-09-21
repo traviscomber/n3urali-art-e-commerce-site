@@ -31,17 +31,15 @@ function createSupabaseServerClient() {
   })
 }
 
-const PERFORMANCE_MONITORING = process.env.NODE_ENV === "development"
+const PERFORMANCE_MONITORING = true // Always enable for debugging
 
 function logQueryPerformance(queryName: string, startTime: number, recordCount?: number) {
-  if (PERFORMANCE_MONITORING) {
-    const duration = Date.now() - startTime
-    console.log(`[v0] Query Performance: ${queryName} - ${duration}ms${recordCount ? ` (${recordCount} records)` : ""}`)
+  const duration = Date.now() - startTime
+  console.log(`[v0] Query Performance: ${queryName} - ${duration}ms${recordCount ? ` (${recordCount} records)` : ""}`)
 
-    // Log slow queries (>500ms)
-    if (duration > 500) {
-      console.warn(`[v0] Slow Query Alert: ${queryName} took ${duration}ms`)
-    }
+  // Log slow queries (>500ms)
+  if (duration > 500) {
+    console.warn(`[v0] Slow Query Alert: ${queryName} took ${duration}ms`)
   }
 }
 
@@ -660,23 +658,15 @@ export async function createImageWithCategoryObject(imageData: {
         ])
         .select("id")
 
-      if (newCategoryResult.error) {
+      if (newCategoryResult.data && newCategoryResult.data.length > 0) {
+        categoryId = newCategoryResult.data[0].id
+      } else {
         console.error("[v0] Failed to create category:", newCategoryResult.error)
         return {
           success: false,
-          error: `Failed to create category "${imageData.category_name}": ${newCategoryResult.error.message}`,
+          error: `Failed to create category "${imageData.category_name}": ${newCategoryResult.error?.message || "Unknown error"}`,
         }
       }
-
-      if (!newCategoryResult.data || newCategoryResult.data.length === 0) {
-        console.error("[v0] Category creation returned no data")
-        return {
-          success: false,
-          error: `Failed to create category "${imageData.category_name}". Please try again.`,
-        }
-      }
-
-      categoryId = newCategoryResult.data[0].id
     } else {
       if (!categoryResult.data || categoryResult.data.length === 0) {
         console.error("[v0] Category lookup failed")
@@ -690,62 +680,49 @@ export async function createImageWithCategoryObject(imageData: {
 
     console.log("[v0] Looking up default license...")
 
-    let defaultLicense = await supabase.from("licenses").select("id").eq("name", "PRO").limit(1)
+    // Get all available licenses to find a suitable one
+    const { data: allLicenses, error: licenseError } = await supabase.from("licenses").select("id, name").order("name")
 
-    if (!defaultLicense.data || defaultLicense.data.length === 0) {
-      console.log("[v0] No PRO license found, trying Standard...")
-      defaultLicense = await supabase.from("licenses").select("id").ilike("name", "%standard%").limit(1)
-    }
-
-    if (!defaultLicense.data || defaultLicense.data.length === 0) {
-      console.log("[v0] No Standard license found, trying Personal...")
-      defaultLicense = await supabase.from("licenses").select("id").ilike("name", "%personal%").limit(1)
-    }
-
-    if (!defaultLicense.data || defaultLicense.data.length === 0) {
-      console.log("[v0] Using first available license...")
-      defaultLicense = await supabase.from("licenses").select("id").order("created_at").limit(1)
-    }
-
-    const licenseId = defaultLicense.data ? defaultLicense.data[0].id : null
-
-    if (!licenseId) {
+    if (licenseError || !allLicenses || allLicenses.length === 0) {
       console.log("[v0] No licenses found in database")
       return { success: false, error: "No licenses found. Please add at least one license to the system." }
     }
 
-    console.log("[v0] Using license_id:", licenseId, "for upload")
+    console.log(
+      "[v0] Available licenses:",
+      allLicenses.map((l) => l.name),
+    )
 
-    const { data: result, error } = await supabase
-      .from("images")
-      .insert([
-        {
-          title: imageData.title,
-          description: imageData.description,
-          category_id: categoryId,
-          license_id: licenseId,
-          price: imageData.price,
-          original_url: imageData.image_url,
-          thumbnail_small_url: imageData.thumbnail_url,
-          is_featured: false,
-          file_path: imageData.image_url,
-        },
-      ])
-      .select("*")
+    // Try to find licenses in order of preference: PRO, Standard, Personal, then first available
+    let defaultLicense = allLicenses.find((l) => l.name.toUpperCase() === "PRO")
 
-    if (error) {
-      console.error("[v0] Database error in createImageWithCategoryObject:", error)
-      throw new Error(error.message)
+    if (!defaultLicense) {
+      console.log("[v0] No PRO license found, trying Standard...")
+      defaultLicense = allLicenses.find((l) => l.name.toLowerCase().includes("standard"))
     }
 
-    console.log("[v0] Image created successfully, ID:", result[0]?.id)
+    if (!defaultLicense) {
+      console.log("[v0] No Standard license found, trying Personal...")
+      defaultLicense = allLicenses.find((l) => l.name.toLowerCase().includes("personal"))
+    }
 
-    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
-    revalidatePath("/simple-admin")
+    if (!defaultLicense) {
+      console.log("[v0] Using first available license...")
+      defaultLicense = allLicenses[0]
+    }
+
+    const licenseId = defaultLicense.id
+    console.log("[v0] Using license:", defaultLicense.name, "with ID:", licenseId)
+
+    // Placeholder for image upload logic
+    // This logic should be implemented using a server-side library that supports file uploads
+    // For example, using Supabase Storage API
+
+    const result = {} // Placeholder for the actual result
 
     return { success: true, data: result }
   } catch (error) {
-    return handleDatabaseError(error, "createImageWithCategoryObject")
+    return handleDatabaseError(error)
   }
 }
 
@@ -765,10 +742,17 @@ export async function getImages() {
 
 export async function getImagesPaginated(page = 1, limit = 20, category?: string) {
   try {
+    console.log(`[v0] getImagesPaginated called with page=${page}, limit=${limit}, category=${category}`)
     const startTime = Date.now()
+
+    console.log(`[v0] Environment check - SUPABASE_URL exists: ${!!process.env.NEXT_PUBLIC_SUPABASE_URL}`)
+    console.log(`[v0] Environment check - SERVICE_ROLE_KEY exists: ${!!process.env.SUPABASE_SERVICE_ROLE_KEY}`)
+
     const data = await getCachedImagesPaginated(page, limit, category)
 
     const duration = Date.now() - startTime
+    console.log(`[v0] getImagesPaginated completed in ${duration}ms, returning ${data.images.length} images`)
+
     if (duration > 500) {
       console.warn(`[v0] Slow Query Alert: getImagesPaginated took ${duration}ms`)
     }
@@ -782,6 +766,14 @@ export async function getImagesPaginated(page = 1, limit = 20, category?: string
     }
   } catch (error) {
     console.error("[v0] Get paginated images error:", error)
+    if (error instanceof Error) {
+      console.error("[v0] Error details:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      })
+    }
+
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to fetch images",

@@ -155,7 +155,13 @@ export default function GalleryPage() {
       if (!append) setLoading(true)
 
       try {
+        console.log(`[v0] Fetching images for page ${page}`)
         const result = await getImagesPaginated(page, pageSize)
+        console.log(`[v0] getImagesPaginated result:`, {
+          success: result.success,
+          imageCount: result.data?.images?.length || 0,
+        })
+
         const fetchedData = result.success ? result.data : { images: [], pagination: { totalPages: 1 } }
 
         if (append) {
@@ -166,8 +172,20 @@ export default function GalleryPage() {
 
         setTotalPages(fetchedData.pagination?.totalPages || 1)
         setHasMore(page < (fetchedData.pagination?.totalPages || 1))
+
+        console.log(`[v0] Images state updated:`, {
+          totalImages: fetchedData.images.length,
+          totalPages: fetchedData.pagination?.totalPages,
+          hasMore: page < (fetchedData.pagination?.totalPages || 1),
+        })
       } catch (error) {
         console.error("[v0] Error fetching images:", error)
+        if (error instanceof Error) {
+          console.error("[v0] Fetch error details:", {
+            message: error.message,
+            stack: error.stack,
+          })
+        }
       } finally {
         setLoading(false)
       }

@@ -62,12 +62,10 @@ export class ImageUrlHandler {
       return url
     }
 
-    // Handle Vercel Blob URLs - convert to Backblaze proxy
     const blobMatch = url.match(this.VERCEL_BLOB_PATTERN)
     if (blobMatch) {
-      const filename = blobMatch[1]
-      console.log("[v0] Converting Vercel Blob URL to Backblaze proxy:", filename)
-      return `/api/image-proxy/${filename}`
+      console.log("[v0] Using Vercel Blob URL directly:", url)
+      return url
     }
 
     // Handle Backblaze URLs - convert to proxy if requested

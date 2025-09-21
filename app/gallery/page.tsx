@@ -212,6 +212,14 @@ export default function GalleryPage() {
           ? `/api/image-proxy/${preview_url.split("/file/")[1]?.split("/").slice(1).join("/")}`
           : preview_url
 
+        console.log(`[v0] Image ${image.id} preview URL:`, {
+          thumbnail_medium: image.thumbnail_medium_url,
+          thumbnail_small: image.thumbnail_small_url,
+          thumbnail_large: image.thumbnail_large_url,
+          original: image.original_url,
+          final: finalPreviewUrl,
+        })
+
         return {
           id: image.id,
           title: image.title,

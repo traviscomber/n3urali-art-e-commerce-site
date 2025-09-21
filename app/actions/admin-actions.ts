@@ -64,23 +64,31 @@ const getCachedImages = unstable_cache(
         return []
       }
 
-      // Transform the data to match expected format
-      const transformedImages =
-        images?.map((image: any) => ({
+      const processedImages = images.map((image: any) => {
+        console.log(`[v0] Processing image ${image.id}: originalUrl=${image.original_url?.substring(0, 50)}...`)
+
+        const thumbnailUrl =
+          image.thumbnail_medium_url || image.thumbnail_small_url || image.thumbnail_large_url || image.original_url
+
+        return {
           id: image.id,
-          title: image.title,
+          title: image.title || "Untitled",
           description: image.description || "",
           category_name: image.categories?.name || "Uncategorized",
           license_name: image.licenses?.name || "Standard",
           price: image.price || 0,
-          image_url: image.original_url || "",
-          thumbnail_url: image.thumbnail_medium_url || image.thumbnail_small_url || "",
-          active: image.is_featured || true,
+          original_url: image.original_url,
+          thumbnail_medium_url: image.thumbnail_medium_url,
+          thumbnail_small_url: image.thumbnail_small_url,
+          thumbnail_large_url: image.thumbnail_large_url,
+          thumbnail_url: thumbnailUrl,
+          active: image.is_featured !== false,
           created_at: image.created_at,
-        })) || []
+        }
+      })
 
-      console.log("[v0] Fetched", transformedImages.length, "images from database")
-      return transformedImages
+      console.log("[v0] Fetched", processedImages.length, "images from database")
+      return processedImages
     } catch (error) {
       console.error("[v0] Error in getCachedImages:", error)
       return []
@@ -95,41 +103,45 @@ const getCachedImages = unstable_cache(
 
 const getCachedImagesPaginated = unstable_cache(
   async (page = 1, limit = 50, category?: string, featured?: boolean) => {
+    console.log(`[v0] getCachedImagesPaginated called with page=${page}, limit=${limit}, category=${category}`)
     const startTime = Date.now()
-    const supabase = createSupabaseServerClient()
-    const offset = (page - 1) * limit
 
     try {
-      // Build the main query with JOINs for better performance
+      const supabase = createSupabaseServerClient()
+      console.log(`[v0] Supabase client created successfully`)
+
+      const offset = (page - 1) * limit
+      console.log(`[v0] Query offset calculated: ${offset}`)
+
       let query = supabase.from("images").select(
         `
           id, title, description, price, file_path,
           thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url, original_url,
-          is_featured, created_at, updated_at, category_id, license_id,
-          categories:category_id(id, name),
-          licenses:license_id(id, name, description)
+          is_featured, created_at, updated_at, category_id, license_id
         `,
         { count: "exact" },
       )
 
-      // Handle category filtering by name with a subquery
-      if (category) {
-        query = query.eq("categories.name", category)
-      }
+      console.log(`[v0] Base query built`)
 
       if (featured !== undefined) {
         query = query.eq("is_featured", featured)
+        console.log(`[v0] Added featured filter: ${featured}`)
       }
 
+      console.log(`[v0] Executing database query...`)
       const {
         data: images,
         error,
         count,
       } = await query.order("created_at", { ascending: false }).range(offset, offset + limit - 1)
 
+      console.log(`[v0] Database query completed. Error:`, error, `Count:`, count, `Images:`, images?.length)
+
       if (error) {
         console.error("[v0] Database error in getCachedImagesPaginated:", error)
         if (error.message.includes("does not exist") || error.message.includes("schema cache")) {
+          console.log("[v0] Database schema issue detected, returning empty result")
           return {
             images: [],
             pagination: {
@@ -144,16 +156,18 @@ const getCachedImagesPaginated = unstable_cache(
         throw new Error(error.message)
       }
 
+      console.log(`[v0] Processing ${images?.length || 0} images...`)
+
       const transformedData =
         images?.map((item) => {
-          // Check if the URL is base64 data and convert it to a proper URL
           let imageUrl = item.original_url || item.file_path || ""
           let thumbnailUrl = item.thumbnail_medium_url || item.thumbnail_small_url || ""
+
+          console.log(`[v0] Processing image ${item.id}: originalUrl=${imageUrl?.substring(0, 50)}...`)
 
           // If the URL starts with data:image, it's base64 - we need to handle this properly
           if (imageUrl.startsWith("data:image/")) {
             console.log("[v0] Found base64 image data, converting to blob URL for:", item.id)
-            // For production, we should store these as proper files, but for now create a fallback
             imageUrl = `/api/image-proxy/base64/${item.id}`
           }
 
@@ -167,11 +181,9 @@ const getCachedImagesPaginated = unstable_cache(
             thumbnail_url: thumbnailUrl,
             active: true,
             featured: item.is_featured,
-            categories: item.categories,
-            licenses: item.licenses,
-            category_name: item.categories?.name,
-            license_name: item.licenses?.name,
-            license_description: item.licenses?.description,
+            category_name: "equirectangular", // Default category
+            license_name: "Standard License",
+            license_description: "Standard usage license",
           }
         }) || []
 
@@ -179,11 +191,13 @@ const getCachedImagesPaginated = unstable_cache(
       const totalPages = Math.ceil(totalCount / limit)
 
       const duration = Date.now() - startTime
+      console.log(
+        `[v0] getCachedImagesPaginated completed in ${duration}ms, returning ${transformedData.length} images`,
+      )
+
       if (duration > 500) {
         console.warn(`[v0] Slow Query Alert: getCachedImagesPaginated took ${duration}ms`)
       }
-
-      console.log(`[v0] Fetched ${transformedData.length} images from database`)
 
       return {
         images: transformedData,
@@ -197,6 +211,13 @@ const getCachedImagesPaginated = unstable_cache(
       }
     } catch (error) {
       console.error("[v0] Error in getCachedImagesPaginated:", error)
+      if (error instanceof Error) {
+        console.error("[v0] Error details:", {
+          message: error.message,
+          stack: error.stack,
+          name: error.name,
+        })
+      }
       return {
         images: [],
         pagination: {
@@ -211,7 +232,7 @@ const getCachedImagesPaginated = unstable_cache(
   },
   ["admin-images"],
   {
-    revalidate: CACHE_REVALIDATE.IMAGES,
+    revalidate: 60, // 1 minute instead of longer cache
     tags: [CACHE_TAGS.IMAGES],
   },
 )

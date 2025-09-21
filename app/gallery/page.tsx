@@ -207,7 +207,10 @@ export default function GalleryPage() {
           image.original_url ||
           "/placeholder.svg?height=400&width=400&text=No+Image"
 
-        const shouldUseProxy = preview_url.includes("backblazeb2.com")
+        const shouldUseProxy =
+          preview_url.includes("backblazeb2.com") &&
+          !preview_url.startsWith("data:") &&
+          !preview_url.startsWith("blob:")
         const finalPreviewUrl = shouldUseProxy
           ? `/api/image-proxy/${preview_url.split("/file/")[1]?.split("/").slice(1).join("/")}`
           : preview_url
@@ -218,6 +221,8 @@ export default function GalleryPage() {
           thumbnail_large: image.thumbnail_large_url,
           original: image.original_url,
           final: finalPreviewUrl,
+          isBase64: finalPreviewUrl.startsWith("data:"),
+          isBlob: finalPreviewUrl.startsWith("blob:"),
         })
 
         return {

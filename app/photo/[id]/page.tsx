@@ -107,12 +107,17 @@ export default function PhotoDetailPage() {
         autoRotate: -2,
         compass: true,
         showZoomCtrl: true,
-        showFullscreenCtrl: true,
+        showFullscreenCtrl: false,
         showControls: true,
         mouseZoom: true,
         doubleClickZoom: true,
         draggable: true,
         keyboardZoom: true,
+        maxHfov: 120,
+        minHfov: 50,
+        hfov: 100,
+        backgroundColor: [0, 0, 0],
+        crossOrigin: "anonymous",
         preview: "/placeholder.svg?height=500&width=500",
         loadButtonLabel: "Click to Load 360° View",
         noscriptErrorMsg: "JavaScript must be enabled to view this panorama.",
@@ -489,7 +494,7 @@ export default function PhotoDetailPage() {
 
                 {show360Viewer && image.category_name !== "Fisheye" ? (
                   <div className="relative">
-                    <div ref={viewerRef} className="w-full h-[500px] bg-muted/10" style={{ minHeight: "500px" }} />
+                    <div ref={viewerRef} className="w-full h-[600px] bg-muted/10" style={{ minHeight: "600px" }} />
                     {!viewerLoaded && (
                       <div className="absolute inset-0 flex items-center justify-center bg-muted/10">
                         <div className="text-center">
@@ -644,7 +649,7 @@ export default function PhotoDetailPage() {
               {show360Viewer && image.category_name !== "Fisheye" ? (
                 <span className="text-primary font-medium">
                   Interactive 360° View • Original Resolution • Drag to look around • Scroll to zoom • Double-click to
-                  zoom • Click fullscreen for immersive experience
+                  zoom • Optimized for best quality
                 </span>
               ) : (
                 <>

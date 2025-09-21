@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { ImageUrlHandler } from "@/lib/image-url-handler"
 
@@ -29,16 +29,33 @@ export function ImageWithFallback({
 }: ImageWithFallbackProps) {
   const [currentSrc, setCurrentSrc] = useState(() => {
     const convertedUrl = ImageUrlHandler.convertToDisplayUrl(src)
-    console.log("[v0] ImageWithFallback - Original:", src, "Converted:", convertedUrl)
+    console.log(
+      "[v0] ImageWithFallback - Original:",
+      src.substring(0, 100) + "...",
+      "Converted:",
+      convertedUrl.substring(0, 100) + "...",
+    )
     return convertedUrl
   })
   const [hasError, setHasError] = useState(false)
 
+  useEffect(() => {
+    return () => {
+      if (currentSrc && currentSrc.startsWith("blob:")) {
+        URL.revokeObjectURL(currentSrc)
+      }
+    }
+  }, [currentSrc])
+
   const handleError = () => {
-    console.log("[v0] Image load error for:", currentSrc)
+    console.log("[v0] Image load error for:", currentSrc.substring(0, 100) + "...")
+
+    if (currentSrc && currentSrc.startsWith("blob:")) {
+      URL.revokeObjectURL(currentSrc)
+    }
 
     if (!hasError && fallbackSrc) {
-      console.log("[v0] Trying fallback:", fallbackSrc)
+      console.log("[v0] Trying fallback:", fallbackSrc.substring(0, 100) + "...")
       setCurrentSrc(ImageUrlHandler.convertToDisplayUrl(fallbackSrc))
       setHasError(true)
     } else if (!hasError) {
@@ -54,7 +71,7 @@ export function ImageWithFallback({
     className,
     onError: handleError,
     priority,
-    crossOrigin: "anonymous" as const,
+    ...(currentSrc.startsWith("blob:") ? {} : { crossOrigin: "anonymous" as const }),
   }
 
   if (fill) {

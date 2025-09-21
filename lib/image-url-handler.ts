@@ -13,12 +13,41 @@ export class ImageUrlHandler {
   private static readonly BACKBLAZE_PATTERN = /https:\/\/f\d+\.backblazeb2\.com\/file\/[^/]+\/(.+)/
   private static readonly PROXY_PATTERN = /^\/api\/image-proxy\/(.+)/
   private static readonly SUPABASE_PATTERN = /https:\/\/[^.]+\.supabase\.co\/storage\/v1\/object\/public\/images\/(.+)/
+  private static readonly BASE64_PATTERN = /^data:image\/[^;]+;base64,/
 
   /**
    * Convert any storage URL to the appropriate display URL
    */
   static convertToDisplayUrl(url: string, config: ImageUrlConfig = {}): string {
     if (!url) return url
+
+    if (this.BASE64_PATTERN.test(url)) {
+      console.log("[v0] Converting base64 data URL to blob URL")
+      try {
+        // Extract the base64 data and mime type
+        const [header, data] = url.split(",")
+        const mimeMatch = header.match(/data:([^;]+)/)
+        const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg"
+
+        // Convert base64 to blob
+        const byteCharacters = atob(data)
+        const byteNumbers = new Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+        const byteArray = new Uint8Array(byteNumbers)
+        const blob = new Blob([byteArray], { type: mimeType })
+
+        // Create blob URL
+        const blobUrl = URL.createObjectURL(blob)
+        console.log("[v0] Created blob URL from base64 data")
+        return blobUrl
+      } catch (error) {
+        console.error("[v0] Error converting base64 to blob URL:", error)
+        // Fallback to placeholder if conversion fails
+        return `/placeholder.svg?height=400&width=400&query=image-conversion-error`
+      }
+    }
 
     // If it's already a proxy URL, return as-is
     if (this.PROXY_PATTERN.test(url)) {

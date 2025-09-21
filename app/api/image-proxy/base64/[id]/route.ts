@@ -6,9 +6,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const { searchParams } = new URL(request.url)
     const type = searchParams.get("type") // 'thumbnail' or undefined for full image
 
-    const supabase = createSupabaseServerClient()
-
     // Fetch the image data from database
+    const supabase = await createSupabaseServerClient()
+
     const { data: image, error } = await supabase
       .from("images")
       .select("original_url, thumbnail_medium_url, thumbnail_small_url")

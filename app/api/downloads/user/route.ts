@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     console.log("[v0] Fetching downloads for user:", userEmail)
 
-    const supabase = createSupabaseServerClient()
+    const supabase = await createSupabaseServerClient()
 
     const { data: downloads, error } = await supabase
       .from("downloads")

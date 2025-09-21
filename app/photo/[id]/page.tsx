@@ -162,36 +162,29 @@ export default function PhotoDetailPage() {
       height: 100%;
       pointer-events: none;
       z-index: 15;
-      background: repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 60px,
-        rgba(255,255,255,0.08) 60px,
-        rgba(255,255,255,0.08) 80px
-      );
     `
 
-    // Reduced from 60 watermarks to just 2 corner watermarks
+    // Keep only 2 corner watermarks with n3urali360.art branding
     const watermarkStyles = `
       position: absolute;
-      color: rgba(255,255,255,0.20);
-      font-size: 16px;
-      font-weight: 700;
+      color: rgba(255,255,255,0.15);
+      font-size: 14px;
+      font-weight: 600;
       transform: rotate(-45deg);
       user-select: none;
       pointer-events: none;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
       user-select: none;
       WebkitUserSelect: none;
       MozUserSelect: none;
     `
 
     const topLeftWatermark = document.createElement("div")
-    topLeftWatermark.textContent = "n3urali.art"
+    topLeftWatermark.textContent = "n3urali360.art"
     topLeftWatermark.style.cssText = `${watermarkStyles} left: 5%; top: 5%;`
 
     const bottomRightWatermark = document.createElement("div")
-    bottomRightWatermark.textContent = "n3urali.art"
+    bottomRightWatermark.textContent = "n3urali360.art"
     bottomRightWatermark.style.cssText = `${watermarkStyles} right: 5%; bottom: 5%;`
 
     watermarkOverlay.appendChild(topLeftWatermark)
@@ -206,7 +199,7 @@ export default function PhotoDetailPage() {
       height: 100%;
       pointer-events: none;
       z-index: 20;
-      background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(255,255,255,0.02) 100%);
+      background: radial-gradient(circle at 50% 50%, transparent 60%, rgba(255,255,255,0.01) 100%);
     `
 
     watermarkOverlay.appendChild(protectionOverlay)
@@ -563,7 +556,7 @@ export default function PhotoDetailPage() {
                                 MozUserSelect: "none",
                               }}
                             >
-                              n3urali.art
+                              n3urali360.art
                             </div>
                             <div
                               className="absolute text-white/20 font-bold text-sm transform -rotate-45 select-none pointer-events-none"
@@ -578,7 +571,7 @@ export default function PhotoDetailPage() {
                                 MozUserSelect: "none",
                               }}
                             >
-                              n3urali.art
+                              n3urali360.art
                             </div>
                           </div>
                         </div>

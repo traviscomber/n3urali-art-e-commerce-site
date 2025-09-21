@@ -680,7 +680,12 @@ export async function createImageWithCategoryObject(imageData: {
     }
 
     if (!defaultLicense.data || defaultLicense.data.length === 0) {
-      console.log("[v0] No Standard license found, getting first license...")
+      console.log("[v0] No Standard license found, trying Personal...")
+      defaultLicense = await supabase.from("licenses").select("id").ilike("name", "%personal%").limit(1)
+    }
+
+    if (!defaultLicense.data || defaultLicense.data.length === 0) {
+      console.log("[v0] Using first available license...")
       defaultLicense = await supabase.from("licenses").select("id").order("created_at").limit(1)
     }
 
@@ -1122,6 +1127,79 @@ export async function uploadImage(formData: FormData) {
     // For example, using Supabase Storage API
 
     const result = {} // Placeholder for the actual result
+
+    return { success: true, data: result }
+  } catch (error) {
+    return handleDatabaseError(error)
+  }
+}
+
+export async function updateImageDetails(
+  imageId: string,
+  details: {
+    title: string
+    price: number
+    description: string
+    category: string
+    rightsType: string
+  },
+) {
+  try {
+    console.log("[v0] updateImageDetails called with:", { imageId, details })
+
+    const supabase = createSupabaseServerClient()
+
+    // Get category ID from category name
+    const categoryResult = await supabase.from("categories").select("id").eq("name", details.category).limit(1)
+
+    let categoryId: string
+    if (categoryResult.data && categoryResult.data.length > 0) {
+      categoryId = categoryResult.data[0].id
+    } else {
+      console.log("[v0] Category not found, creating new category:", details.category)
+
+      const newCategoryResult = await supabase
+        .from("categories")
+        .insert([
+          {
+            name: details.category,
+            description: `Auto-created category for ${details.category}`,
+          },
+        ])
+        .select("id")
+
+      if (newCategoryResult.data && newCategoryResult.data.length > 0) {
+        categoryId = newCategoryResult.data[0].id
+      } else {
+        console.error("[v0] Failed to create category:", newCategoryResult.error)
+        return {
+          success: false,
+          error: `Failed to create category "${details.category}": ${newCategoryResult.error?.message || "Unknown error"}`,
+        }
+      }
+    }
+
+    // Update the image
+    const { data: result, error } = await supabase
+      .from("images")
+      .update({
+        title: details.title,
+        description: details.description,
+        category_id: categoryId,
+        price: details.price,
+      })
+      .eq("id", imageId)
+      .select("*")
+
+    if (error) {
+      console.error("[v0] Database error in updateImageDetails:", error)
+      throw new Error(error.message)
+    }
+
+    console.log("[v0] Image details updated successfully:", result[0]?.id)
+
+    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
+    revalidatePath("/simple-admin")
 
     return { success: true, data: result }
   } catch (error) {

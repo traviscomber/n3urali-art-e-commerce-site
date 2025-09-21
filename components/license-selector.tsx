@@ -68,7 +68,7 @@ export function LicenseSelector({
         setError("No licenses available. Please contact support.")
       }
     } catch (error) {
-      console.error("[v0] Error fetching licenses:", error)
+      console.error("Error fetching licenses:", error)
       setError("Failed to load license options")
       toast.error("Failed to load license options")
 

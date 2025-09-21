@@ -47,13 +47,13 @@ export type DownloadLog = {
 export const LICENSE_TYPES = {
   NON_EXCLUSIVE: {
     name: "Non-Exclusive License",
-    description: "Standard commercial license for personal and commercial use. Non-exclusive rights.",
+    description: "Standard commercial license - image can be sold to multiple buyers",
     multiplier: 1,
   },
   EXCLUSIVE: {
     name: "Exclusive License",
-    description: "Exclusive license with full rights including resale and NFT minting. Complete buyout.",
-    multiplier: 7.5, // 750/99 ratio
+    description: "Exclusive rights - you will be the only buyer of this image",
+    multiplier: 6.67, // 199.99/29.99 ratio
   },
 } as const
 

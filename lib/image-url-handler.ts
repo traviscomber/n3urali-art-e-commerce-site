@@ -1,6 +1,6 @@
 /**
  * Centralized image URL handler for multiple storage origins
- * Handles conversion between Vercel Blob, Backblaze, and proxy URLs
+ * Handles conversion between Vercel Blob, Backblaze, Supabase, and proxy URLs
  */
 
 export interface ImageUrlConfig {
@@ -12,6 +12,7 @@ export class ImageUrlHandler {
   private static readonly VERCEL_BLOB_PATTERN = /https:\/\/[^.]+\.public\.blob\.vercel-storage\.com\/(.+)/
   private static readonly BACKBLAZE_PATTERN = /https:\/\/f\d+\.backblazeb2\.com\/file\/[^/]+\/(.+)/
   private static readonly PROXY_PATTERN = /^\/api\/image-proxy\/(.+)/
+  private static readonly SUPABASE_PATTERN = /https:\/\/[^.]+\.supabase\.co\/storage\/v1\/object\/public\/images\/(.+)/
 
   /**
    * Convert any storage URL to the appropriate display URL
@@ -21,6 +22,14 @@ export class ImageUrlHandler {
 
     // If it's already a proxy URL, return as-is
     if (this.PROXY_PATTERN.test(url)) {
+      return url
+    }
+
+    const supabaseMatch = url.match(this.SUPABASE_PATTERN)
+    if (supabaseMatch) {
+      // In production, Supabase URLs should work directly
+      // But add CORS headers for better compatibility
+      console.log("[v0] Using Supabase URL directly:", url)
       return url
     }
 
@@ -66,9 +75,10 @@ export class ImageUrlHandler {
   /**
    * Get storage provider from URL
    */
-  static getStorageProvider(url: string): "vercel-blob" | "backblaze" | "proxy" | "unknown" {
+  static getStorageProvider(url: string): "vercel-blob" | "backblaze" | "supabase" | "proxy" | "unknown" {
     if (this.VERCEL_BLOB_PATTERN.test(url)) return "vercel-blob"
     if (this.BACKBLAZE_PATTERN.test(url)) return "backblaze"
+    if (this.SUPABASE_PATTERN.test(url)) return "supabase"
     if (this.PROXY_PATTERN.test(url)) return "proxy"
     return "unknown"
   }
@@ -82,6 +92,9 @@ export class ImageUrlHandler {
 
     const backblazeMatch = url.match(this.BACKBLAZE_PATTERN)
     if (backblazeMatch) return backblazeMatch[1]
+
+    const supabaseMatch = url.match(this.SUPABASE_PATTERN)
+    if (supabaseMatch) return supabaseMatch[1]
 
     const proxyMatch = url.match(this.PROXY_PATTERN)
     if (proxyMatch) return proxyMatch[1]

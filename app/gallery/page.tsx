@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import { getImagesPaginated } from "@/app/actions/admin-actions"
-import NextImage from "next/image"
+import { ImageWithFallback } from "@/components/image-with-fallback"
 import React from "react"
 import { useInView } from "react-intersection-observer"
 import { BreadcrumbNav } from "@/components/breadcrumb-nav"
@@ -93,16 +93,14 @@ const ImageCard = React.memo(
             </div>
           )}
 
-          <NextImage
-            src={getImageSrc()}
+          <ImageWithFallback
+            src={getImageSrc() || "/placeholder.svg"}
             alt={image.title}
             fill
             className="object-contain bg-muted/20 group-hover:scale-105 transition-transform duration-300"
-            loading="lazy"
-            onError={handleImageError}
-            onLoad={handleImageLoad}
-            placeholder="blur"
-            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+            priority={false}
+            fallbackSrc="/placeholder.svg?height=400&width=400&text=Image+Error"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
           />
 
           {imageError && (
@@ -461,17 +459,14 @@ export default function GalleryPage() {
                       onClick={() => handleImageSelect(image)}
                     >
                       <div className="relative aspect-square overflow-hidden rounded-lg">
-                        <NextImage
-                          src={image.preview_url}
+                        <ImageWithFallback
+                          src={image.preview_url || "/placeholder.svg"}
                           alt={image.title}
                           fill
                           className="object-contain bg-muted/10"
-                          loading="lazy"
-                          onError={(e) => {
-                            e.currentTarget.src = "/placeholder.svg?height=200&width=200&text=Error"
-                          }}
-                          placeholder="blur"
-                          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+                          priority={false}
+                          fallbackSrc="/placeholder.svg?height=200&width=200&text=Error"
+                          sizes="(max-width: 640px) 20vw, (max-width: 1024px) 10vw, 5vw"
                         />
                         <div className="absolute top-1 right-1 w-2 h-2 bg-yellow-400 rounded-full opacity-60" />
                       </div>

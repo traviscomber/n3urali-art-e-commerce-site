@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Grid, List, ShoppingCart, Eye } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
 import { getImages } from "@/app/actions/admin-actions"
-import NextImage from "next/image"
+import { ImageWithFallback } from "@/components/image-with-fallback" // Import ImageWithFallback component
 import React from "react"
 import { useRouter } from "next/navigation"
 
@@ -55,16 +55,14 @@ const FisheyeCard = React.memo(
   }) => (
     <Card className="group overflow-hidden bg-background/70 backdrop-blur-sm border-primary/15 hover:border-primary/40 transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
       <div className="relative w-full min-h-[200px] overflow-hidden cursor-pointer" onClick={() => onImageClick(image)}>
-        <NextImage
+        <ImageWithFallback
           src={image.previewUrl || "/placeholder.svg"}
           alt={image.title}
           width={400}
           height={400}
           className="w-full h-auto object-contain transition-transform duration-200 group-hover:scale-105"
-          loading="lazy"
+          priority={false}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-          placeholder="blur"
-          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
         />
 
         <div className="absolute inset-0 pointer-events-none">
@@ -363,13 +361,13 @@ export default function FisheyeCategoryPage() {
 
             <div className="p-6 flex justify-center">
               <div className="relative max-w-full">
-                <NextImage
+                <ImageWithFallback
                   src={previewImage.previewUrl || "/placeholder.svg"}
                   alt={previewImage.title}
                   width={720}
                   height={720}
                   className="max-w-full max-h-full object-contain rounded-md"
-                  loading="lazy"
+                  priority={false}
                 />
                 <div className="absolute inset-0 pointer-events-none">
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/25 text-3xl font-bold rotate-12 select-none">

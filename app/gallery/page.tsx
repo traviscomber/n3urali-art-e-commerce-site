@@ -216,12 +216,9 @@ export default function GalleryPage() {
           : preview_url
 
         console.log(`[v0] Image ${image.id} preview URL:`, {
-          thumbnail_small: image.thumbnail_small_url,
-          thumbnail_medium: image.thumbnail_medium_url,
-          thumbnail_large: image.thumbnail_large_url,
-          original: image.original_url,
-          selected: preview_url,
-          final: finalPreviewUrl,
+          thumbnail_small: image.thumbnail_small_url?.substring(0, 50) + "...",
+          selected: preview_url.substring(0, 50) + "...",
+          final: finalPreviewUrl.substring(0, 50) + "...",
           isBase64: finalPreviewUrl.startsWith("data:"),
           isBlob: finalPreviewUrl.startsWith("blob:"),
         })

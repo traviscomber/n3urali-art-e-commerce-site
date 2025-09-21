@@ -499,7 +499,7 @@ function invalidateCache(tags: string[]) {
 
 export async function createImageWithCategory(formData: FormData) {
   const supabase = createSupabaseServerClient()
-  const defaultLicense = await supabase.from("licenses").select("id").eq("name", "PRO").limit(1)
+  const defaultLicense = await supabase.from("licenses").select("id").eq("name", "Non-Exclusive").limit(1)
 
   if (defaultLicense.data && defaultLicense.data.length > 0) {
     formData.set("license_id", defaultLicense.data[0].id)
@@ -714,21 +714,16 @@ export async function createImageWithCategoryObject(imageData: {
       allLicenses.map((l) => l.name),
     )
 
-    // Try to find licenses in order of preference: PRO, Standard, Personal, then first available
-    let defaultLicense = allLicenses.find((l) => l.name.toUpperCase() === "PRO")
+    // Try to find licenses in order of preference: Non-Exclusive, Exclusive, then first available
+    let defaultLicense = allLicenses.find((l) => l.name === "Non-Exclusive")
 
     if (!defaultLicense) {
-      console.log("[v0] No PRO license found, trying Standard...")
-      defaultLicense = allLicenses.find((l) => l.name.toLowerCase().includes("standard"))
+      console.log("[v0] No Non-Exclusive license found, trying Exclusive...")
+      defaultLicense = allLicenses.find((l) => l.name === "Exclusive")
     }
 
     if (!defaultLicense) {
-      console.log("[v0] No Standard license found, trying Personal...")
-      defaultLicense = allLicenses.find((l) => l.name.toLowerCase().includes("personal"))
-    }
-
-    if (!defaultLicense) {
-      console.log("[v0] Using first available license...")
+      console.log("[v0] No standard licenses found, using first available...")
       defaultLicense = allLicenses[0]
     }
 
@@ -1132,21 +1127,16 @@ export async function uploadImage(formData: FormData) {
       allLicenses.map((l) => l.name),
     )
 
-    // Try to find licenses in order of preference: PRO, Standard, Personal, then first available
-    let defaultLicense = allLicenses.find((l) => l.name.toUpperCase() === "PRO")
+    // Try to find licenses in order of preference: Non-Exclusive, Exclusive, then first available
+    let defaultLicense = allLicenses.find((l) => l.name === "Non-Exclusive")
 
     if (!defaultLicense) {
-      console.log("[v0] No PRO license found, trying Standard...")
-      defaultLicense = allLicenses.find((l) => l.name.toLowerCase().includes("standard"))
+      console.log("[v0] No Non-Exclusive license found, trying Exclusive...")
+      defaultLicense = allLicenses.find((l) => l.name === "Exclusive")
     }
 
     if (!defaultLicense) {
-      console.log("[v0] No Standard license found, trying Personal...")
-      defaultLicense = allLicenses.find((l) => l.name.toLowerCase().includes("personal"))
-    }
-
-    if (!defaultLicense) {
-      console.log("[v0] Using first available license...")
+      console.log("[v0] No standard licenses found, using first available...")
       defaultLicense = allLicenses[0]
     }
 

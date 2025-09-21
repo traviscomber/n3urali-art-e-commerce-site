@@ -74,17 +74,17 @@ export function LicenseSelector({
 
       setLicenses([
         {
-          id: "non-exclusive",
+          id: "660e8400-e29b-41d4-a716-446655440000",
           name: "Non-Exclusive",
           description: "Standard commercial license - image can be sold to multiple buyers",
           price: 29.99,
           active: true,
         },
         {
-          id: "exclusive",
+          id: "660e8400-e29b-41d4-a716-446655440001",
           name: "Exclusive",
           description: "Exclusive rights - you will be the only buyer of this image",
-          price: 199.99,
+          price: 59.98, // Exactly 100% more expensive (2x)
           active: true,
         },
       ])
@@ -214,10 +214,11 @@ export function LicenseSelector({
         <p>• Instant download after payment confirmation</p>
         <p>• 30-day download access with up to 5 downloads per purchase</p>
         <p>
-          • <strong>Non-Exclusive:</strong> Standard commercial use, image available to other buyers
+          • <strong>Non-Exclusive ($29.99):</strong> Standard commercial use, image available to other buyers
         </p>
         <p>
-          • <strong>Exclusive:</strong> Full exclusive rights, image removed from sale after purchase
+          • <strong>Exclusive ($59.98):</strong> Full exclusive rights, image removed from sale after purchase (100%
+          more expensive)
         </p>
       </div>
     </div>

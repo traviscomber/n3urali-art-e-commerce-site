@@ -46,14 +46,16 @@ export type DownloadLog = {
 // License type definitions
 export const LICENSE_TYPES = {
   NON_EXCLUSIVE: {
-    name: "Non-Exclusive License",
+    name: "Non-Exclusive",
     description: "Standard commercial license - image can be sold to multiple buyers",
     multiplier: 1,
+    price: 29.99,
   },
   EXCLUSIVE: {
-    name: "Exclusive License",
+    name: "Exclusive",
     description: "Exclusive rights - you will be the only buyer of this image",
-    multiplier: 6.67, // 199.99/29.99 ratio
+    multiplier: 2, // Exactly 100% more expensive (2x)
+    price: 59.98,
   },
 } as const
 

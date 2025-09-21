@@ -201,8 +201,8 @@ export default function GalleryPage() {
     () =>
       images.map((image: any) => {
         const preview_url =
-          image.thumbnail_medium_url ||
           image.thumbnail_small_url ||
+          image.thumbnail_medium_url ||
           image.thumbnail_large_url ||
           image.original_url ||
           "/placeholder.svg?height=400&width=400&text=No+Image"
@@ -216,10 +216,11 @@ export default function GalleryPage() {
           : preview_url
 
         console.log(`[v0] Image ${image.id} preview URL:`, {
-          thumbnail_medium: image.thumbnail_medium_url,
           thumbnail_small: image.thumbnail_small_url,
+          thumbnail_medium: image.thumbnail_medium_url,
           thumbnail_large: image.thumbnail_large_url,
           original: image.original_url,
+          selected: preview_url,
           final: finalPreviewUrl,
           isBase64: finalPreviewUrl.startsWith("data:"),
           isBlob: finalPreviewUrl.startsWith("blob:"),

@@ -146,20 +146,36 @@ const getCachedImagesPaginated = unstable_cache(
         throw new Error(error.message)
       }
 
-      // Transform data with proper URL handling
       const transformedData =
-        images?.map((item) => ({
-          ...item,
-          image_url: item.original_url || item.file_path,
-          thumbnail_url: item.thumbnail_medium_url || item.thumbnail_small_url || "",
-          active: true,
-          featured: item.is_featured,
-          categories: item.categories,
-          licenses: item.licenses,
-          category_name: item.categories?.name,
-          license_name: item.licenses?.name,
-          license_description: item.licenses?.description,
-        })) || []
+        images?.map((item) => {
+          // Check if the URL is base64 data and convert it to a proper URL
+          let imageUrl = item.original_url || item.file_path || ""
+          let thumbnailUrl = item.thumbnail_medium_url || item.thumbnail_small_url || ""
+
+          // If the URL starts with data:image, it's base64 - we need to handle this properly
+          if (imageUrl.startsWith("data:image/")) {
+            console.log("[v0] Found base64 image data, converting to blob URL for:", item.id)
+            // For production, we should store these as proper files, but for now create a fallback
+            imageUrl = `/api/image-proxy/base64/${item.id}`
+          }
+
+          if (thumbnailUrl.startsWith("data:image/")) {
+            thumbnailUrl = `/api/image-proxy/base64/${item.id}?type=thumbnail`
+          }
+
+          return {
+            ...item,
+            image_url: imageUrl,
+            thumbnail_url: thumbnailUrl,
+            active: true,
+            featured: item.is_featured,
+            categories: item.categories,
+            licenses: item.licenses,
+            category_name: item.categories?.name,
+            license_name: item.licenses?.name,
+            license_description: item.licenses?.description,
+          }
+        }) || []
 
       const totalCount = count || 0
       const totalPages = Math.ceil(totalCount / limit)
@@ -168,6 +184,8 @@ const getCachedImagesPaginated = unstable_cache(
       if (duration > 500) {
         console.warn(`[v0] Slow Query Alert: getCachedImagesPaginated took ${duration}ms`)
       }
+
+      console.log(`[v0] Fetched ${transformedData.length} images from database`)
 
       return {
         images: transformedData,
@@ -193,10 +211,10 @@ const getCachedImagesPaginated = unstable_cache(
       }
     }
   },
-  ["images-paginated"],
+  ["admin-images"],
   {
+    revalidate: CACHE_REVALIDATE.IMAGES,
     tags: [CACHE_TAGS.IMAGES],
-    revalidate: 300,
   },
 )
 

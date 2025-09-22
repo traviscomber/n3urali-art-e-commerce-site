@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server"
-import { createSupabaseServerClient } from "@/lib/database"
+import { createClient } from "@/lib/supabase/server"
 
 export async function GET() {
   try {
     console.log("[v0] Fetching analytics data...")
-    const supabase = createSupabaseServerClient()
+    const supabase = await createClient()
 
     // Get overview statistics
     const { data: overviewData, error: overviewError } = await supabase
@@ -46,7 +46,7 @@ export async function GET() {
       .select(`
         id,
         title,
-        category_name,
+        categories(name),
         price,
         order_items!inner(
           price,
@@ -65,7 +65,7 @@ export async function GET() {
           return {
             id: image.id,
             title: image.title,
-            category_name: image.category_name,
+            category_name: image.categories?.name || "Uncategorized",
             price: image.price,
             order_count: orderCount,
             revenue: revenue,
@@ -77,7 +77,7 @@ export async function GET() {
     const { data: categoryData, error: categoryError } = await supabase
       .from("images")
       .select(`
-        category_name,
+        categories(name),
         order_items(
           price,
           orders!inner(status)
@@ -88,7 +88,7 @@ export async function GET() {
     // Transform category data
     const categoryMap = new Map()
     categoryData?.forEach((image) => {
-      const category = image.category_name
+      const category = image.categories?.name || "Uncategorized"
       if (!categoryMap.has(category)) {
         categoryMap.set(category, { orders: 0, revenue: 0, images: new Set() })
       }

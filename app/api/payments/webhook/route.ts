@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createSupabaseServerClient } from "@/lib/database"
+import { createClient } from "@/lib/supabase/server"
 
 // Webhook handler for payment processing services (Stripe, crypto payment processors, etc.)
 export async function POST(request: NextRequest) {
@@ -7,13 +7,13 @@ export async function POST(request: NextRequest) {
     console.log("[v0] Payment webhook received")
 
     const body = await request.json()
-    const { orderId, paymentStatus, paymentMethod, transactionId, amount } = body
+    const { orderId, paymentStatus, paymentMethod, transactionId, amount, type } = body
 
     if (!orderId || !paymentStatus) {
       return NextResponse.json({ success: false, error: "Missing required webhook data" }, { status: 400 })
     }
 
-    const supabase = createSupabaseServerClient()
+    const supabase = await createClient()
 
     console.log("[v0] Processing payment webhook for order:", orderId, "Status:", paymentStatus)
 
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Generate download tokens
-      const { data: orderItems } = await supabase.from("order_items").select("id").eq("order_id", orderId)
+      const { data: orderItems } = await supabase.from("order_items").select("id, image_id").eq("order_id", orderId)
 
       const downloadTokens = []
 
@@ -46,9 +46,11 @@ export async function POST(request: NextRequest) {
             .from("downloads")
             .insert({
               order_item_id: orderItem.id,
+              image_id: orderItem.image_id,
               download_token: downloadToken,
-              expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+              expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
               download_count: 0,
+              max_downloads: 5,
             })
             .select()
             .single()

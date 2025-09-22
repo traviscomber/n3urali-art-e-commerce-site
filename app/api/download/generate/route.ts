@@ -19,7 +19,6 @@ export async function POST(request: NextRequest) {
 
     console.log("[v0] Generating download token...")
     try {
-      // First verify the order item exists and order is completed
       const { data: orderItem, error: orderItemError } = await supabase
         .from("order_items")
         .select(`
@@ -39,24 +38,22 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Order not completed" }, { status: 403 })
       }
 
-      // Generate download token
       const downloadToken = `dl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
       const { data: downloadResult, error: downloadError } = await supabase
         .from("downloads")
         .insert({
           order_item_id: orderItemId,
+          image_id: orderItem.image_id, // Added missing image_id
           download_token: downloadToken,
-          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
           download_count: 0,
         })
         .select()
         .single()
 
-      console.log("[v0] Database result:", downloadResult)
-
       if (downloadError || !downloadResult) {
-        console.log("[v0] No token returned from database")
+        console.log("[v0] Failed to create download record:", downloadError)
         return NextResponse.json({ error: "Failed to generate download token" }, { status: 500 })
       }
 
@@ -70,21 +67,10 @@ export async function POST(request: NextRequest) {
       })
     } catch (dbError: any) {
       console.error("[v0] Database function error:", dbError)
-
-      if (dbError.message?.includes("Order item not found")) {
-        return NextResponse.json({ error: "Order item not found" }, { status: 404 })
-      }
-
-      if (dbError.message?.includes("Order not completed")) {
-        return NextResponse.json({ error: "Order not completed" }, { status: 403 })
-      }
-
-      throw dbError
+      return NextResponse.json({ error: "Database error" }, { status: 500 })
     }
   } catch (error) {
     console.error("[v0] Download generation error:", error)
-    console.error("[v0] Error stack:", error instanceof Error ? error.stack : "No stack trace")
-    console.error("[v0] Error message:", error instanceof Error ? error.message : String(error))
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

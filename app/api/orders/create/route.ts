@@ -61,34 +61,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Customer email is required" }, { status: 400 })
     }
 
-    if (paymentMethod === "crypto") {
-      if (!cryptoDetails || !cryptoDetails.transactionHash) {
-        return NextResponse.json(
-          { success: false, error: "Transaction hash is required for crypto payments" },
-          { status: 400 },
-        )
-      }
-
-      // In a real implementation, you would verify the transaction on the blockchain
-      console.log(
-        "[v0] Processing crypto payment:",
-        cryptoDetails.currency,
-        cryptoDetails.amount,
-        cryptoDetails.transactionHash,
+    if (paymentMethod === "crypto" && (!cryptoDetails || !cryptoDetails.transactionHash)) {
+      return NextResponse.json(
+        { success: false, error: "Transaction hash is required for crypto payments" },
+        { status: 400 },
       )
     }
 
     const supabase = createSupabaseServerClient()
-
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
-
-    console.log("[v0] Creating order with number:", orderNumber)
 
     const { data: orderResult, error: orderError } = await supabase
       .from("orders")
       .insert({
         user_email: customerInfo.email,
-        user_name: customerInfo.firstName + " " + customerInfo.lastName,
+        user_name: `${customerInfo.firstName} ${customerInfo.lastName}`,
         total_amount: total,
         status: "completed",
         payment_method: paymentMethod === "crypto" ? "cryptocurrency" : paymentMethod,
@@ -103,40 +90,15 @@ export async function POST(request: NextRequest) {
     }
 
     const orderId = orderResult.id
-    console.log("[v0] Order created with ID:", orderId)
-
     const orderItemIds: string[] = []
 
     for (const item of items) {
-      console.log("[v0] Creating order item for image:", item.imageId, "License:", item.licenseId)
-
-      // Use the license ID from the cart item instead of finding a default
-      let licenseId = item.licenseId
-
-      // Fallback to finding a license if not provided
-      if (!licenseId) {
-        const { data: licenseResult } = await supabase
-          .from("licenses")
-          .select("id")
-          .eq("active", true)
-          .order("price", { ascending: true })
-          .limit(1)
-          .single()
-
-        licenseId = licenseResult?.id || null
-      }
-
-      if (!licenseId) {
-        console.error("[v0] No license found for item:", item.imageId)
-        return NextResponse.json({ success: false, error: "License configuration error" }, { status: 500 })
-      }
-
       const { data: orderItemResult, error: orderItemError } = await supabase
         .from("order_items")
         .insert({
           order_id: orderId,
           image_id: item.imageId,
-          license_id: licenseId,
+          license_id: item.licenseId,
           price: item.price * item.quantity,
         })
         .select()
@@ -150,36 +112,26 @@ export async function POST(request: NextRequest) {
       orderItemIds.push(orderItemResult.id)
     }
 
-    console.log("[v0] Generating download tokens for order items...")
     const downloadTokens = []
+    for (const orderItemId of orderItemIds) {
+      const downloadToken = `dl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-    try {
-      for (const orderItemId of orderItemIds) {
-        const downloadToken = `dl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      const { data: downloadResult } = await supabase
+        .from("downloads")
+        .insert({
+          order_item_id: orderItemId,
+          image_id: items.find((item) => orderItemIds.includes(orderItemId))?.imageId,
+          download_token: downloadToken,
+          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          download_count: 0,
+        })
+        .select()
+        .single()
 
-        const { data: downloadResult, error: downloadError } = await supabase
-          .from("downloads")
-          .insert({
-            order_item_id: orderItemId,
-            download_token: downloadToken,
-            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
-            download_count: 0,
-          })
-          .select()
-          .single()
-
-        if (!downloadError && downloadResult) {
-          downloadTokens.push(downloadResult)
-        }
+      if (downloadResult) {
+        downloadTokens.push(downloadResult)
       }
-
-      console.log("[v0] Generated", downloadTokens.length, "download tokens")
-    } catch (tokenError) {
-      console.error("[v0] Error generating download tokens:", tokenError)
-      // Don't fail the order creation, but log the error
     }
-
-    console.log("[v0] Order created successfully:", orderNumber)
 
     return NextResponse.json({
       success: true,
@@ -190,15 +142,6 @@ export async function POST(request: NextRequest) {
         total: total,
         paymentMethod: paymentMethod,
         downloadTokensGenerated: downloadTokens.length,
-        ...(paymentMethod === "crypto" && cryptoDetails
-          ? {
-              cryptoDetails: {
-                currency: cryptoDetails.currency,
-                amount: cryptoDetails.amount,
-                transactionHash: cryptoDetails.transactionHash,
-              },
-            }
-          : {}),
       },
     })
   } catch (error) {

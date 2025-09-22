@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createSupabaseServerClient } from "@/lib/database"
 import { ImageUrlHandler } from "@/lib/image-url-handler"
 
 export async function POST(request: NextRequest, { params }: { params: { imageId: string } }) {
@@ -9,7 +9,7 @@ export async function POST(request: NextRequest, { params }: { params: { imageId
     const body = await request.json()
     const { order_item_id, license_id } = body
 
-    const supabase = await createClient()
+    const supabase = await createSupabaseServerClient()
     const { data: orderCheck, error } = await supabase
       .from("order_items")
       .select(`

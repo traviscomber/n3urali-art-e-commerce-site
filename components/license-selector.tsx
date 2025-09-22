@@ -42,7 +42,7 @@ export function LicenseSelector({
   useEffect(() => {
     if (licenses.length > 0 && !selectedLicense) {
       // Auto-select non-exclusive license by default
-      const defaultLicense = licenses.find((l) => l.name === "Non-Exclusive") || licenses[0]
+      const defaultLicense = licenses.find((l) => l.name === "NON_EXCLUSIVE") || licenses[0]
       if (defaultLicense) {
         handleLicenseSelect(defaultLicense)
       }
@@ -75,16 +75,16 @@ export function LicenseSelector({
       setLicenses([
         {
           id: "660e8400-e29b-41d4-a716-446655440000",
-          name: "Non-Exclusive",
+          name: "NON_EXCLUSIVE",
           description: "Standard commercial license - image can be sold to multiple buyers",
-          price: 29.99,
+          price: basePrice,
           active: true,
         },
         {
           id: "660e8400-e29b-41d4-a716-446655440001",
-          name: "Exclusive",
+          name: "EXCLUSIVE",
           description: "Exclusive rights - you will be the only buyer of this image",
-          price: 59.98, // Exactly 100% more expensive (2x)
+          price: basePrice * 3, // 3x price as requested
           active: true,
         },
       ])
@@ -94,7 +94,7 @@ export function LicenseSelector({
   }
 
   const handleLicenseSelect = (license: License) => {
-    if (license.name === "Exclusive" && isImageSoldExclusively) {
+    if (license.name === "EXCLUSIVE" && isImageSoldExclusively) {
       toast.error("This image has already been sold exclusively and is no longer available for exclusive purchase.")
       return
     }
@@ -105,18 +105,24 @@ export function LicenseSelector({
   }
 
   const getLicenseIcon = (licenseName: string) => {
-    if (licenseName === "Exclusive") return <Crown className="h-4 w-4" />
+    if (licenseName === "EXCLUSIVE") return <Crown className="h-4 w-4" />
     return <Users className="h-4 w-4" />
   }
 
   const getLicenseBadgeColor = (licenseName: string) => {
-    if (licenseName === "Exclusive") return "bg-amber-100 text-amber-800 border-amber-200"
+    if (licenseName === "EXCLUSIVE") return "bg-amber-100 text-amber-800 border-amber-200"
     return "bg-blue-100 text-blue-800 border-blue-200"
   }
 
   const getLicenseTypeIndicator = (licenseName: string) => {
-    if (licenseName === "Exclusive") return "One-Time Sale"
+    if (licenseName === "EXCLUSIVE") return "One-Time Sale"
     return "Multiple Sales"
+  }
+
+  const getDisplayName = (licenseName: string) => {
+    if (licenseName === "NON_EXCLUSIVE") return "Non-Exclusive"
+    if (licenseName === "EXCLUSIVE") return "Exclusive"
+    return licenseName
   }
 
   if (loading) {
@@ -171,8 +177,9 @@ export function LicenseSelector({
           .filter((l) => l.active)
           .map((license) => {
             const typeIndicator = getLicenseTypeIndicator(license.name)
-            const isExclusive = license.name === "Exclusive"
+            const isExclusive = license.name === "EXCLUSIVE"
             const isDisabled = isExclusive && isImageSoldExclusively
+            const displayName = getDisplayName(license.name)
 
             return (
               <Card
@@ -191,7 +198,7 @@ export function LicenseSelector({
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         {getLicenseIcon(license.name)}
-                        <h4 className="font-medium">{license.name}</h4>
+                        <h4 className="font-medium">{displayName}</h4>
                         <Badge variant="outline" className={`text-xs ${getLicenseBadgeColor(license.name)}`}>
                           {typeIndicator}
                         </Badge>
@@ -214,11 +221,10 @@ export function LicenseSelector({
         <p>• Instant download after payment confirmation</p>
         <p>• 30-day download access with up to 5 downloads per purchase</p>
         <p>
-          • <strong>Non-Exclusive ($29.99):</strong> Standard commercial use, image available to other buyers
+          • <strong>Non-Exclusive:</strong> Standard commercial use, image available to other buyers
         </p>
         <p>
-          • <strong>Exclusive ($59.98):</strong> Full exclusive rights, image removed from sale after purchase (100%
-          more expensive)
+          • <strong>Exclusive (3x price):</strong> Full exclusive rights, image removed from sale after purchase
         </p>
       </div>
     </div>

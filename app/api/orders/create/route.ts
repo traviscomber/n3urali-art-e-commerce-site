@@ -59,6 +59,8 @@ export async function POST(request: NextRequest) {
       paymentMethod,
     )
 
+    console.log("[v0] Cart items details:", JSON.stringify(items, null, 2))
+
     if (!items || items.length === 0) {
       return NextResponse.json({ success: false, error: "No items in cart" }, { status: 400 })
     }
@@ -67,21 +69,72 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Customer email is required" }, { status: 400 })
     }
 
-    if (paymentMethod === "crypto" && (!cryptoDetails || !cryptoDetails.transactionHash)) {
-      return NextResponse.json(
-        { success: false, error: "Transaction hash is required for crypto payments" },
-        { status: 400 },
-      )
-    }
-
-    if (paymentMethod === "manual_receipt" && (!receiptDetails || !receiptDetails.receiptUrl)) {
-      return NextResponse.json(
-        { success: false, error: "Receipt upload is required for manual payments" },
-        { status: 400 },
-      )
-    }
-
     const supabase = createSupabaseServerClient()
+
+    for (const item of items) {
+      if (!item.licenseId) {
+        console.log("[v0] Missing licenseId for item, attempting to resolve:", item)
+
+        // Map legacy/frontend license types to database license names
+        let licenseTypeName: string
+        const itemLicenseType = (item as any).licenseType
+
+        if (itemLicenseType === "standard" || itemLicenseType === "NON_EXCLUSIVE" || !itemLicenseType) {
+          licenseTypeName = "NON_EXCLUSIVE"
+        } else if (itemLicenseType === "premium" || itemLicenseType === "EXCLUSIVE") {
+          licenseTypeName = "EXCLUSIVE"
+        } else {
+          licenseTypeName = "NON_EXCLUSIVE" // Default fallback
+        }
+
+        console.log("[v0] Resolving license type:", itemLicenseType, "->", licenseTypeName)
+
+        // Fetch available licenses to get the correct licenseId
+        const { data: licenses, error: licenseError } = await supabase
+          .from("licenses")
+          .select("*")
+          .eq("name", licenseTypeName)
+          .limit(1)
+
+        if (licenseError || !licenses || licenses.length === 0) {
+          console.error("[v0] Failed to resolve license:", licenseError)
+          console.log("[v0] Available licenses query result:", { data: licenses, error: licenseError })
+
+          const { data: fallbackLicense, error: fallbackError } = await supabase.from("licenses").select("*").limit(1)
+
+          if (fallbackError || !fallbackLicense || fallbackLicense.length === 0) {
+            console.error("[v0] No licenses found:", fallbackError)
+            return NextResponse.json(
+              {
+                success: false,
+                error: "No valid licenses available. Please contact support.",
+              },
+              { status: 500 },
+            )
+          }
+
+          const license = fallbackLicense[0]
+          item.licenseId = license.id
+          item.licenseName = license.name
+          item.licenseType = license.name as "NON_EXCLUSIVE" | "EXCLUSIVE"
+
+          console.log("[v0] Using fallback license:", license.name)
+        } else {
+          const license = licenses[0]
+          item.licenseId = license.id
+          item.licenseName = license.name
+          item.licenseType = license.name as "NON_EXCLUSIVE" | "EXCLUSIVE"
+        }
+
+        console.log("[v0] Resolved license for item:", {
+          imageId: item.imageId,
+          licenseId: item.licenseId,
+          licenseName: item.licenseName,
+          licenseType: item.licenseType,
+        })
+      }
+    }
+
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
 
     const { data: orderResult, error: orderError } = await supabase
@@ -116,6 +169,13 @@ export async function POST(request: NextRequest) {
     const orderItemIds: string[] = []
 
     for (const item of items) {
+      console.log("[v0] Creating order item:", {
+        order_id: orderId,
+        image_id: item.imageId,
+        license_id: item.licenseId,
+        price: item.price * item.quantity,
+      })
+
       const { data: orderItemResult, error: orderItemError } = await supabase
         .from("order_items")
         .insert({

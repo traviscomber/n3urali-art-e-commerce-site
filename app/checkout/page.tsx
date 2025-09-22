@@ -13,6 +13,7 @@ import { ArrowLeft, Wallet, Lock, ShoppingCart, CheckCircle, Copy, QrCode } from
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+// import { StripePaymentForm } from "@/components/stripe-payment-form"
 
 type CryptoCurrency = {
   symbol: string

@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
-import { createServerClient } from "@supabase/ssr"
-import { cookies } from "next/headers"
+import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import PhotoDetailClient from "./photo-detail-client"
 
@@ -9,27 +8,17 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
-          } catch {
-            // The "setAll" method was called from a Server Component.
-          }
-        },
-      },
-    },
-  )
+  const supabase = await createClient()
 
-  const { data: image } = await supabase.from("images").select("*").eq("id", params.id).eq("is_active", true).single()
+  const { data: image } = await supabase
+    .from("images")
+    .select(`
+      *,
+      categories(name),
+      licenses(name)
+    `)
+    .eq("id", params.id)
+    .single()
 
   if (!image) {
     return {
@@ -38,18 +27,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
   }
 
-  const title = `${image.title} - Premium ${image.category_name} 360° Image | N3urali.art`
+  const title = `${image.title} - Premium ${image.categories?.name || "360°"} Image | N3urali.art`
   const description =
     image.description ||
-    `Professional ${image.category_name} 360° photography perfect for VR, projection mapping, and architectural visualization. AI-generated and enhanced for supreme quality.`
-  const imageUrl = image.thumbnail_url || image.image_url
+    `Professional ${image.categories?.name || "360°"} photography perfect for VR, projection mapping, and architectural visualization. AI-generated and enhanced for supreme quality.`
+  const imageUrl = image.thumbnail_large_url || image.thumbnail_medium_url || image.thumbnail_small_url
   const canonicalUrl = `https://n3urali.com/photo/${image.id}`
 
   return {
     title,
     description,
     keywords: [
-      image.category_name.toLowerCase(),
+      image.categories?.name?.toLowerCase() || "360",
       "360 photography",
       "VR content",
       "projection mapping",
@@ -73,7 +62,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       images: [
         {
-          url: imageUrl,
+          url: imageUrl || "/og-image.jpg",
           width: 1200,
           height: 630,
           alt: image.title,
@@ -86,7 +75,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: [imageUrl],
+      images: [imageUrl || "/og-image.jpg"],
       creator: "@n3urali",
     },
     robots: {
@@ -104,27 +93,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PhotoDetailPage({ params }: Props) {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
-          } catch {
-            // The "setAll" method was called from a Server Component.
-          }
-        },
-      },
-    },
-  )
+  const supabase = await createClient()
 
-  const { data: image } = await supabase.from("images").select("*").eq("id", params.id).eq("is_active", true).single()
+  const { data: image } = await supabase
+    .from("images")
+    .select(`
+      *,
+      categories(name, description),
+      licenses(name, description)
+    `)
+    .eq("id", params.id)
+    .single()
 
   if (!image) {
     notFound()
@@ -135,10 +114,10 @@ export default async function PhotoDetailPage({ params }: Props) {
     "@type": "ImageObject",
     "@id": `https://n3urali.com/photo/${image.id}#image`,
     name: image.title,
-    description: image.description || `Professional ${image.category_name} 360° photography`,
-    url: image.image_url,
-    thumbnailUrl: image.thumbnail_url,
-    contentUrl: image.image_url,
+    description: image.description || `Professional ${image.categories?.name || "360°"} photography`,
+    url: image.original_url,
+    thumbnailUrl: image.thumbnail_large_url,
+    contentUrl: image.original_url,
     width: "4000",
     height: "2000",
     encodingFormat: "image/jpeg",
@@ -175,7 +154,7 @@ export default async function PhotoDetailPage({ params }: Props) {
       },
     },
     keywords: [
-      image.category_name.toLowerCase(),
+      image.categories?.name?.toLowerCase() || "360",
       "360 photography",
       "VR content",
       "projection mapping",

@@ -9,11 +9,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, Wallet, Lock, ShoppingCart, CheckCircle, Copy, QrCode } from "lucide-react"
+import { ArrowLeft, Wallet, Lock, ShoppingCart, CheckCircle, Copy, QrCode, Receipt } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-// import { StripePaymentForm } from "@/components/stripe-payment-form"
+import { DirectUpload } from "@/components/direct-upload"
 
 type CryptoCurrency = {
   symbol: string
@@ -45,7 +45,16 @@ const supportedCryptos: CryptoCurrency[] = [
     icon: "$",
     rate: 1.0, // 1:1 with USD
   },
+  {
+    symbol: "USDT",
+    name: "Tether USD",
+    address: "0x742d35Cc6634C0532925a3b8D4C9db96590b5c8e",
+    icon: "₮",
+    rate: 1.0, // 1:1 with USD
+  },
 ]
+
+type PaymentMethod = "crypto" | "manual_receipt"
 
 function CryptoPaymentForm({
   items,
@@ -62,6 +71,8 @@ function CryptoPaymentForm({
   const [isProcessing, setIsProcessing] = useState(false)
   const [paymentStep, setPaymentStep] = useState<"select" | "pay" | "confirm">("select")
   const [transactionHash, setTransactionHash] = useState("")
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("crypto")
+  const [receiptUrl, setReceiptUrl] = useState<string>("")
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
@@ -90,8 +101,13 @@ function CryptoPaymentForm({
   }
 
   const handleConfirmPayment = async () => {
-    if (!transactionHash.trim()) {
+    if (paymentMethod === "crypto" && !transactionHash.trim()) {
       onError("Please enter your transaction hash")
+      return
+    }
+
+    if (paymentMethod === "manual_receipt" && !receiptUrl) {
+      onError("Please upload your payment receipt")
       return
     }
 
@@ -100,7 +116,6 @@ function CryptoPaymentForm({
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
-      // Create order record with crypto payment info
       const orderResponse = await fetch("/api/orders/create", {
         method: "POST",
         headers: {
@@ -110,31 +125,52 @@ function CryptoPaymentForm({
           items,
           total,
           customerInfo: formData,
-          paymentMethod: "crypto",
-          cryptoDetails: {
-            currency: selectedCrypto.symbol,
-            amount: cryptoAmount,
-            transactionHash: transactionHash,
-            address: selectedCrypto.address,
-          },
+          paymentMethod: paymentMethod === "manual_receipt" ? "manual_receipt" : "crypto",
+          cryptoDetails:
+            paymentMethod === "crypto"
+              ? {
+                  currency: selectedCrypto.symbol,
+                  amount: cryptoAmount,
+                  transactionHash: transactionHash,
+                  address: selectedCrypto.address,
+                }
+              : undefined,
+          receiptDetails:
+            paymentMethod === "manual_receipt"
+              ? {
+                  currency: selectedCrypto.symbol,
+                  amount: cryptoAmount,
+                  receiptUrl: receiptUrl,
+                  address: selectedCrypto.address,
+                }
+              : undefined,
         }),
       })
 
       const orderResult = await orderResponse.json()
 
       if (orderResult.success) {
-        console.log("[v0] Crypto order created successfully:", orderResult.data.orderNumber)
+        console.log("[v0] Order created successfully:", orderResult.data.orderNumber)
         onSuccess()
       } else {
         console.error("[v0] Order creation failed:", orderResult.error)
         onError(orderResult.error || "Failed to create order")
       }
     } catch (error) {
-      console.error("[v0] Crypto payment processing error:", error)
+      console.error("[v0] Payment processing error:", error)
       onError("Payment processing failed. Please try again.")
     } finally {
       setIsProcessing(false)
     }
+  }
+
+  const handleReceiptUpload = (result: { url: string; key: string; fileName: string }) => {
+    setReceiptUrl(result.url)
+    console.log("[v0] Receipt uploaded successfully:", result.fileName)
+  }
+
+  const handleReceiptUploadError = (error: string) => {
+    onError(`Receipt upload failed: ${error}`)
   }
 
   if (paymentStep === "select") {
@@ -180,6 +216,47 @@ function CryptoPaymentForm({
                   onChange={handleInputChange}
                   placeholder="Doe"
                 />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Payment Method Selection */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Payment Method</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div
+                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                  paymentMethod === "crypto" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                }`}
+                onClick={() => setPaymentMethod("crypto")}
+              >
+                <div className="flex items-center gap-3">
+                  <QrCode className="h-6 w-6" />
+                  <div>
+                    <div className="font-medium">Live Transaction</div>
+                    <div className="text-sm text-muted-foreground">Enter transaction hash</div>
+                  </div>
+                </div>
+              </div>
+              <div
+                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                  paymentMethod === "manual_receipt"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/50"
+                }`}
+                onClick={() => setPaymentMethod("manual_receipt")}
+              >
+                <div className="flex items-center gap-3">
+                  <Receipt className="h-6 w-6" />
+                  <div>
+                    <div className="font-medium">Upload Receipt</div>
+                    <div className="text-sm text-muted-foreground">Manual verification</div>
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -239,8 +316,8 @@ function CryptoPaymentForm({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <QrCode className="h-5 w-5" />
-              Send Payment
+              {paymentMethod === "crypto" ? <QrCode className="h-5 w-5" /> : <Receipt className="h-5 w-5" />}
+              {paymentMethod === "crypto" ? "Send Payment" : "Upload Payment Receipt"}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -275,18 +352,40 @@ function CryptoPaymentForm({
               </div>
             </div>
 
-            <div className="space-y-3">
-              <Label htmlFor="txHash">Transaction Hash</Label>
-              <Input
-                id="txHash"
-                value={transactionHash}
-                onChange={(e) => setTransactionHash(e.target.value)}
-                placeholder="Enter transaction hash after sending payment"
-              />
-              <p className="text-xs text-muted-foreground">
-                After sending the payment, paste the transaction hash here to confirm your order.
-              </p>
-            </div>
+            {paymentMethod === "crypto" ? (
+              <div className="space-y-3">
+                <Label htmlFor="txHash">Transaction Hash</Label>
+                <Input
+                  id="txHash"
+                  value={transactionHash}
+                  onChange={(e) => setTransactionHash(e.target.value)}
+                  placeholder="Enter transaction hash after sending payment"
+                />
+                <p className="text-xs text-muted-foreground">
+                  After sending the payment, paste the transaction hash here to confirm your order.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <Label>Upload Payment Receipt</Label>
+                <DirectUpload
+                  onUploadComplete={handleReceiptUpload}
+                  onUploadError={handleReceiptUploadError}
+                  accept="image/*,.pdf"
+                  maxSize={10 * 1024 * 1024}
+                  className="border-2 border-dashed border-gray-300 rounded-lg"
+                />
+                {receiptUrl && (
+                  <div className="flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm text-green-800">Receipt uploaded successfully</span>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Upload a screenshot or photo of your payment confirmation. Accepted formats: JPG, PNG, PDF (max 10MB)
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -296,26 +395,32 @@ function CryptoPaymentForm({
           </Button>
           <Button
             onClick={handleConfirmPayment}
-            disabled={isProcessing || !transactionHash.trim()}
+            disabled={
+              isProcessing ||
+              (paymentMethod === "crypto" && !transactionHash.trim()) ||
+              (paymentMethod === "manual_receipt" && !receiptUrl)
+            }
             size="lg"
             className="flex-1 glow-primary"
           >
             {isProcessing ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                Verifying...
+                Processing...
               </>
             ) : (
               <>
                 <Lock className="h-4 w-4 mr-2" />
-                Confirm Payment
+                {paymentMethod === "crypto" ? "Confirm Payment" : "Submit Order"}
               </>
             )}
           </Button>
         </div>
 
         <p className="text-xs text-muted-foreground text-center">
-          This is a demo system. In production, payment verification would be automated via blockchain APIs.
+          {paymentMethod === "crypto"
+            ? "This is a demo system. In production, payment verification would be automated via blockchain APIs."
+            : "Your order will be manually reviewed and processed within 24 hours after receipt verification."}
         </p>
       </div>
     )
@@ -324,60 +429,11 @@ function CryptoPaymentForm({
   return null
 }
 
-// function PaymentMethodSelector({
-//   selectedMethod,
-//   onMethodChange,
-// }: {
-//   selectedMethod: "crypto" | "stripe"
-//   onMethodChange: (method: "crypto" | "stripe") => void
-// }) {
-//   return (
-//     <Card className="mb-6">
-//       <CardHeader>
-//         <CardTitle>Payment Method</CardTitle>
-//       </CardHeader>
-//       <CardContent>
-//         <div className="grid grid-cols-2 gap-4">
-//           <div
-//             className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-//               selectedMethod === "stripe" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-//             }`}
-//             onClick={() => onMethodChange("stripe")}
-//           >
-//             <div className="flex items-center gap-3">
-//               <CreditCard className="h-6 w-6" />
-//               <div>
-//                 <div className="font-medium">Credit Card</div>
-//                 <div className="text-sm text-muted-foreground">Visa, Mastercard, Amex</div>
-//               </div>
-//             </div>
-//           </div>
-//           <div
-//             className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-//               selectedMethod === "crypto" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-//             }`}
-//             onClick={() => onMethodChange("crypto")}
-//           >
-//             <div className="flex items-center gap-3">
-//               <Wallet className="h-6 w-6" />
-//               <div>
-//                 <div className="font-medium">Cryptocurrency</div>
-//                 <div className="text-sm text-muted-foreground">BTC, ETH, USDC</div>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       </CardContent>
-//     </Card>
-//   )
-// }
-
 export default function CheckoutPage() {
   const { items, total, clearCart, updateQuantity } = useCart()
   const router = useRouter()
   const [orderComplete, setOrderComplete] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  // const [paymentMethod, setPaymentMethod] = useState<"crypto" | "stripe">("stripe")
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -408,7 +464,6 @@ export default function CheckoutPage() {
     setError(errorMessage)
   }
 
-  // Redirect if cart is empty and order not complete
   if (items.length === 0 && !orderComplete) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -429,7 +484,6 @@ export default function CheckoutPage() {
     )
   }
 
-  // Order complete state
   if (orderComplete) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -466,7 +520,7 @@ export default function CheckoutPage() {
             Continue Shopping
           </Link>
           <h1 className="text-3xl font-bold">Secure Checkout</h1>
-          <p className="text-muted-foreground mt-2">Pay securely with cryptocurrency</p>
+          <p className="text-muted-foreground mt-2">Pay securely with cryptocurrency or upload payment receipt</p>
         </div>
 
         {error && (

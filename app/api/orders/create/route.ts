@@ -27,7 +27,7 @@ interface OrderRequest {
     zipCode?: string
     country?: string
   }
-  paymentMethod?: "crypto" | "stripe" | "demo"
+  paymentMethod?: "crypto" | "stripe" | "demo" | "manual_receipt"
   paymentIntentId?: string
   cryptoDetails?: {
     currency: string
@@ -35,12 +35,18 @@ interface OrderRequest {
     transactionHash: string
     address: string
   }
+  receiptDetails?: {
+    currency: string
+    amount: string
+    receiptUrl: string
+    address: string
+  }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: OrderRequest = await request.json()
-    const { items, total, customerInfo, paymentMethod = "demo", paymentIntentId, cryptoDetails } = body
+    const { items, total, customerInfo, paymentMethod = "demo", paymentIntentId, cryptoDetails, receiptDetails } = body
 
     console.log(
       "[v0] Creating order for:",
@@ -68,6 +74,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (paymentMethod === "manual_receipt" && (!receiptDetails || !receiptDetails.receiptUrl)) {
+      return NextResponse.json(
+        { success: false, error: "Receipt upload is required for manual payments" },
+        { status: 400 },
+      )
+    }
+
     const supabase = createSupabaseServerClient()
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
 
@@ -77,9 +90,19 @@ export async function POST(request: NextRequest) {
         user_email: customerInfo.email,
         user_name: `${customerInfo.firstName} ${customerInfo.lastName}`,
         total_amount: total,
-        status: "completed",
-        payment_method: paymentMethod === "crypto" ? "cryptocurrency" : paymentMethod,
-        payment_intent_id: paymentMethod === "crypto" ? cryptoDetails?.transactionHash : paymentIntentId || orderNumber,
+        status: paymentMethod === "manual_receipt" ? "pending" : "completed",
+        payment_method:
+          paymentMethod === "crypto"
+            ? "cryptocurrency"
+            : paymentMethod === "manual_receipt"
+              ? "manual_receipt"
+              : paymentMethod,
+        payment_intent_id:
+          paymentMethod === "crypto"
+            ? cryptoDetails?.transactionHash
+            : paymentMethod === "manual_receipt"
+              ? receiptDetails?.receiptUrl
+              : paymentIntentId || orderNumber,
       })
       .select()
       .single()
@@ -113,23 +136,25 @@ export async function POST(request: NextRequest) {
     }
 
     const downloadTokens = []
-    for (const orderItemId of orderItemIds) {
-      const downloadToken = `dl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    if (paymentMethod === "crypto") {
+      for (const orderItemId of orderItemIds) {
+        const downloadToken = `dl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-      const { data: downloadResult } = await supabase
-        .from("downloads")
-        .insert({
-          order_item_id: orderItemId,
-          image_id: items.find((item) => orderItemIds.includes(orderItemId))?.imageId,
-          download_token: downloadToken,
-          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-          download_count: 0,
-        })
-        .select()
-        .single()
+        const { data: downloadResult } = await supabase
+          .from("downloads")
+          .insert({
+            order_item_id: orderItemId,
+            image_id: items.find((item) => orderItemIds.includes(orderItemId))?.imageId,
+            download_token: downloadToken,
+            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            download_count: 0,
+          })
+          .select()
+          .single()
 
-      if (downloadResult) {
-        downloadTokens.push(downloadResult)
+        if (downloadResult) {
+          downloadTokens.push(downloadResult)
+        }
       }
     }
 
@@ -138,10 +163,14 @@ export async function POST(request: NextRequest) {
       data: {
         orderId: orderId,
         orderNumber: orderNumber,
-        paymentStatus: "completed",
+        paymentStatus: paymentMethod === "manual_receipt" ? "pending_verification" : "completed",
         total: total,
         paymentMethod: paymentMethod,
         downloadTokensGenerated: downloadTokens.length,
+        message:
+          paymentMethod === "manual_receipt"
+            ? "Order submitted for manual verification. You will receive download links within 24 hours after payment confirmation."
+            : undefined,
       },
     })
   } catch (error) {

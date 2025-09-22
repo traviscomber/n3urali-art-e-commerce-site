@@ -98,9 +98,15 @@ export default function DownloadsPage() {
       const data = await response.json()
       console.log("[v0] Token generation successful:", data)
 
-      // Open download in new tab
-      console.log("[v0] Opening download URL:", data.downloadUrl)
-      window.open(data.downloadUrl, "_blank")
+      console.log("[v0] Starting direct download:", data.downloadUrl)
+
+      // Create a temporary link element to trigger download
+      const link = document.createElement("a")
+      link.href = data.downloadUrl
+      link.download = `${imageTitle.replace(/[^a-zA-Z0-9]/g, "_")}.jpg`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
 
       const remainingDownloads = downloadLimit - downloadCount - 1
       if (remainingDownloads > 0) {
@@ -264,7 +270,7 @@ export default function DownloadsPage() {
                       >
                         <Download className="h-4 w-4 mr-2" />
                         {downloadingIds.has(download.order_item_id)
-                          ? "Generating..."
+                          ? "Downloading..."
                           : download.can_download
                             ? "Download"
                             : "Unavailable"}

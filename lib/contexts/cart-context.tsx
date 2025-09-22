@@ -83,9 +83,9 @@ async function resolveLicenseId(licenseType: "NON_EXCLUSIVE" | "EXCLUSIVE"): Pro
 }
 
 function normalizeCartItem(item: CartItem): CartItem {
-  if (!item.licenseId || item.licenseId === "660e8400-e29b-41d4-a716-446655440000") {
+  if (!item.licenseId || item.licenseId === "660e8400-e29b-41d4-a716-446655440000" || item.licenseId.length < 10) {
     console.error("[v0] Cart item has invalid license ID:", item)
-    throw new Error("Invalid license ID - please select a license type")
+    throw new Error("Invalid license ID - please select a valid license type")
   }
 
   // Ensure licenseName matches licenseType
@@ -105,7 +105,11 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       try {
         const normalizedItems = action.payload
           .map((item) => {
-            if (!item.licenseId || item.licenseId === "660e8400-e29b-41d4-a716-446655440000") {
+            if (
+              !item.licenseId ||
+              item.licenseId === "660e8400-e29b-41d4-a716-446655440000" ||
+              item.licenseId.length < 10
+            ) {
               console.warn("[v0] Skipping cart item with invalid license ID:", item)
               return null
             }

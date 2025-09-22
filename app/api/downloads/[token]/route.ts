@@ -97,29 +97,42 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
 
     console.log("[v0] Download successful for:", image.title)
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        image: {
-          id: image.id,
-          title: image.title,
-          downloadUrl: image.original_url || image.file_path,
+    const fileUrl = image.original_url || image.file_path
+    if (!fileUrl) {
+      return NextResponse.json({ success: false, error: "File URL not available" }, { status: 404 })
+    }
+
+    try {
+      // Fetch the file from storage
+      const fileResponse = await fetch(fileUrl)
+      if (!fileResponse.ok) {
+        throw new Error(`Failed to fetch file: ${fileResponse.status}`)
+      }
+
+      const fileBuffer = await fileResponse.arrayBuffer()
+      const fileName = `${image.title.replace(/[^a-zA-Z0-9]/g, "_")}_${license?.name || "Standard"}.jpg`
+
+      // Return the file with proper headers
+      return new NextResponse(fileBuffer, {
+        headers: {
+          "Content-Type": "image/jpeg",
+          "Content-Disposition": `attachment; filename="${fileName}"`,
+          "Content-Length": fileBuffer.byteLength.toString(),
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
         },
-        license: {
-          name: license?.name || "Standard License",
-          description: license?.description || "Standard commercial license",
+      })
+    } catch (fileError) {
+      console.error("[v0] File serving error:", fileError)
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Failed to serve file. Please try again or contact support.",
         },
-        downloadInfo: {
-          downloadsUsed: downloadCount + 1,
-          downloadsRemaining: downloadLimit - downloadCount - 1,
-          downloadLimit: downloadLimit,
-          expiresAt: download.expires_at,
-        },
-        order: {
-          userEmail: orderItem.orders.user_email,
-        },
-      },
-    })
+        { status: 500 },
+      )
+    }
   } catch (error) {
     console.error("[v0] Download error:", error)
     return NextResponse.json(

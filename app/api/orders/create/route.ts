@@ -72,8 +72,8 @@ export async function POST(request: NextRequest) {
     const supabase = createSupabaseServerClient()
 
     for (const item of items) {
-      if (!item.licenseId) {
-        console.log("[v0] Missing licenseId for item, attempting to resolve:", item)
+      if (!item.licenseId || item.licenseId === "660e8400-e29b-41d4-a716-446655440000") {
+        console.log("[v0] Invalid or missing licenseId for item, attempting to resolve:", item)
 
         // Map legacy/frontend license types to database license names
         let licenseTypeName: string
@@ -96,34 +96,60 @@ export async function POST(request: NextRequest) {
           .eq("name", licenseTypeName)
           .limit(1)
 
-        if (licenseError || !licenses || licenses.length === 0) {
-          console.error("[v0] Failed to resolve license:", licenseError)
-          console.log("[v0] Available licenses query result:", { data: licenses, error: licenseError })
+        if (licenseError) {
+          console.error("[v0] License query error:", licenseError)
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Database error while resolving license: ${licenseError.message}`,
+            },
+            { status: 500 },
+          )
+        }
 
-          const { data: fallbackLicense, error: fallbackError } = await supabase.from("licenses").select("*").limit(1)
+        if (!licenses || licenses.length === 0) {
+          console.log("[v0] No specific license found, trying fallback...")
 
-          if (fallbackError || !fallbackLicense || fallbackLicense.length === 0) {
-            console.error("[v0] No licenses found:", fallbackError)
+          // Try to get any available license as fallback
+          const { data: fallbackLicenses, error: fallbackError } = await supabase.from("licenses").select("*").limit(1)
+
+          if (fallbackError) {
+            console.error("[v0] Fallback license query error:", fallbackError)
             return NextResponse.json(
               {
                 success: false,
-                error: "No valid licenses available. Please contact support.",
+                error: `Database error: ${fallbackError.message}`,
               },
               { status: 500 },
             )
           }
 
-          const license = fallbackLicense[0]
+          if (!fallbackLicenses || fallbackLicenses.length === 0) {
+            console.error("[v0] No licenses found in database")
+            return NextResponse.json(
+              {
+                success: false,
+                error: "No valid licenses available. Please run the license setup script and try again.",
+              },
+              { status: 500 },
+            )
+          }
+
+          // Use the first available license
+          const license = fallbackLicenses[0]
           item.licenseId = license.id
           item.licenseName = license.name
           item.licenseType = license.name as "NON_EXCLUSIVE" | "EXCLUSIVE"
 
-          console.log("[v0] Using fallback license:", license.name)
+          console.log("[v0] Using fallback license:", license.name, "ID:", license.id)
         } else {
+          // Use the found license
           const license = licenses[0]
           item.licenseId = license.id
           item.licenseName = license.name
           item.licenseType = license.name as "NON_EXCLUSIVE" | "EXCLUSIVE"
+
+          console.log("[v0] Using resolved license:", license.name, "ID:", license.id)
         }
 
         console.log("[v0] Resolved license for item:", {
@@ -132,6 +158,36 @@ export async function POST(request: NextRequest) {
           licenseName: item.licenseName,
           licenseType: item.licenseType,
         })
+      } else {
+        const { data: licenseCheck, error: checkError } = await supabase
+          .from("licenses")
+          .select("id, name")
+          .eq("id", item.licenseId)
+          .limit(1)
+
+        if (checkError) {
+          console.error("[v0] License verification error:", checkError)
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Database error while verifying license: ${checkError.message}`,
+            },
+            { status: 500 },
+          )
+        }
+
+        if (!licenseCheck || licenseCheck.length === 0) {
+          console.error("[v0] License ID does not exist in database:", item.licenseId)
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Invalid license ID: ${item.licenseId}. Please refresh the page and try again.`,
+            },
+            { status: 400 },
+          )
+        }
+
+        console.log("[v0] License ID verified:", item.licenseId, "Name:", licenseCheck[0].name)
       }
     }
 
@@ -196,23 +252,30 @@ export async function POST(request: NextRequest) {
     }
 
     const downloadTokens = []
-    if (paymentMethod === "crypto") {
-      for (const orderItemId of orderItemIds) {
+    if (paymentMethod !== "manual_receipt") {
+      for (let i = 0; i < orderItemIds.length; i++) {
+        const orderItemId = orderItemIds[i]
+        const item = items[i]
         const downloadToken = `dl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-        const { data: downloadResult } = await supabase
+        const { data: downloadResult, error: downloadError } = await supabase
           .from("downloads")
           .insert({
             order_item_id: orderItemId,
-            image_id: items.find((item) => orderItemIds.includes(orderItemId))?.imageId,
             download_token: downloadToken,
-            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-            download_count: 0,
+            image_id: item.imageId, // Include image_id as required by existing schema
+            user_email: customerInfo.email, // Include user_email as required by existing schema
+            expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+            download_count: 0, // Initialize download count
+            created_at: new Date().toISOString(), // Set creation timestamp
           })
           .select()
           .single()
 
-        if (downloadResult) {
+        if (downloadError) {
+          console.error("[v0] Download token creation error:", downloadError)
+          // Don't fail the order, just log the error
+        } else if (downloadResult) {
           downloadTokens.push(downloadResult)
         }
       }

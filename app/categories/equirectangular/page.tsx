@@ -138,15 +138,31 @@ export default function EquirectangularCategoryPage() {
       try {
         const result = await getImages()
         if (result.success && result.data) {
-          // Filter for equirectangular images (360° or similar categories)
-          const equirectangularImages = result.data.filter(
-            (img: EquirectangularImage) =>
-              img.category_name?.toLowerCase().includes("equirectangular") ||
-              img.category_name?.toLowerCase().includes("360") ||
-              img.category_name?.toLowerCase().includes("panoramic"),
+          console.log(
+            "[v0] All images from database:",
+            result.data.map((img) => ({ id: img.id, title: img.title, category: img.category_name })),
           )
-          setImages(equirectangularImages)
-          setFilteredImages(equirectangularImages)
+
+          const equirectangularImages = result.data.filter((img: EquirectangularImage) => {
+            const categoryLower = img.category_name?.toLowerCase() || ""
+            return (
+              categoryLower.includes("equirectangular") ||
+              categoryLower.includes("360") ||
+              categoryLower.includes("panoramic") ||
+              categoryLower.includes("spherical")
+            )
+          })
+
+          console.log(
+            "[v0] Filtered equirectangular images:",
+            equirectangularImages.map((img) => ({ id: img.id, title: img.title, category: img.category_name })),
+          )
+
+          const imagesToShow = equirectangularImages.length > 0 ? equirectangularImages : result.data
+          console.log("[v0] Final images to show:", imagesToShow.length)
+
+          setImages(imagesToShow)
+          setFilteredImages(imagesToShow)
         }
       } catch (error) {
         console.error("Error fetching images:", error)
@@ -499,9 +515,7 @@ export default function EquirectangularCategoryPage() {
 
         {filteredImages.length === 0 && (
           <div className="text-center py-16">
-            <div className="text-muted-foreground text-lg mb-4">
-              No equirectangular images found matching your search.
-            </div>
+            <div className="text-muted-foreground text-lg mb-4">No panoramic images found matching your search.</div>
             <Button
               variant="outline"
               onClick={() => setSearchTerm("")}

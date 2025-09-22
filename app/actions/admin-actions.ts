@@ -1,7 +1,6 @@
 "use server"
 
-import { createServerClient } from "@supabase/ssr"
-import { cookies } from "next/headers"
+import { createClient } from "@supabase/supabase-js"
 import { unstable_cache } from "next/cache"
 import { revalidatePath, revalidateTag } from "next/cache"
 
@@ -20,13 +19,17 @@ const CACHE_REVALIDATE = {
 } as const
 
 function createSupabaseServerClient() {
-  const cookieStore = cookies()
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
-    cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value
-      },
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error("Missing Supabase environment variables")
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
     },
   })
 }
@@ -660,7 +663,9 @@ export async function createImageWithCategoryObject(imageData: {
 
     let categoryId: string
 
-    if (categoryResult.data && categoryResult.data.length === 0) {
+    if (categoryResult.data && categoryResult.data.length > 0) {
+      categoryId = categoryResult.data[0].id
+    } else {
       console.log("[v0] Category not found, creating new category:", imageData.category_name)
 
       const categoryName = imageData.category_name?.trim()
@@ -688,15 +693,6 @@ export async function createImageWithCategoryObject(imageData: {
           error: `Failed to create category "${imageData.category_name}": ${newCategoryResult.error?.message || "Unknown error"}`,
         }
       }
-    } else {
-      if (!categoryResult.data || categoryResult.data.length === 0) {
-        console.error("[v0] Category lookup failed")
-        return {
-          success: false,
-          error: "Failed to find or create category. Please try again.",
-        }
-      }
-      categoryId = categoryResult.data[0].id
     }
 
     console.log("[v0] Looking up default license...")
@@ -730,14 +726,40 @@ export async function createImageWithCategoryObject(imageData: {
     const licenseId = defaultLicense.id
     console.log("[v0] Using license:", defaultLicense.name, "with ID:", licenseId)
 
-    // Placeholder for image upload logic
-    // This logic should be implemented using a server-side library that supports file uploads
-    // For example, using Supabase Storage API
+    console.log("[v0] Inserting image into database...")
+    const { data: insertedImages, error: insertError } = await supabase
+      .from("images")
+      .insert([
+        {
+          title: imageData.title,
+          description: imageData.description || null,
+          category_id: categoryId,
+          license_id: licenseId,
+          price: imageData.price,
+          original_url: imageData.image_url,
+          file_path: imageData.image_url,
+          thumbnail_small_url: imageData.thumbnail_url,
+          thumbnail_medium_url: imageData.thumbnail_url,
+          thumbnail_large_url: imageData.thumbnail_url,
+          is_featured: false,
+        },
+      ])
+      .select("*")
 
-    const result = {} // Placeholder for the actual result
+    if (insertError) {
+      console.error("[v0] Database insertion failed:", insertError)
+      return {
+        success: false,
+        error: `Failed to save image to database: ${insertError.message}`,
+      }
+    }
 
-    return { success: true, data: result }
+    const createdImage = insertedImages[0]
+    console.log("[v0] Successfully created image in database:", createdImage.id)
+
+    return { success: true, data: createdImage }
   } catch (error) {
+    console.error("[v0] Error in createImageWithCategoryObject:", error)
     return handleDatabaseError(error)
   }
 }
@@ -1224,6 +1246,131 @@ export async function updateImageDetails(
 
     return { success: true, data: result }
   } catch (error) {
+    return handleDatabaseError(error)
+  }
+}
+
+export async function getUserProfile(userId: string) {
+  try {
+    const supabase = createSupabaseServerClient()
+
+    const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).single()
+
+    if (error) {
+      console.error("[v0] Error fetching user profile:", error)
+      return null
+    }
+
+    return data
+  } catch (error) {
+    console.error("[v0] Error in getUserProfile:", error)
+    return null
+  }
+}
+
+export async function isUserAdmin(userId: string) {
+  try {
+    const profile = await getUserProfile(userId)
+    return profile?.role === "admin" || profile?.role === "developer"
+  } catch (error) {
+    console.error("[v0] Error checking admin status:", error)
+    return false
+  }
+}
+
+export async function cleanupSampleImages() {
+  try {
+    console.log("[v0] Starting cleanup of sample images")
+    const supabase = createSupabaseServerClient()
+
+    // Find images that are likely samples/placeholders based on common patterns
+    const { data: sampleImages, error: fetchError } = await supabase
+      .from("images")
+      .select("id, title, description, image_url, thumbnail_url")
+      .or(
+        "title.ilike.%sample%,title.ilike.%placeholder%,title.ilike.%test%,title.ilike.%demo%,description.ilike.%sample%,description.ilike.%placeholder%,description.ilike.%test%,description.ilike.%demo%,image_url.ilike.%placeholder%,thumbnail_url.ilike.%placeholder%",
+      )
+
+    if (fetchError) {
+      console.error("[v0] Error fetching sample images:", fetchError)
+      return {
+        success: false,
+        error: `Failed to fetch sample images: ${fetchError.message}`,
+      }
+    }
+
+    if (!sampleImages || sampleImages.length === 0) {
+      console.log("[v0] No sample images found to cleanup")
+      return {
+        success: true,
+        message: "No sample images found to cleanup",
+        data: [],
+      }
+    }
+
+    console.log(`[v0] Found ${sampleImages.length} sample images to delete`)
+
+    // Check if any of these images are referenced in orders
+    const imageIds = sampleImages.map((img) => img.id)
+    const { data: orderItems, error: orderCheckError } = await supabase
+      .from("order_items")
+      .select("image_id")
+      .in("image_id", imageIds)
+
+    if (orderCheckError) {
+      console.error("[v0] Error checking order references:", orderCheckError)
+      return {
+        success: false,
+        error: `Failed to check order references: ${orderCheckError.message}`,
+      }
+    }
+
+    // Filter out images that are referenced in orders
+    const referencedImageIds = new Set(orderItems?.map((item) => item.image_id) || [])
+    const imagesToDelete = sampleImages.filter((img) => !referencedImageIds.has(img.id))
+
+    if (imagesToDelete.length === 0) {
+      console.log("[v0] All sample images are referenced in orders, cannot delete")
+      return {
+        success: true,
+        message: "All sample images are referenced in orders and cannot be deleted",
+        data: [],
+      }
+    }
+
+    console.log(
+      `[v0] Deleting ${imagesToDelete.length} sample images (${sampleImages.length - imagesToDelete.length} skipped due to order references)`,
+    )
+
+    // Delete the images
+    const deleteIds = imagesToDelete.map((img) => img.id)
+    const { data: deletedImages, error: deleteError } = await supabase
+      .from("images")
+      .delete()
+      .in("id", deleteIds)
+      .select("id, title")
+
+    if (deleteError) {
+      console.error("[v0] Error deleting sample images:", deleteError)
+      return {
+        success: false,
+        error: `Failed to delete sample images: ${deleteError.message}`,
+      }
+    }
+
+    console.log(`[v0] Successfully deleted ${deletedImages?.length || 0} sample images`)
+
+    // Invalidate cache
+    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
+    revalidatePath("/simple-admin")
+
+    return {
+      success: true,
+      message: `Successfully deleted ${deletedImages?.length || 0} sample images`,
+      data: deletedImages || [],
+    }
+  } catch (error) {
+    console.error("[v0] Error in cleanupSampleImages:", error)
     return handleDatabaseError(error)
   }
 }

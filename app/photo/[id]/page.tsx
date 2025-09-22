@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import PhotoDetailClient from "./photo-detail-client"
 
@@ -8,9 +8,11 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
-  const { data: image } = await supabase
+  console.log("[v0] Generating metadata for photo ID:", params.id)
+
+  const { data: image, error } = await supabase
     .from("images")
     .select(`
       *,
@@ -19,6 +21,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     `)
     .eq("id", params.id)
     .single()
+
+  console.log("[v0] Metadata query result:", { image: !!image, error })
 
   if (!image) {
     return {
@@ -93,9 +97,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PhotoDetailPage({ params }: Props) {
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
 
-  const { data: image } = await supabase
+  console.log("[v0] Fetching photo data for ID:", params.id)
+
+  const { data: image, error } = await supabase
     .from("images")
     .select(`
       *,
@@ -105,7 +111,10 @@ export default async function PhotoDetailPage({ params }: Props) {
     .eq("id", params.id)
     .single()
 
+  console.log("[v0] Photo query result:", { image: !!image, error })
+
   if (!image) {
+    console.log("[v0] Image not found, calling notFound()")
     notFound()
   }
 

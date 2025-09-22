@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createSupabaseServerClient } from "@/lib/database"
 
 export async function GET(request: NextRequest, { params }: { params: { token: string } }) {
   try {
@@ -9,23 +9,29 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
       return NextResponse.json({ success: false, error: "Download token is required" }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    console.log("[v0] Processing download for token:", downloadToken)
 
-    // Get download record with related data
+    const supabase = createSupabaseServerClient()
+
     const { data: download, error: downloadError } = await supabase
       .from("downloads")
       .select(`
         *,
-        order_items (
-          images (
+        order_items!inner(
+          *,
+          images!inner(
             id,
             title,
             original_url,
             file_path
           ),
-          licenses (
+          licenses!inner(
             name,
             description
+          ),
+          orders!inner(
+            user_email,
+            status
           )
         )
       `)
@@ -33,37 +39,64 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
       .single()
 
     if (downloadError || !download) {
+      console.log("[v0] Download not found:", downloadError)
       return NextResponse.json({ success: false, error: "Invalid download token" }, { status: 404 })
     }
 
     // Check if download has expired
     if (new Date(download.expires_at) < new Date()) {
+      console.log("[v0] Download expired:", download.expires_at)
       return NextResponse.json({ success: false, error: "Download link has expired" }, { status: 410 })
     }
 
-    // Check download limits
-    if (download.download_count >= (download.max_downloads || 5)) {
+    const orderItem = download.order_items
+    const downloadCount = orderItem.download_count || 0
+    const downloadLimit = orderItem.download_limit || 5
+
+    if (downloadCount >= downloadLimit) {
+      console.log("[v0] Download limit exceeded:", downloadCount, ">=", downloadLimit)
       return NextResponse.json({ success: false, error: "Download limit exceeded" }, { status: 429 })
     }
 
-    // Update download count
-    await supabase
+    // Check if order is completed
+    if (orderItem.orders.status !== "completed") {
+      console.log("[v0] Order not completed:", orderItem.orders.status)
+      return NextResponse.json({ success: false, error: "Order not completed" }, { status: 403 })
+    }
+
+    const { error: updateOrderItemError } = await supabase
+      .from("order_items")
+      .update({
+        download_count: downloadCount + 1,
+      })
+      .eq("id", download.order_item_id)
+
+    if (updateOrderItemError) {
+      console.error("[v0] Failed to update order item download count:", updateOrderItemError)
+    }
+
+    // Update downloads table
+    const { error: updateDownloadError } = await supabase
       .from("downloads")
       .update({
-        download_count: download.download_count + 1,
+        download_count: (download.download_count || 0) + 1,
         downloaded_at: new Date().toISOString(),
       })
       .eq("id", download.id)
 
-    const image = download.order_items?.images
-    const license = download.order_items?.licenses
+    if (updateDownloadError) {
+      console.error("[v0] Failed to update download record:", updateDownloadError)
+    }
+
+    const image = orderItem.images
+    const license = orderItem.licenses
 
     if (!image) {
       return NextResponse.json({ success: false, error: "Image not found" }, { status: 404 })
     }
 
-    // In production, you would generate a signed URL or redirect to the actual file
-    // For now, we'll return the download information
+    console.log("[v0] Download successful for:", image.title)
+
     return NextResponse.json({
       success: true,
       data: {
@@ -77,8 +110,13 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
           description: license?.description || "Standard commercial license",
         },
         downloadInfo: {
-          downloadsRemaining: (download.max_downloads || 5) - (download.download_count + 1),
+          downloadsUsed: downloadCount + 1,
+          downloadsRemaining: downloadLimit - downloadCount - 1,
+          downloadLimit: downloadLimit,
           expiresAt: download.expires_at,
+        },
+        order: {
+          userEmail: orderItem.orders.user_email,
         },
       },
     })

@@ -3,7 +3,6 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import { createImageWithCategoryObject } from "@/app/actions/admin-actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -123,6 +122,7 @@ export default function SimpleAdminPage() {
     setError(null)
 
     try {
+      // Dynamic import to avoid chunk loading issues
       const { getImages, getCategories, getLicenses, getDatabaseStats } = await import("@/app/actions/admin-actions")
 
       const [imagesResult, categoriesResult, licensesResult, statsResult] = await Promise.all([
@@ -371,6 +371,7 @@ export default function SimpleAdminPage() {
         original_file_size: newImage.file.size,
       }
 
+      const { createImageWithCategoryObject } = await import("@/app/actions/admin-actions")
       const result = await createImageWithCategoryObject(imageData)
 
       if (!result.success) {

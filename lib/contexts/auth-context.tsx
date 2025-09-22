@@ -31,18 +31,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [profileFetchAttempts, setProfileFetchAttempts] = useState<Map<string, number>>(new Map())
   const supabase = createClient()
 
   const fetchProfile = async (userId: string) => {
     try {
       console.log("[v0] Fetching profile for user:", userId)
 
+      const attempts = profileFetchAttempts.get(userId) || 0
+      if (attempts >= 3) {
+        console.log("[v0] Max profile fetch attempts reached for user:", userId)
+        return {
+          id: userId,
+          email: user?.email || "",
+          full_name: user?.user_metadata?.full_name || "User",
+          role: user?.email === "travis@nuanu.com" ? "developer" : "user",
+          is_active: true,
+        } as UserProfile
+      }
+
+      setProfileFetchAttempts((prev) => new Map(prev).set(userId, attempts + 1))
+
       const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).single()
 
       if (error) {
         console.error("[v0] Error fetching profile:", error)
 
-        // If profile doesn't exist, create one
+        if (error.message?.includes("infinite recursion")) {
+          console.log("[v0] Infinite recursion detected, creating fallback profile")
+          const fallbackProfile = {
+            id: userId,
+            email: user?.email || "",
+            full_name: user?.user_metadata?.full_name || "User",
+            role: user?.email === "travis@nuanu.com" ? "developer" : "user",
+            is_active: true,
+          } as UserProfile
+
+          setProfileFetchAttempts((prev) => {
+            const newMap = new Map(prev)
+            newMap.delete(userId)
+            return newMap
+          })
+
+          return fallbackProfile
+        }
+
         if (error.code === "PGRST116") {
           console.log("[v0] Profile not found, creating new profile")
           const { data: userData } = await supabase.auth.getUser()
@@ -51,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             id: userId,
             email: userData.user?.email || "",
             full_name: userData.user?.user_metadata?.full_name || "User",
-            role: userData.user?.email === "travis@nuanu.com" ? "admin" : "user",
+            role: userData.user?.email === "travis@nuanu.com" ? "developer" : "user",
             is_active: true,
           }
 
@@ -63,9 +96,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           if (createError) {
             console.error("[v0] Error creating profile:", createError)
+            setProfileFetchAttempts((prev) => {
+              const newMap = new Map(prev)
+              newMap.delete(userId)
+              return newMap
+            })
             return newProfile as UserProfile
           }
 
+          setProfileFetchAttempts((prev) => {
+            const newMap = new Map(prev)
+            newMap.delete(userId)
+            return newMap
+          })
           return createdProfile as UserProfile
         }
 
@@ -73,15 +116,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.log("[v0] Profile fetched successfully:", data)
+      setProfileFetchAttempts((prev) => {
+        const newMap = new Map(prev)
+        newMap.delete(userId)
+        return newMap
+      })
       return data as UserProfile
     } catch (error) {
       console.error("[v0] Error in fetchProfile:", error)
+      setProfileFetchAttempts((prev) => {
+        const newMap = new Map(prev)
+        newMap.delete(userId)
+        return newMap
+      })
       return null
     }
   }
 
   useEffect(() => {
-    // Get initial session
     const getInitialSession = async () => {
       try {
         const {
@@ -104,7 +156,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     getInitialSession()
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {

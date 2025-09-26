@@ -136,10 +136,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const getInitialSession = async () => {
       try {
+        await supabase.auth.refreshSession()
+
         const {
           data: { session },
         } = await supabase.auth.getSession()
 
+        console.log("[v0] Initial session check:", !!session?.user)
         setUser(session?.user ?? null)
 
         if (session?.user) {
@@ -160,6 +163,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("[v0] Auth state changed:", event)
+
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        await supabase.auth.refreshSession()
+      }
+
       setUser(session?.user ?? null)
 
       if (session?.user) {

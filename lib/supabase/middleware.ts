@@ -15,6 +15,13 @@ export async function updateSession(request: NextRequest) {
   })
 
   try {
+    const cookies = request.cookies.getAll()
+    console.log("[v0] Middleware - Request cookies count:", cookies.length)
+    console.log(
+      "[v0] Middleware - Auth cookies:",
+      cookies.filter((c) => c.name.includes("supabase")).map((c) => c.name),
+    )
+
     // With Fluid compute, don't put this client in a global environment
     // variable. Always create a new one on each request.
     const supabase = createServerClient(
@@ -36,6 +43,12 @@ export async function updateSession(request: NextRequest) {
       },
     )
 
+    try {
+      await supabase.auth.refreshSession()
+    } catch (refreshError) {
+      console.log("[v0] Middleware - Session refresh failed:", refreshError)
+    }
+
     // Do not run code between createServerClient and
     // supabase.auth.getUser(). A simple mistake could make it very hard to debug
     // issues with users being randomly logged out.
@@ -44,9 +57,15 @@ export async function updateSession(request: NextRequest) {
     // with the Supabase client, your users may be randomly logged out.
     const {
       data: { user },
+      error: userError,
     } = await supabase.auth.getUser()
 
+    if (userError) {
+      console.log("[v0] Middleware - Error getting user:", userError)
+    }
+
     console.log("[v0] Middleware - User authenticated:", !!user)
+    console.log("[v0] Middleware - User ID:", user?.id)
     console.log("[v0] Middleware - Current path:", request.nextUrl.pathname)
 
     const publicPaths = [

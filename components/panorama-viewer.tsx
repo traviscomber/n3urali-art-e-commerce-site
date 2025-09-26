@@ -252,9 +252,24 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({
       }
     }
 
+    const canvas = canvasRef.current
+    const handleSelectStartEvent = (e: Event) => {
+      if (!isPaid) {
+        e.preventDefault()
+        return false
+      }
+    }
+
     document.addEventListener("keydown", handleKeyDown)
+    if (canvas) {
+      canvas.addEventListener("selectstart", handleSelectStartEvent)
+    }
+
     return () => {
       document.removeEventListener("keydown", handleKeyDown)
+      if (canvas) {
+        canvas.removeEventListener("selectstart", handleSelectStartEvent)
+      }
     }
   }, [onClose, isPaid])
 
@@ -305,7 +320,6 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({
           onMouseLeave={handleMouseUp}
           onContextMenu={handleContextMenu}
           onDragStart={handleDragStart}
-          onSelectStart={handleSelectStart}
         />
       </div>
 

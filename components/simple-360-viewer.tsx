@@ -213,7 +213,6 @@ export const Simple360Viewer = React.memo(function Simple360Viewer({
           style={{ minHeight: "400px" }}
           onContextMenu={handleContextMenu}
           onDragStart={handleDragStart}
-          onSelectStart={handleSelectStart}
         />
 
         <div className="absolute inset-0 pointer-events-none z-20">
@@ -262,7 +261,6 @@ export const Simple360Viewer = React.memo(function Simple360Viewer({
         style={{ minHeight: "400px" }}
         onContextMenu={handleContextMenu}
         onDragStart={handleDragStart}
-        onSelectStart={handleSelectStart}
       />
 
       <div className="absolute inset-0 pointer-events-none z-20">

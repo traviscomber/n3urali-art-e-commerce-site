@@ -8,7 +8,8 @@ interface Simple360ViewerProps {
   imageUrl: string
   title: string
   onClose: () => void
-  inline?: boolean // Added inline prop
+  inline?: boolean
+  isPaid?: boolean // Added isPaid prop to control protection level
 }
 
 declare global {
@@ -17,41 +18,86 @@ declare global {
   }
 }
 
+// Function to load Pannellum library dynamically
+const loadPannellum = async (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") {
+      resolve(false)
+      return
+    }
+
+    if (window.pannellum) {
+      resolve(true)
+      return
+    }
+
+    const script = document.createElement("script")
+    script.src = "https://cdn.jsdelivr.net/npm/pannellum@2.3.2/build/pannellum.js"
+    script.onload = () => {
+      resolve(!!window.pannellum)
+    }
+    script.onerror = () => {
+      console.error("Failed to load Pannellum library.")
+      resolve(false)
+    }
+    document.head.appendChild(script)
+  })
+}
+
 export const Simple360Viewer = React.memo(function Simple360Viewer({
   imageUrl,
   title,
   onClose,
   inline = false,
+  isPaid = false, // Default to unpaid (protected)
 }: Simple360ViewerProps) {
   const [pannellumLoaded, setPannellumLoaded] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const viewerRef = useRef<any>(null)
 
-  const loadPannellum = async () => {
-    if (pannellumLoaded || window.pannellum) {
-      return true
+  const handleContextMenu = (e: Event) => {
+    if (!isPaid) {
+      e.preventDefault()
+      e.stopPropagation()
+      return false
+    }
+  }
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (!isPaid) {
+      // Block common shortcuts for unpaid images
+      if (
+        e.ctrlKey ||
+        e.metaKey || // Block Ctrl/Cmd combinations
+        e.key === "F12" || // Block dev tools
+        (e.ctrlKey && e.shiftKey && e.key === "I") || // Block inspect
+        (e.ctrlKey && e.shiftKey && e.key === "C") || // Block console
+        (e.ctrlKey && e.key === "u") || // Block view source
+        (e.ctrlKey && e.key === "s") // Block save
+      ) {
+        e.preventDefault()
+        e.stopPropagation()
+        return false
+      }
     }
 
-    return new Promise<boolean>((resolve) => {
-      // Load CSS
-      const cssLink = document.createElement("link")
-      cssLink.rel = "stylesheet"
-      cssLink.href = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"
-      document.head.appendChild(cssLink)
+    if (e.key === "Escape") {
+      onClose()
+    }
+  }
 
-      // Load JS
-      const script = document.createElement("script")
-      script.src = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"
-      script.onload = () => {
-        setPannellumLoaded(true)
-        resolve(true)
-      }
-      script.onerror = () => {
-        console.error("Failed to load Pannellum")
-        resolve(false)
-      }
-      document.head.appendChild(script)
-    })
+  const handleDragStart = (e: Event) => {
+    if (!isPaid) {
+      e.preventDefault()
+      return false
+    }
+  }
+
+  const handleSelectStart = (e: Event) => {
+    if (!isPaid) {
+      e.preventDefault()
+      return false
+    }
   }
 
   useEffect(() => {
@@ -71,17 +117,17 @@ export const Simple360Viewer = React.memo(function Simple360Viewer({
           type: "equirectangular",
           panorama: imageUrl,
           autoLoad: true,
-          showControls: true,
-          showFullscreenCtrl: false, // Disabled fullscreen
-          showZoomCtrl: false, // Disabled zoom controls
-          mouseZoom: false, // Disabled mouse zoom
-          doubleClickZoom: false, // Disabled double-click zoom
-          draggable: true, // Movement enabled from beginning
-          keyboardZoom: false, // Disabled keyboard zoom
-          compass: false, // Simplified interface
+          showControls: !isPaid ? false : true, // Hide controls for unpaid images
+          showFullscreenCtrl: false, // Always disabled
+          showZoomCtrl: false, // Always disabled
+          mouseZoom: isPaid ? false : false, // Always disabled for protection
+          doubleClickZoom: false, // Always disabled
+          draggable: true, // Movement always enabled
+          keyboardZoom: false, // Always disabled
+          compass: false,
           title: title,
           author: "n3uralia.art",
-          hfov: 90, // Fixed field of view, no zoom
+          hfov: 90,
           pitch: 0,
           yaw: 0,
           minHfov: 90, // Fixed FOV prevents zoom
@@ -97,7 +143,6 @@ export const Simple360Viewer = React.memo(function Simple360Viewer({
     initViewer()
 
     return () => {
-      // Cleanup viewer on unmount
       if (viewerRef.current && window.pannellum) {
         try {
           viewerRef.current.destroy()
@@ -106,32 +151,37 @@ export const Simple360Viewer = React.memo(function Simple360Viewer({
         }
       }
     }
-  }, [imageUrl, title])
+  }, [imageUrl, title, isPaid]) // Added isPaid to dependencies
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose()
-      }
-    }
-
     document.addEventListener("keydown", handleKeyDown)
+    document.addEventListener("contextmenu", handleContextMenu)
+    document.addEventListener("dragstart", handleDragStart)
+    document.addEventListener("selectstart", handleSelectStart)
+
     return () => {
       document.removeEventListener("keydown", handleKeyDown)
+      document.removeEventListener("contextmenu", handleContextMenu)
+      document.removeEventListener("dragstart", handleDragStart)
+      document.removeEventListener("selectstart", handleSelectStart)
     }
-  }, [onClose])
+  }, [isPaid]) // Added isPaid to dependencies
 
   if (!imageUrl || !title) {
     return null
   }
 
+  const protectionClasses = !isPaid ? "select-none pointer-events-auto" : ""
+
   if (inline) {
     return (
-      <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
+      <div className={`relative w-full h-full bg-black rounded-lg overflow-hidden ${protectionClasses}`}>
         <div className="absolute top-2 left-2 right-2 z-10 flex items-center justify-between">
           <div className="text-white">
             <h3 className="text-sm font-semibold">{title}</h3>
-            <p className="text-xs text-white/70">Drag to look around</p>
+            <p className="text-xs text-white/70">
+              {!isPaid ? "Preview Mode - Purchase for full access" : "Drag to look around"}
+            </p>
           </div>
           <Button
             variant="secondary"
@@ -143,23 +193,44 @@ export const Simple360Viewer = React.memo(function Simple360Viewer({
           </Button>
         </div>
 
-        <div ref={containerRef} className="w-full h-full" style={{ minHeight: "400px" }} />
+        <div
+          ref={containerRef}
+          className="w-full h-full"
+          style={{ minHeight: "400px" }}
+          onContextMenu={handleContextMenu}
+          onDragStart={handleDragStart}
+          onSelectStart={handleSelectStart}
+        />
 
         <div className="absolute inset-0 pointer-events-none z-20">
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/20 text-xl font-bold rotate-12 select-none">
-            n3uralia.art
+          <div
+            className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/30 text-xl font-bold rotate-12 select-none ${!isPaid ? "text-white/50" : "text-white/20"}`}
+          >
+            {!isPaid ? "PREVIEW - n3uralia.art" : "n3uralia.art"}
           </div>
+          {!isPaid && (
+            <>
+              <div className="absolute top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2 text-white/20 text-sm font-bold -rotate-12 select-none">
+                PREVIEW
+              </div>
+              <div className="absolute bottom-1/4 right-1/4 transform translate-x-1/2 translate-y-1/2 text-white/20 text-sm font-bold rotate-45 select-none">
+                PREVIEW
+              </div>
+            </>
+          )}
         </div>
       </div>
     )
   }
 
   return (
-    <div className="fixed inset-4 z-50 bg-black rounded-lg overflow-hidden">
+    <div className={`fixed inset-4 z-50 bg-black rounded-lg overflow-hidden ${protectionClasses}`}>
       <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
         <div className="text-white">
           <h2 className="text-lg font-semibold">{title}</h2>
-          <p className="text-sm text-white/70">Drag to look around</p>
+          <p className="text-sm text-white/70">
+            {!isPaid ? "Preview Mode - Purchase for full access" : "Drag to look around"}
+          </p>
         </div>
         <Button
           variant="secondary"
@@ -171,12 +242,31 @@ export const Simple360Viewer = React.memo(function Simple360Viewer({
         </Button>
       </div>
 
-      <div ref={containerRef} className="w-full h-full" style={{ minHeight: "400px" }} />
+      <div
+        ref={containerRef}
+        className="w-full h-full"
+        style={{ minHeight: "400px" }}
+        onContextMenu={handleContextMenu}
+        onDragStart={handleDragStart}
+        onSelectStart={handleSelectStart}
+      />
 
       <div className="absolute inset-0 pointer-events-none z-20">
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/20 text-2xl font-bold rotate-12 select-none">
-          n3uralia.art
+        <div
+          className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/30 text-2xl font-bold rotate-12 select-none ${!isPaid ? "text-white/50" : "text-white/20"}`}
+        >
+          {!isPaid ? "PREVIEW - n3uralia.art" : "n3uralia.art"}
         </div>
+        {!isPaid && (
+          <>
+            <div className="absolute top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2 text-white/20 text-lg font-bold -rotate-12 select-none">
+              PREVIEW
+            </div>
+            <div className="absolute bottom-1/4 right-1/4 transform translate-x-1/2 translate-y-1/2 text-white/20 text-lg font-bold rotate-45 select-none">
+              PREVIEW
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

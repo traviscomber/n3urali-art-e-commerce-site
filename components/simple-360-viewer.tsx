@@ -18,7 +18,6 @@ declare global {
   }
 }
 
-// Function to load Pannellum library dynamically
 const loadPannellum = async (): Promise<boolean> => {
   return new Promise((resolve) => {
     if (typeof window === "undefined") {
@@ -31,6 +30,21 @@ const loadPannellum = async (): Promise<boolean> => {
       return
     }
 
+    // Check if script is already loading or loaded
+    const existingScript = document.querySelector('script[src*="pannellum"]')
+    if (existingScript) {
+      // Script exists, wait for it to load
+      const checkPannellum = () => {
+        if (window.pannellum) {
+          resolve(true)
+        } else {
+          setTimeout(checkPannellum, 100)
+        }
+      }
+      checkPannellum()
+      return
+    }
+
     const script = document.createElement("script")
     script.src = "https://cdn.jsdelivr.net/npm/pannellum@2.3.2/build/pannellum.js"
     script.onload = () => {
@@ -40,7 +54,7 @@ const loadPannellum = async (): Promise<boolean> => {
       console.error("Failed to load Pannellum library.")
       resolve(false)
     }
-    document.head.appendChild(script)
+    document.body.appendChild(script)
   })
 }
 
@@ -119,7 +133,7 @@ export const Simple360Viewer = React.memo(function Simple360Viewer({
           autoLoad: true,
           showControls: !isPaid ? false : true, // Hide controls for unpaid images
           showFullscreenCtrl: false, // Always disabled
-          showZoomCtrl: false, // Always disabled
+          showZoomCtrl: false, // Always disabled for protection
           mouseZoom: isPaid ? false : false, // Always disabled for protection
           doubleClickZoom: false, // Always disabled
           draggable: true, // Movement always enabled

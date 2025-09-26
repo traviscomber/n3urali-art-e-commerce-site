@@ -47,24 +47,50 @@ export default function EquirectangularCategoryPage() {
     }
 
     return new Promise<boolean>((resolve) => {
-      // Load CSS
-      const cssLink = document.createElement("link")
-      cssLink.rel = "stylesheet"
-      cssLink.href = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"
-      document.head.appendChild(cssLink)
+      // Check if CSS is already loaded
+      const existingCSS = document.querySelector('link[href*="pannellum.css"]')
+      if (!existingCSS) {
+        const cssLink = document.createElement("link")
+        cssLink.rel = "stylesheet"
+        cssLink.href = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"
+        cssLink.onload = () => console.log("[v0] Pannellum CSS loaded")
+        cssLink.onerror = () => console.error("[v0] Failed to load Pannellum CSS")
+        // Use document.body instead of document.head to avoid conflicts
+        document.body.appendChild(cssLink)
+      }
 
-      // Load JS
-      const script = document.createElement("script")
-      script.src = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"
-      script.onload = () => {
-        setPannellumLoaded(true)
-        resolve(true)
+      // Check if script is already loaded
+      const existingScript = document.querySelector('script[src*="pannellum.js"]')
+      if (!existingScript) {
+        const script = document.createElement("script")
+        script.src = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"
+        script.onload = () => {
+          setPannellumLoaded(true)
+          resolve(true)
+        }
+        script.onerror = () => {
+          console.error("Failed to load Pannellum")
+          resolve(false)
+        }
+        // Use document.body instead of document.head to avoid conflicts
+        document.body.appendChild(script)
+      } else {
+        // Script already exists, check if window.pannellum is available
+        if (window.pannellum) {
+          setPannellumLoaded(true)
+          resolve(true)
+        } else {
+          // Wait a bit for the script to initialize
+          setTimeout(() => {
+            if (window.pannellum) {
+              setPannellumLoaded(true)
+              resolve(true)
+            } else {
+              resolve(false)
+            }
+          }, 100)
+        }
       }
-      script.onerror = () => {
-        console.error("Failed to load Pannellum")
-        resolve(false)
-      }
-      document.head.appendChild(script)
     })
   }
 

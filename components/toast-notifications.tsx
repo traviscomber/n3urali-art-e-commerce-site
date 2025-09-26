@@ -51,7 +51,7 @@ export function ToastNotifications({ toasts, onRemove }: ToastNotificationsProps
         return (
           <div
             key={toast.id}
-            className={`p-4 rounded-lg border shadow-lg animate-in slide-in-from-right-full duration-300 ${toastStyles[toast.type]}`}
+            className={`p-4 rounded-lg border shadow-lg animate-in slide-in-from-right-2 duration-300 ${toastStyles[toast.type]}`}
           >
             <div className="flex items-start gap-3">
               <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" />

@@ -37,13 +37,29 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (
-    request.nextUrl.pathname !== "/" &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  const publicPaths = [
+    "/",
+    "/browse",
+    "/categories",
+    "/photo",
+    "/api/images", // Allow public API access for image data
+  ]
+
+  const protectedPaths = ["/admin", "/account", "/protected", "/simple-admin", "/admin-simple"]
+
+  const isPublicPath = publicPaths.some(
+    (path) => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(path + "/"),
+  )
+
+  const isAuthPath = request.nextUrl.pathname.startsWith("/auth") || request.nextUrl.pathname.startsWith("/login")
+
+  const isProtectedPath = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path))
+
+  // Only redirect to login if:
+  // 1. User is not authenticated AND
+  // 2. Path is protected (admin/account) AND
+  // 3. Path is not already auth-related
+  if (!user && isProtectedPath && !isAuthPath) {
     const url = request.nextUrl.clone()
     url.pathname = "/auth/login"
     return NextResponse.redirect(url)

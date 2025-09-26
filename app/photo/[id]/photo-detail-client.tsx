@@ -50,14 +50,15 @@ export default function PhotoDetailClient({ initialImage }: Props) {
   const isEquirectangular = category.toLowerCase().includes("equirectangular") || category.includes("360")
 
   const handleAddToCart = () => {
-    if (!isAuthenticated) {
-      router.push("/auth/login")
-      return
-    }
     setShowLicenseSelector(true)
   }
 
   const handleLicenseSelect = (license: any, totalPrice: number) => {
+    if (!isAuthenticated) {
+      router.push("/auth/login")
+      return
+    }
+
     addItem({
       id: `${image.id}-${license.id}`,
       imageId: image.id,

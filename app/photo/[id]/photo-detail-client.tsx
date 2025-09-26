@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ImageWithFallback } from "@/components/image-with-fallback"
 import { LicenseSelector } from "@/components/license-selector"
 import { BreadcrumbNav } from "@/components/breadcrumb-nav"
-import { ArrowLeft, ShoppingCart, Eye, Share2, Heart, Maximize, Info, ZoomIn } from "lucide-react"
+import { ArrowLeft, ShoppingCart, Eye, Share2, Heart, Maximize, Info } from "lucide-react"
 import { Simple360Viewer } from "@/components/simple-360-viewer"
 
 interface Image {
@@ -134,16 +134,6 @@ export default function PhotoDetailClient({ initialImage }: Props) {
 
                       {/* Action Buttons Overlay */}
                       <div className="absolute bottom-4 right-4 flex gap-2">
-                        {!isEquirectangular && (
-                          <Button
-                            size="sm"
-                            onClick={() => window.open(image.original_url, "_blank")}
-                            className="bg-black/50 hover:bg-black/70 text-white"
-                          >
-                            <ZoomIn className="w-4 h-4 mr-2" />
-                            Zoom
-                          </Button>
-                        )}
                         {isEquirectangular && (
                           <Button
                             size="sm"

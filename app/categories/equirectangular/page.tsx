@@ -122,11 +122,11 @@ export default function EquirectangularCategoryPage() {
           autoLoad: true,
           showControls: true,
           showFullscreenCtrl: true,
-          showZoomCtrl: true,
-          mouseZoom: true,
-          doubleClickZoom: true,
+          showZoomCtrl: false,
+          mouseZoom: false,
+          doubleClickZoom: false,
           draggable: true,
-          keyboardZoom: true,
+          keyboardZoom: false,
           compass: true,
           northOffset: 0,
           preview: image.thumbnail_url,
@@ -135,8 +135,8 @@ export default function EquirectangularCategoryPage() {
           hfov: 100,
           pitch: 0,
           yaw: 0,
-          minHfov: 50,
-          maxHfov: 120,
+          minHfov: 100,
+          maxHfov: 100,
         })
         console.log("[v0] Pannellum 360° viewer initialized successfully")
       } catch (error) {
@@ -568,9 +568,7 @@ export default function EquirectangularCategoryPage() {
             <div className="bg-black/80 text-white px-6 py-4 rounded-xl backdrop-blur-sm border border-white/20 max-w-md">
               <h2 className="text-2xl font-bold mb-2">{current360Image.title}</h2>
               <p className="text-white/80">Interactive 360° Experience</p>
-              <p className="text-xs text-white/60">
-                Drag to explore • Scroll to zoom • Click fullscreen for best experience
-              </p>
+              <p className="text-xs text-white/60">Drag to explore • Click fullscreen for best experience</p>
             </div>
             <Button
               variant="secondary"

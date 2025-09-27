@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createSupabaseServerClient } from "@/lib/database"
+import { createNeonClient } from "@/lib/neon/client"
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,64 +13,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Order item ID is required" }, { status: 400 })
     }
 
-    console.log("[v0] Creating Supabase client...")
-    const supabase = createSupabaseServerClient()
-    console.log("[v0] Supabase client created successfully")
+    console.log("[v0] Creating Neon client...")
+    const sql = createNeonClient()
+    console.log("[v0] Neon client created successfully")
 
-    console.log("[v0] Generating download token...")
-    try {
-      const { data: orderItem, error: orderItemError } = await supabase
-        .from("order_items")
-        .select(`
-          *,
-          orders!inner(status)
-        `)
-        .eq("id", orderItemId)
-        .single()
+    console.log("[v0] Calling generate_download_token function...")
+    const result = await sql`
+      SELECT generate_download_token(${orderItemId}::uuid) as token
+    `
+    console.log("[v0] Database result:", result)
 
-      if (orderItemError || !orderItem) {
-        console.log("[v0] Order item not found")
-        return NextResponse.json({ error: "Order item not found" }, { status: 404 })
-      }
-
-      if (orderItem.orders.status !== "completed") {
-        console.log("[v0] Order not completed")
-        return NextResponse.json({ error: "Order not completed" }, { status: 403 })
-      }
-
-      const downloadToken = `dl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-
-      const { data: downloadResult, error: downloadError } = await supabase
-        .from("downloads")
-        .insert({
-          order_item_id: orderItemId,
-          image_id: orderItem.image_id, // Added missing image_id
-          download_token: downloadToken,
-          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-          download_count: 0,
-        })
-        .select()
-        .single()
-
-      if (downloadError || !downloadResult) {
-        console.log("[v0] Failed to create download record:", downloadError)
-        return NextResponse.json({ error: "Failed to generate download token" }, { status: 500 })
-      }
-
-      const downloadUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/download/by-token/${downloadResult.download_token}`
-      console.log("[v0] Generated download URL:", downloadUrl)
-
-      return NextResponse.json({
-        downloadUrl,
-        token: downloadResult.download_token,
-        expiresIn: "24 hours",
-      })
-    } catch (dbError: any) {
-      console.error("[v0] Database function error:", dbError)
-      return NextResponse.json({ error: "Database error" }, { status: 500 })
+    if (!result[0]?.token) {
+      console.log("[v0] No token returned from database")
+      return NextResponse.json({ error: "Failed to generate download token" }, { status: 500 })
     }
+
+    const downloadUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/download/by-token/${result[0].token}`
+    console.log("[v0] Generated download URL:", downloadUrl)
+
+    return NextResponse.json({
+      downloadUrl,
+      token: result[0].token,
+      expiresIn: "24 hours",
+    })
   } catch (error) {
     console.error("[v0] Download generation error:", error)
+    console.error("[v0] Error stack:", error instanceof Error ? error.stack : "No stack trace")
+    console.error("[v0] Error message:", error instanceof Error ? error.message : String(error))
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

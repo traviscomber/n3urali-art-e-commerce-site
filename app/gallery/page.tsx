@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import { getImagesPaginated } from "@/app/actions/admin-actions"
-import { ImageWithFallback } from "@/components/image-with-fallback"
+import NextImage from "next/image"
 import React from "react"
 import { useInView } from "react-intersection-observer"
 import { BreadcrumbNav } from "@/components/breadcrumb-nav"
@@ -93,14 +93,16 @@ const ImageCard = React.memo(
             </div>
           )}
 
-          <ImageWithFallback
-            src={getImageSrc() || "/placeholder.svg"}
+          <NextImage
+            src={getImageSrc()}
             alt={image.title}
             fill
             className="object-contain bg-muted/20 group-hover:scale-105 transition-transform duration-300"
-            priority={false}
-            fallbackSrc="/placeholder.svg?height=400&width=400&text=Image+Error"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+            loading="lazy"
+            onError={handleImageError}
+            onLoad={handleImageLoad}
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
           />
 
           {imageError && (
@@ -155,13 +157,7 @@ export default function GalleryPage() {
       if (!append) setLoading(true)
 
       try {
-        console.log(`[v0] Fetching images for page ${page}`)
         const result = await getImagesPaginated(page, pageSize)
-        console.log(`[v0] getImagesPaginated result:`, {
-          success: result.success,
-          imageCount: result.data?.images?.length || 0,
-        })
-
         const fetchedData = result.success ? result.data : { images: [], pagination: { totalPages: 1 } }
 
         if (append) {
@@ -172,20 +168,8 @@ export default function GalleryPage() {
 
         setTotalPages(fetchedData.pagination?.totalPages || 1)
         setHasMore(page < (fetchedData.pagination?.totalPages || 1))
-
-        console.log(`[v0] Images state updated:`, {
-          totalImages: fetchedData.images.length,
-          totalPages: fetchedData.pagination?.totalPages,
-          hasMore: page < (fetchedData.pagination?.totalPages || 1),
-        })
       } catch (error) {
         console.error("[v0] Error fetching images:", error)
-        if (error instanceof Error) {
-          console.error("[v0] Fetch error details:", {
-            message: error.message,
-            stack: error.stack,
-          })
-        }
       } finally {
         setLoading(false)
       }
@@ -201,27 +185,11 @@ export default function GalleryPage() {
     () =>
       images.map((image: any) => {
         const preview_url =
-          image.thumbnail_small_url ||
-          image.thumbnail_medium_url ||
-          image.thumbnail_large_url ||
-          image.original_url ||
-          "/placeholder.svg?height=400&width=400&text=No+Image"
+          image.thumbnail_url || image.image_url || "/placeholder.svg?height=400&width=400&text=No+Image"
 
-        const shouldUseProxy =
-          preview_url.includes("backblazeb2.com") &&
-          !preview_url.startsWith("data:") &&
-          !preview_url.startsWith("blob:")
-        const finalPreviewUrl = shouldUseProxy
+        const proxyPreviewUrl = preview_url.includes("backblazeb2.com")
           ? `/api/image-proxy/${preview_url.split("/file/")[1]?.split("/").slice(1).join("/")}`
           : preview_url
-
-        console.log(`[v0] Image ${image.id} preview URL:`, {
-          thumbnail_small: image.thumbnail_small_url?.substring(0, 50) + "...",
-          selected: preview_url.substring(0, 50) + "...",
-          final: finalPreviewUrl.substring(0, 50) + "...",
-          isBase64: finalPreviewUrl.startsWith("data:"),
-          isBlob: finalPreviewUrl.startsWith("blob:"),
-        })
 
         return {
           id: image.id,
@@ -229,7 +197,7 @@ export default function GalleryPage() {
           category:
             image.category_name?.toLowerCase() === "fisheye" ? ("fisheye" as const) : ("equirectangular" as const),
           price: Number.parseFloat(image.price) || 0,
-          preview_url: finalPreviewUrl,
+          preview_url: proxyPreviewUrl,
           dimensions: "4096x4096",
           file_size: 20000000,
           description: image.description || "",
@@ -488,14 +456,18 @@ export default function GalleryPage() {
                       onClick={() => handleImageSelect(image)}
                     >
                       <div className="relative aspect-square overflow-hidden rounded-lg">
-                        <ImageWithFallback
-                          src={image.preview_url || "/placeholder.svg"}
+                        <NextImage
+                          src={image.preview_url}
                           alt={image.title}
                           fill
                           className="object-contain bg-muted/10"
-                          priority={false}
-                          fallbackSrc="/placeholder.svg?height=200&width=200&text=Error"
-                          sizes="(max-width: 640px) 20vw, (max-width: 1024px) 10vw, 5vw"
+                          loading="lazy"
+                          onError={(e) => {
+                            console.log("[v0] Grid image failed to load:", image.preview_url)
+                            e.currentTarget.src = "/placeholder.svg?height=200&width=200&text=Error"
+                          }}
+                          placeholder="blur"
+                          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
                         />
                         <div className="absolute top-1 right-1 w-2 h-2 bg-yellow-400 rounded-full opacity-60" />
                       </div>

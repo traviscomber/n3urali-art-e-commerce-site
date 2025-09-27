@@ -410,12 +410,12 @@ export class WorkingBackblazeStorage {
         console.error("[v0] B2 upload failed with status:", response.status)
         console.error("[v0] B2 error response:", errorText)
 
-        if (response.status === 413 || (errorText && errorText.includes("Request Entity Too Large"))) {
+        if (response.status === 413 || errorText.includes("Request Entity Too Large")) {
           console.log("[v0] File too large for single upload, switching to multipart...")
           return await this.uploadLargeFile(file, key)
         }
 
-        throw new Error(`HTTP ${response.status}: ${errorText || "Unknown error"}`)
+        throw new Error(`HTTP ${response.status}: ${errorText}`)
       }
 
       const contentType = response.headers.get("content-type")
@@ -423,16 +423,13 @@ export class WorkingBackblazeStorage {
         const responseText = await response.text()
         console.error("[v0] B2 returned non-JSON response:", responseText)
 
-        if (
-          responseText &&
-          (responseText.includes("FUNCTION_PAYLOAD_TOO_LARGE") || responseText.includes("Request Entity Too Large"))
-        ) {
+        if (responseText.includes("FUNCTION_PAYLOAD_TOO_LARGE") || responseText.includes("Request Entity Too Large")) {
           console.log("[v0] Function payload too large, switching to multipart upload...")
           return await this.uploadLargeFile(file, key)
         }
 
         throw new Error(
-          `Expected JSON response but got: ${contentType}. Response: ${responseText ? responseText.substring(0, 200) + "..." : "No response"}`,
+          `Expected JSON response but got: ${contentType}. Response: ${responseText.substring(0, 200)}...`,
         )
       }
 

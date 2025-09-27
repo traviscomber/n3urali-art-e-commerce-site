@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js"
+import { createNeonClient } from "@/lib/neon/client"
 
 // Type definitions for database tables
 export type Image = {
@@ -7,10 +7,8 @@ export type Image = {
   description: string
   category_id: string
   price: number
-  original_url: string
-  thumbnail_small_url: string
-  thumbnail_medium_url: string
-  thumbnail_large_url: string
+  image_url: string
+  thumbnail_url: string
   active: boolean
   featured: boolean
   created_at: string
@@ -45,56 +43,20 @@ export type DownloadLog = {
 // License type definitions
 export const LICENSE_TYPES = {
   NON_EXCLUSIVE: {
-    name: "Non-Exclusive",
-    description: "Standard commercial license - image can be sold to multiple buyers",
+    name: "Non-Exclusive License",
+    description: "Standard commercial license for personal and commercial use. Non-exclusive rights.",
     multiplier: 1,
-    price: 29.99,
   },
   EXCLUSIVE: {
-    name: "Exclusive",
-    description: "Exclusive rights - you will be the only buyer of this image",
-    multiplier: 2, // Exactly 100% more expensive (2x)
-    price: 59.98,
+    name: "Exclusive License",
+    description: "Exclusive license with full rights including resale and NFT minting. Complete buyout.",
+    multiplier: 7.5, // 750/99 ratio
   },
 } as const
 
 export type LicenseType = keyof typeof LICENSE_TYPES
 
-export function createSupabaseServerClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!url || !key) {
-    console.error("[v0] Missing Supabase environment variables for server client")
-    console.error("[v0] URL:", !!url, "Key:", !!key)
-    throw new Error("Missing Supabase environment variables for server client")
-  }
-
-  return createClient(url, key)
-}
-
-export function createSupabaseAdminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!url || !key) {
-    console.error("[v0] Missing Supabase environment variables for admin client")
-    console.error("[v0] URL:", !!url, "Key:", !!key)
-    throw new Error("Missing Supabase environment variables for admin client")
-  }
-
-  return createClient(url, key)
-}
-
-export function createSupabaseBrowserClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!url || !key) {
-    console.error("[v0] Missing Supabase environment variables for browser client")
-    console.error("[v0] URL:", !!url, "Key:", !!key)
-    throw new Error("Missing Supabase environment variables for browser client")
-  }
-
-  return createClient(url, key)
+// Helper function to get Neon client
+export function getNeonClient() {
+  return createNeonClient()
 }

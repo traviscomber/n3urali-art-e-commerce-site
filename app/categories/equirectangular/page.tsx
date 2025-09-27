@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { PanoramaViewer } from "@/components/panorama-viewer"
 import { getImages } from "@/app/actions/admin-actions"
 import { useCart } from "@/lib/contexts/cart-context"
-import { ImageWithFallback } from "@/components/image-with-fallback"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 
 interface EquirectangularImage {
@@ -416,14 +416,12 @@ export default function EquirectangularCategoryPage() {
               className="group overflow-hidden bg-background/70 backdrop-blur-sm border-primary/15 hover:border-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-2"
             >
               <div className="relative aspect-[16/9] overflow-hidden">
-                <ImageWithFallback
+                <Image
                   src={image.thumbnail_url || image.image_url || "/placeholder.svg"}
                   alt={image.title}
                   fill
                   className="object-cover transition-all duration-700 group-hover:scale-110"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                 />
-
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
 
                 <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">

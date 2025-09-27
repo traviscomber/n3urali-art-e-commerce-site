@@ -31,7 +31,6 @@ type CartAction =
   | { type: "TOGGLE_CART" }
   | { type: "OPEN_CART" }
   | { type: "CLOSE_CART" }
-  | { type: "LOAD_CART"; payload: CartItem[] }
 
 const CartContext = createContext<{
   state: CartState
@@ -47,14 +46,6 @@ const CartContext = createContext<{
 
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
-    case "LOAD_CART":
-      const loadedTotal = action.payload.reduce((sum, item) => sum + item.price * item.quantity, 0)
-      return {
-        ...state,
-        items: action.payload,
-        total: loadedTotal,
-      }
-
     case "ADD_ITEM":
       const existingItem = state.items.find(
         (item) => item.imageId === action.payload.imageId && item.licenseId === action.payload.licenseId,
@@ -140,29 +131,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   })
 
   useEffect(() => {
-    if (typeof window === "undefined") return
-
-    try {
-      const savedCart = localStorage.getItem("n3urali-cart")
-      if (savedCart) {
+    const savedCart = localStorage.getItem("n3urali-cart")
+    if (savedCart) {
+      try {
         const parsedCart = JSON.parse(savedCart)
-        if (parsedCart.items && Array.isArray(parsedCart.items)) {
-          dispatch({ type: "LOAD_CART", payload: parsedCart.items })
-        }
+        parsedCart.items.forEach((item: CartItem) => {
+          dispatch({ type: "ADD_ITEM", payload: item })
+        })
+      } catch (error) {
+        console.error("Failed to load cart from localStorage:", error)
       }
-    } catch (error) {
-      console.error("Failed to load cart from localStorage:", error)
     }
   }, [])
 
   useEffect(() => {
-    if (typeof window === "undefined") return
-
-    try {
-      localStorage.setItem("n3urali-cart", JSON.stringify(state))
-    } catch (error) {
-      console.error("Failed to save cart to localStorage:", error)
-    }
+    localStorage.setItem("n3urali-cart", JSON.stringify(state))
   }, [state])
 
   const addItem = (item: CartItem) => {

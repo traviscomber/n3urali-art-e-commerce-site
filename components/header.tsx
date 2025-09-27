@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ShoppingCart, Menu, X } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
-import { AuthButton } from "./auth-button"
+import { UserMenu } from "./user-menu"
 import { ThemeToggle } from "./theme-toggle"
 import Image from "next/image"
 
@@ -90,7 +90,7 @@ export function Header() {
               )}
             </Button>
 
-            <AuthButton />
+            <UserMenu />
 
             <Button
               variant="ghost"

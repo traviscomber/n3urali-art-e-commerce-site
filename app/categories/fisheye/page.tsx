@@ -6,12 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Grid, List, ShoppingCart, Eye } from "lucide-react"
+import { Search, Grid, List, ShoppingCart } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
 import { getImages } from "@/app/actions/admin-actions"
-import { ImageWithFallback } from "@/components/image-with-fallback" // Import ImageWithFallback component
+import NextImage from "next/image"
 import React from "react"
-import { useRouter } from "next/navigation"
 
 function useDebounce(value: string, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value)
@@ -46,23 +45,23 @@ const FisheyeCard = React.memo(
     image,
     onPreview,
     onAddToCart,
-    onImageClick,
   }: {
     image: FisheyeImage
     onPreview: (image: FisheyeImage) => void
     onAddToCart: (image: FisheyeImage) => void
-    onImageClick: (image: FisheyeImage) => void
   }) => (
     <Card className="group overflow-hidden bg-background/70 backdrop-blur-sm border-primary/15 hover:border-primary/40 transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
-      <div className="relative w-full min-h-[200px] overflow-hidden cursor-pointer" onClick={() => onImageClick(image)}>
-        <ImageWithFallback
+      <div className="relative w-full min-h-[200px] overflow-hidden cursor-pointer" onClick={() => onPreview(image)}>
+        <NextImage
           src={image.previewUrl || "/placeholder.svg"}
           alt={image.title}
           width={400}
           height={400}
           className="w-full h-auto object-contain transition-transform duration-200 group-hover:scale-105"
-          priority={false}
+          loading="lazy"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
         />
 
         <div className="absolute inset-0 pointer-events-none">
@@ -90,30 +89,19 @@ const FisheyeCard = React.memo(
             <span>{image.fileSize}</span>
           </div>
 
-          <div className="flex items-center justify-between pt-2 gap-2">
+          <div className="flex items-center justify-between pt-2">
             <span className="font-bold text-primary">${image.price}</span>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onPreview(image)
-                }}
-              >
-                <Eye className="w-4 h-4" />
-              </Button>
-              <Button
-                size="sm"
-                variant="default"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onAddToCart(image)
-                }}
-              >
-                <ShoppingCart className="w-4 h-4" />
-              </Button>
-            </div>
+            <Button
+              size="sm"
+              variant="default"
+              onClick={(e) => {
+                e.stopPropagation()
+                onAddToCart(image)
+              }}
+            >
+              <ShoppingCart className="w-4 h-4 mr-1" />
+              Add to Cart
+            </Button>
           </div>
         </div>
       </CardContent>
@@ -131,7 +119,6 @@ export default function FisheyeCategoryPage() {
   const [loading, setLoading] = useState(true)
   const [previewImage, setPreviewImage] = useState<FisheyeImage | null>(null)
   const { addItem } = useCart()
-  const router = useRouter()
 
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
@@ -208,14 +195,6 @@ export default function FisheyeCategoryPage() {
   const handlePreview = useCallback((image: FisheyeImage) => {
     setPreviewImage(image)
   }, [])
-
-  const handleImageClick = useCallback(
-    (image: FisheyeImage) => {
-      console.log("[v0] Image clicked, redirecting to photo:", image.title, "ID:", image.id)
-      router.push(`/photo/${image.id}`)
-    },
-    [router],
-  )
 
   if (loading) {
     return (
@@ -319,13 +298,7 @@ export default function FisheyeCategoryPage() {
           className={`grid gap-6 ${viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"}`}
         >
           {filteredImages.map((image) => (
-            <FisheyeCard
-              key={image.id}
-              image={image}
-              onPreview={handlePreview}
-              onAddToCart={handleAddToCart}
-              onImageClick={handleImageClick}
-            />
+            <FisheyeCard key={image.id} image={image} onPreview={handlePreview} onAddToCart={handleAddToCart} />
           ))}
         </div>
 
@@ -361,13 +334,13 @@ export default function FisheyeCategoryPage() {
 
             <div className="p-6 flex justify-center">
               <div className="relative max-w-full">
-                <ImageWithFallback
+                <NextImage
                   src={previewImage.previewUrl || "/placeholder.svg"}
                   alt={previewImage.title}
                   width={720}
                   height={720}
                   className="max-w-full max-h-full object-contain rounded-md"
-                  priority={false}
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 pointer-events-none">
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/25 text-3xl font-bold rotate-12 select-none">
@@ -395,23 +368,10 @@ export default function FisheyeCategoryPage() {
                 </div>
               </div>
 
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1 bg-transparent"
-                  onClick={() => {
-                    setPreviewImage(null)
-                    handleImageClick(previewImage)
-                  }}
-                >
-                  <Eye className="w-4 h-4 mr-2" />
-                  View Details
-                </Button>
-                <Button className="flex-1 bg-primary hover:bg-primary/90" onClick={() => handleAddToCart(previewImage)}>
-                  <ShoppingCart className="w-4 h-4 mr-2" />
-                  Add to Cart - ${previewImage.price}
-                </Button>
-              </div>
+              <Button className="w-full bg-primary hover:bg-primary/90" onClick={() => handleAddToCart(previewImage)}>
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                Add to Cart - ${previewImage.price}
+              </Button>
             </div>
           </div>
         </div>

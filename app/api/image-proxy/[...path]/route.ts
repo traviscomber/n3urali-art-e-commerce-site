@@ -6,13 +6,6 @@ export async function GET(request: NextRequest, { params }: { params: { path: st
     const imagePath = params.path.join("/")
     console.log("[v0] Image proxy request for:", imagePath)
 
-    const corsHeaders = {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET",
-      "Access-Control-Allow-Headers": "Content-Type",
-      "Cache-Control": "public, max-age=3600, s-maxage=86400",
-    }
-
     // Initialize Backblaze storage
     const storage = new WorkingBackblazeStorage(
       process.env.BACKBLAZE_API_KEY!,
@@ -31,10 +24,7 @@ export async function GET(request: NextRequest, { params }: { params: { path: st
 
     if (!imageResponse.ok) {
       console.log("[v0] Image fetch failed:", imageResponse.status, imageResponse.statusText)
-      return new NextResponse("Image not found", {
-        status: 404,
-        headers: corsHeaders,
-      })
+      return new NextResponse("Image not found", { status: 404 })
     }
 
     const imageBuffer = await imageResponse.arrayBuffer()
@@ -43,29 +33,14 @@ export async function GET(request: NextRequest, { params }: { params: { path: st
     return new NextResponse(imageBuffer, {
       headers: {
         "Content-Type": contentType,
-        ...corsHeaders,
-      },
-    })
-  } catch (error) {
-    console.error("[v0] Image proxy error:", error)
-    return new NextResponse("Internal server error", {
-      status: 500,
-      headers: {
+        "Cache-Control": "public, max-age=3600",
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET",
         "Access-Control-Allow-Headers": "Content-Type",
       },
     })
+  } catch (error) {
+    console.error("[v0] Image proxy error:", error)
+    return new NextResponse("Internal server error", { status: 500 })
   }
-}
-
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  })
 }

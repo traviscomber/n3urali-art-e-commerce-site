@@ -1,30 +1,21 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createSupabaseServerClient } from "@/lib/database"
+import { createNeonClient } from "@/lib/neon/client"
 import { cookies } from "next/headers"
 
 async function getCurrentUser(sessionToken: string) {
-  const supabase = createSupabaseServerClient()
+  const sql = createNeonClient()
 
-  const { data: sessionResult, error } = await supabase
-    .from("user_sessions")
-    .select(`
-      user_id,
-      user_profiles!inner(full_name, is_admin, avatar_url),
-      auth_users!inner(email)
-    `)
-    .eq("session_token", sessionToken)
-    .gt("expires_at", new Date().toISOString())
-    .single()
+  const sessionResult = await sql`
+    SELECT us.user_id, up.full_name, up.is_admin, u.email, up.avatar_url
+    FROM user_sessions us
+    JOIN user_profiles up ON us.user_id = up.id
+    JOIN auth.users u ON up.id = u.id
+    WHERE us.session_token = ${sessionToken}
+    AND us.expires_at > NOW()
+    LIMIT 1
+  `
 
-  return error || !sessionResult
-    ? null
-    : {
-        user_id: sessionResult.user_id,
-        email: sessionResult.auth_users.email,
-        full_name: sessionResult.user_profiles.full_name,
-        avatar_url: sessionResult.user_profiles.avatar_url,
-        is_admin: sessionResult.user_profiles.is_admin,
-      }
+  return sessionResult.length > 0 ? sessionResult[0] : null
 }
 
 export async function GET(request: NextRequest) {
@@ -78,31 +69,29 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Full name is required" }, { status: 400 })
     }
 
-    const supabase = createSupabaseServerClient()
+    const sql = createNeonClient()
 
-    const { data: result, error } = await supabase
-      .from("user_profiles")
-      .update({
-        full_name: full_name,
-        avatar_url: avatar_url || null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", user.user_id)
-      .select()
-      .single()
+    const result = await sql`
+      UPDATE user_profiles 
+      SET full_name = ${full_name}, 
+          avatar_url = ${avatar_url || null},
+          updated_at = NOW()
+      WHERE id = ${user.user_id}
+      RETURNING *
+    `
 
-    if (error || !result) {
+    if (result.length === 0) {
       return NextResponse.json({ error: "Failed to update profile" }, { status: 500 })
     }
 
     return NextResponse.json({
       message: "Profile updated successfully",
       user: {
-        id: result.id,
+        id: result[0].id,
         email: user.email,
-        full_name: result.full_name,
-        avatar_url: result.avatar_url,
-        is_admin: result.is_admin,
+        full_name: result[0].full_name,
+        avatar_url: result[0].avatar_url,
+        is_admin: result[0].is_admin,
       },
     })
   } catch (error) {

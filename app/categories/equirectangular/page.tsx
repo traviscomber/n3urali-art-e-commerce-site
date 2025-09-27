@@ -138,13 +138,43 @@ export default function EquirectangularCategoryPage() {
       try {
         const result = await getImages()
         if (result.success && result.data) {
-          // Filter for equirectangular images (360° or similar categories)
-          const equirectangularImages = result.data.filter(
+          console.log("[v0] Total images fetched:", result.data.length)
+          console.log(
+            "[v0] Sample image categories:",
+            result.data.slice(0, 5).map((img) => ({
+              title: img.title,
+              category: img.category_name,
+              active: img.active,
+            })),
+          )
+
+          let equirectangularImages = result.data.filter(
             (img: EquirectangularImage) =>
               img.category_name?.toLowerCase().includes("equirectangular") ||
               img.category_name?.toLowerCase().includes("360") ||
-              img.category_name?.toLowerCase().includes("panoramic"),
+              img.category_name?.toLowerCase().includes("panoramic") ||
+              img.category_name?.toLowerCase().includes("spherical") ||
+              img.category_name?.toLowerCase().includes("immersive"),
           )
+
+          // If no specific category matches, show all active images
+          if (equirectangularImages.length === 0) {
+            console.log("[v0] No category-specific images found, showing all active images")
+            equirectangularImages = result.data.filter((img: EquirectangularImage) => img.active !== false)
+          }
+
+          console.log("[v0] Filtered images count:", equirectangularImages.length)
+          console.log(
+            "[v0] Filtered images sample:",
+            equirectangularImages.slice(0, 3).map((img) => ({
+              title: img.title,
+              category: img.category_name,
+              active: img.active,
+              hasImageUrl: !!img.image_url,
+              hasThumbnailUrl: !!img.thumbnail_url,
+            })),
+          )
+
           setImages(equirectangularImages)
           setFilteredImages(equirectangularImages)
         }

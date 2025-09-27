@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Filter, Grid3X3, List, Eye, Download } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
 import NextImage from "next/image"
 import { ImageUrlHandler } from "@/lib/image-url-handler"
@@ -91,7 +90,7 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
       <div className="flex flex-col lg:flex-row gap-4 items-center justify-between bg-card/30 backdrop-blur-sm p-6 rounded-xl border border-border/20">
         <div className="flex flex-col sm:flex-row gap-4 flex-1">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground text-sm">🔍</span>
             <Input
               placeholder="Search images..."
               value={searchTerm}
@@ -102,7 +101,7 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
 
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
             <SelectTrigger className="w-full sm:w-48 bg-background/50 border-border/50">
-              <Filter className="h-4 w-4 mr-2" />
+              <span className="mr-2">📁</span>
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
@@ -120,7 +119,7 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
             onClick={() => setViewMode("grid")}
             className="transition-all duration-300"
           >
-            <Grid3X3 className="h-4 w-4" />
+            <span className="text-sm">⊞</span>
           </Button>
           <Button
             variant={viewMode === "list" ? "default" : "outline"}
@@ -128,7 +127,7 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
             onClick={() => setViewMode("list")}
             className="transition-all duration-300"
           >
-            <List className="h-4 w-4" />
+            <span className="text-sm">☰</span>
           </Button>
         </div>
       </div>
@@ -179,14 +178,14 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
                     onClick={() => onImageSelect?.(image)}
                     className="bg-background/80 backdrop-blur-sm hover:bg-background"
                   >
-                    <Eye className="h-4 w-4" />
+                    <span className="text-sm">👁</span>
                   </Button>
                   <Button
                     size="sm"
                     onClick={() => handleAddToCart(image)}
                     className="bg-primary/90 backdrop-blur-sm hover:bg-primary glow-primary"
                   >
-                    <Download className="h-4 w-4" />
+                    <span className="text-sm">⬇</span>
                   </Button>
                 </div>
               </div>
@@ -216,7 +215,7 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
       {filteredImages.length === 0 && (
         <div className="text-center py-16">
           <div className="w-24 h-24 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Search className="h-12 w-12 text-muted-foreground" />
+            <span className="text-4xl">🔍</span>
           </div>
           <h3 className="text-xl font-semibold mb-2">No images found</h3>
           <p className="text-muted-foreground">Try adjusting your search or filter criteria.</p>

@@ -851,13 +851,24 @@ export default function SimpleAdminPage() {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.id} className="text-lg">
-                          {getCategoryDisplayName(cat)}
+                      {loading ? (
+                        <SelectItem value="" disabled className="text-lg">
+                          Loading categories...
                         </SelectItem>
-                      ))}
+                      ) : categories.length === 0 ? (
+                        <SelectItem value="" disabled className="text-lg">
+                          No categories available
+                        </SelectItem>
+                      ) : (
+                        categories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id} className="text-lg">
+                            {getCategoryDisplayName(cat)}
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
+                  <p className="text-xs text-gray-500 mt-1">{categories.length} categories loaded</p>
                 </div>
 
                 <div>

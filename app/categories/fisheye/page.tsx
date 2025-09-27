@@ -155,47 +155,24 @@ export default function FisheyeCategoryPage() {
         if (result.success) {
           console.log("[v0] Total images received:", result.data.length)
 
-          result.data.forEach((img: any, index: number) => {
-            if (index < 5) {
-              // Log first 5 images for debugging
-              console.log(`[v0] Image ${index + 1}:`, {
-                id: img.id,
-                title: img.title,
-                category_name: img.category_name,
-                category_name_type: typeof img.category_name,
-                category_name_lowercase: img.category_name?.toLowerCase(),
-                includes_fisheye: img.category_name?.toLowerCase().includes("fisheye"),
-              })
-            }
-          })
-
-          const fisheyeImages = result.data
-            .filter((img: any) => {
-              const categoryName = img.category_name
-              if (!categoryName) {
-                console.log("[v0] Image with no category_name:", img.title)
-                return false
-              }
-              const matches = categoryName.toLowerCase().includes("fisheye")
-              if (matches) {
-                console.log("[v0] Found fisheye image:", img.title, "category:", categoryName)
-              }
-              return matches
-            })
+          const allActiveImages = result.data
+            .filter((img: any) => img.active !== false) // Only filter out inactive images
             .map((image: any) => ({
               id: image.id,
               title: image.title,
               description: image.description || "",
-              category: "fisheye" as const,
+              category: image.category_name?.toLowerCase().includes("fisheye")
+                ? ("fisheye" as const)
+                : ("equirectangular" as const),
               price: Number.parseFloat(image.price) || 0,
               previewUrl: image.image_url || image.thumbnail_url,
               dimensions: "4096x4096",
               fileSize: "15.0 MB",
-              tags: [image.category_name?.toLowerCase() || "fisheye"],
+              tags: [image.category_name?.toLowerCase() || "image"],
             }))
 
-          console.log("[v0] Filtered fisheye images count:", fisheyeImages.length)
-          setImages(fisheyeImages)
+          console.log("[v0] All active images count:", allActiveImages.length)
+          setImages(allActiveImages)
         } else {
           console.error("[v0] Failed to fetch images:", result.error)
         }

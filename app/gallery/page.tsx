@@ -194,8 +194,9 @@ export default function GalleryPage() {
         return {
           id: image.id,
           title: image.title,
-          category:
-            image.category_name?.toLowerCase() === "fisheye" ? ("fisheye" as const) : ("equirectangular" as const),
+          category: image.category_name?.toLowerCase().includes("fisheye")
+            ? ("fisheye" as const)
+            : ("equirectangular" as const),
           price: Number.parseFloat(image.price) || 0,
           preview_url: proxyPreviewUrl,
           dimensions: "4096x4096",
@@ -207,9 +208,11 @@ export default function GalleryPage() {
   )
 
   const { equirectangularImages, fisheyeImages } = useMemo(() => {
-    const equirectangular = transformedImages.filter((img) => img.category === "equirectangular")
-    const fisheye = transformedImages.filter((img) => img.category === "fisheye")
-    return { equirectangularImages: equirectangular, fisheyeImages: fisheye }
+    const allImages = transformedImages.filter((img) => img.id) // Just filter out any invalid entries
+    return {
+      equirectangularImages: allImages,
+      fisheyeImages: allImages,
+    }
   }, [transformedImages])
 
   const handleImageSelect = useCallback(

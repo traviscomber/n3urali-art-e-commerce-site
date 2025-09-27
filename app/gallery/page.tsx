@@ -157,8 +157,13 @@ export default function GalleryPage() {
       if (!append) setLoading(true)
 
       try {
+        console.log(`[v0] Fetching images for page ${page}`)
         const result = await getImagesPaginated(page, pageSize)
+        console.log(`[v0] getImagesPaginated result:`, result)
+
         const fetchedData = result.success ? result.data : { images: [], pagination: { totalPages: 1 } }
+        console.log(`[v0] Extracted data:`, fetchedData)
+        console.log(`[v0] Images count:`, fetchedData.images?.length || 0)
 
         if (append) {
           setImages((prev) => [...prev, ...fetchedData.images])
@@ -168,6 +173,8 @@ export default function GalleryPage() {
 
         setTotalPages(fetchedData.pagination?.totalPages || 1)
         setHasMore(page < (fetchedData.pagination?.totalPages || 1))
+
+        console.log(`[v0] Set ${fetchedData.images?.length || 0} images in state`)
       } catch (error) {
         console.error("[v0] Error fetching images:", error)
       } finally {
@@ -181,28 +188,31 @@ export default function GalleryPage() {
     fetchImages(1, false)
   }, [fetchImages])
 
-  const transformedImages = useMemo(
-    () =>
-      images.map((image: any) => {
-        const preview_url =
-          image.thumbnail_url || image.image_url || "/placeholder.svg?height=400&width=400&text=No+Image"
+  const transformedImages = useMemo(() => {
+    console.log(`[v0] Transforming ${images.length} images`)
 
-        console.log("[v0] Image URL:", preview_url)
+    return images.map((image: any) => {
+      const preview_url =
+        image.file_path ||
+        image.thumbnail_url ||
+        image.image_url ||
+        "/placeholder.svg?height=400&width=400&text=No+Image"
 
-        return {
-          id: image.id,
-          title: image.title,
-          category:
-            image.category_name?.toLowerCase() === "fisheye" ? ("fisheye" as const) : ("equirectangular" as const),
-          price: Number.parseFloat(image.price) || 0,
-          preview_url: preview_url, // Use direct URL without proxy
-          dimensions: "4096x4096",
-          file_size: 20000000,
-          description: image.description || "",
-        }
-      }),
-    [images],
-  )
+      console.log(`[v0] Image ${image.id}: file_path=${image.file_path}, preview_url=${preview_url}`)
+
+      return {
+        id: image.id,
+        title: image.title,
+        category:
+          image.category_name?.toLowerCase() === "fisheye" ? ("fisheye" as const) : ("equirectangular" as const),
+        price: Number.parseFloat(image.price) || 0,
+        preview_url: preview_url, // Use direct Supabase URL
+        dimensions: "4096x4096",
+        file_size: 20000000,
+        description: image.description || "",
+      }
+    })
+  }, [images])
 
   const { equirectangularImages, fisheyeImages } = useMemo(() => {
     const equirectangular = transformedImages.filter((img) => img.category === "equirectangular")

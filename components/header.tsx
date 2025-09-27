@@ -8,6 +8,7 @@ import { ShoppingCart, Menu, X } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
 import { AuthButton } from "./auth-button"
 import { ThemeToggle } from "./theme-toggle"
+import Image from "next/image"
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -20,20 +21,30 @@ export function Header() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           <Link href="/" className="flex items-center group">
-            <div className="relative flex items-center space-x-2">
-              <div className="text-2xl font-bold text-white group-hover:text-primary transition-colors duration-300">
-                n3urali
+            <div className="relative h-16 w-auto">
+              {/* Animated overlay positioned over the neuralia text part of the logo */}
+              <div className="absolute top-0 left-0 w-48 h-16 flex items-center justify-center pointer-events-none">
+                <div className="w-40 h-12 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 animate-neuralia-pulse opacity-40" />
               </div>
-              <div className="text-sm font-medium text-primary bg-primary/10 px-2 py-1 rounded-full animate-gentle-pulse">
-                360°
+              {/* Animated overlay positioned over the 360° part of the logo */}
+              <div className="absolute top-0 right-0 w-12 h-16 flex items-center justify-center pointer-events-none">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 animate-gentle-pulse opacity-60" />
               </div>
+              <Image
+                src="/images/n3uralia-logo.png"
+                alt="n3uralia 360°"
+                width={320}
+                height={64}
+                className="h-16 w-auto object-contain group-hover:opacity-80 transition-opacity duration-300"
+                priority
+              />
             </div>
           </Link>
 
           <nav className="hidden md:flex items-center space-x-12">
             <Link
-              href="/browse"
-              className="relative text-sm font-medium text-gray-300 hover:text-primary transition-all duration-300 group"
+              href="/gallery"
+              className="relative text-sm font-medium text-white hover:text-primary transition-all duration-300 group"
             >
               Gallery
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
@@ -96,8 +107,8 @@ export function Header() {
           <div className="md:hidden border-t border-border/20 py-6 bg-black/95 backdrop-blur-sm rounded-b-lg">
             <nav className="flex flex-col space-y-6">
               <Link
-                href="/browse"
-                className="text-base font-medium text-gray-300 hover:text-primary transition-colors px-2"
+                href="/gallery"
+                className="text-base font-medium text-white hover:text-primary transition-colors px-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Gallery

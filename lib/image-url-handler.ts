@@ -22,35 +22,30 @@ export class ImageUrlHandler {
     if (!url) return url
 
     if (this.BASE64_PATTERN.test(url)) {
-      if (typeof window !== "undefined") {
-        console.log("[v0] Converting base64 data URL to blob URL")
-        try {
-          // Extract the base64 data and mime type
-          const [header, data] = url.split(",")
-          const mimeMatch = header.match(/data:([^;]+)/)
-          const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg"
+      console.log("[v0] Converting base64 data URL to blob URL")
+      try {
+        // Extract the base64 data and mime type
+        const [header, data] = url.split(",")
+        const mimeMatch = header.match(/data:([^;]+)/)
+        const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg"
 
-          // Convert base64 to blob
-          const byteCharacters = atob(data)
-          const byteNumbers = new Array(byteCharacters.length)
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i)
-          }
-          const byteArray = new Uint8Array(byteNumbers)
-          const blob = new Blob([byteArray], { type: mimeType })
-
-          // Create blob URL
-          const blobUrl = URL.createObjectURL(blob)
-          console.log("[v0] Created blob URL from base64 data")
-          return blobUrl
-        } catch (error) {
-          console.error("[v0] Error converting base64 to blob URL:", error)
-          // Fallback to placeholder if conversion fails
-          return `/placeholder.svg?height=400&width=400&query=image-conversion-error`
+        // Convert base64 to blob
+        const byteCharacters = atob(data)
+        const byteNumbers = new Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i)
         }
-      } else {
-        console.log("[v0] Server-side: Cannot create blob URL, returning base64 URL")
-        return url
+        const byteArray = new Uint8Array(byteNumbers)
+        const blob = new Blob([byteArray], { type: mimeType })
+
+        // Create blob URL
+        const blobUrl = URL.createObjectURL(blob)
+        console.log("[v0] Created blob URL from base64 data")
+        return blobUrl
+      } catch (error) {
+        console.error("[v0] Error converting base64 to blob URL:", error)
+        // Fallback to placeholder if conversion fails
+        return `/placeholder.svg?height=400&width=400&query=image-conversion-error`
       }
     }
 

@@ -9,10 +9,10 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ImageWithFallback } from "@/components/image-with-fallback"
+import { PanoramaViewer } from "@/components/panorama-viewer"
 import { LicenseSelector } from "@/components/license-selector"
 import { BreadcrumbNav } from "@/components/breadcrumb-nav"
-import { ArrowLeft, ShoppingCart, Eye, Share2, Heart, Maximize, Info, ZoomIn } from "lucide-react"
-import { Simple360Viewer } from "@/components/simple-360-viewer"
+import { ArrowLeft, ShoppingCart, Eye, Share2, Heart, Maximize, Info } from "lucide-react"
 
 interface Image {
   id: string
@@ -50,15 +50,14 @@ export default function PhotoDetailClient({ initialImage }: Props) {
   const isEquirectangular = category.toLowerCase().includes("equirectangular") || category.includes("360")
 
   const handleAddToCart = () => {
-    setShowLicenseSelector(true)
-  }
-
-  const handleLicenseSelect = (license: any, totalPrice: number) => {
     if (!isAuthenticated) {
       router.push("/auth/login")
       return
     }
+    setShowLicenseSelector(true)
+  }
 
+  const handleLicenseSelect = (license: any, totalPrice: number) => {
     addItem({
       id: `${image.id}-${license.id}`,
       imageId: image.id,
@@ -108,55 +107,34 @@ export default function PhotoDetailClient({ initialImage }: Props) {
             <Card className="overflow-hidden">
               <CardContent className="p-0">
                 <div className="relative aspect-video bg-muted/20">
-                  {showPanoramaViewer && isEquirectangular ? (
-                    <Simple360Viewer
-                      imageUrl={image.original_url}
-                      title={image.title}
-                      onClose={() => setShowPanoramaViewer(false)}
-                      inline={true}
-                    />
-                  ) : (
-                    <>
-                      <ImageWithFallback
-                        src={displayUrl || "/placeholder.svg"}
-                        alt={image.title}
-                        fill
-                        className="object-contain"
-                        priority
-                      />
+                  <ImageWithFallback
+                    src={displayUrl || "/placeholder.svg"}
+                    alt={image.title}
+                    fill
+                    className="object-contain"
+                    priority
+                  />
 
-                      {/* Watermark */}
-                      <div className="absolute inset-0 pointer-events-none">
-                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/20 text-4xl font-bold rotate-12 select-none">
-                          n3uralia.art
-                        </div>
-                      </div>
+                  {/* Watermark */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/20 text-4xl font-bold rotate-12 select-none">
+                      n3uralia.art
+                    </div>
+                  </div>
 
-                      {/* Action Buttons Overlay */}
-                      <div className="absolute bottom-4 right-4 flex gap-2">
-                        {!isEquirectangular && (
-                          <Button
-                            size="sm"
-                            onClick={() => window.open(image.original_url, "_blank")}
-                            className="bg-black/50 hover:bg-black/70 text-white"
-                          >
-                            <ZoomIn className="w-4 h-4 mr-2" />
-                            Zoom
-                          </Button>
-                        )}
-                        {isEquirectangular && (
-                          <Button
-                            size="sm"
-                            onClick={() => setShowPanoramaViewer(true)}
-                            className="bg-black/50 hover:bg-black/70 text-white"
-                          >
-                            <Maximize className="w-4 h-4 mr-2" />
-                            360° View
-                          </Button>
-                        )}
-                      </div>
-                    </>
-                  )}
+                  {/* Action Buttons Overlay */}
+                  <div className="absolute bottom-4 right-4 flex gap-2">
+                    {isEquirectangular && (
+                      <Button
+                        size="sm"
+                        onClick={() => setShowPanoramaViewer(true)}
+                        className="bg-black/50 hover:bg-black/70 text-white"
+                      >
+                        <Maximize className="w-4 h-4 mr-2" />
+                        360° View
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -285,6 +263,15 @@ export default function PhotoDetailClient({ initialImage }: Props) {
           </div>
         </div>
       </div>
+
+      {/* 360° Panorama Viewer */}
+      {showPanoramaViewer && isEquirectangular && (
+        <PanoramaViewer
+          imageUrl={image.original_url}
+          title={image.title}
+          onClose={() => setShowPanoramaViewer(false)}
+        />
+      )}
 
       {/* License Selection Dialog */}
       <Dialog open={showLicenseSelector} onOpenChange={setShowLicenseSelector}>

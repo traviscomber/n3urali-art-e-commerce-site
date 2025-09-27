@@ -37,24 +37,19 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     for (const orderItem of order.order_items) {
       const downloadToken = `dl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-      const { data: downloadResult, error: downloadError } = await supabase
+      const { data: downloadResult } = await supabase
         .from("downloads")
         .insert({
           order_item_id: orderItem.id,
           image_id: orderItem.image_id,
-          user_email: order.user_email, // Include user_email as required by schema
           download_token: downloadToken,
-          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // Changed to 30 days for consistency
+          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
           download_count: 0,
-          created_at: new Date().toISOString(),
         })
         .select()
         .single()
 
-      if (downloadError) {
-        console.error("Failed to create download token:", downloadError)
-        // Continue with other tokens but log the error
-      } else if (downloadResult) {
+      if (downloadResult) {
         downloadTokens.push(downloadResult)
       }
     }

@@ -47,50 +47,24 @@ export default function EquirectangularCategoryPage() {
     }
 
     return new Promise<boolean>((resolve) => {
-      // Check if CSS is already loaded
-      const existingCSS = document.querySelector('link[href*="pannellum.css"]')
-      if (!existingCSS) {
-        const cssLink = document.createElement("link")
-        cssLink.rel = "stylesheet"
-        cssLink.href = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"
-        cssLink.onload = () => console.log("[v0] Pannellum CSS loaded")
-        cssLink.onerror = () => console.error("[v0] Failed to load Pannellum CSS")
-        // Use document.body instead of document.head to avoid conflicts
-        document.body.appendChild(cssLink)
-      }
+      // Load CSS
+      const cssLink = document.createElement("link")
+      cssLink.rel = "stylesheet"
+      cssLink.href = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"
+      document.head.appendChild(cssLink)
 
-      // Check if script is already loaded
-      const existingScript = document.querySelector('script[src*="pannellum.js"]')
-      if (!existingScript) {
-        const script = document.createElement("script")
-        script.src = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"
-        script.onload = () => {
-          setPannellumLoaded(true)
-          resolve(true)
-        }
-        script.onerror = () => {
-          console.error("Failed to load Pannellum")
-          resolve(false)
-        }
-        // Use document.body instead of document.head to avoid conflicts
-        document.body.appendChild(script)
-      } else {
-        // Script already exists, check if window.pannellum is available
-        if (window.pannellum) {
-          setPannellumLoaded(true)
-          resolve(true)
-        } else {
-          // Wait a bit for the script to initialize
-          setTimeout(() => {
-            if (window.pannellum) {
-              setPannellumLoaded(true)
-              resolve(true)
-            } else {
-              resolve(false)
-            }
-          }, 100)
-        }
+      // Load JS
+      const script = document.createElement("script")
+      script.src = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"
+      script.onload = () => {
+        setPannellumLoaded(true)
+        resolve(true)
       }
+      script.onerror = () => {
+        console.error("Failed to load Pannellum")
+        resolve(false)
+      }
+      document.head.appendChild(script)
     })
   }
 
@@ -164,31 +138,15 @@ export default function EquirectangularCategoryPage() {
       try {
         const result = await getImages()
         if (result.success && result.data) {
-          console.log(
-            "[v0] All images from database:",
-            result.data.map((img) => ({ id: img.id, title: img.title, category: img.category_name })),
+          // Filter for equirectangular images (360° or similar categories)
+          const equirectangularImages = result.data.filter(
+            (img: EquirectangularImage) =>
+              img.category_name?.toLowerCase().includes("equirectangular") ||
+              img.category_name?.toLowerCase().includes("360") ||
+              img.category_name?.toLowerCase().includes("panoramic"),
           )
-
-          const equirectangularImages = result.data.filter((img: EquirectangularImage) => {
-            const categoryLower = img.category_name?.toLowerCase() || ""
-            return (
-              categoryLower.includes("equirectangular") ||
-              categoryLower.includes("360") ||
-              categoryLower.includes("panoramic") ||
-              categoryLower.includes("spherical")
-            )
-          })
-
-          console.log(
-            "[v0] Filtered equirectangular images:",
-            equirectangularImages.map((img) => ({ id: img.id, title: img.title, category: img.category_name })),
-          )
-
-          const imagesToShow = equirectangularImages.length > 0 ? equirectangularImages : result.data
-          console.log("[v0] Final images to show:", imagesToShow.length)
-
-          setImages(imagesToShow)
-          setFilteredImages(imagesToShow)
+          setImages(equirectangularImages)
+          setFilteredImages(equirectangularImages)
         }
       } catch (error) {
         console.error("Error fetching images:", error)
@@ -541,7 +499,9 @@ export default function EquirectangularCategoryPage() {
 
         {filteredImages.length === 0 && (
           <div className="text-center py-16">
-            <div className="text-muted-foreground text-lg mb-4">No panoramic images found matching your search.</div>
+            <div className="text-muted-foreground text-lg mb-4">
+              No equirectangular images found matching your search.
+            </div>
             <Button
               variant="outline"
               onClick={() => setSearchTerm("")}

@@ -9,7 +9,6 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Header } from "@/components/header"
 import { CartSidebar } from "@/components/cart-sidebar"
 import { ToastProvider } from "@/components/toast-notifications"
-import { ErrorBoundary } from "@/components/error-boundary"
 
 export const metadata: Metadata = {
   title: {
@@ -42,11 +41,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
-  },
-  manifest: "/manifest.json",
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -87,10 +81,6 @@ export const metadata: Metadata = {
     google: "your-google-verification-code",
   },
   category: "Digital Art & Photography",
-  other: {
-    "theme-color": "#000000",
-    "msapplication-TileColor": "#000000",
-  },
     generator: 'v0.app'
 }
 
@@ -101,64 +91,70 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Organization",
+                  "@id": "https://n3urali.com/#organization",
+                  name: "N3urali.art",
+                  url: "https://n3urali.com",
+                  logo: {
+                    "@type": "ImageObject",
+                    url: "https://n3urali.com/logo.png",
+                    width: 512,
+                    height: 512,
+                  },
+                  description: "Premium 360° digital photography and AI-generated imagery for professionals",
+                  sameAs: ["https://twitter.com/n3urali", "https://instagram.com/n3urali.art"],
+                },
+                {
+                  "@type": "WebSite",
+                  "@id": "https://n3urali.com/#website",
+                  url: "https://n3urali.com",
+                  name: "N3urali.art",
+                  description: "Premium 360° digital photography and AI-generated imagery",
+                  publisher: {
+                    "@id": "https://n3urali.com/#organization",
+                  },
+                  potentialAction: [
+                    {
+                      "@type": "SearchAction",
+                      target: {
+                        "@type": "EntryPoint",
+                        urlTemplate: "https://n3urali.com/browse?search={search_term_string}",
+                      },
+                      "query-input": "required name=search_term_string",
+                    },
+                  ],
+                },
+              ],
+            }),
+          }}
+        />
+        <link rel="canonical" href="https://n3urali.com" />
+        <meta name="theme-color" content="#000000" />
+        <meta name="msapplication-TileColor" content="#000000" />
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
+      </head>
       <body>
-        <ErrorBoundary>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-            <AuthProvider>
-              <CartProvider>
-                <ToastProvider>
-                  <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{
-                      __html: JSON.stringify({
-                        "@context": "https://schema.org",
-                        "@graph": [
-                          {
-                            "@type": "Organization",
-                            "@id": "https://n3urali.com/#organization",
-                            name: "N3urali.art",
-                            url: "https://n3urali.com",
-                            logo: {
-                              "@type": "ImageObject",
-                              url: "https://n3urali.com/logo.png",
-                              width: 512,
-                              height: 512,
-                            },
-                            description: "Premium 360° digital photography and AI-generated imagery for professionals",
-                            sameAs: ["https://twitter.com/n3urali", "https://instagram.com/n3urali.art"],
-                          },
-                          {
-                            "@type": "WebSite",
-                            "@id": "https://n3urali.com/#website",
-                            url: "https://n3urali.com",
-                            name: "N3urali.art",
-                            description: "Premium 360° digital photography and AI-generated imagery",
-                            publisher: {
-                              "@id": "https://n3urali.com/#organization",
-                            },
-                            potentialAction: [
-                              {
-                                "@type": "SearchAction",
-                                target: {
-                                  "@type": "EntryPoint",
-                                  urlTemplate: "https://n3urali.com/browse?search={search_term_string}",
-                                },
-                                "query-input": "required name=search_term_string",
-                              },
-                            ],
-                          },
-                        ],
-                      }),
-                    }}
-                  />
-                  <Header />
-                  {children}
-                  <CartSidebar />
-                </ToastProvider>
-              </CartProvider>
-            </AuthProvider>
-          </ThemeProvider>
-        </ErrorBoundary>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <AuthProvider>
+            <CartProvider>
+              <ToastProvider>
+                <Header />
+                {children}
+                <CartSidebar />
+              </ToastProvider>
+            </CartProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

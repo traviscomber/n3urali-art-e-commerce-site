@@ -12,6 +12,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     const supabase = createSupabaseServerClient()
 
+    // Update order status to completed
     const { data: orderResult, error: orderError } = await supabase
       .from("orders")
       .update({
@@ -20,18 +21,16 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       })
       .eq("id", orderId)
       .neq("status", "completed")
-      .select("*, user_email")
+      .select()
 
     if (orderError || !orderResult || orderResult.length === 0) {
       return NextResponse.json({ success: false, error: "Order not found or already completed" }, { status: 404 })
     }
 
-    const order = orderResult[0]
-
     // Generate download tokens for the completed order
     console.log("[v0] Generating download tokens for completed order...")
 
-    const { data: orderItems } = await supabase.from("order_items").select("id, image_id").eq("order_id", orderId)
+    const { data: orderItems } = await supabase.from("order_items").select("id").eq("order_id", orderId)
 
     const downloadTokens = []
 
@@ -43,20 +42,14 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
           .from("downloads")
           .insert({
             order_item_id: orderItem.id,
-            image_id: orderItem.image_id, // Include image_id as required by schema
-            user_email: order.user_email, // Include user_email as required by schema
             download_token: downloadToken,
-            expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // Changed to 30 days for consistency
+            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
             download_count: 0,
-            created_at: new Date().toISOString(),
           })
           .select()
           .single()
 
-        if (downloadError) {
-          console.error("Failed to create download token:", downloadError)
-          // Continue with other tokens but log the error
-        } else if (downloadResult) {
+        if (!downloadError && downloadResult) {
           downloadTokens.push(downloadResult)
         }
       }
@@ -67,7 +60,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     return NextResponse.json({
       success: true,
       data: {
-        order: order,
+        order: orderResult[0],
         downloadTokensGenerated: downloadTokens.length,
         downloadTokens: downloadTokens,
       },

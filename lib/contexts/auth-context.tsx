@@ -5,243 +5,53 @@ import { createContext, useContext, useState, useEffect, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
 
-interface UserProfile {
-  id: string
-  email: string
-  full_name: string | null
-  role: "user" | "admin" | "developer"
-  is_active: boolean
-}
-
 interface AuthContextType {
   user: User | null
-  profile: UserProfile | null
   isAuthenticated: boolean
-  isAdmin: boolean
-  isDeveloper: boolean
   isLoading: boolean
   signOut: () => Promise<void>
-  signIn: (email: string, password: string) => Promise<{ error?: string }>
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error?: string }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [profile, setProfile] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [profileFetchAttempts, setProfileFetchAttempts] = useState<Map<string, number>>(new Map())
   const supabase = createClient()
 
-  const fetchProfile = async (userId: string) => {
-    try {
-      console.log("[v0] Fetching profile for user:", userId)
-
-      const attempts = profileFetchAttempts.get(userId) || 0
-      if (attempts >= 3) {
-        console.log("[v0] Max profile fetch attempts reached for user:", userId)
-        return {
-          id: userId,
-          email: user?.email || "",
-          full_name: user?.user_metadata?.full_name || "User",
-          role: user?.email === "travis@nuanu.com" ? "developer" : "user",
-          is_active: true,
-        } as UserProfile
-      }
-
-      setProfileFetchAttempts((prev) => new Map(prev).set(userId, attempts + 1))
-
-      const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).single()
-
-      if (error) {
-        console.error("[v0] Error fetching profile:", error)
-
-        if (error.message?.includes("infinite recursion")) {
-          console.log("[v0] Infinite recursion detected, creating fallback profile")
-          const fallbackProfile = {
-            id: userId,
-            email: user?.email || "",
-            full_name: user?.user_metadata?.full_name || "User",
-            role: user?.email === "travis@nuanu.com" ? "developer" : "user",
-            is_active: true,
-          } as UserProfile
-
-          setProfileFetchAttempts((prev) => {
-            const newMap = new Map(prev)
-            newMap.delete(userId)
-            return newMap
-          })
-
-          return fallbackProfile
-        }
-
-        if (error.code === "PGRST116") {
-          console.log("[v0] Profile not found, creating new profile")
-          const { data: userData } = await supabase.auth.getUser()
-
-          const newProfile = {
-            id: userId,
-            email: userData.user?.email || "",
-            full_name: userData.user?.user_metadata?.full_name || "User",
-            role: userData.user?.email === "travis@nuanu.com" ? "developer" : "user",
-            is_active: true,
-          }
-
-          const { data: createdProfile, error: createError } = await supabase
-            .from("profiles")
-            .insert(newProfile)
-            .select("*")
-            .single()
-
-          if (createError) {
-            console.error("[v0] Error creating profile:", createError)
-            setProfileFetchAttempts((prev) => {
-              const newMap = new Map(prev)
-              newMap.delete(userId)
-              return newMap
-            })
-            return newProfile as UserProfile
-          }
-
-          setProfileFetchAttempts((prev) => {
-            const newMap = new Map(prev)
-            newMap.delete(userId)
-            return newMap
-          })
-          return createdProfile as UserProfile
-        }
-
-        return null
-      }
-
-      console.log("[v0] Profile fetched successfully:", data)
-      setProfileFetchAttempts((prev) => {
-        const newMap = new Map(prev)
-        newMap.delete(userId)
-        return newMap
-      })
-      return data as UserProfile
-    } catch (error) {
-      console.error("[v0] Error in fetchProfile:", error)
-      setProfileFetchAttempts((prev) => {
-        const newMap = new Map(prev)
-        newMap.delete(userId)
-        return newMap
-      })
-      return null
-    }
-  }
-
   useEffect(() => {
+    // Get initial session
     const getInitialSession = async () => {
-      try {
-        await supabase.auth.refreshSession()
-
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
-
-        console.log("[v0] Initial session check:", !!session?.user)
-        setUser(session?.user ?? null)
-
-        if (session?.user) {
-          const userProfile = await fetchProfile(session.user.id)
-          setProfile(userProfile)
-        }
-
-        setIsLoading(false)
-      } catch (error) {
-        console.error("[v0] Error getting initial session:", error)
-        setIsLoading(false)
-      }
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      setUser(session?.user ?? null)
+      setIsLoading(false)
     }
 
     getInitialSession()
 
+    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("[v0] Auth state changed:", event)
-
-      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-        await supabase.auth.refreshSession()
-      }
-
       setUser(session?.user ?? null)
-
-      if (session?.user) {
-        const userProfile = await fetchProfile(session.user.id)
-        setProfile(userProfile)
-      } else {
-        setProfile(null)
-      }
-
       setIsLoading(false)
     })
 
     return () => subscription.unsubscribe()
   }, [supabase.auth])
 
-  const signIn = async (email: string, password: string) => {
-    try {
-      console.log("[v0] Attempting sign in for:", email)
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (error) {
-        console.error("[v0] Sign in error:", error)
-        return { error: error.message }
-      }
-
-      console.log("[v0] Sign in successful")
-      return {}
-    } catch (error) {
-      console.error("[v0] Sign in exception:", error)
-      return { error: "An unexpected error occurred" }
-    }
-  }
-
-  const signUp = async (email: string, password: string, fullName: string) => {
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/protected`,
-          data: {
-            full_name: fullName,
-          },
-        },
-      })
-
-      if (error) {
-        return { error: error.message }
-      }
-
-      return {}
-    } catch (error) {
-      return { error: "An unexpected error occurred" }
-    }
-  }
-
   const contextValue = useMemo(
     () => ({
       user,
-      profile,
       isAuthenticated: !!user,
-      isAdmin: profile?.role === "admin" || profile?.role === "developer",
-      isDeveloper: profile?.role === "developer",
       isLoading,
       signOut: async () => {
         await supabase.auth.signOut()
       },
-      signIn,
-      signUp,
     }),
-    [user, profile, isLoading, supabase.auth],
+    [user, isLoading, supabase.auth],
   )
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>

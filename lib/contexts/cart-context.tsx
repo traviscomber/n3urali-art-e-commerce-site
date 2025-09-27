@@ -27,16 +27,6 @@ type CartAction =
   | { type: "ADD_ITEM"; payload: CartItem }
   | { type: "REMOVE_ITEM"; payload: string }
   | { type: "UPDATE_QUANTITY"; payload: { id: string; quantity: number } }
-  | {
-      type: "UPDATE_LICENSE"
-      payload: {
-        id: string
-        licenseId: string
-        licenseName: string
-        licenseType: "NON_EXCLUSIVE" | "EXCLUSIVE"
-        price: number
-      }
-    }
   | { type: "CLEAR_CART" }
   | { type: "TOGGLE_CART" }
   | { type: "OPEN_CART" }
@@ -49,120 +39,46 @@ const CartContext = createContext<{
   addItem: (item: CartItem) => void
   removeItem: (id: string) => void
   updateQuantity: (id: string, quantity: number) => void
-  updateLicense: (
-    id: string,
-    licenseId: string,
-    licenseName: string,
-    licenseType: "NON_EXCLUSIVE" | "EXCLUSIVE",
-    price: number,
-  ) => void
   clearCart: () => void
   toggleCart: () => void
   openCart: () => void
   closeCart: () => void
 } | null>(null)
 
-function generateCartItemId(imageId: string, licenseId: string): string {
-  return `${imageId}_${licenseId}`
-}
-
-async function resolveLicenseId(licenseType: "NON_EXCLUSIVE" | "EXCLUSIVE"): Promise<string | null> {
-  try {
-    const response = await fetch("/api/licenses")
-    if (!response.ok) return null
-
-    const data = await response.json()
-    if (!data.success || !data.licenses) return null
-
-    const license = data.licenses.find((l: any) => l.name === licenseType)
-    return license?.id || null
-  } catch (error) {
-    console.error("[v0] Failed to resolve license ID:", error)
-    return null
-  }
-}
-
-function normalizeCartItem(item: CartItem): CartItem {
-  if (!item.licenseId || item.licenseId === "660e8400-e29b-41d4-a716-446655440000" || item.licenseId.length < 10) {
-    console.error("[v0] Cart item has invalid license ID:", item)
-    throw new Error("Invalid license ID - please select a valid license type")
-  }
-
-  // Ensure licenseName matches licenseType
-  if (!item.licenseName || item.licenseName !== item.licenseType) {
-    item.licenseName = item.licenseType
-  }
-
-  // Generate consistent ID
-  item.id = generateCartItemId(item.imageId, item.licenseId)
-
-  return item
-}
-
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "LOAD_CART":
-      try {
-        const normalizedItems = action.payload
-          .map((item) => {
-            if (
-              !item.licenseId ||
-              item.licenseId === "660e8400-e29b-41d4-a716-446655440000" ||
-              item.licenseId.length < 10
-            ) {
-              console.warn("[v0] Skipping cart item with invalid license ID:", item)
-              return null
-            }
-            return normalizeCartItem(item)
-          })
-          .filter(Boolean) as CartItem[]
-
-        const loadedTotal = normalizedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-        return {
-          ...state,
-          items: normalizedItems,
-          total: loadedTotal,
-        }
-      } catch (error) {
-        console.error("[v0] Error loading cart, clearing invalid items:", error)
-        return {
-          ...state,
-          items: [],
-          total: 0,
-        }
+      const loadedTotal = action.payload.reduce((sum, item) => sum + item.price * item.quantity, 0)
+      return {
+        ...state,
+        items: action.payload,
+        total: loadedTotal,
       }
 
     case "ADD_ITEM":
-      try {
-        const normalizedNewItem = normalizeCartItem({ ...action.payload })
+      const existingItem = state.items.find(
+        (item) => item.imageId === action.payload.imageId && item.licenseId === action.payload.licenseId,
+      )
 
-        const existingItem = state.items.find(
-          (item) => item.imageId === normalizedNewItem.imageId && item.licenseId === normalizedNewItem.licenseId,
+      if (existingItem) {
+        const updatedItems = state.items.map((item) =>
+          item.imageId === action.payload.imageId && item.licenseId === action.payload.licenseId
+            ? { ...item, quantity: item.quantity + 1 }
+            : item,
         )
-
-        if (existingItem) {
-          const updatedItems = state.items.map((item) =>
-            item.imageId === normalizedNewItem.imageId && item.licenseId === normalizedNewItem.licenseId
-              ? { ...item, quantity: item.quantity + 1 }
-              : item,
-          )
-          return {
-            ...state,
-            items: updatedItems,
-            total: updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
-          }
-        }
-
-        const newItem = { ...normalizedNewItem, quantity: 1 }
-        const newItems = [...state.items, newItem]
         return {
           ...state,
-          items: newItems,
-          total: newItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+          items: updatedItems,
+          total: updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
         }
-      } catch (error) {
-        console.error("[v0] Error adding item to cart:", error)
-        return state
+      }
+
+      const newItem = { ...action.payload, quantity: 1 }
+      const newItems = [...state.items, newItem]
+      return {
+        ...state,
+        items: newItems,
+        total: newItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
       }
 
     case "REMOVE_ITEM":
@@ -184,29 +100,6 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         ...state,
         items: updatedItems,
         total: updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
-      }
-
-    case "UPDATE_LICENSE":
-      const licenseUpdatedItems = state.items.map((item) => {
-        if (item.id === action.payload.id) {
-          const updatedItem = {
-            ...item,
-            licenseId: action.payload.licenseId,
-            licenseName: action.payload.licenseName,
-            licenseType: action.payload.licenseType,
-            price: action.payload.price,
-          }
-          // Update the ID to reflect the new license
-          updatedItem.id = generateCartItemId(item.imageId, action.payload.licenseId)
-          return updatedItem
-        }
-        return item
-      })
-
-      return {
-        ...state,
-        items: licenseUpdatedItems,
-        total: licenseUpdatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
       }
 
     case "CLEAR_CART":
@@ -284,16 +177,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: "UPDATE_QUANTITY", payload: { id, quantity } })
   }
 
-  const updateLicense = (
-    id: string,
-    licenseId: string,
-    licenseName: string,
-    licenseType: "NON_EXCLUSIVE" | "EXCLUSIVE",
-    price: number,
-  ) => {
-    dispatch({ type: "UPDATE_LICENSE", payload: { id, licenseId, licenseName, licenseType, price } })
-  }
-
   const clearCart = () => {
     dispatch({ type: "CLEAR_CART" })
   }
@@ -318,7 +201,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         addItem,
         removeItem,
         updateQuantity,
-        updateLicense,
         clearCart,
         toggleCart,
         openCart,

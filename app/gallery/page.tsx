@@ -184,15 +184,26 @@ export default function GalleryPage() {
   const transformedImages = useMemo(
     () =>
       images.map((image: any) => {
+        console.log("[v0] Original image data:", {
+          id: image.id,
+          title: image.title,
+          thumbnail_url: image.thumbnail_url,
+          image_url: image.image_url,
+          file_path: image.file_path,
+        })
+
         let preview_url =
           image.thumbnail_url || image.image_url || "/placeholder.svg?height=400&width=400&text=No+Image"
+
+        console.log("[v0] Preview URL before transformation:", preview_url)
 
         if (!preview_url.includes("supabase.co")) {
           const filename = preview_url.split("/").pop() || "placeholder.jpg"
           preview_url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/${filename}`
+          console.log("[v0] Preview URL after transformation:", preview_url)
         }
 
-        return {
+        const transformedImage = {
           id: image.id,
           title: image.title,
           category:
@@ -203,6 +214,9 @@ export default function GalleryPage() {
           file_size: 20000000,
           description: image.description || "",
         }
+
+        console.log("[v0] Final transformed image:", transformedImage)
+        return transformedImage
       }),
     [images],
   )

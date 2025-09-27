@@ -285,7 +285,7 @@ const getCachedLicenses = unstable_cache(
   async () => {
     const supabase = await createClient()
 
-    const { data: result, error } = await supabase.from("licenses").select("*").eq("active", true).order("price")
+    const { data: result, error } = await supabase.from("licenses").select("*").eq("active", true).order("name")
 
     if (error) {
       console.error("[v0] Database error in getCachedLicenses:", error)

@@ -8,21 +8,19 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    domains: ['pamfhqilohsqbifujtjz.supabase.co'], // Added Supabase domain for images
   },
   experimental: {
     serverActions: {
-      bodySizeLimit: '2mb', // Conservative limit to ensure reliable uploads with compression
+      bodySizeLimit: '2mb',
     },
   },
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
-  reactStrictMode: false, // Disables React strict mode warnings
+  reactStrictMode: false,
   onDemandEntries: {
-    // Disable warnings for on-demand entries
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
   },
+  output: 'standalone',
 }
 
 export default nextConfig

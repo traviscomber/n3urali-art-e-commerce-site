@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useCart } from "@/lib/contexts/cart-context"
 import { Button } from "@/components/ui/button"
@@ -14,6 +13,7 @@ import { ArrowLeft, Wallet, Lock, ShoppingCart, CheckCircle, Copy, QrCode } from
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+// import { StripePaymentForm } from "@/components/stripe-payment-form"
 
 type CryptoCurrency = {
   symbol: string
@@ -324,11 +324,60 @@ function CryptoPaymentForm({
   return null
 }
 
+// function PaymentMethodSelector({
+//   selectedMethod,
+//   onMethodChange,
+// }: {
+//   selectedMethod: "crypto" | "stripe"
+//   onMethodChange: (method: "crypto" | "stripe") => void
+// }) {
+//   return (
+//     <Card className="mb-6">
+//       <CardHeader>
+//         <CardTitle>Payment Method</CardTitle>
+//       </CardHeader>
+//       <CardContent>
+//         <div className="grid grid-cols-2 gap-4">
+//           <div
+//             className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+//               selectedMethod === "stripe" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+//             }`}
+//             onClick={() => onMethodChange("stripe")}
+//           >
+//             <div className="flex items-center gap-3">
+//               <CreditCard className="h-6 w-6" />
+//               <div>
+//                 <div className="font-medium">Credit Card</div>
+//                 <div className="text-sm text-muted-foreground">Visa, Mastercard, Amex</div>
+//               </div>
+//             </div>
+//           </div>
+//           <div
+//             className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+//               selectedMethod === "crypto" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+//             }`}
+//             onClick={() => onMethodChange("crypto")}
+//           >
+//             <div className="flex items-center gap-3">
+//               <Wallet className="h-6 w-6" />
+//               <div>
+//                 <div className="font-medium">Cryptocurrency</div>
+//                 <div className="text-sm text-muted-foreground">BTC, ETH, USDC</div>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </CardContent>
+//     </Card>
+//   )
+// }
+
 export default function CheckoutPage() {
   const { items, total, clearCart, updateQuantity } = useCart()
   const router = useRouter()
   const [orderComplete, setOrderComplete] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // const [paymentMethod, setPaymentMethod] = useState<"crypto" | "stripe">("stripe")
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -416,8 +465,8 @@ export default function CheckoutPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Continue Shopping
           </Link>
-          <h1 className="text-3xl font-bold">Crypto Checkout</h1>
-          <p className="text-muted-foreground mt-2">Pay with Bitcoin, Ethereum, or USDC</p>
+          <h1 className="text-3xl font-bold">Secure Checkout</h1>
+          <p className="text-muted-foreground mt-2">Pay securely with cryptocurrency</p>
         </div>
 
         {error && (

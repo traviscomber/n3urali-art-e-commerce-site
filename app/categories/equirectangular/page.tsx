@@ -138,9 +138,15 @@ export default function EquirectangularCategoryPage() {
       try {
         const result = await getImages()
         if (result.success && result.data) {
-          const allActiveImages = result.data.filter((img: EquirectangularImage) => img.active !== false)
-          setImages(allActiveImages)
-          setFilteredImages(allActiveImages)
+          // Filter for equirectangular images (360° or similar categories)
+          const equirectangularImages = result.data.filter(
+            (img: EquirectangularImage) =>
+              img.category_name?.toLowerCase().includes("equirectangular") ||
+              img.category_name?.toLowerCase().includes("360") ||
+              img.category_name?.toLowerCase().includes("panoramic"),
+          )
+          setImages(equirectangularImages)
+          setFilteredImages(equirectangularImages)
         }
       } catch (error) {
         console.error("Error fetching images:", error)

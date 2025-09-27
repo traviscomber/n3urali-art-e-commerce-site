@@ -150,34 +150,25 @@ export default function FisheyeCategoryPage() {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        console.log("[v0] Fetching images for fisheye category...")
         const result = await getImages()
         if (result.success) {
-          console.log("[v0] Total images received:", result.data.length)
-
-          const allActiveImages = result.data
-            .filter((img: any) => img.active !== false) // Only filter out inactive images
+          const fisheyeImages = result.data
+            .filter((img: any) => img.category_name?.toLowerCase().includes("fisheye"))
             .map((image: any) => ({
               id: image.id,
               title: image.title,
               description: image.description || "",
-              category: image.category_name?.toLowerCase().includes("fisheye")
-                ? ("fisheye" as const)
-                : ("equirectangular" as const),
+              category: "fisheye" as const,
               price: Number.parseFloat(image.price) || 0,
               previewUrl: image.image_url || image.thumbnail_url,
               dimensions: "4096x4096",
               fileSize: "15.0 MB",
-              tags: [image.category_name?.toLowerCase() || "image"],
+              tags: [image.category_name?.toLowerCase() || "fisheye"],
             }))
-
-          console.log("[v0] All active images count:", allActiveImages.length)
-          setImages(allActiveImages)
-        } else {
-          console.error("[v0] Failed to fetch images:", result.error)
+          setImages(fisheyeImages)
         }
       } catch (error) {
-        console.error("[v0] Error fetching images:", error)
+        console.error("Error fetching images:", error)
       } finally {
         setLoading(false)
       }

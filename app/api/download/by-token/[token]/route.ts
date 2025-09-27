@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createNeonClient } from "@/lib/neon/client"
 import { ImageUrlHandler } from "@/lib/image-url-handler"
 
 export async function GET(request: NextRequest, { params }: { params: { token: string } }) {
@@ -13,19 +13,20 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
       return NextResponse.json({ error: "Download token is required" }, { status: 400 })
     }
 
-    console.log("[v0] Creating Supabase client...")
-    const supabase = await createClient()
-    console.log("[v0] Supabase client created successfully")
+    console.log("[v0] Creating Neon client...")
+    const sql = createNeonClient()
+    console.log("[v0] Neon client created successfully")
 
-    const { data: downloadData, error: downloadError } = await supabase
-      .from("downloads")
-      .select("*, images(id, title, file_path)")
-      .eq("download_token", token)
-      .gt("expires_at", new Date().toISOString())
-      .single()
+    console.log("[v0] Calling verify_and_download function...")
+    const result = await sql`
+      SELECT * FROM verify_and_download(${token})
+    `
+    console.log("[v0] Verification result:", result)
 
-    if (downloadError || !downloadData) {
-      console.log("[v0] Invalid or expired token:", downloadError)
+    const downloadData = result[0]
+
+    if (!downloadData?.valid) {
+      console.log("[v0] Invalid or expired token")
       return NextResponse.json(
         {
           error: "Invalid or expired download token",
@@ -34,23 +35,19 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
       )
     }
 
-    // Update download count
-    const { error: updateError } = await supabase
-      .from("downloads")
-      .update({
-        download_count: (downloadData.download_count || 0) + 1,
-        downloaded_at: new Date().toISOString(),
-      })
-      .eq("id", downloadData.id)
+    console.log("[v0] Fetching image data for ID:", downloadData.image_id)
+    const imageResult = await sql`
+      SELECT image_url, title FROM images WHERE id = ${downloadData.image_id}
+    `
+    console.log("[v0] Image result:", imageResult)
 
-    if (updateError) {
-      console.warn("[v0] Failed to update download count:", updateError)
+    if (!imageResult[0]) {
+      console.log("[v0] Image not found")
+      return NextResponse.json({ error: "Image not found" }, { status: 404 })
     }
 
-    console.log("[v0] Download verified for image:", downloadData.images.title)
-
-    const originalImageUrl = downloadData.images.file_path
-    const imageTitle = downloadData.images.title
+    const originalImageUrl = imageResult[0].image_url
+    const imageTitle = imageResult[0].title
 
     const downloadUrl = ImageUrlHandler.convertToDownloadUrl(originalImageUrl)
     console.log("[v0] Converted URL for download:", downloadUrl)
@@ -58,22 +55,28 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
     try {
       console.log("[v0] Fetching image from:", downloadUrl)
 
+      // Create headers for the fetch request (in case authentication is needed)
       const fetchHeaders: HeadersInit = {
         "User-Agent": "N3urali-Download-Service/1.0",
       }
 
+      // Add Backblaze authentication if needed
       if (ImageUrlHandler.getStorageProvider(originalImageUrl) === "backblaze") {
+        // For Backblaze, we might need to add authorization headers in the future
         console.log("[v0] Fetching from Backblaze storage")
       }
 
+      // Fetch the image from the storage URL
       const imageResponse = await fetch(downloadUrl, {
         headers: fetchHeaders,
+        // Add timeout to prevent hanging requests
         signal: AbortSignal.timeout(30000), // 30 second timeout
       })
 
       if (!imageResponse.ok) {
         console.error("[v0] Failed to fetch image:", imageResponse.status, imageResponse.statusText)
 
+        // Try fallback to original URL if conversion failed
         if (downloadUrl !== originalImageUrl) {
           console.log("[v0] Trying fallback to original URL:", originalImageUrl)
           const fallbackResponse = await fetch(originalImageUrl, {
@@ -97,6 +100,7 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
     } catch (fetchError) {
       console.error("[v0] Error fetching image file:", fetchError)
 
+      // Fallback to redirect if direct serving fails
       console.log("[v0] Falling back to redirect for:", downloadUrl)
       return NextResponse.redirect(downloadUrl)
     }

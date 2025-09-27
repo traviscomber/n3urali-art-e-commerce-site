@@ -13,6 +13,8 @@ import { BreadcrumbNav } from "@/components/breadcrumb-nav"
 import { QuickPreviewModal } from "@/components/quick-preview-modal"
 import { useToast } from "@/components/toast-notifications"
 
+console.log("[v0] Gallery: Module loaded")
+
 interface GalleryImage {
   id: string
   title: string
@@ -141,6 +143,8 @@ const ImageCard = React.memo(
 ImageCard.displayName = "ImageCard"
 
 export default function GalleryPage() {
+  console.log("[v0] Gallery: Component function called")
+
   const router = useRouter()
   const { showToast } = useToast()
   const [images, setImages] = useState<any[]>([])
@@ -152,15 +156,19 @@ export default function GalleryPage() {
   const [isQuickPreviewOpen, setIsQuickPreviewOpen] = useState(false)
   const pageSize = 20
 
+  console.log("[v0] Gallery: State initialized, images length:", images.length)
+
   const fetchImages = useCallback(
     async (page = 1, append = false) => {
+      console.log(`[v0] Gallery: fetchImages called with page=${page}, append=${append}`)
+
       if (!append) setLoading(true)
 
       try {
-        console.log(`[v0] Gallery: Fetching images for page ${page}`)
+        console.log(`[v0] Gallery: About to call getImagesPaginated`)
 
         const result = await getImagesPaginated(page, pageSize)
-        console.log(`[v0] Gallery: getImagesPaginated result:`, {
+        console.log(`[v0] Gallery: getImagesPaginated completed:`, {
           success: result.success,
           error: result.error,
           imagesCount: result.data?.images?.length || 0,
@@ -169,7 +177,7 @@ export default function GalleryPage() {
 
         if (result.success && result.data) {
           const fetchedImages = result.data.images || []
-          console.log(`[v0] Gallery: Retrieved ${fetchedImages.length} images`)
+          console.log(`[v0] Gallery: Processing ${fetchedImages.length} images`)
 
           if (fetchedImages.length > 0) {
             console.log(`[v0] Gallery: First image sample:`, {
@@ -181,8 +189,12 @@ export default function GalleryPage() {
           }
 
           if (append) {
-            setImages((prev) => [...prev, ...fetchedImages])
+            setImages((prev) => {
+              console.log(`[v0] Gallery: Appending ${fetchedImages.length} to existing ${prev.length}`)
+              return [...prev, ...fetchedImages]
+            })
           } else {
+            console.log(`[v0] Gallery: Setting ${fetchedImages.length} images`)
             setImages(fetchedImages)
           }
 
@@ -193,9 +205,10 @@ export default function GalleryPage() {
           setImages([])
         }
       } catch (error) {
-        console.error(`[v0] Gallery: Error fetching images:`, error)
+        console.error(`[v0] Gallery: Error in fetchImages:`, error)
         setImages([])
       } finally {
+        console.log(`[v0] Gallery: fetchImages completed, setting loading to false`)
         setLoading(false)
       }
     },
@@ -203,14 +216,20 @@ export default function GalleryPage() {
   )
 
   useEffect(() => {
-    console.log("[v0] Gallery: Component mounted, fetching images")
-    fetchImages(1, false)
+    console.log("[v0] Gallery: useEffect triggered - Component mounted")
+
+    try {
+      console.log("[v0] Gallery: About to call fetchImages from useEffect")
+      fetchImages(1, false)
+    } catch (error) {
+      console.error("[v0] Gallery: Error in useEffect:", error)
+    }
   }, [fetchImages])
 
   const transformedImages = useMemo(() => {
-    console.log(`[v0] Gallery: Transforming ${images.length} images`)
+    console.log(`[v0] Gallery: transformedImages useMemo - processing ${images.length} images`)
 
-    return images.map((image: any) => {
+    const transformed = images.map((image: any) => {
       let preview_url = image.file_path || "/placeholder.svg?height=400&width=400&text=No+Image"
 
       // Ensure Supabase URLs are properly formatted for public access
@@ -219,7 +238,7 @@ export default function GalleryPage() {
         preview_url = preview_url.replace("/storage/v1/object/", "/storage/v1/object/public/")
       }
 
-      console.log(`[v0] Gallery: Image ${image.id}: file_path=${image.file_path}, preview_url=${preview_url}`)
+      console.log(`[v0] Gallery: Transforming image ${image.id}: ${image.file_path} -> ${preview_url}`)
 
       return {
         id: image.id,
@@ -233,12 +252,19 @@ export default function GalleryPage() {
         description: image.description || "",
       }
     })
+
+    console.log(`[v0] Gallery: Transformed ${transformed.length} images`)
+    return transformed
   }, [images])
 
   const { equirectangularImages, fisheyeImages } = useMemo(() => {
+    console.log(`[v0] Gallery: Filtering ${transformedImages.length} transformed images`)
+
     const equirectangular = transformedImages.filter((img) => img.category === "equirectangular")
     const fisheye = transformedImages.filter((img) => img.category === "fisheye")
-    console.log(`[v0] Gallery: Filtered ${equirectangular.length} equirectangular, ${fisheye.length} fisheye`)
+
+    console.log(`[v0] Gallery: Filtered results - ${equirectangular.length} equirectangular, ${fisheye.length} fisheye`)
+
     return { equirectangularImages: equirectangular, fisheyeImages: fisheye }
   }, [transformedImages])
 
@@ -283,7 +309,17 @@ export default function GalleryPage() {
     },
   })
 
+  console.log(
+    "[v0] Gallery: About to render - loading:",
+    loading,
+    "images:",
+    images.length,
+    "transformed:",
+    transformedImages.length,
+  )
+
   if (loading && images.length === 0) {
+    console.log("[v0] Gallery: Rendering loading state")
     return (
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
@@ -320,6 +356,8 @@ export default function GalleryPage() {
       </div>
     )
   }
+
+  console.log("[v0] Gallery: Rendering main gallery")
 
   return (
     <div className="min-h-screen bg-background">
@@ -412,6 +450,9 @@ export default function GalleryPage() {
               ) : (
                 <div className="text-center py-8 w-full">
                   <p className="text-muted-foreground">No 360° images available</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Debug: {transformedImages.length} total images, {equirectangularImages.length} equirectangular
+                  </p>
                 </div>
               )}
             </div>
@@ -464,6 +505,9 @@ export default function GalleryPage() {
               ) : (
                 <div className="text-center py-8 w-full">
                   <p className="text-muted-foreground">No fisheye images available</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Debug: {transformedImages.length} total images, {fisheyeImages.length} fisheye
+                  </p>
                 </div>
               )}
             </div>
@@ -524,6 +568,12 @@ export default function GalleryPage() {
               <div className="text-center py-16">
                 <h3 className="text-lg font-semibold mb-2 text-foreground">No images available</h3>
                 <p className="text-muted-foreground">Upload some images in the admin panel to see them here</p>
+                <div className="mt-4 text-xs text-muted-foreground space-y-1">
+                  <p>Debug Info:</p>
+                  <p>Raw images: {images.length}</p>
+                  <p>Transformed images: {transformedImages.length}</p>
+                  <p>Loading: {loading.toString()}</p>
+                </div>
               </div>
             )}
           </div>

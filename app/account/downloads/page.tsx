@@ -6,8 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Download, Eye, Clock, CheckCircle, AlertTriangle, Ban } from "lucide-react"
+import { Download, Eye, Clock, CheckCircle, AlertTriangle, Ban, ArrowLeft } from "lucide-react"
 import { toast } from "sonner"
+import Link from "next/link"
 
 interface UserDownload {
   order_item_id: string
@@ -166,6 +167,10 @@ export default function DownloadsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
+        <Link href="/account" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-4">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Account
+        </Link>
         <h1 className="text-3xl font-bold text-foreground mb-2">My Downloads</h1>
         <p className="text-muted-foreground">Access and re-download your purchased images</p>
       </div>

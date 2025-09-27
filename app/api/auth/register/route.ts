@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createSupabaseServerClient } from "@/lib/database"
+import { PasswordManager } from "@/lib/auth/password"
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,41 +10,60 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    const passwordValidation = PasswordManager.isStrongPassword(password)
+    if (!passwordValidation.isValid) {
+      return NextResponse.json(
+        {
+          error: "Password does not meet requirements",
+          details: passwordValidation.errors,
+        },
+        { status: 400 },
+      )
+    }
 
-    // Check if user already exists
-    const { data: existingUser } = await supabase.from("profiles").select("id").eq("email", email).single()
+    const supabase = createSupabaseServerClient()
+
+    const { data: existingUser } = await supabase.from("auth_users").select("id").eq("email", email).single()
 
     if (existingUser) {
       return NextResponse.json({ error: "User already exists" }, { status: 409 })
     }
 
-    // For now, create a profile record directly since we're migrating from custom auth
-    // In a proper Supabase setup, you'd use supabase.auth.signUp()
-    const { data: newProfile, error: profileError } = await supabase
-      .from("profiles")
-      .insert({
-        email: email,
-        full_name: fullName,
-        role: "user",
-        is_active: true,
-      })
-      .select("*")
-      .single()
+    const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const hashedPassword = await PasswordManager.hashPassword(password)
+
+    // Insert into auth_users table
+    const { error: authError } = await supabase.from("auth_users").insert({
+      id: userId,
+      email: email,
+      encrypted_password: hashedPassword,
+    })
+
+    if (authError) {
+      console.error("Auth user creation error:", authError)
+      return NextResponse.json({ error: "Failed to create user" }, { status: 500 })
+    }
+
+    // Insert into user_profiles table
+    const { error: profileError } = await supabase.from("user_profiles").insert({
+      id: userId,
+      full_name: fullName,
+      is_admin: false,
+    })
 
     if (profileError) {
-      console.error("[v0] Profile creation error:", profileError)
+      console.error("User profile creation error:", profileError)
       return NextResponse.json({ error: "Failed to create user profile" }, { status: 500 })
     }
 
     return NextResponse.json({
       message: "User created successfully",
       user: {
-        id: newProfile.id,
-        email: newProfile.email,
+        id: userId,
+        email: email,
         user_metadata: {
-          full_name: newProfile.full_name,
-          is_admin: newProfile.role === "admin",
+          full_name: fullName,
+          is_admin: false,
         },
       },
     })

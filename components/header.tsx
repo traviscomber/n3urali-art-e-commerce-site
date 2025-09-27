@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ShoppingCart, Menu, X } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
-import { UserMenu } from "./user-menu"
+import { AuthButton } from "./auth-button"
 import { ThemeToggle } from "./theme-toggle"
 import Image from "next/image"
 
@@ -42,13 +42,6 @@ export function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center space-x-12">
-            <Link
-              href="/gallery"
-              className="relative text-sm font-medium text-white hover:text-primary transition-all duration-300 group"
-            >
-              Gallery
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
-            </Link>
             <Link
               href="/categories/equirectangular"
               className="relative text-sm font-medium text-gray-300 hover:text-primary transition-all duration-300 group"
@@ -90,7 +83,7 @@ export function Header() {
               )}
             </Button>
 
-            <UserMenu />
+            <AuthButton />
 
             <Button
               variant="ghost"
@@ -106,13 +99,6 @@ export function Header() {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-border/20 py-6 bg-black/95 backdrop-blur-sm rounded-b-lg">
             <nav className="flex flex-col space-y-6">
-              <Link
-                href="/gallery"
-                className="text-base font-medium text-white hover:text-primary transition-colors px-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Gallery
-              </Link>
               <Link
                 href="/categories/equirectangular"
                 className="text-base font-medium text-gray-300 hover:text-primary transition-colors px-2"

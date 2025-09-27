@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createSupabaseServerClient } from "@/lib/database"
 
 export async function GET(request: NextRequest) {
   try {
     console.log("[v0] Fetching user downloads...")
 
     const { searchParams } = new URL(request.url)
-    const userEmail = searchParams.get("email") || "developer@local.dev"
+    const userEmail = searchParams.get("email") || "developer@local.dev" // Updated default email
 
     if (!userEmail) {
       console.log("[v0] Missing user email")
@@ -14,21 +14,21 @@ export async function GET(request: NextRequest) {
     }
 
     console.log("[v0] Fetching downloads for user:", userEmail)
-    const supabase = await createClient()
+
+    const supabase = await createSupabaseServerClient()
 
     const { data: downloads, error } = await supabase
       .from("downloads")
       .select(`
         *,
-        images(id, title, file_path),
-        order_items(id, price, orders(id, created_at))
+        images!inner(title, description),
+        orders!inner(user_email)
       `)
-      .eq("user_email", userEmail)
-      .order("created_at", { ascending: false })
+      .eq("orders.user_email", userEmail)
 
     if (error) {
       console.error("[v0] Error fetching downloads:", error)
-      throw error
+      return NextResponse.json({ error: "Failed to fetch downloads" }, { status: 500 })
     }
 
     console.log("[v0] Found", downloads?.length || 0, "downloads for user")

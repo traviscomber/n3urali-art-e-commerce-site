@@ -1,6 +1,6 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
+import { createSupabaseServerClient } from "@/lib/database"
 import { revalidatePath } from "next/cache"
 
 export interface ImageData {
@@ -28,7 +28,7 @@ export interface ImageUpdateData {
 export async function testDatabaseConnection() {
   try {
     console.log("[v0] Testing Supabase connection...")
-    const supabase = await createClient()
+    const supabase = await createSupabaseServerClient()
     const { data: result, error } = await supabase.from("categories").select("count").limit(1)
 
     if (error) {
@@ -63,7 +63,7 @@ export async function createImage(imageData: ImageData) {
       }
     }
 
-    const supabase = await createClient()
+    const supabase = await createSupabaseServerClient()
 
     let categoryId: string
 
@@ -180,7 +180,7 @@ export async function getImages() {
   try {
     console.log("[v0] Starting getImages server action")
 
-    const supabase = await createClient()
+    const supabase = await createSupabaseServerClient()
     const { data: images, error } = await supabase
       .from("images")
       .select(`
@@ -232,7 +232,7 @@ export async function updateImage(imageId: string, updateData: ImageUpdateData) 
     let categoryId: string | undefined
 
     if (updateData.category) {
-      const supabase = await createClient()
+      const supabase = await createSupabaseServerClient()
       const existingCategories = await supabase.from("categories").select("id").eq("name", updateData.category).limit(1)
 
       if (existingCategories.data && existingCategories.data.length > 0) {
@@ -308,7 +308,7 @@ export async function updateImage(imageId: string, updateData: ImageUpdateData) 
     `
     updateValues.push(imageId)
 
-    const supabase = await createClient()
+    const supabase = await createSupabaseServerClient()
     const { data: updatedImages, error: updateError } = await supabase.unsafe(updateQuery, updateValues)
 
     if (updateError) {
@@ -341,7 +341,7 @@ export async function deleteImage(imageId: string) {
   try {
     console.log("[v0] Starting deleteImage for:", imageId)
 
-    const supabase = await createClient()
+    const supabase = await createSupabaseServerClient()
     const { error: deleteError } = await supabase.from("images").delete().eq("id", imageId)
 
     if (deleteError) {

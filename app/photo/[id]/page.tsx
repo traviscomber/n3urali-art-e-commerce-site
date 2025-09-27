@@ -1,782 +1,177 @@
-"use client"
+import type { Metadata } from "next"
+import { createClient } from "@/lib/supabase/server"
+import { notFound } from "next/navigation"
+import PhotoDetailClient from "./photo-detail-client"
 
-import type React from "react"
-
-import { useState, useEffect, useRef } from "react"
-import { useParams, useRouter, useSearchParams } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Download, ShoppingCart, Eye, Crown, RotateCcw } from "lucide-react"
-import { getImages } from "@/app/actions/admin-actions"
-import { useAuth } from "@/lib/contexts/auth-context"
-
-declare global {
-  interface Window {
-    pannellum: any
-  }
+interface Props {
+  params: { id: string }
 }
 
-interface Image {
-  id: string
-  title: string
-  description: string
-  category_name: string
-  price: number
-  image_url: string
-  thumbnail_url: string
-  license_name?: string
-  metadata?: any
-}
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const supabase = await createClient()
 
-export default function PhotoDetailPage() {
-  const params = useParams()
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const { user } = useAuth()
-  const [image, setImage] = useState<Image | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [purchasing, setPurchasing] = useState(false)
-  const [showQualityPreview, setShowQualityPreview] = useState(false)
-  const [previewPosition, setPreviewPosition] = useState({ x: 50, y: 50 })
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [zoomLevel, setZoomLevel] = useState(6)
-  const [show360Viewer, setShow360Viewer] = useState(false)
-  const [viewerLoaded, setViewerLoaded] = useState(false)
-  const viewerRef = useRef<HTMLDivElement>(null)
-  const pannellumViewerRef = useRef<any>(null)
-  const watermarkRefreshInterval = useRef<NodeJS.Timeout | null>(null)
-
-  const loadPannellum = () => {
-    return new Promise((resolve, reject) => {
-      if (window.pannellum) {
-        resolve(window.pannellum)
-        return
-      }
-
-      // Load CSS
-      const link = document.createElement("link")
-      link.rel = "stylesheet"
-      link.href = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"
-      document.head.appendChild(link)
-
-      // Load JS
-      const script = document.createElement("script")
-      script.src = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"
-      script.onload = () => {
-        console.log("[v0] Pannellum loaded successfully")
-        resolve(window.pannellum)
-      }
-      script.onerror = (error) => {
-        console.error("[v0] Pannellum loading error:", error)
-        reject(new Error("Failed to load Pannellum"))
-      }
-      document.head.appendChild(script)
-    })
-  }
-
-  const init360Viewer = async () => {
-    if (!viewerRef.current || !image) return
-
-    try {
-      console.log("[v0] Starting Pannellum 360° viewer initialization...")
-      await loadPannellum()
-
-      if (!window.pannellum) {
-        throw new Error("Pannellum library not loaded properly")
-      }
-
-      // Destroy existing viewer if any
-      if (pannellumViewerRef.current) {
-        try {
-          window.pannellum.destroy(viewerRef.current)
-        } catch (e) {
-          console.warn("[v0] Error destroying previous viewer:", e)
-        }
-      }
-
-      console.log("[v0] Creating Pannellum viewer instance...")
-
-      // Determine projection type based on category
-      const projection = image.category_name === "Fisheye" ? "fisheye" : "equirectangular"
-
-      pannellumViewerRef.current = window.pannellum.viewer(viewerRef.current, {
-        type: projection,
-        panorama: image.image_url, // Always use original image for best quality
-        autoLoad: true,
-        autoRotate: -2,
-        compass: true,
-        showZoomCtrl: true,
-        showFullscreenCtrl: true,
-        showControls: true,
-        mouseZoom: true,
-        doubleClickZoom: true,
-        draggable: true,
-        keyboardZoom: true,
-        preview: "/placeholder.svg?height=500&width=500",
-        loadButtonLabel: "Click to Load 360° View",
-        noscriptErrorMsg: "JavaScript must be enabled to view this panorama.",
-        notSupportedMsg: "Your browser does not support WebGL.",
-      })
-
-      // Add event listeners
-      pannellumViewerRef.current.on("load", () => {
-        console.log("[v0] Pannellum viewer loaded successfully")
-        setViewerLoaded(true)
-
-        addEnhancedWatermarkOverlay()
-
-        startWatermarkRefresh()
-      })
-
-      pannellumViewerRef.current.on("error", (error: any) => {
-        console.error("[v0] Pannellum viewer error:", error)
-        setViewerLoaded(false)
-      })
-
-      console.log("[v0] Pannellum 360° viewer initialized successfully")
-    } catch (error) {
-      console.error("[v0] Error initializing Pannellum viewer:", error)
-      setViewerLoaded(false)
-      alert("Unable to load 360° viewer. Please try again or check your internet connection.")
-    }
-  }
-
-  const addEnhancedWatermarkOverlay = () => {
-    if (!viewerRef.current) return
-
-    const canvas = viewerRef.current.querySelector("canvas")
-    if (!canvas) return
-
-    // Remove any existing watermark overlays
-    const existingOverlays = viewerRef.current.querySelectorAll(".watermark-overlay")
-    existingOverlays.forEach((overlay) => overlay.remove())
-
-    const watermarkOverlay = document.createElement("div")
-    watermarkOverlay.className = "watermark-overlay"
-    watermarkOverlay.style.cssText = `
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 15;
-      background: repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 60px,
-        rgba(255,255,255,0.08) 60px,
-        rgba(255,255,255,0.08) 80px
-      );
-    `
-
-    // Reduced from 60 watermarks to just 2 corner watermarks
-    const watermarkStyles = `
-      position: absolute;
-      color: rgba(255,255,255,0.20);
-      font-size: 16px;
-      font-weight: 700;
-      transform: rotate(-45deg);
-      user-select: none;
-      pointer-events: none;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-      user-select: none;
-      WebkitUserSelect: none;
-      MozUserSelect: none;
-    `
-
-    const topLeftWatermark = document.createElement("div")
-    topLeftWatermark.textContent = "n3urali.art"
-    topLeftWatermark.style.cssText = `${watermarkStyles} left: 5%; top: 5%;`
-
-    const bottomRightWatermark = document.createElement("div")
-    bottomRightWatermark.textContent = "n3urali.art"
-    bottomRightWatermark.style.cssText = `${watermarkStyles} right: 5%; bottom: 5%;`
-
-    watermarkOverlay.appendChild(topLeftWatermark)
-    watermarkOverlay.appendChild(bottomRightWatermark)
-
-    const protectionOverlay = document.createElement("div")
-    protectionOverlay.style.cssText = `
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 20;
-      background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(255,255,255,0.02) 100%);
-    `
-
-    watermarkOverlay.appendChild(protectionOverlay)
-    viewerRef.current.appendChild(watermarkOverlay)
-
-    const preventInteraction = (e: Event) => {
-      e.preventDefault()
-      e.stopPropagation()
-      return false
-    }
-
-    canvas.addEventListener("contextmenu", preventInteraction)
-    canvas.addEventListener("selectstart", preventInteraction)
-    canvas.addEventListener("dragstart", preventInteraction)
-  }
-
-  const startWatermarkRefresh = () => {
-    if (watermarkRefreshInterval.current) {
-      clearInterval(watermarkRefreshInterval.current)
-    }
-
-    watermarkRefreshInterval.current = setInterval(() => {
-      if (viewerRef.current && show360Viewer) {
-        addEnhancedWatermarkOverlay()
-      }
-    }, 5000) // Refresh every 5 seconds
-  }
-
-  const stopWatermarkRefresh = () => {
-    if (watermarkRefreshInterval.current) {
-      clearInterval(watermarkRefreshInterval.current)
-      watermarkRefreshInterval.current = null
-    }
-  }
-
-  const toggle360Viewer = async () => {
-    if (!show360Viewer) {
-      setShow360Viewer(true)
-      setViewerLoaded(false)
-      setTimeout(() => {
-        init360Viewer()
-      }, 200)
-    } else {
-      stopWatermarkRefresh()
-
-      if (pannellumViewerRef.current && viewerRef.current) {
-        try {
-          window.pannellum.destroy(viewerRef.current)
-        } catch (e) {
-          console.warn("[v0] Error destroying Pannellum viewer:", e)
-        }
-        pannellumViewerRef.current = null
-      }
-      setShow360Viewer(false)
-      setViewerLoaded(false)
-    }
-  }
-
-  useEffect(() => {
-    return () => {
-      stopWatermarkRefresh()
-
-      if (pannellumViewerRef.current && viewerRef.current) {
-        try {
-          window.pannellum.destroy(viewerRef.current)
-        } catch (e) {
-          console.warn("[v0] Error destroying Pannellum viewer on unmount:", e)
-        }
-      }
-    }
-  }, [])
-
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault()
-    return false
-  }
-
-  const handleDragStart = (e: React.DragEvent) => {
-    e.preventDefault()
-    return false
-  }
-
-  useEffect(() => {
-    const viewParam = searchParams.get("view")
-    if (viewParam === "360" && image && image.category_name !== "Fisheye") {
-      console.log("[v0] Auto-activating 360° viewer from URL parameter")
-      setShow360Viewer(true)
-      setViewerLoaded(false)
-      setTimeout(() => {
-        init360Viewer()
-      }, 500) // Small delay to ensure image is loaded
-    }
-  }, [image, searchParams])
-
-  useEffect(() => {
-    const fetchImage = async () => {
-      try {
-        const result = await getImages()
-        if (result.success) {
-          const foundImage = result.data.find((img: any) => img.id === params.id)
-          if (foundImage) {
-            setImage(foundImage)
-          }
-        }
-      } catch (error) {
-        console.error("[v0] Error fetching image:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (params.id) {
-      fetchImage()
-    }
-  }, [params.id])
-
-  const handlePurchase = async () => {
-    if (!user) {
-      router.push("/?auth=required")
-      return
-    }
-
-    setPurchasing(true)
-    try {
-      const orderResponse = await fetch("/api/orders/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          items: [
-            {
-              id: `${image.id}-standard`,
-              imageId: image.id,
-              title: image.title,
-              price: image.price,
-              licenseType: "standard",
-              previewUrl: image.thumbnail_url || image.image_url,
-              category: image.category_name === "equirectangular" ? "equirectangular" : "fisheye",
-              quantity: 1,
-            },
-          ],
-          total: image.price,
-          customerInfo: {
-            email: user.email,
-            firstName: user.user_metadata?.full_name?.split(" ")[0] || "Customer",
-            lastName: user.user_metadata?.full_name?.split(" ").slice(1).join(" ") || "",
-          },
-          paymentMethod: "demo", // Demo payment for direct purchases
-        }),
-      })
-
-      const orderResult = await orderResponse.json()
-
-      if (orderResult.success) {
-        console.log("[v0] Purchase completed for image:", image?.id)
-        console.log("[v0] Order created:", orderResult.data.orderNumber)
-
-        // Show success message and redirect to orders page
-        alert(
-          `Thank you! Your purchase of "${image.title}" is complete. Order #${orderResult.data.orderNumber} created. Check your account for download links.`,
-        )
-        router.push("/account/orders")
-      } else {
-        console.error("[v0] Order creation failed:", orderResult.error)
-        alert(`Purchase failed: ${orderResult.error}. Please try again.`)
-      }
-    } catch (error) {
-      console.error("[v0] Purchase error:", error)
-      alert("There was an error processing your purchase. Please try again.")
-    } finally {
-      setPurchasing(false)
-    }
-  }
-
-  const getRightsTypeDisplay = () => {
-    const rightsType = image?.metadata?.rights_type
-    if (rightsType === "exclusive")
-      return { text: "Exclusive Rights", icon: Crown, color: "bg-primary text-primary-foreground" }
-    if (rightsType === "non-exclusive")
-      return { text: "Non-Exclusive Rights", icon: Eye, color: "bg-blue-600 text-white" }
-    if (rightsType === "both") return { text: "Both Rights Available", icon: Crown, color: "bg-purple-600 text-white" }
-    return { text: "Standard License", icon: Eye, color: "bg-gray-600 text-white" }
-  }
-
-  const handleQualityPreviewToggle = () => {
-    setShowQualityPreview(!showQualityPreview)
-  }
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!showQualityPreview) return
-
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = ((e.clientX - rect.left) / rect.width) * 100
-    const y = ((e.clientY - rect.top) / rect.height) * 100
-
-    setPreviewPosition({ x, y })
-    setMousePosition({ x: e.clientX - rect.left, y: e.clientY - rect.top })
-  }
-
-  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    if (!showQualityPreview) return
-
-    e.preventDefault()
-    const delta = e.deltaY > 0 ? -1 : 1
-    setZoomLevel((prev) => Math.max(2, Math.min(12, prev + delta)))
-  }
-
-  const handleMouseLeave = () => {
-    setShowQualityPreview(false)
-    setZoomLevel(6)
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading image details...</p>
-        </div>
-      </div>
-    )
-  }
+  const { data: image } = await supabase
+    .from("images")
+    .select(`
+      *,
+      categories(name),
+      licenses(name)
+    `)
+    .eq("id", params.id)
+    .single()
 
   if (!image) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Image Not Found</h1>
-          <p className="text-muted-foreground mb-6">The requested image could not be found.</p>
-          <Button onClick={() => router.push("/gallery")}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Gallery
-          </Button>
-        </div>
-      </div>
-    )
+    return {
+      title: "Image Not Found | N3urali.art",
+      description: "The requested image could not be found.",
+    }
   }
 
-  const rightsDisplay = getRightsTypeDisplay()
-  const RightsIcon = rightsDisplay.icon
+  const title = `${image.title} - Premium ${image.categories?.name || "360°"} Image | N3urali.art`
+  const description =
+    image.description ||
+    `Professional ${image.categories?.name || "360°"} photography perfect for VR, projection mapping, and architectural visualization. AI-generated and enhanced for supreme quality.`
+  const imageUrl = image.thumbnail_large_url || image.thumbnail_medium_url || image.thumbnail_small_url
+  const canonicalUrl = `https://n3urali.com/photo/${image.id}`
+
+  return {
+    title,
+    description,
+    keywords: [
+      image.categories?.name?.toLowerCase() || "360",
+      "360 photography",
+      "VR content",
+      "projection mapping",
+      "AI generated",
+      "premium imagery",
+      "digital art",
+      "immersive media",
+    ],
+    authors: [{ name: "N3urali.art", url: "https://n3urali.com" }],
+    creator: "N3urali.art",
+    publisher: "N3urali.art",
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      type: "article",
+      locale: "en_US",
+      url: canonicalUrl,
+      siteName: "N3urali.art",
+      title,
+      description,
+      images: [
+        {
+          url: imageUrl || "/og-image.jpg",
+          width: 1200,
+          height: 630,
+          alt: image.title,
+        },
+      ],
+      publishedTime: image.created_at,
+      modifiedTime: image.updated_at || image.created_at,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [imageUrl || "/og-image.jpg"],
+      creator: "@n3urali",
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+  }
+}
+
+export default async function PhotoDetailPage({ params }: Props) {
+  const supabase = await createClient()
+
+  const { data: image } = await supabase
+    .from("images")
+    .select(`
+      *,
+      categories(name, description),
+      licenses(name, description)
+    `)
+    .eq("id", params.id)
+    .single()
+
+  if (!image) {
+    notFound()
+  }
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "ImageObject",
+    "@id": `https://n3urali.com/photo/${image.id}#image`,
+    name: image.title,
+    description: image.description || `Professional ${image.categories?.name || "360°"} photography`,
+    url: image.original_url,
+    thumbnailUrl: image.thumbnail_large_url,
+    contentUrl: image.original_url,
+    width: "4000",
+    height: "2000",
+    encodingFormat: "image/jpeg",
+    uploadDate: image.created_at,
+    dateModified: image.updated_at || image.created_at,
+    creator: {
+      "@type": "Organization",
+      "@id": "https://n3urali.com/#organization",
+      name: "N3urali.art",
+      url: "https://n3urali.com",
+    },
+    publisher: {
+      "@type": "Organization",
+      "@id": "https://n3urali.com/#organization",
+    },
+    license: "https://n3urali.com/license",
+    acquireLicensePage: `https://n3urali.com/photo/${image.id}`,
+    creditText: "N3urali.art",
+    copyrightNotice: "© N3urali.art - All rights reserved",
+    usageInfo: "https://n3urali.com/license",
+    isPartOf: {
+      "@type": "ImageGallery",
+      name: "N3urali.art Premium 360° Image Collection",
+      url: "https://n3urali.com/gallery",
+    },
+    offers: {
+      "@type": "Offer",
+      price: image.price?.toString() || "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      seller: {
+        "@type": "Organization",
+        "@id": "https://n3urali.com/#organization",
+      },
+    },
+    keywords: [
+      image.categories?.name?.toLowerCase() || "360",
+      "360 photography",
+      "VR content",
+      "projection mapping",
+      "AI generated imagery",
+      "premium digital art",
+    ].join(", "),
+  }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b bg-white/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <Button variant="ghost" onClick={() => router.push("/gallery")} className="mb-4">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Gallery
-          </Button>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {/* Image Preview */}
-          <div className="space-y-4">
-            <Card className="overflow-hidden">
-              <CardContent className="p-0">
-                <div className="flex gap-2 p-4 bg-muted/5 border-b">
-                  {image.category_name !== "Fisheye" && (
-                    <Button
-                      variant={show360Viewer ? "default" : "outline"}
-                      size="sm"
-                      onClick={toggle360Viewer}
-                      className="flex items-center gap-2"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      {show360Viewer ? "Exit 360° View" : "360° Interactive View"}
-                    </Button>
-                  )}
-
-                  {!show360Viewer && (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={handleQualityPreviewToggle}
-                      className={`flex items-center gap-2 transition-all ${
-                        showQualityPreview
-                          ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                          : "bg-card text-card-foreground hover:bg-muted border border-border"
-                      }`}
-                    >
-                      <Eye className="h-4 w-4" />
-                      <span className="text-xs font-medium">HQ Preview</span>
-                    </Button>
-                  )}
-                </div>
-
-                {show360Viewer && image.category_name !== "Fisheye" ? (
-                  <div className="relative">
-                    <div ref={viewerRef} className="w-full h-[500px] bg-muted/10" style={{ minHeight: "500px" }} />
-                    {!viewerLoaded && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-muted/10">
-                        <div className="text-center">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                          <p className="text-sm text-muted-foreground">Loading 360° viewer...</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div
-                    className={`relative aspect-square bg-muted/10 ${
-                      showQualityPreview ? "cursor-crosshair" : "cursor-default"
-                    }`}
-                    onMouseMove={handleMouseMove}
-                    onMouseLeave={handleMouseLeave}
-                    onWheel={handleWheel}
-                    onContextMenu={handleContextMenu}
-                  >
-                    <div
-                      className="relative w-full h-full select-none"
-                      onContextMenu={handleContextMenu}
-                      onDragStart={handleDragStart}
-                      style={{ userSelect: "none", WebkitUserSelect: "none", MozUserSelect: "none" }}
-                    >
-                      <img
-                        src={image.image_url || "/placeholder.svg"}
-                        alt={image.title}
-                        className="w-full h-full object-contain select-none pointer-events-none"
-                        draggable={false}
-                        onContextMenu={handleContextMenu}
-                        onDragStart={handleDragStart}
-                        style={{
-                          userSelect: "none",
-                          WebkitUserSelect: "none",
-                          MozUserSelect: "none",
-                          WebkitUserDrag: "none",
-                          WebkitTouchCallout: "none",
-                        }}
-                      />
-
-                      <div
-                        className="absolute inset-0 pointer-events-none select-none flex items-center justify-center"
-                        style={{ userSelect: "none" }}
-                      >
-                        <div className="relative max-w-full max-h-full" style={{ aspectRatio: "auto" }}>
-                          <img
-                            src={image.image_url || "/placeholder.svg"}
-                            alt=""
-                            className="w-full h-full object-contain opacity-0 pointer-events-none"
-                            style={{ maxWidth: "100%", maxHeight: "100%" }}
-                          />
-                          <div className="absolute inset-0 overflow-hidden">
-                            <div
-                              className="absolute text-white/20 font-bold text-sm transform -rotate-45 select-none pointer-events-none"
-                              style={{
-                                left: "5%",
-                                top: "5%",
-                                textStroke: "1px rgba(255,255,255,0.08)",
-                                WebkitTextStroke: "1px rgba(255,255,255,0.08)",
-                                textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
-                                userSelect: "none",
-                                WebkitUserSelect: "none",
-                                MozUserSelect: "none",
-                              }}
-                            >
-                              n3urali.art
-                            </div>
-                            <div
-                              className="absolute text-white/20 font-bold text-sm transform -rotate-45 select-none pointer-events-none"
-                              style={{
-                                right: "5%",
-                                bottom: "5%",
-                                textStroke: "1px rgba(255,255,255,0.08)",
-                                WebkitTextStroke: "1px rgba(255,255,255,0.08)",
-                                textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
-                                userSelect: "none",
-                                WebkitUserSelect: "none",
-                                MozUserSelect: "none",
-                              }}
-                            >
-                              n3urali.art
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div
-                        className="absolute inset-0 z-10 bg-transparent"
-                        onContextMenu={handleContextMenu}
-                        onDragStart={handleDragStart}
-                        style={{
-                          userSelect: "none",
-                          WebkitUserSelect: "none",
-                          MozUserSelect: "none",
-                        }}
-                      />
-                    </div>
-
-                    {/* Quality preview window showing cropped original image */}
-                    {showQualityPreview && (
-                      <div
-                        className="absolute pointer-events-none z-30 border-2 border-primary shadow-2xl rounded-lg overflow-hidden bg-white"
-                        style={{
-                          left: Math.min(mousePosition.x + 20, 300),
-                          top: Math.min(mousePosition.y - 150, 200),
-                          width: "300px",
-                          height: "300px",
-                        }}
-                      >
-                        <div className="relative w-full h-full">
-                          <img
-                            src={image.image_url || "/placeholder.svg"}
-                            alt="Quality Preview"
-                            className="w-full h-full object-cover"
-                            style={{
-                              transform: `scale(${zoomLevel})`,
-                              transformOrigin: `${previewPosition.x}% ${previewPosition.y}%`,
-                            }}
-                          />
-                          <div className="absolute inset-0 border border-primary/20"></div>
-                          <div className="absolute bottom-0 left-0 right-0 bg-primary text-primary-foreground text-xs px-2 py-1 text-center font-medium">
-                            Original Quality • {zoomLevel}x Zoom
-                          </div>
-                          <div className="absolute top-1 right-1 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                            {zoomLevel}x
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Crosshair indicator when quality preview is active */}
-                    {showQualityPreview && (
-                      <div
-                        className="absolute pointer-events-none z-20"
-                        style={{
-                          left: mousePosition.x - 10,
-                          top: mousePosition.y - 10,
-                          width: "20px",
-                          height: "20px",
-                        }}
-                      >
-                        <div className="w-full h-full border-2 border-primary rounded-full bg-primary/20"></div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <div className="text-center text-sm text-muted-foreground">
-              {show360Viewer && image.category_name !== "Fisheye" ? (
-                <span className="text-primary font-medium">
-                  Interactive 360° View • Original Resolution • Drag to look around • Scroll to zoom • Double-click to
-                  zoom • Click fullscreen for immersive experience
-                </span>
-              ) : (
-                <>
-                  Original Resolution Preview • Watermarked • Full commercial license available after purchase
-                  {showQualityPreview && (
-                    <span className="block mt-1 text-primary font-medium">
-                      Move mouse to explore • Scroll wheel to zoom (2x-12x) • This is the actual full-resolution image
-                    </span>
-                  )}
-                  {!showQualityPreview && (
-                    <span className="block mt-1">
-                      {image.category_name === "Fisheye"
-                        ? "Click HQ Preview to inspect details with enhanced zoom (scroll to zoom up to 12x)"
-                        : "Click HQ Preview to inspect details with enhanced zoom or 360° Interactive View for immersive experience"}
-                    </span>
-                  )}
-                </>
-              )}
-              <span className="block mt-1 text-xs text-red-600">
-                ⚠️ Original images are protected with watermarks - Purchase required for clean, commercial-use files
-              </span>
-            </div>
-          </div>
-
-          {/* Image Details & Purchase */}
-          <div className="space-y-6">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Badge variant="outline" className="bg-card text-card-foreground border-border">
-                  {image.category_name === "Fisheye" ? "180° Fisheye" : "360° Equirectangular"}
-                </Badge>
-                <Badge variant="secondary" className="bg-primary text-primary-foreground">
-                  <RightsIcon className="w-3 h-3 mr-1" />
-                  {rightsDisplay.text}
-                </Badge>
-              </div>
-
-              <h1 className="text-3xl font-bold mb-4">{image.title}</h1>
-
-              {image.description && (
-                <p className="text-muted-foreground text-lg leading-relaxed">{image.description}</p>
-              )}
-            </div>
-
-            {/* Specifications */}
-            <Card>
-              <CardContent className="p-6 space-y-4">
-                <h3 className="font-semibold text-lg">Specifications</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">Resolution:</span>
-                    <p className="font-medium">4K - 16K (Full HQ)</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Format:</span>
-                    <p className="font-medium">JPG, PNG</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">License:</span>
-                    <p className="font-medium">{image.license_name || "Premium License"}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Usage:</span>
-                    <p className="font-medium">Commercial & Personal</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Pricing & Purchase */}
-            <Card className="border-primary/20">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Price</p>
-                    <p className="text-3xl font-bold text-primary">${image.price}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-muted-foreground">Instant Download</p>
-                    <p className="text-sm font-medium">Full Resolution</p>
-                  </div>
-                </div>
-
-                <Button onClick={handlePurchase} disabled={purchasing} className="w-full h-12 text-lg" size="lg">
-                  {purchasing ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart className="w-5 h-5 mr-2" />
-                      Buy & Download Now
-                    </>
-                  )}
-                </Button>
-
-                <div className="flex items-center justify-center gap-4 mt-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Download className="w-4 h-4" />
-                    Instant Download
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Eye className="w-4 h-4" />
-                    Full Resolution
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {!user && (
-              <Card className="border-yellow-500 bg-yellow-100 dark:bg-yellow-900/20 dark:border-yellow-600">
-                <CardContent className="p-4">
-                  <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                    <strong>Sign in required:</strong> You'll be redirected to sign in before completing your purchase.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData),
+        }}
+      />
+      <PhotoDetailClient initialImage={image} />
+    </>
   )
 }

@@ -5,20 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  BarChart3,
-  TrendingUp,
-  Users,
-  ShoppingCart,
-  Eye,
-  Download,
-  DollarSign,
-  Clock,
-  Search,
-  AlertTriangle,
-  Activity,
-  Globe,
-} from "lucide-react"
+import { BarChart3, TrendingUp, ShoppingCart, Download, DollarSign, AlertTriangle, Activity } from "lucide-react"
 import {
   LineChart,
   Line,
@@ -34,55 +21,40 @@ import {
 
 interface AnalyticsData {
   overview: {
-    totalViews: number
-    totalSales: number
     totalRevenue: number
+    totalOrders: number
+    totalDownloads: number
     conversionRate: number
-    avgOrderValue: number
-    activeUsers: number
+    averageOrderValue: number
   }
-  salesTrends: Array<{
-    date: string
-    sales: number
-    revenue: number
-    views: number
+  recentOrders: Array<{
+    id: string
+    user_email: string
+    total_amount: number
+    status: string
+    created_at: string
+    items_count: number
   }>
   popularImages: Array<{
     id: string
     title: string
-    views: number
-    sales: number
+    category_name: string
+    price: number
+    order_count: number
     revenue: number
-    category: string
   }>
   categoryPerformance: Array<{
     category: string
-    sales: number
+    orders: number
     revenue: number
-    views: number
+    images: number
   }>
-  searchAnalytics: Array<{
-    query: string
-    count: number
-    results: number
-    conversionRate: number
+  monthlyStats: Array<{
+    month: string
+    orders: number
+    revenue: number
+    downloads: number
   }>
-  performanceMetrics: {
-    avgPageLoadTime: number
-    avgImageLoadTime: number
-    errorRate: number
-    uptime: number
-  }
-  userBehavior: {
-    bounceRate: number
-    avgSessionDuration: number
-    pagesPerSession: number
-    topPages: Array<{
-      page: string
-      views: number
-      avgTime: number
-    }>
-  }
 }
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"]
@@ -100,10 +72,12 @@ export function AnalyticsDashboard() {
   const fetchAnalytics = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/analytics?range=${timeRange}`)
+      const response = await fetch(`/api/admin/analytics?range=${timeRange}`)
       if (response.ok) {
-        const analyticsData = await response.json()
-        setData(analyticsData)
+        const result = await response.json()
+        if (result.success) {
+          setData(result.data)
+        }
       }
     } catch (error) {
       console.error("Failed to fetch analytics:", error)
@@ -179,14 +153,14 @@ export function AnalyticsDashboard() {
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Eye className="h-5 w-5 text-blue-600" />
+              <DollarSign className="h-5 w-5 text-emerald-600" />
               <div>
-                <p className="text-sm text-muted-foreground">Total Views</p>
-                <p className="text-2xl font-bold">{data.overview.totalViews.toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground">Total Revenue</p>
+                <p className="text-2xl font-bold">${data.overview.totalRevenue.toLocaleString()}</p>
               </div>
             </div>
           </CardContent>
@@ -197,8 +171,8 @@ export function AnalyticsDashboard() {
             <div className="flex items-center gap-2">
               <ShoppingCart className="h-5 w-5 text-green-600" />
               <div>
-                <p className="text-sm text-muted-foreground">Total Sales</p>
-                <p className="text-2xl font-bold">{data.overview.totalSales}</p>
+                <p className="text-sm text-muted-foreground">Total Orders</p>
+                <p className="text-2xl font-bold">{data.overview.totalOrders}</p>
               </div>
             </div>
           </CardContent>
@@ -207,10 +181,10 @@ export function AnalyticsDashboard() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-emerald-600" />
+              <Download className="h-5 w-5 text-blue-600" />
               <div>
-                <p className="text-sm text-muted-foreground">Revenue</p>
-                <p className="text-2xl font-bold">${data.overview.totalRevenue.toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground">Downloads</p>
+                <p className="text-2xl font-bold">{data.overview.totalDownloads}</p>
               </div>
             </div>
           </CardContent>
@@ -234,41 +208,36 @@ export function AnalyticsDashboard() {
               <BarChart3 className="h-5 w-5 text-orange-600" />
               <div>
                 <p className="text-sm text-muted-foreground">Avg Order</p>
-                <p className="text-2xl font-bold">${data.overview.avgOrderValue}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-indigo-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">Active Users</p>
-                <p className="text-2xl font-bold">{data.overview.activeUsers}</p>
+                <p className="text-2xl font-bold">${data.overview.averageOrderValue.toFixed(2)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Sales Trends Chart */}
+      {/* Monthly Trends Chart */}
       <Card>
         <CardHeader>
-          <CardTitle>Sales & Revenue Trends</CardTitle>
-          <CardDescription>Track your sales performance over time</CardDescription>
+          <CardTitle>Monthly Performance</CardTitle>
+          <CardDescription>Track your sales and revenue trends over time</CardDescription>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data.salesTrends}>
+            <LineChart data={data.monthlyStats}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
+              <XAxis dataKey="month" />
               <YAxis yAxisId="left" />
               <YAxis yAxisId="right" orientation="right" />
               <Tooltip />
-              <Line yAxisId="left" type="monotone" dataKey="sales" stroke="#8884d8" strokeWidth={2} />
-              <Line yAxisId="right" type="monotone" dataKey="revenue" stroke="#82ca9d" strokeWidth={2} />
+              <Line yAxisId="left" type="monotone" dataKey="orders" stroke="#8884d8" strokeWidth={2} name="Orders" />
+              <Line
+                yAxisId="right"
+                type="monotone"
+                dataKey="revenue"
+                stroke="#82ca9d"
+                strokeWidth={2}
+                name="Revenue ($)"
+              />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
@@ -279,7 +248,7 @@ export function AnalyticsDashboard() {
         <Card>
           <CardHeader>
             <CardTitle>Top Performing Images</CardTitle>
-            <CardDescription>Most viewed and purchased images</CardDescription>
+            <CardDescription>Most purchased images by revenue</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -291,13 +260,12 @@ export function AnalyticsDashboard() {
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium truncate">{image.title}</h4>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>{image.views} views</span>
-                      <span>{image.sales} sales</span>
-                      <Badge variant="outline">{image.category}</Badge>
+                      <span>{image.order_count} orders</span>
+                      <Badge variant="outline">{image.category_name}</Badge>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-green-600">${image.revenue}</p>
+                    <p className="font-bold text-green-600">${image.revenue.toFixed(2)}</p>
                   </div>
                 </div>
               ))}
@@ -335,120 +303,31 @@ export function AnalyticsDashboard() {
         </Card>
       </div>
 
-      {/* Search Analytics */}
+      {/* Recent Orders */}
       <Card>
         <CardHeader>
-          <CardTitle>Search Analytics</CardTitle>
-          <CardDescription>Most popular search queries and their performance</CardDescription>
+          <CardTitle>Recent Orders</CardTitle>
+          <CardDescription>Latest customer orders and their status</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {data.searchAnalytics.slice(0, 8).map((search, index) => (
-              <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/20">
+            {data.recentOrders.slice(0, 8).map((order, index) => (
+              <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/20">
                 <div className="flex items-center gap-3">
-                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <ShoppingCart className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="font-medium">"{search.query}"</p>
+                    <p className="font-medium">{order.user_email}</p>
                     <p className="text-sm text-muted-foreground">
-                      {search.count} searches • {search.results} results
+                      {order.items_count} items • {new Date(order.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
-                <Badge variant={search.conversionRate > 5 ? "default" : "secondary"}>
-                  {search.conversionRate.toFixed(1)}% conversion
-                </Badge>
+                <div className="text-right">
+                  <p className="font-bold">${order.total_amount.toFixed(2)}</p>
+                  <Badge variant={order.status === "completed" ? "default" : "secondary"}>{order.status}</Badge>
+                </div>
               </div>
             ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Performance Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">Page Load Time</p>
-                <p className="text-xl font-bold">{data.performanceMetrics.avgPageLoadTime}ms</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Download className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">Image Load Time</p>
-                <p className="text-xl font-bold">{data.performanceMetrics.avgImageLoadTime}ms</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">Error Rate</p>
-                <p className="text-xl font-bold">{data.performanceMetrics.errorRate.toFixed(2)}%</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-purple-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">Uptime</p>
-                <p className="text-xl font-bold">{data.performanceMetrics.uptime.toFixed(1)}%</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* User Behavior */}
-      <Card>
-        <CardHeader>
-          <CardTitle>User Behavior</CardTitle>
-          <CardDescription>How users interact with your site</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-primary">{data.userBehavior.bounceRate.toFixed(1)}%</p>
-              <p className="text-sm text-muted-foreground">Bounce Rate</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-primary">{Math.round(data.userBehavior.avgSessionDuration)}s</p>
-              <p className="text-sm text-muted-foreground">Avg Session Duration</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-primary">{data.userBehavior.pagesPerSession.toFixed(1)}</p>
-              <p className="text-sm text-muted-foreground">Pages per Session</p>
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <h4 className="font-semibold mb-3">Top Pages</h4>
-            <div className="space-y-2">
-              {data.userBehavior.topPages.map((page, index) => (
-                <div key={index} className="flex items-center justify-between p-2 rounded bg-muted/20">
-                  <span className="font-medium">{page.page}</span>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span>{page.views} views</span>
-                    <span>{Math.round(page.avgTime)}s avg time</span>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </CardContent>
       </Card>

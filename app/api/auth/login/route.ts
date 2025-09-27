@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createSupabaseServerClient } from "@/lib/database"
+import { PasswordManager } from "@/lib/auth/password"
 import { cookies } from "next/headers"
 
 export async function POST(request: NextRequest) {
@@ -10,27 +11,41 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    const supabase = await createSupabaseServerClient()
 
-    const { data: userResult, error: userError } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("email", email)
-      .eq("is_active", true)
+    const { data: userResult, error } = await supabase
+      .from("user_profiles")
+      .select(`
+        *,
+        auth_users!inner(email, encrypted_password)
+      `)
+      .eq("auth_users.email", email)
       .single()
 
-    if (userError || !userResult) {
+    if (error || !userResult) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
     }
 
-    // Note: For now, we'll skip password verification since Supabase handles auth differently
-    // In a proper Supabase setup, you'd use supabase.auth.signInWithPassword()
-    // But since we're migrating existing data, we'll create a session token approach
+    const isValidPassword = await PasswordManager.verifyPassword(password, userResult.auth_users.encrypted_password)
+
+    if (!isValidPassword) {
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
+    }
 
     const sessionToken = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-    // Note: In production, you'd want to create a user_sessions table or use Supabase auth
-    const cookieStore = await cookies()
+    const { error: sessionError } = await supabase.from("user_sessions").insert({
+      user_id: userResult.id,
+      session_token: sessionToken,
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
+    })
+
+    if (sessionError) {
+      console.error("Session creation error:", sessionError)
+      return NextResponse.json({ error: "Failed to create session" }, { status: 500 })
+    }
+
+    const cookieStore = cookies()
     cookieStore.set("session_token", sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -41,10 +56,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       user: {
         id: userResult.id,
-        email: userResult.email,
+        email: userResult.auth_users.email,
         user_metadata: {
           full_name: userResult.full_name,
-          is_admin: userResult.role === "admin",
+          is_admin: userResult.is_admin,
         },
       },
     })

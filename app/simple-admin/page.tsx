@@ -358,7 +358,7 @@ export default function SimpleAdminPage() {
       const imageData = {
         title: newImage.title,
         description: newImage.description,
-        category_name: newImage.category,
+        category_id: newImage.category,
         rights_type: newImage.rightsType,
         price: Number.parseFloat(newImage.price) || 0,
         image_url: imageUrl,
@@ -852,7 +852,7 @@ export default function SimpleAdminPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.name} className="text-lg">
+                        <SelectItem key={cat.id} value={cat.id} className="text-lg">
                           {getCategoryDisplayName(cat)}
                         </SelectItem>
                       ))}
@@ -1110,7 +1110,7 @@ export default function SimpleAdminPage() {
                               </SelectTrigger>
                               <SelectContent>
                                 {categories.map((cat) => (
-                                  <SelectItem key={cat.id} value={cat.name} className="text-sm">
+                                  <SelectItem key={cat.id} value={cat.id} className="text-sm">
                                     {getCategoryDisplayName(cat)}
                                   </SelectItem>
                                 ))}

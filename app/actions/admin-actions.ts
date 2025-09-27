@@ -552,7 +552,8 @@ export async function createImageWithLicense(formData: FormData) {
 export async function createImageWithCategoryObject(imageData: {
   title: string
   description: string
-  category_name: string
+  category_name?: string // Made optional since we might receive category_id instead
+  category_id?: string // Added category_id field
   rights_type: string
   image_url: string
   thumbnail_url: string
@@ -596,26 +597,40 @@ export async function createImageWithCategoryObject(imageData: {
 
     const supabase = await createClient()
 
-    const categoryResult = await supabase.from("categories").select("id").eq("name", imageData.category_name).limit(1)
-
     let categoryId: string
 
-    if (categoryResult.data && categoryResult.data.length === 0) {
-      console.log("[v0] Category not found, creating new category:", imageData.category_name)
-      const newCategoryResult = await supabase
-        .from("categories")
-        .insert([
-          {
-            name: imageData.category_name,
-            description: "Auto-created category for " + imageData.category_name,
-            active: true,
-          },
-        ])
-        .select("id")
+    if (imageData.category_id) {
+      // If category_id is provided, use it directly
+      categoryId = imageData.category_id
+      console.log("[v0] Using provided category_id:", categoryId)
+    } else if (imageData.category_name) {
+      // If category_name is provided, look up the ID
+      const categoryResult = await supabase.from("categories").select("id").eq("name", imageData.category_name).limit(1)
 
-      categoryId = newCategoryResult.data[0].id
+      if (categoryResult.data && categoryResult.data.length === 0) {
+        console.log("[v0] Category not found, creating new category:", imageData.category_name)
+        const newCategoryResult = await supabase
+          .from("categories")
+          .insert([
+            {
+              name: imageData.category_name,
+              description: "Auto-created category for " + imageData.category_name,
+            },
+          ])
+          .select("id")
+
+        if (newCategoryResult.error) {
+          throw new Error(newCategoryResult.error.message)
+        }
+        categoryId = newCategoryResult.data[0].id
+      } else {
+        categoryId = categoryResult.data[0].id
+      }
     } else {
-      categoryId = categoryResult.data[0].id
+      return {
+        success: false,
+        error: "Either category_id or category_name must be provided",
+      }
     }
 
     console.log("[v0] Looking up default license...")
@@ -655,16 +670,9 @@ export async function createImageWithCategoryObject(imageData: {
           category_id: categoryId,
           license_id: licenseId,
           price: imageData.price,
-          image_url: imageData.image_url,
-          thumbnail_url: imageData.thumbnail_url,
+          file_path: imageData.image_url,
+          is_featured: false,
           active: true,
-          featured: false,
-          metadata: JSON.stringify({
-            rights_type: imageData.rights_type,
-            original_file_size: imageData.original_file_size,
-            upload_timestamp: new Date().toISOString(),
-            storage_type: "supabase_storage",
-          }),
         },
       ])
       .select("*")

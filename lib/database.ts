@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createNeonClient } from "@/lib/neon/client"
 
 // Type definitions for database tables
 export type Image = {
@@ -56,6 +56,7 @@ export const LICENSE_TYPES = {
 
 export type LicenseType = keyof typeof LICENSE_TYPES
 
-export function getSupabaseClient() {
-  return createClient()
+// Helper function to get Neon client
+export function getNeonClient() {
+  return createNeonClient()
 }

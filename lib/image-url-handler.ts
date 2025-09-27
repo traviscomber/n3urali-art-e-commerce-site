@@ -1,6 +1,6 @@
 /**
  * Centralized image URL handler for multiple storage origins
- * Handles conversion between Vercel Blob, Backblaze, Supabase, and proxy URLs
+ * Handles conversion between Vercel Blob, Backblaze, and proxy URLs
  */
 
 export interface ImageUrlConfig {
@@ -12,7 +12,6 @@ export class ImageUrlHandler {
   private static readonly VERCEL_BLOB_PATTERN = /https:\/\/[^.]+\.public\.blob\.vercel-storage\.com\/(.+)/
   private static readonly BACKBLAZE_PATTERN = /https:\/\/f\d+\.backblazeb2\.com\/file\/[^/]+\/(.+)/
   private static readonly PROXY_PATTERN = /^\/api\/image-proxy\/(.+)/
-  private static readonly SUPABASE_PATTERN = /https:\/\/[^.]+\.supabase\.co\/storage\/v1\/object\/public\/(.+)/
 
   /**
    * Convert any storage URL to the appropriate display URL
@@ -20,24 +19,28 @@ export class ImageUrlHandler {
   static convertToDisplayUrl(url: string, config: ImageUrlConfig = {}): string {
     if (!url) return url
 
-    console.log("[v0] Converting URL to display format:", url)
-
-    // If it's already a Supabase URL, return as-is
-    if (this.SUPABASE_PATTERN.test(url)) {
-      console.log("[v0] URL is already Supabase, returning as-is")
+    // If it's already a proxy URL, return as-is
+    if (this.PROXY_PATTERN.test(url)) {
       return url
     }
 
-    // Extract filename from any storage URL
-    const filename = this.extractFilename(url)
-    if (filename) {
-      const supabaseUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/${filename}`
-      console.log("[v0] Converted to Supabase URL:", supabaseUrl)
-      return supabaseUrl
+    // Handle Vercel Blob URLs - convert to Backblaze proxy
+    const blobMatch = url.match(this.VERCEL_BLOB_PATTERN)
+    if (blobMatch) {
+      const filename = blobMatch[1]
+      console.log("[v0] Converting Vercel Blob URL to Backblaze proxy:", filename)
+      return `/api/image-proxy/${filename}`
     }
 
-    // Return original URL if no conversion possible
-    console.log("[v0] No conversion possible, returning original URL")
+    // Handle Backblaze URLs - convert to proxy if requested
+    const backblazeMatch = url.match(this.BACKBLAZE_PATTERN)
+    if (backblazeMatch && config.useProxy !== false) {
+      const filename = backblazeMatch[1]
+      console.log("[v0] Converting Backblaze URL to proxy:", filename)
+      return `/api/image-proxy/${filename}`
+    }
+
+    // Return original URL if no conversion needed
     return url
   }
 
@@ -47,23 +50,26 @@ export class ImageUrlHandler {
   static convertToDownloadUrl(url: string): string {
     if (!url) return url
 
-    // Convert to Supabase storage URL
-    const filename = this.extractFilename(url)
-    if (filename) {
-      return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/${filename}`
+    // Handle Vercel Blob URLs - convert to Backblaze format
+    const blobMatch = url.match(this.VERCEL_BLOB_PATTERN)
+    if (blobMatch) {
+      const filename = blobMatch[1]
+      const backblazeUrl = `https://${process.env.B2_ENDPOINT}/file/${process.env.BACKBLAZE_BUCKET_NAME}/${filename}`
+      console.log("[v0] Converting Vercel Blob URL to Backblaze for download:", backblazeUrl)
+      return backblazeUrl
     }
 
+    // Return original URL for Backblaze or other URLs
     return url
   }
 
   /**
    * Get storage provider from URL
    */
-  static getStorageProvider(url: string): "vercel-blob" | "backblaze" | "proxy" | "supabase" | "unknown" {
+  static getStorageProvider(url: string): "vercel-blob" | "backblaze" | "proxy" | "unknown" {
     if (this.VERCEL_BLOB_PATTERN.test(url)) return "vercel-blob"
     if (this.BACKBLAZE_PATTERN.test(url)) return "backblaze"
     if (this.PROXY_PATTERN.test(url)) return "proxy"
-    if (this.SUPABASE_PATTERN.test(url)) return "supabase"
     return "unknown"
   }
 
@@ -79,9 +85,6 @@ export class ImageUrlHandler {
 
     const proxyMatch = url.match(this.PROXY_PATTERN)
     if (proxyMatch) return proxyMatch[1]
-
-    const supabaseMatch = url.match(this.SUPABASE_PATTERN)
-    if (supabaseMatch) return supabaseMatch[1]
 
     return null
   }

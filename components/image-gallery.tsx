@@ -38,16 +38,10 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
   const { addItem } = useCart()
 
   const transformedImages = useMemo(() => {
-    return images.map((image) => {
-      const supabaseUrl = image.preview_url?.includes("supabase.co")
-        ? image.preview_url
-        : `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/${ImageUrlHandler.extractFilename(image.preview_url) || "placeholder.jpg"}`
-
-      return {
-        ...image,
-        preview_url: supabaseUrl,
-      }
-    })
+    return images.map((image) => ({
+      ...image,
+      preview_url: ImageUrlHandler.convertToDisplayUrl(image.preview_url, { useProxy: true }),
+    }))
   }, [images])
 
   useEffect(() => {
@@ -168,10 +162,6 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
                   loading="lazy"
                   placeholder="blur"
                   blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
-                  onError={(e) => {
-                    console.log("[v0] Image failed to load, using placeholder:", image.preview_url)
-                    e.currentTarget.src = "/placeholder.svg?height=400&width=400&text=Image+Unavailable"
-                  }}
                 />
 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

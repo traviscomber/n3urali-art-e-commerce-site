@@ -40,11 +40,9 @@ const getCachedImages = unstable_cache(
       const { data: images, error: imagesError } = await supabase
         .from("images")
         .select(`
-          id, title, description, price, file_path, original_url,
-          thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url,
-          is_featured, created_at, updated_at, category_id, license_id, active
+          id, title, description, price, file_path,
+          is_featured, created_at, updated_at, category_id, license_id
         `)
-        .eq("active", true)
         .order("created_at", { ascending: false })
 
       if (imagesError) {
@@ -67,9 +65,9 @@ const getCachedImages = unstable_cache(
       const transformedData =
         images?.map((item) => ({
           ...item,
-          image_url: item.file_path || item.original_url,
-          thumbnail_url:
-            item.thumbnail_large_url || item.thumbnail_medium_url || item.thumbnail_small_url || item.file_path,
+          image_url: item.file_path,
+          thumbnail_url: item.file_path,
+          active: true, // Default to active since we don't have this column
           featured: item.is_featured,
           categories: categoryMap.get(item.category_id),
           licenses: licenseMap.get(item.license_id),
@@ -99,17 +97,13 @@ const getCachedImagesPaginated = unstable_cache(
     const offset = (page - 1) * limit
 
     try {
-      let query = supabase
-        .from("images")
-        .select(
-          `
-          id, title, description, price, file_path, original_url,
-          thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url,
-          is_featured, created_at, updated_at, category_id, license_id, active
+      let query = supabase.from("images").select(
+        `
+          id, title, description, price, file_path,
+          is_featured, created_at, updated_at, category_id, license_id
         `,
-          { count: "exact" },
-        )
-        .eq("active", true)
+        { count: "exact" },
+      )
 
       // Handle category filtering by ID instead of name
       if (category) {
@@ -160,9 +154,9 @@ const getCachedImagesPaginated = unstable_cache(
       const transformedData =
         images?.map((item) => ({
           ...item,
-          image_url: item.file_path || item.original_url,
-          thumbnail_url:
-            item.thumbnail_large_url || item.thumbnail_medium_url || item.thumbnail_small_url || item.file_path,
+          image_url: item.file_path,
+          thumbnail_url: item.file_path,
+          active: true, // Default to active since we don't have this column
           featured: item.is_featured,
           categories: categoryMap.get(item.category_id),
           licenses: licenseMap.get(item.license_id),
@@ -285,7 +279,7 @@ const getCachedLicenses = unstable_cache(
   async () => {
     const supabase = await createClient()
 
-    const { data: result, error } = await supabase.from("licenses").select("*").eq("active", true).order("name")
+    const { data: result, error } = await supabase.from("licenses").select("*").eq("active", true).order("price")
 
     if (error) {
       console.error("[v0] Database error in getCachedLicenses:", error)

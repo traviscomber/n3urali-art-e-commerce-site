@@ -1,33 +1,21 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createNeonClient } from "@/lib/neon/client"
 import { cookies } from "next/headers"
 
 async function getCurrentUser(sessionToken: string) {
-  const supabase = await createClient()
+  const sql = createNeonClient()
 
-  const { data: sessionResult, error } = await supabase
-    .from("user_sessions")
-    .select(`
-      user_id,
-      user_profiles!inner(full_name, is_admin, avatar_url),
-      users!inner(email)
-    `)
-    .eq("session_token", sessionToken)
-    .gt("expires_at", new Date().toISOString())
-    .limit(1)
+  const sessionResult = await sql`
+    SELECT us.user_id, up.full_name, up.is_admin, u.email, up.avatar_url
+    FROM user_sessions us
+    JOIN user_profiles up ON us.user_id = up.id
+    JOIN auth.users u ON up.id = u.id
+    WHERE us.session_token = ${sessionToken}
+    AND us.expires_at > NOW()
+    LIMIT 1
+  `
 
-  if (error || !sessionResult || sessionResult.length === 0) {
-    return null
-  }
-
-  const session = sessionResult[0]
-  return {
-    user_id: session.user_id,
-    email: session.users.email,
-    full_name: session.user_profiles.full_name,
-    is_admin: session.user_profiles.is_admin,
-    avatar_url: session.user_profiles.avatar_url,
-  }
+  return sessionResult.length > 0 ? sessionResult[0] : null
 }
 
 export async function GET(request: NextRequest) {
@@ -81,20 +69,18 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Full name is required" }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    const sql = createNeonClient()
 
-    const { data: result, error } = await supabase
-      .from("user_profiles")
-      .update({
-        full_name: full_name,
-        avatar_url: avatar_url || null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", user.user_id)
-      .select("*")
+    const result = await sql`
+      UPDATE user_profiles 
+      SET full_name = ${full_name}, 
+          avatar_url = ${avatar_url || null},
+          updated_at = NOW()
+      WHERE id = ${user.user_id}
+      RETURNING *
+    `
 
-    if (error || !result || result.length === 0) {
-      console.error("Profile update error:", error)
+    if (result.length === 0) {
       return NextResponse.json({ error: "Failed to update profile" }, { status: 500 })
     }
 

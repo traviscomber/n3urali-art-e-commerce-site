@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createNeonClient } from "@/lib/neon/client"
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,22 +14,11 @@ export async function GET(request: NextRequest) {
     }
 
     console.log("[v0] Fetching downloads for user:", userEmail)
-    const supabase = await createClient()
+    const sql = createNeonClient()
 
-    const { data: downloads, error } = await supabase
-      .from("downloads")
-      .select(`
-        *,
-        images!inner(title, thumbnail_url, category_id),
-        orders!inner(id, created_at)
-      `)
-      .eq("user_email", userEmail)
-      .order("created_at", { ascending: false })
-
-    if (error) {
-      console.error("[v0] Downloads query error:", error)
-      return NextResponse.json({ error: "Failed to fetch downloads" }, { status: 500 })
-    }
+    const downloads = await sql`
+      SELECT * FROM get_user_downloads(${userEmail})
+    `
 
     console.log("[v0] Found", downloads?.length || 0, "downloads for user")
 

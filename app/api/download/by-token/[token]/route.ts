@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createNeonClient } from "@/lib/neon/client"
 import { ImageUrlHandler } from "@/lib/image-url-handler"
 
 export async function GET(request: NextRequest, { params }: { params: { token: string } }) {
@@ -13,24 +13,19 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
       return NextResponse.json({ error: "Download token is required" }, { status: 400 })
     }
 
-    console.log("[v0] Creating Supabase client...")
-    const supabase = await createClient()
-    console.log("[v0] Supabase client created successfully")
+    console.log("[v0] Creating Neon client...")
+    const sql = createNeonClient()
+    console.log("[v0] Neon client created successfully")
 
-    console.log("[v0] Verifying download token...")
-    const { data: downloadData, error: verifyError } = await supabase
-      .from("downloads")
-      .select(`
-        *,
-        images!inner(id, image_url, title),
-        orders!inner(id, status)
-      `)
-      .eq("download_token", token)
-      .gt("expires_at", new Date().toISOString())
-      .eq("orders.status", "completed")
-      .single()
+    console.log("[v0] Calling verify_and_download function...")
+    const result = await sql`
+      SELECT * FROM verify_and_download(${token})
+    `
+    console.log("[v0] Verification result:", result)
 
-    if (verifyError || !downloadData) {
+    const downloadData = result[0]
+
+    if (!downloadData?.valid) {
       console.log("[v0] Invalid or expired token")
       return NextResponse.json(
         {
@@ -40,10 +35,19 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
       )
     }
 
-    console.log("[v0] Token verified successfully")
+    console.log("[v0] Fetching image data for ID:", downloadData.image_id)
+    const imageResult = await sql`
+      SELECT image_url, title FROM images WHERE id = ${downloadData.image_id}
+    `
+    console.log("[v0] Image result:", imageResult)
 
-    const originalImageUrl = downloadData.images.image_url
-    const imageTitle = downloadData.images.title
+    if (!imageResult[0]) {
+      console.log("[v0] Image not found")
+      return NextResponse.json({ error: "Image not found" }, { status: 404 })
+    }
+
+    const originalImageUrl = imageResult[0].image_url
+    const imageTitle = imageResult[0].title
 
     const downloadUrl = ImageUrlHandler.convertToDownloadUrl(originalImageUrl)
     console.log("[v0] Converted URL for download:", downloadUrl)

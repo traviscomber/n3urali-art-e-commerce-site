@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createNeonClient } from "@/lib/neon/client"
 import { PasswordManager } from "@/lib/auth/password"
 
 export async function POST(request: NextRequest) {
@@ -21,53 +21,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const sql = createNeonClient()
 
-    const { data: existingUser, error: checkError } = await supabase
-      .from("users")
-      .select("id")
-      .eq("email", email)
-      .limit(1)
+    const existingUser = await sql`
+      SELECT id FROM auth.users WHERE email = ${email} LIMIT 1
+    `
 
-    if (checkError) {
-      console.error("Error checking existing user:", checkError)
-      return NextResponse.json({ error: "Internal server error" }, { status: 500 })
-    }
-
-    if (existingUser && existingUser.length > 0) {
+    if (existingUser.length > 0) {
       return NextResponse.json({ error: "User already exists" }, { status: 409 })
     }
 
     const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
     const hashedPassword = await PasswordManager.hashPassword(password)
 
-    const { error: userError } = await supabase.from("users").insert({
-      id: userId,
-      email: email,
-      encrypted_password: hashedPassword,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
+    await sql`
+      INSERT INTO auth.users (id, email, encrypted_password, created_at, updated_at)
+      VALUES (${userId}, ${email}, ${hashedPassword}, NOW(), NOW())
+    `
 
-    if (userError) {
-      console.error("Error creating user:", userError)
-      return NextResponse.json({ error: "Failed to create user" }, { status: 500 })
-    }
-
-    const { error: profileError } = await supabase.from("user_profiles").insert({
-      id: userId,
-      full_name: fullName,
-      is_admin: false,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-
-    if (profileError) {
-      console.error("Error creating user profile:", profileError)
-      // Clean up the user record if profile creation fails
-      await supabase.from("users").delete().eq("id", userId)
-      return NextResponse.json({ error: "Failed to create user profile" }, { status: 500 })
-    }
+    await sql`
+      INSERT INTO user_profiles (id, full_name, is_admin, created_at, updated_at)
+      VALUES (${userId}, ${fullName}, false, NOW(), NOW())
+    `
 
     return NextResponse.json({
       message: "User created successfully",

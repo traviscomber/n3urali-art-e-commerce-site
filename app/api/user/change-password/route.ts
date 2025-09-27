@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createNeonClient } from "@/lib/neon/client"
 import { PasswordManager } from "@/lib/auth/password"
 import { cookies } from "next/headers"
 
@@ -30,25 +30,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const sql = createNeonClient()
 
     // Get current user and password
-    const { data: userSession, error: sessionError } = await supabase
-      .from("user_sessions")
-      .select(`
-        user_id,
-        users!inner(encrypted_password)
-      `)
-      .eq("session_token", sessionToken)
-      .gt("expires_at", new Date().toISOString())
-      .single()
+    const userResult = await sql`
+      SELECT us.user_id, u.encrypted_password
+      FROM user_sessions us
+      JOIN auth.users u ON us.user_id = u.id
+      WHERE us.session_token = ${sessionToken}
+      AND us.expires_at > NOW()
+      LIMIT 1
+    `
 
-    if (sessionError || !userSession) {
+    if (userResult.length === 0) {
       return NextResponse.json({ error: "Invalid session" }, { status: 401 })
     }
 
+    const user = userResult[0]
+
     // Verify current password
-    const isValidPassword = await PasswordManager.verifyPassword(currentPassword, userSession.users.encrypted_password)
+    const isValidPassword = await PasswordManager.verifyPassword(currentPassword, user.encrypted_password)
 
     if (!isValidPassword) {
       return NextResponse.json({ error: "Current password is incorrect" }, { status: 400 })
@@ -58,28 +59,16 @@ export async function POST(request: NextRequest) {
     const hashedNewPassword = await PasswordManager.hashPassword(newPassword)
 
     // Update password
-    const { error: updateError } = await supabase
-      .from("users")
-      .update({
-        encrypted_password: hashedNewPassword,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", userSession.user_id)
-
-    if (updateError) {
-      console.error("Password update error:", updateError)
-      return NextResponse.json({ error: "Failed to update password" }, { status: 500 })
-    }
+    await sql`
+      UPDATE auth.users 
+      SET encrypted_password = ${hashedNewPassword}, updated_at = NOW()
+      WHERE id = ${user.user_id}
+    `
 
     // Invalidate all existing sessions for security
-    const { error: sessionDeleteError } = await supabase
-      .from("user_sessions")
-      .delete()
-      .eq("user_id", userSession.user_id)
-
-    if (sessionDeleteError) {
-      console.error("Session cleanup error:", sessionDeleteError)
-    }
+    await sql`
+      DELETE FROM user_sessions WHERE user_id = ${user.user_id}
+    `
 
     // Clear current session cookie
     cookieStore.delete("session_token")

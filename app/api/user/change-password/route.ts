@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createNeonClient } from "@/lib/neon/client"
 import { PasswordManager } from "@/lib/auth/password"
 import { cookies } from "next/headers"
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies()
+    const cookieStore = cookies()
     const sessionToken = cookieStore.get("session_token")?.value
 
     if (!sessionToken) {
@@ -30,28 +30,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const sql = createNeonClient()
 
-    const { data: userResult, error } = await supabase
-      .from("user_sessions")
-      .select(`
-        user_id,
-        users!inner(encrypted_password)
-      `)
-      .eq("session_token", sessionToken)
-      .gt("expires_at", new Date().toISOString())
-      .limit(1)
-      .single()
+    // Get current user and password
+    const userResult = await sql`
+      SELECT us.user_id, u.encrypted_password
+      FROM user_sessions us
+      JOIN auth.users u ON us.user_id = u.id
+      WHERE us.session_token = ${sessionToken}
+      AND us.expires_at > NOW()
+      LIMIT 1
+    `
 
-    if (error || !userResult) {
+    if (userResult.length === 0) {
       return NextResponse.json({ error: "Invalid session" }, { status: 401 })
     }
 
-    const user = userResult
-    const userData = user.users as any
+    const user = userResult[0]
 
     // Verify current password
-    const isValidPassword = await PasswordManager.verifyPassword(currentPassword, userData.encrypted_password)
+    const isValidPassword = await PasswordManager.verifyPassword(currentPassword, user.encrypted_password)
 
     if (!isValidPassword) {
       return NextResponse.json({ error: "Current password is incorrect" }, { status: 400 })
@@ -60,15 +58,17 @@ export async function POST(request: NextRequest) {
     // Hash new password
     const hashedNewPassword = await PasswordManager.hashPassword(newPassword)
 
-    await supabase
-      .from("users")
-      .update({
-        encrypted_password: hashedNewPassword,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", user.user_id)
+    // Update password
+    await sql`
+      UPDATE auth.users 
+      SET encrypted_password = ${hashedNewPassword}, updated_at = NOW()
+      WHERE id = ${user.user_id}
+    `
 
-    await supabase.from("user_sessions").delete().eq("user_id", user.user_id)
+    // Invalidate all existing sessions for security
+    await sql`
+      DELETE FROM user_sessions WHERE user_id = ${user.user_id}
+    `
 
     // Clear current session cookie
     cookieStore.delete("session_token")

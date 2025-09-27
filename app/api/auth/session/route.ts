@@ -1,46 +1,42 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createNeonClient } from "@/lib/neon/client"
 import { cookies } from "next/headers"
 
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies()
+    const cookieStore = cookies()
     const sessionToken = cookieStore.get("session_token")?.value
 
     if (!sessionToken) {
       return NextResponse.json({ user: null }, { status: 200 })
     }
 
-    const supabase = await createClient()
+    const sql = createNeonClient()
 
-    const { data: sessionResult, error } = await supabase
-      .from("user_sessions")
-      .select(`
-        user_id,
-        user_profiles!inner(full_name, is_admin),
-        users!inner(email)
-      `)
-      .eq("session_token", sessionToken)
-      .gt("expires_at", new Date().toISOString())
-      .limit(1)
-      .single()
+    const sessionResult = await sql`
+      SELECT us.user_id, up.full_name, up.is_admin, u.email
+      FROM user_sessions us
+      JOIN user_profiles up ON us.user_id = up.id
+      JOIN auth.users u ON up.id = u.id
+      WHERE us.session_token = ${sessionToken}
+      AND us.expires_at > NOW()
+      LIMIT 1
+    `
 
-    if (error || !sessionResult) {
+    if (sessionResult.length === 0) {
       cookieStore.delete("session_token")
       return NextResponse.json({ user: null }, { status: 200 })
     }
 
-    const session = sessionResult
-    const profile = session.user_profiles as any
-    const user = session.users as any
+    const session = sessionResult[0]
 
     return NextResponse.json({
       user: {
         id: session.user_id,
-        email: user.email,
+        email: session.email,
         user_metadata: {
-          full_name: profile.full_name,
-          is_admin: profile.is_admin,
+          full_name: session.full_name,
+          is_admin: session.is_admin,
         },
       },
     })
@@ -52,13 +48,15 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const cookieStore = await cookies()
+    const cookieStore = cookies()
     const sessionToken = cookieStore.get("session_token")?.value
 
     if (sessionToken) {
-      const supabase = await createClient()
+      const sql = createNeonClient()
 
-      await supabase.from("user_sessions").delete().eq("session_token", sessionToken)
+      await sql`
+        DELETE FROM user_sessions WHERE session_token = ${sessionToken}
+      `
     }
 
     cookieStore.delete("session_token")

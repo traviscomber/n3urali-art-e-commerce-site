@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createNeonClient } from "@/lib/neon/client"
 import { ImageUrlHandler } from "@/lib/image-url-handler"
 
 export async function GET(request: NextRequest, { params }: { params: { token: string } }) {
@@ -13,19 +13,19 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
       return NextResponse.json({ error: "Download token is required" }, { status: 400 })
     }
 
-    console.log("[v0] Creating Supabase client...")
-    const supabase = await createClient()
-    console.log("[v0] Supabase client created successfully")
+    console.log("[v0] Creating Neon client...")
+    const sql = createNeonClient()
+    console.log("[v0] Neon client created successfully")
 
-    console.log("[v0] Verifying download token...")
-    const { data: downloadData, error } = await supabase
-      .from("downloads")
-      .select("*")
-      .eq("download_token", token)
-      .gt("expires_at", new Date().toISOString())
-      .single()
+    console.log("[v0] Calling verify_and_download function...")
+    const result = await sql`
+      SELECT * FROM verify_and_download(${token})
+    `
+    console.log("[v0] Verification result:", result)
 
-    if (error || !downloadData) {
+    const downloadData = result[0]
+
+    if (!downloadData?.valid) {
       console.log("[v0] Invalid or expired token")
       return NextResponse.json(
         {
@@ -35,26 +35,19 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
       )
     }
 
-    // Update download count
-    await supabase
-      .from("downloads")
-      .update({ download_count: downloadData.download_count + 1 })
-      .eq("id", downloadData.id)
-
     console.log("[v0] Fetching image data for ID:", downloadData.image_id)
-    const { data: imageResult, error: imageError } = await supabase
-      .from("images")
-      .select("image_url, title")
-      .eq("id", downloadData.image_id)
-      .single()
+    const imageResult = await sql`
+      SELECT image_url, title FROM images WHERE id = ${downloadData.image_id}
+    `
+    console.log("[v0] Image result:", imageResult)
 
-    if (imageError || !imageResult) {
+    if (!imageResult[0]) {
       console.log("[v0] Image not found")
       return NextResponse.json({ error: "Image not found" }, { status: 404 })
     }
 
-    const originalImageUrl = imageResult.image_url
-    const imageTitle = imageResult.title
+    const originalImageUrl = imageResult[0].image_url
+    const imageTitle = imageResult[0].title
 
     const downloadUrl = ImageUrlHandler.convertToDownloadUrl(originalImageUrl)
     console.log("[v0] Converted URL for download:", downloadUrl)
@@ -69,6 +62,7 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
 
       // Add Backblaze authentication if needed
       if (ImageUrlHandler.getStorageProvider(originalImageUrl) === "backblaze") {
+        // For Backblaze, we might need to add authorization headers in the future
         console.log("[v0] Fetching from Backblaze storage")
       }
 

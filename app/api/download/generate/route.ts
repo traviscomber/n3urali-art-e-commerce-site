@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createNeonClient } from "@/lib/neon/client"
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,38 +13,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Order item ID is required" }, { status: 400 })
     }
 
-    console.log("[v0] Creating Supabase client...")
-    const supabase = await createClient()
-    console.log("[v0] Supabase client created successfully")
+    console.log("[v0] Creating Neon client...")
+    const sql = createNeonClient()
+    console.log("[v0] Neon client created successfully")
 
-    const downloadToken = `dl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
+    console.log("[v0] Calling generate_download_token function...")
+    const result = await sql`
+      SELECT generate_download_token(${orderItemId}::uuid) as token
+    `
+    console.log("[v0] Database result:", result)
 
-    console.log("[v0] Generating download token:", downloadToken)
-
-    // Insert the download record
-    const { data: downloadResult, error } = await supabase
-      .from("downloads")
-      .insert({
-        order_item_id: orderItemId,
-        download_token: downloadToken,
-        expires_at: expiresAt.toISOString(),
-        download_count: 0,
-      })
-      .select("download_token")
-      .single()
-
-    if (error || !downloadResult) {
-      console.log("[v0] Failed to create download record:", error)
+    if (!result[0]?.token) {
+      console.log("[v0] No token returned from database")
       return NextResponse.json({ error: "Failed to generate download token" }, { status: 500 })
     }
 
-    const downloadUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/download/by-token/${downloadResult.download_token}`
+    const downloadUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/download/by-token/${result[0].token}`
     console.log("[v0] Generated download URL:", downloadUrl)
 
     return NextResponse.json({
       downloadUrl,
-      token: downloadResult.download_token,
+      token: result[0].token,
       expiresIn: "24 hours",
     })
   } catch (error) {

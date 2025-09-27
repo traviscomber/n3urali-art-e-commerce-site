@@ -15,12 +15,6 @@ export function Header() {
 
   const itemCount = (items || []).reduce((sum, item) => sum + (item.quantity || 0), 0)
 
-  const handleNavClick = (href: string, label: string) => {
-    console.log(`[v0] Navigation clicked: ${label} -> ${href}`)
-    console.log(`[v0] Current location:`, window.location.href)
-    console.log(`[v0] User agent:`, navigator.userAgent)
-  }
-
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/20 bg-black backdrop-blur-xl supports-[backdrop-filter]:bg-black/95">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -40,7 +34,6 @@ export function Header() {
             <Link
               href="/browse"
               className="relative text-sm font-medium text-gray-300 hover:text-primary transition-all duration-300 group"
-              onClick={() => handleNavClick("/browse", "Gallery")}
             >
               Gallery
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
@@ -48,7 +41,6 @@ export function Header() {
             <Link
               href="/categories/equirectangular"
               className="relative text-sm font-medium text-gray-300 hover:text-primary transition-all duration-300 group"
-              onClick={() => handleNavClick("/categories/equirectangular", "360° Images")}
             >
               360° Images
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
@@ -56,7 +48,6 @@ export function Header() {
             <Link
               href="/categories/fisheye"
               className="relative text-sm font-medium text-gray-300 hover:text-primary transition-all duration-300 group"
-              onClick={() => handleNavClick("/categories/fisheye", "Fisheye")}
             >
               Fisheye
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
@@ -64,7 +55,6 @@ export function Header() {
             <Link
               href="/account/orders"
               className="relative text-sm font-medium text-gray-300 hover:text-primary transition-all duration-300 group"
-              onClick={() => handleNavClick("/account/orders", "My Orders")}
             >
               My Orders
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
@@ -108,40 +98,28 @@ export function Header() {
               <Link
                 href="/browse"
                 className="text-base font-medium text-gray-300 hover:text-primary transition-colors px-2"
-                onClick={() => {
-                  handleNavClick("/browse", "Gallery (Mobile)")
-                  setIsMobileMenuOpen(false)
-                }}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 Gallery
               </Link>
               <Link
                 href="/categories/equirectangular"
                 className="text-base font-medium text-gray-300 hover:text-primary transition-colors px-2"
-                onClick={() => {
-                  handleNavClick("/categories/equirectangular", "360° Images (Mobile)")
-                  setIsMobileMenuOpen(false)
-                }}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 360° Images
               </Link>
               <Link
                 href="/categories/fisheye"
                 className="text-base font-medium text-gray-300 hover:text-primary transition-colors px-2"
-                onClick={() => {
-                  handleNavClick("/categories/fisheye", "Fisheye (Mobile)")
-                  setIsMobileMenuOpen(false)
-                }}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 Fisheye
               </Link>
               <Link
                 href="/account/orders"
                 className="text-base font-medium text-gray-300 hover:text-primary transition-colors px-2"
-                onClick={() => {
-                  handleNavClick("/account/orders", "My Orders (Mobile)")
-                  setIsMobileMenuOpen(false)
-                }}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 My Orders
               </Link>

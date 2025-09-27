@@ -211,10 +211,15 @@ export default function GalleryPage() {
     console.log(`[v0] Gallery: Transforming ${images.length} images`)
 
     return images.map((image: any) => {
-      // Use file_path directly from database - this is the Supabase storage URL
-      const preview_url = image.file_path || "/placeholder.svg?height=400&width=400&text=No+Image"
+      let preview_url = image.file_path || "/placeholder.svg?height=400&width=400&text=No+Image"
 
-      console.log(`[v0] Gallery: Image ${image.id}: file_path=${image.file_path}`)
+      // Ensure Supabase URLs are properly formatted for public access
+      if (preview_url.includes("supabase.co/storage/v1/object/")) {
+        // Make sure it's using the public endpoint
+        preview_url = preview_url.replace("/storage/v1/object/", "/storage/v1/object/public/")
+      }
+
+      console.log(`[v0] Gallery: Image ${image.id}: file_path=${image.file_path}, preview_url=${preview_url}`)
 
       return {
         id: image.id,

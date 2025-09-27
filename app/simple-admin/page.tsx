@@ -299,13 +299,12 @@ export default function SimpleAdminPage() {
       let imageUrl: string
       let thumbnailBase64: string
 
-      console.log("[v0] Using Backblaze B2 storage...")
+      console.log("[v0] Using Supabase storage for high-quality uploads...")
 
-      // Upload to Backblaze B2
       const formData = new FormData()
       formData.append("file", newImage.file)
 
-      const uploadResponse = await fetch("/api/backblaze/upload", {
+      const uploadResponse = await fetch("/api/supabase/upload", {
         method: "POST",
         body: formData,
       })
@@ -313,12 +312,12 @@ export default function SimpleAdminPage() {
       if (!uploadResponse.ok) {
         const errorText = await uploadResponse.text()
         console.log("[v0] Upload response error:", errorText)
-        throw new Error("Failed to upload file to Backblaze")
+        throw new Error("Failed to upload file to Supabase")
       }
 
       const { url } = await uploadResponse.json()
       imageUrl = url
-      console.log("[v0] File uploaded successfully to Backblaze:", imageUrl)
+      console.log("[v0] File uploaded successfully to Supabase:", imageUrl)
 
       // Generate thumbnail from the uploaded image
       console.log("[v0] Generating thumbnail...")
@@ -563,10 +562,10 @@ export default function SimpleAdminPage() {
       return
     }
 
-    const MAX_FILE_SIZE = 15 * 1024 * 1024 // 15MB
+    const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB
     if (newImage.file.size > MAX_FILE_SIZE) {
       setUploadError(
-        `File size (${(newImage.file.size / 1024 / 1024).toFixed(1)}MB) exceeds 15MB limit. Please add the original file URL manually after upload.`,
+        `File size (${(newImage.file.size / 1024 / 1024).toFixed(1)}MB) exceeds 100MB limit. Please compress the file or contact support.`,
       )
       return
     }
@@ -585,8 +584,8 @@ export default function SimpleAdminPage() {
       const formData = new FormData()
       formData.append("file", newImage.file)
 
-      console.log("[v0] Uploading to Backblaze...")
-      const uploadResponse = await fetch("/api/backblaze/upload", {
+      console.log("[v0] Uploading to Supabase...")
+      const uploadResponse = await fetch("/api/supabase/upload", {
         method: "POST",
         body: formData,
       })
@@ -616,7 +615,7 @@ export default function SimpleAdminPage() {
       const result = await createImageWithCategoryObject(imageData)
 
       if (result.success) {
-        toast.success("Image uploaded successfully!")
+        toast.success("Image uploaded successfully to Supabase!")
         console.log("[v0] Image saved to database successfully")
 
         // Reset form
@@ -976,7 +975,7 @@ export default function SimpleAdminPage() {
                         <div className="text-xs text-gray-300 space-y-1">
                           <p>High Quality Only: JPG, PNG, WebP</p>
                           <p>• Files &lt;40MB: Database storage (fast access)</p>
-                          <p>• Files &gt;40MB: Backblaze B2 storage (unlimited, cost-effective)</p>
+                          <p>• Files &gt;40MB: Supabase storage (unlimited, high quality)</p>
                         </div>
                       </div>
                     )}
@@ -1035,12 +1034,12 @@ export default function SimpleAdminPage() {
                   {uploading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Uploading with Backblaze B2...
+                      Uploading to Supabase...
                     </>
                   ) : (
                     <>
                       <Upload className="mr-2 h-4 w-4" />
-                      Upload with Backblaze B2
+                      Upload to Supabase (High Quality)
                     </>
                   )}
                 </Button>

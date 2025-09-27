@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createNeonClient } from "@/lib/neon/client"
+import { createClient } from "@/lib/supabase/server"
 
 interface CartItem {
   id: string
@@ -75,31 +75,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const sql = createNeonClient()
+    const supabase = await createClient()
 
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
 
     console.log("[v0] Creating order with number:", orderNumber)
 
-    const orderResult = await sql`
-      INSERT INTO orders (
-        user_email, 
-        user_name,
-        total_amount, 
-        status, 
-        payment_method,
-        payment_id
-      )
-      VALUES (
-        ${customerInfo.email},
-        ${customerInfo.firstName + " " + customerInfo.lastName},
-        ${total},
-        'completed',
-        ${paymentMethod === "crypto" ? "cryptocurrency" : paymentMethod},
-        ${paymentMethod === "crypto" ? cryptoDetails?.transactionHash : paymentIntentId || orderNumber}
-      )
-      RETURNING id
-    `
+    const { data: orderResult, error: orderError } = await supabase
+      .from("orders")
+      .insert({
+        user_email: customerInfo.email,
+        user_name: customerInfo.firstName + " " + customerInfo.lastName,
+        total_amount: total,
+        status: "completed",
+        payment_method: paymentMethod === "crypto" ? "cryptocurrency" : paymentMethod,
+        payment_id: paymentMethod === "crypto" ? cryptoDetails?.transactionHash : paymentIntentId || orderNumber,
+      })
+      .select("id")
+
+    if (orderError || !orderResult || orderResult.length === 0) {
+      console.error("[v0] Order creation error:", orderError)
+      return NextResponse.json({ success: false, error: "Failed to create order" }, { status: 500 })
+    }
 
     const orderId = orderResult[0].id
     console.log("[v0] Order created with ID:", orderId)
@@ -107,31 +104,31 @@ export async function POST(request: NextRequest) {
     for (const item of items) {
       console.log("[v0] Creating order item for image:", item.imageId, "License:", item.licenseType)
 
-      const licenseResult = await sql`
-        SELECT id FROM licenses WHERE active = true ORDER BY price ASC LIMIT 1
-      `
+      const { data: licenseResult, error: licenseError } = await supabase
+        .from("licenses")
+        .select("id")
+        .eq("active", true)
+        .order("price", { ascending: true })
+        .limit(1)
 
-      const licenseId = licenseResult.length > 0 ? licenseResult[0].id : null
-
-      if (!licenseId) {
+      if (licenseError || !licenseResult || licenseResult.length === 0) {
         console.error("[v0] No default license found")
         return NextResponse.json({ success: false, error: "License configuration error" }, { status: 500 })
       }
 
-      await sql`
-        INSERT INTO order_items (
-          order_id,
-          image_id,
-          license_id,
-          price
-        )
-        VALUES (
-          ${orderId},
-          ${item.imageId},
-          ${licenseId},
-          ${item.price * item.quantity}
-        )
-      `
+      const licenseId = licenseResult[0].id
+
+      const { error: itemError } = await supabase.from("order_items").insert({
+        order_id: orderId,
+        image_id: item.imageId,
+        license_id: licenseId,
+        price: item.price * item.quantity,
+      })
+
+      if (itemError) {
+        console.error("[v0] Order item creation error:", itemError)
+        return NextResponse.json({ success: false, error: "Failed to create order items" }, { status: 500 })
+      }
     }
 
     console.log("[v0] Order created successfully:", orderNumber)

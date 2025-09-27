@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createNeonClient } from "@/lib/neon/client"
+import { createClient } from "@/lib/supabase/server"
+import { v4 as uuidv4 } from "uuid"
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,27 +14,58 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Order item ID is required" }, { status: 400 })
     }
 
-    console.log("[v0] Creating Neon client...")
-    const sql = createNeonClient()
-    console.log("[v0] Neon client created successfully")
+    console.log("[v0] Creating Supabase client...")
+    const supabase = await createClient()
+    console.log("[v0] Supabase client created successfully")
 
-    console.log("[v0] Calling generate_download_token function...")
-    const result = await sql`
-      SELECT generate_download_token(${orderItemId}::uuid) as token
-    `
-    console.log("[v0] Database result:", result)
+    console.log("[v0] Verifying order item and generating token...")
 
-    if (!result[0]?.token) {
-      console.log("[v0] No token returned from database")
+    // First verify the order item exists and is valid
+    const { data: orderItem, error: orderError } = await supabase
+      .from("order_items")
+      .select(`
+        *,
+        orders!inner(id, status, user_email),
+        images!inner(id, title)
+      `)
+      .eq("id", orderItemId)
+      .eq("orders.status", "completed")
+      .single()
+
+    if (orderError || !orderItem) {
+      console.log("[v0] Invalid order item or order not completed")
+      return NextResponse.json({ error: "Invalid order item or order not completed" }, { status: 400 })
+    }
+
+    // Generate download token
+    const downloadToken = uuidv4()
+    const expiresAt = new Date()
+    expiresAt.setHours(expiresAt.getHours() + 24) // 24 hours from now
+
+    // Create download record
+    const { data: downloadRecord, error: downloadError } = await supabase
+      .from("downloads")
+      .insert({
+        order_id: orderItem.orders.id,
+        image_id: orderItem.images.id,
+        user_email: orderItem.orders.user_email,
+        download_token: downloadToken,
+        expires_at: expiresAt.toISOString(),
+      })
+      .select()
+      .single()
+
+    if (downloadError) {
+      console.error("[v0] Failed to create download record:", downloadError)
       return NextResponse.json({ error: "Failed to generate download token" }, { status: 500 })
     }
 
-    const downloadUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/download/by-token/${result[0].token}`
+    const downloadUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/download/by-token/${downloadToken}`
     console.log("[v0] Generated download URL:", downloadUrl)
 
     return NextResponse.json({
       downloadUrl,
-      token: result[0].token,
+      token: downloadToken,
       expiresIn: "24 hours",
     })
   } catch (error) {

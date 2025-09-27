@@ -10,7 +10,14 @@
 
 Go to your Vercel project settings and add these environment variables:
 
-#### Database (Neon PostgreSQL)
+#### Database (Supabase)
+\`\`\`
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+\`\`\`
+
+#### Legacy Database Configuration (if still needed)
 \`\`\`
 DATABASE_URL=postgresql://username:password@host:port/database?sslmode=require
 POSTGRES_URL=postgresql://username:password@host:port/database?sslmode=require
@@ -27,7 +34,6 @@ PGHOST_UNPOOLED=your-postgres-host-unpooled
 PGUSER=your-postgres-user
 POSTGRES_URL_NO_SSL=postgresql://username:password@host:port/database
 POSTGRES_HOST=your-postgres-host
-NEON_PROJECT_ID=your-neon-project-id
 \`\`\`
 
 #### Storage Configuration
@@ -36,6 +42,7 @@ BLOB_READ_WRITE_TOKEN=your-new-vercel-blob-token
 BACKBLAZE_API_KEY=your-new-backblaze-api-key
 BACKBLAZE_APPLICATION_KEY=your-new-backblaze-application-key
 BACKBLAZE_BUCKET_NAME=your-bucket-name
+NEXT_PUBLIC_BACKBLAZE_BUCKET_NAME=your-bucket-name
 B2_REGION=your-b2-region
 B2_ENDPOINT=https://s3.your-region.backblazeb2.com
 \`\`\`
@@ -52,7 +59,7 @@ NODE_ENV=production
 1. **Rotate all exposed credentials:**
    - Generate new Vercel Blob token
    - Create new Backblaze API keys
-   - Consider rotating database credentials
+   - Generate new Supabase service role key
 
 2. **Update Vercel environment variables** with new credentials
 
@@ -62,23 +69,32 @@ NODE_ENV=production
    # Edit .env.local with your development credentials
    \`\`\`
 
-### 3. Deployment Configuration
+### 3. Supabase Setup
+
+1. **Create a new Supabase project** at https://supabase.com
+2. **Run the database migration scripts** in the Supabase SQL editor
+3. **Configure Row Level Security (RLS)** policies for your tables
+4. **Set up authentication** if using Supabase Auth
+
+### 4. Deployment Configuration
 
 The project includes:
 - ✅ `vercel.json` - Production deployment configuration
 - ✅ `next.config.mjs` - Optimized for production
 - ✅ Environment variable validation in API routes
 - ✅ Proper error handling for missing credentials
+- ✅ Supabase client configuration for SSR
 
-### 4. Pre-deployment Checklist
+### 5. Pre-deployment Checklist
 
+- [ ] Supabase project created and configured
 - [ ] All environment variables set in Vercel dashboard
 - [ ] New credentials generated and rotated
-- [ ] Database connection tested
+- [ ] Database migration scripts executed
 - [ ] Backblaze B2 bucket configured
 - [ ] Domain configured (if using custom domain)
 
-### 5. Deployment Commands
+### 6. Deployment Commands
 
 \`\`\`bash
 # Deploy to Vercel
@@ -96,11 +112,12 @@ The application includes:
 - Pagination for large datasets
 - Hybrid storage (database + Backblaze B2)
 - Compressed image uploads
+- Supabase real-time subscriptions for live updates
 
 ## Monitoring
 
 Monitor your deployment:
 - Vercel Analytics dashboard
-- Database performance in Neon console
+- Supabase dashboard for database performance
 - Backblaze B2 usage statistics
 - Application logs in Vercel Functions tab

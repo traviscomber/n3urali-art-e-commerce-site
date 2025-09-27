@@ -187,9 +187,10 @@ export default function GalleryPage() {
         const preview_url =
           image.thumbnail_url || image.image_url || "/placeholder.svg?height=400&width=400&text=No+Image"
 
+        // Only convert Backblaze URLs to proxy, leave Supabase URLs as-is
         const proxyPreviewUrl = preview_url.includes("backblazeb2.com")
           ? `/api/image-proxy/${preview_url.split("/file/")[1]?.split("/").slice(1).join("/")}`
-          : preview_url
+          : preview_url // Use original URL for Supabase storage
 
         return {
           id: image.id,

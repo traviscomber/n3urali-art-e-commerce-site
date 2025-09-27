@@ -279,7 +279,7 @@ const getCachedLicenses = unstable_cache(
   async () => {
     const supabase = await createClient()
 
-    const { data: result, error } = await supabase.from("licenses").select("*").eq("active", true).order("price")
+    const { data: result, error } = await supabase.from("licenses").select("*").eq("active", true).order("name")
 
     if (error) {
       console.error("[v0] Database error in getCachedLicenses:", error)
@@ -649,7 +649,7 @@ export async function createImageWithCategoryObject(imageData: {
 
     if (!defaultLicense.data || defaultLicense.data.length === 0) {
       console.log("[v0] No Standard license found, getting first active license...")
-      defaultLicense = await supabase.from("licenses").select("id").eq("active", true).order("price").limit(1)
+      defaultLicense = await supabase.from("licenses").select("id").eq("active", true).order("name").limit(1)
     }
 
     const licenseId = defaultLicense.data ? defaultLicense.data[0].id : null

@@ -9,7 +9,7 @@ interface Simple360ViewerProps {
   title: string
   onClose: () => void
   inline?: boolean
-  isPaid?: boolean // Added isPaid prop to control protection level
+  isPaid?: boolean
 }
 
 declare global {
@@ -18,139 +18,126 @@ declare global {
   }
 }
 
-const loadPannellum = async (): Promise<boolean> => {
-  return new Promise((resolve) => {
-    if (typeof window === "undefined") {
-      resolve(false)
-      return
-    }
-
-    if (window.pannellum) {
-      resolve(true)
-      return
-    }
-
-    // Check if script is already loading or loaded
-    const existingScript = document.querySelector('script[src*="pannellum"]')
-    if (existingScript) {
-      // Script exists, wait for it to load
-      const checkPannellum = () => {
-        if (window.pannellum) {
-          resolve(true)
-        } else {
-          setTimeout(checkPannellum, 100)
-        }
-      }
-      checkPannellum()
-      return
-    }
-
-    const script = document.createElement("script")
-    script.src = "https://cdn.jsdelivr.net/npm/pannellum@2.3.2/build/pannellum.js"
-    script.onload = () => {
-      resolve(!!window.pannellum)
-    }
-    script.onerror = () => {
-      console.error("Failed to load Pannellum library.")
-      resolve(false)
-    }
-    document.body.appendChild(script)
-  })
-}
-
 export const Simple360Viewer = React.memo(function Simple360Viewer({
   imageUrl,
   title,
   onClose,
   inline = false,
-  isPaid = false, // Default to unpaid (protected)
+  isPaid = false,
 }: Simple360ViewerProps) {
-  const [pannellumLoaded, setPannellumLoaded] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string>("")
   const containerRef = useRef<HTMLDivElement>(null)
   const viewerRef = useRef<any>(null)
+  const [isContainerReady, setIsContainerReady] = useState(false)
 
-  const handleContextMenu = (e: Event) => {
-    if (!isPaid) {
-      e.preventDefault()
-      e.stopPropagation()
-      return false
-    }
-  }
+  const protectionClasses = !isPaid ? "select-none pointer-events-auto" : ""
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (!isPaid) {
-      // Block common shortcuts for unpaid images
-      if (
-        e.ctrlKey ||
-        e.metaKey || // Block Ctrl/Cmd combinations
-        e.key === "F12" || // Block dev tools
-        (e.ctrlKey && e.shiftKey && e.key === "I") || // Block inspect
-        (e.ctrlKey && e.shiftKey && e.key === "C") || // Block console
-        (e.ctrlKey && e.key === "u") || // Block view source
-        (e.ctrlKey && e.key === "s") // Block save
-      ) {
-        e.preventDefault()
-        e.stopPropagation()
-        return false
+  useEffect(() => {
+    const checkContainer = () => {
+      if (containerRef.current && containerRef.current.offsetParent !== null) {
+        console.log("[v0] Container is ready and visible")
+        setIsContainerReady(true)
+      } else {
+        console.log("[v0] Container not ready yet, retrying...")
+        setTimeout(checkContainer, 50)
       }
     }
 
-    if (e.key === "Escape") {
-      onClose()
-    }
-  }
-
-  const handleDragStart = (e: Event) => {
-    if (!isPaid) {
-      e.preventDefault()
-      return false
-    }
-  }
-
-  const handleSelectStart = (e: Event) => {
-    if (!isPaid) {
-      e.preventDefault()
-      return false
-    }
-  }
+    // Start checking after a small delay to ensure DOM is rendered
+    const timer = setTimeout(checkContainer, 100)
+    return () => clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
-    const initViewer = async () => {
-      console.log("[v0] Starting Pannellum 360° viewer initialization...")
+    if (!isContainerReady) {
+      console.log("[v0] Waiting for container to be ready...")
+      return
+    }
 
-      const loaded = await loadPannellum()
-      if (!loaded || !window.pannellum || !containerRef.current) {
-        console.error("[v0] Pannellum failed to load")
+    const initViewer = () => {
+      console.log("[v0] Starting Pannellum 360° viewer initialization...")
+      console.log("[v0] Image URL:", imageUrl)
+
+      // Load Pannellum CSS
+      if (!document.querySelector('link[href*="pannellum.css"]')) {
+        const cssLink = document.createElement("link")
+        cssLink.rel = "stylesheet"
+        cssLink.href = "https://cdn.jsdelivr.net/npm/pannellum@2.3.2/build/pannellum.css"
+        document.head.appendChild(cssLink)
+      }
+
+      // Load Pannellum JS
+      if (!window.pannellum && !document.querySelector('script[src*="pannellum.js"]')) {
+        const script = document.createElement("script")
+        script.src = "https://cdn.jsdelivr.net/npm/pannellum@2.3.2/build/pannellum.js"
+        script.onload = () => {
+          console.log("[v0] Pannellum script loaded successfully")
+          createViewer()
+        }
+        script.onerror = () => {
+          console.error("[v0] Failed to load Pannellum library.")
+          setError("Failed to load 360° viewer library")
+          setIsLoading(false)
+        }
+        document.body.appendChild(script)
+      } else if (window.pannellum) {
+        createViewer()
+      }
+    }
+
+    const createViewer = () => {
+      if (!containerRef.current) {
+        console.error("[v0] Container ref not available")
+        setError("Container not ready")
+        setIsLoading(false)
+        return
+      }
+
+      if (!containerRef.current.isConnected) {
+        console.error("[v0] Container not connected to DOM")
+        setError("Container not connected")
+        setIsLoading(false)
         return
       }
 
       try {
         console.log("[v0] Creating Pannellum viewer instance...")
+        console.log("[v0] Container dimensions:", {
+          width: containerRef.current.offsetWidth,
+          height: containerRef.current.offsetHeight,
+        })
+
+        // Clear any existing content
+        containerRef.current.innerHTML = ""
 
         viewerRef.current = window.pannellum.viewer(containerRef.current, {
           type: "equirectangular",
           panorama: imageUrl,
           autoLoad: true,
-          showControls: !isPaid ? false : true, // Hide controls for unpaid images
-          showFullscreenCtrl: false, // Always disabled
-          showZoomCtrl: false, // Always disabled for protection
-          mouseZoom: isPaid ? false : false, // Always disabled for protection
-          doubleClickZoom: false, // Always disabled
-          draggable: true, // Movement always enabled
-          keyboardZoom: false, // Always disabled
+          showControls: isPaid,
+          showFullscreenCtrl: false,
+          showZoomCtrl: isPaid,
+          mouseZoom: isPaid,
+          doubleClickZoom: false,
+          draggable: true,
+          keyboardZoom: false,
           compass: false,
           title: title,
           author: "n3uralia.art",
           hfov: 90,
           pitch: 0,
           yaw: 0,
-          minHfov: 90, // Fixed FOV prevents zoom
-          maxHfov: 90, // Fixed FOV prevents zoom
+          minHfov: isPaid ? 50 : 90,
+          maxHfov: isPaid ? 120 : 90,
         })
 
+        setIsLoading(false)
         console.log("[v0] Pannellum 360° viewer initialized successfully")
-      } catch (error) {
-        console.error("[v0] Error initializing Pannellum viewer:", error)
+      } catch (viewerError) {
+        console.error("[v0] Error creating Pannellum viewer:", viewerError)
+        setError("Failed to create 360° viewer")
+        setIsLoading(false)
       }
     }
 
@@ -165,27 +152,67 @@ export const Simple360Viewer = React.memo(function Simple360Viewer({
         }
       }
     }
-  }, [imageUrl, title, isPaid]) // Added isPaid to dependencies
+  }, [imageUrl, title, isPaid, isContainerReady]) // Added isContainerReady dependency
 
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isPaid && (e.ctrlKey || e.metaKey || e.key === "F12")) {
+        e.preventDefault()
+        return false
+      }
+      if (e.key === "Escape") {
+        onClose()
+      }
+    }
+
+    const handleContextMenu = (e: Event) => {
+      if (!isPaid) {
+        e.preventDefault()
+        return false
+      }
+    }
+
     document.addEventListener("keydown", handleKeyDown)
     document.addEventListener("contextmenu", handleContextMenu)
-    document.addEventListener("dragstart", handleDragStart)
-    document.addEventListener("selectstart", handleSelectStart)
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown)
       document.removeEventListener("contextmenu", handleContextMenu)
-      document.removeEventListener("dragstart", handleDragStart)
-      document.removeEventListener("selectstart", handleSelectStart)
     }
-  }, [isPaid]) // Added isPaid to dependencies
+  }, [isPaid, onClose])
 
   if (!imageUrl || !title) {
     return null
   }
 
-  const protectionClasses = !isPaid ? "select-none pointer-events-auto" : ""
+  if (isLoading) {
+    return (
+      <div
+        className={`relative w-full h-full bg-black rounded-lg overflow-hidden flex items-center justify-center ${protectionClasses}`}
+      >
+        <div className="text-white text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-lg font-semibold">Loading 360° viewer...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div
+        className={`relative w-full h-full bg-black rounded-lg overflow-hidden flex items-center justify-center ${protectionClasses}`}
+      >
+        <div className="text-white text-center">
+          <p className="text-lg font-semibold mb-2">Error loading 360° viewer</p>
+          <p className="text-sm text-white/70 mb-4">{error}</p>
+          <Button onClick={onClose} variant="secondary" size="sm">
+            Close
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   if (inline) {
     return (
@@ -207,13 +234,7 @@ export const Simple360Viewer = React.memo(function Simple360Viewer({
           </Button>
         </div>
 
-        <div
-          ref={containerRef}
-          className="w-full h-full"
-          style={{ minHeight: "400px" }}
-          onContextMenu={handleContextMenu}
-          onDragStart={handleDragStart}
-        />
+        <div ref={containerRef} className="w-full h-full" style={{ minHeight: "400px" }} />
 
         <div className="absolute inset-0 pointer-events-none z-20">
           <div
@@ -255,13 +276,7 @@ export const Simple360Viewer = React.memo(function Simple360Viewer({
         </Button>
       </div>
 
-      <div
-        ref={containerRef}
-        className="w-full h-full"
-        style={{ minHeight: "400px" }}
-        onContextMenu={handleContextMenu}
-        onDragStart={handleDragStart}
-      />
+      <div ref={containerRef} className="w-full h-full" style={{ minHeight: "400px" }} />
 
       <div className="absolute inset-0 pointer-events-none z-20">
         <div

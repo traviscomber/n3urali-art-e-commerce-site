@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ImageWithFallback } from "@/components/image-with-fallback"
 import { LicenseSelector } from "@/components/license-selector"
 import { BreadcrumbNav } from "@/components/breadcrumb-nav"
-import { ArrowLeft, ShoppingCart, Eye, Share2, Heart, Maximize, Info } from "lucide-react"
+import { ArrowLeft, ShoppingCart, Eye, Share2, Heart, Info } from "lucide-react"
 import { Simple360Viewer } from "@/components/simple-360-viewer"
 
 interface Image {
@@ -48,6 +48,12 @@ export default function PhotoDetailClient({ initialImage }: Props) {
     image.thumbnail_large_url || image.thumbnail_medium_url || image.thumbnail_small_url || image.original_url
   const category = image.categories?.name || "360°"
   const isEquirectangular = category.toLowerCase().includes("equirectangular") || category.includes("360")
+
+  console.log("[v0] PhotoDetailClient - Image ID:", image.id)
+  console.log("[v0] PhotoDetailClient - Category:", category)
+  console.log("[v0] PhotoDetailClient - isEquirectangular:", isEquirectangular)
+  console.log("[v0] PhotoDetailClient - showPanoramaViewer:", showPanoramaViewer)
+  console.log("[v0] PhotoDetailClient - original_url:", image.original_url)
 
   const handleAddToCart = () => {
     setShowLicenseSelector(true)
@@ -114,6 +120,7 @@ export default function PhotoDetailClient({ initialImage }: Props) {
                       title={image.title}
                       onClose={() => setShowPanoramaViewer(false)}
                       inline={true}
+                      isPaid={false}
                     />
                   ) : (
                     <>
@@ -130,20 +137,6 @@ export default function PhotoDetailClient({ initialImage }: Props) {
                         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/20 text-4xl font-bold rotate-12 select-none">
                           n3uralia.art
                         </div>
-                      </div>
-
-                      {/* Action Buttons Overlay */}
-                      <div className="absolute bottom-4 right-4 flex gap-2">
-                        {isEquirectangular && (
-                          <Button
-                            size="sm"
-                            onClick={() => setShowPanoramaViewer(true)}
-                            className="bg-black/50 hover:bg-black/70 text-white"
-                          >
-                            <Maximize className="w-4 h-4 mr-2" />
-                            360° View
-                          </Button>
-                        )}
                       </div>
                     </>
                   )}
@@ -231,7 +224,11 @@ export default function PhotoDetailClient({ initialImage }: Props) {
                     <Button
                       variant="outline"
                       className="w-full bg-transparent"
-                      onClick={() => setShowPanoramaViewer(true)}
+                      onClick={() => {
+                        console.log("[v0] Preview button clicked - isEquirectangular:", isEquirectangular)
+                        console.log("[v0] Setting showPanoramaViewer to true")
+                        setShowPanoramaViewer(true)
+                      }}
                       disabled={!isEquirectangular}
                     >
                       <Eye className="w-4 h-4 mr-2" />

@@ -1,13 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Grid3X3, List, Eye, X, Loader2, Play } from "lucide-react"
+import { Search, Grid3X3, List, Eye, Loader2, Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { PanoramaViewer } from "@/components/panorama-viewer"
 import { getImages } from "@/app/actions/admin-actions"
 import { useCart } from "@/lib/contexts/cart-context"
 import { ImageWithFallback } from "@/components/image-with-fallback"
@@ -31,132 +30,11 @@ export default function EquirectangularCategoryPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState("newest")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [viewingPanorama, setViewingPanorama] = useState<EquirectangularImage | null>(null)
   const [loadingImage, setLoadingImage] = useState<string | null>(null)
-  const [show360Viewer, setShow360Viewer] = useState(false)
-  const [current360Image, setCurrent360Image] = useState<EquirectangularImage | null>(null)
-  const [pannellumLoaded, setPannellumLoaded] = useState(false)
   const [loading, setLoading] = useState(true)
   const { addItem, openCart } = useCart()
   const [addedToCart, setAddedToCart] = useState<string | null>(null)
   const router = useRouter()
-
-  const loadPannellum = async () => {
-    if (pannellumLoaded || window.pannellum) {
-      return true
-    }
-
-    return new Promise<boolean>((resolve) => {
-      // Check if CSS is already loaded
-      const existingCSS = document.querySelector('link[href*="pannellum.css"]')
-      if (!existingCSS) {
-        const cssLink = document.createElement("link")
-        cssLink.rel = "stylesheet"
-        cssLink.href = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"
-        cssLink.onload = () => console.log("[v0] Pannellum CSS loaded")
-        cssLink.onerror = () => console.error("[v0] Failed to load Pannellum CSS")
-        // Use document.body instead of document.head to avoid conflicts
-        document.body.appendChild(cssLink)
-      }
-
-      // Check if script is already loaded
-      const existingScript = document.querySelector('script[src*="pannellum.js"]')
-      if (!existingScript) {
-        const script = document.createElement("script")
-        script.src = "https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"
-        script.onload = () => {
-          setPannellumLoaded(true)
-          resolve(true)
-        }
-        script.onerror = () => {
-          console.error("Failed to load Pannellum")
-          resolve(false)
-        }
-        // Use document.body instead of document.head to avoid conflicts
-        document.body.appendChild(script)
-      } else {
-        // Script already exists, check if window.pannellum is available
-        if (window.pannellum) {
-          setPannellumLoaded(true)
-          resolve(true)
-        } else {
-          // Wait a bit for the script to initialize
-          setTimeout(() => {
-            if (window.pannellum) {
-              setPannellumLoaded(true)
-              resolve(true)
-            } else {
-              resolve(false)
-            }
-          }, 100)
-        }
-      }
-    })
-  }
-
-  const init360Viewer = async (image: EquirectangularImage) => {
-    console.log("[v0] Starting Pannellum 360° viewer initialization...")
-
-    const loaded = await loadPannellum()
-    if (!loaded || !window.pannellum) {
-      console.error("[v0] Pannellum failed to load")
-      return
-    }
-
-    setCurrent360Image(image)
-    setShow360Viewer(true)
-
-    // Wait for the container to be rendered
-    setTimeout(() => {
-      const container = document.getElementById("pannellum-container")
-      if (!container) {
-        console.error("[v0] Pannellum container not found")
-        return
-      }
-
-      try {
-        console.log("[v0] Creating Pannellum viewer instance...")
-        window.pannellum.viewer("pannellum-container", {
-          type: "equirectangular",
-          panorama: image.image_url || image.thumbnail_url,
-          autoLoad: true,
-          showControls: true,
-          showFullscreenCtrl: true,
-          showZoomCtrl: false,
-          mouseZoom: false,
-          doubleClickZoom: false,
-          draggable: true,
-          keyboardZoom: false,
-          compass: true,
-          northOffset: 0,
-          preview: image.thumbnail_url,
-          title: image.title,
-          author: "n3urali.art",
-          hfov: 100,
-          pitch: 0,
-          yaw: 0,
-          minHfov: 100,
-          maxHfov: 100,
-        })
-        console.log("[v0] Pannellum 360° viewer initialized successfully")
-      } catch (error) {
-        console.error("[v0] Error initializing Pannellum viewer:", error)
-      }
-    }, 100)
-  }
-
-  const close360Viewer = () => {
-    setShow360Viewer(false)
-    setCurrent360Image(null)
-
-    // Clean up Pannellum instance
-    setTimeout(() => {
-      const container = document.getElementById("pannellum-container")
-      if (container) {
-        container.innerHTML = ""
-      }
-    }, 100)
-  }
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -492,32 +370,18 @@ export default function EquirectangularCategoryPage() {
                   </div>
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
-                    <div className="flex gap-3">
-                      <Button
-                        size="lg"
-                        variant="secondary"
-                        className="bg-white/95 hover:bg-white text-gray-900 border border-gray-200 shadow-xl backdrop-blur-sm px-6 py-3 rounded-xl font-semibold"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleImageClick(image)
-                        }}
-                      >
-                        <Eye className="h-5 w-5 mr-2" />
-                        Preview
-                      </Button>
-                      <Button
-                        size="lg"
-                        variant="default"
-                        className="bg-primary/95 hover:bg-primary text-primary-foreground shadow-xl backdrop-blur-sm px-6 py-3 rounded-xl font-semibold"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          init360Viewer(image)
-                        }}
-                      >
-                        <Play className="h-5 w-5 mr-2" />
-                        360° View
-                      </Button>
-                    </div>
+                    <Button
+                      size="lg"
+                      variant="secondary"
+                      className="bg-white/95 hover:bg-white text-gray-900 border border-gray-200 shadow-xl backdrop-blur-sm px-6 py-3 rounded-xl font-semibold"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleImageClick(image)
+                      }}
+                    >
+                      <Eye className="h-5 w-5 mr-2" />
+                      Preview 360°
+                    </Button>
                   </div>
                 )}
               </div>
@@ -552,99 +416,6 @@ export default function EquirectangularCategoryPage() {
           </div>
         )}
       </div>
-
-      {/* Panorama Viewer */}
-      {viewingPanorama && (
-        <PanoramaViewer
-          imageUrl={viewingPanorama.image_url}
-          title={viewingPanorama.title}
-          onClose={() => setViewingPanorama(null)}
-        />
-      )}
-
-      {show360Viewer && current360Image && (
-        <div className="fixed inset-0 bg-black z-50">
-          <div className="absolute top-6 left-6 right-6 z-30 flex items-start justify-between">
-            <div className="bg-black/80 text-white px-6 py-4 rounded-xl backdrop-blur-sm border border-white/20 max-w-md">
-              <h2 className="text-2xl font-bold mb-2">{current360Image.title}</h2>
-              <p className="text-white/80">Interactive 360° Experience</p>
-              <p className="text-xs text-white/60">Drag to explore • Click fullscreen for best experience</p>
-            </div>
-            <Button
-              variant="secondary"
-              size="lg"
-              onClick={close360Viewer}
-              className="bg-black/80 hover:bg-black/90 text-white border border-white/20 backdrop-blur-sm rounded-xl h-14 w-14 p-0"
-            >
-              <X className="h-6 w-6" />
-            </Button>
-          </div>
-
-          <div id="pannellum-container" className="w-full h-full" style={{ position: "relative" }} />
-
-          <div className="absolute inset-0 pointer-events-none z-20">
-            {/* Primary watermark pattern - diagonal */}
-            <div
-              className="absolute inset-0 opacity-20"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fontFamily='Arial, sans-serif' fontSize='24' fontWeight='600' textAnchor='middle' dominantBaseline='middle' fill='%23FFFFFF' opacity='0.7' transform='rotate(-30 100 100)'%3En3uralia.art%3C/text%3E%3C/svg%3E")`,
-                backgroundRepeat: "repeat",
-                backgroundSize: "140px 140px",
-              }}
-            />
-
-            {/* Secondary watermark pattern - opposite diagonal */}
-            <div
-              className="absolute inset-0 opacity-15"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg width='220' height='220' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fontFamily='Arial, sans-serif' fontSize='20' fontWeight='500' textAnchor='middle' dominantBaseline='middle' fill='%23FFFFFF' opacity='0.6' transform='rotate(30 110 110)'%3En3uralia.art%3C/text%3E%3C/svg%3E")`,
-                backgroundRepeat: "repeat",
-                backgroundSize: "160px 160px",
-                backgroundPosition: "40px 40px",
-              }}
-            />
-
-            {/* Tertiary watermark pattern - horizontal */}
-            <div
-              className="absolute inset-0 opacity-12"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg width='240' height='240' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' fontFamily='Arial, sans-serif' fontSize='18' fontWeight='400' textAnchor='middle' dominantBaseline='middle' fill='%23FFFFFF' opacity='0.5'%3En3uralia.art%3C/text%3E%3C/svg%3E")`,
-                backgroundRepeat: "repeat",
-                backgroundSize: "180px 180px",
-                backgroundPosition: "80px 80px",
-              }}
-            />
-
-            {/* Center prominent watermark */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div
-                className="text-white/25 text-4xl font-bold transform -rotate-12 select-none"
-                style={{
-                  textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
-                  userSelect: "none",
-                  WebkitUserSelect: "none",
-                }}
-              >
-                n3uralia.art
-              </div>
-            </div>
-
-            {/* Corner watermarks */}
-            <div className="absolute top-8 left-8 text-white/20 text-lg font-medium transform -rotate-12 select-none">
-              n3uralia.art
-            </div>
-            <div className="absolute top-8 right-8 text-white/20 text-lg font-medium transform rotate-12 select-none">
-              n3uralia.art
-            </div>
-            <div className="absolute bottom-8 left-8 text-white/20 text-lg font-medium transform rotate-12 select-none">
-              n3uralia.art
-            </div>
-            <div className="absolute bottom-8 right-8 text-white/20 text-lg font-medium transform -rotate-12 select-none">
-              n3uralia.art
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

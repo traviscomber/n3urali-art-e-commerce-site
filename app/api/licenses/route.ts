@@ -1,23 +1,27 @@
 import { NextResponse } from "next/server"
-import { createNeonClient } from "@/lib/neon/client"
+import { createClient } from "@/lib/supabase/server"
 
 export async function GET() {
   try {
     console.log("[v0] Fetching licenses...")
-    const sql = createNeonClient()
+    const supabase = await createClient()
 
-    const licenses = await sql`
-      SELECT id, name, description, price, active
-      FROM licenses 
-      WHERE active = true
-      ORDER BY price ASC
-    `
+    const { data: licenses, error } = await supabase
+      .from("licenses")
+      .select("id, name, description, active")
+      .eq("active", true)
+      .order("id")
 
-    console.log("[v0] Found", licenses.length, "active licenses")
+    if (error) {
+      console.error("[v0] Error fetching licenses:", error)
+      throw error
+    }
+
+    console.log("[v0] Found", licenses?.length || 0, "active licenses")
 
     return NextResponse.json({
       success: true,
-      licenses: licenses,
+      licenses: licenses || [],
     })
   } catch (error) {
     console.error("[v0] Error fetching licenses:", error)

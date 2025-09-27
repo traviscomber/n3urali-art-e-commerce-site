@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Check, Info, AlertCircle, Crown, Users } from "lucide-react"
+import { Check, Info } from "lucide-react"
 import { toast } from "sonner"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface License {
   id: string
@@ -20,20 +19,12 @@ interface LicenseSelectorProps {
   selectedLicenseId?: string
   onLicenseSelect: (license: License, totalPrice: number) => void
   className?: string
-  isImageSoldExclusively?: boolean
 }
 
-export function LicenseSelector({
-  basePrice,
-  selectedLicenseId,
-  onLicenseSelect,
-  className,
-  isImageSoldExclusively = false,
-}: LicenseSelectorProps) {
+export function LicenseSelector({ basePrice, selectedLicenseId, onLicenseSelect, className }: LicenseSelectorProps) {
   const [licenses, setLicenses] = useState<License[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedLicense, setSelectedLicense] = useState<License | null>(null)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchLicenses()
@@ -41,8 +32,8 @@ export function LicenseSelector({
 
   useEffect(() => {
     if (licenses.length > 0 && !selectedLicense) {
-      // Auto-select non-exclusive license by default
-      const defaultLicense = licenses.find((l) => l.name === "Non-Exclusive") || licenses[0]
+      // Auto-select first license if none selected
+      const defaultLicense = licenses.find((l) => l.name.toLowerCase().includes("standard")) || licenses[0]
       if (defaultLicense) {
         handleLicenseSelect(defaultLicense)
       }
@@ -51,40 +42,36 @@ export function LicenseSelector({
 
   const fetchLicenses = async () => {
     try {
-      setError(null)
       const response = await fetch("/api/licenses")
       if (!response.ok) {
         throw new Error("Failed to fetch licenses")
       }
       const data = await response.json()
-
-      if (!data.success) {
-        throw new Error(data.error || "Failed to load licenses")
-      }
-
       setLicenses(data.licenses || [])
-
-      if (data.licenses.length === 0) {
-        setError("No licenses available. Please contact support.")
-      }
     } catch (error) {
       console.error("[v0] Error fetching licenses:", error)
-      setError("Failed to load license options")
       toast.error("Failed to load license options")
-
+      // Fallback to default licenses
       setLicenses([
         {
-          id: "non-exclusive",
-          name: "Non-Exclusive",
-          description: "Standard commercial license - image can be sold to multiple buyers",
-          price: 29.99,
+          id: "standard",
+          name: "Standard License",
+          description: "Personal and commercial use, up to 500,000 print copies",
+          price: 1.0,
           active: true,
         },
         {
-          id: "exclusive",
-          name: "Exclusive",
-          description: "Exclusive rights - you will be the only buyer of this image",
-          price: 199.99,
+          id: "extended",
+          name: "Extended License",
+          description: "Unlimited print copies, digital products, and resale rights",
+          price: 2.5,
+          active: true,
+        },
+        {
+          id: "commercial",
+          name: "Commercial License",
+          description: "Full commercial rights including merchandise and advertising",
+          price: 5.0,
           active: true,
         },
       ])
@@ -94,36 +81,24 @@ export function LicenseSelector({
   }
 
   const handleLicenseSelect = (license: License) => {
-    if (license.name === "Exclusive" && isImageSoldExclusively) {
-      toast.error("This image has already been sold exclusively and is no longer available for exclusive purchase.")
-      return
-    }
-
     setSelectedLicense(license)
-    const totalPrice = license.price
+    const totalPrice = basePrice * license.price
     onLicenseSelect(license, totalPrice)
   }
 
-  const getLicenseIcon = (licenseName: string) => {
-    if (licenseName === "Exclusive") return <Crown className="h-4 w-4" />
-    return <Users className="h-4 w-4" />
-  }
-
   const getLicenseBadgeColor = (licenseName: string) => {
-    if (licenseName === "Exclusive") return "bg-amber-100 text-amber-800 border-amber-200"
-    return "bg-blue-100 text-blue-800 border-blue-200"
-  }
-
-  const getLicenseTypeIndicator = (licenseName: string) => {
-    if (licenseName === "Exclusive") return "One-Time Sale"
-    return "Multiple Sales"
+    const name = licenseName.toLowerCase()
+    if (name.includes("standard")) return "bg-secondary text-secondary-foreground"
+    if (name.includes("extended")) return "bg-primary text-primary-foreground"
+    if (name.includes("commercial")) return "bg-accent text-accent-foreground"
+    return "bg-muted text-muted-foreground"
   }
 
   if (loading) {
     return (
       <div className={`space-y-3 ${className}`}>
         <div className="h-4 bg-muted rounded w-1/3 animate-pulse"></div>
-        {[...Array(2)].map((_, i) => (
+        {[...Array(3)].map((_, i) => (
           <Card key={i} className="animate-pulse">
             <CardContent className="p-4">
               <div className="h-4 bg-muted rounded w-1/2 mb-2"></div>
@@ -131,30 +106,6 @@ export function LicenseSelector({
             </CardContent>
           </Card>
         ))}
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className={`space-y-4 ${className}`}>
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      </div>
-    )
-  }
-
-  if (isImageSoldExclusively) {
-    return (
-      <div className={`space-y-4 ${className}`}>
-        <Alert>
-          <Crown className="h-4 w-4" />
-          <AlertDescription>
-            This image has been sold exclusively and is no longer available for purchase.
-          </AlertDescription>
-        </Alert>
       </div>
     )
   }
@@ -169,56 +120,38 @@ export function LicenseSelector({
       <div className="space-y-3">
         {licenses
           .filter((l) => l.active)
-          .map((license) => {
-            const typeIndicator = getLicenseTypeIndicator(license.name)
-            const isExclusive = license.name === "Exclusive"
-            const isDisabled = isExclusive && isImageSoldExclusively
-
-            return (
-              <Card
-                key={license.id}
-                className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                  selectedLicense?.id === license.id
-                    ? "ring-2 ring-primary bg-primary/5"
-                    : isDisabled
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:border-primary/50"
-                }`}
-                onClick={() => !isDisabled && handleLicenseSelect(license)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        {getLicenseIcon(license.name)}
-                        <h4 className="font-medium">{license.name}</h4>
-                        <Badge variant="outline" className={`text-xs ${getLicenseBadgeColor(license.name)}`}>
-                          {typeIndicator}
-                        </Badge>
-                        {selectedLicense?.id === license.id && <Check className="h-4 w-4 text-primary" />}
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-3">{license.description}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xl font-bold text-primary">${license.price.toFixed(2)}</span>
-                      </div>
+          .map((license) => (
+            <Card
+              key={license.id}
+              className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                selectedLicense?.id === license.id ? "ring-2 ring-primary bg-primary/5" : "hover:border-primary/50"
+              }`}
+              onClick={() => handleLicenseSelect(license)}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h4 className="font-medium">{license.name}</h4>
+                      <Badge className={getLicenseBadgeColor(license.name)} variant="secondary">
+                        {license.price}x
+                      </Badge>
+                      {selectedLicense?.id === license.id && <Check className="h-4 w-4 text-primary" />}
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">{license.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-semibold text-primary">
+                        ${(basePrice * license.price).toFixed(2)}
+                      </span>
+                      {license.price > 1 && (
+                        <span className="text-xs text-muted-foreground">{license.price}x base price</span>
+                      )}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            )
-          })}
-      </div>
-
-      <div className="text-xs text-muted-foreground space-y-1">
-        <p>• All licenses include high-resolution download (4K-16K)</p>
-        <p>• Instant download after payment confirmation</p>
-        <p>• 30-day download access with up to 5 downloads per purchase</p>
-        <p>
-          • <strong>Non-Exclusive:</strong> Standard commercial use, image available to other buyers
-        </p>
-        <p>
-          • <strong>Exclusive:</strong> Full exclusive rights, image removed from sale after purchase
-        </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
       </div>
     </div>
   )

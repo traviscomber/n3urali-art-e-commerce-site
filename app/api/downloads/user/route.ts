@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createNeonClient } from "@/lib/neon/client"
+import { createClient } from "@/lib/supabase/server"
 
 export async function GET(request: NextRequest) {
   try {
     console.log("[v0] Fetching user downloads...")
 
     const { searchParams } = new URL(request.url)
-    const userEmail = searchParams.get("email") || "developer@local.dev" // Updated default email
+    const userEmail = searchParams.get("email") || "developer@local.dev"
 
     if (!userEmail) {
       console.log("[v0] Missing user email")
@@ -14,11 +14,22 @@ export async function GET(request: NextRequest) {
     }
 
     console.log("[v0] Fetching downloads for user:", userEmail)
-    const sql = createNeonClient()
+    const supabase = await createClient()
 
-    const downloads = await sql`
-      SELECT * FROM get_user_downloads(${userEmail})
-    `
+    const { data: downloads, error } = await supabase
+      .from("downloads")
+      .select(`
+        *,
+        images(id, title, file_path),
+        order_items(id, price, orders(id, created_at))
+      `)
+      .eq("user_email", userEmail)
+      .order("created_at", { ascending: false })
+
+    if (error) {
+      console.error("[v0] Error fetching downloads:", error)
+      throw error
+    }
 
     console.log("[v0] Found", downloads?.length || 0, "downloads for user")
 

@@ -157,26 +157,29 @@ export default function GalleryPage() {
       if (!append) setLoading(true)
 
       try {
-        console.log(`[v0] Fetching images for page ${page}`)
+        console.log(`[v0] Gallery: Fetching images for page ${page}`)
         const result = await getImagesPaginated(page, pageSize)
-        console.log(`[v0] getImagesPaginated result:`, result)
+        console.log(`[v0] Gallery: getImagesPaginated result:`, result)
 
-        const fetchedData = result.success ? result.data : { images: [], pagination: { totalPages: 1 } }
-        console.log(`[v0] Extracted data:`, fetchedData)
-        console.log(`[v0] Images count:`, fetchedData.images?.length || 0)
+        if (result.success && result.data) {
+          const fetchedImages = result.data.images || []
+          console.log(`[v0] Gallery: Retrieved ${fetchedImages.length} images`)
 
-        if (append) {
-          setImages((prev) => [...prev, ...fetchedData.images])
+          if (append) {
+            setImages((prev) => [...prev, ...fetchedImages])
+          } else {
+            setImages(fetchedImages)
+          }
+
+          setTotalPages(result.data.pagination?.totalPages || 1)
+          setHasMore(page < (result.data.pagination?.totalPages || 1))
         } else {
-          setImages(fetchedData.images)
+          console.error("[v0] Gallery: Failed to fetch images:", result.error)
+          setImages([])
         }
-
-        setTotalPages(fetchedData.pagination?.totalPages || 1)
-        setHasMore(page < (fetchedData.pagination?.totalPages || 1))
-
-        console.log(`[v0] Set ${fetchedData.images?.length || 0} images in state`)
       } catch (error) {
-        console.error("[v0] Error fetching images:", error)
+        console.error("[v0] Gallery: Error fetching images:", error)
+        setImages([])
       } finally {
         setLoading(false)
       }
@@ -185,20 +188,18 @@ export default function GalleryPage() {
   )
 
   useEffect(() => {
+    console.log("[v0] Gallery: Component mounted, fetching images")
     fetchImages(1, false)
   }, [fetchImages])
 
   const transformedImages = useMemo(() => {
-    console.log(`[v0] Transforming ${images.length} images`)
+    console.log(`[v0] Gallery: Transforming ${images.length} images`)
 
     return images.map((image: any) => {
-      const preview_url =
-        image.file_path ||
-        image.thumbnail_url ||
-        image.image_url ||
-        "/placeholder.svg?height=400&width=400&text=No+Image"
+      // Use file_path directly from database - this is the Supabase storage URL
+      const preview_url = image.file_path || "/placeholder.svg?height=400&width=400&text=No+Image"
 
-      console.log(`[v0] Image ${image.id}: file_path=${image.file_path}, preview_url=${preview_url}`)
+      console.log(`[v0] Gallery: Image ${image.id}: file_path=${image.file_path}`)
 
       return {
         id: image.id,
@@ -206,7 +207,7 @@ export default function GalleryPage() {
         category:
           image.category_name?.toLowerCase() === "fisheye" ? ("fisheye" as const) : ("equirectangular" as const),
         price: Number.parseFloat(image.price) || 0,
-        preview_url: preview_url, // Use direct Supabase URL
+        preview_url: preview_url,
         dimensions: "4096x4096",
         file_size: 20000000,
         description: image.description || "",
@@ -217,12 +218,13 @@ export default function GalleryPage() {
   const { equirectangularImages, fisheyeImages } = useMemo(() => {
     const equirectangular = transformedImages.filter((img) => img.category === "equirectangular")
     const fisheye = transformedImages.filter((img) => img.category === "fisheye")
+    console.log(`[v0] Gallery: Filtered ${equirectangular.length} equirectangular, ${fisheye.length} fisheye`)
     return { equirectangularImages: equirectangular, fisheyeImages: fisheye }
   }, [transformedImages])
 
   const handleImageSelect = useCallback(
     async (image: GalleryImage) => {
-      console.log("[v0] Image clicked, redirecting to photo:", image.title, "ID:", image.id)
+      console.log("[v0] Gallery: Image clicked, redirecting to photo:", image.title, "ID:", image.id)
       router.push(`/photo/${image.id}`)
     },
     [router],
@@ -471,7 +473,7 @@ export default function GalleryPage() {
                           className="object-contain bg-muted/10"
                           loading="lazy"
                           onError={(e) => {
-                            console.log("[v0] Grid image failed to load:", image.preview_url)
+                            console.log("[v0] Gallery: Grid image failed to load:", image.preview_url)
                             e.currentTarget.src = "/placeholder.svg?height=200&width=200&text=Error"
                           }}
                           placeholder="blur"

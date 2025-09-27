@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { PanoramaViewer } from "@/components/panorama-viewer"
 import { getImages } from "@/app/actions/admin-actions"
 import { useCart } from "@/lib/contexts/cart-context"
-import { ImageWithFallback } from "@/components/image-with-fallback"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 
 interface EquirectangularImage {
@@ -138,43 +138,13 @@ export default function EquirectangularCategoryPage() {
       try {
         const result = await getImages()
         if (result.success && result.data) {
-          console.log("[v0] Total images fetched:", result.data.length)
-          console.log(
-            "[v0] Sample image categories:",
-            result.data.slice(0, 5).map((img) => ({
-              title: img.title,
-              category: img.category_name,
-              active: img.active,
-            })),
-          )
-
-          let equirectangularImages = result.data.filter(
+          // Filter for equirectangular images (360° or similar categories)
+          const equirectangularImages = result.data.filter(
             (img: EquirectangularImage) =>
               img.category_name?.toLowerCase().includes("equirectangular") ||
               img.category_name?.toLowerCase().includes("360") ||
-              img.category_name?.toLowerCase().includes("panoramic") ||
-              img.category_name?.toLowerCase().includes("spherical") ||
-              img.category_name?.toLowerCase().includes("immersive"),
+              img.category_name?.toLowerCase().includes("panoramic"),
           )
-
-          // If no specific category matches, show all active images
-          if (equirectangularImages.length === 0) {
-            console.log("[v0] No category-specific images found, showing all active images")
-            equirectangularImages = result.data.filter((img: EquirectangularImage) => img.active !== false)
-          }
-
-          console.log("[v0] Filtered images count:", equirectangularImages.length)
-          console.log(
-            "[v0] Filtered images sample:",
-            equirectangularImages.slice(0, 3).map((img) => ({
-              title: img.title,
-              category: img.category_name,
-              active: img.active,
-              hasImageUrl: !!img.image_url,
-              hasThumbnailUrl: !!img.thumbnail_url,
-            })),
-          )
-
           setImages(equirectangularImages)
           setFilteredImages(equirectangularImages)
         }
@@ -446,14 +416,12 @@ export default function EquirectangularCategoryPage() {
               className="group overflow-hidden bg-background/70 backdrop-blur-sm border-primary/15 hover:border-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-2"
             >
               <div className="relative aspect-[16/9] overflow-hidden">
-                <ImageWithFallback
+                <Image
                   src={image.thumbnail_url || image.image_url || "/placeholder.svg"}
                   alt={image.title}
                   fill
                   className="object-cover transition-all duration-700 group-hover:scale-110"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                 />
-
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
 
                 <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">

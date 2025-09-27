@@ -4,11 +4,10 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ShoppingBag, Eye, Calendar, Package, Download, CreditCard, ArrowLeft } from "lucide-react"
+import { ShoppingBag, Eye, Calendar, Package, Download, CreditCard } from "lucide-react"
 import { toast } from "sonner"
 import { getOrders } from "@/app/actions/admin-actions"
 import { useAuth } from "@/lib/contexts/auth-context"
-import Link from "next/link"
 
 interface OrderItem {
   id: string
@@ -194,18 +193,20 @@ export default function OrdersPage() {
   if (loading) {
     console.log("[v0] Showing loading state")
     return (
-      <div className="space-y-4">
-        {[...Array(3)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader>
-              <div className="h-4 bg-muted rounded w-1/3"></div>
-              <div className="h-3 bg-muted rounded w-1/2"></div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-20 bg-muted rounded"></div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="container mx-auto px-4 py-8">
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <div className="h-4 bg-muted rounded w-1/3"></div>
+                <div className="h-3 bg-muted rounded w-1/2"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-20 bg-muted rounded"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     )
   }
@@ -213,12 +214,8 @@ export default function OrdersPage() {
   console.log("[v0] Rendering orders page with", orders.length, "orders")
 
   return (
-    <div>
+    <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <Link href="/account" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-4">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Account
-        </Link>
         <h1 className="text-3xl font-bold text-foreground mb-2">My Orders</h1>
         <p className="text-muted-foreground">View and manage your order history</p>
       </div>

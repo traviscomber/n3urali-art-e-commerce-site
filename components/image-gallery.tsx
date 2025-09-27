@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Filter, Grid3X3, List, Eye, Download } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
-import { ImageWithFallback } from "@/components/image-with-fallback"
+import NextImage from "next/image"
+import { ImageUrlHandler } from "@/lib/image-url-handler"
 import { LicenseSelector } from "@/components/license-selector"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
@@ -37,7 +38,10 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
   const { addItem } = useCart()
 
   const transformedImages = useMemo(() => {
-    return images
+    return images.map((image) => ({
+      ...image,
+      preview_url: ImageUrlHandler.convertToDisplayUrl(image.preview_url, { useProxy: true }),
+    }))
   }, [images])
 
   useEffect(() => {
@@ -150,13 +154,14 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
           >
             <CardContent className="p-0">
               <div className="relative aspect-square overflow-hidden">
-                <ImageWithFallback
+                <NextImage
                   src={image.preview_url || "/placeholder.svg"}
                   alt={image.title}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  priority={false}
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
                 />
 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

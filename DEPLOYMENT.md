@@ -10,22 +10,32 @@
 
 Go to your Vercel project settings and add these environment variables:
 
-#### Database (Supabase)
+#### Database (Neon PostgreSQL)
 \`\`\`
-SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your-supabase-anon-key
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
-SUPABASE_JWT_SECRET=your-supabase-jwt-secret
+DATABASE_URL=postgresql://username:password@host:port/database?sslmode=require
+POSTGRES_URL=postgresql://username:password@host:port/database?sslmode=require
+POSTGRES_PRISMA_URL=postgresql://username:password@host:port/database?sslmode=require
+DATABASE_URL_UNPOOLED=postgresql://username:password@host:port/database?sslmode=require
+POSTGRES_URL_NON_POOLING=postgresql://username:password@host:port/database?sslmode=require
+PGHOST=your-postgres-host
+POSTGRES_USER=your-postgres-user
+POSTGRES_PASSWORD=your-postgres-password
+POSTGRES_DATABASE=your-database-name
+PGPASSWORD=your-postgres-password
+PGDATABASE=your-database-name
+PGHOST_UNPOOLED=your-postgres-host-unpooled
+PGUSER=your-postgres-user
+POSTGRES_URL_NO_SSL=postgresql://username:password@host:port/database
+POSTGRES_HOST=your-postgres-host
+NEON_PROJECT_ID=your-neon-project-id
 \`\`\`
 
 #### Storage Configuration
 \`\`\`
+BLOB_READ_WRITE_TOKEN=your-new-vercel-blob-token
 BACKBLAZE_API_KEY=your-new-backblaze-api-key
 BACKBLAZE_APPLICATION_KEY=your-new-backblaze-application-key
 BACKBLAZE_BUCKET_NAME=your-bucket-name
-NEXT_PUBLIC_BACKBLAZE_BUCKET_NAME=your-bucket-name
 B2_REGION=your-b2-region
 B2_ENDPOINT=https://s3.your-region.backblazeb2.com
 \`\`\`
@@ -40,8 +50,9 @@ NODE_ENV=production
 
 #### IMMEDIATE ACTIONS:
 1. **Rotate all exposed credentials:**
-   - Generate new Backblaze API keys
-   - Rotate Supabase service role key if needed
+   - Generate new Vercel Blob token
+   - Create new Backblaze API keys
+   - Consider rotating database credentials
 
 2. **Update Vercel environment variables** with new credentials
 
@@ -63,7 +74,7 @@ The project includes:
 
 - [ ] All environment variables set in Vercel dashboard
 - [ ] New credentials generated and rotated
-- [ ] Supabase database connection tested
+- [ ] Database connection tested
 - [ ] Backblaze B2 bucket configured
 - [ ] Domain configured (if using custom domain)
 
@@ -83,13 +94,13 @@ The application includes:
 - Image optimization and lazy loading
 - Database query caching with revalidation
 - Pagination for large datasets
-- Hybrid storage (Supabase + Backblaze B2)
+- Hybrid storage (database + Backblaze B2)
 - Compressed image uploads
 
 ## Monitoring
 
 Monitor your deployment:
 - Vercel Analytics dashboard
-- Supabase dashboard for database performance
+- Database performance in Neon console
 - Backblaze B2 usage statistics
 - Application logs in Vercel Functions tab

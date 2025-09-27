@@ -1,18 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createSupabaseServerClient } from "@/lib/database"
+import { createClient } from "@/lib/supabase/server"
 
 interface CartItem {
   id: string
   imageId: string
   title: string
   price: number
-  licenseId: string
-  licenseName: string
-  licensePrice: number
+  licenseType: "standard" | "extended" | "commercial"
   previewUrl: string
   category: "equirectangular" | "fisheye"
   quantity: number
-  licenseType: "NON_EXCLUSIVE" | "EXCLUSIVE"
 }
 
 interface OrderRequest {
@@ -27,7 +24,7 @@ interface OrderRequest {
     zipCode?: string
     country?: string
   }
-  paymentMethod?: "crypto" | "stripe" | "demo" | "manual_receipt"
+  paymentMethod?: "crypto" | "stripe" | "demo"
   paymentIntentId?: string
   cryptoDetails?: {
     currency: string
@@ -35,18 +32,12 @@ interface OrderRequest {
     transactionHash: string
     address: string
   }
-  receiptDetails?: {
-    currency: string
-    amount: string
-    receiptUrl: string
-    address: string
-  }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: OrderRequest = await request.json()
-    const { items, total, customerInfo, paymentMethod = "demo", paymentIntentId, cryptoDetails, receiptDetails } = body
+    const { items, total, customerInfo, paymentMethod = "demo", paymentIntentId, cryptoDetails } = body
 
     console.log(
       "[v0] Creating order for:",
@@ -67,44 +58,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Customer email is required" }, { status: 400 })
     }
 
-    if (paymentMethod === "crypto" && (!cryptoDetails || !cryptoDetails.transactionHash)) {
-      return NextResponse.json(
-        { success: false, error: "Transaction hash is required for crypto payments" },
-        { status: 400 },
+    if (paymentMethod === "crypto") {
+      if (!cryptoDetails || !cryptoDetails.transactionHash) {
+        return NextResponse.json(
+          { success: false, error: "Transaction hash is required for crypto payments" },
+          { status: 400 },
+        )
+      }
+
+      console.log(
+        "[v0] Processing crypto payment:",
+        cryptoDetails.currency,
+        cryptoDetails.amount,
+        cryptoDetails.transactionHash,
       )
     }
 
-    if (paymentMethod === "manual_receipt" && (!receiptDetails || !receiptDetails.receiptUrl)) {
-      return NextResponse.json(
-        { success: false, error: "Receipt upload is required for manual payments" },
-        { status: 400 },
-      )
-    }
+    const supabase = await createClient()
 
-    const supabase = createSupabaseServerClient()
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+
+    console.log("[v0] Creating order with number:", orderNumber)
 
     const { data: orderResult, error: orderError } = await supabase
       .from("orders")
       .insert({
         user_email: customerInfo.email,
-        user_name: `${customerInfo.firstName} ${customerInfo.lastName}`,
+        user_name: customerInfo.firstName + " " + customerInfo.lastName,
         total_amount: total,
-        status: paymentMethod === "manual_receipt" ? "pending" : "completed",
-        payment_method:
-          paymentMethod === "crypto"
-            ? "cryptocurrency"
-            : paymentMethod === "manual_receipt"
-              ? "manual_receipt"
-              : paymentMethod,
-        payment_intent_id:
-          paymentMethod === "crypto"
-            ? cryptoDetails?.transactionHash
-            : paymentMethod === "manual_receipt"
-              ? receiptDetails?.receiptUrl
-              : paymentIntentId || orderNumber,
+        status: "completed",
+        payment_method: paymentMethod === "crypto" ? "cryptocurrency" : paymentMethod,
+        payment_intent_id: paymentMethod === "crypto" ? cryptoDetails?.transactionHash : paymentIntentId || orderNumber,
       })
-      .select()
+      .select("id")
       .single()
 
     if (orderError || !orderResult) {
@@ -113,64 +99,56 @@ export async function POST(request: NextRequest) {
     }
 
     const orderId = orderResult.id
-    const orderItemIds: string[] = []
+    console.log("[v0] Order created with ID:", orderId)
 
-    for (const item of items) {
-      const { data: orderItemResult, error: orderItemError } = await supabase
-        .from("order_items")
-        .insert({
-          order_id: orderId,
-          image_id: item.imageId,
-          license_id: item.licenseId,
-          price: item.price * item.quantity,
-        })
-        .select()
-        .single()
+    const { data: licenseResult, error: licenseError } = await supabase
+      .from("licenses")
+      .select("id")
+      .eq("active", true)
+      .order("id")
+      .limit(1)
+      .single()
 
-      if (orderItemError || !orderItemResult) {
-        console.error("[v0] Order item creation error:", orderItemError)
-        return NextResponse.json({ success: false, error: "Failed to create order item" }, { status: 500 })
-      }
-
-      orderItemIds.push(orderItemResult.id)
+    if (licenseError || !licenseResult) {
+      console.error("[v0] No default license found:", licenseError)
+      return NextResponse.json({ success: false, error: "License configuration error" }, { status: 500 })
     }
 
-    const downloadTokens = []
-    if (paymentMethod === "crypto") {
-      for (const orderItemId of orderItemIds) {
-        const downloadToken = `dl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const licenseId = licenseResult.id
 
-        const { data: downloadResult } = await supabase
-          .from("downloads")
-          .insert({
-            order_item_id: orderItemId,
-            image_id: items.find((item) => orderItemIds.includes(orderItemId))?.imageId,
-            download_token: downloadToken,
-            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-            download_count: 0,
-          })
-          .select()
-          .single()
+    const orderItems = items.map((item) => ({
+      order_id: orderId,
+      image_id: item.imageId,
+      license_id: licenseId,
+      price: item.price * item.quantity,
+    }))
 
-        if (downloadResult) {
-          downloadTokens.push(downloadResult)
-        }
-      }
+    const { error: itemsError } = await supabase.from("order_items").insert(orderItems)
+
+    if (itemsError) {
+      console.error("[v0] Order items creation error:", itemsError)
+      return NextResponse.json({ success: false, error: "Failed to create order items" }, { status: 500 })
     }
+
+    console.log("[v0] Order created successfully:", orderNumber)
 
     return NextResponse.json({
       success: true,
       data: {
         orderId: orderId,
         orderNumber: orderNumber,
-        paymentStatus: paymentMethod === "manual_receipt" ? "pending_verification" : "completed",
+        paymentStatus: "completed",
         total: total,
         paymentMethod: paymentMethod,
-        downloadTokensGenerated: downloadTokens.length,
-        message:
-          paymentMethod === "manual_receipt"
-            ? "Order submitted for manual verification. You will receive download links within 24 hours after payment confirmation."
-            : undefined,
+        ...(paymentMethod === "crypto" && cryptoDetails
+          ? {
+              cryptoDetails: {
+                currency: cryptoDetails.currency,
+                amount: cryptoDetails.amount,
+                transactionHash: cryptoDetails.transactionHash,
+              },
+            }
+          : {}),
       },
     })
   } catch (error) {

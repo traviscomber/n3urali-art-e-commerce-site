@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { SupabaseStorage } from "@/lib/supabase-storage"
+import { BackblazeAuth } from "@/lib/backblaze-auth"
 import { Buffer } from "buffer"
 
 interface ChunkUploadRequest {
@@ -49,29 +49,48 @@ export async function POST(request: NextRequest) {
 
       // Combine all chunks
       const fullBase64 = assembledChunks.join("")
+
       const buffer = Buffer.from(fullBase64, "base64")
 
       console.log(`[v0] Assembled file size: ${(buffer.length / (1024 * 1024)).toFixed(2)}MB`)
 
-      const storage = new SupabaseStorage()
+      const backblaze = new BackblazeAuth()
+      const key = `uploads/${crypto.randomUUID()}-${filename}`
       const contentType = filename.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg"
 
-      // Upload file to Supabase
-      const uploadResult = await storage.uploadFile(filename, buffer, contentType)
+      // Get presigned URL for upload
+      const presignedUrl = await backblaze.generatePresignedUrl(key, contentType)
 
-      if (!uploadResult.success) {
-        throw new Error(uploadResult.error || "Upload failed")
+      // Upload file to Backblaze using presigned URL
+      const uploadResponse = await fetch(presignedUrl, {
+        method: "PUT",
+        body: buffer,
+        headers: {
+          "Content-Type": contentType,
+          "Content-Length": buffer.length.toString(),
+        },
+      })
+
+      if (!uploadResponse.ok) {
+        throw new Error(`Failed to upload to Backblaze: ${uploadResponse.statusText}`)
       }
+
+      const config = backblaze.getConfig()
+      console.log(`[v0] Backblaze config - endpoint: ${config.endpoint}, bucket: ${config.bucket}`)
+
+      // Construct the public URL safely
+      const publicUrl = `https://f000.backblazeb2.com/file/${config.bucket}/${key}`
+      console.log(`[v0] Constructed Backblaze public URL: ${publicUrl}`)
 
       // Clean up chunks from memory
       chunkStore.delete(fileId)
       fileMetadata.delete(fileId)
 
-      console.log(`[v0] File uploaded successfully to Supabase: ${uploadResult.url}`)
+      console.log(`[v0] File uploaded successfully to Backblaze: ${publicUrl}`)
 
       return NextResponse.json({
         success: true,
-        originalUrl: uploadResult.url,
+        originalUrl: publicUrl,
         filename: filename,
         size: buffer.length,
         type: contentType,

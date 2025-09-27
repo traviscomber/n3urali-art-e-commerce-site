@@ -1,20 +1,51 @@
-import { updateSession } from "@/lib/supabase/middleware"
-import type { NextRequest } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request)
+  const { pathname } = request.nextUrl
+
+  const protectedRoutes = ["/admin"]
+  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
+
+  if (isProtectedRoute) {
+    const sessionToken = request.cookies.get("session_token")?.value
+
+    if (!sessionToken) {
+      const redirectUrl = new URL("/", request.url)
+      redirectUrl.searchParams.set("auth", "required")
+      return NextResponse.redirect(redirectUrl)
+    }
+
+    try {
+      const response = await fetch(`${request.nextUrl.origin}/api/auth/session`, {
+        headers: {
+          Cookie: `session_token=${sessionToken}`,
+        },
+      })
+
+      const data = await response.json()
+
+      if (!data.user) {
+        const redirectUrl = new URL("/", request.url)
+        redirectUrl.searchParams.set("auth", "required")
+        return NextResponse.redirect(redirectUrl)
+      }
+
+      if (pathname.startsWith("/admin")) {
+        if (!data.user.user_metadata?.is_admin) {
+          return NextResponse.redirect(new URL("/", request.url))
+        }
+      }
+    } catch (error) {
+      console.error("Session validation error:", error)
+      const redirectUrl = new URL("/", request.url)
+      redirectUrl.searchParams.set("auth", "required")
+      return NextResponse.redirect(redirectUrl)
+    }
+  }
+
+  return NextResponse.next()
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
-     * Feel free to modify this pattern to include more paths.
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 }

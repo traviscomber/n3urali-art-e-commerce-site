@@ -158,12 +158,27 @@ export default function GalleryPage() {
 
       try {
         console.log(`[v0] Gallery: Fetching images for page ${page}`)
+
         const result = await getImagesPaginated(page, pageSize)
-        console.log(`[v0] Gallery: getImagesPaginated result:`, result)
+        console.log(`[v0] Gallery: getImagesPaginated result:`, {
+          success: result.success,
+          error: result.error,
+          imagesCount: result.data?.images?.length || 0,
+          pagination: result.data?.pagination,
+        })
 
         if (result.success && result.data) {
           const fetchedImages = result.data.images || []
           console.log(`[v0] Gallery: Retrieved ${fetchedImages.length} images`)
+
+          if (fetchedImages.length > 0) {
+            console.log(`[v0] Gallery: First image sample:`, {
+              id: fetchedImages[0].id,
+              title: fetchedImages[0].title,
+              file_path: fetchedImages[0].file_path,
+              category_name: fetchedImages[0].category_name,
+            })
+          }
 
           if (append) {
             setImages((prev) => [...prev, ...fetchedImages])
@@ -174,11 +189,11 @@ export default function GalleryPage() {
           setTotalPages(result.data.pagination?.totalPages || 1)
           setHasMore(page < (result.data.pagination?.totalPages || 1))
         } else {
-          console.error("[v0] Gallery: Failed to fetch images:", result.error)
+          console.error(`[v0] Gallery: Failed to fetch images:`, result.error)
           setImages([])
         }
       } catch (error) {
-        console.error("[v0] Gallery: Error fetching images:", error)
+        console.error(`[v0] Gallery: Error fetching images:`, error)
         setImages([])
       } finally {
         setLoading(false)

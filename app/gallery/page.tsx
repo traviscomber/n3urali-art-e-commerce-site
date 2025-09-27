@@ -184,12 +184,13 @@ export default function GalleryPage() {
   const transformedImages = useMemo(
     () =>
       images.map((image: any) => {
-        const preview_url =
+        let preview_url =
           image.thumbnail_url || image.image_url || "/placeholder.svg?height=400&width=400&text=No+Image"
 
-        const proxyPreviewUrl = preview_url.includes("backblazeb2.com")
-          ? `/api/image-proxy/${preview_url.split("/file/")[1]?.split("/").slice(1).join("/")}`
-          : preview_url
+        if (!preview_url.includes("supabase.co")) {
+          const filename = preview_url.split("/").pop() || "placeholder.jpg"
+          preview_url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/${filename}`
+        }
 
         return {
           id: image.id,
@@ -197,7 +198,7 @@ export default function GalleryPage() {
           category:
             image.category_name?.toLowerCase() === "fisheye" ? ("fisheye" as const) : ("equirectangular" as const),
           price: Number.parseFloat(image.price) || 0,
-          preview_url: proxyPreviewUrl,
+          preview_url: preview_url,
           dimensions: "4096x4096",
           file_size: 20000000,
           description: image.description || "",

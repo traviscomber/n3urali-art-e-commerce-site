@@ -709,8 +709,14 @@ export async function getImages() {
 
 export async function getImagesPaginated(page = 1, limit = 20, category?: string) {
   try {
+    console.log(`[v0] getImagesPaginated called with page=${page}, limit=${limit}, category=${category}`)
     const startTime = Date.now()
     const data = await getCachedImagesPaginated(page, limit, category)
+
+    console.log(`[v0] getImagesPaginated: getCachedImagesPaginated returned:`, {
+      imagesCount: data.images.length,
+      pagination: data.pagination,
+    })
 
     logQueryPerformance("getImagesPaginated", startTime, data.images.length)
 

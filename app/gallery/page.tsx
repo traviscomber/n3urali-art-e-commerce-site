@@ -187,10 +187,7 @@ export default function GalleryPage() {
         const preview_url =
           image.thumbnail_url || image.image_url || "/placeholder.svg?height=400&width=400&text=No+Image"
 
-        // Only convert Backblaze URLs to proxy, leave Supabase URLs as-is
-        const proxyPreviewUrl = preview_url.includes("backblazeb2.com")
-          ? `/api/image-proxy/${preview_url.split("/file/")[1]?.split("/").slice(1).join("/")}`
-          : preview_url // Use original URL for Supabase storage
+        console.log("[v0] Image URL:", preview_url)
 
         return {
           id: image.id,
@@ -198,7 +195,7 @@ export default function GalleryPage() {
           category:
             image.category_name?.toLowerCase() === "fisheye" ? ("fisheye" as const) : ("equirectangular" as const),
           price: Number.parseFloat(image.price) || 0,
-          preview_url: proxyPreviewUrl,
+          preview_url: preview_url, // Use direct URL without proxy
           dimensions: "4096x4096",
           file_size: 20000000,
           description: image.description || "",

@@ -10,9 +10,35 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown"
     const userAgent = request.headers.get("user-agent") || "unknown"
 
-    // Note: Analytics tables would need to be created in Supabase
-    // For now, we'll skip analytics tracking since the tables don't exist in the current schema
-    console.log("[v0] Analytics tracking:", type, data)
+    if (type === "page_view") {
+      const { error } = await supabase.from("analytics_page_views").insert({
+        page: data.page,
+        title: data.title,
+        referrer: data.referrer,
+        user_agent: userAgent,
+        ip_address: ip,
+        session_id: data.sessionId || null,
+        user_id: data.userId || null,
+      })
+
+      if (error) {
+        console.error("Failed to insert page view:", error)
+      }
+    } else if (type === "event") {
+      const { error } = await supabase.from("analytics_events").insert({
+        event_name: data.event,
+        properties: data.properties,
+        page: data.page,
+        user_agent: userAgent,
+        ip_address: ip,
+        session_id: data.sessionId || null,
+        user_id: data.userId || null,
+      })
+
+      if (error) {
+        console.error("Failed to insert event:", error)
+      }
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

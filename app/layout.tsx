@@ -8,6 +8,9 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Header } from "@/components/header"
 import { CartSidebar } from "@/components/cart-sidebar"
 import { ToastProvider } from "@/components/toast-notifications"
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: {
@@ -77,6 +80,20 @@ export default function RootLayout({
   return (
     <html lang="en" className="antialiased">
       <head>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'GA_MEASUREMENT_ID', {
+                page_title: document.title,
+                page_location: window.location.href,
+              });
+            `,
+          }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -128,9 +145,13 @@ export default function RootLayout({
             <CartProvider>
               <TagFilterProvider>
                 <ToastProvider>
-                  <Header />
-                  {children}
-                  <CartSidebar />
+                  <Suspense fallback={null}>
+                    <Header />
+                    {children}
+                    <CartSidebar />
+                    <Analytics />
+                    <SpeedInsights />
+                  </Suspense>
                 </ToastProvider>
               </TagFilterProvider>
             </CartProvider>

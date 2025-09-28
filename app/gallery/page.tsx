@@ -191,7 +191,10 @@ export default function GalleryPage() {
     const transformed = images.map((image: any) => {
       console.log("[v0] Processing image:", image.title, "file_path:", image.file_path)
       const preview_url =
-        image.thumbnail_url || image.image_url || "/placeholder.svg?height=400&width=400&text=No+Image"
+        image.file_path ||
+        image.thumbnail_url ||
+        image.image_url ||
+        "/placeholder.svg?height=400&width=400&text=No+Image"
 
       const proxyPreviewUrl = preview_url.includes("backblazeb2.com")
         ? `/api/image-proxy/${preview_url.split("/file/")[1]?.split("/").slice(1).join("/")}`

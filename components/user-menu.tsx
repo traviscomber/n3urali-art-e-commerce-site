@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -20,13 +20,14 @@ export function UserMenu() {
   const { user, isAuthenticated, signOut, isLoading } = useAuth()
   const router = useRouter()
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   const handleSignOut = async () => {
     await signOut()
   }
 
   const handleAdminDashboard = () => {
-    router.push("/admin")
+    router.push("/simple-admin")
   }
 
   const handleProfile = () => {
@@ -45,8 +46,31 @@ export function UserMenu() {
     return email.substring(0, 2).toUpperCase()
   }
 
-  // Check if user is admin based on profiles table
-  const isAdmin = user?.user_metadata?.role === "admin"
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (user?.email) {
+        try {
+          const { createClient } = await import("@/lib/supabase/client")
+          const supabase = createClient()
+
+          const { data: profile } = await supabase
+            .from("user_profiles")
+            .select("is_admin")
+            .eq("email", user.email)
+            .single()
+
+          setIsAdmin(profile?.is_admin || user.email === "travis@nuanu.com")
+        } catch (error) {
+          // Fallback: check if user is travis@nuanu.com
+          setIsAdmin(user.email === "travis@nuanu.com")
+        }
+      }
+    }
+
+    if (isAuthenticated && user) {
+      checkAdminStatus()
+    }
+  }, [user, isAuthenticated])
 
   if (isLoading) {
     return (

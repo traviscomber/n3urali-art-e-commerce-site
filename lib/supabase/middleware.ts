@@ -74,10 +74,43 @@ export async function updateSession(request: NextRequest) {
 
   if (request.nextUrl.pathname.startsWith("/admin") && user) {
     try {
-      // Check if user has admin privileges
-      const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single()
+      let isAdmin = false
 
-      if (!profile?.is_admin) {
+      // First check if user is travis@nuanu.com (always admin)
+      if (user.email === "travis@nuanu.com") {
+        isAdmin = true
+        console.log("[v0] Granting admin access to travis@nuanu.com")
+      } else {
+        // Check profiles table (with role column)
+        try {
+          const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+          if (profile?.role === "admin") {
+            isAdmin = true
+            console.log("[v0] Admin access granted via profiles.role")
+          }
+        } catch (error) {
+          console.log("[v0] profiles table not found or accessible, trying user_profiles")
+        }
+
+        // If not admin yet, check user_profiles table (with is_admin column)
+        if (!isAdmin) {
+          try {
+            const { data: userProfile } = await supabase
+              .from("user_profiles")
+              .select("is_admin")
+              .eq("email", user.email)
+              .single()
+            if (userProfile?.is_admin) {
+              isAdmin = true
+              console.log("[v0] Admin access granted via user_profiles.is_admin")
+            }
+          } catch (error) {
+            console.log("[v0] user_profiles table not found or accessible")
+          }
+        }
+      }
+
+      if (!isAdmin) {
         console.log("[v0] User lacks admin privileges, redirecting to dashboard")
         const url = request.nextUrl.clone()
         url.pathname = "/dashboard"
@@ -85,7 +118,14 @@ export async function updateSession(request: NextRequest) {
       }
     } catch (error) {
       console.warn("[v0] Failed to check admin privileges:", error)
-      // Allow access if we can't check admin status
+      // Allow access if we can't check admin status for travis@nuanu.com
+      if (user.email === "travis@nuanu.com") {
+        console.log("[v0] Allowing admin access for travis@nuanu.com despite error")
+      } else {
+        const url = request.nextUrl.clone()
+        url.pathname = "/dashboard"
+        return NextResponse.redirect(url)
+      }
     }
   }
 

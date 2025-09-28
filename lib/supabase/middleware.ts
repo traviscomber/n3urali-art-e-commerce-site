@@ -9,11 +9,18 @@ export async function updateSession(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  // If Supabase is not configured, skip middleware processing
   if (!supabaseUrl || !supabaseAnonKey) {
     console.warn("[v0] Supabase environment variables not found, skipping auth middleware")
+    console.warn("[v0] NEXT_PUBLIC_SUPABASE_URL:", supabaseUrl ? "✓ Set" : "✗ Missing")
+    console.warn("[v0] NEXT_PUBLIC_SUPABASE_ANON_KEY:", supabaseAnonKey ? "✓ Set" : "✗ Missing")
+    console.warn(
+      "[v0] Available env vars:",
+      Object.keys(process.env).filter((key) => key.includes("SUPABASE")),
+    )
     return supabaseResponse
   }
+
+  console.log("[v0] Supabase middleware initialized with URL:", supabaseUrl.substring(0, 30) + "...")
 
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.
@@ -44,6 +51,7 @@ export async function updateSession(request: NextRequest) {
       data: { user: authUser },
     } = await supabase.auth.getUser()
     user = authUser
+    console.log("[v0] User authentication check:", user ? "✓ Authenticated" : "✗ Not authenticated")
   } catch (error) {
     console.warn("[v0] Failed to get user in middleware:", error)
     return supabaseResponse
@@ -58,6 +66,7 @@ export async function updateSession(request: NextRequest) {
       request.nextUrl.pathname.startsWith("/account"))
   ) {
     // no user, potentially respond by redirecting the user to the login page
+    console.log("[v0] Redirecting unauthenticated user to login")
     const url = request.nextUrl.clone()
     url.pathname = "/auth/login"
     return NextResponse.redirect(url)
@@ -69,6 +78,7 @@ export async function updateSession(request: NextRequest) {
       const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single()
 
       if (!profile?.is_admin) {
+        console.log("[v0] User lacks admin privileges, redirecting to dashboard")
         const url = request.nextUrl.clone()
         url.pathname = "/dashboard"
         return NextResponse.redirect(url)

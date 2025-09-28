@@ -9,7 +9,22 @@ import { cookies } from "next/headers"
 export async function createClient() {
   const cookieStore = await cookies()
 
-  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl) {
+    console.error("[v0] NEXT_PUBLIC_SUPABASE_URL is not set in server context")
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL environment variable")
+  }
+
+  if (!supabaseAnonKey) {
+    console.error("[v0] NEXT_PUBLIC_SUPABASE_ANON_KEY is not set in server context")
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable")
+  }
+
+  console.log("[v0] Creating server Supabase client with URL:", supabaseUrl.substring(0, 30) + "...")
+
+  return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll()

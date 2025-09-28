@@ -11,6 +11,9 @@ const CACHE_TAGS = {
   ORDERS: "orders",
   LICENSES: "licenses",
   STATS: "stats",
+  TAG_CATEGORIES: "tag_categories",
+  TAGS: "tags",
+  IMAGE_TAGS: "image_tags",
 } as const
 
 const CACHE_REVALIDATE = {
@@ -326,6 +329,109 @@ const getCachedDatabaseStats = unstable_cache(
   ["database-stats"],
   {
     tags: [CACHE_TAGS.STATS],
+    revalidate: CACHE_REVALIDATE.IMAGES,
+  },
+)
+
+const getCachedTagCategories = unstable_cache(
+  async () => {
+    try {
+      const supabase = await createClient()
+
+      const { data: result, error } = await supabase
+        .from("tag_categories")
+        .select("*")
+        .eq("active", true)
+        .order("sort_order", { ascending: true })
+
+      if (error) {
+        console.error("[v0] Database error in getCachedTagCategories:", error)
+        throw new Error(error.message)
+      }
+
+      console.log(`[v0] getCachedTagCategories: Retrieved ${result?.length || 0} tag categories`)
+      return result || []
+    } catch (error) {
+      console.error("[v0] Error in getCachedTagCategories:", error)
+      return []
+    }
+  },
+  ["tag-categories"],
+  {
+    tags: [CACHE_TAGS.TAG_CATEGORIES],
+    revalidate: CACHE_REVALIDATE.CATEGORIES,
+  },
+)
+
+const getCachedTags = unstable_cache(
+  async (categoryId?: string) => {
+    try {
+      const supabase = await createClient()
+
+      let query = supabase
+        .from("tags")
+        .select(`
+          *,
+          tag_categories!inner(name, color, icon)
+        `)
+        .eq("active", true)
+        .order("usage_count", { ascending: false })
+
+      if (categoryId) {
+        query = query.eq("category_id", categoryId)
+      }
+
+      const { data: result, error } = await query
+
+      if (error) {
+        console.error("[v0] Database error in getCachedTags:", error)
+        throw new Error(error.message)
+      }
+
+      console.log(`[v0] getCachedTags: Retrieved ${result?.length || 0} tags`)
+      return result || []
+    } catch (error) {
+      console.error("[v0] Error in getCachedTags:", error)
+      return []
+    }
+  },
+  ["tags"],
+  {
+    tags: [CACHE_TAGS.TAGS],
+    revalidate: CACHE_REVALIDATE.IMAGES,
+  },
+)
+
+const getCachedImageTags = unstable_cache(
+  async (imageId: string) => {
+    try {
+      const supabase = await createClient()
+
+      const { data: result, error } = await supabase
+        .from("image_tags")
+        .select(`
+          *,
+          tags!inner(name, slug, description, category_id),
+          tags!inner(tag_categories!inner(name, color))
+        `)
+        .eq("image_id", imageId)
+        .order("created_at", { ascending: false })
+
+      if (error) {
+        console.error("[v0] Database error in getCachedImageTags:", error)
+        throw new Error(error.message)
+      }
+
+      console.log(`[v0] getCachedImageTags: Retrieved ${result?.length || 0} tags for image ${imageId}`)
+      return result || []
+    } catch (error) {
+      console.error("[v0] Error in getCachedImageTags:", error)
+      return []
+    }
+  },
+  ["image-tags"],
+  {
+    tags: [CACHE_TAGS.IMAGE_TAGS],
     revalidate: CACHE_REVALIDATE.IMAGES,
   },
 )
@@ -888,6 +994,449 @@ export async function getDatabaseStats() {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
     }
+  }
+}
+
+export async function getTagCategories() {
+  try {
+    const data = await getCachedTagCategories()
+    return { success: true, data }
+  } catch (error) {
+    console.error("[v0] Get tag categories error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+      data: [],
+    }
+  }
+}
+
+export async function getTags(categoryId?: string) {
+  try {
+    const data = await getCachedTags(categoryId)
+    return { success: true, data }
+  } catch (error) {
+    console.error("[v0] Get tags error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+      data: [],
+    }
+  }
+}
+
+export async function createTag(tagData: {
+  name: string
+  description?: string
+  category_id: string
+  synonyms?: string[]
+  is_featured?: boolean
+}) {
+  try {
+    console.log("[v0] Creating tag:", tagData)
+    const supabase = await createClient()
+
+    // Generate slug from name
+    const slug = tagData.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+
+    const { data: result, error } = await supabase
+      .from("tags")
+      .insert([
+        {
+          name: tagData.name,
+          slug: slug,
+          description: tagData.description || "",
+          category_id: tagData.category_id,
+          synonyms: tagData.synonyms || [],
+          is_featured: tagData.is_featured || false,
+          active: true,
+        },
+      ])
+      .select("*")
+
+    if (error) {
+      console.error("[v0] Database error in createTag:", error)
+      throw new Error(error.message)
+    }
+
+    console.log("[v0] Tag created successfully:", result[0])
+
+    invalidateCache([CACHE_TAGS.TAGS])
+    revalidatePath("/simple-admin")
+
+    return { success: true, data: result[0] }
+  } catch (error) {
+    return handleDatabaseError(error, "createTag")
+  }
+}
+
+export async function updateTag(
+  tagId: string,
+  tagData: {
+    name?: string
+    description?: string
+    category_id?: string
+    synonyms?: string[]
+    is_featured?: boolean
+    active?: boolean
+  },
+) {
+  try {
+    console.log(`[v0] Updating tag ${tagId} with data:`, tagData)
+    const supabase = await createClient()
+
+    const updateData: any = { ...tagData }
+
+    // Generate new slug if name is being updated
+    if (tagData.name) {
+      updateData.slug = tagData.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+    }
+
+    const { data: result, error } = await supabase.from("tags").update(updateData).eq("id", tagId).select("*")
+
+    if (error) {
+      console.error("[v0] Database error in updateTag:", error)
+      throw new Error(error.message)
+    }
+
+    if (!result || result.length === 0) {
+      return {
+        success: false,
+        error: "Tag not found",
+      }
+    }
+
+    console.log("[v0] Tag updated successfully:", result[0])
+
+    invalidateCache([CACHE_TAGS.TAGS, CACHE_TAGS.IMAGE_TAGS])
+    revalidatePath("/simple-admin")
+
+    return { success: true, data: result[0] }
+  } catch (error) {
+    return handleDatabaseError(error, "updateTag")
+  }
+}
+
+export async function deleteTag(tagId: string) {
+  try {
+    console.log("[v0] Starting tag deletion for ID:", tagId)
+    const supabase = await createClient()
+
+    // Check if tag is being used by any images
+    const { data: imageTagsCheck, error: checkError } = await supabase
+      .from("image_tags")
+      .select("count")
+      .eq("tag_id", tagId)
+      .single()
+
+    if (checkError && checkError.code !== "PGRST116") {
+      // PGRST116 = no rows returned
+      console.error("[v0] Error checking tag usage:", checkError)
+      throw new Error(checkError.message)
+    }
+
+    const usageCount = Number.parseInt(imageTagsCheck?.count || "0")
+
+    if (usageCount > 0) {
+      console.log(`[v0] Cannot delete tag ${tagId}: used by ${usageCount} images`)
+      return {
+        success: false,
+        error: `Cannot delete tag: it is used by ${usageCount} image(s). Remove the tag from all images first.`,
+      }
+    }
+
+    const { data: result, error } = await supabase.from("tags").delete().eq("id", tagId).select("*")
+
+    if (error) {
+      console.error("[v0] Database error in deleteTag:", error)
+      throw new Error(error.message)
+    }
+
+    if (!result || result.length === 0) {
+      console.log("[v0] No tag found with ID:", tagId)
+      return {
+        success: false,
+        error: "Tag not found",
+      }
+    }
+
+    console.log("[v0] Tag deleted successfully:", result[0])
+
+    invalidateCache([CACHE_TAGS.TAGS])
+    revalidatePath("/simple-admin")
+
+    return { success: true, data: result[0] }
+  } catch (error) {
+    return handleDatabaseError(error, "deleteTag")
+  }
+}
+
+export async function getImageTags(imageId: string) {
+  try {
+    const data = await getCachedImageTags(imageId)
+    return { success: true, data }
+  } catch (error) {
+    console.error("[v0] Get image tags error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+      data: [],
+    }
+  }
+}
+
+export async function updateImageTags(imageId: string, tagIds: string[]) {
+  try {
+    console.log(`[v0] Updating tags for image ${imageId}:`, tagIds)
+    const supabase = await createClient()
+
+    // First, remove all existing tags for this image
+    const { error: deleteError } = await supabase.from("image_tags").delete().eq("image_id", imageId)
+
+    if (deleteError) {
+      console.error("[v0] Error removing existing image tags:", deleteError)
+      throw new Error(deleteError.message)
+    }
+
+    // Then, add the new tags
+    if (tagIds.length > 0) {
+      const imageTagsData = tagIds.map((tagId) => ({
+        image_id: imageId,
+        tag_id: tagId,
+        source: "manual",
+        confidence: 1.0,
+      }))
+
+      const { data: result, error: insertError } = await supabase.from("image_tags").insert(imageTagsData).select("*")
+
+      if (insertError) {
+        console.error("[v0] Error inserting new image tags:", insertError)
+        throw new Error(insertError.message)
+      }
+
+      console.log(`[v0] Successfully updated ${result.length} tags for image ${imageId}`)
+    }
+
+    // Update usage counts for affected tags
+    await updateTagUsageCounts(tagIds)
+
+    invalidateCache([CACHE_TAGS.IMAGE_TAGS, CACHE_TAGS.TAGS, CACHE_TAGS.IMAGES])
+    revalidatePath("/simple-admin")
+
+    return { success: true, message: `Updated ${tagIds.length} tags for image` }
+  } catch (error) {
+    return handleDatabaseError(error, "updateImageTags")
+  }
+}
+
+export async function suggestTagsForImage(imageData: {
+  title: string
+  description?: string
+  category_name?: string
+}) {
+  try {
+    console.log("[v0] Generating tag suggestions for:", imageData.title)
+    const supabase = await createClient()
+
+    // Use the database function to suggest tags
+    const { data: suggestions, error } = await supabase.rpc("suggest_tags_for_image", {
+      image_title: imageData.title,
+      image_description: imageData.description || "",
+      category_name: imageData.category_name,
+    })
+
+    if (error) {
+      console.error("[v0] Error generating tag suggestions:", error)
+      throw new Error(error.message)
+    }
+
+    // Get the actual tag objects for the suggested tag names
+    const { data: suggestedTags, error: tagsError } = await supabase
+      .from("tags")
+      .select("*")
+      .in("name", suggestions || [])
+      .eq("active", true)
+
+    if (tagsError) {
+      console.error("[v0] Error fetching suggested tags:", tagsError)
+      throw new Error(tagsError.message)
+    }
+
+    console.log(`[v0] Generated ${suggestedTags?.length || 0} tag suggestions`)
+
+    return { success: true, data: suggestedTags || [] }
+  } catch (error) {
+    return handleDatabaseError(error, "suggestTagsForImage")
+  }
+}
+
+export async function migrateExistingTags() {
+  try {
+    console.log("[v0] Starting migration of existing array-based tags")
+    const supabase = await createClient()
+
+    // Call the database migration function
+    const { data: result, error } = await supabase.rpc("migrate_existing_tags")
+
+    if (error) {
+      console.error("[v0] Error migrating existing tags:", error)
+      throw new Error(error.message)
+    }
+
+    const migratedCount = result || 0
+    console.log(`[v0] Successfully migrated ${migratedCount} tag relationships`)
+
+    invalidateCache([CACHE_TAGS.TAGS, CACHE_TAGS.IMAGE_TAGS])
+    revalidatePath("/simple-admin")
+
+    return {
+      success: true,
+      message: `Successfully migrated ${migratedCount} tag relationships from array-based system`,
+      data: { migrated_count: migratedCount },
+    }
+  } catch (error) {
+    return handleDatabaseError(error, "migrateExistingTags")
+  }
+}
+
+export async function createTagCategory(categoryData: {
+  name: string
+  description?: string
+  color?: string
+  icon?: string
+  sort_order?: number
+}) {
+  try {
+    console.log("[v0] Creating tag category:", categoryData)
+    const supabase = await createClient()
+
+    const { data: result, error } = await supabase
+      .from("tag_categories")
+      .insert([
+        {
+          name: categoryData.name,
+          description: categoryData.description || "",
+          color: categoryData.color || "#6B7280",
+          icon: categoryData.icon || "Tag",
+          sort_order: categoryData.sort_order || 0,
+          active: true,
+        },
+      ])
+      .select("*")
+
+    if (error) {
+      console.error("[v0] Database error in createTagCategory:", error)
+      throw new Error(error.message)
+    }
+
+    console.log("[v0] Tag category created successfully:", result[0])
+
+    invalidateCache([CACHE_TAGS.TAG_CATEGORIES])
+    revalidatePath("/simple-admin")
+
+    return { success: true, data: result[0] }
+  } catch (error) {
+    return handleDatabaseError(error, "createTagCategory")
+  }
+}
+
+export async function bulkTagSuggestion() {
+  try {
+    console.log("[v0] Starting bulk tag suggestion for all images")
+    const supabase = await createClient()
+
+    // Get all images that don't have tags in the new system
+    const { data: images, error: imagesError } = await supabase
+      .from("images")
+      .select(`
+        id, title, description,
+        categories!inner(name)
+      `)
+      .eq("active", true)
+
+    if (imagesError) {
+      console.error("[v0] Error fetching images for bulk tagging:", imagesError)
+      throw new Error(imagesError.message)
+    }
+
+    if (!images || images.length === 0) {
+      return {
+        success: true,
+        message: "No images found for bulk tag suggestion",
+        data: { processed: 0, tagged: 0 },
+      }
+    }
+
+    let processed = 0
+    let tagged = 0
+
+    for (const image of images) {
+      try {
+        // Check if image already has tags in new system
+        const { data: existingTags } = await supabase.from("image_tags").select("id").eq("image_id", image.id).limit(1)
+
+        if (existingTags && existingTags.length > 0) {
+          processed++
+          continue // Skip images that already have tags
+        }
+
+        // Generate suggestions for this image
+        const suggestions = await suggestTagsForImage({
+          title: image.title,
+          description: image.description,
+          category_name: image.categories?.name,
+        })
+
+        if (suggestions.success && suggestions.data.length > 0) {
+          // Apply the suggested tags
+          const tagIds = suggestions.data.map((tag: any) => tag.id)
+          const updateResult = await updateImageTags(image.id, tagIds)
+
+          if (updateResult.success) {
+            tagged++
+          }
+        }
+
+        processed++
+      } catch (error) {
+        console.error(`[v0] Error processing image ${image.id}:`, error)
+        processed++
+      }
+    }
+
+    const message = `Bulk tag suggestion completed: ${tagged} images tagged out of ${processed} processed`
+    console.log(`[v0] ${message}`)
+
+    return {
+      success: true,
+      message,
+      data: { processed, tagged },
+    }
+  } catch (error) {
+    return handleDatabaseError(error, "bulkTagSuggestion")
+  }
+}
+
+async function updateTagUsageCounts(tagIds: string[]) {
+  try {
+    const supabase = await createClient()
+
+    for (const tagId of tagIds) {
+      const { data: count } = await supabase.from("image_tags").select("id", { count: "exact" }).eq("tag_id", tagId)
+
+      await supabase
+        .from("tags")
+        .update({ usage_count: count || 0 })
+        .eq("id", tagId)
+    }
+  } catch (error) {
+    console.error("[v0] Error updating tag usage counts:", error)
   }
 }
 

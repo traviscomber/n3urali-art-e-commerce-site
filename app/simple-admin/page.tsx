@@ -9,8 +9,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
-import { Loader2, Upload, Eye, Trash2, Database, BarChart3, Crown, Edit2, Check, X, HardDrive } from "lucide-react"
+import {
+  Loader2,
+  Upload,
+  Eye,
+  Trash2,
+  Database,
+  BarChart3,
+  Crown,
+  Edit2,
+  Check,
+  X,
+  HardDrive,
+  Tag,
+  Tags,
+} from "lucide-react"
+import { TagManagementDashboard } from "@/components/admin/tag-management-dashboard"
 
 interface Image {
   id: string
@@ -76,6 +92,7 @@ export default function SimpleAdminPage() {
   const [uploading, setUploading] = useState(false)
   const [cleaning, setCleaning] = useState(false)
   const [migrating, setMigrating] = useState(false)
+  const [migratingTags, setMigratingTags] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const [editingImage, setEditingImage] = useState<string | null>(null)
@@ -239,6 +256,32 @@ export default function SimpleAdminPage() {
       toast.error("Failed to migrate files")
     } finally {
       setMigrating(false)
+    }
+  }
+
+  const handleMigrateExistingTags = async () => {
+    if (
+      !confirm("This will migrate existing array-based tags to the new enhanced tag classification system. Continue?")
+    ) {
+      return
+    }
+
+    setMigratingTags(true)
+    try {
+      const { migrateExistingTags } = await import("@/app/actions/admin-actions")
+      const result = await migrateExistingTags()
+
+      if (result.success) {
+        toast.success(result.message || "Tag migration completed successfully")
+        await loadInitialData()
+      } else {
+        toast.error("Failed to migrate tags: " + result.error)
+      }
+    } catch (error) {
+      console.error("[v0] SimpleAdmin: Tag migration error:", error)
+      toast.error("Failed to migrate tags")
+    } finally {
+      setMigratingTags(false)
     }
   }
 
@@ -722,7 +765,7 @@ export default function SimpleAdminPage() {
         )}
 
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-8">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2">
@@ -800,437 +843,497 @@ export default function SimpleAdminPage() {
                 </Button>
               </CardContent>
             </Card>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
-          {/* Upload Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl">
-                <Upload className="h-6 w-6" />
-                Upload New Photo
-              </CardTitle>
-              <CardDescription className="text-lg">
-                Add a new full resolution image (4K-16K) to the premium gallery
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="title" className="text-lg font-medium">
-                    Title *
-                  </Label>
-                  <Input
-                    id="title"
-                    value={newImage.title}
-                    onChange={(e) => setNewImage((prev) => ({ ...prev, title: e.target.value }))}
-                    placeholder="Enter image title"
-                    className="text-lg h-12"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="description" className="text-lg font-medium">
-                    Description
-                  </Label>
-                  <Textarea
-                    id="description"
-                    value={newImage.description}
-                    onChange={(e) => setNewImage((prev) => ({ ...prev, description: e.target.value }))}
-                    placeholder="Enter image description"
-                    rows={3}
-                    className="text-lg"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="category" className="text-lg font-medium">
-                    Category *
-                  </Label>
-                  <Select
-                    value={newImage.category}
-                    onValueChange={(value) => setNewImage((prev) => ({ ...prev, category: value }))}
-                    required
-                  >
-                    <SelectTrigger className="h-12 text-lg">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.id} className="text-lg">
-                          {getCategoryDisplayName(cat)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="rightsType" className="text-lg font-medium">
-                    Rights Type *
-                  </Label>
-                  <Select
-                    value={newImage.rightsType}
-                    onValueChange={(value) => setNewImage((prev) => ({ ...prev, rightsType: value }))}
-                    required
-                  >
-                    <SelectTrigger className="h-12 text-lg">
-                      <SelectValue placeholder="Select rights type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="both" className="text-lg">
-                        <div>
-                          <div className="font-medium">Both Rights Available</div>
-                          <div className="text-sm text-gray-500">
-                            Exclusive & Non-Exclusive - Full HQ resolution (4K-16K)
-                          </div>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="exclusive" className="text-lg">
-                        <div className="flex items-center gap-2">
-                          <Crown className="h-4 w-4 text-yellow-500" />
-                          <div>
-                            <div className="font-medium">Exclusive Rights</div>
-                            <div className="text-sm text-gray-500">
-                              Full ownership - Complete HQ resolution (4K-16K)
-                            </div>
-                          </div>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="non-exclusive" className="text-lg">
-                        <div>
-                          <div className="font-medium">Non-Exclusive Rights</div>
-                          <div className="text-sm text-gray-500">Shared licensing - Full HQ resolution (4K-16K)</div>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-sm text-gray-500 mt-1">
-                    All images sold at full resolution (4K-16K). Pricing based on rights type and exclusivity.
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="price" className="text-lg font-medium">
-                    Price (USD) *
-                  </Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={newImage.price}
-                    onChange={(e) => setNewImage((prev) => ({ ...prev, price: e.target.value }))}
-                    placeholder="Enter price (e.g., 99.00)"
-                    className="text-lg h-12"
-                    required
-                  />
-                  <p className="text-sm text-gray-500 mt-1">
-                    Premium pricing for full HQ resolution (4K-16K). Starting from $99 for standard rights.
-                  </p>
-                </div>
-
-                <div>
-                  <Label className="text-lg font-medium">Image File * (Full HQ Resolution: 4K-16K)</Label>
-                  <div
-                    className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                      isDragOver
-                        ? "border-orange-500 bg-orange-50"
-                        : newImage.file
-                          ? "border-green-500 bg-green-50"
-                          : "border-gray-300 hover:border-gray-400"
-                    }`}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                  >
-                    <input
-                      id="file"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileSelect}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-
-                    {newImage.file ? (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-center">
-                          <Upload className="h-8 w-8 text-green-600" />
-                        </div>
-                        <p className="text-lg font-medium text-green-700">{newImage.file.name}</p>
-                        <p className="text-sm text-gray-500">{(newImage.file.size / (1024 * 1024)).toFixed(2)} MB</p>
-                        <p className="text-sm text-gray-500">Click or drag to replace</p>
-                        <div className="flex items-center justify-center gap-2 mt-2">
-                          <Database className="h-4 w-4 text-green-600" />
-                          <span className="text-sm text-green-600 font-medium">
-                            Will use database storage (Small file: {(newImage.file.size / (1024 * 1024)).toFixed(1)}
-                            MB)
-                          </span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-center">
-                          <Upload className={`h-8 w-8 ${isDragOver ? "text-orange-600" : "text-gray-400"}`} />
-                        </div>
-                        <p className={`text-lg font-medium ${isDragOver ? "text-orange-700" : "text-white"}`}>
-                          {isDragOver ? "Drop your HQ image here" : "Drag & drop your HQ image here (4K-16K)"}
-                        </p>
-                        <p className="text-sm text-gray-300">or click to browse files</p>
-                        <div className="text-xs text-gray-300 space-y-1">
-                          <p>High Quality Only: JPG, PNG, WebP</p>
-                          <p>• Files &lt;40MB: Database storage (fast access)</p>
-                          <p>• Files &gt;40MB: Supabase storage (unlimited, high quality)</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {newImage.preview && (
-                  <div className="space-y-3">
-                    <Label className="text-lg font-medium">Preview</Label>
-                    <div className="border rounded-lg p-4 bg-gray-50">
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="flex-shrink-0">
-                          <img
-                            src={newImage.preview || "/placeholder.svg?height=128&width=128&text=Preview"}
-                            alt="Preview"
-                            className="w-full sm:w-32 h-32 object-cover rounded border shadow-sm"
-                            crossOrigin="anonymous"
-                            onError={(e) => {
-                              console.log("[v0] Preview image failed to load:", newImage.preview)
-                              e.currentTarget.src = "/placeholder.svg?height=128&width=128&text=Preview+Error"
-                            }}
-                            onLoad={() => {
-                              console.log("[v0] Preview image loaded successfully")
-                            }}
-                          />
-                        </div>
-                        <div className="flex-1 space-y-2">
-                          <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div>
-                              <span className="font-medium text-gray-600">File:</span>
-                              <p className="text-gray-800 truncate">{newImage.file?.name}</p>
-                            </div>
-                            <div>
-                              <span className="font-medium text-gray-600">Size:</span>
-                              <p className="text-gray-800">
-                                {newImage.file ? (newImage.file.size / (1024 * 1024)).toFixed(2) : "0"} MB
-                              </p>
-                            </div>
-                            <div>
-                              <span className="font-medium text-gray-600">Type:</span>
-                              <p className="text-gray-800">{newImage.file?.type}</p>
-                            </div>
-                            <div>
-                              <span className="font-medium text-gray-600">Status:</span>
-                              <p className="text-green-600 font-medium">Ready to upload</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
+            <Card>
+              <CardContent className="p-4">
                 <Button
-                  onClick={handleImageUpload}
-                  disabled={uploading}
-                  className="w-full bg-orange-600 hover:bg-orange-700 text-lg h-12"
+                  onClick={handleMigrateExistingTags}
+                  disabled={migratingTags}
+                  variant="outline"
+                  className="w-full h-full border-blue-200 hover:bg-blue-50 bg-transparent"
                 >
-                  {uploading ? (
+                  {migratingTags ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Uploading to Supabase...
+                      Migrating...
                     </>
                   ) : (
                     <>
-                      <Upload className="mr-2 h-4 w-4" />
-                      Upload to Supabase (High Quality)
+                      <Tags className="mr-2 h-4 w-4" />
+                      Migrate Tags
                     </>
                   )}
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-          {/* Images List */}
-          <Card className="flex flex-col">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl">
-                <Eye className="h-6 w-6" />
-                Uploaded Photos ({images.length})
-              </CardTitle>
-              <CardDescription className="text-lg">
-                Manage your full resolution premium collection (4K-16K)
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col">
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                  <span className="text-lg">Loading images...</span>
-                </div>
-              ) : images.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 text-lg">No images uploaded yet</div>
-              ) : (
-                <div className="space-y-4 flex-1 overflow-y-auto min-h-0">
-                  {images.map((image) => (
-                    <div key={image.id} className="flex items-center gap-4 p-3 border rounded-lg">
-                      <img
-                        src={
-                          image.file_path ||
-                          image.image_url ||
-                          image.thumbnail_url ||
-                          "/placeholder.svg?height=64&width=64&text=No+Image"
-                        }
-                        alt={image.title}
-                        className="w-16 h-16 object-cover rounded"
-                        crossOrigin="anonymous"
-                        onError={(e) => {
-                          console.log(
-                            "[v0] Image failed to load:",
-                            image.file_path || image.image_url || image.thumbnail_url,
-                          )
-                          const currentSrc = e.currentTarget.src
-                          if (currentSrc === image.file_path && image.image_url) {
-                            e.currentTarget.src = image.image_url
-                          } else if (currentSrc === image.image_url && image.thumbnail_url) {
-                            e.currentTarget.src = image.thumbnail_url
-                          } else {
-                            e.currentTarget.src = "/placeholder.svg?height=64&width=64&text=Error"
-                          }
-                        }}
-                        onLoad={() => {
-                          console.log(
-                            "[v0] Image loaded successfully:",
-                            image.file_path || image.image_url || image.thumbnail_url,
-                          )
-                        }}
+        <Tabs defaultValue="images" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="images" className="flex items-center gap-2">
+              <Eye className="h-4 w-4" />
+              Image Management
+            </TabsTrigger>
+            <TabsTrigger value="tags" className="flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              Tag Management
+            </TabsTrigger>
+            <TabsTrigger value="upload" className="flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              Upload Images
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="images" className="space-y-6">
+            <div className="grid grid-cols-1 gap-8 h-full">
+              {/* Images List */}
+              <Card className="flex flex-col">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-2xl">
+                    <Eye className="h-6 w-6" />
+                    Uploaded Photos ({images.length})
+                  </CardTitle>
+                  <CardDescription className="text-lg">
+                    Manage your full resolution premium collection (4K-16K)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col">
+                  {loading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                      <span className="text-lg">Loading images...</span>
+                    </div>
+                  ) : images.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500 text-lg">No images uploaded yet</div>
+                  ) : (
+                    <div className="space-y-4 flex-1 overflow-y-auto min-h-0">
+                      {images.map((image) => (
+                        <div key={image.id} className="flex items-center gap-4 p-3 border rounded-lg">
+                          <img
+                            src={
+                              image.file_path ||
+                              image.image_url ||
+                              image.thumbnail_url ||
+                              "/placeholder.svg?height=64&width=64&text=No+Image" ||
+                              "/placeholder.svg"
+                            }
+                            alt={image.title}
+                            className="w-16 h-16 object-cover rounded"
+                            crossOrigin="anonymous"
+                            onError={(e) => {
+                              console.log(
+                                "[v0] Image failed to load:",
+                                image.file_path || image.image_url || image.thumbnail_url,
+                              )
+                              const currentSrc = e.currentTarget.src
+                              if (currentSrc === image.file_path && image.image_url) {
+                                e.currentTarget.src = image.image_url
+                              } else if (currentSrc === image.image_url && image.thumbnail_url) {
+                                e.currentTarget.src = image.thumbnail_url
+                              } else {
+                                e.currentTarget.src = "/placeholder.svg?height=64&width=64&text=Error"
+                              }
+                            }}
+                            onLoad={() => {
+                              console.log(
+                                "[v0] Image loaded successfully:",
+                                image.file_path || image.image_url || image.thumbnail_url,
+                              )
+                            }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            {editingImage === image.id ? (
+                              <div className="space-y-2">
+                                <Input
+                                  value={editValues.title}
+                                  onChange={(e) => setEditValues((prev) => ({ ...prev, title: e.target.value }))}
+                                  placeholder="Image title"
+                                  className="text-sm"
+                                />
+                                <Textarea
+                                  value={editValues.description}
+                                  onChange={(e) => setEditValues((prev) => ({ ...prev, description: e.target.value }))}
+                                  placeholder="Description"
+                                  className="text-sm"
+                                  rows={2}
+                                />
+                                <Select
+                                  value={editValues.category}
+                                  onValueChange={(value) => setEditValues((prev) => ({ ...prev, category: value }))}
+                                >
+                                  <SelectTrigger className="text-sm">
+                                    <SelectValue placeholder="Select category" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {categories.map((cat) => (
+                                      <SelectItem key={cat.id} value={cat.id} className="text-sm">
+                                        {getCategoryDisplayName(cat)}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Select
+                                  value={editValues.rightsType}
+                                  onValueChange={(value) => setEditValues((prev) => ({ ...prev, rightsType: value }))}
+                                >
+                                  <SelectTrigger className="text-sm">
+                                    <SelectValue placeholder="Select rights type" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="both" className="text-sm">
+                                      Both Rights Available
+                                    </SelectItem>
+                                    <SelectItem value="exclusive" className="text-sm">
+                                      Exclusive Rights
+                                    </SelectItem>
+                                    <SelectItem value="non-exclusive" className="text-sm">
+                                      Non-Exclusive Rights
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  value={editValues.price}
+                                  onChange={(e) => setEditValues((prev) => ({ ...prev, price: e.target.value }))}
+                                  placeholder="Price"
+                                  className="text-sm"
+                                />
+                              </div>
+                            ) : (
+                              <>
+                                <h4 className="font-medium truncate text-lg">{image.title}</h4>
+                                {image.description && (
+                                  <p className="text-sm text-gray-600 truncate">{image.description}</p>
+                                )}
+                                <p className="text-base text-gray-500">
+                                  {getCategoryBadgeName(image.category_name || "")}
+                                </p>
+                                <div className="flex items-center gap-2">
+                                  {image.license_name?.includes("EXCLUSIVE") && (
+                                    <Crown className="h-3 w-3 text-yellow-500" />
+                                  )}
+                                  <p className="text-base font-medium">
+                                    ${image.price > 0 ? image.price : "Price TBD"}
+                                  </p>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {editingImage === image.id ? (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  onClick={() => handleEditSave(image.id)}
+                                  className="h-8 w-8 bg-green-600 hover:bg-green-700"
+                                >
+                                  <Check className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={handleEditCancel}
+                                  className="h-8 w-8 bg-transparent"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleEditStart(image)}
+                                className="h-8 w-8"
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleDeleteImage(image.id)}
+                              className="h-8 w-8"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="tags" className="space-y-6">
+            <TagManagementDashboard />
+          </TabsContent>
+
+          <TabsContent value="upload" className="space-y-6">
+            <div className="grid grid-cols-1 gap-8 h-full">
+              {/* Upload Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-2xl">
+                    <Upload className="h-6 w-6" />
+                    Upload New Photo
+                  </CardTitle>
+                  <CardDescription className="text-lg">
+                    Add a new full resolution image (4K-16K) to the premium gallery
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="title" className="text-lg font-medium">
+                        Title *
+                      </Label>
+                      <Input
+                        id="title"
+                        value={newImage.title}
+                        onChange={(e) => setNewImage((prev) => ({ ...prev, title: e.target.value }))}
+                        placeholder="Enter image title"
+                        className="text-lg h-12"
+                        required
                       />
-                      <div className="flex-1 min-w-0">
-                        {editingImage === image.id ? (
+                    </div>
+
+                    <div>
+                      <Label htmlFor="description" className="text-lg font-medium">
+                        Description
+                      </Label>
+                      <Textarea
+                        id="description"
+                        value={newImage.description}
+                        onChange={(e) => setNewImage((prev) => ({ ...prev, description: e.target.value }))}
+                        placeholder="Enter image description"
+                        rows={3}
+                        className="text-lg"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="category" className="text-lg font-medium">
+                        Category *
+                      </Label>
+                      <Select
+                        value={newImage.category}
+                        onValueChange={(value) => setNewImage((prev) => ({ ...prev, category: value }))}
+                        required
+                      >
+                        <SelectTrigger className="h-12 text-lg">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id} className="text-lg">
+                              {getCategoryDisplayName(cat)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="rightsType" className="text-lg font-medium">
+                        Rights Type *
+                      </Label>
+                      <Select
+                        value={newImage.rightsType}
+                        onValueChange={(value) => setNewImage((prev) => ({ ...prev, rightsType: value }))}
+                        required
+                      >
+                        <SelectTrigger className="h-12 text-lg">
+                          <SelectValue placeholder="Select rights type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="both" className="text-lg">
+                            <div>
+                              <div className="font-medium">Both Rights Available</div>
+                              <div className="text-sm text-gray-500">
+                                Exclusive & Non-Exclusive - Full HQ resolution (4K-16K)
+                              </div>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="exclusive" className="text-lg">
+                            <div className="flex items-center gap-2">
+                              <Crown className="h-4 w-4 text-yellow-500" />
+                              <div>
+                                <div className="font-medium">Exclusive Rights</div>
+                                <div className="text-sm text-gray-500">
+                                  Full ownership - Complete HQ resolution (4K-16K)
+                                </div>
+                              </div>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="non-exclusive" className="text-lg">
+                            <div>
+                              <div className="font-medium">Non-Exclusive Rights</div>
+                              <div className="text-sm text-gray-500">
+                                Shared licensing - Full HQ resolution (4K-16K)
+                              </div>
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-sm text-gray-500 mt-1">
+                        All images sold at full resolution (4K-16K). Pricing based on rights type and exclusivity.
+                      </p>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="price" className="text-lg font-medium">
+                        Price (USD) *
+                      </Label>
+                      <Input
+                        id="price"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={newImage.price}
+                        onChange={(e) => setNewImage((prev) => ({ ...prev, price: e.target.value }))}
+                        placeholder="Enter price (e.g., 99.00)"
+                        className="text-lg h-12"
+                        required
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        Premium pricing for full HQ resolution (4K-16K). Starting from $99 for standard rights.
+                      </p>
+                    </div>
+
+                    <div>
+                      <Label className="text-lg font-medium">Image File * (Full HQ Resolution: 4K-16K)</Label>
+                      <div
+                        className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                          isDragOver
+                            ? "border-orange-500 bg-orange-50"
+                            : newImage.file
+                              ? "border-green-500 bg-green-50"
+                              : "border-gray-300 hover:border-gray-400"
+                        }`}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                      >
+                        <input
+                          id="file"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileSelect}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+
+                        {newImage.file ? (
                           <div className="space-y-2">
-                            <Input
-                              value={editValues.title}
-                              onChange={(e) => setEditValues((prev) => ({ ...prev, title: e.target.value }))}
-                              placeholder="Image title"
-                              className="text-sm"
-                            />
-                            <Textarea
-                              value={editValues.description}
-                              onChange={(e) => setEditValues((prev) => ({ ...prev, description: e.target.value }))}
-                              placeholder="Description"
-                              className="text-sm"
-                              rows={2}
-                            />
-                            <Select
-                              value={editValues.category}
-                              onValueChange={(value) => setEditValues((prev) => ({ ...prev, category: value }))}
-                            >
-                              <SelectTrigger className="text-sm">
-                                <SelectValue placeholder="Select category" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {categories.map((cat) => (
-                                  <SelectItem key={cat.id} value={cat.id} className="text-sm">
-                                    {getCategoryDisplayName(cat)}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <Select
-                              value={editValues.rightsType}
-                              onValueChange={(value) => setEditValues((prev) => ({ ...prev, rightsType: value }))}
-                            >
-                              <SelectTrigger className="text-sm">
-                                <SelectValue placeholder="Select rights type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="both" className="text-sm">
-                                  Both Rights Available
-                                </SelectItem>
-                                <SelectItem value="exclusive" className="text-sm">
-                                  Exclusive Rights
-                                </SelectItem>
-                                <SelectItem value="non-exclusive" className="text-sm">
-                                  Non-Exclusive Rights
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <Input
-                              type="number"
-                              min="0"
-                              step="0.01"
-                              value={editValues.price}
-                              onChange={(e) => setEditValues((prev) => ({ ...prev, price: e.target.value }))}
-                              placeholder="Price"
-                              className="text-sm"
-                            />
+                            <div className="flex items-center justify-center">
+                              <Upload className="h-8 w-8 text-green-600" />
+                            </div>
+                            <p className="text-lg font-medium text-green-700">{newImage.file.name}</p>
+                            <p className="text-sm text-gray-500">
+                              {(newImage.file.size / (1024 * 1024)).toFixed(2)} MB
+                            </p>
+                            <p className="text-sm text-gray-500">Click or drag to replace</p>
+                            <div className="flex items-center justify-center gap-2 mt-2">
+                              <Database className="h-4 w-4 text-green-600" />
+                              <span className="text-sm text-green-600 font-medium">
+                                Will use database storage (Small file: {(newImage.file.size / (1024 * 1024)).toFixed(1)}
+                                MB)
+                              </span>
+                            </div>
                           </div>
                         ) : (
-                          <>
-                            <h4 className="font-medium truncate text-lg">{image.title}</h4>
-                            {image.description && <p className="text-sm text-gray-600 truncate">{image.description}</p>}
-                            <p className="text-base text-gray-500">{getCategoryBadgeName(image.category_name || "")}</p>
-                            <div className="flex items-center gap-2">
-                              {image.license_name?.includes("EXCLUSIVE") && (
-                                <Crown className="h-3 w-3 text-yellow-500" />
-                              )}
-                              <p className="text-base font-medium">${image.price > 0 ? image.price : "Price TBD"}</p>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-center">
+                              <Upload className={`h-8 w-8 ${isDragOver ? "text-orange-600" : "text-gray-400"}`} />
                             </div>
-                          </>
+                            <p className={`text-lg font-medium ${isDragOver ? "text-orange-700" : "text-white"}`}>
+                              {isDragOver ? "Drop your HQ image here" : "Drag & drop your HQ image here (4K-16K)"}
+                            </p>
+                            <p className="text-sm text-gray-300">or click to browse files</p>
+                            <div className="text-xs text-gray-300 space-y-1">
+                              <p>High Quality Only: JPG, PNG, WebP</p>
+                              <p>• Files &lt;40MB: Database storage (fast access)</p>
+                              <p>• Files &gt;40MB: Supabase storage (unlimited, high quality)</p>
+                            </div>
+                          </div>
                         )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {editingImage === image.id ? (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="default"
-                              onClick={() => handleEditSave(image.id)}
-                              className="h-8 w-8 bg-green-600 hover:bg-green-700"
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={handleEditCancel}
-                              className="h-8 w-8 bg-transparent"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEditStart(image)}
-                            className="h-8 w-8"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDeleteImage(image.id)}
-                          className="h-8 w-8"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+
+                    {newImage.preview && (
+                      <div className="space-y-3">
+                        <Label className="text-lg font-medium">Preview</Label>
+                        <div className="border rounded-lg p-4 bg-gray-50">
+                          <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="flex-shrink-0">
+                              <img
+                                src={newImage.preview || "/placeholder.svg?height=128&width=128&text=Preview"}
+                                alt="Preview"
+                                className="w-full sm:w-32 h-32 object-cover rounded border shadow-sm"
+                                crossOrigin="anonymous"
+                                onError={(e) => {
+                                  console.log("[v0] Preview image failed to load:", newImage.preview)
+                                  e.currentTarget.src = "/placeholder.svg?height=128&width=128&text=Preview+Error"
+                                }}
+                                onLoad={() => {
+                                  console.log("[v0] Preview image loaded successfully")
+                                }}
+                              />
+                            </div>
+                            <div className="flex-1 space-y-2">
+                              <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                  <span className="font-medium text-gray-600">File:</span>
+                                  <p className="text-gray-800 truncate">{newImage.file?.name}</p>
+                                </div>
+                                <div>
+                                  <span className="font-medium text-gray-600">Size:</span>
+                                  <p className="text-gray-800">
+                                    {newImage.file ? (newImage.file.size / (1024 * 1024)).toFixed(2) : "0"} MB
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className="font-medium text-gray-600">Type:</span>
+                                  <p className="text-gray-800">{newImage.file?.type}</p>
+                                </div>
+                                <div>
+                                  <span className="font-medium text-gray-600">Status:</span>
+                                  <p className="text-green-600 font-medium">Ready to upload</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <Button
+                      onClick={handleImageUpload}
+                      disabled={uploading}
+                      className="w-full bg-orange-600 hover:bg-orange-700 text-lg h-12"
+                    >
+                      {uploading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Uploading to Supabase...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="mr-2 h-4 w-4" />
+                          Upload to Supabase (High Quality)
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   )

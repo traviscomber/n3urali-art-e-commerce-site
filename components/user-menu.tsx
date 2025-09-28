@@ -53,13 +53,9 @@ export function UserMenu() {
           const { createClient } = await import("@/lib/supabase/client")
           const supabase = createClient()
 
-          const { data: profile } = await supabase
-            .from("user_profiles")
-            .select("is_admin")
-            .eq("email", user.email)
-            .single()
+          const { data: profile } = await supabase.from("profiles").select("role").eq("email", user.email).single()
 
-          setIsAdmin(profile?.is_admin || user.email === "travis@nuanu.com")
+          setIsAdmin(profile?.role === "admin" || user.email === "travis@nuanu.com")
         } catch (error) {
           // Fallback: check if user is travis@nuanu.com
           setIsAdmin(user.email === "travis@nuanu.com")

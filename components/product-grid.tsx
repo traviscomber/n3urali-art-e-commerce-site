@@ -215,7 +215,7 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
       ) : filteredImages.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredImages.map((image) => (
-            <ProductCard key={image.id} image={image} />
+            <ProductCard key={image.id} product={image} />
           ))}
         </div>
       ) : (

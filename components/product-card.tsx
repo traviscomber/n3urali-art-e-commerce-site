@@ -40,6 +40,10 @@ export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart()
   const [isLoading, setIsLoading] = useState(false)
 
+  if (!product) {
+    return null
+  }
+
   const handleAddToCart = async () => {
     setIsLoading(true)
     try {
@@ -61,7 +65,12 @@ export function ProductCard({ product }: ProductCardProps) {
     <Card className="group overflow-hidden bg-card/50 border-border/50 hover:bg-card hover:border-border transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
       <div className="relative aspect-[4/3] overflow-hidden">
         <Image
-          src={product.thumbnail_large_url || "/placeholder.svg?height=300&width=400&query=360 degree panoramic image"}
+          src={
+            product.thumbnail_large_url ||
+            product.thumbnail_medium_url ||
+            product.thumbnail_small_url ||
+            "/placeholder.svg?height=300&width=400&query=360 degree panoramic image"
+          }
           alt={product.title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"

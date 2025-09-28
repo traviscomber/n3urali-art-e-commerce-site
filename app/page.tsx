@@ -2,8 +2,9 @@ import type { Metadata } from "next"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowRight, Eye, Download, Shield } from "lucide-react"
+import { ArrowRight, Eye, Download, Shield, HelpCircle } from "lucide-react"
 import Link from "next/link"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 export const metadata: Metadata = {
   title: "N3urali.art - Premium 360° Digital Photography & AI-Generated Imagery",
@@ -22,6 +23,11 @@ export const metadata: Metadata = {
     "4K",
     "8K",
     "16K",
+    "what is 360 degree photography",
+    "how to use equirectangular images",
+    "best VR content creation",
+    "professional immersive imagery",
+    "AI generated panoramic photos",
   ],
   openGraph: {
     title: "N3urali.art - Premium 360° Digital Photography & AI-Generated Imagery",
@@ -78,6 +84,42 @@ export default function HomePage() {
                   <Eye className="w-4 h-4 group-hover:scale-110 transition-transform" />
                 </Link>
               </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Key Takeaways Section */}
+      <section className="py-16 bg-muted/20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <Badge variant="secondary" className="mb-4">
+                Key Takeaways
+              </Badge>
+              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-balance">What Makes N3urali.art Different?</h2>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">For Content Creators & Developers:</h3>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li>• Get professional 360° images without expensive equipment</li>
+                  <li>• Download high-resolution files (4K-16K) instantly after purchase</li>
+                  <li>• Use for VR applications, projection mapping, and immersive experiences</li>
+                  <li>• Choose flexible licensing options for your specific project needs</li>
+                </ul>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">AI-Powered Quality:</h3>
+                <ul className="space-y-2 text-muted-foreground">
+                  <li>• Every image is AI-generated from scratch using proprietary tools</li>
+                  <li>• Professional enhancement pipeline ensures supreme quality</li>
+                  <li>• Unique scenes that don't exist anywhere else</li>
+                  <li>• Equirectangular and fisheye formats for maximum compatibility</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -231,6 +273,105 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-24 bg-muted/20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <HelpCircle className="w-6 h-6 text-primary" />
+                <Badge variant="secondary">Frequently Asked Questions</Badge>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance">
+                Everything You Need to Know About
+                <span className="text-primary block">360° Digital Photography</span>
+              </h2>
+              <p className="text-lg text-muted-foreground text-pretty">
+                Common questions about our AI-generated imagery, licensing, and technical specifications.
+              </p>
+            </div>
+
+            <Accordion type="single" collapsible className="space-y-4">
+              <AccordionItem value="what-is-360-photography" className="bg-card rounded-lg px-6">
+                <AccordionTrigger className="text-left">
+                  What is 360° photography and how is it different from regular photography?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  360° photography captures a complete spherical view of an environment, allowing viewers to look in any
+                  direction. Unlike regular photography that captures a single perspective, 360° images provide an
+                  immersive experience where you can explore the entire scene. Our AI-generated 360° images are created
+                  in equirectangular and fisheye formats, making them perfect for VR applications, projection mapping,
+                  and architectural visualization.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="ai-generated-quality" className="bg-card rounded-lg px-6">
+                <AccordionTrigger className="text-left">
+                  How can AI-generated images match professional photography quality?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  Our proprietary AI generation and enhancement pipeline creates images that often exceed traditional
+                  photography quality. Every image is generated from scratch using custom-built tools, then enhanced
+                  through professional post-processing. This approach allows us to create unique scenes with perfect
+                  lighting, composition, and detail that would be impossible or extremely expensive to capture with
+                  traditional methods. The result is supreme quality 4K-16K resolution imagery.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="licensing-options" className="bg-card rounded-lg px-6">
+                <AccordionTrigger className="text-left">
+                  What licensing options are available and which should I choose?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  We offer both exclusive and non-exclusive licensing options. Non-exclusive licenses are perfect for
+                  most commercial projects and allow multiple buyers to use the same image. Exclusive licenses give you
+                  sole rights to use the image, making it ideal for brand campaigns or unique projects where exclusivity
+                  is important. All licenses include commercial usage rights for projection mapping, VR experiences,
+                  architectural visualization, and digital content creation.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="technical-specs" className="bg-card rounded-lg px-6">
+                <AccordionTrigger className="text-left">
+                  What technical specifications and formats do you provide?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  All images are available in high-resolution formats ranging from 4K to 16K resolution. We provide both
+                  equirectangular (360° x 180°) and fisheye formats to ensure compatibility with various VR platforms,
+                  projection systems, and software applications. Images are delivered in standard formats (JPEG, PNG)
+                  with full metadata and are optimized for immediate use in professional workflows.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="use-cases" className="bg-card rounded-lg px-6">
+                <AccordionTrigger className="text-left">What are the best use cases for 360° imagery?</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  360° imagery is perfect for VR experiences, virtual tours, projection mapping installations,
+                  architectural visualization, game development, immersive marketing campaigns, and educational content.
+                  Content creators use our images for YouTube 360° videos, social media campaigns, and interactive
+                  presentations. Developers integrate them into VR applications, games, and simulation software. The
+                  immersive nature makes them ideal for any project requiring environmental storytelling or spatial
+                  presence.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="download-process" className="bg-card rounded-lg px-6">
+                <AccordionTrigger className="text-left">
+                  How does the download and purchase process work?
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  Browse our gallery with interactive 360° previews, select your desired images, choose your licensing
+                  option, and complete the purchase. Downloads are available immediately after payment confirmation.
+                  You'll receive high-resolution files along with licensing documentation and technical specifications.
+                  All purchases include lifetime access to re-download your files, and we provide customer support for
+                  any technical questions about implementation.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
         </div>
       </section>

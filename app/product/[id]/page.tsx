@@ -77,7 +77,7 @@ export async function generateMetadata({ params }: ProductPageProps) {
       description: image.description,
       images: [displayUrl],
       type: "website",
-      url: `https://n3urali.art/product/${id}`,
+      url: `https://www.n3uralia360.art/product/${id}`,
     },
     twitter: {
       card: "summary_large_image",
@@ -86,7 +86,7 @@ export async function generateMetadata({ params }: ProductPageProps) {
       images: [displayUrl],
     },
     alternates: {
-      canonical: `https://n3urali.art/product/${id}`,
+      canonical: `https://www.n3uralia360.art/product/${id}`,
     },
   }
 }

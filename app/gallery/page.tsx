@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     description:
       "Browse our complete gallery of AI-generated equirectangular and fisheye images. High-resolution 4K-16K imagery perfect for VR, projection mapping, and professional visualization projects.",
     type: "website",
-    url: "https://n3urali.art/gallery",
+    url: "https://www.n3uralia360.art/gallery",
   },
   twitter: {
     card: "summary_large_image",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
       "Browse our complete gallery of AI-generated equirectangular and fisheye images. High-resolution 4K-16K imagery perfect for VR, projection mapping, and professional visualization projects.",
   },
   alternates: {
-    canonical: "https://n3urali.art/gallery",
+    canonical: "https://www.n3uralia360.art/gallery",
   },
 }
 

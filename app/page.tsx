@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     description:
       "Discover our curated collection of AI-generated equirectangular and fisheye images, perfect for projection mapping, VR experiences, and architectural visualization.",
     type: "website",
-    url: "https://n3uralia360.art",
+    url: "https://www.n3uralia360.art",
   },
   twitter: {
     card: "summary_large_image",
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
       "Discover our curated collection of AI-generated equirectangular and fisheye images, perfect for projection mapping, VR experiences, and architectural visualization.",
   },
   alternates: {
-    canonical: "https://n3uralia360.art",
+    canonical: "https://www.n3uralia360.art",
   },
 }
 
@@ -387,7 +387,8 @@ export default function HomePage() {
             </h2>
 
             <p className="text-xl text-muted-foreground text-pretty">
-              Join thousands of professionals who trust n3urali.art for their immersive imagery needs.
+              Join thousands of professionals who trust N3urali.art for premium 360° digital photography and immersive
+              imagery solutions.
             </p>
 
             <Button size="lg" className="glow-primary">

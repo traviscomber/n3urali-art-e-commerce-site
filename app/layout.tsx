@@ -37,6 +37,9 @@ export const metadata: Metadata = {
   authors: [{ name: "N3urali.art" }],
   creator: "N3urali.art",
   publisher: "N3urali.art",
+  applicationName: "N3urali.art",
+  generator: "N3urali.art Platform",
+  referrer: "origin-when-cross-origin",
   verification: {
     google: "your-google-verification-code",
   },
@@ -54,22 +57,30 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://n3uralia360.art",
+    url: "https://www.n3uralia360.art",
     siteName: "N3urali.art",
     title: "N3urali.art - Premium 360° Digital Photography",
     description:
       "Discover our curated collection of equirectangular and fisheye images, perfect for projection mapping, VR experiences, and architectural visualization.",
+    images: [
+      {
+        url: "https://www.n3uralia360.art/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "N3urali.art - Premium 360° Digital Photography",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "N3urali.art - Premium 360° Digital Photography",
     description:
       "Discover our curated collection of equirectangular and fisheye images, perfect for projection mapping, VR experiences, and architectural visualization.",
+    images: ["https://www.n3uralia360.art/og-image.jpg"],
   },
   alternates: {
-    canonical: "https://n3uralia360.art",
+    canonical: "https://www.n3uralia360.art",
   },
-    generator: 'v0.app'
 }
 
 export default function RootLayout({
@@ -80,6 +91,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="antialiased">
       <head>
+        <meta name="theme-color" content="#000000" />
+        <meta name="msapplication-TileColor" content="#000000" />
+        <meta name="apple-mobile-web-app-title" content="N3urali.art" />
+        <meta name="application-name" content="N3urali.art" />
+        <meta property="og:site_name" content="N3urali.art" />
+        <meta name="format-detection" content="telephone=no" />
+
         <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
         <script
           dangerouslySetInnerHTML={{
@@ -101,8 +119,8 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               name: "N3urali.art",
-              url: "https://n3uralia360.art",
-              logo: "https://n3uralia360.art/logo.png",
+              url: "https://www.n3uralia360.art",
+              logo: "https://www.n3uralia360.art/logo.png",
               description:
                 "Professional AI-generated 360° photography and immersive imagery for VR, projection mapping, and architectural visualization.",
               foundingDate: "2024",
@@ -119,7 +137,7 @@ export default function RootLayout({
                 "@type": "ContactPoint",
                 telephone: "+1-555-0123",
                 contactType: "Customer Service",
-                email: "hello@n3urali.art",
+                email: "hello@www.n3uralia360.art",
                 availableLanguage: "English",
               },
               address: {
@@ -128,7 +146,7 @@ export default function RootLayout({
                 addressRegion: "CA",
                 addressCountry: "US",
               },
-              sameAs: ["https://n3uralia360.art"],
+              sameAs: ["https://www.n3uralia360.art"],
               offers: {
                 "@type": "Offer",
                 category: "360° Photography Services",

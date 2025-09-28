@@ -1,0 +1,14 @@
+/* TEAM */
+N3urali.art Development Team
+Site: https://www.n3uralia360.art
+Contact: contact@www.n3uralia360.art
+Location: Global
+
+/* SITE */
+Last update: 2025/01/27
+Language: English
+Doctype: HTML5
+IDE: v0 by Vercel
+Standards: HTML5, CSS3, JavaScript ES6+
+Components: React, Next.js, Tailwind CSS
+Software: AI-Generated Content Pipeline

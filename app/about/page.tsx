@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     description:
       "Learn how N3urali.art revolutionizes immersive imagery with AI-generated 360° photography for professional applications.",
     type: "website",
-    url: "https://n3uralia360.art/about",
+    url: "https://www.n3uralia360.art/about",
   },
   twitter: {
     card: "summary_large_image",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
       "Learn how N3urali.art revolutionizes immersive imagery with AI-generated 360° photography for professional applications.",
   },
   alternates: {
-    canonical: "https://n3uralia360.art/about",
+    canonical: "https://www.n3uralia360.art/about",
   },
 }
 

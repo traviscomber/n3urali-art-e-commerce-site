@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://n3urali.art/sitemap.xml
+Sitemap: https://www.n3uralia360.art/sitemap.xml
 
 # Disallow admin and debug pages
 Disallow: /simple-admin
@@ -10,3 +10,42 @@ Disallow: /debug-images
 Disallow: /setup-cors
 Disallow: /fix-cors
 Disallow: /api/
+
+# Allow important pages for indexing
+Allow: /gallery
+Allow: /about
+Allow: /contact
+
+# Crawl-delay
+Crawl-delay: 1
+
+# Allow specific bots
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+# Block AI training crawlers while allowing search engines
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /

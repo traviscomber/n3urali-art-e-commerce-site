@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     description:
       "Contact N3urali.art for custom 360° imagery projects, enterprise solutions, and professional support.",
     type: "website",
-    url: "https://n3uralia360.art/contact",
+    url: "https://www.n3uralia360.art/contact",
   },
   twitter: {
     card: "summary_large_image",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
       "Contact N3urali.art for custom 360° imagery projects, enterprise solutions, and professional support.",
   },
   alternates: {
-    canonical: "https://n3uralia360.art/contact",
+    canonical: "https://www.n3uralia360.art/contact",
   },
 }
 
@@ -108,7 +108,8 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold mb-1">Email</h3>
-                    <p className="text-muted-foreground">hello@n3urali.art</p>
+                    {/* Updated email domain to www.n3uralia360.art */}
+                    <p className="text-muted-foreground">hello@n3uralia360.art</p>
                     <p className="text-sm text-muted-foreground">We'll respond within 24 hours</p>
                   </div>
                 </div>
@@ -139,11 +140,11 @@ export default function ContactPage() {
               <div className="bg-card rounded-lg p-6">
                 <h3 className="font-semibold mb-3">What can we help you with?</h3>
                 <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• Custom 360° imagery projects</li>
-                  <li>• Bulk licensing and enterprise solutions</li>
-                  <li>• Technical support and integration</li>
-                  <li>• Partnership opportunities</li>
-                  <li>• General questions about our services</li>
+                  <li>Custom 360° imagery projects</li>
+                  <li>Bulk licensing and enterprise solutions</li>
+                  <li>Technical support and integration</li>
+                  <li>Partnership opportunities</li>
+                  <li>General questions about our services</li>
                 </ul>
               </div>
             </div>

@@ -175,8 +175,10 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
-      if (!isDragging) return
       e.preventDefault()
+      e.stopPropagation()
+
+      if (!isDragging) return
 
       const deltaX = e.clientX - lastMousePos.x
       const deltaY = e.clientY - lastMousePos.y
@@ -189,12 +191,15 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({
     [isDragging, lastMousePos],
   )
 
-  const handleMouseUp = useCallback(() => {
+  const handleMouseUp = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     setIsDragging(false)
   }, [])
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault()
+    e.stopPropagation() // Added stopPropagation to prevent background scrolling
     const delta = e.deltaY > 0 ? 5 : -5
     setFov((prev) => Math.max(30, Math.min(120, prev + delta)))
   }, [])
@@ -369,6 +374,18 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
           onWheel={handleWheel}
+          onContextMenu={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+          }}
+          onDragStart={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+          }}
+          style={{
+            pointerEvents: "auto",
+            touchAction: "none",
+          }}
         />
       </div>
 

@@ -603,6 +603,14 @@ export async function createImageWithCategoryObject(imageData: {
       // If category_id is provided, use it directly
       categoryId = imageData.category_id
       console.log("[v0] Using provided category_id:", categoryId)
+
+      const categoryCheck = await supabase.from("categories").select("id").eq("id", categoryId).single()
+      if (categoryCheck.error || !categoryCheck.data) {
+        return {
+          success: false,
+          error: "Invalid category selected. Please choose a valid category.",
+        }
+      }
     } else if (imageData.category_name) {
       // If category_name is provided, look up the ID
       const categoryResult = await supabase.from("categories").select("id").eq("name", imageData.category_name).limit(1)
@@ -670,7 +678,7 @@ export async function createImageWithCategoryObject(imageData: {
           category_id: categoryId,
           license_id: licenseId,
           price: imageData.price,
-          file_path: imageData.image_url,
+          file_path: imageData.image_url, // Store the main image URL in file_path
           is_featured: false,
           active: true,
         },

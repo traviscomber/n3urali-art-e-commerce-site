@@ -358,8 +358,8 @@ export default function SimpleAdminPage() {
       const imageData = {
         title: newImage.title,
         description: newImage.description,
-        category_id: newImage.category,
-        rights_type: newImage.rightsType,
+        category_id: newImage.category, // Using category_id directly since form stores the ID
+        rights_type: newImage.rightsType, // Keep rights_type for future use
         price: Number.parseFloat(newImage.price) || 0,
         image_url: imageUrl,
         thumbnail_url: thumbnailBase64,
@@ -602,14 +602,12 @@ export default function SimpleAdminPage() {
       const imageData = {
         title: newImage.title,
         description: newImage.description,
-        category_id: newImage.category,
-        license_id: newImage.rightsType,
+        category_id: newImage.category, // Using category_id directly
+        rights_type: newImage.rightsType, // Keep rights_type for future use
         price: Number.parseFloat(newImage.price),
         image_url: uploadResult.url,
         thumbnail_url: uploadResult.url,
         original_file_url: newImage.originalFileUrl || null,
-        active: true,
-        featured: false,
       }
 
       const result = await createImageWithCategoryObject(imageData)

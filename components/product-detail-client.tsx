@@ -146,7 +146,11 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Image Section */}
           <div className="space-y-4">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-muted">
+            <div
+              className={`relative overflow-hidden rounded-lg bg-muted ${
+                isFisheyeOrDomeImage() ? "aspect-square" : "aspect-[4/3]"
+              }`}
+            >
               <WatermarkedImage
                 src={
                   image.file_path ||
@@ -159,7 +163,7 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
                 }
                 alt={image.title}
                 fill
-                className={isFisheyeOrDomeImage() ? "object-contain" : "object-cover"}
+                className="object-contain"
               />
               {image.is_featured && (
                 <Badge className="absolute top-4 left-4 bg-primary text-primary-foreground">Featured</Badge>

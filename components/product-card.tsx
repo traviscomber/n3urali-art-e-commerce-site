@@ -101,11 +101,13 @@ export function ProductCard({ product, onView360 }: ProductCardProps) {
             product.thumbnail_small_url ||
             "/placeholder.svg?height=300&width=400&query=360 degree panoramic image" ||
             "/placeholder.svg" ||
+            "/placeholder.svg" ||
+            "/placeholder.svg" ||
             "/placeholder.svg"
           }
           alt={product.title}
           fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          className="object-contain transition-transform duration-300 group-hover:scale-105"
         />
         {product.is_featured && (
           <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground">Featured</Badge>

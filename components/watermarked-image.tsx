@@ -69,8 +69,8 @@ export function WatermarkedImage({
           ctx.drawImage(logo, pos.x, pos.y, watermarkSize, watermarkSize)
         })
 
-        ctx.globalAlpha = 0.25 // Reduced from 0.5
-        const largeCenterSize = watermarkSize * 1.2 // Reduced from 1.5
+        ctx.globalAlpha = 0.4 // Increased center watermark opacity from 0.25 to 0.4 to make it more visible
+        const largeCenterSize = watermarkSize * 1.2
         const largeCenterX = (img.naturalWidth - largeCenterSize) / 2
         const largeCenterY = (img.naturalHeight - largeCenterSize) / 2
         ctx.drawImage(logo, largeCenterX, largeCenterY, largeCenterSize, largeCenterSize)

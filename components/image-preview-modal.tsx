@@ -130,8 +130,8 @@ export function ImagePreviewModal({
               </div>
             </div>
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center p-4">
-              <div className="relative w-full h-full">
+            <div className="flex items-center justify-center p-4 h-full">
+              <div className="relative w-full h-full max-h-full">
                 <WatermarkedImage
                   src={displayImageUrl || "/placeholder.svg"}
                   alt={title}

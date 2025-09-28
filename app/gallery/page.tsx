@@ -23,6 +23,7 @@ interface Image {
   category_id: string
   license_id: string
   created_at: string
+  tags: string[]
   categories?: {
     name: string
     description: string

@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import "./globals.css"
 import { CartProvider } from "@/lib/contexts/cart-context"
 import { AuthProvider } from "@/lib/contexts/auth-context"
+import { TagFilterProvider } from "@/lib/contexts/tag-filter-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Header } from "@/components/header"
 import { CartSidebar } from "@/components/cart-sidebar"
@@ -26,11 +27,13 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <AuthProvider>
             <CartProvider>
-              <ToastProvider>
-                <Header />
-                {children}
-                <CartSidebar />
-              </ToastProvider>
+              <TagFilterProvider>
+                <ToastProvider>
+                  <Header />
+                  {children}
+                  <CartSidebar />
+                </ToastProvider>
+              </TagFilterProvider>
             </CartProvider>
           </AuthProvider>
         </ThemeProvider>

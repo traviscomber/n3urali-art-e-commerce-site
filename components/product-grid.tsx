@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Search, X } from "lucide-react"
+import { useTagFilter } from "@/lib/contexts/tag-filter-context"
 
 interface Image {
   id: string
@@ -23,6 +24,7 @@ interface Image {
   category_id: string
   license_id: string
   created_at: string
+  tags: string[]
   categories?: {
     name: string
     description: string
@@ -47,6 +49,8 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
   const [selectedCategory, setSelectedCategory] = useState<string>(categoryId || "all")
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
   const [viewingPanorama, setViewingPanorama] = useState<Image | null>(null)
+
+  const { selectedTags, clearTags, hasActiveTags } = useTagFilter()
 
   const supabase = createClient()
 
@@ -127,15 +131,21 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
       searchTerm === "" ||
       image.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       image.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      image.categories?.name.toLowerCase().includes(searchTerm.toLowerCase())
+      image.categories?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      image.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()))
 
-    return matchesSearch
+    // Tag filtering: if tags are selected, image must have at least one matching tag
+    const matchesTags =
+      selectedTags.length === 0 || selectedTags.some((selectedTag) => image.tags.includes(selectedTag))
+
+    return matchesSearch && matchesTags
   })
 
   const clearFilters = () => {
     setSearchTerm("")
     setSelectedCategory("all")
     setSortBy("created_at")
+    clearTags()
   }
 
   const handleView360 = (image: Image) => {
@@ -186,9 +196,8 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
           </Select>
         </div>
 
-        {/* Active filters */}
-        {(searchTerm || selectedCategory !== "all" || sortBy !== "created_at") && (
-          <div className="flex items-center gap-2">
+        {(searchTerm || selectedCategory !== "all" || sortBy !== "created_at" || hasActiveTags) && (
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm text-muted-foreground">Active filters:</span>
             {searchTerm && (
               <Badge variant="secondary">
@@ -202,6 +211,12 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
                 <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => setSelectedCategory("all")} />
               </Badge>
             )}
+            {selectedTags.map((tag) => (
+              <Badge key={tag} variant="default" className="bg-primary text-primary-foreground">
+                Tag: {tag}
+                <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => clearTags()} />
+              </Badge>
+            ))}
             <Button variant="ghost" size="sm" onClick={clearFilters}>
               Clear all
             </Button>
@@ -213,6 +228,11 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           {loading ? "Loading..." : `${filteredImages.length} images found`}
+          {hasActiveTags && (
+            <span className="ml-2 text-primary">
+              (filtered by {selectedTags.length} tag{selectedTags.length !== 1 ? "s" : ""})
+            </span>
+          )}
         </p>
       </div>
 
@@ -232,6 +252,11 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
       ) : (
         <div className="text-center py-12">
           <p className="text-muted-foreground">No images found matching your criteria.</p>
+          {hasActiveTags && (
+            <p className="text-sm text-muted-foreground mt-2">
+              Try removing some tag filters or search for different terms.
+            </p>
+          )}
           <Button variant="outline" onClick={clearFilters} className="mt-4 bg-transparent">
             Clear filters
           </Button>

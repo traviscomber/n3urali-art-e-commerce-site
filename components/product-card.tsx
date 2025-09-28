@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -7,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { ShoppingCart, Eye, RotateCcw } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
+import { useTagFilter } from "@/lib/contexts/tag-filter-context"
 import { useState } from "react"
 
 interface Product {
@@ -23,6 +26,7 @@ interface Product {
   category_id: string
   license_id: string
   created_at: string
+  tags: string[]
   categories?: {
     name: string
     description: string
@@ -40,6 +44,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, onView360 }: ProductCardProps) {
   const { addItem } = useCart()
+  const { selectedTags, toggleTag } = useTagFilter()
   const [isLoading, setIsLoading] = useState(false)
 
   if (!product) {
@@ -78,6 +83,12 @@ export function ProductCard({ product, onView360 }: ProductCardProps) {
     }
   }
 
+  const handleTagClick = (tag: string, e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    toggleTag(tag)
+  }
+
   return (
     <Card className="group overflow-hidden bg-card/50 border-border/50 hover:bg-card hover:border-border transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
       <div className="relative aspect-[4/3] overflow-hidden">
@@ -87,6 +98,7 @@ export function ProductCard({ product, onView360 }: ProductCardProps) {
             product.thumbnail_medium_url ||
             product.thumbnail_small_url ||
             "/placeholder.svg?height=300&width=400&query=360 degree panoramic image" ||
+            "/placeholder.svg" ||
             "/placeholder.svg"
           }
           alt={product.title}
@@ -148,6 +160,23 @@ export function ProductCard({ product, onView360 }: ProductCardProps) {
                 {product.categories.name}
               </Badge>
             )}
+          </div>
+
+          <div className="flex flex-wrap gap-1">
+            {product.tags.map((tag) => (
+              <Badge
+                key={tag}
+                variant={selectedTags.includes(tag) ? "default" : "outline"}
+                className={`text-xs cursor-pointer transition-all duration-200 hover:scale-105 ${
+                  selectedTags.includes(tag)
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "hover:bg-primary/10 hover:border-primary/50"
+                }`}
+                onClick={(e) => handleTagClick(tag, e)}
+              >
+                {tag}
+              </Badge>
+            ))}
           </div>
         </div>
       </CardContent>

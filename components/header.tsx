@@ -50,20 +50,6 @@ export function Header() {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
-              href="/categories/equirectangular"
-              className="relative text-sm font-medium text-gray-300 hover:text-primary transition-all duration-300 group"
-            >
-              360° Images
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
-            </Link>
-            <Link
-              href="/categories/fisheye"
-              className="relative text-sm font-medium text-gray-300 hover:text-primary transition-all duration-300 group"
-            >
-              Fisheye
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
-            </Link>
-            <Link
               href="/account/orders"
               className="relative text-sm font-medium text-gray-300 hover:text-primary transition-all duration-300 group"
             >
@@ -112,20 +98,6 @@ export function Header() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Gallery
-              </Link>
-              <Link
-                href="/categories/equirectangular"
-                className="text-base font-medium text-gray-300 hover:text-primary transition-colors px-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                360° Images
-              </Link>
-              <Link
-                href="/categories/fisheye"
-                className="text-base font-medium text-gray-300 hover:text-primary transition-colors px-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Fisheye
               </Link>
               <Link
                 href="/account/orders"

@@ -3,14 +3,12 @@
 import { useCart } from "@/lib/contexts/cart-context"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { Badge } from "@/components/ui/badge"
-import { Trash2, ShoppingCart } from "lucide-react"
+import { Trash2, ShoppingCart, Plus, Minus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { ImageUrlHandler } from "@/lib/image-url-handler"
 
 export function CartSidebar() {
-  const { state, removeItem, closeCart } = useCart()
+  const { state, removeItem, updateQuantity, closeCart } = useCart()
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -19,22 +17,9 @@ export function CartSidebar() {
     }).format(price)
   }
 
-  const getLicenseBadgeColor = (license: string) => {
-    switch (license) {
-      case "standard":
-        return "bg-blue-100 text-blue-800"
-      case "extended":
-        return "bg-purple-100 text-purple-800"
-      case "commercial":
-        return "bg-gold-100 text-gold-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
-  }
-
   return (
     <Sheet open={state.isOpen} onOpenChange={closeCart}>
-      <SheetContent className="w-full sm:max-w-lg">
+      <SheetContent className="w-full sm:max-w-lg flex flex-col">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
@@ -47,7 +32,10 @@ export function CartSidebar() {
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Your cart is empty</p>
+                <p className="text-muted-foreground mb-2">Your cart is empty</p>
+                <Button variant="outline" onClick={closeCart}>
+                  Continue Shopping
+                </Button>
               </div>
             </div>
           ) : (
@@ -55,12 +43,12 @@ export function CartSidebar() {
               <div className="flex-1 overflow-y-auto py-6">
                 <div className="space-y-4">
                   {state.items.map((item) => (
-                    <div key={item.id} className="flex gap-4 p-4 border rounded-lg">
+                    <div key={`${item.id}-${item.license_id}`} className="flex gap-4 p-4 border rounded-lg">
                       <div className="relative w-16 h-16 flex-shrink-0">
                         <Image
                           src={
-                            ImageUrlHandler.convertToDisplayUrl(item.previewUrl || "", { useProxy: true }) ||
-                            "/placeholder.svg"
+                            item.preview_image_url ||
+                            "/placeholder.svg?height=64&width=64&query=360 panoramic thumbnail"
                           }
                           alt={item.title}
                           fill
@@ -70,15 +58,32 @@ export function CartSidebar() {
 
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm truncate">{item.title}</h4>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="secondary" className={`text-xs ${getLicenseBadgeColor(item.licenseType)}`}>
-                            {item.licenseType}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {item.category}
-                          </Badge>
+                        <p className="text-xs text-muted-foreground">{item.license_name}</p>
+                        <p className="text-sm text-muted-foreground mt-1">{formatPrice(item.price)}</p>
+
+                        {/* Quantity Controls - Note: Digital products typically don't need quantity > 1 */}
+                        <div className="flex items-center gap-2 mt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 w-8 p-0 bg-transparent"
+                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            disabled={item.quantity <= 1}
+                          >
+                            <Minus className="h-3 w-3" />
+                          </Button>
+                          <span className="text-sm font-medium w-8 text-center">{item.quantity}</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 w-8 p-0 bg-transparent"
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
                         </div>
-                        <p className="font-semibold text-sm mt-2">{formatPrice(item.price)}</p>
+
+                        <p className="font-semibold text-sm mt-2">{formatPrice(item.price * item.quantity)}</p>
                       </div>
 
                       <Button
@@ -100,11 +105,16 @@ export function CartSidebar() {
                   <span className="font-bold text-lg">{formatPrice(state.total)}</span>
                 </div>
 
-                <Link href="/checkout" onClick={closeCart}>
-                  <Button className="w-full" size="lg">
-                    Proceed to Checkout
+                <div className="space-y-2">
+                  <Link href="/checkout" onClick={closeCart}>
+                    <Button className="w-full" size="lg">
+                      Proceed to Checkout
+                    </Button>
+                  </Link>
+                  <Button variant="outline" className="w-full bg-transparent" onClick={closeCart}>
+                    Continue Shopping
                   </Button>
-                </Link>
+                </div>
               </div>
             </>
           )}

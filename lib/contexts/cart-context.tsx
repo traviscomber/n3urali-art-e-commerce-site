@@ -5,16 +5,12 @@ import { createContext, useContext, useReducer, useEffect } from "react"
 
 export interface CartItem {
   id: string
-  imageId: string
   title: string
   price: number
-  licenseId: string
-  licenseName: string
-  licensePrice: number
-  previewUrl: string
-  category: "equirectangular" | "fisheye"
+  preview_image_url: string
+  license_id: string
+  license_name: string
   quantity: number
-  licenseType: "NON_EXCLUSIVE" | "EXCLUSIVE"
 }
 
 interface CartState {
@@ -24,18 +20,19 @@ interface CartState {
 }
 
 type CartAction =
-  | { type: "ADD_ITEM"; payload: CartItem }
+  | { type: "ADD_ITEM"; payload: Omit<CartItem, "quantity"> }
   | { type: "REMOVE_ITEM"; payload: string }
   | { type: "UPDATE_QUANTITY"; payload: { id: string; quantity: number } }
   | { type: "CLEAR_CART" }
   | { type: "TOGGLE_CART" }
   | { type: "OPEN_CART" }
   | { type: "CLOSE_CART" }
+  | { type: "LOAD_CART"; payload: CartItem[] }
 
 const CartContext = createContext<{
   state: CartState
   dispatch: React.Dispatch<CartAction>
-  addItem: (item: CartItem) => void
+  addItem: (item: Omit<CartItem, "quantity">) => void
   removeItem: (id: string) => void
   updateQuantity: (id: string, quantity: number) => void
   clearCart: () => void
@@ -47,13 +44,14 @@ const CartContext = createContext<{
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "ADD_ITEM":
+      const itemKey = `${action.payload.id}-${action.payload.license_id}`
       const existingItem = state.items.find(
-        (item) => item.imageId === action.payload.imageId && item.licenseId === action.payload.licenseId,
+        (item) => item.id === action.payload.id && item.license_id === action.payload.license_id,
       )
 
       if (existingItem) {
         const updatedItems = state.items.map((item) =>
-          item.imageId === action.payload.imageId && item.licenseId === action.payload.licenseId
+          item.id === action.payload.id && item.license_id === action.payload.license_id
             ? { ...item, quantity: item.quantity + 1 }
             : item,
         )
@@ -118,6 +116,14 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         isOpen: false,
       }
 
+    case "LOAD_CART":
+      const loadedItems = action.payload
+      return {
+        ...state,
+        items: loadedItems,
+        total: loadedItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+      }
+
     default:
       return state
   }
@@ -130,25 +136,27 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     total: 0,
   })
 
+  // Load cart from localStorage on mount
   useEffect(() => {
     const savedCart = localStorage.getItem("n3urali-cart")
     if (savedCart) {
       try {
         const parsedCart = JSON.parse(savedCart)
-        parsedCart.items.forEach((item: CartItem) => {
-          dispatch({ type: "ADD_ITEM", payload: item })
-        })
+        if (parsedCart.items && Array.isArray(parsedCart.items)) {
+          dispatch({ type: "LOAD_CART", payload: parsedCart.items })
+        }
       } catch (error) {
         console.error("Failed to load cart from localStorage:", error)
       }
     }
   }, [])
 
+  // Save cart to localStorage whenever state changes
   useEffect(() => {
-    localStorage.setItem("n3urali-cart", JSON.stringify(state))
-  }, [state])
+    localStorage.setItem("n3urali-cart", JSON.stringify({ items: state.items }))
+  }, [state.items])
 
-  const addItem = (item: CartItem) => {
+  const addItem = (item: Omit<CartItem, "quantity">) => {
     dispatch({ type: "ADD_ITEM", payload: item })
   }
 
@@ -205,5 +213,6 @@ export function useCart() {
     items: context.state.items || [],
     total: context.state.total || 0,
     isOpen: context.state.isOpen || false,
+    itemCount: context.state.items.length || 0,
   }
 }

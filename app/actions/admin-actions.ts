@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { unstable_cache } from "next/cache"
 import { revalidatePath, revalidateTag } from "next/cache"
+import { ImageUrlHandler } from "@/lib/image-url-handler"
 
 const CACHE_TAGS = {
   IMAGES: "images",
@@ -63,18 +64,25 @@ const getCachedImages = unstable_cache(
       const licenseMap = new Map(licenses?.map((l) => [l.id, l]) || [])
 
       const transformedData =
-        images?.map((item) => ({
-          ...item,
-          image_url: item.file_path,
-          thumbnail_url: item.file_path,
-          active: true, // Default to active since we don't have this column
-          featured: item.is_featured,
-          categories: categoryMap.get(item.category_id),
-          licenses: licenseMap.get(item.license_id),
-          category_name: categoryMap.get(item.category_id)?.name,
-          license_name: licenseMap.get(item.license_id)?.name,
-          license_description: licenseMap.get(item.license_id)?.description,
-        })) || []
+        images?.map((item) => {
+          const displayUrl = item.file_path
+            ? ImageUrlHandler.convertToDisplayUrl(item.file_path, { useProxy: true })
+            : item.file_path
+
+          return {
+            ...item,
+            image_url: displayUrl,
+            thumbnail_url: displayUrl,
+            file_path: displayUrl, // Ensure file_path also uses proxy URL
+            active: true, // Default to active since we don't have this column
+            featured: item.is_featured,
+            categories: categoryMap.get(item.category_id),
+            licenses: licenseMap.get(item.license_id),
+            category_name: categoryMap.get(item.category_id)?.name,
+            license_name: licenseMap.get(item.license_id)?.name,
+            license_description: licenseMap.get(item.license_id)?.description,
+          }
+        }) || []
 
       console.log(`[v0] getCachedImages: Retrieved ${transformedData.length} images`)
       return transformedData
@@ -152,18 +160,25 @@ const getCachedImagesPaginated = unstable_cache(
       const licenseMap = new Map(licenses?.map((l) => [l.id, l]) || [])
 
       const transformedData =
-        images?.map((item) => ({
-          ...item,
-          image_url: item.file_path,
-          thumbnail_url: item.file_path,
-          active: true, // Default to active since we don't have this column
-          featured: item.is_featured,
-          categories: categoryMap.get(item.category_id),
-          licenses: licenseMap.get(item.license_id),
-          category_name: categoryMap.get(item.category_id)?.name,
-          license_name: licenseMap.get(item.license_id)?.name,
-          license_description: licenseMap.get(item.license_id)?.description,
-        })) || []
+        images?.map((item) => {
+          const displayUrl = item.file_path
+            ? ImageUrlHandler.convertToDisplayUrl(item.file_path, { useProxy: true })
+            : item.file_path
+
+          return {
+            ...item,
+            image_url: displayUrl,
+            thumbnail_url: displayUrl,
+            file_path: displayUrl, // Ensure file_path also uses proxy URL
+            active: true, // Default to active since we don't have this column
+            featured: item.is_featured,
+            categories: categoryMap.get(item.category_id),
+            licenses: licenseMap.get(item.license_id),
+            category_name: categoryMap.get(item.category_id)?.name,
+            license_name: licenseMap.get(item.license_id)?.name,
+            license_description: licenseMap.get(item.license_id)?.description,
+          }
+        }) || []
 
       const totalCount = count || 0
       const totalPages = Math.ceil(totalCount / limit)

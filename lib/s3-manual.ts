@@ -1,52 +1,41 @@
-export async function generatePresignedUrl(
-  bucket: string,
-  key: string,
-  contentType: string,
-  expiresIn = 600,
-): Promise<string> {
-  const accessKeyId = process.env.BACKBLAZE_KEY_ID
-  const secretAccessKey = process.env.BACKBLAZE_APPLICATION_KEY
-  const region = process.env.B2_REGION || "us-east-005"
-  const endpoint = process.env.B2_ENDPOINT || "https://s3.us-east-005.backblazeb2.com"
+/**
+ * S3-compatible manual presigned URL generation for Backblaze B2
+ */
 
-  console.log("[v0] Presigned URL generation - accessKeyId exists:", !!accessKeyId)
-  console.log("[v0] Presigned URL generation - secretAccessKey exists:", !!secretAccessKey)
-  console.log("[v0] Presigned URL generation - bucket:", bucket)
-  console.log("[v0] Presigned URL generation - key:", key)
-  console.log("[v0] Presigned URL generation - region:", region)
-  console.log("[v0] Presigned URL generation - endpoint:", endpoint)
+import { createHmac } from "crypto"
 
-  if (!accessKeyId || !secretAccessKey) {
-    throw new Error("Missing Backblaze credentials: BACKBLAZE_KEY_ID or BACKBLAZE_APPLICATION_KEY")
+interface BackblazeConfig {
+  endpoint: string
+  bucket: string
+  region: string
+  accessKeyId: string
+  secretAccessKey: string
+}
+
+function getBackblazeConfig(): BackblazeConfig {
+  return {
+    endpoint: process.env.B2_ENDPOINT || "https://s3.us-west-004.backblazeb2.com",
+    bucket: process.env.BACKBLAZE_BUCKET_NAME || "Neuraliart",
+    region: process.env.B2_REGION || "us-west-004",
+    accessKeyId: process.env.BACKBLAZE_API_KEY!,
+    secretAccessKey: process.env.BACKBLAZE_APPLICATION_KEY!,
   }
+}
 
-  if (!bucket) {
-    throw new Error("Missing bucket name")
-  }
-
-  if (!key) {
-    throw new Error("Missing object key")
-  }
-
-  let endpointUrl: URL
-  try {
-    endpointUrl = new URL(endpoint)
-  } catch (error) {
-    throw new Error(`Invalid endpoint URL: ${endpoint}`)
-  }
-
-  const now = new Date()
-  const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, "")
-  const dateStamp = amzDate.slice(0, 8)
-  const expirationTime = Math.floor(now.getTime() / 1000) + expiresIn
-
-  // Create canonical request
-  const method = "PUT"
-  const canonicalUri = `/${bucket}/${key}`
-  const canonicalQueryString = `X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=${encodeURIComponent(accessKeyId)}%2F${dateStamp}%2F${region}%2Fs3%2Faws4_request&X-Amz-Date=${amzDate}&X-Amz-Expires=${expiresIn}&X-Amz-SignedHeaders=host`
-  const canonicalHeaders = `host:${endpointUrl.host}\n`
-  const signedHeaders = "host"
-  const payloadHash = "UNSIGNED-PAYLOAD"
+function createSignature(
+  method: string,
+  canonicalUri: string,
+  canonicalQueryString: string,
+  canonicalHeaders: string,
+  signedHeaders: string,
+  payloadHash: string,
+  timestamp: string,
+  region: string,
+  service: string,
+  secretKey: string,
+): string {
+  const algorithm = "AWS4-HMAC-SHA256"
+  const credentialScope = `${timestamp.slice(0, 8)}/${region}/${service}/aws4_request`
 
   const canonicalRequest = [
     method,
@@ -57,50 +46,67 @@ export async function generatePresignedUrl(
     payloadHash,
   ].join("\n")
 
-  // Create string to sign
-  const algorithm = "AWS4-HMAC-SHA256"
-  const credentialScope = `${dateStamp}/${region}/s3/aws4_request`
-  const stringToSign = [algorithm, amzDate, credentialScope, await sha256(canonicalRequest)].join("\n")
+  const canonicalRequestHash = createHmac("sha256", "").update(canonicalRequest).digest("hex")
 
-  // Calculate signature
-  const signature = await calculateSignature(secretAccessKey, dateStamp, region, "s3", stringToSign)
+  const stringToSign = [algorithm, timestamp, credentialScope, canonicalRequestHash].join("\n")
 
-  // Build presigned URL
-  const presignedUrl = `${endpoint}/${bucket}/${key}?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=${encodeURIComponent(accessKeyId)}%2F${dateStamp}%2F${region}%2Fs3%2Faws4_request&X-Amz-Date=${amzDate}&X-Amz-Expires=${expiresIn}&X-Amz-SignedHeaders=host&X-Amz-Signature=${signature}`
+  const dateKey = createHmac("sha256", `AWS4${secretKey}`).update(timestamp.slice(0, 8)).digest()
 
-  console.log("[v0] Generated presigned URL length:", presignedUrl.length)
-  console.log("[v0] Generated presigned URL starts with:", presignedUrl.substring(0, 100))
+  const dateRegionKey = createHmac("sha256", dateKey).update(region).digest()
 
-  return presignedUrl
+  const dateRegionServiceKey = createHmac("sha256", dateRegionKey).update(service).digest()
+
+  const signingKey = createHmac("sha256", dateRegionServiceKey).update("aws4_request").digest()
+
+  const signature = createHmac("sha256", signingKey).update(stringToSign).digest("hex")
+
+  return signature
 }
 
-async function sha256(message: string): Promise<string> {
-  const msgBuffer = new TextEncoder().encode(message)
-  const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("")
-}
-
-async function hmacSha256(key: Uint8Array, message: string): Promise<Uint8Array> {
-  const cryptoKey = await crypto.subtle.importKey("raw", key, { name: "HMAC", hash: "SHA-256" }, false, ["sign"])
-  const signature = await crypto.subtle.sign("HMAC", cryptoKey, new TextEncoder().encode(message))
-  return new Uint8Array(signature)
-}
-
-async function calculateSignature(
-  secretAccessKey: string,
-  dateStamp: string,
-  region: string,
-  service: string,
-  stringToSign: string,
+export async function generatePresignedUrl(
+  bucketName: string,
+  key: string,
+  contentType: string,
+  expiresInSeconds = 600,
 ): Promise<string> {
-  const kDate = await hmacSha256(new TextEncoder().encode(`AWS4${secretAccessKey}`), dateStamp)
-  const kRegion = await hmacSha256(kDate, region)
-  const kService = await hmacSha256(kRegion, service)
-  const kSigning = await hmacSha256(kService, "aws4_request")
-  const signature = await hmacSha256(kSigning, stringToSign)
+  const config = getBackblazeConfig()
 
-  return Array.from(signature)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("")
+  const timestamp = new Date().toISOString().replace(/[:-]|\.\d{3}/g, "")
+  const date = timestamp.slice(0, 8)
+
+  const canonicalUri = `/${key}`
+  const host = new URL(config.endpoint).host
+
+  const queryParams = new URLSearchParams({
+    "X-Amz-Algorithm": "AWS4-HMAC-SHA256",
+    "X-Amz-Credential": `${config.accessKeyId}/${date}/${config.region}/s3/aws4_request`,
+    "X-Amz-Date": timestamp,
+    "X-Amz-Expires": expiresInSeconds.toString(),
+    "X-Amz-SignedHeaders": "host",
+  })
+
+  const canonicalQueryString = queryParams.toString()
+  const canonicalHeaders = `host:${host}\n`
+  const signedHeaders = "host"
+  const payloadHash = "UNSIGNED-PAYLOAD"
+
+  const signature = createSignature(
+    "PUT",
+    canonicalUri,
+    canonicalQueryString,
+    canonicalHeaders,
+    signedHeaders,
+    payloadHash,
+    timestamp,
+    config.region,
+    "s3",
+    config.secretAccessKey,
+  )
+
+  queryParams.set("X-Amz-Signature", signature)
+
+  const presignedUrl = `${config.endpoint}${canonicalUri}?${queryParams.toString()}`
+
+  console.log("[v0] Generated presigned URL for:", key)
+  return presignedUrl
 }

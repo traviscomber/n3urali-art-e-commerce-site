@@ -17,17 +17,16 @@ import { useAuth } from "@/lib/contexts/auth-context"
 import { useRouter } from "next/navigation"
 
 export function UserMenu() {
-  const { user: contextUser, isAuthenticated, signOut: contextSignOut } = useAuth()
+  const { user, isAuthenticated, signOut, isLoading } = useAuth()
   const router = useRouter()
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
 
   const handleSignOut = async () => {
-    console.log("[v0] Signing out from context")
-    contextSignOut()
+    await signOut()
   }
 
   const handleAdminDashboard = () => {
-    router.push("/simple-admin")
+    router.push("/admin")
   }
 
   const handleProfile = () => {
@@ -46,9 +45,18 @@ export function UserMenu() {
     return email.substring(0, 2).toUpperCase()
   }
 
-  const isAdmin = contextUser?.user_metadata?.is_admin === true
+  // Check if user is admin based on profiles table
+  const isAdmin = user?.user_metadata?.role === "admin"
 
-  if (!isAuthenticated || !contextUser) {
+  if (isLoading) {
+    return (
+      <Button variant="ghost" size="sm" disabled>
+        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+      </Button>
+    )
+  }
+
+  if (!isAuthenticated || !user) {
     return (
       <>
         <Button
@@ -69,7 +77,7 @@ export function UserMenu() {
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-primary text-primary-foreground">
-              {getInitials(contextUser.email || "")}
+              {getInitials(user.email || "")}
             </AvatarFallback>
           </Avatar>
           {isAuthenticated && (
@@ -81,13 +89,10 @@ export function UserMenu() {
         <div className="flex items-center justify-start gap-2 p-2">
           <div className="flex flex-col space-y-1 leading-none">
             <div className="flex items-center gap-2">
-              <p className="font-medium text-sm">{contextUser.user_metadata?.full_name || "User"}</p>
+              <p className="font-medium text-sm">{user.user_metadata?.full_name || "User"}</p>
               {isAuthenticated && <CheckCircle className="w-3 h-3 text-green-500" />}
             </div>
-            <p className="w-[200px] truncate text-xs text-muted-foreground">{contextUser.email}</p>
-            <Badge variant="secondary" className="text-xs bg-secondary text-secondary-foreground">
-              Developer Mode
-            </Badge>
+            <p className="w-[200px] truncate text-xs text-muted-foreground">{user.email}</p>
             {isAdmin && (
               <Badge variant="default" className="text-xs bg-primary text-primary-foreground">
                 Admin Access

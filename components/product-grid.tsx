@@ -1,6 +1,7 @@
 "use client"
 
 import { ProductCard } from "./product-card"
+import { PanoramaViewer } from "./panorama-viewer"
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -30,6 +31,7 @@ interface Image {
     name: string
     description: string
   }
+  original_url?: string
 }
 
 interface ProductGridProps {
@@ -44,6 +46,7 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
   const [sortBy, setSortBy] = useState("created_at")
   const [selectedCategory, setSelectedCategory] = useState<string>(categoryId || "all")
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
+  const [viewingPanorama, setViewingPanorama] = useState<Image | null>(null)
 
   const supabase = createClient()
 
@@ -135,6 +138,14 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
     setSortBy("created_at")
   }
 
+  const handleView360 = (image: Image) => {
+    setViewingPanorama(image)
+  }
+
+  const closePanoramaViewer = () => {
+    setViewingPanorama(null)
+  }
+
   return (
     <div className="space-y-6">
       {/* Filters */}
@@ -215,7 +226,7 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
       ) : filteredImages.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredImages.map((image) => (
-            <ProductCard key={image.id} product={image} />
+            <ProductCard key={image.id} product={image} onView360={handleView360} />
           ))}
         </div>
       ) : (
@@ -224,6 +235,22 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
           <Button variant="outline" onClick={clearFilters} className="mt-4 bg-transparent">
             Clear filters
           </Button>
+        </div>
+      )}
+
+      {/* PanoramaViewer for 360° preview */}
+      {viewingPanorama && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="relative w-full max-w-4xl max-h-[80vh] bg-background rounded-lg shadow-2xl overflow-hidden">
+            <div className="h-[70vh]">
+              <PanoramaViewer
+                imageUrl={viewingPanorama.original_url || viewingPanorama.thumbnail_large_url}
+                title={viewingPanorama.title}
+                onClose={closePanoramaViewer}
+                isPreview={true}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

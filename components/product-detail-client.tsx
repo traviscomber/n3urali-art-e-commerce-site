@@ -11,7 +11,7 @@ import { useCart } from "@/lib/contexts/cart-context"
 import { useAuth } from "@/lib/contexts/auth-context"
 import { AuthModal } from "@/components/auth-modal"
 import Link from "next/link"
-import { PanoramaViewer } from "@/components/panorama-viewer"
+import { ImagePreviewModal } from "@/components/image-preview-modal"
 import { LicenseSelector } from "@/components/license-selector"
 
 interface ProductDetailClientProps {
@@ -51,6 +51,33 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { addItem } = useCart()
   const { isAuthenticated } = useAuth()
+
+  const isEquirectangularImage = () => {
+    const categoryName = image.categories?.name?.toLowerCase() || ""
+    const title = image.title?.toLowerCase() || ""
+
+    // Only show 360° preview for true equirectangular images
+    return (
+      categoryName.includes("equirectangular") ||
+      (categoryName.includes("360") &&
+        !categoryName.includes("fisheye") &&
+        !title.includes("180") &&
+        !title.includes("dome"))
+    )
+  }
+
+  const isFisheyeOrDomeImage = () => {
+    const categoryName = image.categories?.name?.toLowerCase() || ""
+    const title = image.title?.toLowerCase() || ""
+
+    return (
+      categoryName.includes("fisheye") ||
+      categoryName.includes("dome") ||
+      title.includes("fisheye") ||
+      title.includes("dome") ||
+      title.includes("180")
+    )
+  }
 
   const handleLicenseSelect = (license: any, calculatedTotalPrice: number) => {
     setSelectedLicense(license)
@@ -97,6 +124,13 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
     }
   }
 
+  const handlePreviewToggle = () => {
+    console.log("[v0] ProductDetailClient: Opening preview modal")
+    console.log("[v0] ProductDetailClient: showPreview state before:", showPreview)
+    setShowPreview(true)
+    console.log("[v0] ProductDetailClient: showPreview state after:", true)
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
@@ -114,23 +148,36 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
             <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-muted">
               <Image
                 src={
-                  image.thumbnail_large_url || "/placeholder.svg?height=600&width=800&query=360 degree panoramic image"
+                  image.thumbnail_large_url ||
+                  "/placeholder.svg?height=600&width=800&query=360 degree panoramic image" ||
+                  "/placeholder.svg" ||
+                  "/placeholder.svg" ||
+                  "/placeholder.svg" ||
+                  "/placeholder.svg" ||
+                  "/placeholder.svg"
                 }
                 alt={image.title}
                 fill
-                className="object-cover"
+                className={isFisheyeOrDomeImage() ? "object-contain" : "object-cover"}
                 priority
               />
               {image.is_featured && (
                 <Badge className="absolute top-4 left-4 bg-primary text-primary-foreground">Featured</Badge>
               )}
+              {image.categories?.name && (
+                <Badge className="absolute top-4 right-4" variant="secondary">
+                  {image.categories.name}
+                </Badge>
+              )}
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowPreview(true)} className="flex-1">
-                <Eye className="h-4 w-4 mr-2" />
-                360° Preview
-              </Button>
+              {isEquirectangularImage() && (
+                <Button variant="outline" onClick={handlePreviewToggle} className="flex-1 bg-transparent">
+                  <Eye className="h-4 w-4 mr-2" />
+                  360° Preview
+                </Button>
+              )}
               <Button variant="outline" onClick={handleShare}>
                 <Share2 className="h-4 w-4" />
               </Button>
@@ -173,7 +220,7 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Type:</span>
-                  <span>360° Equirectangular</span>
+                  <span>{image.categories?.name || "Digital Image"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Resolution:</span>
@@ -217,14 +264,14 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
         </div>
       </div>
 
-      {/* 360° Preview Modal */}
-      {showPreview && (
-        <PanoramaViewer
-          imageUrl={image.original_url || image.thumbnail_large_url}
-          title={image.title}
-          onClose={() => setShowPreview(false)}
-        />
-      )}
+      {/* Image Preview Modal */}
+      <ImagePreviewModal
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        imageUrl={image.original_url || image.thumbnail_large_url}
+        title={image.title}
+        isEquirectangular={isEquirectangularImage()}
+      />
 
       {/* Auth Modal */}
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} defaultTab="login" />

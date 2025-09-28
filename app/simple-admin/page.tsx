@@ -103,6 +103,12 @@ export default function SimpleAdminPage() {
   }, [])
 
   const getCategoryDisplayName = (category: Category) => {
+    if (category.name === "equirectangular") {
+      return "Equirectangular or 360°"
+    }
+    if (category.name === "fisheye") {
+      return "Fisheye or 180°"
+    }
     return category.display_name || category.name
   }
 

@@ -1,34 +1,42 @@
 "use client"
 
 import React, { useState, useRef, useEffect, useCallback } from "react"
-import { X, RotateCcw, ZoomIn, ZoomOut, Maximize, Minimize } from "lucide-react"
+import { X, RotateCcw, ZoomIn, ZoomOut, Maximize } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface PanoramaViewerProps {
   imageUrl: string
   title: string
-  onClose: () => void
-  isPreview?: boolean // Added preview mode option
+  onClose?: () => void
+  isInline?: boolean
+  isPreview?: boolean
+  className?: string
 }
 
 export const PanoramaViewer = React.memo(function PanoramaViewer({
   imageUrl,
   title,
   onClose,
-  isPreview = false, // Default to preview mode
+  isInline = false,
+  isPreview = false,
+  className = "",
 }: PanoramaViewerProps) {
-  const [yaw, setYaw] = useState(0)
-  const [pitch, setPitch] = useState(0)
-  const [fov, setFov] = useState(90)
+  const [yaw, setYaw] = useState(0) // Horizontal rotation
+  const [pitch, setPitch] = useState(0) // Vertical rotation
+  const [fov, setFov] = useState(75) // Field of view (zoom)
   const [isDragging, setIsDragging] = useState(false)
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 })
   const [imageLoaded, setImageLoaded] = useState(false)
-  const [isFullscreen, setIsFullscreen] = useState(!isPreview) // Start in preview mode if specified
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const imageRef = useRef<HTMLImageElement>(null)
   const animationRef = useRef<number>()
   const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    console.log("[v0] PanoramaViewer initialized with isInline:", isInline, "isPreview:", isPreview)
+  }, [isInline, isPreview])
 
   const renderPanorama = useCallback(() => {
     const canvas = canvasRef.current
@@ -57,7 +65,7 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({
 
     if (!sourceImageData) return
 
-    // Render each pixel
+    // Render each pixel with optimized sampling
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         // Convert screen coordinates to normalized coordinates (-1 to 1)
@@ -99,9 +107,9 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({
         const u = (theta / (2 * Math.PI) + 0.5) % 1
         const v = 0.5 - phi / Math.PI
 
-        // Sample from source image
+        // Sample from source image with bounds checking
         const sourceX = Math.floor(u * image.width) % image.width
-        const sourceY = Math.floor(v * image.height)
+        const sourceY = Math.max(0, Math.min(image.height - 1, Math.floor(v * image.height)))
 
         if (sourceX >= 0 && sourceX < image.width && sourceY >= 0 && sourceY < image.height) {
           const sourceIndex = (sourceY * image.width + sourceX) * 4
@@ -142,10 +150,16 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({
       if (!canvas || !container) return
 
       const rect = container.getBoundingClientRect()
-      canvas.width = rect.width
-      canvas.height = rect.height
+      const dpr = window.devicePixelRatio || 1
+      canvas.width = rect.width * dpr
+      canvas.height = rect.height * dpr
       canvas.style.width = `${rect.width}px`
       canvas.style.height = `${rect.height}px`
+
+      const ctx = canvas.getContext("2d")
+      if (ctx) {
+        ctx.scale(dpr, dpr)
+      }
     }
 
     updateCanvasSize()
@@ -181,42 +195,31 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault()
-    const delta = e.deltaY > 0 ? 3 : -3 // Reduced from 5 to 3 for finer control
-    setFov((prev) => Math.max(60, Math.min(110, prev + delta))) // Limited range: 60-110°
+    const delta = e.deltaY > 0 ? 5 : -5
+    setFov((prev) => Math.max(30, Math.min(120, prev + delta)))
   }, [])
 
   const resetView = useCallback(() => {
     setYaw(0)
     setPitch(0)
-    setFov(90) // Changed from 75 to 90 for better default view
+    setFov(75)
   }, [])
 
   const toggleFullscreen = useCallback(() => {
-    if (isPreview) {
-      setIsFullscreen(!isFullscreen)
+    if (isInline || isPreview) {
+      console.log("[v0] Fullscreen disabled in inline/preview mode")
+      return
+    }
+
+    console.log("[v0] Toggling fullscreen, current state:", !!document.fullscreenElement)
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen()
+      setIsFullscreen(true)
     } else {
-      if (!document.fullscreenElement) {
-        containerRef.current?.requestFullscreen()
-      } else {
-        document.exitFullscreen()
-      }
+      document.exitFullscreen()
+      setIsFullscreen(false)
     }
-  }, [isPreview, isFullscreen])
-
-  useEffect(() => {
-    if (!imageUrl) return
-
-    const img = new Image()
-    img.crossOrigin = "anonymous"
-    img.onload = () => {
-      setImageLoaded(true)
-    }
-    img.onerror = () => {
-      console.error("Failed to load panorama image")
-    }
-    img.src = imageUrl
-    imageRef.current = img
-  }, [imageUrl])
+  }, [isInline, isPreview])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -224,158 +227,136 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({
         if (document.fullscreenElement) {
           document.exitFullscreen()
           setIsFullscreen(false)
-        } else {
-          onClose()
+        } else if (!isInline && !isPreview) {
+          onClose?.()
         }
       }
     }
 
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement)
+      const isCurrentlyFullscreen = !!document.fullscreenElement
+      console.log("[v0] Fullscreen state changed:", isCurrentlyFullscreen)
+      setIsFullscreen(isCurrentlyFullscreen)
     }
 
-    document.addEventListener("keydown", handleKeyDown)
-    document.addEventListener("fullscreenchange", handleFullscreenChange)
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown)
-      document.removeEventListener("fullscreenchange", handleFullscreenChange)
+    if (!isInline && !isPreview) {
+      document.addEventListener("keydown", handleKeyDown)
+      document.addEventListener("fullscreenchange", handleFullscreenChange)
     }
-  }, [onClose])
+
+    return () => {
+      if (!isInline && !isPreview) {
+        document.removeEventListener("keydown", handleKeyDown)
+        document.removeEventListener("fullscreenchange", handleFullscreenChange)
+      }
+    }
+  }, [onClose, isInline, isPreview])
+
+  useEffect(() => {
+    if (!imageUrl) return
+
+    const img = new Image()
+    img.crossOrigin = "anonymous"
+    img.onload = () => {
+      console.log("[v0] Panorama image loaded successfully")
+      setImageLoaded(true)
+    }
+    img.onerror = () => {
+      console.error("[v0] Failed to load panorama image")
+    }
+    img.src = imageUrl
+    imageRef.current = img
+  }, [imageUrl])
 
   if (!imageUrl || !title) {
     return null
   }
 
-  if (isPreview && !isFullscreen) {
-    // Preview mode - embedded in page
-    return (
-      <div ref={containerRef} className="relative w-full h-96 bg-black rounded-lg overflow-hidden">
-        <div className="absolute top-2 left-2 right-2 z-10 flex items-center justify-between">
-          <div className="text-white">
-            <h3 className="text-lg font-semibold">{title}</h3>
-            <p className="text-xs text-white/70">360° Preview • Drag to explore</p>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setFov((prev) => Math.max(60, prev + 5))}
-              className="bg-white/10 hover:bg-white/20 text-white border-white/20 h-8 w-8 p-0"
-            >
-              <ZoomOut className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setFov((prev) => Math.min(110, prev - 5))}
-              className="bg-white/10 hover:bg-white/20 text-white border-white/20 h-8 w-8 p-0"
-            >
-              <ZoomIn className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={toggleFullscreen}
-              className="bg-white/10 hover:bg-white/20 text-white border-white/20 h-8 w-8 p-0"
-            >
-              <Maximize className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={resetView}
-              className="bg-white/10 hover:bg-white/20 text-white border-white/20 h-8 w-8 p-0"
-            >
-              <RotateCcw className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={onClose}
-              className="bg-white/10 hover:bg-white/20 text-white border-white/20 h-8 w-8 p-0"
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          </div>
-        </div>
+  const containerClasses = isInline
+    ? `relative w-full h-full ${className}`
+    : isPreview
+      ? "relative w-full h-full"
+      : "fixed inset-0 z-50 bg-black"
 
-        <div className="w-full h-full">
-          <canvas
-            ref={canvasRef}
-            className="w-full h-full cursor-grab active:cursor-grabbing"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            onWheel={handleWheel}
-          />
-        </div>
+  const controlsClasses =
+    isInline || isPreview
+      ? "absolute top-2 right-2 z-10 flex items-center gap-1"
+      : "absolute top-4 left-4 right-4 z-10 flex items-center justify-between"
 
-        {!imageLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center text-white">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
-              <p className="text-sm">Loading 360° view...</p>
-            </div>
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  // Fullscreen mode - overlay
   return (
-    <div ref={containerRef} className="fixed inset-0 z-50 bg-black">
-      <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
-        <div className="text-white">
-          <h2 className="text-xl font-semibold">{title}</h2>
-          <p className="text-sm text-white/70">
-            Drag to look around • Limited zoom to preserve quality • True 360° spherical view
-          </p>
+    <div ref={containerRef} className={containerClasses}>
+      {!isInline && !isPreview && (
+        <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
+          <div className="text-white">
+            <h2 className="text-xl font-semibold">{title}</h2>
+            <p className="text-sm text-white/70">Drag to look around • Scroll to zoom • True 360° spherical view</p>
+          </div>
         </div>
+      )}
+
+      <div className={controlsClasses}>
+        {!isInline && !isPreview && <div></div>}
         <div className="flex items-center gap-2">
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => setFov((prev) => Math.max(60, prev + 5))}
-            className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+            onClick={() => setFov((prev) => Math.max(30, prev + 10))}
+            className={
+              isInline || isPreview
+                ? "bg-black/50 hover:bg-black/70 text-white border-white/20 h-8 w-8 p-0"
+                : "bg-white/10 hover:bg-white/20 text-white border-white/20"
+            }
           >
             <ZoomOut className="h-4 w-4" />
           </Button>
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => setFov((prev) => Math.min(110, prev - 5))}
-            className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+            onClick={() => setFov((prev) => Math.min(120, prev - 10))}
+            className={
+              isInline || isPreview
+                ? "bg-black/50 hover:bg-black/70 text-white border-white/20 h-8 w-8 p-0"
+                : "bg-white/10 hover:bg-white/20 text-white border-white/20"
+            }
           >
             <ZoomIn className="h-4 w-4" />
           </Button>
-          {isPreview && (
+          {!isInline && !isPreview && (
             <Button
               variant="secondary"
               size="sm"
               onClick={toggleFullscreen}
               className="bg-white/10 hover:bg-white/20 text-white border-white/20"
             >
-              <Minimize className="h-4 w-4" />
+              <Maximize className="h-4 w-4" />
             </Button>
           )}
           <Button
             variant="secondary"
             size="sm"
             onClick={resetView}
-            className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+            className={
+              isInline || isPreview
+                ? "bg-black/50 hover:bg-black/70 text-white border-white/20 h-8 w-8 p-0"
+                : "bg-white/10 hover:bg-white/20 text-white border-white/20"
+            }
           >
             <RotateCcw className="h-4 w-4" />
           </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={onClose}
-            className="bg-white/10 hover:bg-white/20 text-white border-white/20"
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          {onClose && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={onClose}
+              className={
+                isInline || isPreview
+                  ? "bg-black/50 hover:bg-black/70 text-white border-white/20 h-8 w-8 p-0"
+                  : "bg-white/10 hover:bg-white/20 text-white border-white/20"
+              }
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -392,7 +373,9 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({
       </div>
 
       {!imageLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center text-white">
+        <div
+          className={`absolute inset-0 flex items-center justify-center ${isInline || isPreview ? "text-white" : "text-white"}`}
+        >
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
             <p>Loading spherical panorama...</p>
@@ -400,11 +383,13 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({
         </div>
       )}
 
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center text-white/70 text-sm">
-        <div className="bg-black/50 rounded-lg px-4 py-2 backdrop-blur-sm">
-          <p>Drag to rotate • Limited zoom for quality • F11 for fullscreen • ESC to close</p>
+      {!isInline && !isPreview && (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center text-white/70 text-sm">
+          <div className="bg-black/50 rounded-lg px-4 py-2 backdrop-blur-sm">
+            <p>Drag to rotate • Scroll to zoom • F11 for fullscreen • ESC to close</p>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 })

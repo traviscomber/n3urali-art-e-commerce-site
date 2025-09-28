@@ -3,12 +3,11 @@ import { createClient } from "@/lib/supabase/server"
 
 interface CartItem {
   id: string
-  imageId: string
   title: string
   price: number
-  licenseType: "standard" | "extended" | "commercial"
-  previewUrl: string
-  category: "equirectangular" | "fisheye"
+  preview_image_url: string
+  license_id: string
+  license_name: string
   quantity: number
 }
 
@@ -101,33 +100,74 @@ export async function POST(request: NextRequest) {
     const orderId = orderResult.id
     console.log("[v0] Order created with ID:", orderId)
 
+    console.log("[v0] Looking up active licenses...")
     const { data: licenseResult, error: licenseError } = await supabase
       .from("licenses")
-      .select("id")
+      .select("id, name, active")
       .eq("active", true)
-      .order("id")
+      .order("created_at")
       .limit(1)
       .single()
 
+    console.log("[v0] License lookup result:", { licenseResult, licenseError })
+
+    let licenseId: string
     if (licenseError || !licenseResult) {
-      console.error("[v0] No default license found:", licenseError)
-      return NextResponse.json({ success: false, error: "License configuration error" }, { status: 500 })
-    }
+      console.error("[v0] No active license found, checking all licenses...")
 
-    const licenseId = licenseResult.id
+      // Fallback: get any license if no active ones exist
+      const { data: fallbackLicense, error: fallbackError } = await supabase
+        .from("licenses")
+        .select("id, name, active")
+        .order("created_at")
+        .limit(1)
+        .single()
 
-    const orderItems = items.map((item) => ({
-      order_id: orderId,
-      image_id: item.imageId,
-      license_id: licenseId,
-      price: item.price * item.quantity,
-    }))
+      console.log("[v0] Fallback license result:", { fallbackLicense, fallbackError })
 
-    const { error: itemsError } = await supabase.from("order_items").insert(orderItems)
+      if (fallbackError || !fallbackLicense) {
+        console.error("[v0] No licenses found at all:", fallbackError)
+        return NextResponse.json({ success: false, error: "No licenses configured in system" }, { status: 500 })
+      }
 
-    if (itemsError) {
-      console.error("[v0] Order items creation error:", itemsError)
-      return NextResponse.json({ success: false, error: "Failed to create order items" }, { status: 500 })
+      // Use fallback license but log the issue
+      console.warn("[v0] Using inactive license as fallback:", fallbackLicense.name)
+      licenseId = fallbackLicense.id
+
+      const orderItems = items.map((item) => ({
+        order_id: orderId,
+        image_id: item.id,
+        license_id: licenseId,
+        price: item.price * item.quantity,
+      }))
+
+      console.log("[v0] Creating order items with fallback license:", orderItems)
+
+      const { error: itemsError } = await supabase.from("order_items").insert(orderItems)
+
+      if (itemsError) {
+        console.error("[v0] Order items creation error:", itemsError)
+        return NextResponse.json({ success: false, error: "Failed to create order items" }, { status: 500 })
+      }
+    } else {
+      licenseId = licenseResult.id
+      console.log("[v0] Using active license:", licenseResult.name, "ID:", licenseId)
+
+      const orderItems = items.map((item) => ({
+        order_id: orderId,
+        image_id: item.id,
+        license_id: licenseId,
+        price: item.price * item.quantity,
+      }))
+
+      console.log("[v0] Creating order items:", orderItems)
+
+      const { error: itemsError } = await supabase.from("order_items").insert(orderItems)
+
+      if (itemsError) {
+        console.error("[v0] Order items creation error:", itemsError)
+        return NextResponse.json({ success: false, error: "Failed to create order items" }, { status: 500 })
+      }
     }
 
     console.log("[v0] Order created successfully:", orderNumber)

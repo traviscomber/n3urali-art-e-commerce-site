@@ -8,9 +8,9 @@ export async function GET() {
 
     const { data: licenses, error } = await supabase
       .from("licenses")
-      .select("id, name, description, active")
+      .select("id, name, description, price, active")
       .eq("active", true)
-      .order("id")
+      .order("price")
 
     if (error) {
       console.error("[v0] Error fetching licenses:", error)

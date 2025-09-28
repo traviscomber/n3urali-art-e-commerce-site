@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Check, Info } from "lucide-react"
+import { Check, Info, Crown, Users } from "lucide-react"
 import { toast } from "sonner"
 
 interface License {
@@ -32,8 +32,7 @@ export function LicenseSelector({ basePrice, selectedLicenseId, onLicenseSelect,
 
   useEffect(() => {
     if (licenses.length > 0 && !selectedLicense) {
-      // Auto-select first license if none selected
-      const defaultLicense = licenses.find((l) => l.name.toLowerCase().includes("standard")) || licenses[0]
+      const defaultLicense = licenses.find((l) => l.name.toLowerCase().includes("non-exclusive")) || licenses[0]
       if (defaultLicense) {
         handleLicenseSelect(defaultLicense)
       }
@@ -51,27 +50,20 @@ export function LicenseSelector({ basePrice, selectedLicenseId, onLicenseSelect,
     } catch (error) {
       console.error("[v0] Error fetching licenses:", error)
       toast.error("Failed to load license options")
-      // Fallback to default licenses
       setLicenses([
         {
-          id: "standard",
-          name: "Standard License",
-          description: "Personal and commercial use, up to 500,000 print copies",
+          id: "non-exclusive",
+          name: "Non-Exclusive",
+          description: "Standard commercial and personal use license. Image remains available for others to purchase.",
           price: 1.0,
           active: true,
         },
         {
-          id: "extended",
-          name: "Extended License",
-          description: "Unlimited print copies, digital products, and resale rights",
-          price: 2.5,
-          active: true,
-        },
-        {
-          id: "commercial",
-          name: "Commercial License",
-          description: "Full commercial rights including merchandise and advertising",
-          price: 5.0,
+          id: "exclusive",
+          name: "Exclusive",
+          description:
+            "Exclusive rights license. Image will be removed from marketplace after purchase. Full commercial rights included.",
+          price: 3.0,
           active: true,
         },
       ])
@@ -86,19 +78,23 @@ export function LicenseSelector({ basePrice, selectedLicenseId, onLicenseSelect,
     onLicenseSelect(license, totalPrice)
   }
 
+  const getLicenseIcon = (licenseName: string) => {
+    const name = licenseName.toLowerCase()
+    if (name.includes("exclusive")) return <Crown className="h-4 w-4" />
+    return <Users className="h-4 w-4" />
+  }
+
   const getLicenseBadgeColor = (licenseName: string) => {
     const name = licenseName.toLowerCase()
-    if (name.includes("standard")) return "bg-secondary text-secondary-foreground"
-    if (name.includes("extended")) return "bg-primary text-primary-foreground"
-    if (name.includes("commercial")) return "bg-accent text-accent-foreground"
-    return "bg-muted text-muted-foreground"
+    if (name.includes("exclusive")) return "bg-amber-100 text-amber-800 border-amber-200"
+    return "bg-blue-100 text-blue-800 border-blue-200"
   }
 
   if (loading) {
     return (
       <div className={`space-y-3 ${className}`}>
         <div className="h-4 bg-muted rounded w-1/3 animate-pulse"></div>
-        {[...Array(3)].map((_, i) => (
+        {[...Array(2)].map((_, i) => (
           <Card key={i} className="animate-pulse">
             <CardContent className="p-4">
               <div className="h-4 bg-muted rounded w-1/2 mb-2"></div>
@@ -132,13 +128,14 @@ export function LicenseSelector({ basePrice, selectedLicenseId, onLicenseSelect,
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
+                      {getLicenseIcon(license.name)}
                       <h4 className="font-medium">{license.name}</h4>
-                      <Badge className={getLicenseBadgeColor(license.name)} variant="secondary">
-                        {license.price}x
+                      <Badge className={getLicenseBadgeColor(license.name)} variant="outline">
+                        {license.price === 1 ? "1x" : `${license.price}x`}
                       </Badge>
                       {selectedLicense?.id === license.id && <Check className="h-4 w-4 text-primary" />}
                     </div>
-                    <p className="text-sm text-muted-foreground mb-2">{license.description}</p>
+                    <p className="text-sm text-muted-foreground mb-3">{license.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-lg font-semibold text-primary">
                         ${(basePrice * license.price).toFixed(2)}

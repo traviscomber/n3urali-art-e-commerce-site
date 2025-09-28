@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { ShoppingCart, Eye } from "lucide-react"
+import { ShoppingCart, Eye, RotateCcw } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
 import { useState } from "react"
 
@@ -17,6 +17,7 @@ interface Product {
   thumbnail_large_url: string
   thumbnail_medium_url: string
   thumbnail_small_url: string
+  original_url?: string
   is_featured: boolean
   active: boolean
   category_id: string
@@ -34,15 +35,25 @@ interface Product {
 
 interface ProductCardProps {
   product: Product
+  onView360?: (product: Product) => void
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, onView360 }: ProductCardProps) {
   const { addItem } = useCart()
   const [isLoading, setIsLoading] = useState(false)
 
   if (!product) {
     return null
   }
+
+  const isEquirectangular =
+    product.categories?.name?.toLowerCase().includes("equirectangular") ||
+    (product.categories?.name?.toLowerCase().includes("360") &&
+      !product.categories?.name?.toLowerCase().includes("fisheye")) ||
+    (product.title?.toLowerCase().includes("360") &&
+      !product.title?.toLowerCase().includes("fisheye") &&
+      !product.title?.toLowerCase().includes("180") &&
+      !product.title?.toLowerCase().includes("dome"))
 
   const handleAddToCart = async () => {
     setIsLoading(true)
@@ -61,6 +72,12 @@ export function ProductCard({ product }: ProductCardProps) {
     }
   }
 
+  const handle360Preview = () => {
+    if (onView360) {
+      onView360(product)
+    }
+  }
+
   return (
     <Card className="group overflow-hidden bg-card/50 border-border/50 hover:bg-card hover:border-border transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
       <div className="relative aspect-[4/3] overflow-hidden">
@@ -69,7 +86,8 @@ export function ProductCard({ product }: ProductCardProps) {
             product.thumbnail_large_url ||
             product.thumbnail_medium_url ||
             product.thumbnail_small_url ||
-            "/placeholder.svg?height=300&width=400&query=360 degree panoramic image"
+            "/placeholder.svg?height=300&width=400&query=360 degree panoramic image" ||
+            "/placeholder.svg"
           }
           alt={product.title}
           fill
@@ -82,6 +100,10 @@ export function ProductCard({ product }: ProductCardProps) {
           {product.categories?.name || "Uncategorized"}
         </Badge>
 
+        {isEquirectangular && (
+          <Badge className="absolute bottom-3 left-3 bg-primary/90 text-primary-foreground">360°</Badge>
+        )}
+
         {/* Overlay with quick actions */}
         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
           <Button size="sm" variant="secondary" asChild>
@@ -90,6 +112,12 @@ export function ProductCard({ product }: ProductCardProps) {
               View
             </Link>
           </Button>
+          {isEquirectangular && onView360 && (
+            <Button size="sm" variant="secondary" onClick={handle360Preview}>
+              <RotateCcw className="h-4 w-4 mr-1" />
+              360°
+            </Button>
+          )}
           <Button size="sm" onClick={handleAddToCart} disabled={isLoading} className="bg-primary hover:bg-primary/90">
             <ShoppingCart className="h-4 w-4 mr-1" />
             {isLoading ? "Adding..." : "Add"}

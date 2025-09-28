@@ -157,8 +157,13 @@ export default function GalleryPage() {
       if (!append) setLoading(true)
 
       try {
+        console.log("[v0] Fetching images - page:", page, "pageSize:", pageSize)
         const result = await getImagesPaginated(page, pageSize)
+        console.log("[v0] getImagesPaginated result:", result)
+
         const fetchedData = result.success ? result.data : { images: [], pagination: { totalPages: 1 } }
+        console.log("[v0] Fetched data:", fetchedData)
+        console.log("[v0] Images count:", fetchedData.images?.length || 0)
 
         if (append) {
           setImages((prev) => [...prev, ...fetchedData.images])
@@ -181,30 +186,32 @@ export default function GalleryPage() {
     fetchImages(1, false)
   }, [fetchImages])
 
-  const transformedImages = useMemo(
-    () =>
-      images.map((image: any) => {
-        const preview_url =
-          image.thumbnail_url || image.image_url || "/placeholder.svg?height=400&width=400&text=No+Image"
+  const transformedImages = useMemo(() => {
+    console.log("[v0] Transforming images, raw count:", images.length)
+    const transformed = images.map((image: any) => {
+      console.log("[v0] Processing image:", image.title, "file_path:", image.file_path)
+      const preview_url =
+        image.thumbnail_url || image.image_url || "/placeholder.svg?height=400&width=400&text=No+Image"
 
-        const proxyPreviewUrl = preview_url.includes("backblazeb2.com")
-          ? `/api/image-proxy/${preview_url.split("/file/")[1]?.split("/").slice(1).join("/")}`
-          : preview_url
+      const proxyPreviewUrl = preview_url.includes("backblazeb2.com")
+        ? `/api/image-proxy/${preview_url.split("/file/")[1]?.split("/").slice(1).join("/")}`
+        : preview_url
 
-        return {
-          id: image.id,
-          title: image.title,
-          category:
-            image.category_name?.toLowerCase() === "fisheye" ? ("fisheye" as const) : ("equirectangular" as const),
-          price: Number.parseFloat(image.price) || 0,
-          preview_url: proxyPreviewUrl,
-          dimensions: "4096x4096",
-          file_size: 20000000,
-          description: image.description || "",
-        }
-      }),
-    [images],
-  )
+      return {
+        id: image.id,
+        title: image.title,
+        category:
+          image.category_name?.toLowerCase() === "fisheye" ? ("fisheye" as const) : ("equirectangular" as const),
+        price: Number.parseFloat(image.price) || 0,
+        preview_url: proxyPreviewUrl,
+        dimensions: "4096x4096",
+        file_size: 20000000,
+        description: image.description || "",
+      }
+    })
+    console.log("[v0] Transformed images count:", transformed.length)
+    return transformed
+  }, [images])
 
   const { equirectangularImages, fisheyeImages } = useMemo(() => {
     const equirectangular = transformedImages.filter((img) => img.category === "equirectangular")

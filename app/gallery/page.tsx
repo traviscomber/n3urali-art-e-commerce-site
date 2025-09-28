@@ -51,20 +51,18 @@ const ImageCard = React.memo(
     }, [image.preview_url])
 
     const handleImageLoad = useCallback(() => {
+      console.log("[v0] Image loaded successfully:", image.preview_url)
       setIsLoading(false)
-    }, [])
+    }, [image.preview_url])
 
     const getImageSrc = useCallback(() => {
       if (imageError) {
         return "/placeholder.svg?height=400&width=400&text=Image+Unavailable"
       }
 
-      if (!inView) {
-        return "/placeholder.svg?height=400&width=400&text=Loading"
-      }
-
+      // Always return the actual image URL, don't wait for inView
       return image.preview_url || "/placeholder.svg?height=400&width=400&text=No+Image"
-    }, [image.preview_url, imageError, inView])
+    }, [image.preview_url, imageError])
 
     return (
       <div
@@ -87,7 +85,7 @@ const ImageCard = React.memo(
                 : "aspect-video h-[140px]"
           } overflow-hidden`}
         >
-          {(isLoading || !inView) && (
+          {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-muted/20">
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
@@ -505,7 +503,11 @@ export default function GalleryPage() {
                           loading="lazy"
                           onError={(e) => {
                             console.log("[v0] Grid image failed to load:", image.preview_url)
-                            e.currentTarget.src = "/placeholder.svg?height=200&width=200&text=Error"
+                            const target = e.currentTarget as HTMLImageElement
+                            target.src = "/placeholder.svg?height=200&width=200&text=Error"
+                          }}
+                          onLoad={() => {
+                            console.log("[v0] Grid image loaded successfully:", image.preview_url)
                           }}
                           placeholder="blur"
                           blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="

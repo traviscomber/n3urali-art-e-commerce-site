@@ -14,6 +14,7 @@ interface ImagePreviewModalProps {
   imageUrl: string
   title: string
   isEquirectangular?: boolean
+  imageType?: string
 }
 
 export function ImagePreviewModal({
@@ -22,6 +23,7 @@ export function ImagePreviewModal({
   imageUrl,
   title,
   isEquirectangular = false,
+  imageType = "",
 }: ImagePreviewModalProps) {
   const [viewMode, setViewMode] = useState<"image" | "zoom" | "panorama">("image")
 
@@ -120,6 +122,7 @@ export function ImagePreviewModal({
                   width={2000}
                   height={1500}
                   className="max-w-none cursor-zoom-in"
+                  imageType={imageType}
                   style={{
                     width: "auto",
                     height: "auto",
@@ -137,6 +140,7 @@ export function ImagePreviewModal({
                   alt={title}
                   fill
                   className="object-contain"
+                  imageType={imageType}
                 />
               </div>
             </div>

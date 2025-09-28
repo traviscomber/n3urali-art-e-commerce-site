@@ -276,6 +276,7 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
         imageUrl={image.file_path || image.original_url || image.thumbnail_large_url}
         title={image.title}
         isEquirectangular={isEquirectangularImage()}
+        imageType={image.categories?.name?.toLowerCase() || ""}
       />
 
       {/* Auth Modal */}

@@ -2,7 +2,7 @@
 
 import { ProductCard } from "./product-card"
 import { PanoramaViewer } from "./panorama-viewer"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -52,7 +52,7 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
 
   const { selectedTags, clearTags, hasActiveTags } = useTagFilter()
 
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
     loadCategories()
@@ -107,7 +107,7 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
         case "title":
           query = query.order("title", { ascending: true })
           break
-        default:
+        default: // created_at
           query = query.order("created_at", { ascending: false })
       }
 

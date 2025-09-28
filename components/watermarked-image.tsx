@@ -45,6 +45,10 @@ export function WatermarkedImage({
     img.crossOrigin = "anonymous"
 
     img.onload = () => {
+      console.log("[v0] WatermarkedImage: Image loaded, starting watermark process")
+      console.log("[v0] WatermarkedImage: Image dimensions:", img.naturalWidth, "x", img.naturalHeight)
+      console.log("[v0] WatermarkedImage: Image type:", imageType)
+
       // Set canvas dimensions
       canvas.width = img.naturalWidth
       canvas.height = img.naturalHeight
@@ -56,6 +60,8 @@ export function WatermarkedImage({
       const logo = new Image()
       logo.crossOrigin = "anonymous"
       logo.onload = () => {
+        console.log("[v0] WatermarkedImage: Logo loaded successfully")
+
         let watermarkSizeMultiplier = 0.12 // Default size
 
         // Smaller watermarks for panoramic images
@@ -66,6 +72,8 @@ export function WatermarkedImage({
         }
 
         const watermarkSize = Math.min(img.naturalWidth * watermarkSizeMultiplier, 200)
+
+        console.log("[v0] WatermarkedImage: Watermark size:", watermarkSize, "multiplier:", watermarkSizeMultiplier)
 
         // Corner watermarks with higher opacity
         const positions = [
@@ -89,11 +97,13 @@ export function WatermarkedImage({
         ctx.drawImage(logo, largeCenterX, largeCenterY, largeCenterSize, largeCenterSize)
 
         ctx.globalAlpha = 1.0
+        console.log("[v0] WatermarkedImage: Watermarks applied successfully")
         setIsLoading(false)
         onLoad?.()
       }
 
       logo.onerror = () => {
+        console.error("[v0] WatermarkedImage: Failed to load logo from /images/n3u360-logo.png")
         // If logo fails to load, just show the image without watermark
         setIsLoading(false)
         onLoad?.()

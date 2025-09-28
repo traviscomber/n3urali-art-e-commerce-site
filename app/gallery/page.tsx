@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { ProductGrid } from "@/components/product-grid"
 import { PanoramaViewer } from "@/components/panorama-viewer"
@@ -48,7 +48,8 @@ export default function GalleryPage() {
   const [featuredImages, setFeaturedImages] = useState<Image[]>([])
   const [equirectangularImages, setEquirectangularImages] = useState<Image[]>([])
   const [viewingPanorama, setViewingPanorama] = useState<Image | null>(null)
-  const supabase = createClient()
+
+  const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
     loadData()

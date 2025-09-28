@@ -71,10 +71,22 @@ export async function generateMetadata({ params }: ProductPageProps) {
   return {
     title: `${image.title} - N3urali.art`,
     description: image.description,
+    keywords: ["360 photography", "equirectangular", "fisheye", "VR", "projection mapping", "immersive imagery"],
     openGraph: {
-      title: image.title,
+      title: `${image.title} - N3urali.art`,
       description: image.description,
       images: [displayUrl],
+      type: "website",
+      url: `https://n3urali.art/product/${id}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${image.title} - N3urali.art`,
+      description: image.description,
+      images: [displayUrl],
+    },
+    alternates: {
+      canonical: `https://n3urali.art/product/${id}`,
     },
   }
 }

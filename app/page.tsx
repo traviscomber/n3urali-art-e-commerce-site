@@ -1,8 +1,45 @@
+import type { Metadata } from "next"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowRight, Eye, Download, Shield } from "lucide-react"
 import Link from "next/link"
+
+export const metadata: Metadata = {
+  title: "N3urali.art - Premium 360° Digital Photography & AI-Generated Imagery",
+  description:
+    "Discover our curated collection of AI-generated equirectangular and fisheye images, perfect for projection mapping, VR experiences, and architectural visualization. Professional quality 4K-16K resolution.",
+  keywords: [
+    "360 photography",
+    "AI generated imagery",
+    "equirectangular",
+    "fisheye",
+    "VR",
+    "projection mapping",
+    "architectural visualization",
+    "immersive imagery",
+    "panoramic photography",
+    "4K",
+    "8K",
+    "16K",
+  ],
+  openGraph: {
+    title: "N3urali.art - Premium 360° Digital Photography & AI-Generated Imagery",
+    description:
+      "Discover our curated collection of AI-generated equirectangular and fisheye images, perfect for projection mapping, VR experiences, and architectural visualization.",
+    type: "website",
+    url: "https://n3urali.art",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "N3urali.art - Premium 360° Digital Photography & AI-Generated Imagery",
+    description:
+      "Discover our curated collection of AI-generated equirectangular and fisheye images, perfect for projection mapping, VR experiences, and architectural visualization.",
+  },
+  alternates: {
+    canonical: "https://n3urali.art",
+  },
+}
 
 export default function HomePage() {
   return (

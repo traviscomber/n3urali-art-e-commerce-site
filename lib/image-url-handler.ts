@@ -1,6 +1,6 @@
 /**
  * Centralized image URL handler for multiple storage origins
- * Handles conversion between Vercel Blob, Backblaze, and proxy URLs
+ * Handles conversion between cloud storage, Backblaze, and proxy URLs
  */
 
 export interface ImageUrlConfig {
@@ -9,7 +9,7 @@ export interface ImageUrlConfig {
 }
 
 export class ImageUrlHandler {
-  private static readonly VERCEL_BLOB_PATTERN = /https:\/\/[^.]+\.public\.blob\.vercel-storage\.com\/(.+)/
+  private static readonly CLOUD_BLOB_PATTERN = /https:\/\/[^.]+\.public\.blob\.[\w-]+\.com\/(.+)/
   private static readonly BACKBLAZE_PATTERN = /https:\/\/f\d+\.backblazeb2\.com\/file\/[^/]+\/(.+)/
   private static readonly PROXY_PATTERN = /^\/api\/image-proxy\/(.+)/
 
@@ -24,11 +24,10 @@ export class ImageUrlHandler {
       return url
     }
 
-    // Handle Vercel Blob URLs - convert to Backblaze proxy
-    const blobMatch = url.match(this.VERCEL_BLOB_PATTERN)
+    // Handle cloud blob URLs - convert to Backblaze proxy
+    const blobMatch = url.match(this.CLOUD_BLOB_PATTERN)
     if (blobMatch) {
       const filename = blobMatch[1]
-      console.log("[v0] Converting Vercel Blob URL to Backblaze proxy:", filename)
       return `/api/image-proxy/${filename}`
     }
 
@@ -36,7 +35,6 @@ export class ImageUrlHandler {
     const backblazeMatch = url.match(this.BACKBLAZE_PATTERN)
     if (backblazeMatch && config.useProxy !== false) {
       const filename = backblazeMatch[1]
-      console.log("[v0] Converting Backblaze URL to proxy:", filename)
       return `/api/image-proxy/${filename}`
     }
 
@@ -50,12 +48,11 @@ export class ImageUrlHandler {
   static convertToDownloadUrl(url: string): string {
     if (!url) return url
 
-    // Handle Vercel Blob URLs - convert to Backblaze format
-    const blobMatch = url.match(this.VERCEL_BLOB_PATTERN)
+    // Handle cloud blob URLs - convert to Backblaze format
+    const blobMatch = url.match(this.CLOUD_BLOB_PATTERN)
     if (blobMatch) {
       const filename = blobMatch[1]
       const backblazeUrl = `https://${process.env.B2_ENDPOINT}/file/${process.env.BACKBLAZE_BUCKET_NAME}/${filename}`
-      console.log("[v0] Converting Vercel Blob URL to Backblaze for download:", backblazeUrl)
       return backblazeUrl
     }
 
@@ -66,8 +63,8 @@ export class ImageUrlHandler {
   /**
    * Get storage provider from URL
    */
-  static getStorageProvider(url: string): "vercel-blob" | "backblaze" | "proxy" | "unknown" {
-    if (this.VERCEL_BLOB_PATTERN.test(url)) return "vercel-blob"
+  static getStorageProvider(url: string): "cloud-blob" | "backblaze" | "proxy" | "unknown" {
+    if (this.CLOUD_BLOB_PATTERN.test(url)) return "cloud-blob"
     if (this.BACKBLAZE_PATTERN.test(url)) return "backblaze"
     if (this.PROXY_PATTERN.test(url)) return "proxy"
     return "unknown"
@@ -77,7 +74,7 @@ export class ImageUrlHandler {
    * Extract filename from any storage URL
    */
   static extractFilename(url: string): string | null {
-    const blobMatch = url.match(this.VERCEL_BLOB_PATTERN)
+    const blobMatch = url.match(this.CLOUD_BLOB_PATTERN)
     if (blobMatch) return blobMatch[1]
 
     const backblazeMatch = url.match(this.BACKBLAZE_PATTERN)

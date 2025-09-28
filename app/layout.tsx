@@ -10,10 +10,55 @@ import { CartSidebar } from "@/components/cart-sidebar"
 import { ToastProvider } from "@/components/toast-notifications"
 
 export const metadata: Metadata = {
-  title: "N3urali.art - Premium 360° Digital Photography",
+  title: {
+    default: "N3urali.art - Premium 360° Digital Photography",
+    template: "%s | N3urali.art",
+  },
   description:
     "Discover our curated collection of equirectangular and fisheye images, perfect for projection mapping, VR experiences, and architectural visualization.",
-  generator: "v0.app",
+  keywords: [
+    "360 photography",
+    "equirectangular",
+    "fisheye",
+    "VR",
+    "projection mapping",
+    "architectural visualization",
+    "immersive imagery",
+    "panoramic photography",
+  ],
+  authors: [{ name: "N3urali.art" }],
+  creator: "N3urali.art",
+  publisher: "N3urali.art",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://n3urali.art",
+    siteName: "N3urali.art",
+    title: "N3urali.art - Premium 360° Digital Photography",
+    description:
+      "Discover our curated collection of equirectangular and fisheye images, perfect for projection mapping, VR experiences, and architectural visualization.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "N3urali.art - Premium 360° Digital Photography",
+    description:
+      "Discover our curated collection of equirectangular and fisheye images, perfect for projection mapping, VR experiences, and architectural visualization.",
+  },
+  alternates: {
+    canonical: "https://n3urali.art",
+  },
+    generator: 'v0.app'
 }
 
 export default function RootLayout({

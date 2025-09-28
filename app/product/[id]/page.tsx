@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { ProductDetailClient } from "@/components/product-detail-client"
+import { ImageUrlHandler } from "@/lib/image-url-handler"
 
 interface ProductPageProps {
   params: Promise<{ id: string }>
@@ -33,18 +34,29 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound()
   }
 
-  return <ProductDetailClient image={image} />
+  const displayUrl = image.file_path
+    ? ImageUrlHandler.convertToDisplayUrl(image.file_path, { useProxy: true })
+    : image.file_path
+
+  const processedImage = {
+    ...image,
+    image_url: displayUrl,
+    thumbnail_url: displayUrl,
+    thumbnail_large_url: displayUrl,
+    thumbnail_medium_url: displayUrl,
+    thumbnail_small_url: displayUrl,
+    original_url: displayUrl,
+    file_path: displayUrl, // Ensure file_path also uses proxy URL
+  }
+
+  return <ProductDetailClient image={processedImage} />
 }
 
 export async function generateMetadata({ params }: ProductPageProps) {
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: image } = await supabase
-    .from("images")
-    .select("title, description, thumbnail_large_url")
-    .eq("id", id)
-    .single()
+  const { data: image } = await supabase.from("images").select("title, description, file_path").eq("id", id).single()
 
   if (!image) {
     return {
@@ -52,13 +64,17 @@ export async function generateMetadata({ params }: ProductPageProps) {
     }
   }
 
+  const displayUrl = image.file_path
+    ? ImageUrlHandler.convertToDisplayUrl(image.file_path, { useProxy: true })
+    : image.file_path
+
   return {
     title: `${image.title} - N3urali.art`,
     description: image.description,
     openGraph: {
       title: image.title,
       description: image.description,
-      images: [image.thumbnail_large_url],
+      images: [displayUrl],
     },
   }
 }

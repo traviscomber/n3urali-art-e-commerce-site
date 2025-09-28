@@ -24,12 +24,15 @@ export function ImagePreviewModal({
   const [viewMode, setViewMode] = useState<"image" | "zoom" | "panorama">("image")
 
   console.log("[v0] ImagePreviewModal render - isOpen:", isOpen, "viewMode:", viewMode)
+  console.log("[v0] ImagePreviewModal imageUrl:", imageUrl)
 
   if (isOpen) {
     console.log("[v0] ImagePreviewModal is OPEN - title:", title)
   }
 
   if (!isOpen) return null
+
+  const displayImageUrl = imageUrl || "/placeholder.svg?height=600&width=800"
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm">
@@ -80,7 +83,7 @@ export function ImagePreviewModal({
             <>
               {console.log("[v0] ImagePreviewModal: Rendering PanoramaViewer with isInline: true")}
               <PanoramaViewer
-                imageUrl={imageUrl}
+                imageUrl={displayImageUrl}
                 title={title}
                 onClose={() => setViewMode("image")}
                 isInline={true}
@@ -91,7 +94,7 @@ export function ImagePreviewModal({
             <div className="absolute inset-0 overflow-auto">
               <div className="min-h-full flex items-center justify-center p-4">
                 <Image
-                  src={imageUrl || "/placeholder.svg"}
+                  src={displayImageUrl || "/placeholder.svg"}
                   alt={title}
                   width={2000}
                   height={1500}
@@ -108,7 +111,7 @@ export function ImagePreviewModal({
           ) : (
             <div className="absolute inset-0 flex items-center justify-center p-4">
               <div className="relative w-full h-full">
-                <Image src={imageUrl || "/placeholder.svg"} alt={title} fill className="object-contain" />
+                <Image src={displayImageUrl || "/placeholder.svg"} alt={title} fill className="object-contain" />
               </div>
             </div>
           )}

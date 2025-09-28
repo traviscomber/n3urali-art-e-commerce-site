@@ -20,6 +20,7 @@ interface Product {
   thumbnail_large_url: string
   thumbnail_medium_url: string
   thumbnail_small_url: string
+  file_path?: string
   original_url?: string
   is_featured: boolean
   active: boolean
@@ -94,6 +95,7 @@ export function ProductCard({ product, onView360 }: ProductCardProps) {
       <div className="relative aspect-[4/3] overflow-hidden">
         <Image
           src={
+            product.file_path ||
             product.thumbnail_large_url ||
             product.thumbnail_medium_url ||
             product.thumbnail_small_url ||

@@ -23,6 +23,7 @@ interface Image {
   thumbnail_url: string
   active: boolean
   created_at: string
+  file_path?: string // New field added
 }
 
 interface Category {
@@ -1003,6 +1004,9 @@ export default function SimpleAdminPage() {
                               console.log("[v0] Preview image failed to load:", newImage.preview)
                               e.currentTarget.src = "/placeholder.svg?height=128&width=128&text=Preview+Error"
                             }}
+                            onLoad={() => {
+                              console.log("[v0] Preview image loaded successfully")
+                            }}
                           />
                         </div>
                         <div className="flex-1 space-y-2">
@@ -1078,17 +1082,33 @@ export default function SimpleAdminPage() {
                     <div key={image.id} className="flex items-center gap-4 p-3 border rounded-lg">
                       <img
                         src={
-                          image.thumbnail_url || image.image_url || "/placeholder.svg?height=64&width=64&text=No+Image"
+                          image.file_path ||
+                          image.image_url ||
+                          image.thumbnail_url ||
+                          "/placeholder.svg?height=64&width=64&text=No+Image"
                         }
                         alt={image.title}
                         className="w-16 h-16 object-cover rounded"
                         crossOrigin="anonymous"
                         onError={(e) => {
-                          console.log("[v0] Image failed to load:", image.thumbnail_url || image.image_url)
-                          e.currentTarget.src = "/placeholder.svg?height=64&width=64&text=Error"
+                          console.log(
+                            "[v0] Image failed to load:",
+                            image.file_path || image.image_url || image.thumbnail_url,
+                          )
+                          const currentSrc = e.currentTarget.src
+                          if (currentSrc === image.file_path && image.image_url) {
+                            e.currentTarget.src = image.image_url
+                          } else if (currentSrc === image.image_url && image.thumbnail_url) {
+                            e.currentTarget.src = image.thumbnail_url
+                          } else {
+                            e.currentTarget.src = "/placeholder.svg?height=64&width=64&text=Error"
+                          }
                         }}
                         onLoad={() => {
-                          console.log("[v0] Image loaded successfully:", image.thumbnail_url || image.image_url)
+                          console.log(
+                            "[v0] Image loaded successfully:",
+                            image.file_path || image.image_url || image.thumbnail_url,
+                          )
                         }}
                       />
                       <div className="flex-1 min-w-0">

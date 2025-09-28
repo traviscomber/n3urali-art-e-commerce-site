@@ -18,6 +18,7 @@ interface Image {
   thumbnail_medium_url: string
   thumbnail_small_url: string
   original_url: string
+  file_path: string
   is_featured: boolean
   active: boolean
   category_id: string
@@ -237,7 +238,7 @@ export default function GalleryPage() {
                     >
                       <div className="aspect-[2/1] relative overflow-hidden">
                         <img
-                          src={image.thumbnail_large_url || "/placeholder.svg?height=400&width=800"}
+                          src={image.file_path || image.thumbnail_large_url || "/placeholder.svg?height=400&width=800"}
                           alt={image.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />

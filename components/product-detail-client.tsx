@@ -24,6 +24,7 @@ interface ProductDetailClientProps {
     thumbnail_medium_url: string
     thumbnail_small_url: string
     original_url: string
+    file_path: string
     is_featured: boolean
     active: boolean
     category_id: string
@@ -148,11 +149,11 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
             <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-muted">
               <Image
                 src={
+                  image.file_path ||
                   image.thumbnail_large_url ||
+                  image.thumbnail_medium_url ||
+                  image.thumbnail_small_url ||
                   "/placeholder.svg?height=600&width=800&query=360 degree panoramic image" ||
-                  "/placeholder.svg" ||
-                  "/placeholder.svg" ||
-                  "/placeholder.svg" ||
                   "/placeholder.svg" ||
                   "/placeholder.svg"
                 }
@@ -268,7 +269,7 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
       <ImagePreviewModal
         isOpen={showPreview}
         onClose={() => setShowPreview(false)}
-        imageUrl={image.original_url || image.thumbnail_large_url}
+        imageUrl={image.file_path || image.original_url || image.thumbnail_large_url}
         title={image.title}
         isEquirectangular={isEquirectangularImage()}
       />

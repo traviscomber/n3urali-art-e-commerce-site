@@ -188,37 +188,68 @@ export default function GalleryPage() {
 
   const transformedImages = useMemo(() => {
     console.log("[v0] Transforming images, raw count:", images.length)
+    console.log("[v0] Raw images sample:", images.slice(0, 2))
+
     const transformed = images.map((image: any) => {
-      console.log("[v0] Processing image:", image.title, "file_path:", image.file_path)
-      const preview_url =
-        image.file_path ||
-        image.thumbnail_url ||
-        image.image_url ||
-        "/placeholder.svg?height=400&width=400&text=No+Image"
-
-      const proxyPreviewUrl = preview_url.includes("backblazeb2.com")
-        ? `/api/image-proxy/${preview_url.split("/file/")[1]?.split("/").slice(1).join("/")}`
-        : preview_url
-
-      return {
+      console.log("[v0] Processing image:", {
         id: image.id,
         title: image.title,
-        category:
-          image.category_name?.toLowerCase() === "fisheye" ? ("fisheye" as const) : ("equirectangular" as const),
+        file_path: image.file_path,
+        category_name: image.category_name,
+        category_id: image.category_id,
+      })
+
+      const preview_url = image.file_path || "/placeholder.svg?height=400&width=400&text=No+Image"
+
+      let category: "equirectangular" | "fisheye" = "equirectangular"
+      if (image.category_name) {
+        const categoryLower = image.category_name.toLowerCase()
+        if (categoryLower.includes("fisheye") || categoryLower.includes("180")) {
+          category = "fisheye"
+        } else if (categoryLower.includes("equirectangular") || categoryLower.includes("360")) {
+          category = "equirectangular"
+        }
+      }
+
+      const transformedImage = {
+        id: image.id,
+        title: image.title,
+        category,
         price: Number.parseFloat(image.price) || 0,
-        preview_url: proxyPreviewUrl,
+        preview_url,
         dimensions: "4096x4096",
         file_size: 20000000,
         description: image.description || "",
       }
+
+      console.log("[v0] Transformed image:", {
+        id: transformedImage.id,
+        title: transformedImage.title,
+        category: transformedImage.category,
+        preview_url: transformedImage.preview_url.substring(0, 100) + "...",
+      })
+
+      return transformedImage
     })
+
     console.log("[v0] Transformed images count:", transformed.length)
+    console.log(
+      "[v0] Categories found:",
+      transformed.map((img) => img.category),
+    )
     return transformed
   }, [images])
 
   const { equirectangularImages, fisheyeImages } = useMemo(() => {
     const equirectangular = transformedImages.filter((img) => img.category === "equirectangular")
     const fisheye = transformedImages.filter((img) => img.category === "fisheye")
+
+    console.log("[v0] Filtered images:", {
+      total: transformedImages.length,
+      equirectangular: equirectangular.length,
+      fisheye: fisheye.length,
+    })
+
     return { equirectangularImages: equirectangular, fisheyeImages: fisheye }
   }, [transformedImages])
 

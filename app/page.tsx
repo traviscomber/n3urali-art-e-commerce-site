@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     description:
       "Discover our curated collection of AI-generated equirectangular and fisheye images, perfect for projection mapping, VR experiences, and architectural visualization.",
     type: "website",
-    url: "https://n3urali.art",
+    url: "https://n3uralia360.art",
   },
   twitter: {
     card: "summary_large_image",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
       "Discover our curated collection of AI-generated equirectangular and fisheye images, perfect for projection mapping, VR experiences, and architectural visualization.",
   },
   alternates: {
-    canonical: "https://n3urali.art",
+    canonical: "https://n3uralia360.art",
   },
 }
 

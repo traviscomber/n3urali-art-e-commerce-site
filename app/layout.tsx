@@ -29,6 +29,9 @@ export const metadata: Metadata = {
   authors: [{ name: "N3urali.art" }],
   creator: "N3urali.art",
   publisher: "N3urali.art",
+  verification: {
+    google: "your-google-verification-code",
+  },
   robots: {
     index: true,
     follow: true,
@@ -43,7 +46,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://n3urali.art",
+    url: "https://n3uralia360.art",
     siteName: "N3urali.art",
     title: "N3urali.art - Premium 360° Digital Photography",
     description:
@@ -56,7 +59,7 @@ export const metadata: Metadata = {
       "Discover our curated collection of equirectangular and fisheye images, perfect for projection mapping, VR experiences, and architectural visualization.",
   },
   alternates: {
-    canonical: "https://n3urali.art",
+    canonical: "https://n3uralia360.art",
   },
     generator: 'v0.app'
 }

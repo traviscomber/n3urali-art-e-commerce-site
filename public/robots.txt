@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://n3urali.art/sitemap.xml
+
+# Disallow admin and debug pages
+Disallow: /simple-admin
+Disallow: /debug-images
+Disallow: /setup-cors
+Disallow: /fix-cors
+Disallow: /api/

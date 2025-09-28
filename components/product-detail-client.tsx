@@ -44,11 +44,19 @@ interface ProductDetailClientProps {
 
 export function ProductDetailClient({ image }: ProductDetailClientProps) {
   const [selectedLicenseId, setSelectedLicenseId] = useState(image.license_id)
+  const [selectedLicense, setSelectedLicense] = useState<any>(null)
+  const [totalPrice, setTotalPrice] = useState(Number(image.price))
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { addItem } = useCart()
   const { isAuthenticated } = useAuth()
+
+  const handleLicenseSelect = (license: any, calculatedTotalPrice: number) => {
+    setSelectedLicense(license)
+    setSelectedLicenseId(license.id)
+    setTotalPrice(calculatedTotalPrice)
+  }
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
@@ -61,10 +69,10 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
       addItem({
         id: image.id,
         title: image.title,
-        price: Number(image.price),
+        price: totalPrice, // Use calculated total price instead of base price
         preview_image_url: image.thumbnail_medium_url,
         license_id: selectedLicenseId,
-        license_name: image.licenses?.name || "Standard License",
+        license_name: selectedLicense?.name || image.licenses?.name || "Standard License",
         quantity: 1,
       })
     } finally {
@@ -146,7 +154,7 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
               <h3 className="text-lg font-semibold mb-3">License Options</h3>
               <LicenseSelector
                 selectedLicenseId={selectedLicenseId}
-                onLicenseChange={setSelectedLicenseId}
+                onLicenseSelect={handleLicenseSelect}
                 basePrice={Number(image.price)}
               />
             </div>
@@ -173,7 +181,7 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">License:</span>
-                  <span>{image.licenses?.name || "Standard License"}</span>
+                  <span>{selectedLicense?.name || image.licenses?.name || "Standard License"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Delivery:</span>
@@ -186,7 +194,7 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
             <Card className="border-primary/20">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="text-3xl font-bold text-primary">${Number(image.price).toFixed(2)}</div>
+                  <div className="text-3xl font-bold text-primary">${totalPrice.toFixed(2)}</div>
                   <div className="text-sm text-muted-foreground">One-time purchase</div>
                 </div>
 

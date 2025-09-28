@@ -358,8 +358,8 @@ export default function SimpleAdminPage() {
       const imageData = {
         title: newImage.title,
         description: newImage.description,
-        category_id: newImage.category,
-        rights_type: newImage.rightsType,
+        category_id: newImage.category, // Changed from category to category_id
+        rights_type: newImage.rightsType, // Changed from rightsType to rights_type
         price: Number.parseFloat(newImage.price) || 0,
         image_url: imageUrl,
         thumbnail_url: thumbnailBase64,
@@ -602,8 +602,8 @@ export default function SimpleAdminPage() {
       const imageData = {
         title: newImage.title,
         description: newImage.description,
-        category_id: newImage.category,
-        license_id: newImage.rightsType,
+        category_id: newImage.category, // Changed from category to category_id
+        rights_type: newImage.rightsType, // Changed from rightsType to rights_type
         price: Number.parseFloat(newImage.price),
         image_url: uploadResult.url,
         thumbnail_url: uploadResult.url,

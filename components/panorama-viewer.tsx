@@ -1,23 +1,29 @@
 "use client"
 
 import React, { useState, useRef, useEffect, useCallback } from "react"
-import { X, RotateCcw, ZoomIn, ZoomOut, Maximize } from "lucide-react"
+import { X, RotateCcw, ZoomIn, ZoomOut, Maximize, Minimize } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface PanoramaViewerProps {
   imageUrl: string
   title: string
   onClose: () => void
+  isPreview?: boolean // Added preview mode option
 }
 
-export const PanoramaViewer = React.memo(function PanoramaViewer({ imageUrl, title, onClose }: PanoramaViewerProps) {
-  const [yaw, setYaw] = useState(0) // Horizontal rotation
-  const [pitch, setPitch] = useState(0) // Vertical rotation
-  const [fov, setFov] = useState(75) // Field of view (zoom)
+export const PanoramaViewer = React.memo(function PanoramaViewer({
+  imageUrl,
+  title,
+  onClose,
+  isPreview = false, // Default to preview mode
+}: PanoramaViewerProps) {
+  const [yaw, setYaw] = useState(0)
+  const [pitch, setPitch] = useState(0)
+  const [fov, setFov] = useState(90)
   const [isDragging, setIsDragging] = useState(false)
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 })
   const [imageLoaded, setImageLoaded] = useState(false)
-  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(!isPreview) // Start in preview mode if specified
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const imageRef = useRef<HTMLImageElement>(null)
@@ -175,25 +181,27 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({ imageUrl, tit
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault()
-    const delta = e.deltaY > 0 ? 5 : -5
-    setFov((prev) => Math.max(30, Math.min(120, prev + delta)))
+    const delta = e.deltaY > 0 ? 3 : -3 // Reduced from 5 to 3 for finer control
+    setFov((prev) => Math.max(60, Math.min(110, prev + delta))) // Limited range: 60-110°
   }, [])
 
   const resetView = useCallback(() => {
     setYaw(0)
     setPitch(0)
-    setFov(75)
+    setFov(90) // Changed from 75 to 90 for better default view
   }, [])
 
   const toggleFullscreen = useCallback(() => {
-    if (!document.fullscreenElement) {
-      containerRef.current?.requestFullscreen()
-      setIsFullscreen(true)
+    if (isPreview) {
+      setIsFullscreen(!isFullscreen)
     } else {
-      document.exitFullscreen()
-      setIsFullscreen(false)
+      if (!document.fullscreenElement) {
+        containerRef.current?.requestFullscreen()
+      } else {
+        document.exitFullscreen()
+      }
     }
-  }, [])
+  }, [isPreview, isFullscreen])
 
   useEffect(() => {
     if (!imageUrl) return
@@ -238,18 +246,98 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({ imageUrl, tit
     return null
   }
 
+  if (isPreview && !isFullscreen) {
+    // Preview mode - embedded in page
+    return (
+      <div ref={containerRef} className="relative w-full h-96 bg-black rounded-lg overflow-hidden">
+        <div className="absolute top-2 left-2 right-2 z-10 flex items-center justify-between">
+          <div className="text-white">
+            <h3 className="text-lg font-semibold">{title}</h3>
+            <p className="text-xs text-white/70">360° Preview • Drag to explore</p>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setFov((prev) => Math.max(60, prev + 5))}
+              className="bg-white/10 hover:bg-white/20 text-white border-white/20 h-8 w-8 p-0"
+            >
+              <ZoomOut className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setFov((prev) => Math.min(110, prev - 5))}
+              className="bg-white/10 hover:bg-white/20 text-white border-white/20 h-8 w-8 p-0"
+            >
+              <ZoomIn className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={toggleFullscreen}
+              className="bg-white/10 hover:bg-white/20 text-white border-white/20 h-8 w-8 p-0"
+            >
+              <Maximize className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={resetView}
+              className="bg-white/10 hover:bg-white/20 text-white border-white/20 h-8 w-8 p-0"
+            >
+              <RotateCcw className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={onClose}
+              className="bg-white/10 hover:bg-white/20 text-white border-white/20 h-8 w-8 p-0"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="w-full h-full">
+          <canvas
+            ref={canvasRef}
+            className="w-full h-full cursor-grab active:cursor-grabbing"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onWheel={handleWheel}
+          />
+        </div>
+
+        {!imageLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center text-white">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+              <p className="text-sm">Loading 360° view...</p>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // Fullscreen mode - overlay
   return (
     <div ref={containerRef} className="fixed inset-0 z-50 bg-black">
       <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
         <div className="text-white">
           <h2 className="text-xl font-semibold">{title}</h2>
-          <p className="text-sm text-white/70">Drag to look around • Scroll to zoom • True 360° spherical view</p>
+          <p className="text-sm text-white/70">
+            Drag to look around • Limited zoom to preserve quality • True 360° spherical view
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => setFov((prev) => Math.max(30, prev + 10))}
+            onClick={() => setFov((prev) => Math.max(60, prev + 5))}
             className="bg-white/10 hover:bg-white/20 text-white border-white/20"
           >
             <ZoomOut className="h-4 w-4" />
@@ -257,19 +345,21 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({ imageUrl, tit
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => setFov((prev) => Math.min(120, prev - 10))}
+            onClick={() => setFov((prev) => Math.min(110, prev - 5))}
             className="bg-white/10 hover:bg-white/20 text-white border-white/20"
           >
             <ZoomIn className="h-4 w-4" />
           </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={toggleFullscreen}
-            className="bg-white/10 hover:bg-white/20 text-white border-white/20"
-          >
-            <Maximize className="h-4 w-4" />
-          </Button>
+          {isPreview && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={toggleFullscreen}
+              className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+            >
+              <Minimize className="h-4 w-4" />
+            </Button>
+          )}
           <Button
             variant="secondary"
             size="sm"
@@ -312,7 +402,7 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({ imageUrl, tit
 
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center text-white/70 text-sm">
         <div className="bg-black/50 rounded-lg px-4 py-2 backdrop-blur-sm">
-          <p>Drag to rotate • Scroll to zoom • F11 for fullscreen • ESC to close</p>
+          <p>Drag to rotate • Limited zoom for quality • F11 for fullscreen • ESC to close</p>
         </div>
       </div>
     </div>

@@ -46,6 +46,7 @@ export default function GalleryPage() {
   const [featuredImages, setFeaturedImages] = useState<Image[]>([])
   const [equirectangularImages, setEquirectangularImages] = useState<Image[]>([])
   const [viewingPanorama, setViewingPanorama] = useState<Image | null>(null)
+  const [previewPanorama, setPreviewPanorama] = useState<Image | null>(null) // Added preview state
   const supabase = createClient()
 
   useEffect(() => {
@@ -106,8 +107,18 @@ export default function GalleryPage() {
     setViewingPanorama(image)
   }
 
+  const handlePreview360 = (image: Image) => {
+    // Added preview handler
+    setPreviewPanorama(image)
+  }
+
   const closePanoramaViewer = () => {
     setViewingPanorama(null)
+  }
+
+  const closePanoramaPreview = () => {
+    // Added preview close handler
+    setPreviewPanorama(null)
   }
 
   if (loading) {
@@ -243,12 +254,12 @@ export default function GalleryPage() {
                         </div>
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           <Button
-                            onClick={() => handleView360(image)}
+                            onClick={() => handlePreview360(image)} // Changed to preview instead of fullscreen
                             size="sm"
                             className="bg-white/90 text-black hover:bg-white"
                           >
                             <Eye className="w-4 h-4 mr-2" />
-                            360° View
+                            360° Preview
                           </Button>
                         </div>
                       </div>
@@ -258,7 +269,9 @@ export default function GalleryPage() {
                         <div className="flex items-center justify-between">
                           <span className="text-2xl font-bold">${image.price}</span>
                           <div className="flex gap-2">
-                            <Button onClick={() => handleView360(image)} variant="outline" size="sm">
+                            <Button onClick={() => handlePreview360(image)} variant="outline" size="sm">
+                              {" "}
+                              // Changed to preview
                               <Eye className="w-4 h-4 mr-1" />
                               Preview
                             </Button>
@@ -298,6 +311,19 @@ export default function GalleryPage() {
           title={viewingPanorama.title}
           onClose={closePanoramaViewer}
         />
+      )}
+
+      {previewPanorama && ( // Added preview panorama viewer
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <div className="w-full max-w-4xl">
+            <PanoramaViewer
+              imageUrl={previewPanorama.original_url || previewPanorama.thumbnail_large_url}
+              title={previewPanorama.title}
+              onClose={closePanoramaPreview}
+              isPreview={true}
+            />
+          </div>
+        </div>
       )}
     </div>
   )

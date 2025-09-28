@@ -1,5 +1,5 @@
 {
-  "name": "my-v0-project",
+  "name": "n3urali-art",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -51,7 +51,6 @@
     "date-fns": "4.1.0",
     "embla-carousel-react": "8.5.1",
     "formdata-node": "6.0.3",
-    "geist": "latest",
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
     "next": "15.2.4",
@@ -60,7 +59,7 @@
     "react-day-picker": "9.8.0",
     "react-dom": "^19",
     "react-hook-form": "^7.60.0",
-    "react-intersection-observer": "9.16.0",
+    "react-intersection-observer": "latest",
     "react-resizable-panels": "^2.1.7",
     "recharts": "latest",
     "sonner": "latest",

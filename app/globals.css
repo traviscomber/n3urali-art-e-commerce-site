@@ -78,8 +78,6 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -134,7 +132,7 @@
     text-wrap: pretty;
   }
 
-  /* Updated gallery frame effects with new magenta and indigo color scheme */
+  /* Gallery frame effects */
   .gallery-frame {
     background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--muted)));
     border: 1px solid hsl(var(--border));
@@ -149,7 +147,7 @@
       inset 0 1px 0 hsl(var(--foreground) / 0.05);
   }
 
-  /* Enhanced glow effects with magenta and indigo colors for better contrast */
+  /* Glow effects */
   .glow-primary {
     box-shadow: 0 0 15px hsl(var(--primary) / 0.4);
     will-change: box-shadow;
@@ -165,89 +163,7 @@
     backdrop-filter: blur(8px);
   }
 
-  /* Updated metallic effects with magenta and indigo gradient combinations */
-  .metallic-navy {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--primary)) 0%,
-      #e879f9 30%,
-      #d946ef 50%,
-      #c026d3 70%,
-      hsl(var(--primary)) 100%
-    );
-    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.1), 0 1px 3px rgba(0, 0, 0, 0.2);
-  }
-
-  .metallic-cyan {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--secondary)) 0%,
-      #818cf8 30%,
-      #6366f1 50%,
-      #4f46e5 70%,
-      hsl(var(--secondary)) 100%
-    );
-    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.15), 0 1px 3px rgba(0, 0, 0, 0.2);
-  }
-
-  /* Dark theme specific enhanced gradients with magenta and indigo for excellent visibility */
-  .dark .glow-primary {
-    box-shadow: 0 0 20px #d946ef, 0 0 35px rgba(217, 70, 239, 0.4);
-  }
-
-  .dark .glow-accent {
-    box-shadow: 0 0 15px #6366f1, 0 0 25px rgba(99, 102, 241, 0.5);
-  }
-
-  .dark .premium-backdrop {
-    background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
-    backdrop-filter: blur(12px);
-  }
-
-  /* Better contrast for dark theme elements */
-  .dark .text-red-600 {
-    color: #fca5a5;
-  }
-
-  .dark .text-yellow-800 {
-    color: #fde047;
-  }
-
-  .dark .text-yellow-200 {
-    color: #fef3c7;
-  }
-
-  /* Enhanced contrast for warning and error text in dark theme */
-  .dark .text-red-500 {
-    color: #f87171;
-  }
-
-  .dark .text-amber-600 {
-    color: #fbbf24;
-  }
-
-  .dark .text-amber-800 {
-    color: #f59e0b;
-  }
-
-  /* Better visibility for semi-transparent overlays */
-  .dark .bg-white\/20 {
-    background-color: rgba(248, 250, 252, 0.3);
-  }
-
-  .dark .bg-white\/90 {
-    background-color: rgba(248, 250, 252, 0.95);
-  }
-
-  .dark .bg-black\/50 {
-    background-color: rgba(15, 23, 42, 0.8);
-  }
-
-  .dark .bg-black\/60 {
-    background-color: rgba(15, 23, 42, 0.85);
-  }
-
-  /* Grid pattern for homepage performance */
+  /* Grid pattern for homepage */
   .grid-pattern {
     background-image: linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
@@ -259,82 +175,25 @@
       linear-gradient(90deg, rgba(248, 250, 252, 0.05) 1px, transparent 1px);
     background-size: 20px 20px;
   }
+
+  /* Dark theme glow enhancements */
+  .dark .glow-primary {
+    box-shadow: 0 0 20px #d946ef, 0 0 35px rgba(217, 70, 239, 0.4);
+  }
+
+  .dark .glow-accent {
+    box-shadow: 0 0 15px #6366f1, 0 0 25px rgba(99, 102, 241, 0.5);
+  }
 }
 
-/* Enhanced animations with magenta and indigo colors for dark theme visibility */
-@keyframes elegant-float {
+/* Animations */
+@keyframes float {
   0%,
   100% {
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-2px);
-  }
-}
-
-@keyframes frame-glow {
-  0%,
-  100% {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  }
-  50% {
-    box-shadow: 0 10px 15px -3px hsl(var(--primary) / 0.4), 0 4px 6px -2px hsl(var(--primary) / 0.2), 0 0 0 1px
-      hsl(var(--primary) / 0.5);
-  }
-}
-
-/* Adding gentle rotation animation for the 360 logo */
-@keyframes gentle-rotate {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Adding gentle pulse animation for the 360 overlay effect */
-@keyframes gentle-pulse {
-  0%,
-  100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.1);
-  }
-}
-
-/* Adding very subtle neuralia pulse animation for the text portion */
-@keyframes neuralia-pulse {
-  0%,
-  100% {
-    opacity: 0.2;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(1.05);
-  }
-}
-
-@keyframes frame-glow-dark {
-  0%,
-  100% {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-  }
-  50% {
-    box-shadow: 0 10px 15px -3px #d946ef, 0 4px 6px -2px rgba(217, 70, 239, 0.6), 0 0 0 1px rgba(217, 70, 239, 0.8);
-  }
-}
-
-@keyframes metallic-shine {
-  0% {
-    background-position: -200% center;
-  }
-  100% {
-    background-position: 200% center;
+    transform: translateY(-6px);
   }
 }
 
@@ -350,62 +209,12 @@
   }
 }
 
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
-}
-
-.animate-elegant-float {
-  animation: elegant-float 4s ease-in-out infinite;
+.animate-float {
+  animation: float 3s ease-in-out infinite;
   will-change: transform;
-}
-
-.animate-frame-glow {
-  animation: frame-glow 3s ease-in-out infinite;
-  will-change: box-shadow;
-}
-
-/* Adding gentle rotation animation class */
-.animate-gentle-rotate {
-  animation: gentle-rotate 20s linear infinite;
-}
-
-/* Adding gentle pulse animation class for the 360 overlay */
-.animate-gentle-pulse {
-  animation: gentle-pulse 4s ease-in-out infinite;
-  will-change: opacity, transform;
-}
-
-/* Adding neuralia pulse animation class for very slow, subtle pulsing */
-.animate-neuralia-pulse {
-  animation: neuralia-pulse 8s ease-in-out infinite;
-  will-change: opacity, transform;
-}
-
-.animate-metallic-shine {
-  background: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.1), transparent);
-  background-size: 200% 100%;
-  animation: metallic-shine 2s ease-in-out infinite;
-}
-
-/* Enhanced metallic shine for dark theme with better visibility */
-.dark .animate-metallic-shine {
-  background: linear-gradient(90deg, transparent, rgba(217, 70, 239, 0.4), transparent);
-  background-size: 200% 100%;
-  animation: metallic-shine 2s ease-in-out infinite;
 }
 
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
   will-change: opacity, box-shadow;
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-  will-change: transform;
 }

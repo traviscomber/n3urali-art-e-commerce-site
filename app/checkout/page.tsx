@@ -329,6 +329,11 @@ export default function CheckoutPage() {
   const [orderComplete, setOrderComplete] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<"crypto" | "demo">("crypto")
+  const [demoFormData, setDemoFormData] = useState({
+    email: "",
+    firstName: "",
+    lastName: "",
+  })
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -337,8 +342,10 @@ export default function CheckoutPage() {
     }).format(price)
   }
 
-  const handlePaymentSuccess = async (paymentIntentId?: string) => {
+  const handlePaymentSuccess = async (paymentIntentId?: string, customerInfo?: any) => {
     try {
+      console.log("[v0] Creating order with customer info:", customerInfo)
+
       // Create order in database
       const response = await fetch("/api/orders/create", {
         method: "POST",
@@ -348,6 +355,11 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           items,
           total: total * 1.03, // Include processing fee
+          customerInfo: customerInfo || {
+            email: "demo@example.com",
+            firstName: "Demo",
+            lastName: "User",
+          },
           paymentMethod,
           paymentIntentId,
         }),
@@ -359,16 +371,32 @@ export default function CheckoutPage() {
         clearCart()
         setOrderComplete(true)
       } else {
+        console.error("[v0] Order creation failed:", result.error)
         setError(result.error || "Failed to create order")
       }
     } catch (error) {
-      console.error("Order creation error:", error)
+      console.error("[v0] Order creation error:", error)
       setError("Failed to create order")
     }
   }
 
   const handlePaymentError = (errorMessage: string) => {
     setError(errorMessage)
+  }
+
+  const handleDemoPayment = () => {
+    if (!demoFormData.email || !demoFormData.firstName || !demoFormData.lastName) {
+      setError("Please fill in all required fields")
+      return
+    }
+    handlePaymentSuccess(`DEMO-${Date.now()}`, demoFormData)
+  }
+
+  const handleDemoInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDemoFormData({
+      ...demoFormData,
+      [e.target.name]: e.target.value,
+    })
   }
 
   // Redirect if cart is empty and order not complete
@@ -518,6 +546,50 @@ export default function CheckoutPage() {
 
                   <TabsContent value="demo" className="mt-6">
                     <div className="space-y-4">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Contact Information</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div>
+                            <Label htmlFor="demo-email">Email Address</Label>
+                            <Input
+                              id="demo-email"
+                              name="email"
+                              type="email"
+                              required
+                              value={demoFormData.email}
+                              onChange={handleDemoInputChange}
+                              placeholder="your@email.com"
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="demo-firstName">First Name</Label>
+                              <Input
+                                id="demo-firstName"
+                                name="firstName"
+                                required
+                                value={demoFormData.firstName}
+                                onChange={handleDemoInputChange}
+                                placeholder="John"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="demo-lastName">Last Name</Label>
+                              <Input
+                                id="demo-lastName"
+                                name="lastName"
+                                required
+                                value={demoFormData.lastName}
+                                onChange={handleDemoInputChange}
+                                placeholder="Doe"
+                              />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
                       <div className="p-4 border rounded-lg bg-muted/20">
                         <div className="flex items-center gap-2 mb-2">
                           <Wallet className="h-4 w-4" />
@@ -528,7 +600,7 @@ export default function CheckoutPage() {
                         </p>
                       </div>
 
-                      <Button onClick={() => handlePaymentSuccess()} size="lg" className="w-full">
+                      <Button onClick={handleDemoPayment} size="lg" className="w-full">
                         Complete Demo Order - {formatPrice(total * 1.03)}
                       </Button>
                     </div>

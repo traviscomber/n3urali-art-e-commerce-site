@@ -1017,3 +1017,200 @@ export async function updateImage(formData: FormData) {
     return handleDatabaseError(error)
   }
 }
+
+export async function updateImageDetails(
+  imageId: string,
+  updateData: {
+    title: string
+    price: number
+    description: string
+    category: string
+    rightsType: string
+  },
+) {
+  try {
+    console.log(`[v0] Updating image ${imageId} with data:`, updateData)
+    const supabase = await createClient()
+
+    // Get category ID from name
+    const categoryResult = await supabase.from("categories").select("id").eq("name", updateData.category).limit(1)
+
+    if (!categoryResult.data || categoryResult.data.length === 0) {
+      return {
+        success: false,
+        error: `Category '${updateData.category}' not found`,
+      }
+    }
+
+    const categoryId = categoryResult.data[0].id
+
+    const { data: result, error } = await supabase
+      .from("images")
+      .update({
+        title: updateData.title,
+        description: updateData.description,
+        category_id: categoryId,
+        price: updateData.price,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", imageId)
+      .select("*")
+
+    if (error) {
+      console.error("[v0] Database error in updateImageDetails:", error)
+      throw new Error(error.message)
+    }
+
+    if (!result || result.length === 0) {
+      return {
+        success: false,
+        error: "Image not found",
+      }
+    }
+
+    console.log("[v0] Image updated successfully:", result[0])
+
+    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
+    revalidatePath("/simple-admin")
+
+    return { success: true, data: result[0] }
+  } catch (error) {
+    return handleDatabaseError(error, "updateImageDetails")
+  }
+}
+
+export async function cleanupSampleImages() {
+  try {
+    console.log("[v0] Starting cleanup of sample images")
+    const supabase = await createClient()
+
+    // Find images that are likely samples/placeholders
+    const { data: sampleImages, error: findError } = await supabase
+      .from("images")
+      .select("id, title, description, file_path")
+      .or(
+        "title.ilike.%sample%,title.ilike.%placeholder%,title.ilike.%test%,description.ilike.%sample%,description.ilike.%placeholder%,file_path.ilike.%placeholder%",
+      )
+
+    if (findError) {
+      console.error("[v0] Error finding sample images:", findError)
+      throw new Error(findError.message)
+    }
+
+    if (!sampleImages || sampleImages.length === 0) {
+      return {
+        success: true,
+        message: "No sample images found to cleanup",
+        data: [],
+      }
+    }
+
+    console.log(`[v0] Found ${sampleImages.length} sample images to delete`)
+
+    // Check if any of these images are in orders (prevent deletion)
+    const imageIds = sampleImages.map((img) => img.id)
+    const { data: orderItems } = await supabase.from("order_items").select("image_id").in("image_id", imageIds)
+
+    const protectedImageIds = new Set(orderItems?.map((item) => item.image_id) || [])
+    const imagesToDelete = sampleImages.filter((img) => !protectedImageIds.has(img.id))
+
+    if (imagesToDelete.length === 0) {
+      return {
+        success: true,
+        message: "All sample images are protected (have orders), none deleted",
+        data: [],
+      }
+    }
+
+    // Delete the safe-to-delete images
+    const { data: deletedImages, error: deleteError } = await supabase
+      .from("images")
+      .delete()
+      .in(
+        "id",
+        imagesToDelete.map((img) => img.id),
+      )
+      .select("*")
+
+    if (deleteError) {
+      console.error("[v0] Error deleting sample images:", deleteError)
+      throw new Error(deleteError.message)
+    }
+
+    console.log(`[v0] Successfully deleted ${deletedImages?.length || 0} sample images`)
+
+    invalidateCache([CACHE_TAGS.IMAGES, CACHE_TAGS.CATEGORIES, CACHE_TAGS.STATS])
+    revalidatePath("/simple-admin")
+
+    return {
+      success: true,
+      message: `Successfully deleted ${deletedImages?.length || 0} sample images${protectedImageIds.size > 0 ? ` (${protectedImageIds.size} protected by orders)` : ""}`,
+      data: deletedImages || [],
+    }
+  } catch (error) {
+    return handleDatabaseError(error, "cleanupSampleImages")
+  }
+}
+
+export async function migrateFilesToOptimalStorage() {
+  try {
+    console.log("[v0] Starting file migration to optimal storage")
+    const supabase = await createClient()
+
+    // Get all images to analyze their storage
+    const { data: images, error: fetchError } = await supabase.from("images").select("id, title, file_path")
+
+    if (fetchError) {
+      console.error("[v0] Error fetching images for migration:", fetchError)
+      throw new Error(fetchError.message)
+    }
+
+    if (!images || images.length === 0) {
+      return {
+        success: true,
+        message: "No images found to migrate",
+        data: { migrated: 0, skipped: 0, errors: 0, total: 0 },
+      }
+    }
+
+    let migrated = 0
+    let skipped = 0
+    let errors = 0
+    const total = images.length
+
+    console.log(`[v0] Analyzing ${total} images for migration`)
+
+    for (const image of images) {
+      try {
+        // Skip if already using optimal storage patterns
+        if (image.file_path?.includes("uploads/high-quality/") || image.file_path?.startsWith("data:image/")) {
+          skipped++
+          continue
+        }
+
+        // For now, just mark as processed since we don't have actual file size data
+        // In a real implementation, you would:
+        // 1. Check file size from storage
+        // 2. Move files <40MB to database storage (base64)
+        // 3. Keep files >40MB in Supabase storage
+
+        console.log(`[v0] Would migrate image ${image.id}: ${image.title}`)
+        migrated++
+      } catch (error) {
+        console.error(`[v0] Error processing image ${image.id}:`, error)
+        errors++
+      }
+    }
+
+    const message = `Migration analysis completed: ${migrated} files would be optimized, ${skipped} already optimal, ${errors} errors out of ${total} total files`
+    console.log(`[v0] ${message}`)
+
+    return {
+      success: true,
+      message,
+      data: { migrated, skipped, errors, total },
+    }
+  } catch (error) {
+    return handleDatabaseError(error, "migrateFilesToOptimalStorage")
+  }
+}

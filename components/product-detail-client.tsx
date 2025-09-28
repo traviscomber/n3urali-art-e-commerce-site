@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,6 +12,7 @@ import { AuthModal } from "@/components/auth-modal"
 import Link from "next/link"
 import { ImagePreviewModal } from "@/components/image-preview-modal"
 import { LicenseSelector } from "@/components/license-selector"
+import { WatermarkedImage } from "@/components/watermarked-image"
 
 interface ProductDetailClientProps {
   image: {
@@ -147,7 +147,7 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
           {/* Image Section */}
           <div className="space-y-4">
             <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-muted">
-              <Image
+              <WatermarkedImage
                 src={
                   image.file_path ||
                   image.thumbnail_large_url ||
@@ -160,7 +160,6 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
                 alt={image.title}
                 fill
                 className={isFisheyeOrDomeImage() ? "object-contain" : "object-cover"}
-                priority
               />
               {image.is_featured && (
                 <Badge className="absolute top-4 left-4 bg-primary text-primary-foreground">Featured</Badge>

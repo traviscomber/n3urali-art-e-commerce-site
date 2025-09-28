@@ -1,10 +1,12 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { X, ZoomIn, Eye } from "lucide-react"
 import { PanoramaViewer } from "@/components/panorama-viewer"
+import { WatermarkedImage } from "@/components/watermarked-image"
 
 interface ImagePreviewModalProps {
   isOpen: boolean
@@ -34,8 +36,27 @@ export function ImagePreviewModal({
 
   const displayImageUrl = imageUrl || "/placeholder.svg?height=600&width=800"
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault()
+    return false
+  }
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.preventDefault()
+    return false
+  }
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
+      onContextMenu={handleContextMenu}
+      onDragStart={handleDragStart}
+      style={{
+        userSelect: "none",
+        WebkitUserSelect: "none",
+        MozUserSelect: "none",
+      }}
+    >
       <div className="absolute inset-4 bg-background rounded-lg shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur-sm shrink-0">
@@ -93,7 +114,7 @@ export function ImagePreviewModal({
           ) : viewMode === "zoom" ? (
             <div className="absolute inset-0 overflow-auto">
               <div className="min-h-full flex items-center justify-center p-4">
-                <Image
+                <WatermarkedImage
                   src={displayImageUrl || "/placeholder.svg"}
                   alt={title}
                   width={2000}
@@ -111,10 +132,21 @@ export function ImagePreviewModal({
           ) : (
             <div className="absolute inset-0 flex items-center justify-center p-4">
               <div className="relative w-full h-full">
-                <Image src={displayImageUrl || "/placeholder.svg"} alt={title} fill className="object-contain" />
+                <WatermarkedImage
+                  src={displayImageUrl || "/placeholder.svg"}
+                  alt={title}
+                  fill
+                  className="object-contain"
+                />
               </div>
             </div>
           )}
+        </div>
+
+        <div className="p-2 bg-muted/50 text-center">
+          <p className="text-xs text-muted-foreground">
+            ⚠️ Preview with watermarks - Purchase required for clean, commercial-use files
+          </p>
         </div>
       </div>
     </div>

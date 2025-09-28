@@ -56,15 +56,11 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
 
   useEffect(() => {
     loadCategories()
-    if (!initialImages.length) {
-      loadImages()
-    }
+    loadImages()
   }, [])
 
   useEffect(() => {
-    if (!initialImages.length) {
-      loadImages()
-    }
+    loadImages()
   }, [selectedCategory, sortBy])
 
   const loadCategories = async () => {
@@ -126,6 +122,21 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
     }
   }
 
+  const sortImages = (imagesToSort: Image[]) => {
+    return [...imagesToSort].sort((a, b) => {
+      switch (sortBy) {
+        case "price_asc":
+          return a.price - b.price
+        case "price_desc":
+          return b.price - a.price
+        case "title":
+          return a.title.localeCompare(b.title)
+        default: // created_at
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      }
+    })
+  }
+
   const filteredImages = images.filter((image) => {
     const matchesSearch =
       searchTerm === "" ||
@@ -140,6 +151,8 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
 
     return matchesSearch && matchesTags
   })
+
+  const sortedAndFilteredImages = sortImages(filteredImages)
 
   const clearFilters = () => {
     setSearchTerm("")
@@ -227,7 +240,7 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
       {/* Results count */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {loading ? "Loading..." : `${filteredImages.length} images found`}
+          {loading ? "Loading..." : `${sortedAndFilteredImages.length} images found`}
           {hasActiveTags && (
             <span className="ml-2 text-primary">
               (filtered by {selectedTags.length} tag{selectedTags.length !== 1 ? "s" : ""})
@@ -243,9 +256,9 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
             <div key={i} className="bg-card/30 rounded-lg h-96 animate-pulse" />
           ))}
         </div>
-      ) : filteredImages.length > 0 ? (
+      ) : sortedAndFilteredImages.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredImages.map((image) => (
+          {sortedAndFilteredImages.map((image) => (
             <ProductCard key={image.id} product={image} onView360={handleView360} />
           ))}
         </div>

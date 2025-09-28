@@ -61,10 +61,11 @@ export interface Database {
         Row: {
           id: string
           user_email: string
-          stripe_payment_intent_id: string | null
+          payment_intent_id: string | null
           total_amount: number
           status: "pending" | "completed" | "failed" | "refunded"
-          customer_name: string | null
+          payment_method: string | null
+          user_name: string | null
           billing_address: Record<string, any> | null
           created_at: string
           updated_at: string
@@ -72,10 +73,11 @@ export interface Database {
         Insert: {
           id?: string
           user_email: string
-          stripe_payment_intent_id?: string | null
+          payment_intent_id?: string | null
           total_amount: number
           status?: "pending" | "completed" | "failed" | "refunded"
-          customer_name?: string | null
+          payment_method?: string | null
+          user_name?: string | null
           billing_address?: Record<string, any> | null
           created_at?: string
           updated_at?: string
@@ -83,10 +85,11 @@ export interface Database {
         Update: {
           id?: string
           user_email?: string
-          stripe_payment_intent_id?: string | null
+          payment_intent_id?: string | null
           total_amount?: number
           status?: "pending" | "completed" | "failed" | "refunded"
-          customer_name?: string | null
+          payment_method?: string | null
+          user_name?: string | null
           billing_address?: Record<string, any> | null
           created_at?: string
           updated_at?: string

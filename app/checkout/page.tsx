@@ -1,22 +1,18 @@
 "use client"
 
 import { Input } from "@/components/ui/input"
-
 import { Label } from "@/components/ui/label"
-
 import type React from "react"
-
 import { useState } from "react"
 import { useCart } from "@/lib/contexts/cart-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, ShoppingCart, CheckCircle, CreditCard, Wallet } from "lucide-react"
+import { ArrowLeft, ShoppingCart, CheckCircle, Wallet } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { StripeCheckoutForm } from "@/components/stripe-checkout-form"
 
 type CryptoCurrency = {
   symbol: string
@@ -332,7 +328,7 @@ export default function CheckoutPage() {
   const router = useRouter()
   const [orderComplete, setOrderComplete] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "crypto" | "demo">("stripe")
+  const [paymentMethod, setPaymentMethod] = useState<"crypto" | "demo">("crypto")
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -433,7 +429,7 @@ export default function CheckoutPage() {
             Continue Shopping
           </Link>
           <h1 className="text-3xl font-bold">Checkout</h1>
-          <p className="text-muted-foreground mt-2">Complete your purchase</p>
+          <p className="text-muted-foreground mt-2">Complete your purchase with cryptocurrency</p>
         </div>
 
         {error && (
@@ -503,25 +499,13 @@ export default function CheckoutPage() {
               </CardHeader>
               <CardContent>
                 <Tabs value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as any)}>
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="stripe" className="flex items-center gap-2">
-                      <CreditCard className="h-4 w-4" />
-                      Card
-                    </TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="crypto" className="flex items-center gap-2">
                       <Wallet className="h-4 w-4" />
                       Crypto
                     </TabsTrigger>
                     <TabsTrigger value="demo">Demo</TabsTrigger>
                   </TabsList>
-
-                  <TabsContent value="stripe" className="mt-6">
-                    <StripeCheckoutForm
-                      amount={total * 1.03}
-                      onSuccess={handlePaymentSuccess}
-                      onError={handlePaymentError}
-                    />
-                  </TabsContent>
 
                   <TabsContent value="crypto" className="mt-6">
                     <CryptoPaymentForm

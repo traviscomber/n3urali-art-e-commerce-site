@@ -147,7 +147,7 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
           {/* Image Section */}
           <div className="space-y-4">
             <div
-              className={`relative overflow-hidden rounded-lg bg-muted ${
+              className={`relative overflow-hidden rounded-lg bg-black/5 dark:bg-white/5 ${
                 isFisheyeOrDomeImage() ? "aspect-square" : "aspect-[4/3]"
               }`}
             >
@@ -164,6 +164,7 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
                 alt={image.title}
                 fill
                 className="object-contain"
+                imageType={image.categories?.name?.toLowerCase() || ""}
               />
               {image.is_featured && (
                 <Badge className="absolute top-4 left-4 bg-primary text-primary-foreground">Featured</Badge>

@@ -13,6 +13,7 @@ interface WatermarkedImageProps {
   fill?: boolean
   width?: number
   height?: number
+  imageType?: string // Added imageType prop for dynamic watermark sizing
 }
 
 export function WatermarkedImage({
@@ -24,6 +25,7 @@ export function WatermarkedImage({
   fill = false,
   width,
   height,
+  imageType = "",
 }: WatermarkedImageProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -54,7 +56,16 @@ export function WatermarkedImage({
       const logo = new Image()
       logo.crossOrigin = "anonymous"
       logo.onload = () => {
-        const watermarkSize = Math.min(img.naturalWidth * 0.12, 300)
+        let watermarkSizeMultiplier = 0.12 // Default size
+
+        // Smaller watermarks for panoramic images
+        if (imageType.includes("equirectangular") || imageType.includes("squirectangular")) {
+          watermarkSizeMultiplier = 0.08 // Smaller for panoramic images
+        } else if (imageType.includes("fisheye") || imageType.includes("dome")) {
+          watermarkSizeMultiplier = 0.1 // Medium size for fisheye/dome
+        }
+
+        const watermarkSize = Math.min(img.naturalWidth * watermarkSizeMultiplier, 200)
 
         // Corner watermarks with higher opacity
         const positions = [
@@ -69,8 +80,10 @@ export function WatermarkedImage({
           ctx.drawImage(logo, pos.x, pos.y, watermarkSize, watermarkSize)
         })
 
-        ctx.globalAlpha = 0.4 // Increased center watermark opacity from 0.25 to 0.4 to make it more visible
-        const largeCenterSize = watermarkSize * 1.2
+        ctx.globalAlpha = 0.4
+        const centerSizeMultiplier =
+          imageType.includes("equirectangular") || imageType.includes("squirectangular") ? 1.0 : 1.2
+        const largeCenterSize = watermarkSize * centerSizeMultiplier
         const largeCenterX = (img.naturalWidth - largeCenterSize) / 2
         const largeCenterY = (img.naturalHeight - largeCenterSize) / 2
         ctx.drawImage(logo, largeCenterX, largeCenterY, largeCenterSize, largeCenterSize)
@@ -116,7 +129,7 @@ export function WatermarkedImage({
       canvas.removeEventListener("dragstart", preventDrag)
       canvas.removeEventListener("selectstart", preventDrag)
     }
-  }, [src, onLoad])
+  }, [src, onLoad, imageType])
 
   if (error) {
     return (

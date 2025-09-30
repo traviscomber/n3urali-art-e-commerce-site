@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Check, Info, Crown, Users } from "lucide-react"
+import { Check, Info, Crown, Users, ExternalLink } from "lucide-react"
 import { toast } from "sonner"
+import Link from "next/link"
 
 interface License {
   id: string
@@ -108,9 +109,19 @@ export function LicenseSelector({ basePrice, selectedLicenseId, onLicenseSelect,
 
   return (
     <div className={`space-y-4 ${className}`}>
-      <div className="flex items-center gap-2">
-        <h3 className="font-semibold">License Type</h3>
-        <Info className="h-4 w-4 text-muted-foreground" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <h3 className="font-semibold">License Type</h3>
+          <Info className="h-4 w-4 text-muted-foreground" />
+        </div>
+        <Link
+          href="/licensing-terms"
+          target="_blank"
+          className="text-xs text-primary hover:underline flex items-center gap-1"
+        >
+          View Full Terms
+          <ExternalLink className="h-3 w-3" />
+        </Link>
       </div>
 
       <div className="space-y-3">

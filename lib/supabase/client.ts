@@ -6,6 +6,10 @@ export function createClient() {
 
   if (!supabaseUrl) {
     console.error("[v0] NEXT_PUBLIC_SUPABASE_URL is not set")
+    console.error(
+      "[v0] Available env vars:",
+      Object.keys(process.env).filter((key) => key.includes("SUPABASE")),
+    )
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL environment variable")
   }
 
@@ -17,4 +21,13 @@ export function createClient() {
   console.log("[v0] Creating Supabase client with URL:", supabaseUrl.substring(0, 30) + "...")
 
   return createBrowserClient(supabaseUrl, supabaseAnonKey)
+}
+
+export function createClientSafe() {
+  try {
+    return createClient()
+  } catch (error) {
+    console.error("[v0] Failed to create Supabase client:", error)
+    return null
+  }
 }

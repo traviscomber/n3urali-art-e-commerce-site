@@ -1,0 +1,357 @@
+@media print {
+  /* Reset and base styles for professional document printing */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: white !important;
+    /* Force pure black text for maximum contrast */
+    color: #000 !important;
+    font-size: 11pt;
+    line-height: 1.6;
+  }
+
+  /* Hide all non-essential UI elements */
+  header,
+  nav,
+  footer,
+  button,
+  .print\\:hidden,
+  [class*="lucide"],
+  svg {
+    display: none !important;
+  }
+
+  /* Page setup with margins for professional document */
+  @page {
+    size: letter;
+    margin: 0.75in 1in;
+  }
+
+  /* Container adjustments */
+  .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Remove card styling for clean document look */
+  [class*="card"],
+  [class*="Card"] {
+    background: white !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Typography hierarchy for professional document */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    /* Force all headings to pure black */
+    color: #000 !important;
+  }
+
+  h1 {
+    font-size: 18pt;
+    font-weight: bold;
+    margin-bottom: 8pt;
+    page-break-after: avoid;
+  }
+
+  h2 {
+    font-size: 14pt;
+    font-weight: bold;
+    margin-top: 16pt;
+    margin-bottom: 8pt;
+    page-break-after: avoid;
+    text-transform: uppercase;
+    letter-spacing: 0.5pt;
+  }
+
+  h3 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-top: 14pt;
+    margin-bottom: 6pt;
+    page-break-after: avoid;
+  }
+
+  h4 {
+    font-size: 11pt;
+    font-weight: 600;
+    margin-top: 10pt;
+    margin-bottom: 4pt;
+    page-break-after: avoid;
+  }
+
+  p {
+    /* Force all paragraphs to pure black */
+    color: #000 !important;
+    margin-bottom: 8pt;
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Section spacing and page breaks */
+  section {
+    page-break-inside: avoid;
+    margin-bottom: 16pt;
+  }
+
+  /* Signature section - must stay together on one page */
+  .signature-section {
+    page-break-before: auto;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    display: block;
+    margin-top: 24pt;
+    padding-top: 16pt;
+  }
+
+  /* Ensure signature grid stays together */
+  .signature-section .grid,
+  .signature-section > div {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Lists formatting */
+  ul,
+  ol {
+    margin-bottom: 8pt;
+    padding-left: 24pt;
+  }
+
+  li {
+    /* Force all list items to pure black */
+    color: #000 !important;
+    margin-bottom: 4pt;
+    line-height: 1.5;
+  }
+
+  /* Information boxes - convert to bordered sections */
+  .bg-muted,
+  .bg-muted-50,
+  [class*="bg-muted"],
+  [class*="bg-gray"] {
+    /* Use white background with border for clarity */
+    background-color: white !important;
+    border: 1.5pt solid #000 !important;
+    padding: 12pt !important;
+    margin: 8pt 0 !important;
+    page-break-inside: avoid;
+  }
+
+  /* Force all text colors to black for maximum contrast */
+  .text-muted-foreground,
+  [class*="text-muted"],
+  [class*="text-gray"],
+  .text-foreground,
+  [class*="text-foreground"] {
+    color: #000 !important;
+  }
+
+  .text-primary,
+  [class*="text-primary"] {
+    color: #000 !important;
+  }
+
+  /* Override all Tailwind color classes */
+  [class*="text-gray-"] {
+    color: #000 !important;
+  }
+
+  /* Borders and dividers */
+  .border,
+  .border-b,
+  .border-t,
+  [class*="border"] {
+    border-color: #000 !important;
+  }
+
+  /* Signature section formatting */
+  .grid {
+    display: table;
+    width: 100%;
+    page-break-inside: avoid;
+    break-inside: avoid !important;
+  }
+
+  .grid > div {
+    display: table-cell;
+    width: 50%;
+    padding: 0 12pt;
+    vertical-align: top;
+  }
+
+  /* Signature lines */
+  .border-b.border-foreground-20,
+  [class*="border-gray"] {
+    border-bottom: 1pt solid #000 !important;
+    min-height: 24pt;
+    margin-top: 4pt;
+  }
+
+  /* Links - show URLs for external links only */
+  a {
+    color: #000 !important;
+    text-decoration: none !important;
+  }
+
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #000;
+    word-break: break-all;
+  }
+
+  a[href^="#"]:after,
+  a[href^="/"]:after {
+    content: "";
+  }
+
+  /* Document header styling */
+  .text-center.mb-12 {
+    text-align: center;
+    margin-bottom: 24pt;
+    padding-bottom: 12pt;
+    border-bottom: 2pt solid #000;
+    page-break-after: avoid;
+  }
+
+  /* Prose adjustments */
+  .prose,
+  .prose * {
+    /* Force all prose content to black */
+    color: #000 !important;
+    max-width: 100% !important;
+  }
+
+  /* Space adjustments */
+  .space-y-8 > * + * {
+    margin-top: 16pt;
+  }
+
+  .space-y-4 > * + * {
+    margin-top: 8pt;
+  }
+
+  .space-y-2 > * + * {
+    margin-top: 4pt;
+  }
+
+  .space-y-3 > * + * {
+    margin-top: 6pt;
+  }
+
+  /* Margin utilities */
+  .ml-4 {
+    margin-left: 16pt;
+  }
+
+  .ml-6 {
+    margin-left: 24pt;
+  }
+
+  .mb-2 {
+    margin-bottom: 4pt;
+  }
+
+  .mb-4 {
+    margin-bottom: 8pt;
+  }
+
+  .mb-6 {
+    margin-bottom: 12pt;
+  }
+
+  .mt-12 {
+    margin-top: 24pt;
+  }
+
+  .pt-8 {
+    padding-top: 16pt;
+  }
+
+  .pb-8 {
+    padding-bottom: 16pt;
+  }
+
+  /* Footer note styling */
+  .mt-12.p-6 {
+    margin-top: 24pt;
+    padding: 12pt;
+    /* White background with black border for clarity */
+    background-color: white !important;
+    border: 1.5pt solid #000 !important;
+    page-break-inside: avoid;
+  }
+
+  /* Strong/bold text */
+  strong {
+    font-weight: 600;
+    color: #000 !important;
+  }
+
+  /* Ensure proper text rendering */
+  .font-semibold {
+    font-weight: 600;
+    color: #000 !important;
+  }
+
+  .font-bold {
+    font-weight: bold;
+    color: #000 !important;
+  }
+
+  /* Remove rounded corners for print */
+  .rounded,
+  .rounded-lg,
+  [class*="rounded"] {
+    border-radius: 0 !important;
+  }
+
+  /* Page number in footer */
+  @page {
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font-size: 9pt;
+      color: #000;
+    }
+  }
+
+  /* Document title in header */
+  @page {
+    @top-center {
+      content: "Image Licensing Agreement - n3uralia360.art";
+      font-size: 9pt;
+      color: #000;
+      border-bottom: 0.5pt solid #000;
+      padding-bottom: 4pt;
+    }
+  }
+
+  /* First page - no header */
+  @page :first {
+    @top-center {
+      content: none;
+    }
+  }
+
+  /* Additional overrides for any remaining color classes */
+  div,
+  span,
+  label {
+    color: #000 !important;
+  }
+}

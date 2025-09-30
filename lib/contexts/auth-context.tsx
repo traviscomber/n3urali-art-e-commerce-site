@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useState, useEffect, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
 
@@ -17,9 +17,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
+
+  const supabase = useMemo(() => {
+    try {
+      return createClient()
+    } catch (error) {
+      console.error("[v0] Failed to create Supabase client:", error)
+      return null
+    }
+  }, [])
 
   useEffect(() => {
+    if (!supabase) {
+      console.warn("[v0] Supabase client not available, skipping auth")
+      setIsLoading(false)
+      return
+    }
+
     const getInitialSession = async () => {
       try {
         const {
@@ -43,9 +57,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [supabase])
 
   const signOut = async () => {
+    if (!supabase) {
+      console.warn("[v0] Cannot sign out: Supabase client not available")
+      return
+    }
+
     try {
       await supabase.auth.signOut()
     } catch (error) {

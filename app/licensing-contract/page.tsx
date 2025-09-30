@@ -190,8 +190,10 @@ export default function LicensingContractPage() {
                     </h4>
                     <ul className="list-disc ml-6 space-y-1 text-gray-800 dark:text-gray-200">
                       <li>
-                        <strong className="text-gray-900 dark:text-gray-100">No Resale:</strong> You may NOT resell,
-                        redistribute, or sublicense the original image files
+                        <strong className="text-gray-900 dark:text-gray-100">Limited Resale:</strong> You may resell the
+                        image ONE time to a final customer. The final customer may use and display the image for their
+                        purposes but receives no exclusive rights and cannot resell, redistribute, or sublicense the
+                        image further
                       </li>
                       <li>
                         <strong className="text-gray-900 dark:text-gray-100">No Standalone Distribution:</strong> Images

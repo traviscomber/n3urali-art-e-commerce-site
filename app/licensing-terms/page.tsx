@@ -513,7 +513,13 @@ export default function LicensingTermsPage() {
                 If you have questions about which license is right for your project, or need clarification on any of
                 these terms, please don't hesitate to contact us.
               </p>
-              <div className="flex gap-4">
+              <div className="flex flex-wrap gap-4">
+                <Link href="/licensing-contract">
+                  <Button variant="outline" className="flex items-center gap-2 bg-transparent">
+                    <FileText className="h-4 w-4" />
+                    View Contract Template
+                  </Button>
+                </Link>
                 <Link href="/contact">
                   <Button>Contact Support</Button>
                 </Link>

@@ -304,6 +304,11 @@ export default function LicensingContractPage() {
                     <strong className="text-gray-900 dark:text-gray-100">6.4</strong> Refunds are subject to our refund
                     policy available at n3uralia360.art/refund-policy.
                   </p>
+                  <p>
+                    <strong className="text-gray-900 dark:text-gray-100">6.5 Fidelity Rewards Program:</strong>{" "}
+                    n3uralia360.art operates a fidelity rewards program offering 10% to 15% commission to qualified
+                    sellers and curators who promote our products.
+                  </p>
                 </div>
               </section>
 

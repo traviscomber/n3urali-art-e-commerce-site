@@ -403,6 +403,17 @@ export default function LicensingTermsPage() {
                   sales are final once the download has been accessed.
                 </p>
               </div>
+
+              {/* Fidelity Rewards Program */}
+              <div>
+                <h3 className="font-semibold mb-2">5.3 Fidelity Rewards Program</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  n3uralia360.art offers a fidelity rewards program for sellers and curators who promote our products.
+                  Qualified participants can earn between 10% to 15% commission on sales generated through their
+                  referrals. This program is designed to reward those who are interested in sharing our ultra
+                  high-quality AI-generated 360° photography with their audiences.
+                </p>
+              </div>
             </CardContent>
           </Card>
 

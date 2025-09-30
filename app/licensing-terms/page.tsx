@@ -77,6 +77,10 @@ export default function LicensingTermsPage() {
                   </div>
                   <div className="flex items-start gap-2">
                     <X className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm font-semibold">No resale or redistribution rights</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <X className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
                     <span className="text-sm">Image remains in marketplace</span>
                   </div>
                   <div className="flex items-start gap-2">
@@ -113,6 +117,14 @@ export default function LicensingTermsPage() {
                   </div>
                   <div className="flex items-start gap-2">
                     <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm font-semibold">Resale and redistribution rights</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm font-semibold">Full modification and derivative rights</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                     <span className="text-sm font-semibold">Image removed from marketplace</span>
                   </div>
                   <div className="flex items-start gap-2">
@@ -144,6 +156,10 @@ export default function LicensingTermsPage() {
                   the licensed image for both commercial and personal purposes. The image will remain available in our
                   marketplace for other customers to purchase.
                 </p>
+                <p className="text-sm text-muted-foreground leading-relaxed mt-2 font-semibold">
+                  Important: Non-Exclusive licenses do NOT include resale or redistribution rights. You may not resell,
+                  redistribute, or sublicense the original image files to third parties.
+                </p>
               </div>
 
               <div>
@@ -155,6 +171,11 @@ export default function LicensingTermsPage() {
                   licenses will be granted to any third parties. You become the sole licensee with exclusive commercial
                   rights to the image.
                 </p>
+                <p className="text-sm text-muted-foreground leading-relaxed mt-2 font-semibold">
+                  Exclusive License Benefits: With an Exclusive License, you CAN resell, redistribute, sublicense, and
+                  create derivative works from the image. You have full commercial control including the right to modify
+                  and monetize the content as you see fit.
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -162,97 +183,159 @@ export default function LicensingTermsPage() {
           {/* Section 2: Permitted Uses */}
           <Card>
             <CardHeader>
-              <CardTitle>2. Permitted Uses (Both License Types)</CardTitle>
+              <CardTitle>2. Permitted Uses</CardTitle>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span>
-                    <strong>Commercial Use:</strong> Advertising, marketing materials, websites, social media, product
-                    packaging, presentations, and any commercial projects
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span>
-                    <strong>Editorial Use:</strong> Magazines, newspapers, blogs, books, and editorial publications
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span>
-                    <strong>Digital Products:</strong> Websites, mobile apps, software interfaces, digital
-                    presentations, and online content
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span>
-                    <strong>Print Products:</strong> Brochures, flyers, posters, business cards, and other printed
-                    materials
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span>
-                    <strong>Modifications:</strong> You may modify, crop, resize, and edit the images to suit your needs
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span>
-                    <strong>Unlimited Reproductions:</strong> No limit on the number of times you can use or reproduce
-                    the image
-                  </span>
-                </li>
-              </ul>
+            <CardContent className="space-y-6">
+              <div>
+                <h3 className="font-semibold mb-3 text-base">2.1 Both License Types Include:</h3>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>Commercial Use:</strong> Advertising, marketing materials, websites, social media, product
+                      packaging, presentations, and any commercial projects
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>Editorial Use:</strong> Magazines, newspapers, blogs, books, and editorial publications
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>Digital Products:</strong> Websites, mobile apps, software interfaces, digital
+                      presentations, and online content
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>Print Products:</strong> Brochures, flyers, posters, business cards, and other printed
+                      materials
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>Modifications:</strong> You may modify, crop, resize, and edit the images to suit your
+                      needs
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>Unlimited Reproductions:</strong> No limit on the number of times you can use or reproduce
+                      the image
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-3 text-base">2.2 Exclusive License Additional Rights:</h3>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>Resale Rights:</strong> You may resell the image or modified versions to third parties
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>Redistribution Rights:</strong> You may redistribute the image through any channels
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>Sublicensing Rights:</strong> You may grant sublicenses to others for use of the image
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>Derivative Works:</strong> Full rights to create and monetize derivative works based on
+                      the image
+                    </span>
+                  </li>
+                </ul>
+              </div>
             </CardContent>
           </Card>
 
           {/* Section 3: Restrictions */}
           <Card>
             <CardHeader>
-              <CardTitle>3. Restrictions (Both License Types)</CardTitle>
+              <CardTitle>3. Restrictions</CardTitle>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <X className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
-                  <span>
-                    <strong>No Resale:</strong> You may not resell, redistribute, or sublicense the original image files
-                    to third parties
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <X className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
-                  <span>
-                    <strong>No Standalone Distribution:</strong> Images cannot be distributed as standalone files or in
-                    a way that allows extraction
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <X className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
-                  <span>
-                    <strong>No Trademark Use:</strong> Images cannot be used as trademarks, service marks, or logos
-                    without explicit written permission
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <X className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
-                  <span>
-                    <strong>No Defamatory Use:</strong> Images cannot be used in a defamatory, pornographic, or unlawful
-                    manner
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <X className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
-                  <span>
-                    <strong>No False Representation:</strong> You may not claim authorship or ownership of the original
-                    AI-generated content
-                  </span>
-                </li>
-              </ul>
+            <CardContent className="space-y-6">
+              <div>
+                <h3 className="font-semibold mb-3 text-base">3.1 Non-Exclusive License Restrictions:</h3>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <X className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>No Resale:</strong> You may NOT resell, redistribute, or sublicense the original image
+                      files to third parties
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <X className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>No Standalone Distribution:</strong> Images cannot be distributed as standalone files or
+                      in a way that allows extraction
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <X className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>No Trademark Use:</strong> Images cannot be used as trademarks, service marks, or logos
+                      without explicit written permission
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <X className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>No Defamatory Use:</strong> Images cannot be used in a defamatory, pornographic, or
+                      unlawful manner
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <X className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>No False Representation:</strong> You may not claim authorship or ownership of the
+                      original AI-generated content
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-3 text-base">3.2 Exclusive License Restrictions:</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Exclusive licenses have significantly fewer restrictions. You have full commercial control including
+                  resale and redistribution rights. The following restrictions still apply:
+                </p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <X className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>No Defamatory Use:</strong> Images cannot be used in a defamatory, pornographic, or
+                      unlawful manner
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <X className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                    <span>
+                      <strong>No False Representation:</strong> You may not claim to have created the original
+                      AI-generation technology or algorithms
+                    </span>
+                  </li>
+                </ul>
+              </div>
             </CardContent>
           </Card>
 

@@ -33,8 +33,8 @@ export default function ContractsPage() {
       id: "069",
       customer: "Labyrinth + Neuralia",
       status: "active",
-      totalAmount: 3000,
-      imageCount: 50,
+      totalAmount: 1500, // Updated from 3000 to 1500
+      imageCount: 20, // Updated from 50 to 20
       resolution: "4K",
       commission: 15,
       terms: [

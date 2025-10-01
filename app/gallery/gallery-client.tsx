@@ -59,17 +59,32 @@ export default function GalleryClient() {
 
   const loadData = async () => {
     try {
-      const [imagesResult, categoriesResult] = await Promise.all([getImages(), getCategories()])
+      const [imagesResult, categoriesResult] = await Promise.all([
+        getImages().catch((error) => {
+          console.error("Error fetching images:", error)
+          return { success: false, error: error.message, data: [] }
+        }),
+        getCategories().catch((error) => {
+          console.error("Error fetching categories:", error)
+          return { success: false, error: error.message, data: [] }
+        }),
+      ])
 
       if (imagesResult.success && categoriesResult.success) {
         const allImages = imagesResult.data || []
         const allCategories = categoriesResult.data || []
 
-        setImages(allImages)
-        setCategories(allCategories)
-        setFeaturedImages(allImages.filter((img) => img.featured || img.is_featured))
+        const validImages = allImages.filter((img) => {
+          return img && img.id && img.title
+        })
 
-        const equirectangular = allImages.filter(
+        console.log(`[v0] Loaded ${validImages.length} valid images out of ${allImages.length} total`)
+
+        setImages(validImages)
+        setCategories(allCategories)
+        setFeaturedImages(validImages.filter((img) => img.featured || img.is_featured))
+
+        const equirectangular = validImages.filter(
           (img) =>
             img.category_name?.toLowerCase().includes("equirectangular") ||
             img.categories?.name?.toLowerCase().includes("equirectangular") ||
@@ -85,9 +100,17 @@ export default function GalleryClient() {
         setEquirectangularImages(equirectangular)
       } else {
         console.error("Error loading data:", imagesResult.error || categoriesResult.error)
+        setImages([])
+        setCategories([])
+        setFeaturedImages([])
+        setEquirectangularImages([])
       }
     } catch (error) {
       console.error("Error loading data:", error)
+      setImages([])
+      setCategories([])
+      setFeaturedImages([])
+      setEquirectangularImages([])
     } finally {
       setLoading(false)
     }
@@ -226,7 +249,8 @@ export default function GalleryClient() {
                             image.image_url ||
                             image.file_path ||
                             image.thumbnail_large_url ||
-                            "/placeholder.svg?height=400&width=800"
+                            "/placeholder.svg?height=400&width=800" ||
+                            "/placeholder.svg"
                           }
                           alt={image.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

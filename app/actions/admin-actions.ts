@@ -36,6 +36,58 @@ function logQueryPerformance(queryName: string, startTime: number, recordCount?:
   }
 }
 
+function sanitizeString(str: string | null | undefined): string {
+  if (!str) return ""
+
+  try {
+    // Remove or escape problematic characters
+    return str
+      .replace(/\\/g, "\\\\") // Escape backslashes
+      .replace(/"/g, '\\"') // Escape quotes
+      .replace(/\n/g, "\\n") // Escape newlines
+      .replace(/\r/g, "\\r") // Escape carriage returns
+      .replace(/\t/g, "\\t") // Escape tabs
+      .replace(/[\x00-\x1F\x7F-\x9F]/g, "") // Remove control characters
+      .substring(0, 10000) // Limit string length to prevent huge payloads
+  } catch (error) {
+    console.error("[v0] Error sanitizing string:", error)
+    return ""
+  }
+}
+
+function sanitizeImageData(image: any): any {
+  try {
+    return {
+      ...image,
+      title: sanitizeString(image.title),
+      description: sanitizeString(image.description),
+      file_path: sanitizeString(image.file_path),
+      image_url: sanitizeString(image.image_url),
+      thumbnail_url: sanitizeString(image.thumbnail_url),
+      category_name: sanitizeString(image.category_name),
+      license_name: sanitizeString(image.license_name),
+      license_description: sanitizeString(image.license_description),
+      categories: image.categories
+        ? {
+            ...image.categories,
+            name: sanitizeString(image.categories.name),
+            description: sanitizeString(image.categories.description),
+          }
+        : undefined,
+      licenses: image.licenses
+        ? {
+            ...image.licenses,
+            name: sanitizeString(image.licenses.name),
+            description: sanitizeString(image.licenses.description),
+          }
+        : undefined,
+    }
+  } catch (error) {
+    console.error("[v0] Error sanitizing image data:", error)
+    return null
+  }
+}
+
 const getCachedImages = unstable_cache(
   async () => {
     try {
@@ -66,26 +118,35 @@ const getCachedImages = unstable_cache(
       const categoryMap = new Map(categories?.map((c) => [c.id, c]) || [])
       const licenseMap = new Map(licenses?.map((l) => [l.id, l]) || [])
 
-      const transformedData =
-        images?.map((item) => {
-          const displayUrl = item.file_path
-            ? ImageUrlHandler.convertToDisplayUrl(item.file_path, { useProxy: true })
-            : item.file_path
+      const transformedData = (images || [])
+        .map((item) => {
+          try {
+            const displayUrl = item.file_path
+              ? ImageUrlHandler.convertToDisplayUrl(item.file_path, { useProxy: true })
+              : item.file_path
 
-          return {
-            ...item,
-            image_url: displayUrl,
-            thumbnail_url: displayUrl,
-            file_path: displayUrl, // Ensure file_path also uses proxy URL
-            active: true, // Default to active since we don't have this column
-            featured: item.is_featured,
-            categories: categoryMap.get(item.category_id),
-            licenses: licenseMap.get(item.license_id),
-            category_name: categoryMap.get(item.category_id)?.name,
-            license_name: licenseMap.get(item.license_id)?.name,
-            license_description: licenseMap.get(item.license_id)?.description,
+            const imageData = {
+              ...item,
+              image_url: displayUrl,
+              thumbnail_url: displayUrl,
+              file_path: displayUrl, // Ensure file_path also uses proxy URL
+              active: true, // Default to active since we don't have this column
+              featured: item.is_featured,
+              categories: categoryMap.get(item.category_id),
+              licenses: licenseMap.get(item.license_id),
+              category_name: categoryMap.get(item.category_id)?.name,
+              license_name: licenseMap.get(item.license_id)?.name,
+              license_description: licenseMap.get(item.license_id)?.description,
+            }
+
+            // Sanitize all string fields
+            return sanitizeImageData(imageData)
+          } catch (error) {
+            console.error(`[v0] Error transforming image ${item.id}:`, error)
+            return null
           }
-        }) || []
+        })
+        .filter((item) => item !== null) // Remove any failed transformations
 
       console.log(`[v0] getCachedImages: Retrieved ${transformedData.length} images`)
       return transformedData
@@ -183,13 +244,16 @@ const getCachedImagesPaginated = unstable_cache(
           }
         }) || []
 
+      // Sanitize transformed data before returning
+      const sanitizedData = transformedData.map(sanitizeImageData).filter((item) => item !== null)
+
       const totalCount = count || 0
       const totalPages = Math.ceil(totalCount / limit)
 
-      logQueryPerformance("getCachedImagesPaginated", startTime, transformedData.length)
+      logQueryPerformance("getCachedImagesPaginated", startTime, sanitizedData.length)
 
       return {
-        images: transformedData,
+        images: sanitizedData,
         pagination: {
           currentPage: page,
           totalPages,
@@ -782,18 +846,31 @@ export async function createImageWithCategoryObject(imageData: {
 
     console.log("[v0] Using license_id:", licenseId, "for upload")
 
+    // Sanitize image data before inserting into the database
+    const sanitizedImageData = sanitizeImageData({
+      title: imageData.title,
+      description: imageData.description,
+      category_id: categoryId,
+      license_id: licenseId,
+      price: imageData.price,
+      file_path: imageData.image_url, // Use image_url as file_path for now
+      thumbnail_url: imageData.thumbnail_url, // This might need adjustment if it's not a direct file path
+      is_featured: false,
+      active: true,
+    })
+
+    if (!sanitizedImageData) {
+      return { success: false, error: "Failed to sanitize image data." }
+    }
+
     const { data: result, error } = await supabase
       .from("images")
       .insert([
         {
-          title: imageData.title,
-          description: imageData.description,
-          category_id: categoryId,
-          license_id: licenseId,
-          price: imageData.price,
-          file_path: imageData.image_url,
-          is_featured: false,
-          active: true,
+          ...sanitizedImageData,
+          // Ensure correct fields are mapped if 'file_path' is meant to be distinct from 'image_url'
+          // For now, assuming image_url is the primary path.
+          file_path: sanitizedImageData.image_url,
         },
       ])
       .select("*")
@@ -864,7 +941,7 @@ export async function getOrders(userEmail?: string) {
       result = await supabase
         .from("orders")
         .select(`
-          *, 
+          *,
           order_items!inner(id, license_id, price, image_id, images(title, thumbnail_url))
         `)
         .eq("user_email", userEmail)
@@ -873,7 +950,7 @@ export async function getOrders(userEmail?: string) {
       result = await supabase
         .from("orders")
         .select(`
-          *, 
+          *,
           order_items!inner(id, license_id, price, image_id, images(title, thumbnail_url))
         `)
         .order("created_at", { ascending: false })
@@ -901,7 +978,7 @@ export async function getOrdersOptimized(userEmail?: string, page = 1, limit = 2
       result = await supabase
         .from("orders")
         .select(`
-          *, 
+          *,
           order_items!inner(id, license_id, price, image_id, images(title, thumbnail_url))
         `)
         .eq("user_email", userEmail)
@@ -911,7 +988,7 @@ export async function getOrdersOptimized(userEmail?: string, page = 1, limit = 2
       result = await supabase
         .from("orders")
         .select(`
-          *, 
+          *,
           order_items!inner(id, license_id, price, image_id, images(title, thumbnail_url))
         `)
         .order("created_at", { ascending: false })

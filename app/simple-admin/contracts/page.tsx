@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,18 +25,8 @@ interface Contract {
 
 export default function ContractsPage() {
   const router = useRouter()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [copied, setCopied] = useState(false)
   const [showFullContract, setShowFullContract] = useState(false)
-
-  useEffect(() => {
-    const authStatus = localStorage.getItem("simple_admin_auth")
-    if (authStatus === "true") {
-      setIsAuthenticated(true)
-    } else {
-      router.push("/simple-admin")
-    }
-  }, [router])
 
   const contracts: Contract[] = [
     {

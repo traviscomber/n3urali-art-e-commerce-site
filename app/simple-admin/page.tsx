@@ -25,6 +25,7 @@ import {
   HardDrive,
   Tag,
   Tags,
+  FileText,
 } from "lucide-react"
 import { TagManagementDashboard } from "@/components/admin/tag-management-dashboard"
 
@@ -802,6 +803,18 @@ export default function SimpleAdminPage() {
             <Card>
               <CardContent className="p-4">
                 <Button
+                  onClick={() => (window.location.href = "/simple-admin/contracts")}
+                  variant="outline"
+                  className="w-full h-full border-purple-200 hover:bg-purple-50 bg-transparent"
+                >
+                  <FileText className="mr-2 h-4 w-4" />
+                  View Contracts
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <Button
                   onClick={handleCleanupSampleImages}
                   disabled={cleaning}
                   variant="destructive"
@@ -843,23 +856,28 @@ export default function SimpleAdminPage() {
                 </Button>
               </CardContent>
             </Card>
+          </div>
+        )}
+
+        {stats && (
+          <div className="mb-8">
             <Card>
               <CardContent className="p-4">
                 <Button
                   onClick={handleMigrateExistingTags}
                   disabled={migratingTags}
                   variant="outline"
-                  className="w-full h-full border-blue-200 hover:bg-blue-50 bg-transparent"
+                  className="w-full border-blue-200 hover:bg-blue-50 bg-transparent"
                 >
                   {migratingTags ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Migrating...
+                      Migrating Tags...
                     </>
                   ) : (
                     <>
                       <Tags className="mr-2 h-4 w-4" />
-                      Migrate Tags
+                      Migrate Tags to Enhanced System
                     </>
                   )}
                 </Button>
@@ -915,6 +933,7 @@ export default function SimpleAdminPage() {
                               image.image_url ||
                               image.thumbnail_url ||
                               "/placeholder.svg?height=64&width=64&text=No+Image" ||
+                              "/placeholder.svg" ||
                               "/placeholder.svg"
                             }
                             alt={image.title}

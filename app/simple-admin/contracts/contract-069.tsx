@@ -85,7 +85,7 @@ export function Contract069() {
             <h2 className="text-xl font-bold border-b border-slate-300 pb-2">ARTICLE 1: SCOPE OF WORK</h2>
             <div className="space-y-2 ml-4">
               <p>
-                <span className="font-semibold">1.1 Deliverables:</span> Provider shall deliver to Client fifty (50)
+                <span className="font-semibold">1.1 Deliverables:</span> Provider shall deliver to Client twenty (20)
                 digital images in 4K resolution format.
               </p>
               <p>
@@ -129,7 +129,7 @@ export function Contract069() {
               <p>
                 <span className="font-semibold">2.4 Completion of Work:</span> Provider's obligations under this
                 Agreement shall be deemed complete upon Client's receipt of the download link and successful download of
-                all fifty (50) images.
+                all twenty (20) images.
               </p>
             </div>
           </section>
@@ -139,17 +139,17 @@ export function Contract069() {
             <h2 className="text-xl font-bold border-b border-slate-300 pb-2">ARTICLE 3: PAYMENT TERMS</h2>
             <div className="space-y-2 ml-4">
               <p>
-                <span className="font-semibold">3.1 Total Contract Value:</span> Three Thousand United States Dollars
-                (USD $3,000.00)
+                <span className="font-semibold">3.1 Total Contract Value:</span> Twenty-Three Million Five Hundred Fifty
+                Thousand Indonesian Rupiah (IDR Rp 23,550,000)
               </p>
 
               <p>
                 <span className="font-semibold">3.2 Payment Structure:</span>
               </p>
               <ul className="list-disc ml-8 space-y-1">
-                <li>Gross Amount: USD $3,000.00</li>
-                <li>Commission (Labyrinth): 15% (USD $450.00)</li>
-                <li>Net Amount to Provider: USD $2,550.00</li>
+                <li>Gross Amount: IDR Rp 23,550,000</li>
+                <li>Commission (Labyrinth): 15% (IDR Rp 3,532,500)</li>
+                <li>Net Amount to Provider: IDR Rp 20,017,500</li>
               </ul>
 
               <p>
@@ -220,7 +220,7 @@ export function Contract069() {
             <div className="space-y-2 ml-4">
               <p>
                 <span className="font-semibold">6.1 Maximum Liability:</span> Provider's total liability under this
-                Agreement shall not exceed the total amount paid by Client under this Agreement (USD $3,000.00).
+                Agreement shall not exceed the total amount paid by Client under this Agreement (IDR Rp 23,550,000).
               </p>
               <p>
                 <span className="font-semibold">6.2 Consequential Damages:</span> In no event shall either party be

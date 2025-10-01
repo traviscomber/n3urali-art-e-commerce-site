@@ -33,7 +33,7 @@ export default function ContractsPage() {
       id: "069",
       customer: "Labyrinth + Neuralia",
       status: "active",
-      totalAmount: 1500, // Updated from 3000 to 1500
+      totalAmount: 23550000, // Updated from 3000 to 1500 USD, now in IDR
       imageCount: 20, // Updated from 50 to 20
       resolution: "4K",
       commission: 15,
@@ -142,7 +142,7 @@ export default function ContractsPage() {
                 <div>
                   <p className="text-sm font-medium text-slate-600">Total Value</p>
                   <p className="text-3xl font-bold text-slate-900">
-                    ${contracts.reduce((sum, c) => sum + c.totalAmount, 0).toLocaleString()}
+                    Rp {contracts.reduce((sum, c) => sum + c.totalAmount, 0).toLocaleString("id-ID")}
                   </p>
                 </div>
               </div>
@@ -195,7 +195,7 @@ export default function ContractsPage() {
                     </CardDescription>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-white">${contract.totalAmount.toLocaleString()}</p>
+                    <p className="text-3xl font-bold text-white">Rp {contract.totalAmount.toLocaleString("id-ID")}</p>
                     <p className="text-sm text-orange-100">Total Contract Value</p>
                   </div>
                 </div>
@@ -233,14 +233,16 @@ export default function ContractsPage() {
                       <div className="flex justify-between">
                         <span className="text-slate-700 font-medium">Commission Amount:</span>
                         <span className="font-bold text-green-700">
-                          ${((contract.totalAmount * contract.commission) / 100).toLocaleString()}
+                          Rp {((contract.totalAmount * contract.commission) / 100).toLocaleString("id-ID")}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-slate-700 font-medium">Net Amount:</span>
                         <span className="font-bold text-slate-900">
-                          $
-                          {(contract.totalAmount - (contract.totalAmount * contract.commission) / 100).toLocaleString()}
+                          Rp{" "}
+                          {(contract.totalAmount - (contract.totalAmount * contract.commission) / 100).toLocaleString(
+                            "id-ID",
+                          )}
                         </span>
                       </div>
                     </div>

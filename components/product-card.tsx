@@ -103,6 +103,7 @@ export function ProductCard({ product, onView360 }: ProductCardProps) {
             "/placeholder.svg" ||
             "/placeholder.svg" ||
             "/placeholder.svg" ||
+            "/placeholder.svg" ||
             "/placeholder.svg"
           }
           alt={product.title}
@@ -167,20 +168,22 @@ export function ProductCard({ product, onView360 }: ProductCardProps) {
           </div>
 
           <div className="flex flex-wrap gap-1">
-            {product.tags.map((tag) => (
-              <Badge
-                key={tag}
-                variant={selectedTags.includes(tag) ? "default" : "outline"}
-                className={`text-xs cursor-pointer transition-all duration-200 hover:scale-105 ${
-                  selectedTags.includes(tag)
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "hover:bg-primary/10 hover:border-primary/50"
-                }`}
-                onClick={(e) => handleTagClick(tag, e)}
-              >
-                {tag}
-              </Badge>
-            ))}
+            {product.tags &&
+              Array.isArray(product.tags) &&
+              product.tags.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant={selectedTags.includes(tag) ? "default" : "outline"}
+                  className={`text-xs cursor-pointer transition-all duration-200 hover:scale-105 ${
+                    selectedTags.includes(tag)
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "hover:bg-primary/10 hover:border-primary/50"
+                  }`}
+                  onClick={(e) => handleTagClick(tag, e)}
+                >
+                  {tag}
+                </Badge>
+              ))}
           </div>
         </div>
       </CardContent>

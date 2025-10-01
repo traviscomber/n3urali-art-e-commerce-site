@@ -76,10 +76,6 @@ export default function LicensingTermsPage() {
                     <span className="text-sm">Unlimited reproductions</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm font-semibold">One-time resale to final customer allowed</span>
-                  </div>
-                  <div className="flex items-start gap-2">
                     <X className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
                     <span className="text-sm">Image remains in marketplace</span>
                   </div>
@@ -155,11 +151,6 @@ export default function LicensingTermsPage() {
                   perpetual, worldwide, non-exclusive, royalty-free license to use, reproduce, modify, and distribute
                   the licensed image for both commercial and personal purposes. The image will remain available in our
                   marketplace for other customers to purchase.
-                </p>
-                <p className="text-sm text-muted-foreground leading-relaxed mt-2 font-semibold">
-                  Limited Resale: Non-Exclusive licenses allow ONE resale to a final customer. The final customer may
-                  use and display the image for their purposes but cannot resell, redistribute, or sublicense it
-                  further, and receives no exclusive rights.
                 </p>
               </div>
 
@@ -277,11 +268,10 @@ export default function LicensingTermsPage() {
                 <h3 className="font-semibold mb-3 text-base">3.1 Non-Exclusive License Restrictions:</h3>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <X className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
                     <span>
-                      <strong>Limited Resale:</strong> You may resale the image ONE time to a final customer. The final
-                      customer may use and display the image for their purposes but cannot resell, redistribute, or
-                      sublicense it further, and receives no exclusive rights.
+                      <strong>No Resale or Redistribution:</strong> You cannot resell, redistribute, or sublicense the
+                      image to third parties
                     </span>
                   </li>
                   <li className="flex items-start gap-2">

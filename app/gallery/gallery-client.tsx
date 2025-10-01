@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { useState, useEffect } from "react"
+import { getImages, getCategories } from "@/app/actions/admin-actions"
 import { ProductGrid } from "@/components/product-grid"
 import { PanoramaViewer } from "@/components/panorama-viewer"
 import { Badge } from "@/components/ui/badge"
@@ -33,6 +33,10 @@ interface Image {
     name: string
     description: string
   }
+  image_url?: string
+  thumbnail_url?: string
+  category_name?: string
+  featured?: boolean
 }
 
 interface Category {
@@ -49,59 +53,39 @@ export default function GalleryClient() {
   const [equirectangularImages, setEquirectangularImages] = useState<Image[]>([])
   const [viewingPanorama, setViewingPanorama] = useState<Image | null>(null)
 
-  const supabase = useMemo(() => createClient(), [])
-
   useEffect(() => {
     loadData()
   }, [])
 
   const loadData = async () => {
     try {
-      // Load categories
-      const { data: categoriesData, error: categoriesError } = await supabase
-        .from("categories")
-        .select("*")
-        .order("name")
+      const [imagesResult, categoriesResult] = await Promise.all([getImages(), getCategories()])
 
-      if (categoriesError) throw categoriesError
+      if (imagesResult.success && categoriesResult.success) {
+        const allImages = imagesResult.data || []
+        const allCategories = categoriesResult.data || []
 
-      // Load images with category information
-      const { data: imagesData, error: imagesError } = await supabase
-        .from("images")
-        .select(`
-          *,
-          categories (
-            name,
-            description
-          ),
-          licenses (
-            name,
-            description
-          )
-        `)
-        .eq("active", true)
-        .order("created_at", { ascending: false })
+        setImages(allImages)
+        setCategories(allCategories)
+        setFeaturedImages(allImages.filter((img) => img.featured || img.is_featured))
 
-      if (imagesError) throw imagesError
-
-      const allImages = imagesData || []
-      const allCategories = categoriesData || []
-
-      setImages(allImages)
-      setCategories(allCategories)
-      setFeaturedImages(allImages.filter((img) => img.is_featured))
-
-      const equirectangular = allImages.filter(
-        (img) =>
-          img.categories?.name?.toLowerCase().includes("equirectangular") ||
-          (img.categories?.name?.toLowerCase().includes("360") &&
-            !img.categories?.name?.toLowerCase().includes("fisheye")) ||
-          (img.title?.toLowerCase().includes("360") &&
-            !img.title?.toLowerCase().includes("fisheye") &&
-            !img.title?.toLowerCase().includes("180") &&
-            !img.title?.toLowerCase().includes("dome")),
-      )
-      setEquirectangularImages(equirectangular)
+        const equirectangular = allImages.filter(
+          (img) =>
+            img.category_name?.toLowerCase().includes("equirectangular") ||
+            img.categories?.name?.toLowerCase().includes("equirectangular") ||
+            (img.category_name?.toLowerCase().includes("360") &&
+              !img.category_name?.toLowerCase().includes("fisheye")) ||
+            (img.categories?.name?.toLowerCase().includes("360") &&
+              !img.categories?.name?.toLowerCase().includes("fisheye")) ||
+            (img.title?.toLowerCase().includes("360") &&
+              !img.title?.toLowerCase().includes("fisheye") &&
+              !img.title?.toLowerCase().includes("180") &&
+              !img.title?.toLowerCase().includes("dome")),
+        )
+        setEquirectangularImages(equirectangular)
+      } else {
+        console.error("Error loading data:", imagesResult.error || categoriesResult.error)
+      }
     } catch (error) {
       console.error("Error loading data:", error)
     } finally {
@@ -238,7 +222,12 @@ export default function GalleryClient() {
                     >
                       <div className="aspect-[2/1] relative overflow-hidden">
                         <img
-                          src={image.file_path || image.thumbnail_large_url || "/placeholder.svg?height=400&width=800"}
+                          src={
+                            image.image_url ||
+                            image.file_path ||
+                            image.thumbnail_large_url ||
+                            "/placeholder.svg?height=400&width=800"
+                          }
                           alt={image.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
@@ -301,7 +290,7 @@ export default function GalleryClient() {
 
       {viewingPanorama && (
         <PanoramaViewer
-          imageUrl={viewingPanorama.original_url || viewingPanorama.thumbnail_large_url}
+          imageUrl={viewingPanorama.original_url || viewingPanorama.image_url || viewingPanorama.thumbnail_large_url}
           title={viewingPanorama.title}
           onClose={closePanoramaViewer}
         />

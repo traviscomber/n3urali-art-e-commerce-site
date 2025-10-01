@@ -719,7 +719,6 @@ export default function SimpleAdminPage() {
                   autoFocus
                   required
                 />
-                <p className="text-sm text-gray-500 mt-1 font-medium">Password: C4rlit0s</p>
               </div>
 
               {error && (
@@ -933,6 +932,7 @@ export default function SimpleAdminPage() {
                               image.image_url ||
                               image.thumbnail_url ||
                               "/placeholder.svg?height=64&width=64&text=No+Image" ||
+                              "/placeholder.svg" ||
                               "/placeholder.svg" ||
                               "/placeholder.svg"
                             }

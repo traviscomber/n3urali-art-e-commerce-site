@@ -58,7 +58,7 @@ export function Contract069() {
               <div>
                 <p className="font-semibold">Client:</p>
                 <p className="ml-4">Labyrinth</p>
-                <p className="ml-4 text-sm text-slate-600">Location: Bali, Indonesia</p>
+                <p className="text-sm text-slate-600">Location: Bali, Indonesia</p>
               </div>
             </div>
           </section>
@@ -89,12 +89,18 @@ export function Contract069() {
                 digital images in 4K resolution format.
               </p>
               <p>
-                <span className="font-semibold">1.2 Quality Standards:</span> All images shall be delivered in
+                <span className="font-semibold">1.2 Nature of Images:</span> The images provided under this Agreement
+                are selected from Provider's existing database of digital creations and inventory. These images are NOT
+                specially created or commissioned for Client under this contract. Client is licensing pre-existing works
+                from Provider's catalog.
+              </p>
+              <p>
+                <span className="font-semibold">1.3 Quality Standards:</span> All images shall be delivered in
                 high-quality 4K resolution (3840 x 2160 pixels minimum) in industry-standard formats (PNG, JPG, or
                 equivalent).
               </p>
               <p>
-                <span className="font-semibold">1.3 Delivery Method:</span> Images shall be delivered via secure
+                <span className="font-semibold">1.4 Delivery Method:</span> Images shall be delivered via secure
                 download link provided in real-time upon confirmation of payment.
               </p>
             </div>
@@ -153,29 +159,36 @@ export function Contract069() {
               </ul>
 
               <p>
-                <span className="font-semibold">3.3 Payment Method:</span> Payment shall be made via cryptocurrency on
-                the TRC-20 Tron Network to the following address:
+                <span className="font-semibold">3.3 Payment Method:</span> Payment shall be made via bank transfer to
+                the following account:
               </p>
-              <div className="bg-slate-100 p-3 rounded font-mono text-sm break-all border border-slate-300 my-2">
-                TJi1odaRdVm5e7yKLy3Uck3dwiUKDbmJ4a
+              <div className="bg-slate-100 p-4 rounded border border-slate-300 my-2 space-y-1">
+                <p className="font-semibold">Beneficiary Name:</p>
+                <p className="ml-4 font-mono text-sm">Juan Francisco Vial Comber</p>
+                <p className="font-semibold mt-2">Bank Name:</p>
+                <p className="ml-4 font-mono text-sm">Bank Mandiri</p>
+                <p className="font-semibold mt-2">Account Number:</p>
+                <p className="ml-4 font-mono text-sm">1750002001195</p>
+                <p className="font-semibold mt-2">Country:</p>
+                <p className="ml-4 font-mono text-sm">Indonesia</p>
               </div>
 
               <p>
                 <span className="font-semibold">3.4 Payment Requirement:</span> One hundred percent (100%) of the total
-                contract value must be received and confirmed on the blockchain before the download link will be
+                contract value must be received and confirmed in the bank account before the download link will be
                 provided to Client.
               </p>
 
               <p>
-                <span className="font-semibold">3.5 Real-Time Processing:</span> Upon confirmation of payment on the
-                blockchain, Provider shall immediately provide Client with the secure download link. Delivery is
+                <span className="font-semibold">3.5 Real-Time Processing:</span> Upon confirmation of payment in the
+                bank account, Provider shall immediately provide Client with the secure download link. Delivery is
                 processed in real-time.
               </p>
 
               <p>
                 <span className="font-semibold">3.6 Payment Verification:</span> Client is solely responsible for
-                ensuring payment is sent to the correct address and on the correct network (TRC-20 Tron Network).
-                Provider is not responsible for funds sent to incorrect addresses or on incorrect networks.
+                ensuring payment is sent to the correct bank account with proper reference information. Provider is not
+                responsible for funds sent to incorrect accounts or with missing reference details.
               </p>
             </div>
           </section>
@@ -242,6 +255,11 @@ export function Contract069() {
                 intellectual property provisions, and limitation of liability shall survive any termination of this
                 Agreement.
               </p>
+              <p>
+                <span className="font-semibold">7.3 Final Delivery Deadline:</span> The absolute final deadline for
+                delivery of all images under this Agreement is October 10, 2025. No additional conditions, penalties, or
+                fees shall apply for delivery on or before this date.
+              </p>
             </div>
           </section>
 
@@ -253,17 +271,11 @@ export function Contract069() {
             <div className="space-y-2 ml-4">
               <p>
                 <span className="font-semibold">8.1 Governing Law:</span> This Agreement shall be governed by and
-                construed in accordance with international commercial law principles and blockchain industry standards.
+                construed in accordance with the laws of Indonesia.
               </p>
               <p>
-                <span className="font-semibold">8.2 Jurisdiction:</span> Given the international and decentralized
-                nature of this transaction, the parties agree to resolve disputes through good faith negotiation and, if
-                necessary, international arbitration.
-              </p>
-              <p>
-                <span className="font-semibold">8.3 Blockchain Transactions:</span> The parties acknowledge that
-                cryptocurrency transactions are irreversible and agree to exercise due diligence in all payment
-                activities.
+                <span className="font-semibold">8.2 Jurisdiction:</span> The parties agree to resolve disputes through
+                good faith negotiation and, if necessary, through the courts of Indonesia.
               </p>
             </div>
           </section>
@@ -300,6 +312,8 @@ export function Contract069() {
               <div className="space-y-4">
                 <p className="font-semibold">PROVIDER:</p>
                 <p>Neuralia (N3urali.art)</p>
+                <p className="text-sm text-slate-600 mt-2">By: Irina Lebedeva</p>
+                <p className="text-sm text-slate-600">Title: Director of n3uralia360 - n3uraliart</p>
                 <div className="border-t border-slate-900 pt-2 mt-12">
                   <p className="text-sm">Authorized Signature</p>
                 </div>
@@ -310,8 +324,9 @@ export function Contract069() {
 
               <div className="space-y-4">
                 <p className="font-semibold">CLIENT:</p>
-                <p>Labyrinth</p>
+                <p>PT Labyrinth Collective Bali</p>
                 <p className="text-sm text-slate-600">Bali, Indonesia</p>
+                <p className="text-sm text-slate-600 mt-2">By: Rafael Jimenez Arroyo</p>
                 <div className="border-t border-slate-900 pt-2 mt-8">
                   <p className="text-sm">Authorized Signature</p>
                 </div>
@@ -322,10 +337,10 @@ export function Contract069() {
             </div>
 
             <div className="bg-slate-100 p-4 rounded border border-slate-300 mt-8">
-              <p className="text-sm font-semibold mb-2">BLOCKCHAIN PAYMENT CONFIRMATION:</p>
+              <p className="text-sm font-semibold mb-2">BANK TRANSFER PAYMENT CONFIRMATION:</p>
               <p className="text-xs text-slate-600">
-                By sending payment to the specified TRC-20 address, Client acknowledges acceptance of all terms and
-                conditions set forth in this Agreement. The blockchain transaction serves as digital acceptance and
+                By sending payment to the specified bank account, Client acknowledges acceptance of all terms and
+                conditions set forth in this Agreement. The bank transfer confirmation serves as acceptance and
                 confirmation of this contract.
               </p>
             </div>

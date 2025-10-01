@@ -45,8 +45,8 @@ export default function ContractsPage() {
         "Full 4K resolution delivery",
       ],
       startDate: "2025-01-10",
-      depositAddress: "TJi1odaRdVm5e7yKLy3Uck3dwiUKDbmJ4a",
-      depositNetwork: "TRC-20 Tron Network",
+      depositAddress: "1750002001195",
+      depositNetwork: "Bank Mandiri - Indonesia",
     },
   ]
 
@@ -278,13 +278,19 @@ export default function ContractsPage() {
                     <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-lg border-2 border-orange-300">
                       <div className="space-y-4">
                         <div>
-                          <p className="text-sm font-medium text-slate-700 mb-2">Deposit Network</p>
+                          <p className="text-sm font-medium text-slate-700 mb-2">Bank Name</p>
                           <div className="bg-white p-3 rounded-lg border border-orange-200">
                             <p className="font-bold text-slate-900 text-lg">{contract.depositNetwork}</p>
                           </div>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-slate-700 mb-2">Deposit Address</p>
+                          <p className="text-sm font-medium text-slate-700 mb-2">Beneficiary Name</p>
+                          <div className="bg-white p-3 rounded-lg border border-orange-200">
+                            <p className="font-bold text-slate-900 text-lg">Juan Francisco Vial Comber</p>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-slate-700 mb-2">Account Number</p>
                           <div className="bg-white p-4 rounded-lg border border-orange-200 flex items-center justify-between gap-3">
                             <code className="font-mono text-sm text-slate-900 break-all flex-1">
                               {contract.depositAddress}
@@ -301,8 +307,8 @@ export default function ContractsPage() {
                         </div>
                         <div className="bg-orange-200 border border-orange-400 rounded-lg p-3">
                           <p className="text-sm text-orange-900 font-medium">
-                            ⚠️ Important: Ensure deposits are made only to this address on the {contract.depositNetwork}.
-                            Deposits to other networks may result in permanent loss of funds.
+                            ⚠️ Important: Please ensure bank transfers are made to the correct account number at{" "}
+                            {contract.depositNetwork}. Verify all details before making payment.
                           </p>
                         </div>
                         <div className="bg-blue-100 border-2 border-blue-400 rounded-lg p-4 mt-3">

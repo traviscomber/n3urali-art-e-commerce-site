@@ -51,6 +51,9 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
   const [viewingPanorama, setViewingPanorama] = useState<Image | null>(null)
   const [availableTags, setAvailableTags] = useState<string[]>([])
   const [displayCount, setDisplayCount] = useState(20)
+  const [hasMoreInDB, setHasMoreInDB] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const BATCH_SIZE = 30
 
   const { selectedTags, clearTags, hasActiveTags, toggleTag } = useTagFilter()
 
@@ -62,6 +65,8 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
   }, [])
 
   useEffect(() => {
+    setImages([])
+    setHasMoreInDB(true)
     loadImages()
   }, [selectedCategory, sortBy])
 
@@ -99,9 +104,17 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
     }
   }
 
-  const loadImages = async () => {
-    setLoading(true)
+  const loadImages = async (append = false) => {
+    if (append) {
+      setLoadingMore(true)
+    } else {
+      setLoading(true)
+    }
+
     try {
+      const startIndex = append ? images.length : 0
+      const endIndex = startIndex + BATCH_SIZE - 1
+
       let query = supabase
         .from("images")
         .select(`
@@ -119,17 +132,10 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
           category_id,
           license_id,
           created_at,
-          tags,
-          categories (
-            name,
-            description
-          ),
-          licenses (
-            name,
-            description
-          )
+          tags
         `)
         .eq("active", true)
+        .range(startIndex, endIndex)
 
       if (selectedCategory !== "all") {
         query = query.eq("category_id", selectedCategory)
@@ -152,11 +158,24 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
       const { data, error } = await query
 
       if (error) throw error
-      setImages(data || [])
+
+      if (!data || data.length < BATCH_SIZE) {
+        setHasMoreInDB(false)
+      }
+
+      if (append) {
+        setImages((prev) => [...prev, ...(data || [])])
+      } else {
+        setImages(data || [])
+      }
     } catch (error) {
       console.error("Error loading images:", error)
+      if (error instanceof Error && error.message.includes("JSON")) {
+        console.error("Database contains corrupted data. Please contact support.")
+      }
     } finally {
       setLoading(false)
+      setLoadingMore(false)
     }
   }
 
@@ -180,7 +199,6 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
       searchTerm === "" ||
       image.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       image.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      image.categories?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (image.tags &&
         Array.isArray(image.tags) &&
         image.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())))
@@ -212,12 +230,31 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
   }
 
   const loadMore = () => {
-    setDisplayCount((prev) => Math.min(prev + 20, sortedAndFilteredImages.length))
+    // If we have more filtered images to show, just increase display count
+    if (hasMore) {
+      setDisplayCount((prev) => Math.min(prev + 20, sortedAndFilteredImages.length))
+    }
+    // If we've shown all filtered images but there might be more in DB, load next batch
+    else if (hasMoreInDB && !loadingMore) {
+      loadImages(true)
+    }
   }
 
   useEffect(() => {
     setDisplayCount(20)
   }, [searchTerm, selectedCategory, sortBy, selectedTags])
+
+  useEffect(() => {
+    if (
+      !loading &&
+      !loadingMore &&
+      displayCount >= sortedAndFilteredImages.length &&
+      hasMoreInDB &&
+      images.length > 0
+    ) {
+      loadImages(true)
+    }
+  }, [displayCount, sortedAndFilteredImages.length, hasMoreInDB, loading, loadingMore])
 
   return (
     <div className="space-y-6">
@@ -343,10 +380,18 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
             ))}
           </div>
 
-          {hasMore && (
+          {(hasMore || (hasMoreInDB && !loadingMore)) && (
             <div className="flex justify-center pt-8">
-              <Button onClick={loadMore} variant="outline" size="lg" className="bg-card/50 hover:bg-card">
-                Load More Images ({sortedAndFilteredImages.length - displayCount} remaining)
+              <Button
+                onClick={loadMore}
+                variant="outline"
+                size="lg"
+                className="bg-card/50 hover:bg-card"
+                disabled={loadingMore}
+              >
+                {loadingMore
+                  ? "Loading..."
+                  : `Load More Images ${hasMore ? `(${sortedAndFilteredImages.length - displayCount} remaining)` : ""}`}
               </Button>
             </div>
           )}

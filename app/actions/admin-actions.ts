@@ -67,6 +67,7 @@ function sanitizeImageData(image: any): any {
       category_name: sanitizeString(image.category_name),
       license_name: sanitizeString(image.license_name),
       license_description: sanitizeString(image.license_description),
+      original_file_url: sanitizeString(image.original_file_url), // Sanitize original_file_url
       categories: image.categories
         ? {
             ...image.categories,
@@ -98,7 +99,7 @@ const getCachedImages = unstable_cache(
         .select(`
           id, title, description, price, file_path,
           thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,
-          is_featured, created_at, updated_at, category_id, license_id, tags
+          is_featured, created_at, updated_at, category_id, license_id, tags, original_file_url
         `)
         .order("created_at", { ascending: false })
 
@@ -178,7 +179,7 @@ const getCachedImagesPaginated = unstable_cache(
         `
           id, title, description, price, file_path,
           thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,
-          is_featured, created_at, updated_at, category_id, license_id, tags
+          is_featured, created_at, updated_at, category_id, license_id, tags, original_file_url
         `,
         { count: "exact" },
       )
@@ -774,6 +775,7 @@ export async function createImageWithCategoryObject(imageData: {
   thumbnail_url: string
   price: number
   original_file_size?: number
+  original_file_url?: string // Added original_file_url field
 }) {
   try {
     const imageUrlPreview = imageData.image_url
@@ -790,6 +792,7 @@ export async function createImageWithCategoryObject(imageData: {
       original_file_size: imageData.original_file_size
         ? `${(imageData.original_file_size / (1024 * 1024)).toFixed(2)}MB`
         : "unknown",
+      original_file_url: imageData.original_file_url || "not provided", // Log original_file_url
     })
 
     if (!imageData.image_url || !imageData.thumbnail_url) {
@@ -876,7 +879,6 @@ export async function createImageWithCategoryObject(imageData: {
 
     console.log("[v0] Using license_id:", licenseId, "for upload")
 
-    // Sanitize image data before inserting into the database
     const sanitizedImageData = sanitizeImageData({
       title: imageData.title,
       description: imageData.description,
@@ -884,7 +886,8 @@ export async function createImageWithCategoryObject(imageData: {
       license_id: licenseId,
       price: imageData.price,
       file_path: imageData.image_url, // Use image_url as file_path for now
-      thumbnail_url: imageData.thumbnail_url, // This might need adjustment if it's not a direct file path
+      thumbnail_url: imageData.thumbnail_url,
+      original_file_url: imageData.original_file_url || null, // Include original_file_url
       is_featured: false,
       active: true,
     })
@@ -898,9 +901,8 @@ export async function createImageWithCategoryObject(imageData: {
       .insert([
         {
           ...sanitizedImageData,
-          // Ensure correct fields are mapped if 'file_path' is meant to be distinct from 'image_url'
-          // For now, assuming image_url is the primary path.
           file_path: sanitizedImageData.image_url,
+          original_file_url: sanitizedImageData.original_file_url, // Explicitly include original_file_url
         },
       ])
       .select("*")
@@ -972,7 +974,7 @@ export async function getOrders(userEmail?: string) {
         .from("orders")
         .select(`
           *,
-          order_items!inner(id, license_id, price, image_id, images(title, thumbnail_url))
+          order_items!inner(id, license_id, price, image_id, images(title, thumbnail_url, original_file_url))
         `)
         .eq("user_email", userEmail)
         .order("created_at", { ascending: false })
@@ -981,7 +983,7 @@ export async function getOrders(userEmail?: string) {
         .from("orders")
         .select(`
           *,
-          order_items!inner(id, license_id, price, image_id, images(title, thumbnail_url))
+          order_items!inner(id, license_id, price, image_id, images(title, thumbnail_url, original_file_url))
         `)
         .order("created_at", { ascending: false })
     }
@@ -1009,7 +1011,7 @@ export async function getOrdersOptimized(userEmail?: string, page = 1, limit = 2
         .from("orders")
         .select(`
           *,
-          order_items!inner(id, license_id, price, image_id, images(title, thumbnail_url))
+          order_items!inner(id, license_id, price, image_id, images(title, thumbnail_url, original_file_url))
         `)
         .eq("user_email", userEmail)
         .order("created_at", { ascending: false })
@@ -1019,7 +1021,7 @@ export async function getOrdersOptimized(userEmail?: string, page = 1, limit = 2
         .from("orders")
         .select(`
           *,
-          order_items!inner(id, license_id, price, image_id, images(title, thumbnail_url))
+          order_items!inner(id, license_id, price, image_id, images(title, thumbnail_url, original_file_url))
         `)
         .order("created_at", { ascending: false })
         .range(offset, offset + limit - 1)
@@ -1743,7 +1745,7 @@ export async function cleanupSampleImages() {
     // Find images that are likely samples/placeholders
     const { data: sampleImages, error: findError } = await supabase
       .from("images")
-      .select("id, title, description, file_path")
+      .select("id, title, description, file_path, original_file_url") // Include original_file_url
       .or(
         "title.ilike.%sample%,title.ilike.%placeholder%,title.ilike.%test%,description.ilike.%sample%,description.ilike.%placeholder%,file_path.ilike.%placeholder%",
       )
@@ -1814,7 +1816,9 @@ export async function migrateFilesToOptimalStorage() {
     const supabase = await createClient()
 
     // Get all images to analyze their storage
-    const { data: images, error: fetchError } = await supabase.from("images").select("id, title, file_path")
+    const { data: images, error: fetchError } = await supabase
+      .from("images")
+      .select("id, title, file_path, original_file_url") // Include original_file_url
 
     if (fetchError) {
       console.error("[v0] Error fetching images for migration:", fetchError)
@@ -1839,7 +1843,12 @@ export async function migrateFilesToOptimalStorage() {
     for (const image of images) {
       try {
         // Skip if already using optimal storage patterns
-        if (image.file_path?.includes("uploads/high-quality/") || image.file_path?.startsWith("data:image/")) {
+        if (
+          image.file_path?.includes("uploads/high-quality/") ||
+          image.file_path?.startsWith("data:image/") ||
+          image.original_file_url?.startsWith("data:image/")
+        ) {
+          // Check original_file_url as well
           skipped++
           continue
         }

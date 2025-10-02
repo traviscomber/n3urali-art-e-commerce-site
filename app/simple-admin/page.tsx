@@ -657,7 +657,7 @@ export default function SimpleAdminPage() {
         rights_type: newImage.rightsType, // Changed from rightsType to rights_type
         price: Number.parseFloat(newImage.price),
         image_url: uploadResult.url,
-        thumbnail_url: uploadResult.url,
+        thumbnail_url: uploadResult.url, // This should ideally be a generated thumbnail, not the same URL
         original_file_url: newImage.originalFileUrl || null,
         active: true,
         featured: false,
@@ -932,6 +932,8 @@ export default function SimpleAdminPage() {
                               image.image_url ||
                               image.thumbnail_url ||
                               "/placeholder.svg?height=64&width=64&text=No+Image" ||
+                              "/placeholder.svg" ||
+                              "/placeholder.svg" ||
                               "/placeholder.svg" ||
                               "/placeholder.svg" ||
                               "/placeholder.svg"
@@ -1225,6 +1227,25 @@ export default function SimpleAdminPage() {
                     </div>
 
                     <div>
+                      <Label htmlFor="originalFileUrl" className="text-lg font-medium">
+                        High-Res Download URL (Optional)
+                      </Label>
+                      <Input
+                        id="originalFileUrl"
+                        type="url"
+                        value={newImage.originalFileUrl}
+                        onChange={(e) => setNewImage((prev) => ({ ...prev, originalFileUrl: e.target.value }))}
+                        placeholder="https://your-backblaze-bucket.com/path/to/high-res-file.jpg"
+                        className="text-lg h-12"
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        Direct link to the final high-resolution file (e.g., from Backblaze). This link will only be
+                        accessible to customers after payment and will be sent via email with their purchase
+                        confirmation.
+                      </p>
+                    </div>
+
+                    <div>
                       <Label className="text-lg font-medium">Image File * (Full HQ Resolution: 4K-16K)</Label>
                       <div
                         className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
@@ -1331,7 +1352,7 @@ export default function SimpleAdminPage() {
                     )}
 
                     <Button
-                      onClick={handleImageUpload}
+                      onClick={handleUpload}
                       disabled={uploading}
                       className="w-full bg-orange-600 hover:bg-orange-700 text-lg h-12"
                     >

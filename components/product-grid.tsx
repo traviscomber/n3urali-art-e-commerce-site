@@ -105,7 +105,21 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
       let query = supabase
         .from("images")
         .select(`
-          *,
+          id,
+          title,
+          description,
+          price,
+          thumbnail_large_url,
+          thumbnail_medium_url,
+          thumbnail_small_url,
+          file_path,
+          original_url,
+          is_featured,
+          active,
+          category_id,
+          license_id,
+          created_at,
+          tags,
           categories (
             name,
             description

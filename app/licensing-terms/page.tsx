@@ -526,7 +526,7 @@ export default function LicensingTermsPage() {
                 <Link href="/contact">
                   <Button>Contact Support</Button>
                 </Link>
-                <Link href="/browse">
+                <Link href="/gallery">
                   <Button variant="outline">Browse Images</Button>
                 </Link>
               </div>

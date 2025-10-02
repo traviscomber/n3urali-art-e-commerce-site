@@ -50,6 +50,7 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
   const [viewingPanorama, setViewingPanorama] = useState<Image | null>(null)
   const [availableTags, setAvailableTags] = useState<string[]>([])
+  const [displayCount, setDisplayCount] = useState(20)
 
   const { selectedTags, clearTags, hasActiveTags, toggleTag } = useTagFilter()
 
@@ -178,6 +179,8 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
   })
 
   const sortedAndFilteredImages = sortImages(filteredImages)
+  const displayedImages = sortedAndFilteredImages.slice(0, displayCount)
+  const hasMore = displayCount < sortedAndFilteredImages.length
 
   const clearFilters = () => {
     setSearchTerm("")
@@ -193,6 +196,14 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
   const closePanoramaViewer = () => {
     setViewingPanorama(null)
   }
+
+  const loadMore = () => {
+    setDisplayCount((prev) => Math.min(prev + 20, sortedAndFilteredImages.length))
+  }
+
+  useEffect(() => {
+    setDisplayCount(20)
+  }, [searchTerm, selectedCategory, sortBy, selectedTags])
 
   return (
     <div className="space-y-6">
@@ -289,11 +300,17 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {loading ? "Loading..." : `${sortedAndFilteredImages.length} images found`}
-          {hasActiveTags && (
-            <span className="ml-2 text-primary">
-              (filtered by {selectedTags.length} tag{selectedTags.length !== 1 ? "s" : ""})
-            </span>
+          {loading ? (
+            "Loading..."
+          ) : (
+            <>
+              Showing {displayedImages.length} of {sortedAndFilteredImages.length} images
+              {hasActiveTags && (
+                <span className="ml-2 text-primary">
+                  (filtered by {selectedTags.length} tag{selectedTags.length !== 1 ? "s" : ""})
+                </span>
+              )}
+            </>
           )}
         </p>
       </div>
@@ -305,11 +322,21 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
           ))}
         </div>
       ) : sortedAndFilteredImages.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {sortedAndFilteredImages.map((image) => (
-            <ProductCard key={image.id} product={image} onView360={handleView360} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {displayedImages.map((image, index) => (
+              <ProductCard key={image.id} product={image} onView360={handleView360} priority={index < 8} />
+            ))}
+          </div>
+
+          {hasMore && (
+            <div className="flex justify-center pt-8">
+              <Button onClick={loadMore} variant="outline" size="lg" className="bg-card/50 hover:bg-card">
+                Load More Images ({sortedAndFilteredImages.length - displayCount} remaining)
+              </Button>
+            </div>
+          )}
+        </>
       ) : (
         <div className="text-center py-12">
           <p className="text-muted-foreground">No images found matching your criteria.</p>

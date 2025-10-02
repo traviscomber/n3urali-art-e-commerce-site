@@ -41,12 +41,14 @@ interface Product {
 interface ProductCardProps {
   product: Product
   onView360?: (product: Product) => void
+  priority?: boolean
 }
 
-export function ProductCard({ product, onView360 }: ProductCardProps) {
+export function ProductCard({ product, onView360, priority = false }: ProductCardProps) {
   const { addItem } = useCart()
   const { selectedTags, toggleTag } = useTagFilter()
   const [isLoading, setIsLoading] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
 
   if (!product) {
     return null
@@ -90,25 +92,45 @@ export function ProductCard({ product, onView360 }: ProductCardProps) {
     toggleTag(tag)
   }
 
+  const isValidUrl = (url: string | null | undefined): url is string => {
+    return !!url && url.trim() !== "" && !url.includes("placeholder.svg")
+  }
+
+  const imageUrl =
+    (isValidUrl(product.thumbnail_large_url) && product.thumbnail_large_url) ||
+    (isValidUrl(product.thumbnail_medium_url) && product.thumbnail_medium_url) ||
+    (isValidUrl(product.thumbnail_small_url) && product.thumbnail_small_url) ||
+    (isValidUrl(product.file_path) && product.file_path) ||
+    (isValidUrl(product.original_url) && product.original_url) ||
+    "/placeholder.svg?height=300&width=400"
+
+  console.log("[v0] ProductCard image URLs:", {
+    id: product.id,
+    title: product.title,
+    thumbnail_large_url: product.thumbnail_large_url,
+    thumbnail_medium_url: product.thumbnail_medium_url,
+    thumbnail_small_url: product.thumbnail_small_url,
+    file_path: product.file_path,
+    original_url: product.original_url,
+    selectedImageUrl: imageUrl,
+  })
+
   return (
     <Card className="group overflow-hidden bg-card/50 border-border/50 hover:bg-card hover:border-border transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
-      <div className="relative aspect-[4/3] overflow-hidden">
+      <div className="relative aspect-[4/3] overflow-hidden bg-muted/30">
+        {!imageLoaded && <div className="absolute inset-0 animate-pulse bg-muted/50" />}
         <Image
-          src={
-            product.file_path ||
-            product.thumbnail_large_url ||
-            product.thumbnail_medium_url ||
-            product.thumbnail_small_url ||
-            "/placeholder.svg?height=300&width=400&query=360 degree panoramic image" ||
-            "/placeholder.svg" ||
-            "/placeholder.svg" ||
-            "/placeholder.svg" ||
-            "/placeholder.svg" ||
-            "/placeholder.svg"
-          }
+          src={imageUrl || "/placeholder.svg"}
           alt={product.title}
           fill
-          className="object-contain transition-transform duration-300 group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+          priority={priority}
+          loading={priority ? "eager" : "lazy"}
+          quality={85}
+          className={`object-contain transition-all duration-500 ${
+            imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-95"
+          } group-hover:scale-105`}
+          onLoad={() => setImageLoaded(true)}
         />
         {product.is_featured && (
           <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground">Featured</Badge>

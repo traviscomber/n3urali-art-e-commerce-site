@@ -97,7 +97,8 @@ const getCachedImages = unstable_cache(
         .from("images")
         .select(`
           id, title, description, price, file_path,
-          is_featured, created_at, updated_at, category_id, license_id
+          thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,
+          is_featured, created_at, updated_at, category_id, license_id, tags
         `)
         .order("created_at", { ascending: false })
 
@@ -130,6 +131,10 @@ const getCachedImages = unstable_cache(
               image_url: displayUrl,
               thumbnail_url: displayUrl,
               file_path: displayUrl, // Ensure file_path also uses proxy URL
+              thumbnail_large_url: item.thumbnail_large_url || displayUrl,
+              thumbnail_medium_url: item.thumbnail_medium_url || displayUrl,
+              thumbnail_small_url: item.thumbnail_small_url || displayUrl,
+              original_url: item.original_url || displayUrl,
               active: true, // Default to active since we don't have this column
               featured: item.is_featured,
               categories: categoryMap.get(item.category_id),
@@ -172,7 +177,8 @@ const getCachedImagesPaginated = unstable_cache(
       let query = supabase.from("images").select(
         `
           id, title, description, price, file_path,
-          is_featured, created_at, updated_at, category_id, license_id
+          thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,
+          is_featured, created_at, updated_at, category_id, license_id, tags
         `,
         { count: "exact" },
       )
@@ -234,6 +240,10 @@ const getCachedImagesPaginated = unstable_cache(
             image_url: displayUrl,
             thumbnail_url: displayUrl,
             file_path: displayUrl, // Ensure file_path also uses proxy URL
+            thumbnail_large_url: item.thumbnail_large_url || displayUrl,
+            thumbnail_medium_url: item.thumbnail_medium_url || displayUrl,
+            thumbnail_small_url: item.thumbnail_small_url || displayUrl,
+            original_url: item.original_url || displayUrl,
             active: true, // Default to active since we don't have this column
             featured: item.is_featured,
             categories: categoryMap.get(item.category_id),

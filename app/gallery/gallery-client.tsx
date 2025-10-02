@@ -78,6 +78,17 @@ export default function GalleryClient() {
 
         console.log(`[v0] Loaded ${validImages.length} valid images out of ${allImages.length} total`)
 
+        if (validImages.length > 0) {
+          console.log("[v0] First image data:", validImages[0])
+          console.log("[v0] First image thumbnail URLs:", {
+            thumbnail_large_url: validImages[0].thumbnail_large_url,
+            thumbnail_medium_url: validImages[0].thumbnail_medium_url,
+            thumbnail_small_url: validImages[0].thumbnail_small_url,
+            original_url: validImages[0].original_url,
+            file_path: validImages[0].file_path,
+          })
+        }
+
         setImages(validImages)
         setCategories(allCategories)
         setFeaturedImages(validImages.filter((img) => img.featured || img.is_featured))

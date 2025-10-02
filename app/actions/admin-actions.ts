@@ -295,8 +295,20 @@ const getCachedCategories = unstable_cache(
         throw new Error(error.message)
       }
 
-      console.log(`[v0] getCachedCategories: Retrieved ${result?.length || 0} categories`)
-      return result || []
+      // Keep only the capitalized versions (Equirectangular, Fisheye, Stereographic)
+      const filteredResult = result?.filter((category) => {
+        const lowercaseName = category.name.toLowerCase()
+        // Exclude lowercase versions of these specific categories
+        if (lowercaseName === "equirectangular" || lowercaseName === "fisheye" || lowercaseName === "stereographic") {
+          // Only keep if the first letter is uppercase (capitalized version)
+          return category.name[0] === category.name[0].toUpperCase()
+        }
+        // Keep all other categories
+        return true
+      })
+
+      console.log(`[v0] getCachedCategories: Retrieved ${filteredResult?.length || 0} categories (filtered duplicates)`)
+      return filteredResult || []
     } catch (error) {
       console.error("[v0] Error in getCachedCategories:", error)
       throw error
@@ -324,6 +336,14 @@ const getCachedCategoriesOptimized = unstable_cache(
       throw new Error(categoriesError.message)
     }
 
+    const filteredCategories = categories?.filter((category) => {
+      const lowercaseName = category.name.toLowerCase()
+      if (lowercaseName === "equirectangular" || lowercaseName === "fisheye" || lowercaseName === "stereographic") {
+        return category.name[0] === category.name[0].toUpperCase()
+      }
+      return true
+    })
+
     // Get image counts separately
     const { data: imageCounts } = await supabase.from("images").select("category_id").eq("active", true)
 
@@ -335,13 +355,13 @@ const getCachedCategoriesOptimized = unstable_cache(
     })
 
     const result =
-      categories?.map((category) => ({
+      filteredCategories?.map((category) => ({
         ...category,
         image_count: countMap.get(category.id) || 0,
         display_name:
-          category.name === "equirectangular"
+          category.name === "Equirectangular"
             ? "360 images"
-            : category.name === "fisheye"
+            : category.name === "Fisheye"
               ? "180 images"
               : category.name,
       })) || []

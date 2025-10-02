@@ -40,7 +40,7 @@ export function Contract069() {
         <div className="max-w-4xl mx-auto space-y-6 text-slate-900">
           {/* Header */}
           <div className="text-center border-b-2 border-slate-900 pb-6">
-            <h1 className="text-3xl font-bold mb-2">DIGITAL ASSET LICENSE AGREEMENT</h1>
+            <h1 className="text-3xl font-bold mb-2">SLO DIGITAL ASSET LICENSE AGREEMENT</h1>
             <p className="text-lg">Contract #069</p>
             <p className="text-sm text-slate-600 mt-2">Effective Date: January 10, 2025</p>
           </div>
@@ -308,18 +308,24 @@ export function Contract069() {
           <section className="space-y-6 mt-8 pt-6 border-t-2 border-slate-900">
             <h2 className="text-xl font-bold">ACCEPTANCE AND SIGNATURES</h2>
 
+            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+              <p className="text-sm font-semibold text-blue-900 mb-1">Signed Contract Available</p>
+              <p className="text-sm text-blue-800">
+                The fully executed version of this contract with original signatures can be viewed in the "Signed
+                Contract" section on the{" "}
+                <a href="/simple-admin/contracts" className="underline font-semibold hover:text-blue-600">
+                  Contracts Summary Page
+                </a>
+                .
+              </p>
+            </div>
+
             <div className="grid grid-cols-2 gap-8 mt-8">
               <div className="space-y-4">
                 <p className="font-semibold">PROVIDER:</p>
                 <p>Neuralia (N3urali.art)</p>
                 <p className="text-sm text-slate-600 mt-2">By: Irina Lebedeva</p>
                 <p className="text-sm text-slate-600">Title: Director of n3uralia360 - n3uraliart</p>
-                <div className="border-t border-slate-900 pt-2 mt-12">
-                  <p className="text-sm">Authorized Signature</p>
-                </div>
-                <div className="border-t border-slate-900 pt-2 mt-4">
-                  <p className="text-sm">Date</p>
-                </div>
               </div>
 
               <div className="space-y-4">
@@ -327,12 +333,6 @@ export function Contract069() {
                 <p>PT Labyrinth Collective Bali</p>
                 <p className="text-sm text-slate-600">Bali, Indonesia</p>
                 <p className="text-sm text-slate-600 mt-2">By: Rafael Jimenez Arroyo</p>
-                <div className="border-t border-slate-900 pt-2 mt-8">
-                  <p className="text-sm">Authorized Signature</p>
-                </div>
-                <div className="border-t border-slate-900 pt-2 mt-4">
-                  <p className="text-sm">Date</p>
-                </div>
               </div>
             </div>
 

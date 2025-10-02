@@ -349,6 +349,25 @@ export default function ContractsPage() {
                     </div>
                   </div>
                 </div>
+
+                <div className="mt-6 pt-6 border-t border-slate-200">
+                  <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2 mb-4">
+                    <FileText className="h-5 w-5 text-orange-600" />
+                    Signed Contract
+                  </h3>
+                  <div className="bg-slate-50 p-6 rounded-lg border-2 border-slate-200">
+                    <p className="text-sm text-slate-600 mb-4 font-medium">
+                      Contract signed by both parties on October 2, 2025
+                    </p>
+                    <div className="bg-white p-4 rounded-lg border border-slate-300">
+                      <img
+                        src="/contracts/labyrinth-signatures.png"
+                        alt="Signed contract with signatures from Irina Lebedeva (N3uralia) and Rafael Jimenez Arroyo (PT Labyrinth Collective Bali)"
+                        className="w-full h-auto"
+                      />
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           ))}

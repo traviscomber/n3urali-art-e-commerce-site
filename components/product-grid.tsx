@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Search, X } from "lucide-react"
+import { Search, X, Tag } from "lucide-react"
 import { useTagFilter } from "@/lib/contexts/tag-filter-context"
 
 interface Image {
@@ -49,8 +49,9 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
   const [selectedCategory, setSelectedCategory] = useState<string>(categoryId || "all")
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
   const [viewingPanorama, setViewingPanorama] = useState<Image | null>(null)
+  const [availableTags, setAvailableTags] = useState<string[]>([])
 
-  const { selectedTags, clearTags, hasActiveTags } = useTagFilter()
+  const { selectedTags, clearTags, hasActiveTags, toggleTag } = useTagFilter()
 
   const supabase = useMemo(() => createClient(), [])
 
@@ -63,12 +64,35 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
     loadImages()
   }, [selectedCategory, sortBy])
 
+  useEffect(() => {
+    const tags = new Set<string>()
+    images.forEach((image) => {
+      if (image.tags && Array.isArray(image.tags)) {
+        image.tags.forEach((tag) => tags.add(tag))
+      }
+    })
+    setAvailableTags(Array.from(tags).sort())
+  }, [images])
+
   const loadCategories = async () => {
     try {
       const { data, error } = await supabase.from("categories").select("id, name").order("name")
 
       if (error) throw error
-      setCategories(data || [])
+
+      const filteredCategories = (data || []).filter((category) => {
+        const name = category.name
+        if (
+          name.toLowerCase() === "equirectangular" ||
+          name.toLowerCase() === "fisheye" ||
+          name.toLowerCase() === "stereographic"
+        ) {
+          return name[0] === name[0].toUpperCase()
+        }
+        return true
+      })
+
+      setCategories(filteredCategories)
     } catch (error) {
       console.error("Error loading categories:", error)
     }
@@ -96,7 +120,6 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
         query = query.eq("category_id", selectedCategory)
       }
 
-      // Apply sorting
       switch (sortBy) {
         case "price_asc":
           query = query.order("price", { ascending: true })
@@ -143,11 +166,13 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
       image.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       image.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       image.categories?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      image.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      (image.tags &&
+        Array.isArray(image.tags) &&
+        image.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())))
 
-    // Tag filtering: if tags are selected, image must have at least one matching tag
     const matchesTags =
-      selectedTags.length === 0 || selectedTags.some((selectedTag) => image.tags.includes(selectedTag))
+      selectedTags.length === 0 ||
+      (image.tags && Array.isArray(image.tags) && selectedTags.some((selectedTag) => image.tags.includes(selectedTag)))
 
     return matchesSearch && matchesTags
   })
@@ -171,8 +196,33 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
       <div className="bg-card/30 rounded-lg p-4 space-y-4">
+        {availableTags.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Tag className="h-4 w-4" />
+              <span>Filter by Tags:</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {availableTags.map((tag) => {
+                const isSelected = selectedTags.includes(tag)
+                return (
+                  <Badge
+                    key={tag}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`cursor-pointer transition-all ${
+                      isSelected ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-muted"
+                    }`}
+                    onClick={() => toggleTag(tag)}
+                  >
+                    {tag}
+                  </Badge>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -237,7 +287,6 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
         )}
       </div>
 
-      {/* Results count */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           {loading ? "Loading..." : `${sortedAndFilteredImages.length} images found`}
@@ -249,7 +298,6 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
         </p>
       </div>
 
-      {/* Image grid */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -276,7 +324,6 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
         </div>
       )}
 
-      {/* PanoramaViewer for 360° preview */}
       {viewingPanorama && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="relative w-full max-w-4xl max-h-[80vh] bg-background rounded-lg shadow-2xl overflow-hidden">

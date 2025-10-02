@@ -5,9 +5,7 @@ import { getImages, getCategories } from "@/app/actions/admin-actions"
 import { ProductGrid } from "@/components/product-grid"
 import { PanoramaViewer } from "@/components/panorama-viewer"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, Eye } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Loader2 } from "lucide-react"
 
 interface Image {
   id: string
@@ -204,111 +202,13 @@ export default function GalleryClient() {
 
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <Tabs defaultValue="all" className="w-full">
-            <div className="flex justify-center mb-12">
-              <TabsList className="grid w-full max-w-md grid-cols-3">
-                <TabsTrigger value="all">All Images</TabsTrigger>
-                <TabsTrigger value="360">360° Images</TabsTrigger>
-                <TabsTrigger value="featured">Featured</TabsTrigger>
-              </TabsList>
+          <div className="space-y-12">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Complete Collection</h2>
+              <p className="text-muted-foreground">Browse our entire catalog of professional images</p>
             </div>
-
-            <TabsContent value="all" className="space-y-12">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold mb-4">Complete Collection</h2>
-                <p className="text-muted-foreground">Browse our entire catalog of professional images</p>
-              </div>
-              <ProductGrid initialImages={images} />
-            </TabsContent>
-
-            <TabsContent value="360" className="space-y-12">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold mb-4">360° Equirectangular Images</h2>
-                <p className="text-muted-foreground">
-                  Immersive spherical panoramas perfect for VR, projection mapping, and virtual tours
-                </p>
-                <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground mt-4">
-                  <span>Interactive 360° Viewer</span>
-                  <span>•</span>
-                  <span>8K Resolution</span>
-                  <span>•</span>
-                  <span>VR Ready</span>
-                </div>
-              </div>
-
-              {equirectangularImages.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {equirectangularImages.map((image) => (
-                    <div
-                      key={image.id}
-                      className="group relative bg-card rounded-lg overflow-hidden border shadow-sm hover:shadow-lg transition-all duration-300"
-                    >
-                      <div className="aspect-[2/1] relative overflow-hidden">
-                        <img
-                          src={
-                            image.image_url ||
-                            image.file_path ||
-                            image.thumbnail_large_url ||
-                            "/placeholder.svg?height=400&width=800" ||
-                            "/placeholder.svg"
-                          }
-                          alt={image.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-                        <div className="absolute top-2 right-2">
-                          <Badge variant="secondary" className="bg-primary/90 text-primary-foreground">
-                            360°
-                          </Badge>
-                        </div>
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <Button
-                            onClick={() => handleView360(image)}
-                            size="sm"
-                            className="bg-white/90 text-black hover:bg-white"
-                          >
-                            <Eye className="w-4 h-4 mr-2" />
-                            360° View
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="p-6">
-                        <h3 className="font-semibold text-lg mb-2 line-clamp-1">{image.title}</h3>
-                        <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{image.description}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-2xl font-bold">${image.price}</span>
-                          <div className="flex gap-2">
-                            <Button onClick={() => handleView360(image)} variant="outline" size="sm">
-                              <Eye className="w-4 h-4 mr-1" />
-                              Preview
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-20">
-                  <p className="text-muted-foreground text-lg">No 360° images found.</p>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="featured" className="space-y-12">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold mb-4">Featured Images</h2>
-                <p className="text-muted-foreground">Hand-picked selections from our premium collection</p>
-              </div>
-              {featuredImages.length > 0 ? (
-                <ProductGrid initialImages={featuredImages} />
-              ) : (
-                <div className="text-center py-20">
-                  <p className="text-muted-foreground text-lg">No featured images available.</p>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+            <ProductGrid initialImages={images} />
+          </div>
         </div>
       </section>
 

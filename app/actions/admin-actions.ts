@@ -184,10 +184,9 @@ const getCachedImagesPaginated = unstable_cache(
         { count: "exact" },
       )
 
-      // Handle category filtering by ID instead of name
       if (category) {
-        // First get the category ID
-        const { data: categoryData } = await supabase.from("categories").select("id").eq("name", category).single()
+        // First get the category ID using case-insensitive match
+        const { data: categoryData } = await supabase.from("categories").select("id").ilike("name", category).single()
 
         if (categoryData) {
           query = query.eq("category_id", categoryData.id)
@@ -1690,8 +1689,7 @@ export async function updateImageDetails(
     console.log(`[v0] Updating image ${imageId} with data:`, updateData)
     const supabase = await createClient()
 
-    // Get category ID from name
-    const categoryResult = await supabase.from("categories").select("id").eq("name", updateData.category).limit(1)
+    const categoryResult = await supabase.from("categories").select("id").ilike("name", updateData.category).limit(1)
 
     if (!categoryResult.data || categoryResult.data.length === 0) {
       return {

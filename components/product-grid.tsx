@@ -91,7 +91,7 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
         if (
           name.toLowerCase() === "equirectangular" ||
           name.toLowerCase() === "fisheye" ||
-          name.toLowerCase() === "stereographic"
+          name.toLowerCase() === "standard"
         ) {
           return name[0] === name[0].toUpperCase()
         }

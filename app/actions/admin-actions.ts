@@ -305,11 +305,11 @@ const getCachedCategories = unstable_cache(
         throw new Error(error.message)
       }
 
-      // Keep only the capitalized versions (Equirectangular, Fisheye, Stereographic)
+      // Keep only the capitalized versions (Equirectangular, Fisheye, Standard)
       const filteredResult = result?.filter((category) => {
         const lowercaseName = category.name.toLowerCase()
         // Exclude lowercase versions of these specific categories
-        if (lowercaseName === "equirectangular" || lowercaseName === "fisheye" || lowercaseName === "stereographic") {
+        if (lowercaseName === "equirectangular" || lowercaseName === "fisheye" || lowercaseName === "standard") {
           // Only keep if the first letter is uppercase (capitalized version)
           return category.name[0] === category.name[0].toUpperCase()
         }
@@ -348,7 +348,7 @@ const getCachedCategoriesOptimized = unstable_cache(
 
     const filteredCategories = categories?.filter((category) => {
       const lowercaseName = category.name.toLowerCase()
-      if (lowercaseName === "equirectangular" || lowercaseName === "fisheye" || lowercaseName === "stereographic") {
+      if (lowercaseName === "equirectangular" || lowercaseName === "fisheye" || lowercaseName === "standard") {
         return category.name[0] === category.name[0].toUpperCase()
       }
       return true

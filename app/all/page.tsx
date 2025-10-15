@@ -302,24 +302,27 @@ export default function BackblazeGalleryPage() {
             </p>
           </div>
         ) : viewMode === "grid" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             {filteredImages.map((image) => (
               <Card
                 key={image.fileId}
                 className="group cursor-pointer overflow-hidden bg-slate-800/50 border-slate-700 hover:border-blue-500/50 transition-all"
                 onClick={() => setSelectedImage(image)}
               >
-                <div className="aspect-square relative overflow-hidden bg-slate-900">
+                <div className="aspect-square relative overflow-hidden bg-slate-900 max-w-[200px] max-h-[200px]">
                   <img
                     src={image.url || "/placeholder.svg"}
                     alt={image.fileName}
+                    width={200}
+                    height={200}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     loading="lazy"
+                    decoding="async"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="absolute bottom-0 left-0 right-0 p-3">
-                      <p className="text-white text-sm font-medium truncate">{image.fileName}</p>
-                      <p className="text-slate-300 text-xs">{formatFileSize(image.contentLength)}</p>
+                    <div className="absolute bottom-0 left-0 right-0 p-2">
+                      <p className="text-white text-xs font-medium truncate">{image.fileName}</p>
+                      <p className="text-slate-300 text-[10px]">{formatFileSize(image.contentLength)}</p>
                     </div>
                   </div>
                 </div>
@@ -336,12 +339,15 @@ export default function BackblazeGalleryPage() {
               >
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 flex-shrink-0 rounded overflow-hidden bg-slate-900">
+                    <div className="w-12 h-12 flex-shrink-0 rounded overflow-hidden bg-slate-900">
                       <img
                         src={image.url || "/placeholder.svg"}
                         alt={image.fileName}
+                        width={48}
+                        height={48}
                         className="w-full h-full object-cover"
                         loading="lazy"
+                        decoding="async"
                       />
                     </div>
                     <div className="flex-1 min-w-0">

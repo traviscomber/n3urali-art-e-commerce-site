@@ -51,10 +51,12 @@ export default function BackblazeGalleryPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [sortField, setSortField] = useState<SortField>("date")
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc")
-  const [nextFileName, setNextFileName] = useState<string | null>(null)
-  const [loadingMore, setLoadingMore] = useState(false)
+  const [offset, setOffset] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
+  const [totalCount, setTotalCount] = useState(0)
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set())
+  const [loadingMore, setLoadingMore] = useState(false)
 
   useEffect(() => {
     const auth = localStorage.getItem("b2_gallery_auth")
@@ -146,12 +148,14 @@ export default function BackblazeGalleryPage() {
     setError(null)
 
     try {
-      const result = await listBackblazeImages(undefined, 100)
+      const result = await listBackblazeImages(0, 100)
 
       if (result.success) {
         setImages(result.data)
         setFilteredImages(result.data)
-        setNextFileName(result.nextFileName)
+        setOffset(100)
+        setHasMore(result.hasMore || false)
+        setTotalCount(result.totalCount || 0)
         toast.success(`Loaded ${result.data.length} images from Backblaze B2`)
       } else {
         setError(result.error || "Failed to load images")
@@ -167,16 +171,17 @@ export default function BackblazeGalleryPage() {
   }
 
   const loadMoreImages = async () => {
-    if (!nextFileName || loadingMore) return
+    if (!hasMore || loadingMore) return
 
     setLoadingMore(true)
 
     try {
-      const result = await listBackblazeImages(nextFileName, 100)
+      const result = await listBackblazeImages(offset, 100)
 
       if (result.success) {
         setImages((prev) => [...prev, ...result.data])
-        setNextFileName(result.nextFileName)
+        setOffset((prev) => prev + 100)
+        setHasMore(result.hasMore || false)
         toast.success(`Loaded ${result.data.length} more images`)
       } else {
         toast.error("Failed to load more images")
@@ -367,7 +372,7 @@ export default function BackblazeGalleryPage() {
               <div>
                 <h1 className="text-2xl font-bold text-white">Backblaze B2 Gallery</h1>
                 <p className="text-sm text-slate-400">
-                  {filteredImages.length} {filteredImages.length === 1 ? "image" : "images"}
+                  {filteredImages.length} of {totalCount} {totalCount === 1 ? "image" : "images"}
                   {searchQuery && ` matching "${searchQuery}"`}
                   {favorites.size > 0 && ` • ${favorites.size} favorited`}
                   {selectedImages.size > 0 && ` • ${selectedImages.size} selected`}
@@ -652,7 +657,7 @@ export default function BackblazeGalleryPage() {
               </div>
             )}
 
-            {nextFileName && !searchQuery && (
+            {hasMore && !searchQuery && (
               <div className="flex justify-center mt-8">
                 <Button
                   onClick={loadMoreImages}
@@ -666,7 +671,7 @@ export default function BackblazeGalleryPage() {
                       Loading More...
                     </>
                   ) : (
-                    "Load More Images"
+                    `Load More Images (${images.length} of ${totalCount})`
                   )}
                 </Button>
               </div>

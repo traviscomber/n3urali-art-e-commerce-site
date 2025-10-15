@@ -12,7 +12,7 @@ interface B2File {
   isFavorite?: boolean
 }
 
-export async function listBackblazeImages(startFileName?: string, maxCount = 100) {
+export async function listBackblazeImages(offset = 0, maxCount = 100) {
   try {
     const apiKey = process.env.BACKBLAZE_API_KEY
     const applicationKey = process.env.BACKBLAZE_APPLICATION_KEY
@@ -23,7 +23,8 @@ export async function listBackblazeImages(startFileName?: string, maxCount = 100
         success: false,
         error: "Backblaze credentials not configured",
         data: [],
-        nextFileName: null,
+        hasMore: false,
+        totalCount: 0,
       }
     }
 
@@ -67,33 +68,44 @@ export async function listBackblazeImages(startFileName?: string, maxCount = 100
       throw new Error("Bucket not found")
     }
 
-    const requestBody: any = {
-      bucketId: bucket.bucketId,
-      maxFileCount: maxCount,
+    let allFiles: any[] = []
+    let nextFileName: string | null = null
+    let hasMore = true
+
+    // Fetch all files with pagination
+    while (hasMore) {
+      const requestBody: any = {
+        bucketId: bucket.bucketId,
+        maxFileCount: 10000, // Max allowed by B2 API
+      }
+
+      if (nextFileName) {
+        requestBody.startFileName = nextFileName
+      }
+
+      const filesResponse = await fetch(`${apiUrl}/b2api/v2/b2_list_file_names`, {
+        method: "POST",
+        headers: {
+          Authorization: authorizationToken,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      })
+
+      if (!filesResponse.ok) {
+        throw new Error(`Failed to list files: ${filesResponse.statusText}`)
+      }
+
+      const filesData = await filesResponse.json()
+      allFiles = allFiles.concat(filesData.files)
+      nextFileName = filesData.nextFileName
+      hasMore = !!nextFileName
     }
-
-    if (startFileName) {
-      requestBody.startFileName = startFileName
-    }
-
-    const filesResponse = await fetch(`${apiUrl}/b2api/v2/b2_list_file_names`, {
-      method: "POST",
-      headers: {
-        Authorization: authorizationToken,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    })
-
-    if (!filesResponse.ok) {
-      throw new Error(`Failed to list files: ${filesResponse.statusText}`)
-    }
-
-    const filesData = await filesResponse.json()
 
     const favoriteFileNames = new Set<string>()
 
-    const images: B2File[] = filesData.files
+    // Filter for images only
+    const allImages: B2File[] = allFiles
       .filter((file: any) => {
         const ext = file.fileName.toLowerCase()
         return ext.endsWith(".jpg") || ext.endsWith(".jpeg") || ext.endsWith(".png") || ext.endsWith(".webp")
@@ -108,12 +120,19 @@ export async function listBackblazeImages(startFileName?: string, maxCount = 100
         isFavorite: favoriteFileNames.has(file.fileName),
       }))
 
-    console.log(`[v0] Loaded ${images.length} images from Backblaze B2`)
+    allImages.sort((a, b) => b.uploadTimestamp - a.uploadTimestamp)
+
+    const totalCount = allImages.length
+    console.log(`[v0] Loaded ${totalCount} total images from Backblaze B2, sorted by newest first`)
+
+    const images = allImages.slice(offset, offset + maxCount)
+    const hasMoreImages = offset + maxCount < totalCount
 
     return {
       success: true,
       data: images,
-      nextFileName: filesData.nextFileName || null,
+      hasMore: hasMoreImages,
+      totalCount: totalCount,
       error: null,
     }
   } catch (error) {
@@ -122,7 +141,8 @@ export async function listBackblazeImages(startFileName?: string, maxCount = 100
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
       data: [],
-      nextFileName: null,
+      hasMore: false,
+      totalCount: 0,
     }
   }
 }

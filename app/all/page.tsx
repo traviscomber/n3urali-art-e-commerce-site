@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { Loader2, ImageIcon, Download, X, Search, Grid3x3, List } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Loader2, ImageIcon, Download, X, Search, Grid3x3, List, ArrowUpDown } from "lucide-react"
 import { toast } from "sonner"
 import { listBackblazeImages } from "@/app/actions/backblaze-actions"
 
@@ -21,6 +22,9 @@ interface B2Image {
   url: string
 }
 
+type SortField = "name" | "date" | "size"
+type SortOrder = "asc" | "desc"
+
 export default function BackblazeGalleryPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [password, setPassword] = useState("")
@@ -31,6 +35,8 @@ export default function BackblazeGalleryPage() {
   const [selectedImage, setSelectedImage] = useState<B2Image | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [sortField, setSortField] = useState<SortField>("date")
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc")
 
   useEffect(() => {
     // Check if already authenticated
@@ -42,14 +48,35 @@ export default function BackblazeGalleryPage() {
   }, [])
 
   useEffect(() => {
-    // Filter images based on search query
-    if (searchQuery.trim() === "") {
-      setFilteredImages(images)
-    } else {
+    let result = images
+
+    // Filter by search query
+    if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase()
-      setFilteredImages(images.filter((img) => img.fileName.toLowerCase().includes(query)))
+      result = result.filter((img) => img.fileName.toLowerCase().includes(query))
     }
-  }, [searchQuery, images])
+
+    // Sort images
+    result = [...result].sort((a, b) => {
+      let comparison = 0
+
+      switch (sortField) {
+        case "name":
+          comparison = a.fileName.localeCompare(b.fileName)
+          break
+        case "date":
+          comparison = a.uploadTimestamp - b.uploadTimestamp
+          break
+        case "size":
+          comparison = a.contentLength - b.contentLength
+          break
+      }
+
+      return sortOrder === "asc" ? comparison : -comparison
+    })
+
+    setFilteredImages(result)
+  }, [searchQuery, images, sortField, sortOrder])
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -210,9 +237,8 @@ export default function BackblazeGalleryPage() {
             </div>
           </div>
 
-          {/* Search Bar */}
-          <div className="mt-4">
-            <div className="relative">
+          <div className="mt-4 flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
               <Input
                 type="text"
@@ -221,6 +247,35 @@ export default function BackblazeGalleryPage() {
                 placeholder="Search images by filename..."
                 className="pl-10 h-12 bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400"
               />
+            </div>
+
+            <div className="flex gap-2">
+              <Select value={sortField} onValueChange={(value) => setSortField(value as SortField)}>
+                <SelectTrigger className="w-[140px] h-12 bg-slate-700/50 border-slate-600 text-white">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="name" className="text-white hover:bg-slate-700">
+                    Name
+                  </SelectItem>
+                  <SelectItem value="date" className="text-white hover:bg-slate-700">
+                    Last Modified
+                  </SelectItem>
+                  <SelectItem value="size" className="text-white hover:bg-slate-700">
+                    Size
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                className="h-12 w-12 bg-slate-700/50 border-slate-600 text-white hover:bg-slate-700"
+                title={sortOrder === "asc" ? "Ascending" : "Descending"}
+              >
+                <ArrowUpDown className={`h-5 w-5 transition-transform ${sortOrder === "desc" ? "rotate-180" : ""}`} />
+              </Button>
             </div>
           </div>
         </div>

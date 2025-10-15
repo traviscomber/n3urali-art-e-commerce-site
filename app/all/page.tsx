@@ -9,9 +9,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2, ImageIcon, Download, X, Search, Grid3x3, List, ArrowUpDown } from "lucide-react"
+import {
+  Loader2,
+  ImageIcon,
+  Download,
+  X,
+  Search,
+  Grid3x3,
+  List,
+  ArrowUpDown,
+  Trash2,
+  Star,
+  CheckSquare,
+  Square,
+} from "lucide-react"
 import { toast } from "sonner"
-import { listBackblazeImages } from "@/app/actions/backblaze-actions"
+import { listBackblazeImages, deleteBackblazeImage } from "@/app/actions/backblaze-actions"
 
 interface B2Image {
   fileName: string
@@ -20,6 +33,7 @@ interface B2Image {
   contentType: string
   uploadTimestamp: number
   url: string
+  isFavorite?: boolean
 }
 
 type SortField = "name" | "date" | "size"
@@ -37,10 +51,22 @@ export default function BackblazeGalleryPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [sortField, setSortField] = useState<SortField>("date")
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc")
+  const [nextFileName, setNextFileName] = useState<string | null>(null)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [favorites, setFavorites] = useState<Set<string>>(new Set())
+  const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set())
 
   useEffect(() => {
-    // Check if already authenticated
     const auth = localStorage.getItem("b2_gallery_auth")
+    const storedFavorites = localStorage.getItem("b2_favorites")
+    if (storedFavorites) {
+      try {
+        setFavorites(new Set(JSON.parse(storedFavorites)))
+      } catch (e) {
+        console.error("[v0] Error loading favorites:", e)
+      }
+    }
+
     if (auth === "true") {
       setIsAuthenticated(true)
       loadImages()
@@ -48,16 +74,20 @@ export default function BackblazeGalleryPage() {
   }, [])
 
   useEffect(() => {
-    let result = images
+    let result = images.map((img) => ({
+      ...img,
+      isFavorite: favorites.has(img.fileName),
+    }))
 
-    // Filter by search query
     if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase()
       result = result.filter((img) => img.fileName.toLowerCase().includes(query))
     }
 
-    // Sort images
     result = [...result].sort((a, b) => {
+      if (a.isFavorite && !b.isFavorite) return -1
+      if (!a.isFavorite && b.isFavorite) return 1
+
       let comparison = 0
 
       switch (sortField) {
@@ -76,13 +106,28 @@ export default function BackblazeGalleryPage() {
     })
 
     setFilteredImages(result)
-  }, [searchQuery, images, sortField, sortOrder])
+  }, [searchQuery, images, sortField, sortOrder, favorites])
+
+  const handleToggleFavorite = (image: B2Image, e: React.MouseEvent) => {
+    e.stopPropagation()
+
+    const newFavorites = new Set(favorites)
+    if (newFavorites.has(image.fileName)) {
+      newFavorites.delete(image.fileName)
+      toast.success("Removed from favorites")
+    } else {
+      newFavorites.add(image.fileName)
+      toast.success("Added to favorites")
+    }
+
+    setFavorites(newFavorites)
+    localStorage.setItem("b2_favorites", JSON.stringify(Array.from(newFavorites)))
+  }
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
-    // Use the same password as simple-admin
     if (password === "C4rlit0s") {
       setIsAuthenticated(true)
       localStorage.setItem("b2_gallery_auth", "true")
@@ -101,11 +146,12 @@ export default function BackblazeGalleryPage() {
     setError(null)
 
     try {
-      const result = await listBackblazeImages()
+      const result = await listBackblazeImages(undefined, 100)
 
       if (result.success) {
         setImages(result.data)
         setFilteredImages(result.data)
+        setNextFileName(result.nextFileName)
         toast.success(`Loaded ${result.data.length} images from Backblaze B2`)
       } else {
         setError(result.error || "Failed to load images")
@@ -117,6 +163,29 @@ export default function BackblazeGalleryPage() {
       toast.error("Failed to load images")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadMoreImages = async () => {
+    if (!nextFileName || loadingMore) return
+
+    setLoadingMore(true)
+
+    try {
+      const result = await listBackblazeImages(nextFileName, 100)
+
+      if (result.success) {
+        setImages((prev) => [...prev, ...result.data])
+        setNextFileName(result.nextFileName)
+        toast.success(`Loaded ${result.data.length} more images`)
+      } else {
+        toast.error("Failed to load more images")
+      }
+    } catch (error) {
+      console.error("[v0] Error loading more images:", error)
+      toast.error("Failed to load more images")
+    } finally {
+      setLoadingMore(false)
     }
   }
 
@@ -142,6 +211,101 @@ export default function BackblazeGalleryPage() {
       hour: "2-digit",
       minute: "2-digit",
     })
+  }
+
+  const handleDeleteImage = async (image: B2Image, e: React.MouseEvent) => {
+    e.stopPropagation()
+
+    if (!confirm(`Are you sure you want to delete "${image.fileName}"? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      const result = await deleteBackblazeImage(image.fileId, image.fileName)
+
+      if (result.success) {
+        setImages((prev) => prev.filter((img) => img.fileId !== image.fileId))
+        setFilteredImages((prev) => prev.filter((img) => img.fileId !== image.fileId))
+        toast.success(`Deleted ${image.fileName}`)
+      } else {
+        toast.error(`Failed to delete: ${result.error}`)
+      }
+    } catch (error) {
+      console.error("[v0] Error deleting image:", error)
+      toast.error("Failed to delete image")
+    }
+  }
+
+  const toggleImageSelection = (fileId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    const newSelection = new Set(selectedImages)
+    if (newSelection.has(fileId)) {
+      newSelection.delete(fileId)
+    } else {
+      newSelection.add(fileId)
+    }
+    setSelectedImages(newSelection)
+  }
+
+  const selectAllImages = () => {
+    if (selectedImages.size === filteredImages.length) {
+      setSelectedImages(new Set())
+      toast.success("Deselected all images")
+    } else {
+      setSelectedImages(new Set(filteredImages.map((img) => img.fileId)))
+      toast.success(`Selected ${filteredImages.length} images`)
+    }
+  }
+
+  const deleteSelectedImages = async () => {
+    if (selectedImages.size === 0) return
+
+    if (!confirm(`Are you sure you want to delete ${selectedImages.size} images? This action cannot be undone.`)) {
+      return
+    }
+
+    const deletePromises = Array.from(selectedImages).map((fileId) => {
+      const image = images.find((img) => img.fileId === fileId)
+      if (image) {
+        return deleteBackblazeImage(image.fileId, image.fileName)
+      }
+      return Promise.resolve({ success: false, error: "Image not found" })
+    })
+
+    try {
+      const results = await Promise.all(deletePromises)
+      const successCount = results.filter((r) => r.success).length
+      const failCount = results.length - successCount
+
+      setImages((prev) => prev.filter((img) => !selectedImages.has(img.fileId)))
+      setFilteredImages((prev) => prev.filter((img) => !selectedImages.has(img.fileId)))
+      setSelectedImages(new Set())
+
+      if (failCount === 0) {
+        toast.success(`Successfully deleted ${successCount} images`)
+      } else {
+        toast.warning(`Deleted ${successCount} images, ${failCount} failed`)
+      }
+    } catch (error) {
+      console.error("[v0] Error deleting images:", error)
+      toast.error("Failed to delete some images")
+    }
+  }
+
+  const favoriteSelectedImages = () => {
+    if (selectedImages.size === 0) return
+
+    const newFavorites = new Set(favorites)
+    const selectedFileNames = images.filter((img) => selectedImages.has(img.fileId)).map((img) => img.fileName)
+
+    selectedFileNames.forEach((fileName) => {
+      newFavorites.add(fileName)
+    })
+
+    setFavorites(newFavorites)
+    localStorage.setItem("b2_favorites", JSON.stringify(Array.from(newFavorites)))
+    setSelectedImages(new Set())
+    toast.success(`Added ${selectedFileNames.length} images to favorites`)
   }
 
   if (!isAuthenticated) {
@@ -205,10 +369,30 @@ export default function BackblazeGalleryPage() {
                 <p className="text-sm text-slate-400">
                   {filteredImages.length} {filteredImages.length === 1 ? "image" : "images"}
                   {searchQuery && ` matching "${searchQuery}"`}
+                  {favorites.size > 0 && ` • ${favorites.size} favorited`}
+                  {selectedImages.size > 0 && ` • ${selectedImages.size} selected`}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={selectAllImages}
+                className="bg-slate-700/50 border-slate-600 text-white hover:bg-slate-700"
+              >
+                {selectedImages.size === filteredImages.length ? (
+                  <>
+                    <CheckSquare className="h-4 w-4 mr-2" />
+                    Deselect All
+                  </>
+                ) : (
+                  <>
+                    <Square className="h-4 w-4 mr-2" />
+                    Select All
+                  </>
+                )}
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -282,7 +466,7 @@ export default function BackblazeGalleryPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 pb-24">
         {error && (
           <Alert className="mb-6 border-red-500/50 bg-red-500/10">
             <AlertDescription className="text-red-400">{error}</AlertDescription>
@@ -301,81 +485,238 @@ export default function BackblazeGalleryPage() {
               {searchQuery ? `No images found matching "${searchQuery}"` : "No images found in Backblaze B2"}
             </p>
           </div>
-        ) : viewMode === "grid" ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-            {filteredImages.map((image) => (
-              <Card
-                key={image.fileId}
-                className="group cursor-pointer overflow-hidden bg-slate-800/50 border-slate-700 hover:border-blue-500/50 transition-all"
-                onClick={() => setSelectedImage(image)}
-              >
-                <div className="aspect-square relative overflow-hidden bg-slate-900 max-w-[200px] max-h-[200px]">
-                  <img
-                    src={image.url || "/placeholder.svg"}
-                    alt={image.fileName}
-                    width={200}
-                    height={200}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="absolute bottom-0 left-0 right-0 p-2">
-                      <p className="text-white text-xs font-medium truncate">{image.fileName}</p>
-                      <p className="text-slate-300 text-[10px]">{formatFileSize(image.contentLength)}</p>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
         ) : (
-          <div className="space-y-2">
-            {filteredImages.map((image) => (
-              <Card
-                key={image.fileId}
-                className="cursor-pointer bg-slate-800/50 border-slate-700 hover:border-blue-500/50 transition-all"
-                onClick={() => setSelectedImage(image)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 flex-shrink-0 rounded overflow-hidden bg-slate-900">
+          <>
+            {viewMode === "grid" ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                {filteredImages.map((image) => (
+                  <Card
+                    key={image.fileId}
+                    className={`group overflow-hidden bg-slate-800/50 border-slate-700 hover:border-blue-500/50 transition-all ${
+                      selectedImages.has(image.fileId) ? "ring-2 ring-blue-500" : ""
+                    }`}
+                  >
+                    <div className="aspect-square relative overflow-hidden bg-slate-900 max-w-[200px] max-h-[200px]">
                       <img
                         src={image.url || "/placeholder.svg"}
                         alt={image.fileName}
-                        width={48}
-                        height={48}
-                        className="w-full h-full object-cover"
+                        width={200}
+                        height={200}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
                         loading="lazy"
                         decoding="async"
+                        onClick={() => setSelectedImage(image)}
                       />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white font-medium truncate">{image.fileName}</p>
-                      <div className="flex items-center gap-4 text-sm text-slate-400 mt-1">
-                        <span>{formatFileSize(image.contentLength)}</span>
-                        <span>{formatDate(image.uploadTimestamp)}</span>
-                        <span className="text-xs bg-slate-700 px-2 py-0.5 rounded">{image.contentType}</span>
+                      <div className="absolute inset-0 pointer-events-none">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => toggleImageSelection(image.fileId, e)}
+                          className={`absolute top-2 left-2 h-8 w-8 shadow-lg pointer-events-auto ${
+                            selectedImages.has(image.fileId)
+                              ? "bg-blue-500 hover:bg-blue-600 text-white"
+                              : "bg-slate-700/90 hover:bg-slate-600 text-white"
+                          }`}
+                          title={selectedImages.has(image.fileId) ? "Deselect" : "Select"}
+                        >
+                          {selectedImages.has(image.fileId) ? (
+                            <CheckSquare className="h-4 w-4" />
+                          ) : (
+                            <Square className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleToggleFavorite(image, e)
+                          }}
+                          className="absolute top-2 right-2 h-8 w-8 bg-yellow-500/90 hover:bg-yellow-600 text-white shadow-lg pointer-events-auto"
+                          title={image.isFavorite ? "Remove from favorites" : "Add to favorites"}
+                        >
+                          <Star className={`h-4 w-4 ${image.isFavorite ? "fill-current" : ""}`} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteImage(image, e)
+                          }}
+                          className="absolute bottom-2 right-2 h-8 w-8 bg-red-500/90 hover:bg-red-600 text-white shadow-lg pointer-events-auto opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Delete image"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                        <div className="absolute bottom-0 left-0 right-0 p-2">
+                          <p className="text-white text-xs font-medium truncate">{image.fileName}</p>
+                          <p className="text-slate-300 text-[10px]">{formatFileSize(image.contentLength)}</p>
+                        </div>
                       </div>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        window.open(image.url, "_blank")
-                      }}
-                      className="bg-slate-700/50 border-slate-600 text-white hover:bg-slate-700"
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredImages.map((image) => (
+                  <Card
+                    key={image.fileId}
+                    className={`bg-slate-800/50 border-slate-700 hover:border-blue-500/50 transition-all ${
+                      selectedImages.has(image.fileId) ? "ring-2 ring-blue-500" : ""
+                    }`}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-4">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => toggleImageSelection(image.fileId, e)}
+                          className={`flex-shrink-0 ${
+                            selectedImages.has(image.fileId)
+                              ? "text-blue-500 hover:text-blue-600"
+                              : "text-slate-400 hover:text-slate-300"
+                          }`}
+                          title={selectedImages.has(image.fileId) ? "Deselect" : "Select"}
+                        >
+                          {selectedImages.has(image.fileId) ? (
+                            <CheckSquare className="h-5 w-5" />
+                          ) : (
+                            <Square className="h-5 w-5" />
+                          )}
+                        </Button>
+                        <div
+                          className="w-12 h-12 flex-shrink-0 rounded overflow-hidden bg-slate-900 cursor-pointer"
+                          onClick={() => setSelectedImage(image)}
+                        >
+                          <img
+                            src={image.url || "/placeholder.svg"}
+                            alt={image.fileName}
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setSelectedImage(image)}>
+                          <p className="text-white font-medium truncate">{image.fileName}</p>
+                          <div className="flex items-center gap-4 text-sm text-slate-400 mt-1">
+                            <span>{formatFileSize(image.contentLength)}</span>
+                            <span>{formatDate(image.uploadTimestamp)}</span>
+                            <span className="text-xs bg-slate-700 px-2 py-0.5 rounded">{image.contentType}</span>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleToggleFavorite(image, e)
+                          }}
+                          className="text-yellow-400 hover:text-yellow-500"
+                          title={image.isFavorite ? "Remove from favorites" : "Add to favorites"}
+                        >
+                          <Star className={`h-4 w-4 ${image.isFavorite ? "fill-current" : ""}`} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteImage(image, e)
+                          }}
+                          className="text-red-400 hover:text-red-500"
+                          title="Delete image"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            window.open(image.url, "_blank")
+                          }}
+                          className="bg-slate-700/50 border-slate-600 text-white hover:bg-slate-700"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {nextFileName && !searchQuery && (
+              <div className="flex justify-center mt-8">
+                <Button
+                  onClick={loadMoreImages}
+                  disabled={loadingMore}
+                  size="lg"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                >
+                  {loadingMore ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                      Loading More...
+                    </>
+                  ) : (
+                    "Load More Images"
+                  )}
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
+
+      {/* Floating batch action toolbar */}
+      {selectedImages.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-20">
+          <Card className="bg-slate-800 border-slate-700 shadow-2xl">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <div className="text-white font-medium">
+                  {selectedImages.size} {selectedImages.size === 1 ? "image" : "images"} selected
+                </div>
+                <div className="h-6 w-px bg-slate-600" />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={favoriteSelectedImages}
+                  className="bg-yellow-500/20 border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/30"
+                >
+                  <Star className="h-4 w-4 mr-2" />
+                  Favorite Selected
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={deleteSelectedImages}
+                  className="bg-red-500/20 border-red-500/50 text-red-400 hover:bg-red-500/30"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Selected
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedImages(new Set())}
+                  className="bg-slate-700/50 border-slate-600 text-white hover:bg-slate-700"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Clear Selection
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Image Preview Modal */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>

@@ -305,11 +305,11 @@ const getCachedCategories = unstable_cache(
         throw new Error(error.message)
       }
 
-      // Keep only the capitalized versions (Equirectangular, Fisheye, Standard)
+      // Keep only the capitalized versions (Equirectangular, Fisheye, Stereographic)
       const filteredResult = result?.filter((category) => {
         const lowercaseName = category.name.toLowerCase()
         // Exclude lowercase versions of these specific categories
-        if (lowercaseName === "equirectangular" || lowercaseName === "fisheye" || lowercaseName === "standard") {
+        if (lowercaseName === "equirectangular" || lowercaseName === "fisheye" || lowercaseName === "stereographic") {
           // Only keep if the first letter is uppercase (capitalized version)
           return category.name[0] === category.name[0].toUpperCase()
         }
@@ -348,7 +348,7 @@ const getCachedCategoriesOptimized = unstable_cache(
 
     const filteredCategories = categories?.filter((category) => {
       const lowercaseName = category.name.toLowerCase()
-      if (lowercaseName === "equirectangular" || lowercaseName === "fisheye" || lowercaseName === "standard") {
+      if (lowercaseName === "equirectangular" || lowercaseName === "fisheye" || lowercaseName === "stereographic") {
         return category.name[0] === category.name[0].toUpperCase()
       }
       return true
@@ -777,6 +777,20 @@ export async function createImageWithCategoryObject(imageData: {
   original_file_url?: string // Added original_file_url field
 }) {
   try {
+    if (!imageData.title || !imageData.image_url || !imageData.thumbnail_url) {
+      return {
+        success: false,
+        error: "Missing required fields: title, image_url, and thumbnail_url are required.",
+      }
+    }
+
+    if (!imageData.category_id && !imageData.category_name) {
+      return {
+        success: false,
+        error: "Either category_id or category_name must be provided",
+      }
+    }
+
     const imageUrlPreview = imageData.image_url
       ? `${imageData.image_url.substring(0, 50)}... (${Math.round(imageData.image_url.length / 1024)}KB)`
       : "No image URL"
@@ -791,15 +805,8 @@ export async function createImageWithCategoryObject(imageData: {
       original_file_size: imageData.original_file_size
         ? `${(imageData.original_file_size / (1024 * 1024)).toFixed(2)}MB`
         : "unknown",
-      original_file_url: imageData.original_file_url || "not provided", // Log original_file_url
+      original_file_url: imageData.original_file_url || "not provided",
     })
-
-    if (!imageData.image_url || !imageData.thumbnail_url) {
-      return {
-        success: false,
-        error: "Missing required image data. Please ensure both image and thumbnail are provided.",
-      }
-    }
 
     const totalPayloadSize = imageData.image_url.length + imageData.thumbnail_url.length
     const payloadSizeMB = totalPayloadSize / (1024 * 1024)
@@ -817,16 +824,41 @@ export async function createImageWithCategoryObject(imageData: {
     let categoryId: string
 
     if (imageData.category_id) {
-      // If category_id is provided, use it directly
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      if (!uuidRegex.test(imageData.category_id)) {
+        return {
+          success: false,
+          error: "Invalid category_id format. Please select a valid category.",
+        }
+      }
+
+      // Verify the category exists
+      const { data: categoryCheck, error: categoryError } = await supabase
+        .from("categories")
+        .select("id")
+        .eq("id", imageData.category_id)
+        .single()
+
+      if (categoryError || !categoryCheck) {
+        return {
+          success: false,
+          error: "Selected category not found. Please select a valid category.",
+        }
+      }
+
       categoryId = imageData.category_id
       console.log("[v0] Using provided category_id:", categoryId)
     } else if (imageData.category_name) {
-      // If category_name is provided, look up the ID
-      const categoryResult = await supabase.from("categories").select("id").eq("name", imageData.category_name).limit(1)
+      // If category_name is provided, look up the ID using case-insensitive match
+      const { data: categoryResult, error: categoryError } = await supabase
+        .from("categories")
+        .select("id")
+        .ilike("name", imageData.category_name)
+        .single()
 
-      if (categoryResult.data && categoryResult.data.length === 0) {
+      if (categoryError || !categoryResult) {
         console.log("[v0] Category not found, creating new category:", imageData.category_name)
-        const newCategoryResult = await supabase
+        const { data: newCategoryResult, error: createError } = await supabase
           .from("categories")
           .insert([
             {
@@ -835,13 +867,17 @@ export async function createImageWithCategoryObject(imageData: {
             },
           ])
           .select("id")
+          .single()
 
-        if (newCategoryResult.error) {
-          throw new Error(newCategoryResult.error.message)
+        if (createError || !newCategoryResult) {
+          return {
+            success: false,
+            error: "Failed to create category: " + (createError?.message || "Unknown error"),
+          }
         }
-        categoryId = newCategoryResult.data[0].id
+        categoryId = newCategoryResult.id
       } else {
-        categoryId = categoryResult.data[0].id
+        categoryId = categoryResult.id
       }
     } else {
       return {
@@ -878,33 +914,22 @@ export async function createImageWithCategoryObject(imageData: {
 
     console.log("[v0] Using license_id:", licenseId, "for upload")
 
-    const sanitizedImageData = sanitizeImageData({
-      title: imageData.title,
-      description: imageData.description,
+    const insertData = {
+      title: sanitizeString(imageData.title),
+      description: sanitizeString(imageData.description),
       category_id: categoryId,
       license_id: licenseId,
       price: imageData.price,
-      file_path: imageData.image_url, // Use image_url as file_path for now
-      thumbnail_url: imageData.thumbnail_url,
-      original_file_url: imageData.original_file_url || null, // Include original_file_url
+      file_path: sanitizeString(imageData.image_url),
+      thumbnail_small_url: sanitizeString(imageData.thumbnail_url),
+      thumbnail_medium_url: sanitizeString(imageData.thumbnail_url),
+      thumbnail_large_url: sanitizeString(imageData.thumbnail_url),
+      original_file_url: sanitizeString(imageData.original_file_url) || null,
       is_featured: false,
       active: true,
-    })
-
-    if (!sanitizedImageData) {
-      return { success: false, error: "Failed to sanitize image data." }
     }
 
-    const { data: result, error } = await supabase
-      .from("images")
-      .insert([
-        {
-          ...sanitizedImageData,
-          file_path: sanitizedImageData.image_url,
-          original_file_url: sanitizedImageData.original_file_url, // Explicitly include original_file_url
-        },
-      ])
-      .select("*")
+    const { data: result, error } = await supabase.from("images").insert([insertData]).select("*")
 
     if (error) {
       console.error("[v0] Database error in createImageWithCategoryObject:", error)

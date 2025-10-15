@@ -613,6 +613,26 @@ export default function SimpleAdminPage() {
       return
     }
 
+    if (!newImage.title || !newImage.title.trim()) {
+      setUploadError("Please enter a title")
+      return
+    }
+
+    if (!newImage.category) {
+      setUploadError("Please select a category")
+      return
+    }
+
+    if (!newImage.rightsType) {
+      setUploadError("Please select a rights type")
+      return
+    }
+
+    if (!newImage.price || Number.parseFloat(newImage.price) < 0) {
+      setUploadError("Please enter a valid price")
+      return
+    }
+
     const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB
     if (newImage.file.size > MAX_FILE_SIZE) {
       setUploadError(
@@ -621,16 +641,14 @@ export default function SimpleAdminPage() {
       return
     }
 
-    if (!newImage.title || !newImage.category || !newImage.rightsType || !newImage.price) {
-      setUploadError("Please fill in all required fields")
-      return
-    }
-
     setUploading(true)
     setUploadError(null)
 
     try {
       console.log("[v0] Starting upload process...")
+      console.log("[v0] Category ID:", newImage.category)
+      console.log("[v0] Rights Type:", newImage.rightsType)
+      console.log("[v0] Price:", newImage.price)
 
       const formData = new FormData()
       formData.append("file", newImage.file)
@@ -651,17 +669,23 @@ export default function SimpleAdminPage() {
       console.log("[v0] File uploaded successfully, saving to database...")
 
       const imageData = {
-        title: newImage.title,
-        description: newImage.description,
-        category_id: newImage.category, // Changed from category to category_id
-        rights_type: newImage.rightsType, // Changed from rightsType to rights_type
+        title: newImage.title.trim(),
+        description: newImage.description.trim(),
+        category_id: newImage.category,
+        rights_type: newImage.rightsType,
         price: Number.parseFloat(newImage.price),
         image_url: uploadResult.url,
-        thumbnail_url: uploadResult.url, // This should ideally be a generated thumbnail, not the same URL
+        thumbnail_url: uploadResult.url,
         original_file_url: newImage.originalFileUrl || null,
         active: true,
         featured: false,
       }
+
+      console.log("[v0] Saving image with data:", {
+        ...imageData,
+        image_url: imageData.image_url.substring(0, 50) + "...",
+        thumbnail_url: imageData.thumbnail_url.substring(0, 50) + "...",
+      })
 
       const result = await createImageWithCategoryObject(imageData)
 
@@ -689,7 +713,7 @@ export default function SimpleAdminPage() {
     } catch (error) {
       console.error("[v0] Upload error:", error)
       setUploadError(error instanceof Error ? error.message : "Upload failed")
-      toast.error("Upload failed")
+      toast.error("Upload failed: " + (error instanceof Error ? error.message : "Unknown error"))
     } finally {
       setUploading(false)
     }
@@ -932,6 +956,7 @@ export default function SimpleAdminPage() {
                               image.image_url ||
                               image.thumbnail_url ||
                               "/placeholder.svg?height=64&width=64&text=No+Image" ||
+                              "/placeholder.svg" ||
                               "/placeholder.svg" ||
                               "/placeholder.svg" ||
                               "/placeholder.svg" ||

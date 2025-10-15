@@ -91,7 +91,7 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
         if (
           name.toLowerCase() === "equirectangular" ||
           name.toLowerCase() === "fisheye" ||
-          name.toLowerCase() === "stereographic"
+          name.toLowerCase() === "standard"
         ) {
           return name[0] === name[0].toUpperCase()
         }
@@ -159,19 +159,14 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
 
       if (error) throw error
 
-      const validImages = (data || []).filter((image) => {
-        const filePath = image.file_path || ""
-        return !filePath.startsWith("/placeholder.svg")
-      })
-
       if (!data || data.length < BATCH_SIZE) {
         setHasMoreInDB(false)
       }
 
       if (append) {
-        setImages((prev) => [...prev, ...validImages])
+        setImages((prev) => [...prev, ...(data || [])])
       } else {
-        setImages(validImages)
+        setImages(data || [])
       }
     } catch (error) {
       console.error("Error loading images:", error)

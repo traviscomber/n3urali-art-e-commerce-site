@@ -76,7 +76,26 @@ export default function BackblazeGalleryPage() {
   }, [])
 
   useEffect(() => {
-    let result = images.map((img) => ({
+    const getBaseFileName = (fileName: string) => {
+      // Remove folder path
+      const nameWithoutPath = fileName.split("/").pop() || fileName
+      // Remove UUID prefix (pattern: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-)
+      return nameWithoutPath.replace(/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}-/, "")
+    }
+
+    // Deduplicate images by base filename, keeping the newest one
+    const deduplicatedImages = images.reduce((acc, img) => {
+      const baseFileName = getBaseFileName(img.fileName)
+      const existing = acc.get(baseFileName)
+
+      if (!existing || img.uploadTimestamp > existing.uploadTimestamp) {
+        acc.set(baseFileName, img)
+      }
+
+      return acc
+    }, new Map<string, B2Image>())
+
+    let result = Array.from(deduplicatedImages.values()).map((img) => ({
       ...img,
       isFavorite: favorites.has(img.fileName),
     }))

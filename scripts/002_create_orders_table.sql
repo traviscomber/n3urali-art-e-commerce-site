@@ -1,13 +1,13 @@
 -- Create orders table for purchase tracking
+-- Removed stripe_session_id column as it doesn't exist in current schema
 CREATE TABLE IF NOT EXISTS public.orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_email VARCHAR(255) NOT NULL,
-  stripe_session_id VARCHAR(255) UNIQUE,
-  stripe_payment_intent_id VARCHAR(255) UNIQUE,
+  user_email TEXT NOT NULL,
+  user_name TEXT,
+  payment_intent_id TEXT,
+  payment_method TEXT,
   total_amount DECIMAL(10,2) NOT NULL,
-  status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'failed', 'refunded')),
-  customer_name VARCHAR(255),
-  billing_address JSONB,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'failed', 'refunded')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -29,8 +29,6 @@ CREATE POLICY "orders_admin_access" ON public.orders
 
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_orders_user_email ON public.orders(user_email);
-CREATE INDEX IF NOT EXISTS idx_orders_stripe_session ON public.orders(stripe_session_id);
+CREATE INDEX IF NOT EXISTS idx_orders_payment_intent ON public.orders(payment_intent_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON public.orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON public.orders(created_at DESC);
-
--- Execute orders table creation script

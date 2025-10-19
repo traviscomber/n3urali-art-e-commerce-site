@@ -9,9 +9,7 @@ CREATE TABLE IF NOT EXISTS categories (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL UNIQUE,
   description TEXT,
-  slug TEXT UNIQUE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Licenses table
@@ -19,9 +17,9 @@ CREATE TABLE IF NOT EXISTS licenses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL UNIQUE,
   description TEXT,
-  price_multiplier DECIMAL(3,2) DEFAULT 1.00,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  price NUMERIC DEFAULT 0.00,
+  active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Images table
@@ -31,14 +29,16 @@ CREATE TABLE IF NOT EXISTS images (
   description TEXT,
   category_id UUID REFERENCES categories(id),
   license_id UUID REFERENCES licenses(id),
-  price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  image_url TEXT NOT NULL,
-  thumbnail_url TEXT,
-  resolution TEXT DEFAULT '4096x4096',
-  format TEXT DEFAULT 'JPG',
-  file_size INTEGER,
+  price NUMERIC NOT NULL DEFAULT 0.00,
+  file_path TEXT,
+  original_url TEXT,
+  original_file_url TEXT,
+  thumbnail_small_url TEXT,
+  thumbnail_medium_url TEXT,
+  thumbnail_large_url TEXT,
+  tags TEXT[],
   active BOOLEAN DEFAULT true,
-  featured BOOLEAN DEFAULT false,
+  is_featured BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -48,7 +48,8 @@ CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT,
   full_name TEXT,
-  avatar_url TEXT,
+  role TEXT DEFAULT 'user',
+  is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -58,9 +59,11 @@ CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES profiles(id),
   user_email TEXT NOT NULL,
-  total_amount DECIMAL(10,2) NOT NULL,
+  user_name TEXT,
+  total_amount NUMERIC NOT NULL,
   status TEXT DEFAULT 'pending',
   payment_intent_id TEXT,
+  payment_method TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -71,19 +74,22 @@ CREATE TABLE IF NOT EXISTS order_items (
   order_id UUID REFERENCES orders(id) ON DELETE CASCADE,
   image_id UUID REFERENCES images(id),
   license_id UUID REFERENCES licenses(id),
-  price DECIMAL(10,2) NOT NULL,
+  price NUMERIC NOT NULL,
+  download_count INTEGER DEFAULT 0,
+  download_limit INTEGER DEFAULT 5,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Downloads table (track user downloads)
 CREATE TABLE IF NOT EXISTS downloads (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES profiles(id),
+  order_item_id UUID REFERENCES order_items(id),
   image_id UUID REFERENCES images(id),
-  license_id UUID REFERENCES licenses(id),
-  order_id UUID REFERENCES orders(id),
+  user_id UUID REFERENCES profiles(id),
+  download_token TEXT UNIQUE,
   download_count INTEGER DEFAULT 0,
-  last_downloaded_at TIMESTAMP WITH TIME ZONE,
+  expires_at TIMESTAMP WITH TIME ZONE,
+  downloaded_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -101,11 +107,11 @@ CREATE TABLE IF NOT EXISTS analytics (
 CREATE INDEX IF NOT EXISTS idx_images_category ON images(category_id);
 CREATE INDEX IF NOT EXISTS idx_images_license ON images(license_id);
 CREATE INDEX IF NOT EXISTS idx_images_active ON images(active);
-CREATE INDEX IF NOT EXISTS idx_images_featured ON images(featured);
+CREATE INDEX IF NOT EXISTS idx_images_featured ON images(is_featured);
 CREATE INDEX IF NOT EXISTS idx_images_created_at ON images(created_at);
 CREATE INDEX IF NOT EXISTS idx_orders_user_email ON orders(user_email);
 CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
-CREATE INDEX IF NOT EXISTS idx_downloads_user ON downloads(user_id);
+CREATE INDEX IF NOT EXISTS idx_downloads_token ON downloads(download_token);
 CREATE INDEX IF NOT EXISTS idx_analytics_event_type ON analytics(event_type);
 CREATE INDEX IF NOT EXISTS idx_analytics_created_at ON analytics(created_at);
 
@@ -155,20 +161,15 @@ CREATE POLICY "Users can view own downloads" ON downloads FOR SELECT USING (auth
 -- No policies needed as this will be accessed via service role
 
 -- Insert default categories
-INSERT INTO categories (name, description, slug) VALUES
-  ('Equirectangular', 'Panoramic 360-degree images perfect for VR and immersive experiences', 'equirectangular'),
-  ('Landscapes', 'Beautiful natural landscapes and outdoor scenes', 'landscapes'),
-  ('Architecture', 'Buildings, structures, and architectural photography', 'architecture'),
-  ('Abstract', 'Abstract and artistic compositions', 'abstract'),
-  ('Nature', 'Flora, fauna, and natural elements', 'nature'),
-  ('Urban', 'City scenes, streets, and urban environments', 'urban')
+INSERT INTO categories (name, description) VALUES
+  ('Equirectangular', 'Panoramic 360-degree images perfect for VR and immersive experiences'),
+  ('Fisheye', 'Ultra-wide angle fisheye images with distinctive curved perspective')
 ON CONFLICT (name) DO NOTHING;
 
 -- Insert default licenses
-INSERT INTO licenses (name, description, price_multiplier) VALUES
-  ('Standard', 'Standard license for personal and commercial use', 1.00),
-  ('Extended', 'Extended license with additional usage rights', 2.00),
-  ('PRO', 'Professional license with unlimited usage rights', 3.00)
+INSERT INTO licenses (name, description, price, active) VALUES
+  ('Standard', 'Standard license for personal and commercial use', 29.99, true),
+  ('Extended', 'Extended license with additional usage rights', 79.99, true)
 ON CONFLICT (name) DO NOTHING;
 
 -- Create function to handle new user signup

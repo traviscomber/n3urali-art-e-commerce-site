@@ -1,13 +1,13 @@
 -- Create order_items table for individual items in orders
+-- Changed license_type to license_id to match actual schema
 CREATE TABLE IF NOT EXISTS public.order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
   image_id UUID NOT NULL REFERENCES public.images(id) ON DELETE RESTRICT,
-  license_type VARCHAR(20) NOT NULL DEFAULT 'standard' CHECK (license_type IN ('standard', 'extended', 'commercial')),
-  price DECIMAL(10,2) NOT NULL,
+  license_id UUID REFERENCES public.licenses(id),
+  price NUMERIC NOT NULL,
   download_count INTEGER DEFAULT 0,
   download_limit INTEGER DEFAULT 5,
-  download_expires_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -31,6 +31,4 @@ CREATE POLICY "order_items_admin_access" ON public.order_items
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON public.order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_image_id ON public.order_items(image_id);
-CREATE INDEX IF NOT EXISTS idx_order_items_license_type ON public.order_items(license_type);
-
--- Execute order items table creation script
+CREATE INDEX IF NOT EXISTS idx_order_items_license_id ON public.order_items(license_id);

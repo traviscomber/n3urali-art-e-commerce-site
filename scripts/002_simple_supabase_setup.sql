@@ -9,9 +9,7 @@ CREATE TABLE IF NOT EXISTS categories (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL UNIQUE,
   description TEXT,
-  slug TEXT NOT NULL UNIQUE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Create licenses table
@@ -19,9 +17,9 @@ CREATE TABLE IF NOT EXISTS licenses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL UNIQUE,
   description TEXT,
-  price DECIMAL(10,2) NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  price NUMERIC NOT NULL DEFAULT 0.00,
+  active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Create images table
@@ -30,27 +28,28 @@ CREATE TABLE IF NOT EXISTS images (
   title TEXT NOT NULL,
   description TEXT,
   category_id UUID REFERENCES categories(id),
-  file_url TEXT NOT NULL,
-  thumbnail_url TEXT,
-  preview_url TEXT,
-  file_size BIGINT,
-  resolution TEXT,
-  format TEXT DEFAULT 'jpg',
+  license_id UUID REFERENCES licenses(id),
+  file_path TEXT,
+  original_url TEXT,
+  original_file_url TEXT,
+  thumbnail_small_url TEXT,
+  thumbnail_medium_url TEXT,
+  thumbnail_large_url TEXT,
+  price NUMERIC DEFAULT 0.00,
   tags TEXT[],
-  metadata JSONB DEFAULT '{}',
   is_featured BOOLEAN DEFAULT FALSE,
-  is_active BOOLEAN DEFAULT TRUE,
+  active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create user profiles table (extends Supabase auth.users)
+-- Create profiles table
 CREATE TABLE IF NOT EXISTS profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  id UUID PRIMARY KEY,
   email TEXT,
   full_name TEXT,
-  avatar_url TEXT,
-  is_admin BOOLEAN DEFAULT FALSE,
+  role TEXT DEFAULT 'user',
+  is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -58,11 +57,12 @@ CREATE TABLE IF NOT EXISTS profiles (
 -- Create orders table
 CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES profiles(id),
-  total_amount DECIMAL(10,2) NOT NULL,
+  user_email TEXT NOT NULL,
+  user_name TEXT,
+  total_amount NUMERIC NOT NULL,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'failed', 'refunded')),
   payment_intent_id TEXT,
-  metadata JSONB DEFAULT '{}',
+  payment_method TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -73,24 +73,22 @@ CREATE TABLE IF NOT EXISTS order_items (
   order_id UUID REFERENCES orders(id) ON DELETE CASCADE,
   image_id UUID REFERENCES images(id),
   license_id UUID REFERENCES licenses(id),
-  price DECIMAL(10,2) NOT NULL,
+  price NUMERIC NOT NULL,
+  download_count INTEGER DEFAULT 0,
+  download_limit INTEGER DEFAULT 5,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Insert default categories
-INSERT INTO categories (name, description, slug) VALUES
-  ('Equirectangular', 'Full 360° panoramic images perfect for VR and immersive experiences', 'equirectangular'),
-  ('Fisheye', 'Ultra-wide angle images with distinctive curved perspective', 'fisheye'),
-  ('Architectural', 'Interior and exterior architectural photography', 'architectural'),
-  ('Nature', 'Natural landscapes and outdoor environments', 'nature'),
-  ('Abstract', 'Artistic and abstract compositions', 'abstract')
-ON CONFLICT (slug) DO NOTHING;
+INSERT INTO categories (name, description) VALUES
+  ('Equirectangular', 'Full 360° panoramic images perfect for VR and immersive experiences'),
+  ('Fisheye', 'Ultra-wide angle images with distinctive curved perspective')
+ON CONFLICT (name) DO NOTHING;
 
 -- Insert default licenses
-INSERT INTO licenses (name, description, price) VALUES
-  ('Standard License', 'Non-exclusive license for commercial and personal use', 29.99),
-  ('Extended License', 'Enhanced usage rights with broader commercial applications', 79.99),
-  ('Exclusive License', 'Exclusive rights with image removal from marketplace', 299.99)
+INSERT INTO licenses (name, description, price, active) VALUES
+  ('Standard', 'Standard license for personal and commercial use', 29.99, true),
+  ('Extended', 'Extended license with additional usage rights', 79.99, true)
 ON CONFLICT (name) DO NOTHING;
 
 -- Enable Row Level Security
@@ -104,43 +102,13 @@ ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 -- Create policies for public read access
 CREATE POLICY "Categories are viewable by everyone" ON categories FOR SELECT USING (true);
 CREATE POLICY "Licenses are viewable by everyone" ON licenses FOR SELECT USING (true);
-CREATE POLICY "Active images are viewable by everyone" ON images FOR SELECT USING (is_active = true);
-
--- Create policies for user profiles
-CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
-
--- Create policies for orders
-CREATE POLICY "Users can view own orders" ON orders FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can create own orders" ON orders FOR INSERT WITH CHECK (auth.uid() = user_id);
-
--- Create policies for order items
-CREATE POLICY "Users can view own order items" ON order_items 
-  FOR SELECT USING (EXISTS (
-    SELECT 1 FROM orders WHERE orders.id = order_items.order_id AND orders.user_id = auth.uid()
-  ));
-
--- Create function to handle user profile creation
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO public.profiles (id, email, full_name)
-  VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'full_name');
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Create trigger for automatic profile creation
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+CREATE POLICY "Active images are viewable by everyone" ON images FOR SELECT USING (active = true);
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_images_category_id ON images(category_id);
-CREATE INDEX IF NOT EXISTS idx_images_is_active ON images(is_active);
-CREATE INDEX IF NOT EXISTS idx_images_is_featured ON images(is_featured);
-CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_images_active ON images(active);
+CREATE INDEX IF NOT EXISTS idx_images_featured ON images(is_featured);
+CREATE INDEX IF NOT EXISTS idx_orders_user_email ON orders(user_email);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_image_id ON order_items(image_id);

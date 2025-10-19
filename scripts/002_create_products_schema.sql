@@ -3,8 +3,8 @@ CREATE TABLE IF NOT EXISTS public.products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   description TEXT,
-  category TEXT NOT NULL CHECK (category IN ('equirectangular', 'fisheye', 'panoramic')),
-  price DECIMAL(10,2) NOT NULL,
+  category TEXT NOT NULL,
+  price NUMERIC NOT NULL,
   preview_image_url TEXT NOT NULL,
   full_image_url TEXT NOT NULL,
   download_url TEXT NOT NULL,
@@ -25,17 +25,6 @@ ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "products_select_all"
   ON public.products FOR SELECT
   USING (is_active = TRUE);
-
--- Admin policies (will be restricted by admin role check in middleware)
-CREATE POLICY "products_admin_all"
-  ON public.products FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles 
-      WHERE profiles.id = auth.uid() 
-      AND profiles.is_admin = TRUE
-    )
-  );
 
 -- Create orders table
 CREATE TABLE IF NOT EXISTS public.orders (
@@ -126,9 +115,6 @@ CREATE POLICY "user_downloads_insert_own"
 CREATE POLICY "user_downloads_update_own"
   ON public.user_downloads FOR UPDATE
   USING (auth.uid() = user_id);
-
--- Add is_admin column to profiles table
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;
 
 -- Create updated_at triggers
 CREATE TRIGGER products_updated_at

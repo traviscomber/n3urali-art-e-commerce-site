@@ -1,6 +1,6 @@
 {
-  "name": "N3urali.art - Premium 360° Digital Photography & AI-Generated Imagery",
-  "short_name": "N3urali.art",
+  "name": "n3uralia360.art - Premium 360° Digital Photography & AI-Generated Imagery",
+  "short_name": "n3uralia360.art",
   "description": "Discover our curated collection of AI-generated equirectangular and fisheye images, perfect for projection mapping, VR experiences, and architectural visualization. Professional quality 4K-16K resolution.",
   "start_url": "/",
   "display": "standalone",
@@ -8,7 +8,7 @@
   "theme_color": "#000000",
   "orientation": "portrait-primary",
   "scope": "/",
-  "id": "n3urali-art-360-photography",
+  "id": "n3uralia360-art-360-photography",
   "icons": [
     {
       "src": "/images/n3uralia-logo.png",
@@ -32,7 +32,7 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "N3urali.art Gallery View"
+      "label": "n3uralia360.art Gallery View"
     }
   ]
 }

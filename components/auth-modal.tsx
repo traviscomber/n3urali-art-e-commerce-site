@@ -103,7 +103,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Welcome to n3urali.art</DialogTitle>
+          <DialogTitle>Welcome to n3uralia360.art</DialogTitle>
         </DialogHeader>
 
         {message && (

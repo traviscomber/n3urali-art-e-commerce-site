@@ -27,7 +27,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Load cart from localStorage on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem("n3urali-cart")
+    const savedCart = localStorage.getItem("n3uralia360-cart")
     if (savedCart) {
       try {
         setItems(JSON.parse(savedCart))
@@ -39,7 +39,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Save cart to localStorage whenever items change
   useEffect(() => {
-    localStorage.setItem("n3urali-cart", JSON.stringify(items))
+    localStorage.setItem("n3uralia360-cart", JSON.stringify(items))
   }, [items])
 
   const addToCart = (item: CartItem) => {

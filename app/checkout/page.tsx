@@ -7,329 +7,22 @@ import { useState } from "react"
 import { useCart } from "@/lib/contexts/cart-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, ShoppingCart, CheckCircle, Wallet } from "lucide-react"
+import { ArrowLeft, ShoppingCart, CheckCircle, Copy, Check, Send, AlertCircle } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { Badge } from "@/components/ui/badge"
 
-type CryptoCurrency = {
-  symbol: string
-  name: string
-  address: string
-  icon: string
-  rate: number // USD to crypto rate
-}
-
-const supportedCryptos: CryptoCurrency[] = [
-  {
-    symbol: "BTC",
-    name: "Bitcoin",
-    address: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
-    icon: "₿",
-    rate: 0.000023, // Example rate: 1 USD = 0.000023 BTC
-  },
-  {
-    symbol: "ETH",
-    name: "Ethereum",
-    address: "0x742d35Cc6634C0532925a3b8D4C9db96590b5c8e",
-    icon: "Ξ",
-    rate: 0.00041, // Example rate: 1 USD = 0.00041 ETH
-  },
-  {
-    symbol: "USDC",
-    name: "USD Coin",
-    address: "0x742d35Cc6634C0532925a3b8D4C9db96590b5c8e",
-    icon: "$",
-    rate: 1.0, // 1:1 with USD
-  },
-]
-
-function CryptoPaymentForm({
-  items,
-  total,
-  onSuccess,
-  onError,
-}: {
-  items: any[]
-  total: number
-  onSuccess: () => void
-  onError: (error: string) => void
-}) {
-  const [selectedCrypto, setSelectedCrypto] = useState<CryptoCurrency>(supportedCryptos[0])
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [paymentStep, setPaymentStep] = useState<"select" | "pay" | "confirm">("select")
-  const [transactionHash, setTransactionHash] = useState("")
-  const [formData, setFormData] = useState({
-    email: "",
-    firstName: "",
-    lastName: "",
-  })
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    })
-  }
-
-  const cryptoAmount = (total * 1.03 * selectedCrypto.rate).toFixed(8)
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-  }
-
-  const handleContinueToPayment = () => {
-    if (!formData.email || !formData.firstName || !formData.lastName) {
-      onError("Please fill in all required fields")
-      return
-    }
-    setPaymentStep("pay")
-  }
-
-  const handleConfirmPayment = async () => {
-    if (!transactionHash.trim()) {
-      onError("Please enter your transaction hash")
-      return
-    }
-
-    setIsProcessing(true)
-
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      // Create order record with crypto payment info
-      const orderResponse = await fetch("/api/orders/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          items,
-          total,
-          customerInfo: formData,
-          paymentMethod: "crypto",
-          cryptoDetails: {
-            currency: selectedCrypto.symbol,
-            amount: cryptoAmount,
-            transactionHash: transactionHash,
-            address: selectedCrypto.address,
-          },
-        }),
-      })
-
-      const orderResult = await orderResponse.json()
-
-      if (orderResult.success) {
-        console.log("[v0] Crypto order created successfully:", orderResult.data.orderNumber)
-        onSuccess()
-      } else {
-        console.error("[v0] Order creation failed:", orderResult.error)
-        onError(orderResult.error || "Failed to create order")
-      }
-    } catch (error) {
-      console.error("[v0] Crypto payment processing error:", error)
-      onError("Payment processing failed. Please try again.")
-    } finally {
-      setIsProcessing(false)
-    }
-  }
-
-  if (paymentStep === "select") {
-    return (
-      <div className="space-y-6">
-        {/* Contact Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Contact Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="your@email.com"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="firstName">First Name</Label>
-                <Input
-                  id="firstName"
-                  name="firstName"
-                  required
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  placeholder="John"
-                />
-              </div>
-              <div>
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  name="lastName"
-                  required
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  placeholder="Doe"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Crypto Selection */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Wallet className="h-5 w-5" />
-              Select Cryptocurrency
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3">
-              {supportedCryptos.map((crypto) => (
-                <div
-                  key={crypto.symbol}
-                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                    selectedCrypto.symbol === crypto.symbol
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/50"
-                  }`}
-                  onClick={() => setSelectedCrypto(crypto)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="text-2xl">{crypto.icon}</div>
-                      <div>
-                        <div className="font-medium">{crypto.name}</div>
-                        <div className="text-sm text-muted-foreground">{crypto.symbol}</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-medium">
-                        {(total * 1.03 * crypto.rate).toFixed(8)} {crypto.symbol}
-                      </div>
-                      <div className="text-sm text-muted-foreground">${(total * 1.03).toFixed(2)} USD</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Button onClick={handleContinueToPayment} size="lg" className="w-full glow-primary">
-          Continue to Payment
-        </Button>
-      </div>
-    )
-  }
-
-  if (paymentStep === "pay") {
-    return (
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Wallet className="h-5 w-5" />
-              Send Payment
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="text-center space-y-4">
-              <div className="text-lg font-medium">
-                Send exactly{" "}
-                <span className="font-bold text-primary">
-                  {cryptoAmount} {selectedCrypto.symbol}
-                </span>
-              </div>
-              <div className="text-sm text-muted-foreground">to the following address:</div>
-            </div>
-
-            <div className="space-y-3">
-              <Label>Wallet Address</Label>
-              <div className="flex items-center gap-2">
-                <Input value={selectedCrypto.address} readOnly className="font-mono text-sm" />
-                <Button variant="outline" size="sm" onClick={() => copyToClipboard(selectedCrypto.address)}>
-                  Copy
-                </Button>
-              </div>
-            </div>
-
-            <div className="bg-muted p-4 rounded-lg space-y-2">
-              <div className="font-medium text-sm">Payment Details:</div>
-              <div className="text-sm space-y-1">
-                <div>
-                  Amount: {cryptoAmount} {selectedCrypto.symbol}
-                </div>
-                <div>Network: {selectedCrypto.symbol === "BTC" ? "Bitcoin" : "Ethereum"}</div>
-                <div>Confirmations required: {selectedCrypto.symbol === "BTC" ? "1" : "12"}</div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <Label htmlFor="txHash">Transaction Hash</Label>
-              <Input
-                id="txHash"
-                value={transactionHash}
-                onChange={(e) => setTransactionHash(e.target.value)}
-                placeholder="Enter transaction hash after sending payment"
-              />
-              <p className="text-xs text-muted-foreground">
-                After sending the payment, paste the transaction hash here to confirm your order.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={() => setPaymentStep("select")} className="flex-1">
-            Back
-          </Button>
-          <Button
-            onClick={handleConfirmPayment}
-            disabled={isProcessing || !transactionHash.trim()}
-            size="lg"
-            className="flex-1 glow-primary"
-          >
-            {isProcessing ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                Verifying...
-              </>
-            ) : (
-              <>
-                <Wallet className="h-4 w-4 mr-2" />
-                Confirm Payment
-              </>
-            )}
-          </Button>
-        </div>
-
-        <p className="text-xs text-muted-foreground text-center">
-          This is a demo system. In production, payment verification would be automated via blockchain APIs.
-        </p>
-      </div>
-    )
-  }
-
-  return null
-}
+const USDT_WALLET_ADDRESS = process.env.NEXT_PUBLIC_USDT_WALLET_ADDRESS || "TJ1iodaRdVm5e7yKLy3Uck3dw1iKDbmJ4a"
+const USDT_RATE = 1.0 // 1 USD = 1 USDT
 
 export default function CheckoutPage() {
-  const { items, total, clearCart, updateQuantity, removeItem } = useCart()
-  const router = useRouter()
+  const { items, total, clearCart } = useCart()
   const [orderComplete, setOrderComplete] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [paymentMethod, setPaymentMethod] = useState<"crypto" | "demo">("crypto")
-  const [demoFormData, setDemoFormData] = useState({
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const [formData, setFormData] = useState({
     email: "",
     firstName: "",
     lastName: "",
@@ -342,11 +35,32 @@ export default function CheckoutPage() {
     }).format(price)
   }
 
-  const handlePaymentSuccess = async (paymentIntentId?: string, customerInfo?: any) => {
-    try {
-      console.log("[v0] Creating order with customer info:", customerInfo)
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    })
+  }
 
-      // Create order in database
+  const usdtAmount = (total * USDT_RATE).toFixed(2)
+
+  const copyToClipboard = async (text: string) => {
+    await navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleConfirmPayment = async () => {
+    if (!formData.email || !formData.firstName || !formData.lastName) {
+      setError("Please fill in all contact information")
+      return
+    }
+
+    setIsProcessing(true)
+    setError(null)
+
+    try {
+      // Create order with USDT payment info
       const response = await fetch("/api/orders/create", {
         method: "POST",
         headers: {
@@ -354,14 +68,19 @@ export default function CheckoutPage() {
         },
         body: JSON.stringify({
           items,
-          total: total * 1.03, // Include processing fee
-          customerInfo: customerInfo || {
-            email: "demo@example.com",
-            firstName: "Demo",
-            lastName: "User",
+          total,
+          customerInfo: {
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
           },
-          paymentMethod,
-          paymentIntentId,
+          paymentMethod: "crypto",
+          cryptoDetails: {
+            currency: "USDT",
+            network: "TRC20",
+            amount: usdtAmount,
+            address: USDT_WALLET_ADDRESS,
+          },
         }),
       })
 
@@ -371,32 +90,14 @@ export default function CheckoutPage() {
         clearCart()
         setOrderComplete(true)
       } else {
-        console.error("[v0] Order creation failed:", result.error)
         setError(result.error || "Failed to create order")
       }
     } catch (error) {
-      console.error("[v0] Order creation error:", error)
-      setError("Failed to create order")
+      console.error("[v0] Payment processing error:", error)
+      setError("Payment processing failed. Please try again.")
+    } finally {
+      setIsProcessing(false)
     }
-  }
-
-  const handlePaymentError = (errorMessage: string) => {
-    setError(errorMessage)
-  }
-
-  const handleDemoPayment = () => {
-    if (!demoFormData.email || !demoFormData.firstName || !demoFormData.lastName) {
-      setError("Please fill in all required fields")
-      return
-    }
-    handlePaymentSuccess(`DEMO-${Date.now()}`, demoFormData)
-  }
-
-  const handleDemoInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDemoFormData({
-      ...demoFormData,
-      [e.target.name]: e.target.value,
-    })
   }
 
   // Redirect if cart is empty and order not complete
@@ -427,9 +128,10 @@ export default function CheckoutPage() {
         <div className="text-center space-y-6 max-w-md">
           <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
           <div>
-            <h1 className="text-2xl font-bold mb-2">Order Complete!</h1>
+            <h1 className="text-2xl font-bold mb-2">Order Submitted!</h1>
             <p className="text-muted-foreground mb-6">
-              Thank you for your purchase. You'll receive download links via email shortly.
+              Thank you for your order. After sending the USDT payment, our team will verify the transaction and send
+              your download links via email within 5-10 minutes.
             </p>
             <div className="space-y-3">
               <Link href="/gallery">
@@ -456,158 +158,163 @@ export default function CheckoutPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Continue Shopping
           </Link>
-          <h1 className="text-3xl font-bold">Checkout</h1>
-          <p className="text-muted-foreground mt-2">Complete your purchase with cryptocurrency</p>
+          <h1 className="text-3xl font-bold">Deposit USDT</h1>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-800 text-sm">{error}</p>
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
             <Button variant="outline" size="sm" onClick={() => setError(null)} className="mt-2">
-              Try Again
+              Dismiss
             </Button>
           </div>
         )}
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Order Summary */}
-          <div className="lg:order-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShoppingCart className="h-5 w-5" />
-                  Order Summary ({items.length} items)
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {items.map((item) => (
-                  <div key={item.id} className="flex gap-4 p-4 border rounded-lg">
-                    <div className="relative w-16 h-16 flex-shrink-0">
-                      <Image
-                        src={item.preview_image_url || "/placeholder.svg?height=64&width=64"}
-                        alt={item.title}
-                        fill
-                        className="object-cover rounded"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm truncate">{item.title}</h4>
-                      <p className="text-sm text-muted-foreground mt-1">{formatPrice(item.price)}</p>
-                      <p className="font-semibold text-sm mt-2">{formatPrice(item.price * item.quantity)}</p>
-                    </div>
-                  </div>
-                ))}
-
-                <Separator />
-
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Subtotal</span>
-                    <span>{formatPrice(total)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Processing Fee (3%)</span>
-                    <span>{formatPrice(total * 0.03)}</span>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Total</span>
-                    <span>{formatPrice(total * 1.03)}</span>
+        <div className="max-w-xl mx-auto space-y-6">
+          {/* Order Summary Card */}
+          <Card className="bg-muted/30">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-muted-foreground mb-1">Package</div>
+                  <div className="font-semibold">{items.length === 1 ? items[0].title : `${items.length} Images`}</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    You will receive {items.reduce((sum, item) => sum + item.quantity, 0)} image
+                    {items.reduce((sum, item) => sum + item.quantity, 0) > 1 ? "s" : ""}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+                <div className="text-right">
+                  <div className="text-sm text-muted-foreground mb-1">Amount</div>
+                  <div className="text-2xl font-bold">${usdtAmount} USDT</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Payment Form */}
-          <div className="lg:order-1">
-            <Card>
-              <CardHeader>
-                <CardTitle>Payment Method</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Tabs value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as any)}>
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="crypto" className="flex items-center gap-2">
-                      <Wallet className="h-4 w-4" />
-                      Crypto
-                    </TabsTrigger>
-                    <TabsTrigger value="demo">Demo</TabsTrigger>
-                  </TabsList>
+          <Card>
+            <CardContent className="pt-6 space-y-6">
+              {/* QR Code */}
+              <div className="flex justify-center">
+                <div className="bg-white p-4 rounded-lg">
+                  <Image
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${USDT_WALLET_ADDRESS}`}
+                    alt="USDT Wallet QR Code"
+                    width={200}
+                    height={200}
+                    className="rounded"
+                  />
+                </div>
+              </div>
 
-                  <TabsContent value="crypto" className="mt-6">
-                    <CryptoPaymentForm
-                      items={items}
-                      total={total}
-                      onSuccess={() => handlePaymentSuccess()}
-                      onError={handlePaymentError}
-                    />
-                  </TabsContent>
+              {/* Network Badge */}
+              <div>
+                <div className="text-sm text-muted-foreground mb-2">Network</div>
+                <Badge variant="secondary" className="text-sm px-3 py-1">
+                  <span className="font-mono font-semibold mr-2">TRX</span>
+                  Tron (TRC20)
+                </Badge>
+              </div>
 
-                  <TabsContent value="demo" className="mt-6">
-                    <div className="space-y-4">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Contact Information</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div>
-                            <Label htmlFor="demo-email">Email Address</Label>
-                            <Input
-                              id="demo-email"
-                              name="email"
-                              type="email"
-                              required
-                              value={demoFormData.email}
-                              onChange={handleDemoInputChange}
-                              placeholder="your@email.com"
-                            />
-                          </div>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <Label htmlFor="demo-firstName">First Name</Label>
-                              <Input
-                                id="demo-firstName"
-                                name="firstName"
-                                required
-                                value={demoFormData.firstName}
-                                onChange={handleDemoInputChange}
-                                placeholder="John"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="demo-lastName">Last Name</Label>
-                              <Input
-                                id="demo-lastName"
-                                name="lastName"
-                                required
-                                value={demoFormData.lastName}
-                                onChange={handleDemoInputChange}
-                                placeholder="Doe"
-                              />
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+              {/* Deposit Address */}
+              <div>
+                <div className="text-sm text-muted-foreground mb-2">Deposit Address</div>
+                <div className="flex items-center gap-2">
+                  <Input value={USDT_WALLET_ADDRESS} readOnly className="font-mono text-sm bg-muted/50" />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => copyToClipboard(USDT_WALLET_ADDRESS)}
+                    className="flex-shrink-0"
+                  >
+                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
 
-                      <div className="p-4 border rounded-lg bg-muted/20">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Wallet className="h-4 w-4" />
-                          <span className="font-medium">Demo Payment</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          This is a demo checkout. Click below to simulate a successful payment.
-                        </p>
-                      </div>
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm space-y-1">
+                    <p className="font-medium text-blue-500 dark:text-blue-400">Important:</p>
+                    <p className="text-foreground">
+                      Send exactly <span className="font-semibold">${usdtAmount} USDT</span> to the address above using
+                      the <span className="font-semibold">Tron (TRC20)</span> network. Credits will be added to your
+                      account after confirmation (usually 5-10 minutes).
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-                      <Button onClick={handleDemoPayment} size="lg" className="w-full">
-                        Complete Demo Order - {formatPrice(total * 1.03)}
-                      </Button>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
+          {/* Contact Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Contact Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="email">Email Address *</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="your@email.com"
+                />
+                <p className="text-xs text-muted-foreground mt-1">Download links will be sent here</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="firstName">First Name *</Label>
+                  <Input
+                    id="firstName"
+                    name="firstName"
+                    required
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    placeholder="John"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    required
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    placeholder="Doe"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Button
+            onClick={handleConfirmPayment}
+            disabled={isProcessing || !formData.email || !formData.firstName || !formData.lastName}
+            size="lg"
+            className="w-full"
+          >
+            {isProcessing ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4 mr-2" />
+                Confirm Payment
+              </>
+            )}
+          </Button>
+
+          <div className="text-center space-y-2 text-sm text-muted-foreground">
+            <p>After sending payment, click the button above to notify the admin for faster processing.</p>
+            <p>Having issues? Contact support with your transaction hash.</p>
           </div>
         </div>
       </div>

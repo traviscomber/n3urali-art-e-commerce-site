@@ -1,10 +1,10 @@
-# N3urali.art - Premium 360° Digital Photography Platform
+# n3uralia360.art - Premium 360° Digital Photography Platform
 
 A professional e-commerce platform for AI-generated equirectangular and fisheye imagery, built for creators, architects, and visualization professionals.
 
 ## Overview
 
-N3urali.art is a cutting-edge digital photography platform specializing in high-resolution 360° imagery. Our collection features AI-generated equirectangular and fisheye images perfect for projection mapping, VR experiences, and architectural visualization.
+n3uralia360.art is a cutting-edge digital photography platform specializing in high-resolution 360° imagery. Our collection features AI-generated equirectangular and fisheye images perfect for projection mapping, VR experiences, and architectural visualization.
 
 ## Features
 
@@ -40,7 +40,7 @@ N3urali.art is a cutting-edge digital photography platform specializing in high-
 1. Clone the repository
 \`\`\`bash
 git clone <repository-url>
-cd n3urali-art
+cd n3uralia360.art
 \`\`\`
 
 2. Install dependencies
@@ -88,8 +88,8 @@ See `.env.example` for required environment variables including:
 
 ## Contributing
 
-This is a proprietary project for N3urali.art. For questions or support, please contact the development team.
+This is a proprietary project for n3uralia360.art. For questions or support, please contact the development team.
 
 ## License
 
-© 2025 N3urali.art. All rights reserved.
+© 2025 n3uralia360.art. All rights reserved.

@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server"
 import LandingGalleryTabs from "@/components/landing-gallery-tabs"
 
 export const metadata: Metadata = {
-  title: "N3urali.art - Premium 360° Imagery",
+  title: "n3uralia360.art - Premium 360° Imagery",
   description:
     "Curated collection of premium 360° dome and equirectangular images for VR, projection mapping, and visualization.",
 }
@@ -18,12 +18,22 @@ export const revalidate = 300
 
 export default async function HomePage() {
   const supabase = await createClient()
+
   const { data: previewImages } = await supabase
     .from("images")
     .select("id, title, thumbnail_medium_url, thumbnail_small_url, file_path")
     .eq("featured_collection", true)
     .eq("active", true)
     .limit(4)
+
+  const { data: imageOfTheDay } = await supabase
+    .from("images")
+    .select("id, title, file_path, original_url, upscaled_url, price, image_format")
+    .eq("featured_collection", true)
+    .eq("active", true)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single()
 
   return (
     <div className="min-h-screen bg-background">
@@ -163,6 +173,87 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Image of the Day Section */}
+      {imageOfTheDay && (
+        <section className="py-24 bg-background">
+          <div className="container mx-auto px-4">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-12">
+                <Badge variant="default" className="mb-4 bg-primary/10 text-primary hover:bg-primary/20">
+                  Image of the Day
+                </Badge>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance">
+                  Today's Featured
+                  <span className="text-primary block">Premium 360° Image</span>
+                </h2>
+                <p className="text-lg text-muted-foreground text-pretty">
+                  Experience the quality and detail of our professional imagery
+                </p>
+              </div>
+
+              <div className="relative group">
+                {/* Image Container with Watermark */}
+                <div className="relative aspect-[21/9] rounded-2xl overflow-hidden border border-border/50 shadow-2xl">
+                  <Image
+                    src={
+                      imageOfTheDay.upscaled_url ||
+                      imageOfTheDay.original_url ||
+                      imageOfTheDay.file_path ||
+                      "/placeholder.svg" ||
+                      "/placeholder.svg" ||
+                      "/placeholder.svg" ||
+                      "/placeholder.svg"
+                    }
+                    alt={imageOfTheDay.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1200px) 100vw, 1200px"
+                    priority
+                  />
+
+                  {/* Watermark Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="text-white/20 text-6xl md:text-8xl lg:text-9xl font-bold tracking-wider transform -rotate-12 select-none">
+                      N3URALIA360.ART
+                    </div>
+                  </div>
+
+                  {/* Gradient Overlay for Better Text Visibility */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                  {/* Image Info Overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                    <div className="flex items-end justify-between gap-4">
+                      <div className="space-y-2">
+                        <h3 className="text-2xl md:text-3xl font-bold">{imageOfTheDay.title}</h3>
+                        <div className="flex items-center gap-3 text-sm">
+                          <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/30">
+                            {imageOfTheDay.image_format}
+                          </Badge>
+                          <span className="text-white/80">Ultra High Resolution</span>
+                        </div>
+                      </div>
+                      <div className="text-right space-y-2">
+                        <div className="text-3xl font-bold">${imageOfTheDay.price}</div>
+                        <Link href={`/product/${imageOfTheDay.id}`}>
+                          <Button size="lg" className="bg-primary hover:bg-primary/90">
+                            View Details
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Decorative Glow Effect */}
+                <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
@@ -180,24 +271,6 @@ export default async function HomePage() {
                 <p className="text-muted-foreground">Perfect for immersive experiences</p>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20 bg-muted/20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <Badge variant="secondary" className="mb-4">
-              AI-Powered Excellence
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-balance">
-              Professional Quality,
-              <span className="text-primary block">Instant Access</span>
-            </h2>
-            <p className="text-lg text-muted-foreground text-pretty">
-              Every image is AI-generated and professionally enhanced to deliver supreme quality 360° imagery. Perfect
-              for VR experiences, projection mapping, architectural visualization, and immersive content creation.
-            </p>
           </div>
         </div>
       </section>

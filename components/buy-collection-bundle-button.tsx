@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ShoppingCart, Package } from "lucide-react"
+import { ShoppingCart, Sparkles } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
 import { toast } from "sonner"
 
@@ -42,26 +42,31 @@ export function BuyCollectionBundleButton({ images, bundlePrice }: BuyCollection
     openCart()
   }
 
-  const savings = images.reduce((sum, img) => sum + img.price, 0) - bundlePrice
-  const savingsPercent = Math.round((savings / images.reduce((sum, img) => sum + img.price, 0)) * 100)
-
   return (
-    <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg p-6 border-2 border-primary/20">
-      <div className="flex items-start gap-4">
-        <div className="p-3 bg-primary/10 rounded-lg">
-          <Package className="h-8 w-8 text-primary" />
+    <div className="relative bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-xl p-8 border border-primary/20 shadow-lg hover:shadow-xl transition-all duration-300">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-300" />
+
+      <div className="relative flex items-start gap-6">
+        <div className="p-4 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl shadow-md">
+          <Sparkles className="h-8 w-8 text-primary" />
         </div>
-        <div className="flex-1">
-          <h3 className="text-xl font-bold mb-2">Buy Complete Collection</h3>
-          <p className="text-muted-foreground mb-4">Get all {images.length} premium images in one bundle</p>
-          <div className="flex items-baseline gap-2 mb-4">
-            <span className="text-3xl font-bold">${bundlePrice.toFixed(2)}</span>
-            <span className="text-muted-foreground line-through">
-              ${images.reduce((sum, img) => sum + img.price, 0).toFixed(2)}
-            </span>
-            <span className="text-sm font-semibold text-green-600">Save {savingsPercent}%</span>
+
+        <div className="flex-1 space-y-4">
+          <div>
+            <h3 className="text-2xl font-bold mb-2 text-balance">Buy Complete Collection</h3>
+            <p className="text-muted-foreground text-pretty">Get all {images.length} premium images in one bundle</p>
           </div>
-          <Button size="lg" onClick={handleBuyBundle} className="w-full sm:w-auto">
+
+          <div className="flex items-baseline gap-3">
+            <span className="text-4xl font-bold text-primary">${bundlePrice}</span>
+            <span className="text-sm text-muted-foreground">for {images.length} images</span>
+          </div>
+
+          <Button
+            size="lg"
+            onClick={handleBuyBundle}
+            className="w-full sm:w-auto shadow-md hover:shadow-lg transition-all"
+          >
             <ShoppingCart className="h-5 w-5 mr-2" />
             Buy Collection Bundle
           </Button>

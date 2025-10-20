@@ -3,9 +3,10 @@
 import { useCart } from "@/lib/contexts/cart-context"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { Trash2, ShoppingCart, Plus, Minus } from "lucide-react"
+import { Trash2, ShoppingCart, Plus, Minus, Package } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { Badge } from "@/components/ui/badge"
 
 export function CartSidebar() {
   const { state, removeItem, updateQuantity, closeCart } = useCart()
@@ -44,11 +45,21 @@ export function CartSidebar() {
                 <div className="space-y-4">
                   {state.items.map((item) => (
                     <div key={`${item.id}-${item.license_id}`} className="flex gap-4 p-4 border rounded-lg">
+                      {item.isBundle && (
+                        <div className="absolute top-2 left-2">
+                          <Badge variant="default" className="flex items-center gap-1">
+                            <Package className="h-3 w-3" />
+                            Bundle
+                          </Badge>
+                        </div>
+                      )}
+
                       <div className="relative w-16 h-16 flex-shrink-0">
                         <Image
                           src={
                             item.preview_image_url ||
-                            "/placeholder.svg?height=64&width=64&query=360 panoramic thumbnail"
+                            "/placeholder.svg?height=64&width=64&query=360 panoramic thumbnail" ||
+                            "/placeholder.svg"
                           }
                           alt={item.title}
                           fill
@@ -58,30 +69,35 @@ export function CartSidebar() {
 
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm truncate">{item.title}</h4>
-                        <p className="text-xs text-muted-foreground">{item.license_name}</p>
+                        {item.isBundle && item.bundleImageCount ? (
+                          <p className="text-xs text-muted-foreground">{item.bundleImageCount} images included</p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">{item.license_name}</p>
+                        )}
                         <p className="text-sm text-muted-foreground mt-1">{formatPrice(item.price)}</p>
 
-                        {/* Quantity Controls - Note: Digital products typically don't need quantity > 1 */}
-                        <div className="flex items-center gap-2 mt-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 p-0 bg-transparent"
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            disabled={item.quantity <= 1}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span className="text-sm font-medium w-8 text-center">{item.quantity}</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 p-0 bg-transparent"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
+                        {!item.isBundle && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 w-8 p-0 bg-transparent"
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              disabled={item.quantity <= 1}
+                            >
+                              <Minus className="h-3 w-3" />
+                            </Button>
+                            <span className="text-sm font-medium w-8 text-center">{item.quantity}</span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 w-8 p-0 bg-transparent"
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
 
                         <p className="font-semibold text-sm mt-2">{formatPrice(item.price * item.quantity)}</p>
                       </div>

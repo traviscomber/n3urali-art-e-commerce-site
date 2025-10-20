@@ -99,7 +99,8 @@ const getCachedImages = unstable_cache(
         .select(`
           id, title, description, price, file_path,
           thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,
-          is_featured, created_at, updated_at, category_id, license_id, tags, original_file_url
+          is_featured, created_at, updated_at, category_id, license_id, tags, original_file_url,
+          image_format, featured_collection
         `)
         .order("created_at", { ascending: false })
 
@@ -179,7 +180,8 @@ const getCachedImagesPaginated = unstable_cache(
         `
           id, title, description, price, file_path,
           thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,
-          is_featured, created_at, updated_at, category_id, license_id, tags, original_file_url
+          is_featured, created_at, updated_at, category_id, license_id, tags, original_file_url,
+          image_format, featured_collection
         `,
         { count: "exact" },
       )
@@ -1875,5 +1877,129 @@ export async function migrateFilesToOptimalStorage() {
     }
   } catch (error) {
     return handleDatabaseError(error, "migrateFilesToOptimalStorage")
+  }
+}
+
+export async function updateImageFeaturedSettings(
+  imageId: string,
+  settings: {
+    image_format?: "dome" | "equirectangular" | null
+    featured_collection?: boolean
+    upscaled_url?: string | null
+  },
+) {
+  try {
+    console.log(`[v0] Updating featured settings for image ${imageId}:`, settings)
+    const supabase = await createClient()
+
+    const { data: result, error } = await supabase
+      .from("images")
+      .update({
+        ...settings,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", imageId)
+      .select("*")
+
+    if (error) {
+      console.error("[v0] Database error in updateImageFeaturedSettings:", error)
+      throw new Error(error.message)
+    }
+
+    if (!result || result.length === 0) {
+      return {
+        success: false,
+        error: "Image not found",
+      }
+    }
+
+    console.log("[v0] Image featured settings updated successfully")
+
+    invalidateCache([CACHE_TAGS.IMAGES])
+    revalidatePath("/simple-admin")
+    revalidatePath("/")
+
+    return { success: true, data: result[0] }
+  } catch (error) {
+    return handleDatabaseError(error, "updateImageFeaturedSettings")
+  }
+}
+
+export async function bulkUpdateFeaturedCollection(imageIds: string[], featured: boolean) {
+  try {
+    console.log(`[v0] Bulk updating featured_collection for ${imageIds.length} images to ${featured}`)
+    const supabase = await createClient()
+
+    // If setting to featured, check the limit
+    if (featured) {
+      const { data: currentFeatured } = await supabase
+        .from("images")
+        .select("id")
+        .eq("featured_collection", true)
+        .eq("active", true)
+
+      const currentCount = currentFeatured?.length || 0
+      const newTotal = currentCount + imageIds.length
+
+      if (newTotal > 20) {
+        return {
+          success: false,
+          error: `Cannot add ${imageIds.length} images. Featured collection limit is 20 (currently ${currentCount} featured).`,
+        }
+      }
+    }
+
+    const { data: result, error } = await supabase
+      .from("images")
+      .update({
+        featured_collection: featured,
+        updated_at: new Date().toISOString(),
+      })
+      .in("id", imageIds)
+      .select("id")
+
+    if (error) {
+      console.error("[v0] Database error in bulkUpdateFeaturedCollection:", error)
+      throw new Error(error.message)
+    }
+
+    console.log(`[v0] Successfully updated ${result?.length || 0} images`)
+
+    invalidateCache([CACHE_TAGS.IMAGES])
+    revalidatePath("/simple-admin")
+    revalidatePath("/")
+
+    return { success: true, data: result }
+  } catch (error) {
+    return handleDatabaseError(error, "bulkUpdateFeaturedCollection")
+  }
+}
+
+export async function getFeaturedGalleryStats() {
+  try {
+    const supabase = await createClient()
+
+    const [domeResult, equirectangularResult, collectionResult] = await Promise.all([
+      supabase.from("images").select("id", { count: "exact" }).eq("image_format", "dome").eq("active", true),
+      supabase.from("images").select("id", { count: "exact" }).eq("image_format", "equirectangular").eq("active", true),
+      supabase.from("images").select("id", { count: "exact" }).eq("featured_collection", true).eq("active", true),
+    ])
+
+    const stats = {
+      dome: domeResult.count || 0,
+      equirectangular: equirectangularResult.count || 0,
+      collection: collectionResult.count || 0,
+    }
+
+    console.log("[v0] Featured gallery stats:", stats)
+
+    return { success: true, stats }
+  } catch (error) {
+    console.error("[v0] Error getting featured gallery stats:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+      stats: { dome: 0, equirectangular: 0, collection: 0 },
+    }
   }
 }

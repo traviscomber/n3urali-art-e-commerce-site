@@ -6,6 +6,7 @@ import { ProductGrid } from "@/components/product-grid"
 import { PanoramaViewer } from "@/components/panorama-viewer"
 import { Badge } from "@/components/ui/badge"
 import { Loader2 } from "lucide-react"
+import Link from "next/link"
 
 interface Image {
   id: string
@@ -191,13 +192,15 @@ export default function GalleryClient() {
             <Badge variant="secondary">Professional Collection</Badge>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-balance">
-              Immersive
-              <span className="text-primary block">Image Gallery</span>
+              Full Image
+              <span className="text-primary block">Gallery</span>
             </h1>
 
             <p className="text-xl text-muted-foreground text-pretty">
-              Discover our curated collection of high-resolution equirectangular and fisheye images. Perfect for VR,
-              projection mapping, and architectural visualization.
+              Browse and purchase individual 360° images. Looking for our curated bundle?{" "}
+              <Link href="/collection" className="text-primary hover:underline">
+                View the Featured Collection
+              </Link>
             </p>
 
             <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">

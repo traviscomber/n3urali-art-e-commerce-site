@@ -57,7 +57,6 @@ CREATE TABLE IF NOT EXISTS profiles (
 -- Orders table
 CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES profiles(id),
   user_email TEXT NOT NULL,
   user_name TEXT,
   total_amount NUMERIC NOT NULL,
@@ -85,7 +84,7 @@ CREATE TABLE IF NOT EXISTS downloads (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   order_item_id UUID REFERENCES order_items(id),
   image_id UUID REFERENCES images(id),
-  user_id UUID REFERENCES profiles(id),
+  user_email TEXT,
   download_token TEXT UNIQUE,
   download_count INTEGER DEFAULT 0,
   expires_at TIMESTAMP WITH TIME ZONE,
@@ -128,34 +127,45 @@ ALTER TABLE analytics ENABLE ROW LEVEL SECURITY;
 -- RLS Policies
 
 -- Categories: Public read access
+DROP POLICY IF EXISTS "Categories are viewable by everyone" ON categories;
 CREATE POLICY "Categories are viewable by everyone" ON categories FOR SELECT USING (true);
 
 -- Licenses: Public read access
+DROP POLICY IF EXISTS "Licenses are viewable by everyone" ON licenses;
 CREATE POLICY "Licenses are viewable by everyone" ON licenses FOR SELECT USING (true);
 
 -- Images: Public read access for active images
+DROP POLICY IF EXISTS "Active images are viewable by everyone" ON images;
 CREATE POLICY "Active images are viewable by everyone" ON images FOR SELECT USING (active = true);
 
 -- Profiles: Users can view and edit their own profile
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
 CREATE POLICY "Users can insert own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- Orders: Users can view their own orders
-CREATE POLICY "Users can view own orders" ON orders FOR SELECT USING (auth.uid() = user_id OR user_email = auth.jwt() ->> 'email');
+DROP POLICY IF EXISTS "Users can view own orders" ON orders;
+CREATE POLICY "Users can view own orders" ON orders 
+FOR SELECT USING (user_email = auth.jwt() ->> 'email');
 
 -- Order items: Users can view items from their own orders
+DROP POLICY IF EXISTS "Users can view own order items" ON order_items;
 CREATE POLICY "Users can view own order items" ON order_items 
 FOR SELECT USING (
   EXISTS (
     SELECT 1 FROM orders 
     WHERE orders.id = order_items.order_id 
-    AND (orders.user_id = auth.uid() OR orders.user_email = auth.jwt() ->> 'email')
+    AND orders.user_email = auth.jwt() ->> 'email'
   )
 );
 
 -- Downloads: Users can view their own downloads
-CREATE POLICY "Users can view own downloads" ON downloads FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can view own downloads" ON downloads;
+CREATE POLICY "Users can view own downloads" ON downloads 
+FOR SELECT USING (user_email = auth.jwt() ->> 'email');
 
 -- Analytics: No direct user access (admin only through service role)
 -- No policies needed as this will be accessed via service role

@@ -26,8 +26,11 @@ import {
   Tag,
   Tags,
   FileText,
+  Calendar,
 } from "lucide-react"
 import { TagManagementDashboard } from "@/components/admin/tag-management-dashboard"
+import { FeaturedGalleryManager } from "@/components/admin/featured-gallery-manager"
+import { CollectionsManager } from "@/components/admin/collections-manager" // Added for Collections tab
 
 interface Image {
   id: string
@@ -886,7 +889,9 @@ export default function SimpleAdminPage() {
         )}
 
         <Tabs defaultValue="images" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-5">
+            {" "}
+            {/* Changed to 5 columns */}
             <TabsTrigger value="images" className="flex items-center gap-2">
               <Eye className="h-4 w-4" />
               Image Management
@@ -895,9 +900,18 @@ export default function SimpleAdminPage() {
               <Tag className="h-4 w-4" />
               Tag Management
             </TabsTrigger>
+            <TabsTrigger value="featured" className="flex items-center gap-2">
+              <Crown className="h-4 w-4" />
+              Featured Gallery
+            </TabsTrigger>
             <TabsTrigger value="upload" className="flex items-center gap-2">
               <Upload className="h-4 w-4" />
               Upload Images
+            </TabsTrigger>
+            {/* New Tab Trigger for Collections */}
+            <TabsTrigger value="collections" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Collections
             </TabsTrigger>
           </TabsList>
 
@@ -932,6 +946,8 @@ export default function SimpleAdminPage() {
                               image.image_url ||
                               image.thumbnail_url ||
                               "/placeholder.svg?height=64&width=64&text=No+Image" ||
+                              "/placeholder.svg" ||
+                              "/placeholder.svg" ||
                               "/placeholder.svg" ||
                               "/placeholder.svg" ||
                               "/placeholder.svg" ||
@@ -1092,6 +1108,10 @@ export default function SimpleAdminPage() {
 
           <TabsContent value="tags" className="space-y-6">
             <TagManagementDashboard />
+          </TabsContent>
+
+          <TabsContent value="featured" className="space-y-6">
+            <FeaturedGalleryManager images={images} />
           </TabsContent>
 
           <TabsContent value="upload" className="space-y-6">
@@ -1372,6 +1392,11 @@ export default function SimpleAdminPage() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* New Tab Content for Collections */}
+          <TabsContent value="collections" className="space-y-6">
+            <CollectionsManager images={images} />
           </TabsContent>
         </Tabs>
       </div>

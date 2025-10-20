@@ -10,24 +10,25 @@
 
 Go to your Vercel project settings and add these environment variables:
 
-#### Database (Neon PostgreSQL)
+#### Supabase Configuration
 \`\`\`
-DATABASE_URL=postgresql://username:password@host:port/database?sslmode=require
-POSTGRES_URL=postgresql://username:password@host:port/database?sslmode=require
-POSTGRES_PRISMA_URL=postgresql://username:password@host:port/database?sslmode=require
-DATABASE_URL_UNPOOLED=postgresql://username:password@host:port/database?sslmode=require
-POSTGRES_URL_NON_POOLING=postgresql://username:password@host:port/database?sslmode=require
-PGHOST=your-postgres-host
-POSTGRES_USER=your-postgres-user
+SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-supabase-anon-key
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+SUPABASE_JWT_SECRET=your-jwt-secret
+\`\`\`
+
+#### Supabase Database Connection
+\`\`\`
+POSTGRES_URL=postgresql://postgres:[password]@[host]:5432/postgres
+POSTGRES_PRISMA_URL=postgresql://postgres:[password]@[host]:5432/postgres?pgbouncer=true
+POSTGRES_URL_NON_POOLING=postgresql://postgres:[password]@[host]:5432/postgres
+POSTGRES_USER=postgres
 POSTGRES_PASSWORD=your-postgres-password
-POSTGRES_DATABASE=your-database-name
-PGPASSWORD=your-postgres-password
-PGDATABASE=your-database-name
-PGHOST_UNPOOLED=your-postgres-host-unpooled
-PGUSER=your-postgres-user
-POSTGRES_URL_NO_SSL=postgresql://username:password@host:port/database
-POSTGRES_HOST=your-postgres-host
-NEON_PROJECT_ID=your-neon-project-id
+POSTGRES_DATABASE=postgres
+POSTGRES_HOST=your-supabase-host.supabase.co
 \`\`\`
 
 #### Storage Configuration
@@ -36,6 +37,7 @@ BLOB_READ_WRITE_TOKEN=your-new-vercel-blob-token
 BACKBLAZE_API_KEY=your-new-backblaze-api-key
 BACKBLAZE_APPLICATION_KEY=your-new-backblaze-application-key
 BACKBLAZE_BUCKET_NAME=your-bucket-name
+NEXT_PUBLIC_BACKBLAZE_BUCKET_NAME=your-bucket-name
 B2_REGION=your-b2-region
 B2_ENDPOINT=https://s3.your-region.backblazeb2.com
 \`\`\`
@@ -43,6 +45,7 @@ B2_ENDPOINT=https://s3.your-region.backblazeb2.com
 #### Application Settings
 \`\`\`
 NEXT_PUBLIC_APP_URL=https://your-domain.vercel.app
+NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL=http://localhost:3000
 NODE_ENV=production
 \`\`\`
 
@@ -69,12 +72,14 @@ The project includes:
 - ✅ `next.config.mjs` - Optimized for production
 - ✅ Environment variable validation in API routes
 - ✅ Proper error handling for missing credentials
+- ✅ Supabase integration for database and authentication
 
 ### 4. Pre-deployment Checklist
 
 - [ ] All environment variables set in Vercel dashboard
 - [ ] New credentials generated and rotated
-- [ ] Database connection tested
+- [ ] Supabase project configured and connected
+- [ ] Database migrations run successfully
 - [ ] Backblaze B2 bucket configured
 - [ ] Domain configured (if using custom domain)
 
@@ -92,15 +97,17 @@ git push origin main
 
 The application includes:
 - Image optimization and lazy loading
-- Database query caching with revalidation
+- Database query caching with revalidation (ISR)
 - Pagination for large datasets
-- Hybrid storage (database + Backblaze B2)
+- Hybrid storage (Supabase + Backblaze B2)
 - Compressed image uploads
+- Server-side rendering with caching
 
 ## Monitoring
 
 Monitor your deployment:
 - Vercel Analytics dashboard
-- Database performance in Neon console
+- Supabase database dashboard
 - Backblaze B2 usage statistics
 - Application logs in Vercel Functions tab
+\`\`\`

@@ -9,6 +9,10 @@ interface CartItem {
   license_id: string
   license_name: string
   quantity: number
+  isBundle?: boolean
+  bundleType?: "featured-collection"
+  bundleImageIds?: string[]
+  bundleImageCount?: number
 }
 
 interface OrderRequest {
@@ -115,7 +119,6 @@ export async function POST(request: NextRequest) {
     if (licenseError || !licenseResult) {
       console.error("[v0] No active license found, checking all licenses...")
 
-      // Fallback: get any license if no active ones exist
       const { data: fallbackLicense, error: fallbackError } = await supabase
         .from("licenses")
         .select("id, name, active")
@@ -130,44 +133,45 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: "No licenses configured in system" }, { status: 500 })
       }
 
-      // Use fallback license but log the issue
-      console.warn("[v0] Using inactive license as fallback:", fallbackLicense.name)
       licenseId = fallbackLicense.id
-
-      const orderItems = items.map((item) => ({
-        order_id: orderId,
-        image_id: item.id,
-        license_id: licenseId,
-        price: item.price * item.quantity,
-      }))
-
-      console.log("[v0] Creating order items with fallback license:", orderItems)
-
-      const { error: itemsError } = await supabase.from("order_items").insert(orderItems)
-
-      if (itemsError) {
-        console.error("[v0] Order items creation error:", itemsError)
-        return NextResponse.json({ success: false, error: "Failed to create order items" }, { status: 500 })
-      }
     } else {
       licenseId = licenseResult.id
-      console.log("[v0] Using active license:", licenseResult.name, "ID:", licenseId)
+    }
 
-      const orderItems = items.map((item) => ({
-        order_id: orderId,
-        image_id: item.id,
-        license_id: licenseId,
-        price: item.price * item.quantity,
-      }))
+    const orderItems = []
+    for (const item of items) {
+      if (item.isBundle && item.bundleImageIds && item.bundleImageIds.length > 0) {
+        console.log("[v0] Processing bundle with", item.bundleImageIds.length, "images")
 
-      console.log("[v0] Creating order items:", orderItems)
+        // Create an order item for each image in the bundle
+        const bundlePricePerImage = item.price / item.bundleImageIds.length
 
-      const { error: itemsError } = await supabase.from("order_items").insert(orderItems)
-
-      if (itemsError) {
-        console.error("[v0] Order items creation error:", itemsError)
-        return NextResponse.json({ success: false, error: "Failed to create order items" }, { status: 500 })
+        for (const imageId of item.bundleImageIds) {
+          orderItems.push({
+            order_id: orderId,
+            image_id: imageId,
+            license_id: licenseId,
+            price: bundlePricePerImage,
+          })
+        }
+      } else {
+        // Regular item
+        orderItems.push({
+          order_id: orderId,
+          image_id: item.id,
+          license_id: licenseId,
+          price: item.price * item.quantity,
+        })
       }
+    }
+
+    console.log("[v0] Creating", orderItems.length, "order items")
+
+    const { error: itemsError } = await supabase.from("order_items").insert(orderItems)
+
+    if (itemsError) {
+      console.error("[v0] Order items creation error:", itemsError)
+      return NextResponse.json({ success: false, error: "Failed to create order items" }, { status: 500 })
     }
 
     console.log("[v0] Order created successfully:", orderNumber)

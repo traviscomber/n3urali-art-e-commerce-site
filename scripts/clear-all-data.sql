@@ -28,12 +28,6 @@ DELETE FROM password_reset_tokens;
 DELETE FROM password_reset_attempts;
 DELETE FROM user_profiles;
 
--- Delete auth sync data
-DELETE FROM neon_auth.users_sync;
-
--- Reset any sequences if needed (optional)
--- This ensures IDs start from 1 again for tables with serial columns
-
 -- Commit the transaction
 COMMIT;
 

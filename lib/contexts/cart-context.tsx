@@ -11,6 +11,11 @@ export interface CartItem {
   license_id: string
   license_name: string
   quantity: number
+  // Bundle-specific fields
+  isBundle?: boolean
+  bundleType?: "featured-collection"
+  bundleImageIds?: string[]
+  bundleImageCount?: number
 }
 
 interface CartState {
@@ -44,6 +49,26 @@ const CartContext = createContext<{
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "ADD_ITEM":
+      if (action.payload.isBundle) {
+        const existingBundle = state.items.find(
+          (item) => item.isBundle && item.bundleType === action.payload.bundleType,
+        )
+
+        if (existingBundle) {
+          // Bundle already in cart, don't add again
+          return state
+        }
+
+        const newBundle = { ...action.payload, quantity: 1 }
+        const newItems = [...state.items, newBundle]
+        return {
+          ...state,
+          items: newItems,
+          total: newItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        }
+      }
+
+      // Original logic for regular items
       const itemKey = `${action.payload.id}-${action.payload.license_id}`
       const existingItem = state.items.find(
         (item) => item.id === action.payload.id && item.license_id === action.payload.license_id,
@@ -80,9 +105,14 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 
     case "UPDATE_QUANTITY":
       const updatedItems = state.items
-        .map((item) =>
-          item.id === action.payload.id ? { ...item, quantity: Math.max(0, action.payload.quantity) } : item,
-        )
+        .map((item) => {
+          if (item.id === action.payload.id) {
+            // Don't allow quantity changes for bundles
+            if (item.isBundle) return item
+            return { ...item, quantity: Math.max(0, action.payload.quantity) }
+          }
+          return item
+        })
         .filter((item) => item.quantity > 0)
 
       return {

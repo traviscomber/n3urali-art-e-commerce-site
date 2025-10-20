@@ -33,6 +33,7 @@ import { TagManagementDashboard } from "@/components/admin/tag-management-dashbo
 import { FeaturedGalleryManager } from "@/components/admin/featured-gallery-manager"
 import { CollectionsManager } from "@/components/admin/collections-manager" // Added for Collections tab
 import { PaymentsManager } from "@/components/admin/payments-manager" // Added for Payments tab
+import { SalesAnalyticsDashboard } from "@/components/admin/sales-analytics-dashboard" // Added import for Sales Analytics
 
 interface Image {
   id: string
@@ -891,9 +892,8 @@ export default function SimpleAdminPage() {
         )}
 
         <Tabs defaultValue="images" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             {" "}
-            {/* Changed to 6 columns */}
             <TabsTrigger value="images" className="flex items-center gap-2">
               <Eye className="h-4 w-4" />
               Image Management
@@ -919,6 +919,10 @@ export default function SimpleAdminPage() {
             <TabsTrigger value="payments" className="flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
               Payments
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Sales Analytics
             </TabsTrigger>
           </TabsList>
 
@@ -953,6 +957,7 @@ export default function SimpleAdminPage() {
                               image.image_url ||
                               image.thumbnail_url ||
                               "/placeholder.svg?height=64&width=64&text=No+Image" ||
+                              "/placeholder.svg" ||
                               "/placeholder.svg" ||
                               "/placeholder.svg" ||
                               "/placeholder.svg" ||
@@ -1410,6 +1415,10 @@ export default function SimpleAdminPage() {
           {/* New Tab Content for Payments */}
           <TabsContent value="payments" className="space-y-6">
             <PaymentsManager />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
+            <SalesAnalyticsDashboard />
           </TabsContent>
         </Tabs>
       </div>

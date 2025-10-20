@@ -578,6 +578,7 @@ export default function BackblazeGalleryPage() {
                         <div className="absolute bottom-0 left-0 right-0 p-2">
                           <p className="text-white text-xs font-medium truncate">{image.fileName}</p>
                           <p className="text-slate-300 text-[10px]">{formatFileSize(image.contentLength)}</p>
+                          <p className="text-blue-400 text-[10px] font-mono">ID: {image.fileId.slice(0, 8)}...</p>
                         </div>
                       </div>
                     </div>
@@ -632,6 +633,9 @@ export default function BackblazeGalleryPage() {
                             <span>{formatFileSize(image.contentLength)}</span>
                             <span>{formatDate(image.uploadTimestamp)}</span>
                             <span className="text-xs bg-slate-700 px-2 py-0.5 rounded">{image.contentType}</span>
+                            <span className="text-xs bg-blue-900/50 px-2 py-0.5 rounded font-mono text-blue-400">
+                              ID: {image.fileId.slice(0, 12)}
+                            </span>
                           </div>
                         </div>
                         <Button

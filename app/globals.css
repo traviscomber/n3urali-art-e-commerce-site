@@ -208,6 +208,16 @@
   }
 }
 
+/* Adding infinite scroll animation for collection carousel */
+@keyframes infinite-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
 .animate-float {
   animation: float 3s ease-in-out infinite;
   will-change: transform;
@@ -216,4 +226,14 @@
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
   will-change: opacity, box-shadow;
+}
+
+/* Infinite scroll animation with pause on hover */
+.animate-infinite-scroll {
+  animation: infinite-scroll 60s linear infinite;
+  will-change: transform;
+}
+
+.pause-animation {
+  animation-play-state: paused;
 }

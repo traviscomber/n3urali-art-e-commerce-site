@@ -19,13 +19,6 @@ export const revalidate = 300
 export default async function HomePage() {
   const supabase = await createClient()
 
-  const { data: previewImages } = await supabase
-    .from("images")
-    .select("id, title, thumbnail_medium_url, thumbnail_small_url, file_path")
-    .eq("featured_collection", true)
-    .eq("active", true)
-    .limit(4)
-
   const { data: imageOfTheDay } = await supabase
     .from("images")
     .select("id, title, file_path, original_url, upscaled_url, price, image_format")
@@ -35,50 +28,191 @@ export default async function HomePage() {
     .limit(1)
     .single()
 
+  const { data: collectionImages } = await supabase
+    .from("images")
+    .select("id, title, file_path, original_url, upscaled_url, price, image_format")
+    .eq("featured_collection", true)
+    .eq("active", true)
+    .order("created_at", { ascending: false })
+    .limit(20)
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
+      {imageOfTheDay && (
+        <section className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
 
-        <div className="relative container mx-auto px-4 py-20">
-          <div className="max-w-5xl mx-auto text-center space-y-12">
-            <div className="space-y-6">
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-balance">
-                Premium 360°
-                <span className="block text-primary mt-2">Imagery</span>
-              </h1>
-
-              <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto text-pretty">
-                Curated collection of ultra high-quality dome and equirectangular images for VR, projection mapping, and
-                visualization
-              </p>
-            </div>
-
-            {/* Preview Images Grid */}
-            {previewImages && previewImages.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-                {previewImages.map((image) => (
-                  <div
-                    key={image.id}
-                    className="relative aspect-square rounded-lg overflow-hidden border border-border/50 hover:border-primary/50 transition-colors"
-                  >
-                    <Image
-                      src={
-                        image.thumbnail_medium_url || image.thumbnail_small_url || image.file_path || "/placeholder.svg"
-                      }
-                      alt={image.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 50vw, 25vw"
-                    />
-                  </div>
-                ))}
+          <div className="relative container mx-auto px-4">
+            <div className="max-w-7xl mx-auto space-y-12">
+              {/* Site Title and Badge */}
+              <div className="text-center space-y-6">
+                <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20 text-sm px-4 py-2">
+                  Image of the Day
+                </Badge>
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance">
+                  Premium 360°
+                  <span className="block text-primary mt-2">Imagery</span>
+                </h1>
+                <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-pretty">
+                  Experience the quality and detail of our professional AI-generated imagery
+                </p>
               </div>
-            )}
+
+              {/* Featured Image with Watermark */}
+              <div className="relative group">
+                <div className="relative aspect-[21/9] rounded-2xl overflow-hidden border border-border/50 shadow-2xl">
+                  <Image
+                    src={
+                      imageOfTheDay.upscaled_url ||
+                      imageOfTheDay.original_url ||
+                      imageOfTheDay.file_path ||
+                      "/placeholder.svg" ||
+                      "/placeholder.svg" ||
+                      "/placeholder.svg"
+                    }
+                    alt={imageOfTheDay.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1400px) 100vw, 1400px"
+                    priority
+                  />
+
+                  {/* Watermark Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="text-white/20 text-6xl md:text-8xl lg:text-9xl font-bold tracking-wider transform -rotate-12 select-none">
+                      N3URALIA360.ART
+                    </div>
+                  </div>
+
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                  {/* Image Info Overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                    <div className="flex items-end justify-between gap-4 flex-wrap">
+                      <div className="space-y-2">
+                        <h2 className="text-2xl md:text-3xl font-bold">{imageOfTheDay.title}</h2>
+                        <div className="flex items-center gap-3 text-sm">
+                          <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/30">
+                            {imageOfTheDay.image_format}
+                          </Badge>
+                          <span className="text-white/80">Ultra High Resolution</span>
+                        </div>
+                      </div>
+                      <div className="text-right space-y-2">
+                        <div className="text-3xl font-bold">${imageOfTheDay.price}</div>
+                        <Link href={`/product/${imageOfTheDay.id}`}>
+                          <Button size="lg" className="bg-primary hover:bg-primary/90">
+                            View Details
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Decorative Glow Effect */}
+                <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
+
+      {collectionImages && collectionImages.length > 0 && (
+        <section className="py-16 bg-background overflow-hidden">
+          <div className="container mx-auto px-4 mb-8">
+            <div className="text-center space-y-3">
+              <Badge variant="secondary" className="bg-primary/10 text-primary">
+                Premium Collection
+              </Badge>
+              <h2 className="text-2xl md:text-3xl font-bold">
+                20 Curated <span className="text-primary">360° Images</span>
+              </h2>
+            </div>
+          </div>
+
+          <div className="relative">
+            {/* Gradient Overlays for fade effect */}
+            <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+
+            {/* Infinite Scroll Container */}
+            <div className="flex gap-6 animate-infinite-scroll hover:pause-animation">
+              {/* First set of images */}
+              {collectionImages.map((image) => (
+                <Link
+                  key={`first-${image.id}`}
+                  href={`/product/${image.id}`}
+                  className="group flex-shrink-0 w-80 h-52 relative rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
+                >
+                  <Image
+                    src={image.upscaled_url || image.original_url || image.file_path || "/placeholder.svg"}
+                    alt={image.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="320px"
+                  />
+
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                  {/* Info */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                    <h3 className="font-semibold text-sm line-clamp-1 mb-1">{image.title}</h3>
+                    <div className="flex items-center justify-between">
+                      <Badge variant="secondary" className="bg-white/20 text-white text-xs">
+                        {image.image_format}
+                      </Badge>
+                      <span className="text-lg font-bold">${image.price}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+
+              {/* Duplicate set for seamless loop */}
+              {collectionImages.map((image) => (
+                <Link
+                  key={`second-${image.id}`}
+                  href={`/product/${image.id}`}
+                  className="group flex-shrink-0 w-80 h-52 relative rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
+                >
+                  <Image
+                    src={image.upscaled_url || image.original_url || image.file_path || "/placeholder.svg"}
+                    alt={image.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="320px"
+                  />
+
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                  <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                    <h3 className="font-semibold text-sm line-clamp-1 mb-1">{image.title}</h3>
+                    <div className="flex items-center justify-between">
+                      <Badge variant="secondary" className="bg-white/20 text-white text-xs">
+                        {image.image_format}
+                      </Badge>
+                      <span className="text-lg font-bold">${image.price}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* View All Button */}
+          <div className="text-center mt-8">
+            <Link href="/collection">
+              <Button size="lg" variant="outline" className="group bg-transparent">
+                View Complete Collection
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* Main CTAs - 3 Large Cards */}
       <section className="py-20 bg-muted/30">
@@ -172,87 +306,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Image of the Day Section */}
-      {imageOfTheDay && (
-        <section className="py-24 bg-background">
-          <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-12">
-                <Badge variant="default" className="mb-4 bg-primary/10 text-primary hover:bg-primary/20">
-                  Image of the Day
-                </Badge>
-                <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance">
-                  Today's Featured
-                  <span className="text-primary block">Premium 360° Image</span>
-                </h2>
-                <p className="text-lg text-muted-foreground text-pretty">
-                  Experience the quality and detail of our professional imagery
-                </p>
-              </div>
-
-              <div className="relative group">
-                {/* Image Container with Watermark */}
-                <div className="relative aspect-[21/9] rounded-2xl overflow-hidden border border-border/50 shadow-2xl">
-                  <Image
-                    src={
-                      imageOfTheDay.upscaled_url ||
-                      imageOfTheDay.original_url ||
-                      imageOfTheDay.file_path ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg"
-                    }
-                    alt={imageOfTheDay.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 1200px) 100vw, 1200px"
-                    priority
-                  />
-
-                  {/* Watermark Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="text-white/20 text-6xl md:text-8xl lg:text-9xl font-bold tracking-wider transform -rotate-12 select-none">
-                      N3URALIA360.ART
-                    </div>
-                  </div>
-
-                  {/* Gradient Overlay for Better Text Visibility */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-                  {/* Image Info Overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                    <div className="flex items-end justify-between gap-4">
-                      <div className="space-y-2">
-                        <h3 className="text-2xl md:text-3xl font-bold">{imageOfTheDay.title}</h3>
-                        <div className="flex items-center gap-3 text-sm">
-                          <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/30">
-                            {imageOfTheDay.image_format}
-                          </Badge>
-                          <span className="text-white/80">Ultra High Resolution</span>
-                        </div>
-                      </div>
-                      <div className="text-right space-y-2">
-                        <div className="text-3xl font-bold">${imageOfTheDay.price}</div>
-                        <Link href={`/product/${imageOfTheDay.id}`}>
-                          <Button size="lg" className="bg-primary hover:bg-primary/90">
-                            View Details
-                            <ArrowRight className="w-4 h-4 ml-2" />
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Decorative Glow Effect */}
-                <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       <section className="py-20">
         <div className="container mx-auto px-4">

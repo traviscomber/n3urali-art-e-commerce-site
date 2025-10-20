@@ -1,40 +1,69 @@
 import type { Metadata } from "next"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Eye, Star } from "lucide-react"
+import { Package, Star, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { BuyCollectionBundleButton } from "@/components/buy-collection-bundle-button"
 import { createClient } from "@/lib/supabase/server"
 
 export const metadata: Metadata = {
-  title: "Weekly Collection - Premium 360° Image Bundle",
+  title: "Collections - Premium 360° Image Bundles | n3uralia360.art",
   description:
-    "This week's curated collection of 20 premium 360° images. Buy the complete collection at a special bundle price and get instant access to all images.",
-  keywords: ["360 collection", "image bundle", "VR collection", "panoramic bundle", "premium 360 images"],
+    "Browse our curated collections of premium 360° images. Each collection is carefully organized with unique codes and bundle pricing for professional projects.",
+  keywords: ["360 collections", "image bundles", "VR collections", "panoramic bundles", "premium 360 images"],
 }
 
 export const revalidate = 300 // Revalidate every 5 minutes
 
-export default async function CollectionPage() {
+export default async function CollectionsPage() {
   const supabase = await createClient()
 
-  const { data: images, error } = await supabase
-    .from("images")
-    .select("*")
-    .eq("featured_collection", true)
-    .eq("active", true)
+  const { data: collections, error: collectionsError } = await supabase
+    .from("collections")
+    .select(
+      `
+      *,
+      collection_images (
+        image_id
+      )
+    `,
+    )
+    .eq("is_active", true)
     .order("created_at", { ascending: false })
-    .limit(20)
 
-  if (error) {
-    console.error("[v0] Error fetching collection images:", error)
+  if (collectionsError) {
+    console.error("[v0] Error fetching collections:", collectionsError)
   }
 
-  const collectionImages = images || []
+  const collectionsData = collections || []
 
-  const bundlePrice = 999
+  // Get image counts and first image for each collection
+  const collectionsWithDetails = await Promise.all(
+    collectionsData.map(async (collection) => {
+      const imageCount = collection.collection_images?.length || 0
+
+      // Get first image as thumbnail
+      const firstImageId = collection.collection_images?.[0]?.image_id
+      let thumbnailUrl = null
+
+      if (firstImageId) {
+        const { data: image } = await supabase
+          .from("images")
+          .select("thumbnail_medium_url, file_path")
+          .eq("id", firstImageId)
+          .single()
+
+        thumbnailUrl = image?.thumbnail_medium_url || image?.file_path
+      }
+
+      return {
+        ...collection,
+        imageCount,
+        thumbnailUrl,
+      }
+    }),
+  )
 
   return (
     <div className="min-h-screen bg-background">
@@ -51,152 +80,109 @@ export default async function CollectionPage() {
         <div className="relative container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center space-y-6">
             <Badge variant="default" className="animate-pulse-glow">
-              <Star className="h-3 w-3 mr-1" />
-              Featured Collection
+              <Package className="h-3 w-3 mr-1" />
+              Premium Collections
             </Badge>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-balance">
-              Premium
-              <span className="text-primary block">360° Collection</span>
+              Curated 360° Image
+              <span className="text-primary block">Collections</span>
             </h1>
 
             <p className="text-xl text-muted-foreground text-pretty">
-              Our handpicked selection of 20 premium 360° images for professional visualization projects.
+              Browse our organized collections of premium 360° images. Each collection is carefully curated with unique
+              codes for easy reference and professional use.
             </p>
 
             <div className="flex items-center justify-center gap-8 text-sm">
               <div className="flex flex-col items-center gap-1">
-                <span className="text-3xl font-bold">{collectionImages.length}</span>
-                <span className="text-muted-foreground">Premium Images</span>
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-3xl font-bold text-primary">${bundlePrice}</span>
-                <span className="text-muted-foreground">Complete Bundle</span>
+                <span className="text-3xl font-bold">{collectionsWithDetails.length}</span>
+                <span className="text-muted-foreground">Active Collections</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Collection Grid */}
+      {/* Collections Grid */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold mb-4">What's Included</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              All {collectionImages.length} images in high resolution, perfect for VR experiences, projection mapping,
-              and professional visualization projects.
-            </p>
-          </div>
-
-          {collectionImages.length === 0 ? (
+          {collectionsWithDetails.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">The collection is being curated. Check back soon!</p>
+              <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-xl font-semibold mb-2">No Collections Yet</h3>
+              <p className="text-muted-foreground mb-6">Collections are being curated. Check back soon!</p>
+              <Button asChild>
+                <Link href="/gallery">Browse Gallery</Link>
+              </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {collectionImages.map((image, index) => {
-                const getImageUrl = () => {
-                  if (image.thumbnail_medium_url) return image.thumbnail_medium_url
-                  if (image.thumbnail_small_url) return image.thumbnail_small_url
-                  if (image.thumbnail_large_url) return image.thumbnail_large_url
-                  if (image.file_path) return image.file_path
-                  if (image.original_url) return image.original_url
-                  return `/placeholder.svg?height=400&width=400&text=${encodeURIComponent(image.title)}`
-                }
-
-                const imageUrl = getImageUrl()
-
-                return (
-                  <Card key={image.id} className="group overflow-hidden hover:shadow-lg transition-all duration-300">
-                    <CardContent className="p-0">
-                      <div className="relative aspect-square">
-                        <Image
-                          src={imageUrl || "/placeholder.svg"}
-                          alt={image.title}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
-                          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
-                          loading="lazy"
-                        />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                          <Button size="sm" variant="secondary" asChild>
-                            <Link href={`/gallery?image=${image.id}`}>
-                              <Eye className="w-4 h-4 mr-1" />
-                              View
-                            </Link>
-                          </Button>
-                        </div>
-                        <Badge variant="secondary" className="absolute top-2 left-2 text-xs">
-                          #{index + 1}
-                        </Badge>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {collectionsWithDetails.map((collection) => (
+                <Card key={collection.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300">
+                  <div className="relative aspect-video overflow-hidden bg-muted">
+                    {collection.thumbnailUrl ? (
+                      <Image
+                        src={collection.thumbnailUrl || "/placeholder.svg"}
+                        alt={collection.title}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Package className="h-16 w-16 text-muted-foreground/30" />
                       </div>
-                      <div className="p-3">
-                        <h3 className="font-semibold text-sm truncate mb-1">{image.title}</h3>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground line-through">${image.price}</span>
-                          <Badge variant="outline" className="text-xs">
-                            {image.image_format || "360°"}
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    {collection.code && (
+                      <Badge variant="secondary" className="absolute top-3 left-3 font-mono">
+                        {collection.code}
+                      </Badge>
+                    )}
+                    {collection.is_auto_curated && (
+                      <Badge variant="default" className="absolute top-3 right-3">
+                        <Star className="h-3 w-3 mr-1" />
+                        Auto
+                      </Badge>
+                    )}
+                  </div>
+
+                  <CardHeader>
+                    <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                      {collection.title}
+                    </CardTitle>
+                    {collection.description && (
+                      <CardDescription className="line-clamp-2">{collection.description}</CardDescription>
+                    )}
+                  </CardHeader>
+
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">{collection.imageCount} images</span>
+                      <span className="text-2xl font-bold text-primary">${collection.bundle_price}</span>
+                    </div>
+
+                    <Button asChild className="w-full group/btn">
+                      <Link href={`/collection/${collection.code || collection.id}`}>
+                        View Collection
+                        <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )}
         </div>
       </section>
 
-      {/* Features Section */}
-      {collectionImages.length > 0 && (
-        <section className="py-16 bg-background">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-              <div className="text-center space-y-2">
-                <h3 className="text-3xl md:text-4xl font-bold">4K-16K</h3>
-                <p className="text-muted-foreground">Ultra high resolution</p>
-              </div>
-              <div className="text-center space-y-2">
-                <h3 className="text-3xl md:text-4xl font-bold">Instant</h3>
-                <p className="text-muted-foreground">Download after purchase</p>
-              </div>
-              <div className="text-center space-y-2">
-                <h3 className="text-3xl md:text-4xl font-bold">VR Ready</h3>
-                <p className="text-muted-foreground">Perfect for immersive experiences</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {collectionImages.length > 0 && (
-        <section className="py-16 bg-muted/30">
-          <div className="container mx-auto px-4">
-            <div className="max-w-2xl mx-auto">
-              <BuyCollectionBundleButton
-                images={collectionImages.map((img) => ({
-                  id: img.id,
-                  title: img.title,
-                  price: img.price,
-                  thumbnail_medium_url: img.thumbnail_medium_url,
-                  thumbnail_small_url: img.thumbnail_small_url,
-                  file_path: img.file_path,
-                  original_url: img.original_url,
-                }))}
-                bundlePrice={bundlePrice}
-              />
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* Browse Gallery CTA */}
-      <section className="py-16">
+      <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center">
-            <p className="text-muted-foreground mb-4">Looking for individual images? Browse our full gallery</p>
+            <h2 className="text-2xl font-bold mb-4">Looking for Individual Images?</h2>
+            <p className="text-muted-foreground mb-6">Browse our full gallery to find specific images</p>
             <Button variant="outline" size="lg" asChild>
               <Link href="/gallery">View Gallery</Link>
             </Button>

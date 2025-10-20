@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge"
 
 const USDT_WALLET_ADDRESS = process.env.NEXT_PUBLIC_USDT_WALLET_ADDRESS || "TJ1iodaRdVm5e7yKLy3Uck3dw1iKDbmJ4a"
 const USDT_RATE = 1.0 // 1 USD = 1 USDT
+const WHATSAPP_PHONE = "56940946660"
 
 export default function CheckoutPage() {
   const { items, total, clearCart } = useCart()
@@ -50,57 +51,31 @@ export default function CheckoutPage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleConfirmPayment = async () => {
+  const handleConfirmPayment = () => {
     if (!formData.email || !formData.firstName || !formData.lastName) {
       setError("Please fill in all contact information")
       return
     }
 
-    setIsProcessing(true)
-    setError(null)
+    const itemsList = items.map((item) => `- ${item.title} (${item.quantity}x)`).join("\n")
+    const message = `Hello! I've just sent a USDT payment for my order on n3uralia360.art.
 
-    try {
-      // Create order with USDT payment info
-      const response = await fetch("/api/orders/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          items,
-          total,
-          customerInfo: {
-            email: formData.email,
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-          },
-          paymentMethod: "crypto",
-          cryptoDetails: {
-            currency: "USDT",
-            network: "TRC20",
-            amount: usdtAmount,
-            address: USDT_WALLET_ADDRESS,
-          },
-        }),
-      })
+*Order Details:*
+${itemsList}
 
-      const result = await response.json()
+*Total:* $${usdtAmount} USDT
+*Email:* ${formData.email}
+*Name:* ${formData.firstName} ${formData.lastName}
 
-      if (result.success) {
-        clearCart()
-        setOrderComplete(true)
-      } else {
-        setError(result.error || "Failed to create order")
-      }
-    } catch (error) {
-      console.error("[v0] Payment processing error:", error)
-      setError("Payment processing failed. Please try again.")
-    } finally {
-      setIsProcessing(false)
-    }
+Please confirm my payment. Thank you!`
+
+    const whatsappUrl = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`
+    window.open(whatsappUrl, "_blank")
+
+    clearCart()
+    setOrderComplete(true)
   }
 
-  // Redirect if cart is empty and order not complete
   if (items.length === 0 && !orderComplete) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -121,17 +96,16 @@ export default function CheckoutPage() {
     )
   }
 
-  // Order complete state
   if (orderComplete) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-6 max-w-md">
           <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
           <div>
-            <h1 className="text-2xl font-bold mb-2">Order Submitted!</h1>
+            <h1 className="text-2xl font-bold mb-2">Payment Notification Sent!</h1>
             <p className="text-muted-foreground mb-6">
-              Thank you for your order. After sending the USDT payment, our team will verify the transaction and send
-              your download links via email within 5-10 minutes.
+              Thank you! Your payment notification has been sent via WhatsApp. After we verify your USDT transaction,
+              we'll send your download links via email within 5-10 minutes.
             </p>
             <div className="space-y-3">
               <Link href="/gallery">
@@ -152,7 +126,6 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
         <div className="mb-8">
           <Link href="/gallery" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -171,7 +144,6 @@ export default function CheckoutPage() {
         )}
 
         <div className="max-w-xl mx-auto space-y-6">
-          {/* Order Summary Card */}
           <Card className="bg-muted/30">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
@@ -193,7 +165,6 @@ export default function CheckoutPage() {
 
           <Card>
             <CardContent className="pt-6 space-y-6">
-              {/* QR Code */}
               <div className="flex justify-center">
                 <div className="bg-white p-4 rounded-lg">
                   <Image
@@ -206,7 +177,6 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Network Badge */}
               <div>
                 <div className="text-sm text-muted-foreground mb-2">Network</div>
                 <Badge variant="secondary" className="text-sm px-3 py-1">
@@ -215,7 +185,6 @@ export default function CheckoutPage() {
                 </Badge>
               </div>
 
-              {/* Deposit Address */}
               <div>
                 <div className="text-sm text-muted-foreground mb-2">Deposit Address</div>
                 <div className="flex items-center gap-2">
@@ -238,8 +207,8 @@ export default function CheckoutPage() {
                     <p className="font-medium text-blue-500 dark:text-blue-400">Important:</p>
                     <p className="text-foreground">
                       Send exactly <span className="font-semibold">${usdtAmount} USDT</span> to the address above using
-                      the <span className="font-semibold">Tron (TRC20)</span> network. Credits will be added to your
-                      account after confirmation (usually 5-10 minutes).
+                      the <span className="font-semibold">Tron (TRC20)</span> network. After sending, click the button
+                      below to notify us via WhatsApp.
                     </p>
                   </div>
                 </div>
@@ -247,7 +216,6 @@ export default function CheckoutPage() {
             </CardContent>
           </Card>
 
-          {/* Contact Information */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Contact Information</CardTitle>
@@ -299,22 +267,13 @@ export default function CheckoutPage() {
             size="lg"
             className="w-full"
           >
-            {isProcessing ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                Processing...
-              </>
-            ) : (
-              <>
-                <Send className="h-4 w-4 mr-2" />
-                Confirm Payment
-              </>
-            )}
+            <Send className="h-4 w-4 mr-2" />
+            Notify via WhatsApp
           </Button>
 
           <div className="text-center space-y-2 text-sm text-muted-foreground">
-            <p>After sending payment, click the button above to notify the admin for faster processing.</p>
-            <p>Having issues? Contact support with your transaction hash.</p>
+            <p>After sending payment, click the button above to notify us via WhatsApp for faster processing.</p>
+            <p>We'll verify your transaction and send download links within 5-10 minutes.</p>
           </div>
         </div>
       </div>

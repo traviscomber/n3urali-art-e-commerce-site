@@ -11,6 +11,8 @@ export interface Collection {
   end_date: string
   bundle_price: number
   is_auto_curated: boolean
+  code: string
+  is_active: boolean
 }
 
 export interface CollectionImage {
@@ -128,19 +130,25 @@ export async function createCollection(data: {
   end_date: string
   bundle_price: number
   image_ids: string[]
+  code?: string // Optional, will auto-generate if not provided
 }) {
   const supabase = await createClient()
+
+  // Auto-generate code if not provided
+  const collectionCode = data.code || (await generateCollectionCode())
 
   // Create collection
   const { data: collection, error: collectionError } = await supabase
     .from("collections")
     .insert({
+      code: collectionCode,
       title: data.title,
       description: data.description,
       start_date: data.start_date,
       end_date: data.end_date,
       bundle_price: data.bundle_price,
       is_auto_curated: false,
+      is_active: true,
     })
     .select()
     .single()
@@ -225,4 +233,135 @@ export async function getAllCollections() {
   }
 
   return data
+}
+
+// Auto-generate collection code function
+export async function generateCollectionCode(prefix = "COL"): Promise<string> {
+  const supabase = await createClient()
+
+  // Get the latest collection with this prefix
+  const { data: collections } = await supabase
+    .from("collections")
+    .select("code")
+    .like("code", `${prefix}-%`)
+    .order("created_at", { ascending: false })
+    .limit(1)
+
+  if (!collections || collections.length === 0) {
+    return `${prefix}-001`
+  }
+
+  // Extract number from last code and increment
+  const lastCode = collections[0].code
+  if (!lastCode) return `${prefix}-001`
+
+  const match = lastCode.match(/-(\d+)$/)
+  if (!match) return `${prefix}-001`
+
+  const nextNumber = Number.parseInt(match[1]) + 1
+  return `${prefix}-${nextNumber.toString().padStart(3, "0")}`
+}
+
+// Update collection images function for reordering/adding/removing images
+export async function updateCollectionImages(collectionId: string, imageIds: string[]) {
+  const supabase = await createClient()
+
+  // Delete existing collection images
+  const { error: deleteError } = await supabase.from("collection_images").delete().eq("collection_id", collectionId)
+
+  if (deleteError) {
+    return { success: false, error: deleteError.message }
+  }
+
+  // Insert new collection images with updated positions
+  const collectionImages = imageIds.map((imageId, index) => ({
+    collection_id: collectionId,
+    image_id: imageId,
+    position: index + 1,
+  }))
+
+  const { error: insertError } = await supabase.from("collection_images").insert(collectionImages)
+
+  if (insertError) {
+    return { success: false, error: insertError.message }
+  }
+
+  revalidatePath("/collection")
+  revalidatePath("/simple-admin")
+
+  return { success: true }
+}
+
+// Get collection with images for editing
+export async function getCollectionWithImages(collectionId: string) {
+  const supabase = await createClient()
+
+  const { data: collection, error: collectionError } = await supabase
+    .from("collections")
+    .select("*")
+    .eq("id", collectionId)
+    .single()
+
+  if (collectionError) {
+    return { success: false, error: collectionError.message, data: null }
+  }
+
+  const images = await getCollectionImages(collectionId)
+
+  return {
+    success: true,
+    data: {
+      ...collection,
+      images,
+    },
+  }
+}
+
+// Bulk operations
+export async function bulkUpdateCollectionStatus(collectionIds: string[], isActive: boolean) {
+  const supabase = await createClient()
+
+  const { error } = await supabase.from("collections").update({ is_active: isActive }).in("id", collectionIds)
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath("/collection")
+  revalidatePath("/simple-admin")
+
+  return { success: true }
+}
+
+export async function duplicateCollection(collectionId: string) {
+  const supabase = await createClient()
+
+  // Get original collection
+  const { data: original, error: fetchError } = await supabase
+    .from("collections")
+    .select("*")
+    .eq("id", collectionId)
+    .single()
+
+  if (fetchError || !original) {
+    return { success: false, error: "Collection not found" }
+  }
+
+  // Get original images
+  const originalImages = await getCollectionImages(collectionId)
+  const imageIds = originalImages.map((ci) => ci.image.id)
+
+  // Create duplicate with new code
+  const newCode = await generateCollectionCode()
+  const result = await createCollection({
+    title: `${original.title} (Copy)`,
+    description: original.description || "",
+    start_date: original.start_date,
+    end_date: original.end_date,
+    bundle_price: original.bundle_price,
+    image_ids: imageIds,
+    code: newCode,
+  })
+
+  return result
 }

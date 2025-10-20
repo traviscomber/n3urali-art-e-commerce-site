@@ -51,15 +51,40 @@ export default function CheckoutPage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
     if (!formData.email || !formData.firstName || !formData.lastName) {
       setError("Please fill in all contact information")
       return
     }
 
-    const itemsList = items.map((item) => `- ${item.title} (${item.quantity}x)`).join("\n")
-    const message = `Hello! I've just sent a USDT payment for my order on n3uralia360.art.
+    setIsProcessing(true)
 
+    try {
+      const { createOrder } = await import("@/app/actions/payment-actions")
+
+      const orderData = {
+        userEmail: formData.email,
+        userName: `${formData.firstName} ${formData.lastName}`,
+        items: items.map((item) => ({
+          imageId: item.id,
+          price: item.price,
+        })),
+        totalAmount: total,
+        paymentMethod: "usdt",
+      }
+
+      const result = await createOrder(orderData)
+
+      if (!result.success) {
+        setError("Failed to create order. Please try again.")
+        setIsProcessing(false)
+        return
+      }
+
+      const itemsList = items.map((item) => `- ${item.title} (${item.quantity}x)`).join("\n")
+      const message = `Hello! I've just sent a USDT payment for my order on n3uralia360.art.
+
+*Order ID:* ${result.data.id}
 *Order Details:*
 ${itemsList}
 
@@ -69,11 +94,17 @@ ${itemsList}
 
 Please confirm my payment. Thank you!`
 
-    const whatsappUrl = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`
-    window.open(whatsappUrl, "_blank")
+      const whatsappUrl = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`
+      window.open(whatsappUrl, "_blank")
 
-    clearCart()
-    setOrderComplete(true)
+      clearCart()
+      setOrderComplete(true)
+    } catch (error) {
+      console.error("[v0] Error creating order:", error)
+      setError("Failed to process order. Please try again.")
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   if (items.length === 0 && !orderComplete) {

@@ -68,6 +68,7 @@ export default async function HomePage() {
                       imageOfTheDay.file_path ||
                       "/placeholder.svg" ||
                       "/placeholder.svg" ||
+                      "/placeholder.svg" ||
                       "/placeholder.svg"
                     }
                     alt={imageOfTheDay.title}
@@ -100,14 +101,26 @@ export default async function HomePage() {
                         </div>
                       </div>
                       <div className="text-right space-y-2">
-                        <div className="text-3xl font-bold">${imageOfTheDay.price}</div>
+                        <div className="flex items-center gap-3 justify-end">
+                          <Badge variant="default" className="bg-red-500 text-white animate-pulse">
+                            20% OFF Today
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-3 justify-end">
+                          <span className="text-xl text-white/60 line-through">${imageOfTheDay.price}</span>
+                          <div className="text-3xl md:text-4xl font-bold text-green-400">
+                            ${(imageOfTheDay.price * 0.8).toFixed(2)}
+                          </div>
+                        </div>
+                        <div className="text-sm text-white/80">Save ${(imageOfTheDay.price * 0.2).toFixed(2)}</div>
                         <Link href={`/product/${imageOfTheDay.id}`}>
-                          <Button size="lg" className="bg-primary hover:bg-primary/90">
+                          <Button size="lg" className="bg-primary hover:bg-primary/90 w-full">
                             View Details
                             <ArrowRight className="w-4 h-4 ml-2" />
                           </Button>
                         </Link>
                       </div>
+                      {/* </CHANGE> */}
                     </div>
                   </div>
                 </div>

@@ -7,6 +7,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { createClient } from "@/lib/supabase/server"
 import LandingGalleryTabs from "@/components/landing-gallery-tabs"
+import AuctionCarousel from "@/components/auction-carousel"
 
 export const metadata: Metadata = {
   title: "n3uralia360.art - Premium 360° Imagery",
@@ -19,22 +20,58 @@ export const revalidate = 300
 export default async function HomePage() {
   const supabase = await createClient()
 
-  const { data: imageOfTheDay } = await supabase
+  const { data: featuredImages } = await supabase
     .from("images")
     .select("id, title, file_path, original_url, upscaled_url, price, image_format")
     .eq("featured_collection", true)
     .eq("active", true)
     .order("created_at", { ascending: false })
-    .limit(1)
-    .single()
 
-  const { data: collectionImages } = await supabase
-    .from("images")
-    .select("id, title, file_path, original_url, upscaled_url, price, image_format")
-    .eq("featured_collection", true)
-    .eq("active", true)
-    .order("created_at", { ascending: false })
-    .limit(20)
+  let imageOfTheDay = null
+  if (featuredImages && featuredImages.length > 0) {
+    const today = new Date()
+    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000)
+    const imageIndex = dayOfYear % featuredImages.length
+    imageOfTheDay = featuredImages[imageIndex]
+  }
+
+  let collectionImages: typeof featuredImages = []
+  if (featuredImages && featuredImages.length > 0) {
+    const today = new Date()
+    const weekOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (86400000 * 7))
+
+    // Create a shuffled array based on the week number
+    const shuffled = [...featuredImages]
+    const seed = weekOfYear
+
+    // Simple seeded shuffle algorithm
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = ((seed + i) * 9301 + 49297) % shuffled.length
+      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+
+    // Take up to 20 images for the collection
+    collectionImages = shuffled.slice(0, Math.min(20, shuffled.length))
+  }
+
+  let auctionImages: typeof featuredImages = []
+  if (featuredImages && featuredImages.length > 0) {
+    const today = new Date()
+    const hourOfDay = today.getHours()
+
+    // Create a shuffled array based on the hour
+    const shuffled = [...featuredImages]
+    const seed = hourOfDay * 1000
+
+    // Simple seeded shuffle algorithm
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = ((seed + i) * 9301 + 49297) % shuffled.length
+      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+
+    // Take up to 15 images for the auction
+    auctionImages = shuffled.slice(0, Math.min(15, shuffled.length))
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -66,6 +103,7 @@ export default async function HomePage() {
                       imageOfTheDay.upscaled_url ||
                       imageOfTheDay.original_url ||
                       imageOfTheDay.file_path ||
+                      "/placeholder.svg" ||
                       "/placeholder.svg" ||
                       "/placeholder.svg" ||
                       "/placeholder.svg" ||
@@ -120,7 +158,6 @@ export default async function HomePage() {
                           </Button>
                         </Link>
                       </div>
-                      {/* </CHANGE> */}
                     </div>
                   </div>
                 </div>
@@ -223,6 +260,32 @@ export default async function HomePage() {
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
+          </div>
+        </section>
+      )}
+
+      {auctionImages && auctionImages.length > 0 && (
+        <section className="py-16 bg-gradient-to-b from-background to-muted/20 overflow-hidden">
+          <div className="container mx-auto px-4 mb-8">
+            <div className="text-center space-y-3">
+              <Badge variant="secondary" className="bg-red-500/10 text-red-500 animate-pulse">
+                ⚡ Flash Auction
+              </Badge>
+              <h2 className="text-2xl md:text-3xl font-bold">
+                Catch the <span className="text-primary">Best Prices</span>
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Prices drop every minute! Grab premium images at unbeatable prices before they reset
+              </p>
+            </div>
+          </div>
+
+          <AuctionCarousel images={auctionImages} />
+
+          <div className="text-center mt-8">
+            <p className="text-sm text-muted-foreground">
+              💡 Prices reset every hour • The deeper the discount, the better the deal
+            </p>
           </div>
         </section>
       )}

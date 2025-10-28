@@ -19,6 +19,12 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 
+interface ApprovedPaymentData {
+  orderId: string
+  downloadTokens: string[]
+  customerEmail: string
+}
+
 export function PaymentsManager() {
   const [payments, setPayments] = useState<PendingPayment[]>([])
   const [loading, setLoading] = useState(true)
@@ -26,6 +32,8 @@ export function PaymentsManager() {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState<PendingPayment | null>(null)
   const [rejectReason, setRejectReason] = useState("")
+  const [approvedPaymentData, setApprovedPaymentData] = useState<ApprovedPaymentData | null>(null)
+  const [downloadLinksDialogOpen, setDownloadLinksDialogOpen] = useState(false)
 
   useEffect(() => {
     loadPayments()
@@ -50,13 +58,65 @@ export function PaymentsManager() {
     setProcessingId(payment.id)
     const result = await approvePayment(payment.id)
 
-    if (result.success) {
-      toast.success(`Payment approved! Download links created for ${payment.user_email}`)
+    if (result.success && result.data) {
+      toast.success(`Payment approved! Download links generated for ${payment.user_email}`)
+
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+      const links = result.data.downloadTokens
+        .map((token, index) => `${index + 1}. ${baseUrl}/api/download/by-token/${token}`)
+        .join("\n\n")
+
+      const message = `✅ Payment Approved - Download Links Ready
+
+Customer: ${payment.user_name}
+Email: ${payment.user_email}
+Amount: $${payment.total_amount} USDT
+
+High-Resolution Download Links:
+${links}
+
+⏰ Links expire in 1 year
+📥 Up to 10 downloads per image
+
+Please forward these links to the customer.`
+
+      const whatsappUrl = `https://wa.me/56940946660?text=${encodeURIComponent(message)}`
+      window.open(whatsappUrl, "_blank")
+
       await loadPayments()
     } else {
       toast.error("Failed to approve payment: " + result.error)
     }
     setProcessingId(null)
+  }
+
+  const copyDownloadLinks = () => {
+    if (!approvedPaymentData) return
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+    const links = approvedPaymentData.downloadTokens
+      .map((token, index) => `${index + 1}. ${baseUrl}/api/download/by-token/${token}`)
+      .join("\n")
+
+    const message = `Hi ${approvedPaymentData.customerEmail},
+
+Your payment has been approved! Here are your download links for the high-resolution images:
+
+${links}
+
+These links will expire in 1 year. You can download each image up to 10 times.
+
+Thank you for your purchase!`
+
+    navigator.clipboard.writeText(message)
+    toast.success("Download links copied to clipboard!")
+  }
+
+  const copyIndividualLink = (token: string) => {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+    const link = `${baseUrl}/api/download/by-token/${token}`
+    navigator.clipboard.writeText(link)
+    toast.success("Link copied!")
   }
 
   const handleRejectClick = (payment: PendingPayment) => {
@@ -209,7 +269,7 @@ export function PaymentsManager() {
                           ) : (
                             <>
                               <CheckCircle className="h-4 w-4 mr-2" />
-                              Approve & Credit User
+                              Approve & Generate Links
                             </>
                           )}
                         </Button>

@@ -7,7 +7,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Download, ShoppingCart, Eye, Crown, RotateCcw } from "lucide-react"
+import { ArrowLeft, Download, ShoppingCart, Eye, Crown, RotateCcw, Zap, Clock } from "lucide-react"
 import { getImages } from "@/app/actions/admin-actions"
 import { useAuth } from "@/lib/contexts/auth-context"
 
@@ -46,6 +46,53 @@ export default function PhotoDetailPage() {
   const viewerRef = useRef<HTMLDivElement>(null)
   const pannellumViewerRef = useRef<any>(null)
   const watermarkRefreshInterval = useRef<NodeJS.Timeout | null>(null)
+
+  const [auctionPrice, setAuctionPrice] = useState<number | null>(null)
+  const [auctionTimestamp, setAuctionTimestamp] = useState<Date | null>(null)
+  const [auctionTimeLeft, setAuctionTimeLeft] = useState<number>(0)
+
+  useEffect(() => {
+    const priceParam = searchParams.get("auctionPrice")
+    const timestampParam = searchParams.get("auctionTimestamp")
+
+    if (priceParam && timestampParam) {
+      const price = Number.parseFloat(priceParam)
+      const timestamp = new Date(timestampParam)
+      setAuctionPrice(price)
+      setAuctionTimestamp(timestamp)
+
+      // Set 10 minute timer for auction price lock
+      const lockDuration = 10 * 60 * 1000 // 10 minutes in milliseconds
+      const timeLeft = lockDuration - (Date.now() - timestamp.getTime())
+      setAuctionTimeLeft(Math.max(0, timeLeft))
+
+      console.log("[v0] Auction price loaded:", { price, timestamp, timeLeft })
+    }
+  }, [searchParams])
+
+  useEffect(() => {
+    if (auctionTimeLeft <= 0) return
+
+    const interval = setInterval(() => {
+      setAuctionTimeLeft((prev) => {
+        const newTime = prev - 1000
+        if (newTime <= 0) {
+          setAuctionPrice(null)
+          setAuctionTimestamp(null)
+          return 0
+        }
+        return newTime
+      })
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [auctionTimeLeft])
+
+  const formatTimeLeft = (ms: number) => {
+    const minutes = Math.floor(ms / 60000)
+    const seconds = Math.floor((ms % 60000) / 1000)
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`
+  }
 
   const loadPannellum = () => {
     return new Promise((resolve, reject) => {
@@ -331,6 +378,15 @@ export default function PhotoDetailPage() {
 
     setPurchasing(true)
     try {
+      const finalPrice = auctionPrice || image.price
+
+      console.log("[v0] Processing purchase:", {
+        imageId: image.id,
+        regularPrice: image.price,
+        auctionPrice,
+        finalPrice,
+      })
+
       const orderResponse = await fetch("/api/orders/create", {
         method: "POST",
         headers: {
@@ -342,20 +398,20 @@ export default function PhotoDetailPage() {
               id: `${image.id}-standard`,
               imageId: image.id,
               title: image.title,
-              price: image.price,
+              price: finalPrice, // Use final price (auction or regular)
               licenseType: "standard",
               previewUrl: image.thumbnail_url || image.image_url,
               category: image.category_name === "equirectangular" ? "equirectangular" : "fisheye",
               quantity: 1,
             },
           ],
-          total: image.price,
+          total: finalPrice, // Use final price
           customerInfo: {
             email: user.email,
             firstName: user.user_metadata?.full_name?.split(" ")[0] || "Customer",
             lastName: user.user_metadata?.full_name?.split(" ").slice(1).join(" ") || "",
           },
-          paymentMethod: "demo", // Demo payment for direct purchases
+          paymentMethod: "demo",
         }),
       })
 
@@ -365,7 +421,6 @@ export default function PhotoDetailPage() {
         console.log("[v0] Purchase completed for image:", image?.id)
         console.log("[v0] Order created:", orderResult.data.orderNumber)
 
-        // Show success message and redirect to orders page
         alert(
           `Thank you! Your purchase of "${image.title}" is complete. Order #${orderResult.data.orderNumber} created. Check your account for download links.`,
         )
@@ -448,6 +503,10 @@ export default function PhotoDetailPage() {
 
   const rightsDisplay = getRightsTypeDisplay()
   const RightsIcon = rightsDisplay.icon
+
+  const displayPrice = auctionPrice || image.price
+  const hasAuctionPrice = auctionPrice !== null && auctionTimeLeft > 0
+  const discountPercentage = hasAuctionPrice ? Math.round(((image.price - auctionPrice) / image.price) * 100) : 0
 
   return (
     <div className="min-h-screen bg-background">
@@ -727,10 +786,31 @@ export default function PhotoDetailPage() {
             {/* Pricing & Purchase */}
             <Card className="border-primary/20">
               <CardContent className="p-6">
+                {hasAuctionPrice && (
+                  <div className="mb-4 p-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge className="bg-green-500 text-white">
+                        <Zap className="w-3 h-3 mr-1" />
+                        FLASH AUCTION PRICE
+                      </Badge>
+                      <Badge variant="outline" className="text-green-600 border-green-600">
+                        {discountPercentage}% OFF
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Clock className="w-4 h-4" />
+                      <span>Price locked for: {formatTimeLeft(auctionTimeLeft)}</span>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <p className="text-sm text-muted-foreground">Price</p>
-                    <p className="text-3xl font-bold text-primary">${image.price}</p>
+                    {hasAuctionPrice && <p className="text-lg text-muted-foreground line-through">${image.price}</p>}
+                    <p className={`text-3xl font-bold ${hasAuctionPrice ? "text-green-500" : "text-primary"}`}>
+                      ${displayPrice.toFixed(2)}
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground">Instant Download</p>
@@ -747,7 +827,7 @@ export default function PhotoDetailPage() {
                   ) : (
                     <>
                       <ShoppingCart className="w-5 h-5 mr-2" />
-                      Buy & Download Now
+                      {hasAuctionPrice ? `Lock In Auction Price - $${displayPrice.toFixed(2)}` : "Buy & Download Now"}
                     </>
                   )}
                 </Button>

@@ -10,10 +10,11 @@ export function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link href="/licensing-terms" className="text-sm text-muted-foreground hover:text-foreground">
-                  Licensing Terms
+                  Términos de Licencia
                 </Link>
               </li>
             </ul>
+            {/* </CHANGE> */}
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import "./globals.css"
 import { CartProvider } from "@/lib/contexts/cart-context"
 import { AuthProvider } from "@/lib/contexts/auth-context"
 import { TagFilterProvider } from "@/lib/contexts/tag-filter-context"
+import { LanguageProvider } from "@/lib/contexts/language-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Header } from "@/components/header"
 import { CartSidebar } from "@/components/cart-sidebar"
@@ -95,7 +96,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="antialiased">
+    <html lang="es" className="antialiased">
       <head>
         <meta name="theme-color" content="#000000" />
         <meta name="msapplication-TileColor" content="#000000" />
@@ -175,15 +176,17 @@ export default function RootLayout({
           <AuthProvider>
             <CartProvider>
               <TagFilterProvider>
-                <ToastProvider>
-                  <Suspense fallback={null}>
-                    <Header />
-                    {children}
-                    <CartSidebar />
-                    <Analytics />
-                    <SpeedInsights />
-                  </Suspense>
-                </ToastProvider>
+                <LanguageProvider>
+                  <ToastProvider>
+                    <Suspense fallback={null}>
+                      <Header />
+                      {children}
+                      <CartSidebar />
+                      <Analytics />
+                      <SpeedInsights />
+                    </Suspense>
+                  </ToastProvider>
+                </LanguageProvider>
               </TagFilterProvider>
             </CartProvider>
           </AuthProvider>

@@ -100,7 +100,8 @@ export default function AuctionCarousel({ images }: AuctionCarouselProps) {
           return (
             <div
               key={`first-${image.id}`}
-              className="group flex-shrink-0 w-80 relative rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
+              className="group flex-shrink-0 w-80 relative rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 cursor-pointer"
+              onClick={(e) => handleAuctionClick(image, e)}
             >
               {hotDeal && (
                 <div className="absolute top-3 left-3 z-20">
@@ -112,13 +113,13 @@ export default function AuctionCarousel({ images }: AuctionCarouselProps) {
               )}
 
               <div className="absolute top-3 right-3 z-20">
-                <Badge className="bg-green-500 text-white flex items-center gap-1">
-                  <TrendingDown className="w-3 h-3" />
+                <Badge className="bg-green-500 text-white flex items-center gap-1 text-base px-3 py-1">
+                  <TrendingDown className="w-4 h-4" />
                   {discount}% OFF
                 </Badge>
               </div>
 
-              <div className="block h-52 relative cursor-pointer" onClick={(e) => handleAuctionClick(image, e)}>
+              <div className="block h-52 relative">
                 <Image
                   src={image.upscaled_url || image.original_url || image.file_path || "/placeholder.svg"}
                   alt={image.title}
@@ -130,38 +131,28 @@ export default function AuctionCarousel({ images }: AuctionCarouselProps) {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               </div>
 
-              <div className="absolute bottom-0 left-0 right-0 p-4 text-white space-y-3">
-                <h3 className="font-semibold text-sm line-clamp-1">{image.title}</h3>
+              <div className="absolute bottom-0 left-0 right-0 p-4 text-white space-y-2">
+                <h3 className="font-semibold text-sm line-clamp-2">{image.title}</h3>
 
                 <div className="flex items-center justify-between">
                   <Badge variant="secondary" className="bg-white/20 text-white text-xs">
                     {image.image_format}
                   </Badge>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-white/60 line-through">${image.price.toFixed(2)}</span>
-                      <span className="text-2xl font-bold text-green-400">${currentPrice.toFixed(2)}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-xs text-white/80">
+                  <div className="flex items-center gap-1 text-xs text-white/80">
                     <Clock className="w-3 h-3" />
                     <span>
-                      Price resets in {timeLeft.minutes}:{timeLeft.seconds.toString().padStart(2, "0")}
+                      {timeLeft.minutes}:{timeLeft.seconds.toString().padStart(2, "0")}
                     </span>
                   </div>
-
-                  <Button
-                    size="sm"
-                    onClick={(e) => handleAuctionClick(image, e)}
-                    className={`w-full ${hotDeal ? "bg-red-500 hover:bg-red-600 animate-pulse" : "bg-primary hover:bg-primary/90"}`}
-                  >
-                    {hotDeal ? "GRAB NOW!" : "Buy Now"}
-                  </Button>
                 </div>
+
+                <Button
+                  size="sm"
+                  onClick={(e) => handleAuctionClick(image, e)}
+                  className={`w-full ${hotDeal ? "bg-red-500 hover:bg-red-600 animate-pulse" : "bg-primary hover:bg-primary/90"}`}
+                >
+                  {hotDeal ? "GRAB NOW!" : "View Deal"}
+                </Button>
               </div>
             </div>
           )
@@ -175,7 +166,8 @@ export default function AuctionCarousel({ images }: AuctionCarouselProps) {
           return (
             <div
               key={`second-${image.id}`}
-              className="group flex-shrink-0 w-80 relative rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
+              className="group flex-shrink-0 w-80 relative rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 cursor-pointer"
+              onClick={(e) => handleAuctionClick(image, e)}
             >
               {hotDeal && (
                 <div className="absolute top-3 left-3 z-20">
@@ -187,13 +179,13 @@ export default function AuctionCarousel({ images }: AuctionCarouselProps) {
               )}
 
               <div className="absolute top-3 right-3 z-20">
-                <Badge className="bg-green-500 text-white flex items-center gap-1">
-                  <TrendingDown className="w-3 h-3" />
+                <Badge className="bg-green-500 text-white flex items-center gap-1 text-base px-3 py-1">
+                  <TrendingDown className="w-4 h-4" />
                   {discount}% OFF
                 </Badge>
               </div>
 
-              <div className="block h-52 relative cursor-pointer" onClick={(e) => handleAuctionClick(image, e)}>
+              <div className="block h-52 relative">
                 <Image
                   src={image.upscaled_url || image.original_url || image.file_path || "/placeholder.svg"}
                   alt={image.title}
@@ -205,38 +197,28 @@ export default function AuctionCarousel({ images }: AuctionCarouselProps) {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
               </div>
 
-              <div className="absolute bottom-0 left-0 right-0 p-4 text-white space-y-3">
-                <h3 className="font-semibold text-sm line-clamp-1">{image.title}</h3>
+              <div className="absolute bottom-0 left-0 right-0 p-4 text-white space-y-2">
+                <h3 className="font-semibold text-sm line-clamp-2">{image.title}</h3>
 
                 <div className="flex items-center justify-between">
                   <Badge variant="secondary" className="bg-white/20 text-white text-xs">
                     {image.image_format}
                   </Badge>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-white/60 line-through">${image.price.toFixed(2)}</span>
-                      <span className="text-2xl font-bold text-green-400">${currentPrice.toFixed(2)}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-xs text-white/80">
+                  <div className="flex items-center gap-1 text-xs text-white/80">
                     <Clock className="w-3 h-3" />
                     <span>
-                      Price resets in {timeLeft.minutes}:{timeLeft.seconds.toString().padStart(2, "0")}
+                      {timeLeft.minutes}:{timeLeft.seconds.toString().padStart(2, "0")}
                     </span>
                   </div>
-
-                  <Button
-                    size="sm"
-                    onClick={(e) => handleAuctionClick(image, e)}
-                    className={`w-full ${hotDeal ? "bg-red-500 hover:bg-red-600 animate-pulse" : "bg-primary hover:bg-primary/90"}`}
-                  >
-                    {hotDeal ? "GRAB NOW!" : "Buy Now"}
-                  </Button>
                 </div>
+
+                <Button
+                  size="sm"
+                  onClick={(e) => handleAuctionClick(image, e)}
+                  className={`w-full ${hotDeal ? "bg-red-500 hover:bg-red-600 animate-pulse" : "bg-primary hover:bg-primary/90"}`}
+                >
+                  {hotDeal ? "GRAB NOW!" : "View Deal"}
+                </Button>
               </div>
             </div>
           )

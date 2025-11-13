@@ -307,20 +307,10 @@ const getCachedCategories = unstable_cache(
         throw new Error(error.message)
       }
 
-      // Keep only the capitalized versions (Equirectangular, Fisheye, Standard)
-      const filteredResult = result?.filter((category) => {
-        const lowercaseName = category.name.toLowerCase()
-        // Exclude lowercase versions of these specific categories
-        if (lowercaseName === "equirectangular" || lowercaseName === "fisheye" || lowercaseName === "standard") {
-          // Only keep if the first letter is uppercase (capitalized version)
-          return category.name[0] === category.name[0].toUpperCase()
-        }
-        // Keep all other categories
-        return true
-      })
-
-      console.log(`[v0] getCachedCategories: Retrieved ${filteredResult?.length || 0} categories (filtered duplicates)`)
-      return filteredResult || []
+      // Don't filter categories - return all of them
+      // The display name handling is done in the UI components
+      console.log(`[v0] getCachedCategories: Retrieved ${result?.length || 0} categories`)
+      return result || []
     } catch (error) {
       console.error("[v0] Error in getCachedCategories:", error)
       throw error

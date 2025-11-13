@@ -128,18 +128,24 @@ export default function SimpleAdminPage() {
   }, [])
 
   const getCategoryDisplayName = (category: Category) => {
-    if (category.name === "equirectangular") {
+    const name = category.name.toLowerCase()
+    if (name === "equirectangular") {
       return "Equirectangular or 360°"
     }
-    if (category.name === "fisheye") {
+    if (name === "fisheye") {
       return "Fisheye or 180°"
+    }
+    if (name === "standard") {
+      return "Standard"
     }
     return category.display_name || category.name
   }
 
   const getCategoryBadgeName = (categoryName: string) => {
-    if (categoryName === "equirectangular") return "360°"
-    if (categoryName === "fisheye") return "180°"
+    const name = categoryName?.toLowerCase() || ""
+    if (name === "equirectangular") return "360°"
+    if (name === "fisheye") return "180°"
+    if (name === "standard") return "Standard"
     return categoryName
   }
 

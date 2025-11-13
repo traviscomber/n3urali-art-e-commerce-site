@@ -115,9 +115,9 @@ export default async function LandingGalleryTabs() {
                 />
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
                   <Button size="sm" variant="secondary" asChild>
-                    <Link href={`/product/${image.id}`}>
+                    <Link href={`/photo/${image.id}`}>
                       <Eye className="w-4 h-4 mr-1" />
-                      View
+                      View Details
                     </Link>
                   </Button>
                   {image.upscaled_url && (
@@ -128,11 +128,13 @@ export default async function LandingGalleryTabs() {
                 </div>
               </div>
               <div className="p-3">
-                <h3 className="font-semibold text-sm truncate mb-1">{image.title}</h3>
+                <h3 className="font-semibold text-sm line-clamp-2 mb-2">{image.title}</h3>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">${image.price}</span>
                   <Badge variant="outline" className="text-xs">
                     {image.image_format || "360°"}
+                  </Badge>
+                  <Badge variant="default" className="bg-green-500 text-white text-xs">
+                    10% OFF
                   </Badge>
                 </div>
               </div>

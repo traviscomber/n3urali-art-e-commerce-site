@@ -104,9 +104,6 @@ export default async function HomePage() {
                       imageOfTheDay.original_url ||
                       imageOfTheDay.file_path ||
                       "/placeholder.svg" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg" ||
                       "/placeholder.svg"
                     }
                     alt={imageOfTheDay.title}
@@ -139,21 +136,12 @@ export default async function HomePage() {
                         </div>
                       </div>
                       <div className="text-right space-y-2">
-                        <div className="flex items-center gap-3 justify-end">
-                          <Badge variant="default" className="bg-red-500 text-white animate-pulse">
-                            20% OFF Today
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-3 justify-end">
-                          <span className="text-xl text-white/60 line-through">${imageOfTheDay.price}</span>
-                          <div className="text-3xl md:text-4xl font-bold text-green-400">
-                            ${(imageOfTheDay.price * 0.8).toFixed(2)}
-                          </div>
-                        </div>
-                        <div className="text-sm text-white/80">Save ${(imageOfTheDay.price * 0.2).toFixed(2)}</div>
-                        <Link href={`/product/${imageOfTheDay.id}`}>
-                          <Button size="lg" className="bg-primary hover:bg-primary/90 w-full">
-                            View Details
+                        <Badge variant="default" className="bg-red-500 text-white animate-pulse text-lg px-4 py-2">
+                          20% OFF Today
+                        </Badge>
+                        <Link href={`/photo/${imageOfTheDay.id}`}>
+                          <Button size="lg" className="bg-primary hover:bg-primary/90 w-full mt-2">
+                            View Details & Price
                             <ArrowRight className="w-4 h-4 ml-2" />
                           </Button>
                         </Link>
@@ -194,7 +182,7 @@ export default async function HomePage() {
               {collectionImages.map((image) => (
                 <Link
                   key={`first-${image.id}`}
-                  href={`/product/${image.id}`}
+                  href={`/photo/${image.id}`}
                   className="group flex-shrink-0 w-80 h-52 relative rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
                 >
                   <Image
@@ -210,12 +198,14 @@ export default async function HomePage() {
 
                   {/* Info */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                    <h3 className="font-semibold text-sm line-clamp-1 mb-1">{image.title}</h3>
+                    <h3 className="font-semibold text-sm line-clamp-2 mb-2">{image.title}</h3>
                     <div className="flex items-center justify-between">
                       <Badge variant="secondary" className="bg-white/20 text-white text-xs">
                         {image.image_format}
                       </Badge>
-                      <span className="text-lg font-bold">${image.price}</span>
+                      <Badge variant="default" className="bg-green-500 text-white text-xs">
+                        15% OFF
+                      </Badge>
                     </div>
                   </div>
                 </Link>
@@ -225,7 +215,7 @@ export default async function HomePage() {
               {collectionImages.map((image) => (
                 <Link
                   key={`second-${image.id}`}
-                  href={`/product/${image.id}`}
+                  href={`/photo/${image.id}`}
                   className="group flex-shrink-0 w-80 h-52 relative rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
                 >
                   <Image
@@ -239,12 +229,14 @@ export default async function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                   <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                    <h3 className="font-semibold text-sm line-clamp-1 mb-1">{image.title}</h3>
+                    <h3 className="font-semibold text-sm line-clamp-2 mb-2">{image.title}</h3>
                     <div className="flex items-center justify-between">
                       <Badge variant="secondary" className="bg-white/20 text-white text-xs">
                         {image.image_format}
                       </Badge>
-                      <span className="text-lg font-bold">${image.price}</span>
+                      <Badge variant="default" className="bg-green-500 text-white text-xs">
+                        15% OFF
+                      </Badge>
                     </div>
                   </div>
                 </Link>

@@ -113,7 +113,7 @@ export default function AuctionCarousel({ images }: AuctionCarouselProps) {
               )}
 
               <div className="absolute top-3 right-3 z-20">
-                <Badge className="bg-green-500 text-white flex items-center gap-1 text-base px-3 py-1">
+                <Badge className="bg-gradient-to-r from-yellow-400/40 to-orange-500/40 text-black flex items-center gap-1 text-base px-3 py-1 font-bold border-0">
                   <TrendingDown className="w-4 h-4" />
                   {discount}% OFF
                 </Badge>
@@ -179,7 +179,7 @@ export default function AuctionCarousel({ images }: AuctionCarouselProps) {
               )}
 
               <div className="absolute top-3 right-3 z-20">
-                <Badge className="bg-green-500 text-white flex items-center gap-1 text-base px-3 py-1">
+                <Badge className="bg-gradient-to-r from-yellow-400/40 to-orange-500/40 text-black flex items-center gap-1 text-base px-3 py-1 font-bold border-0">
                   <TrendingDown className="w-4 h-4" />
                   {discount}% OFF
                 </Badge>

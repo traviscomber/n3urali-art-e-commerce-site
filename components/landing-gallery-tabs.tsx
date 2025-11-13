@@ -105,6 +105,8 @@ export default async function LandingGalleryTabs() {
                     image.original_url ||
                     "/placeholder.svg?height=400&width=400" ||
                     "/placeholder.svg" ||
+                    "/placeholder.svg" ||
+                    "/placeholder.svg" ||
                     "/placeholder.svg"
                   }
                   alt={image.title}
@@ -133,7 +135,7 @@ export default async function LandingGalleryTabs() {
                   <Badge variant="outline" className="text-xs">
                     {image.image_format || "360°"}
                   </Badge>
-                  <Badge variant="default" className="bg-green-500 text-white text-xs">
+                  <Badge className="bg-gradient-to-r from-yellow-400/40 to-orange-500/40 text-black text-xs font-bold border-0">
                     10% OFF
                   </Badge>
                 </div>

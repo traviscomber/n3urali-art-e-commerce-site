@@ -104,6 +104,8 @@ export default async function HomePage() {
                       imageOfTheDay.original_url ||
                       imageOfTheDay.file_path ||
                       "/placeholder.svg" ||
+                      "/placeholder.svg" ||
+                      "/placeholder.svg" ||
                       "/placeholder.svg"
                     }
                     alt={imageOfTheDay.title}
@@ -136,7 +138,7 @@ export default async function HomePage() {
                         </div>
                       </div>
                       <div className="text-right space-y-2">
-                        <Badge variant="default" className="bg-red-500 text-white animate-pulse text-lg px-4 py-2">
+                        <Badge className="bg-gradient-to-r from-yellow-400/40 to-orange-500/40 text-black font-bold text-lg px-4 py-2 border-0 animate-pulse">
                           20% OFF Today
                         </Badge>
                         <Link href={`/photo/${imageOfTheDay.id}`}>
@@ -203,7 +205,7 @@ export default async function HomePage() {
                       <Badge variant="secondary" className="bg-white/20 text-white text-xs">
                         {image.image_format}
                       </Badge>
-                      <Badge variant="default" className="bg-green-500 text-white text-xs">
+                      <Badge className="bg-gradient-to-r from-yellow-400/40 to-orange-500/40 text-black text-xs font-bold border-0">
                         15% OFF
                       </Badge>
                     </div>
@@ -234,7 +236,7 @@ export default async function HomePage() {
                       <Badge variant="secondary" className="bg-white/20 text-white text-xs">
                         {image.image_format}
                       </Badge>
-                      <Badge variant="default" className="bg-green-500 text-white text-xs">
+                      <Badge className="bg-gradient-to-r from-yellow-400/40 to-orange-500/40 text-black text-xs font-bold border-0">
                         15% OFF
                       </Badge>
                     </div>

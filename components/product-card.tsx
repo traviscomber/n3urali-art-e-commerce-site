@@ -111,7 +111,9 @@ export function ProductCard({ product, onView360, priority = false }: ProductCar
             <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground">Featured</Badge>
           )}
           {discountPercentage > 0 && (
-            <Badge className="absolute top-3 right-3 bg-red-500 text-white font-bold">-{discountPercentage}%</Badge>
+            <Badge className="absolute top-3 right-3 bg-gradient-to-r from-yellow-400/40 to-orange-500/40 text-black font-bold border-0">
+              -{discountPercentage}% OFF
+            </Badge>
           )}
 
           {isEquirectangular && (

@@ -54,15 +54,43 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
   return (
     <div className="min-h-screen bg-background">
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Ambient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/10" />
-        
+        {/* Video background placeholder - fullscreen behind content */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60" />
+          
+          {/* Video placeholder element */}
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/20">
+            <div className="text-center space-y-4 p-8 opacity-30">
+              <div className="text-6xl">🎬</div>
+              <p className="text-2xl font-semibold text-muted-foreground">{t("hero.videoPlaceholder")}</p>
+              <p className="text-sm text-muted-foreground/70">Video demostrativo próximamente</p>
+            </div>
+          </div>
+
+          {/* If imageOfTheDay exists, show it as background fallback */}
+          {imageOfTheDay && (
+            <Image
+              src={
+                imageOfTheDay.upscaled_url ||
+                imageOfTheDay.original_url ||
+                imageOfTheDay.file_path ||
+                "/placeholder.svg"
+               || "/placeholder.svg"}
+              alt={imageOfTheDay.title}
+              fill
+              className="object-cover opacity-40"
+              sizes="100vw"
+              priority
+            />
+          )}
+        </div>
+
         {/* Subtle pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.03]">
+        <div className="absolute inset-0 opacity-[0.03] z-[1]">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.3),transparent_50%)]" />
         </div>
 
-        <div className="relative container mx-auto px-4 py-20">
+        <div className="relative container mx-auto px-4 py-20 z-10">
           <div className="max-w-7xl mx-auto">
             {/* Hero content */}
             <div className="text-center space-y-10 mb-20">
@@ -73,14 +101,14 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
               </div>
 
               {/* Main headline - elegant and bold */}
-              <h1 className="text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-[0.95] text-balance">
+              <h1 className="text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-[0.95] text-balance text-white drop-shadow-2xl">
                 {t("hero.title")}
                 <br />
                 <span className="text-primary">{t("hero.subtitle")}</span>
               </h1>
 
               {/* Description - focus on art and uniqueness */}
-              <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed text-pretty font-light">
+              <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed text-pretty font-light drop-shadow-lg">
                 {t("hero.description")}
               </p>
 
@@ -93,14 +121,14 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                   </Button>
                 </Link>
                 <Link href="#featured">
-                  <Button size="lg" variant="outline" className="text-lg px-10 py-7 h-auto bg-background/50 backdrop-blur-sm hover:bg-background/80">
+                  <Button size="lg" variant="outline" className="text-lg px-10 py-7 h-auto bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border-white/20 hover:border-white/40">
                     {t("hero.cta.demo")}
                   </Button>
                 </Link>
               </div>
 
               {/* Technical indicators - minimal and elegant */}
-              <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-white/80">
                 <div className="flex items-center gap-2.5">
                   <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
                   <span className="font-medium">4K – 16K</span>
@@ -115,49 +143,12 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                 </div>
               </div>
             </div>
-
-            {/* Video/Hero media placeholder */}
-            <div className="relative group max-w-6xl mx-auto">
-              <div className="relative aspect-[21/9] rounded-3xl overflow-hidden border border-border/50 shadow-2xl bg-muted/20">
-                {/* Placeholder for video - can be replaced with actual video element */}
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/20 backdrop-blur-sm">
-                  <div className="text-center space-y-4 p-8">
-                    <div className="text-6xl">🎬</div>
-                    <p className="text-2xl font-semibold text-muted-foreground">{t("hero.videoPlaceholder")}</p>
-                    <p className="text-sm text-muted-foreground/70">Video demostrativo próximamente</p>
-                  </div>
-                </div>
-
-                {/* If imageOfTheDay exists, show it as fallback */}
-                {imageOfTheDay && (
-                  <Image
-                    src={
-                      imageOfTheDay.upscaled_url ||
-                      imageOfTheDay.original_url ||
-                      imageOfTheDay.file_path ||
-                      "/placeholder.svg"
-                     || "/placeholder.svg"}
-                    alt={imageOfTheDay.title}
-                    fill
-                    className="object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-                    sizes="(max-width: 1536px) 100vw, 1536px"
-                    priority
-                  />
-                )}
-
-                {/* Subtle hover overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              </div>
-
-              {/* Glow effect */}
-              <div className="absolute -inset-6 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-[2.5rem] blur-3xl opacity-50 -z-10" />
-            </div>
           </div>
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
-          <div className="flex flex-col items-center gap-2 text-muted-foreground/60 animate-bounce">
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10">
+          <div className="flex flex-col items-center gap-2 text-white/60 animate-bounce">
             <div className="w-6 h-10 border-2 border-current rounded-full flex items-start justify-center p-2">
               <div className="w-1 h-2 bg-current rounded-full animate-scroll" />
             </div>

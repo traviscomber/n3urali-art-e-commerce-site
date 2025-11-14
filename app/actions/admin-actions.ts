@@ -98,9 +98,9 @@ const getCachedImages = unstable_cache(
         .from("images")
         .select(`
           id, title, description, price, file_path,
-          thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,
+          thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,upscaled_url,
           is_featured, created_at, updated_at, category_id, license_id, tags, original_file_url,
-          image_format, featured_collection, upscaled_url
+          image_format, featured_collection
         `)
         .order("created_at", { ascending: false })
 
@@ -126,19 +126,16 @@ const getCachedImages = unstable_cache(
           try {
             const imageData = {
               ...item,
-              // Use the actual URLs from the database - don't convert or proxy them
+              // Use the direct URLs from database without conversion
               image_url: item.upscaled_url || item.original_url || item.file_path,
-              thumbnail_url: item.thumbnail_large_url || item.thumbnail_medium_url || item.thumbnail_small_url || item.file_path,
-              // Preserve all individual URL fields
-              file_path: item.file_path,
-              upscaled_url: item.upscaled_url,
-              original_url: item.original_url,
+              thumbnail_url: item.thumbnail_large_url || item.thumbnail_medium_url || item.file_path,
+              file_path: item.file_path, // Keep original file_path
               thumbnail_large_url: item.thumbnail_large_url,
               thumbnail_medium_url: item.thumbnail_medium_url,
               thumbnail_small_url: item.thumbnail_small_url,
-              original_file_url: item.original_file_url,
-              // </CHANGE>
-              active: true,
+              original_url: item.original_url,
+              upscaled_url: item.upscaled_url,
+              active: true, // Default to active since we don't have this column
               featured: item.is_featured,
               categories: categoryMap.get(item.category_id),
               licenses: licenseMap.get(item.license_id),
@@ -147,11 +144,9 @@ const getCachedImages = unstable_cache(
               license_description: licenseMap.get(item.license_id)?.description,
             }
 
-            console.log(`[v0] Image ${item.id} URLs:`, {
-              image_url: imageData.image_url?.substring(0, 80),
-              thumbnail_url: imageData.thumbnail_url?.substring(0, 80),
-              upscaled: item.upscaled_url?.substring(0, 80),
-              original: item.original_url?.substring(0, 80),
+            console.log("[v0] Image URL for", item.id, ":", {
+              image_url: imageData.image_url?.substring(0, 50),
+              thumbnail_url: imageData.thumbnail_url?.substring(0, 50),
             })
 
             // Sanitize all string fields
@@ -161,9 +156,9 @@ const getCachedImages = unstable_cache(
             return null
           }
         })
-        .filter((item) => item !== null)
+        .filter((item) => item !== null) // Remove any failed transformations
 
-      console.log(`[v0] getCachedImages: Retrieved ${transformedData.length} images with valid Backblaze URLs`)
+      console.log(`[v0] getCachedImages: Retrieved ${transformedData.length} images`)
       return transformedData
     } catch (error) {
       console.error("[v0] Error in getCachedImages:", error)
@@ -187,9 +182,9 @@ const getCachedImagesPaginated = unstable_cache(
       let query = supabase.from("images").select(
         `
           id, title, description, price, file_path,
-          thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,
+          thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url, upscaled_url,
           is_featured, created_at, updated_at, category_id, license_id, tags, original_file_url,
-          image_format, featured_collection, upscaled_url
+          image_format, featured_collection
         `,
         { count: "exact" },
       )
@@ -243,19 +238,16 @@ const getCachedImagesPaginated = unstable_cache(
         images?.map((item) => {
           return {
             ...item,
-            // Use the actual URLs from the database - don't convert or proxy them
+            // Use the direct URLs from database without conversion
             image_url: item.upscaled_url || item.original_url || item.file_path,
-            thumbnail_url: item.thumbnail_large_url || item.thumbnail_medium_url || item.thumbnail_small_url || item.file_path,
-            // Preserve all individual URL fields
-            file_path: item.file_path,
-            upscaled_url: item.upscaled_url,
-            original_url: item.original_url,
+            thumbnail_url: item.thumbnail_large_url || item.thumbnail_medium_url || item.file_path,
+            file_path: item.file_path, // Keep original file_path
             thumbnail_large_url: item.thumbnail_large_url,
             thumbnail_medium_url: item.thumbnail_medium_url,
             thumbnail_small_url: item.thumbnail_small_url,
-            original_file_url: item.original_file_url,
-            // </CHANGE>
-            active: true,
+            original_url: item.original_url,
+            upscaled_url: item.upscaled_url,
+            active: true, // Default to active since we don't have this column
             featured: item.is_featured,
             categories: categoryMap.get(item.category_id),
             licenses: licenseMap.get(item.license_id),

@@ -126,9 +126,18 @@ const getCachedImages = unstable_cache(
           try {
             const imageData = {
               ...item,
-              // Keep all the original URLs from the database
-              image_url: item.file_path,
+              // Use the actual URLs from the database - don't convert or proxy them
+              image_url: item.upscaled_url || item.original_url || item.file_path,
               thumbnail_url: item.thumbnail_large_url || item.thumbnail_medium_url || item.thumbnail_small_url || item.file_path,
+              // Preserve all individual URL fields
+              file_path: item.file_path,
+              upscaled_url: item.upscaled_url,
+              original_url: item.original_url,
+              thumbnail_large_url: item.thumbnail_large_url,
+              thumbnail_medium_url: item.thumbnail_medium_url,
+              thumbnail_small_url: item.thumbnail_small_url,
+              original_file_url: item.original_file_url,
+              // </CHANGE>
               active: true,
               featured: item.is_featured,
               categories: categoryMap.get(item.category_id),
@@ -139,12 +148,11 @@ const getCachedImages = unstable_cache(
             }
 
             console.log(`[v0] Image ${item.id} URLs:`, {
-              file_path: item.file_path?.substring(0, 80),
-              thumbnail_large: item.thumbnail_large_url?.substring(0, 80),
+              image_url: imageData.image_url?.substring(0, 80),
+              thumbnail_url: imageData.thumbnail_url?.substring(0, 80),
               upscaled: item.upscaled_url?.substring(0, 80),
               original: item.original_url?.substring(0, 80),
             })
-            // </CHANGE>
 
             // Sanitize all string fields
             return sanitizeImageData(imageData)
@@ -155,7 +163,7 @@ const getCachedImages = unstable_cache(
         })
         .filter((item) => item !== null)
 
-      console.log(`[v0] getCachedImages: Retrieved ${transformedData.length} images`)
+      console.log(`[v0] getCachedImages: Retrieved ${transformedData.length} images with valid Backblaze URLs`)
       return transformedData
     } catch (error) {
       console.error("[v0] Error in getCachedImages:", error)
@@ -235,9 +243,19 @@ const getCachedImagesPaginated = unstable_cache(
         images?.map((item) => {
           return {
             ...item,
-            image_url: item.file_path,
+            // Use the actual URLs from the database - don't convert or proxy them
+            image_url: item.upscaled_url || item.original_url || item.file_path,
             thumbnail_url: item.thumbnail_large_url || item.thumbnail_medium_url || item.thumbnail_small_url || item.file_path,
-            active: true, // Default to active since we don't have this column
+            // Preserve all individual URL fields
+            file_path: item.file_path,
+            upscaled_url: item.upscaled_url,
+            original_url: item.original_url,
+            thumbnail_large_url: item.thumbnail_large_url,
+            thumbnail_medium_url: item.thumbnail_medium_url,
+            thumbnail_small_url: item.thumbnail_small_url,
+            original_file_url: item.original_file_url,
+            // </CHANGE>
+            active: true,
             featured: item.is_featured,
             categories: categoryMap.get(item.category_id),
             licenses: licenseMap.get(item.license_id),
@@ -245,7 +263,6 @@ const getCachedImagesPaginated = unstable_cache(
             license_name: licenseMap.get(item.license_id)?.name,
             license_description: licenseMap.get(item.license_id)?.description,
           }
-          // </CHANGE>
         }) || []
 
       // Sanitize transformed data before returning

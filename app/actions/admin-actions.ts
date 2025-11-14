@@ -124,17 +124,35 @@ const getCachedImages = unstable_cache(
       const transformedData = (images || [])
         .map((item) => {
           try {
+            const ensureCompleteUrl = (url: string | null | undefined): string | null => {
+              if (!url) return null
+
+              // If it's already a complete URL, return it
+              if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+                return url
+              }
+
+              // If it's a partial path, construct the full Supabase storage URL
+              if (url.startsWith('/storage/v1/') || url.includes('uploads/')) {
+                const basePath = url.startsWith('/') ? url.slice(1) : url
+                return `https://pamfhqilohsqbifujtjz.supabase.co/${basePath}`
+              }
+
+              // If it's just a filename or partial path, assume it's in the images bucket
+              return `https://pamfhqilohsqbifujtjz.supabase.co/storage/v1/object/public/images/${url}`
+            }
+
             const imageData = {
               ...item,
-              // Use the direct URLs from database without conversion
-              image_url: item.upscaled_url || item.original_url || item.file_path,
-              thumbnail_url: item.thumbnail_large_url || item.thumbnail_medium_url || item.file_path,
-              file_path: item.file_path, // Keep original file_path
-              thumbnail_large_url: item.thumbnail_large_url,
-              thumbnail_medium_url: item.thumbnail_medium_url,
-              thumbnail_small_url: item.thumbnail_small_url,
-              original_url: item.original_url,
-              upscaled_url: item.upscaled_url,
+              // Use the direct URLs from database, ensuring they're complete
+              image_url: ensureCompleteUrl(item.upscaled_url) || ensureCompleteUrl(item.original_url) || ensureCompleteUrl(item.file_path),
+              thumbnail_url: ensureCompleteUrl(item.thumbnail_large_url) || ensureCompleteUrl(item.thumbnail_medium_url) || ensureCompleteUrl(item.file_path),
+              file_path: ensureCompleteUrl(item.file_path), // Keep original file_path but ensure it's complete
+              thumbnail_large_url: ensureCompleteUrl(item.thumbnail_large_url),
+              thumbnail_medium_url: ensureCompleteUrl(item.thumbnail_medium_url),
+              thumbnail_small_url: ensureCompleteUrl(item.thumbnail_small_url),
+              original_url: ensureCompleteUrl(item.original_url),
+              upscaled_url: ensureCompleteUrl(item.upscaled_url),
               active: true, // Default to active since we don't have this column
               featured: item.is_featured,
               categories: categoryMap.get(item.category_id),
@@ -145,8 +163,8 @@ const getCachedImages = unstable_cache(
             }
 
             console.log("[v0] Image URL for", item.id, ":", {
-              image_url: imageData.image_url?.substring(0, 50),
-              thumbnail_url: imageData.thumbnail_url?.substring(0, 50),
+              image_url: imageData.image_url?.substring(0, 100),
+              thumbnail_url: imageData.thumbnail_url?.substring(0, 100),
             })
 
             // Sanitize all string fields
@@ -236,17 +254,35 @@ const getCachedImagesPaginated = unstable_cache(
 
       const transformedData =
         images?.map((item) => {
+          const ensureCompleteUrl = (url: string | null | undefined): string | null => {
+            if (!url) return null
+
+            // If it's already a complete URL, return it
+            if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+              return url
+            }
+
+            // If it's a partial path, construct the full Supabase storage URL
+            if (url.startsWith('/storage/v1/') || url.includes('uploads/')) {
+              const basePath = url.startsWith('/') ? url.slice(1) : url
+              return `https://pamfhqilohsqbifujtjz.supabase.co/${basePath}`
+            }
+
+            // If it's just a filename or partial path, assume it's in the images bucket
+            return `https://pamfhqilohsqbifujtjz.supabase.co/storage/v1/object/public/images/${url}`
+          }
+
           return {
             ...item,
-            // Use the direct URLs from database without conversion
-            image_url: item.upscaled_url || item.original_url || item.file_path,
-            thumbnail_url: item.thumbnail_large_url || item.thumbnail_medium_url || item.file_path,
-            file_path: item.file_path, // Keep original file_path
-            thumbnail_large_url: item.thumbnail_large_url,
-            thumbnail_medium_url: item.thumbnail_medium_url,
-            thumbnail_small_url: item.thumbnail_small_url,
-            original_url: item.original_url,
-            upscaled_url: item.upscaled_url,
+            // Use the direct URLs from database, ensuring they're complete
+            image_url: ensureCompleteUrl(item.upscaled_url) || ensureCompleteUrl(item.original_url) || ensureCompleteUrl(item.file_path),
+            thumbnail_url: ensureCompleteUrl(item.thumbnail_large_url) || ensureCompleteUrl(item.thumbnail_medium_url) || ensureCompleteUrl(item.file_path),
+            file_path: ensureCompleteUrl(item.file_path), // Keep original file_path but ensure it's complete
+            thumbnail_large_url: ensureCompleteUrl(item.thumbnail_large_url),
+            thumbnail_medium_url: ensureCompleteUrl(item.thumbnail_medium_url),
+            thumbnail_small_url: ensureCompleteUrl(item.thumbnail_small_url),
+            original_url: ensureCompleteUrl(item.original_url),
+            upscaled_url: ensureCompleteUrl(item.upscaled_url),
             active: true, // Default to active since we don't have this column
             featured: item.is_featured,
             categories: categoryMap.get(item.category_id),

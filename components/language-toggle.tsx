@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/contexts/language-context"
-import { Globe } from 'lucide-react'
 
 export function LanguageToggle() {
   const { language, setLanguage } = useLanguage()
@@ -15,12 +14,17 @@ export function LanguageToggle() {
       className="relative hover:bg-card/50 transition-all duration-300 group"
       title={language === "es" ? "Switch to English" : "Cambiar a Español"}
     >
-      <div className="flex items-center gap-2">
-        <Globe className="w-4 h-4" />
-        <span className="text-sm font-medium">
-          {language === "es" ? "ES" : "EN"}
-        </span>
-      </div>
+      {language === "es" ? (
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">🇨🇱</span>
+          <span className="text-xs font-medium hidden sm:inline">ES</span>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">🇬🇧</span>
+          <span className="text-xs font-medium hidden sm:inline">EN</span>
+        </div>
+      )}
     </Button>
   )
 }

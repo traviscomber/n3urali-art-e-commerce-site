@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Eye } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
 import { useState } from "react"
+import { useLanguage } from "@/lib/contexts/language-context"
 
 interface Product {
   id: string
@@ -43,6 +44,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, onView360, priority = false }: ProductCardProps) {
   const { addItem } = useCart()
+  const { t } = useLanguage()
   const [isLoading, setIsLoading] = useState(false)
 
   if (!product) {
@@ -108,11 +110,11 @@ export function ProductCard({ product, onView360, priority = false }: ProductCar
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
           {product.is_featured && (
-            <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground">Featured</Badge>
+            <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground">{t("featured")}</Badge>
           )}
           {discountPercentage > 0 && (
             <Badge className="absolute top-3 right-3 bg-gradient-to-r from-yellow-400/40 to-orange-500/40 text-black font-bold border-0">
-              -{discountPercentage}% OFF
+              -{discountPercentage}% {t("off")}
             </Badge>
           )}
 
@@ -123,7 +125,7 @@ export function ProductCard({ product, onView360, priority = false }: ProductCar
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
             <Button size="sm" variant="secondary" onClick={(e) => e.preventDefault()}>
               <Eye className="h-4 w-4 mr-1" />
-              View Details
+              {t("viewDetails")}
             </Button>
           </div>
         </div>

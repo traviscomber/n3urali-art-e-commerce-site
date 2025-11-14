@@ -127,24 +127,26 @@ const getCachedImages = unstable_cache(
             const ensureCompleteUrl = (url: string | null | undefined): string | null => {
               if (!url) return null
 
-              // If it's already a complete URL, return it
+              // If it's already a complete URL (http/https/data), return it as-is
+              // This includes Backblaze URLs like https://f005.backblazeb2.com/...
               if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
                 return url
               }
 
-              // If it's a partial path, construct the full Supabase storage URL
+              // If it's a partial Supabase storage path, construct the full URL
               if (url.startsWith('/storage/v1/') || url.includes('uploads/')) {
                 const basePath = url.startsWith('/') ? url.slice(1) : url
                 return `https://pamfhqilohsqbifujtjz.supabase.co/${basePath}`
               }
 
-              // If it's just a filename or partial path, assume it's in the images bucket
+              // If it's just a filename or partial path, assume it's in the Supabase images bucket
               return `https://pamfhqilohsqbifujtjz.supabase.co/storage/v1/object/public/images/${url}`
             }
 
             const imageData = {
               ...item,
               // Use the direct URLs from database, ensuring they're complete
+              // Priority: upscaled_url > original_url > file_path
               image_url: ensureCompleteUrl(item.upscaled_url) || ensureCompleteUrl(item.original_url) || ensureCompleteUrl(item.file_path),
               thumbnail_url: ensureCompleteUrl(item.thumbnail_large_url) || ensureCompleteUrl(item.thumbnail_medium_url) || ensureCompleteUrl(item.file_path),
               file_path: ensureCompleteUrl(item.file_path), // Keep original file_path but ensure it's complete

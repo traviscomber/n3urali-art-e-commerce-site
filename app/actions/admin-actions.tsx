@@ -100,7 +100,7 @@ const getCachedImages = unstable_cache(
           id, title, description, price, file_path,
           thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,
           is_featured, created_at, updated_at, category_id, license_id, tags, original_file_url,
-          image_format, featured_collection
+          image_format, featured_collection, upscaled_url
         `)
         .order("created_at", { ascending: false })
 
@@ -124,18 +124,12 @@ const getCachedImages = unstable_cache(
       const transformedData = (images || [])
         .map((item) => {
           try {
-            const displayUrl = item.file_path || item.file_path
-
             const imageData = {
               ...item,
-              image_url: displayUrl,
-              thumbnail_url: displayUrl,
-              file_path: displayUrl,
-              thumbnail_large_url: item.thumbnail_large_url || displayUrl,
-              thumbnail_medium_url: item.thumbnail_medium_url || displayUrl,
-              thumbnail_small_url: item.thumbnail_small_url || displayUrl,
-              original_url: item.original_url || displayUrl,
-              active: true, // Default to active since we don't have this column
+              // Keep all the original URLs from the database
+              image_url: item.file_path,
+              thumbnail_url: item.thumbnail_large_url || item.thumbnail_medium_url || item.thumbnail_small_url || item.file_path,
+              active: true,
               featured: item.is_featured,
               categories: categoryMap.get(item.category_id),
               licenses: licenseMap.get(item.license_id),
@@ -144,6 +138,14 @@ const getCachedImages = unstable_cache(
               license_description: licenseMap.get(item.license_id)?.description,
             }
 
+            console.log(`[v0] Image ${item.id} URLs:`, {
+              file_path: item.file_path?.substring(0, 80),
+              thumbnail_large: item.thumbnail_large_url?.substring(0, 80),
+              upscaled: item.upscaled_url?.substring(0, 80),
+              original: item.original_url?.substring(0, 80),
+            })
+            // </CHANGE>
+
             // Sanitize all string fields
             return sanitizeImageData(imageData)
           } catch (error) {
@@ -151,7 +153,7 @@ const getCachedImages = unstable_cache(
             return null
           }
         })
-        .filter((item) => item !== null) // Remove any failed transformations
+        .filter((item) => item !== null)
 
       console.log(`[v0] getCachedImages: Retrieved ${transformedData.length} images`)
       return transformedData
@@ -179,7 +181,7 @@ const getCachedImagesPaginated = unstable_cache(
           id, title, description, price, file_path,
           thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,
           is_featured, created_at, updated_at, category_id, license_id, tags, original_file_url,
-          image_format, featured_collection
+          image_format, featured_collection, upscaled_url
         `,
         { count: "exact" },
       )
@@ -231,17 +233,10 @@ const getCachedImagesPaginated = unstable_cache(
 
       const transformedData =
         images?.map((item) => {
-          const displayUrl = item.file_path || item.file_path
-
           return {
             ...item,
-            image_url: displayUrl,
-            thumbnail_url: displayUrl,
-            file_path: displayUrl,
-            thumbnail_large_url: item.thumbnail_large_url || displayUrl,
-            thumbnail_medium_url: item.thumbnail_medium_url || displayUrl,
-            thumbnail_small_url: item.thumbnail_small_url || displayUrl,
-            original_url: item.original_url || displayUrl,
+            image_url: item.file_path,
+            thumbnail_url: item.thumbnail_large_url || item.thumbnail_medium_url || item.thumbnail_small_url || item.file_path,
             active: true, // Default to active since we don't have this column
             featured: item.is_featured,
             categories: categoryMap.get(item.category_id),
@@ -250,6 +245,7 @@ const getCachedImagesPaginated = unstable_cache(
             license_name: licenseMap.get(item.license_id)?.name,
             license_description: licenseMap.get(item.license_id)?.description,
           }
+          // </CHANGE>
         }) || []
 
       // Sanitize transformed data before returning

@@ -42,20 +42,23 @@ export default async function HomePage() {
     .eq("active", true)
     .order("created_at", { ascending: false })
 
-  let imageOfTheDay = null
+  let auctionImages: typeof featuredImages = []
   if (featuredImages && featuredImages.length > 0) {
     const today = new Date()
     const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000)
     const imageIndex = dayOfYear % featuredImages.length
-    imageOfTheDay = featuredImages[imageIndex]
+    auctionImages.push(featuredImages[imageIndex])
   }
 
+  const remainingFeaturedImages = featuredImages?.filter(img => !auctionImages.some(auctionImg => auctionImg.id === img.id)) || []
+
+  const usedImageIds = new Set(auctionImages.map(img => img.id).filter(Boolean))
   let collectionImages: typeof featuredImages = []
-  if (featuredImages && featuredImages.length > 0) {
+  if (remainingFeaturedImages.length > 0) {
     const today = new Date()
     const weekOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (86400000 * 7))
 
-    const shuffled = [...featuredImages]
+    const shuffled = [...remainingFeaturedImages]
     const seed = weekOfYear
 
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -66,21 +69,7 @@ export default async function HomePage() {
     collectionImages = shuffled.slice(0, Math.min(20, shuffled.length))
   }
 
-  let auctionImages: typeof featuredImages = []
-  if (featuredImages && featuredImages.length > 0) {
-    const today = new Date()
-    const hourOfDay = today.getHours()
-
-    const shuffled = [...featuredImages]
-    const seed = hourOfDay * 1000
-
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = ((seed + i) * 9301 + 49297) % shuffled.length
-      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-    }
-
-    auctionImages = shuffled.slice(0, Math.min(15, shuffled.length))
-  }
+  collectionImages?.forEach(img => usedImageIds.add(img.id))
 
   const { data: allActiveImages } = await supabase
     .from("images")
@@ -89,15 +78,21 @@ export default async function HomePage() {
     )
     .eq("active", true)
     .order("created_at", { ascending: false })
-    .limit(50)
+    .limit(100)
 
-  const dailyImages = allActiveImages ? getDailyImageSelection(allActiveImages, 16) : []
+  const availableForDaily = allActiveImages?.filter(img => !usedImageIds.has(img.id)) || []
+  const dailyImages = availableForDaily.length > 0 ? getDailyImageSelection(availableForDaily, 16) : []
+
+  console.log("[v0] Images distribution:", {
+    auctionCount: auctionImages?.length || 0,
+    collectionCount: collectionImages?.length || 0,
+    dailyCount: dailyImages?.length || 0,
+  })
 
   return (
     <ClientWrapper
-      imageOfTheDay={imageOfTheDay}
-      collectionImages={collectionImages || []}
       auctionImages={auctionImages || []}
+      collectionImages={collectionImages || []}
       dailyImages={dailyImages}
     />
   )

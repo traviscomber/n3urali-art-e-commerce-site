@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowRight, HelpCircle, Sparkles, Grid3x3, User } from "lucide-react"
+import { ArrowRight, HelpCircle, Sparkles, Grid3x3, User } from 'lucide-react'
 import Link from "next/link"
 import Image from "next/image"
 import LandingGalleryTabs from "@/components/landing-gallery-tabs"
@@ -38,9 +38,9 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date()
-      const minutesLeft = 59 - now.getMinutes()
       const secondsLeft = 59 - now.getSeconds()
-      return { minutes: minutesLeft, seconds: secondsLeft }
+      // Always show 0 minutes since we're only counting 60 seconds
+      return { minutes: 0, seconds: secondsLeft }
     }
 
     setAuctionTimeLeft(calculateTimeLeft())
@@ -53,6 +53,153 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
 
   return (
     <div className="min-h-screen bg-background">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Ambient background with subtle gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
+        
+        {/* Subtle animated pattern overlay */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_50%)]" />
+        </div>
+
+        <div className="relative container mx-auto px-4 py-20">
+          <div className="max-w-7xl mx-auto">
+            {/* Hero content */}
+            <div className="text-center space-y-8 mb-16">
+              {/* Badge with Chilean innovation context */}
+              <div className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 rounded-full px-6 py-3 backdrop-blur-sm">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-primary">
+                  {t("language") === "es" ? "Innovación Chilena en IA" : "Chilean AI Innovation"}
+                </span>
+              </div>
+
+              {/* Main headline - large and impactful */}
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.1] text-balance">
+                {t("language") === "es" ? (
+                  <>
+                    Arte Digital Inmersivo
+                    <br />
+                    <span className="text-primary">360° Generado por IA</span>
+                  </>
+                ) : (
+                  <>
+                    Immersive Digital Art
+                    <br />
+                    <span className="text-primary">AI-Generated 360°</span>
+                  </>
+                )}
+              </h1>
+
+              {/* Subtitle with cultural/technical context */}
+              <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed text-pretty">
+                {t("language") === "es"
+                  ? "Experiencias visuales de ultra alta resolución creadas con algoritmos propietarios de difusión de ruido. Desarrollado íntegramente en Chile como parte del programa nacional de innovación digital."
+                  : "Ultra high-resolution visual experiences created with proprietary noise diffusion algorithms. Entirely developed in Chile as part of the national digital innovation program."}
+              </p>
+
+              {/* CTA buttons */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                <Link href="/gallery">
+                  <Button size="lg" className="text-lg px-8 py-6 h-auto shadow-lg shadow-primary/20">
+                    {t("language") === "es" ? "Explorar Colección" : "Explore Collection"}
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </Link>
+                <Link href="#featured">
+                  <Button size="lg" variant="outline" className="text-lg px-8 py-6 h-auto bg-transparent">
+                    {t("language") === "es" ? "Ver Demostración" : "View Demo"}
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Technical badges */}
+              <div className="flex flex-wrap items-center justify-center gap-6 pt-8 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                  <span className="font-medium">4K - 16K</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                  <span className="font-medium">{t("language") === "es" ? "VR Compatible" : "VR Compatible"}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                  <span className="font-medium">
+                    {t("language") === "es" ? "Descarga Instantánea" : "Instant Download"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Featured hero image showcase - if imageOfTheDay exists */}
+            {imageOfTheDay && (
+              <div className="relative group max-w-6xl mx-auto">
+                <div className="relative aspect-[21/9] rounded-3xl overflow-hidden border border-border/50 shadow-2xl">
+                  <Image
+                    src={
+                      imageOfTheDay.upscaled_url ||
+                      imageOfTheDay.original_url ||
+                      imageOfTheDay.file_path ||
+                      "/placeholder.svg"
+                     || "/placeholder.svg"}
+                    alt={imageOfTheDay.title}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    sizes="(max-width: 1536px) 100vw, 1536px"
+                    priority
+                  />
+
+                  {/* Gradient overlay for better text contrast on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                  {/* Image info overlay - shows on hover */}
+                  <div className="absolute bottom-0 left-0 right-0 p-8 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                    <div className="flex items-end justify-between gap-6 flex-wrap">
+                      <div className="space-y-3 flex-1">
+                        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-sm">
+                          <Sparkles className="w-3 h-3" />
+                          <span>{t("hero.imageOfDay")}</span>
+                        </div>
+                        <h2 className="text-3xl md:text-4xl font-bold leading-tight">{imageOfTheDay.title}</h2>
+                        <div className="flex items-center gap-3">
+                          <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/30">
+                            {imageOfTheDay.image_format}
+                          </Badge>
+                          <span className="text-white/80 text-sm">{t("stats.resolutionNote")}</span>
+                        </div>
+                      </div>
+                      <Link href={`/photo/${imageOfTheDay.id}`}>
+                        <Button size="lg" className="bg-white text-black hover:bg-white/90 shadow-xl">
+                          {t("hero.viewDetails")}
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Glow effect on hover */}
+                <div className="absolute -inset-6 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 rounded-[2.5rem] blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <div className="flex flex-col items-center gap-2 text-muted-foreground">
+            <span className="text-xs uppercase tracking-wider">
+              {t("language") === "es" ? "Descubre más" : "Discover more"}
+            </span>
+            <div className="w-6 h-10 border-2 border-muted-foreground/30 rounded-full flex items-start justify-center p-2">
+              <div className="w-1 h-2 bg-muted-foreground/50 rounded-full animate-scroll" />
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* End of new hero section */}
+
       {imageOfTheDay && (
         <section className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
@@ -61,13 +208,13 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
             <div className="max-w-7xl mx-auto space-y-12">
               <div className="text-center space-y-6">
                 <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20 text-sm px-4 py-2">
-                  {t("imageOfTheDay")}
+                  {t("hero.imageOfDay")}
                 </Badge>
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance">
-                  {t("premium360Imagery")}
+                  {t("hero.title")} <span className="text-primary">{t("hero.titleHighlight")}</span>
                 </h1>
                 <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-pretty">
-                  {t("experienceQuality")}
+                  {t("hero.subtitle")}
                 </p>
               </div>
 
@@ -80,7 +227,7 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                       imageOfTheDay.file_path ||
                       "/placeholder.svg" ||
                       "/placeholder.svg"
-                    }
+                     || "/placeholder.svg"}
                     alt={imageOfTheDay.title}
                     fill
                     className="object-cover"
@@ -104,16 +251,16 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                           <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/30">
                             {imageOfTheDay.image_format}
                           </Badge>
-                          <span className="text-white/80">{t("ultraHighResolution")}</span>
+                          <span className="text-white/80">{t("stats.resolutionNote")}</span>
                         </div>
                       </div>
                       <div className="text-right space-y-2">
                         <Badge className="bg-gradient-to-r from-yellow-400/40 to-orange-500/40 text-black font-bold text-lg px-4 py-2 border-0 animate-pulse">
-                          {t("20PercentOffToday")}
+                          20{t("hero.offToday")}
                         </Badge>
                         <Link href={`/photo/${imageOfTheDay.id}`}>
                           <Button size="lg" className="bg-primary hover:bg-primary/90 w-full mt-2">
-                            {t("viewDetailsPrice")}
+                            {t("hero.viewDetails")}
                             <ArrowRight className="w-4 h-4 ml-2" />
                           </Button>
                         </Link>
@@ -135,9 +282,11 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
           <div className="container mx-auto px-4 mb-8">
             <div className="text-center space-y-3">
               <Badge variant="secondary" className="bg-primary/10 text-primary">
-                {t("premiumCollection")}
+                {t("collection.badge")}
               </Badge>
-              <h2 className="text-2xl md:text-3xl font-bold">{t("curatedImages")}</h2>
+              <h2 className="text-2xl md:text-3xl font-bold">
+                {t("collection.title")} <span className="text-primary">{t("collection.titleHighlight")}</span>
+              </h2>
             </div>
           </div>
 
@@ -169,7 +318,7 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                         {image.image_format}
                       </Badge>
                       <Badge className="bg-gradient-to-r from-yellow-400/40 to-orange-500/40 text-black text-xs font-bold border-0">
-                        {t("15PercentOff")}
+                        15{t("collection.off")}
                       </Badge>
                     </div>
                   </div>
@@ -199,7 +348,7 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                         {image.image_format}
                       </Badge>
                       <Badge className="bg-gradient-to-r from-yellow-400/40 to-orange-500/40 text-black text-xs font-bold border-0">
-                        {t("15PercentOff")}
+                        15{t("collection.off")}
                       </Badge>
                     </div>
                   </div>
@@ -211,7 +360,7 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
           <div className="text-center mt-8">
             <Link href="/collection">
               <Button size="lg" variant="outline" className="group bg-transparent">
-                {t("viewCompleteCollection")}
+                {t("collection.viewComplete")}
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
@@ -227,51 +376,32 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
             <div className="max-w-5xl mx-auto">
               <div className="text-center space-y-8 mb-16">
                 <div className="space-y-4">
-                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">{t("catchBestPrices")}</h2>
+                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+                    {t("auction.title")} <span className="text-primary">{t("auction.titleHighlight")}</span>
+                  </h2>
 
                   <div className="flex justify-center mt-8">
-                    <div className="flex items-center gap-6 md:gap-8">
-                      {/* Minutes */}
-                      <div className="text-center">
-                        <div
-                          className="text-6xl md:text-7xl lg:text-8xl font-thin tabular-nums"
-                          style={{ color: "#392A48" }}
-                        >
-                          {auctionTimeLeft.minutes.toString().padStart(2, "0")}
-                        </div>
-                        <div
-                          className="text-xs md:text-sm uppercase tracking-widest font-light mt-2"
-                          style={{ color: "#392A48" }}
-                        >
-                          {t("minutes") || "Minutos"}
-                        </div>
+                    <div className="text-center">
+                      <div
+                        className="text-6xl md:text-7xl lg:text-8xl font-thin tabular-nums"
+                        style={{ color: "#392A48" }}
+                      >
+                        {auctionTimeLeft.seconds.toString().padStart(2, "0")}
                       </div>
-
-                      {/* Separator */}
-                      <div className="text-5xl md:text-6xl lg:text-7xl font-thin" style={{ color: "#392A48" }}>
-                        :
+                      <div
+                        className="text-xs md:text-sm uppercase tracking-widest font-light mt-2"
+                        style={{ color: "#392A48" }}
+                      >
+                        {t("seconds")}
                       </div>
-
-                      {/* Seconds */}
-                      <div className="text-center">
-                        <div
-                          className="text-6xl md:text-7xl lg:text-8xl font-thin tabular-nums"
-                          style={{ color: "#392A48" }}
-                        >
-                          {auctionTimeLeft.seconds.toString().padStart(2, "0")}
-                        </div>
-                        <div
-                          className="text-xs md:text-sm uppercase tracking-widest font-light mt-2"
-                          style={{ color: "#392A48" }}
-                        >
-                          {t("seconds") || "Segundos"}
-                        </div>
+                      <div className="text-sm text-muted-foreground mt-3">
+                        {t("untilPricesReset")}
                       </div>
                     </div>
                   </div>
 
                   <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mt-6">
-                    {t("pricesDropEveryMinute")}
+                    {t("auction.subtitle")}
                   </p>
                 </div>
               </div>
@@ -284,7 +414,7 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
 
           <div className="text-center mt-12">
             <p className="text-sm text-muted-foreground bg-muted/50 inline-block px-6 py-3 rounded-full backdrop-blur-sm border border-border/50">
-              {t("pricesResetEveryHour")}
+              {t("auction.tip")}
             </p>
           </div>
         </section>
@@ -301,11 +431,11 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                   </div>
 
                   <div className="flex-1 space-y-3">
-                    <h2 className="text-3xl font-bold">{t("collection")}</h2>
-                    <p className="text-muted-foreground text-lg">{t("curatedImages")}</p>
+                    <h2 className="text-3xl font-bold">{t("cta.collection.title")}</h2>
+                    <p className="text-muted-foreground text-lg">{t("cta.collection.subtitle")}</p>
                     <div className="pt-2">
-                      <div className="text-4xl font-bold text-primary">$999</div>
-                      <div className="text-sm text-muted-foreground">{t("completeBundle")}</div>
+                      <div className="text-4xl font-bold text-primary">{t("cta.collection.price")}</div>
+                      <div className="text-sm text-muted-foreground">{t("cta.collection.priceNote")}</div>
                     </div>
                   </div>
 
@@ -313,7 +443,7 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                     className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
                     size="lg"
                   >
-                    {t("viewCollection")}
+                    {t("cta.collection.button")}
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </CardContent>
@@ -328,11 +458,11 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                   </div>
 
                   <div className="flex-1 space-y-3">
-                    <h2 className="text-3xl font-bold">{t("gallery")}</h2>
-                    <p className="text-muted-foreground text-lg">{t("browseAllImages")}</p>
+                    <h2 className="text-3xl font-bold">{t("cta.gallery.title")}</h2>
+                    <p className="text-muted-foreground text-lg">{t("cta.gallery.subtitle")}</p>
                     <div className="pt-2">
-                      <div className="text-4xl font-bold">130+</div>
-                      <div className="text-sm text-muted-foreground">{t("premiumImages")}</div>
+                      <div className="text-4xl font-bold">{t("cta.gallery.count")}</div>
+                      <div className="text-sm text-muted-foreground">{t("cta.gallery.countNote")}</div>
                     </div>
                   </div>
 
@@ -341,7 +471,7 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                     className="w-full group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors bg-transparent"
                     size="lg"
                   >
-                    {t("browseGallery")}
+                    {t("cta.gallery.button")}
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </CardContent>
@@ -356,11 +486,11 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                   </div>
 
                   <div className="flex-1 space-y-3">
-                    <h2 className="text-3xl font-bold">{t("signIn")}</h2>
-                    <p className="text-muted-foreground text-lg">{t("instantDownloadAccess")}</p>
+                    <h2 className="text-3xl font-bold">{t("cta.signIn.title")}</h2>
+                    <p className="text-muted-foreground text-lg">{t("cta.signIn.subtitle")}</p>
                     <div className="pt-2">
-                      <div className="text-lg font-semibold">{t("instant")}</div>
-                      <div className="text-sm text-muted-foreground">{t("downloadAccess")}</div>
+                      <div className="text-lg font-semibold">{t("cta.signIn.access")}</div>
+                      <div className="text-sm text-muted-foreground">{t("cta.signIn.accessNote")}</div>
                     </div>
                   </div>
 
@@ -369,7 +499,7 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                     className="w-full group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors bg-transparent"
                     size="lg"
                   >
-                    {t("signIn")}
+                    {t("cta.signIn.button")}
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </CardContent>
@@ -384,16 +514,16 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
           <div className="max-w-4xl mx-auto">
             <div className="grid md:grid-cols-3 gap-12 text-center">
               <div className="space-y-3">
-                <div className="text-4xl font-bold text-primary">4K-16K</div>
-                <p className="text-muted-foreground">{t("ultraHighResolution")}</p>
+                <div className="text-4xl font-bold text-primary">{t("stats.resolution")}</div>
+                <p className="text-muted-foreground">{t("stats.resolutionNote")}</p>
               </div>
               <div className="space-y-3">
-                <div className="text-4xl font-bold">Instant</div>
-                <p className="text-muted-foreground">{t("downloadAfterPurchase")}</p>
+                <div className="text-4xl font-bold">{t("stats.instant")}</div>
+                <p className="text-muted-foreground">{t("stats.instantNote")}</p>
               </div>
               <div className="space-y-3">
-                <div className="text-4xl font-bold text-primary">VR Ready</div>
-                <p className="text-muted-foreground">{t("perfectForImmersive")}</p>
+                <div className="text-4xl font-bold text-primary">{t("stats.vr")}</div>
+                <p className="text-muted-foreground">{t("stats.vrNote")}</p>
               </div>
             </div>
           </div>
@@ -405,10 +535,12 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <Badge variant="secondary" className="mb-4 animate-pulse-glow">
-                {t("featuredGallery")}
+                {t("featured.badge")}
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance">{t("exploreOurPremium")}</h2>
-              <p className="text-lg text-muted-foreground text-pretty">{t("browseOurCurated")}</p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance">
+                {t("featured.title")} <span className="text-primary">{t("featured.titleHighlight")}</span>
+              </h2>
+              <p className="text-lg text-muted-foreground text-pretty">{t("featured.subtitle")}</p>
             </div>
 
             <LandingGalleryTabs dailyImages={dailyImages} />
@@ -422,41 +554,43 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
             <div className="text-center mb-16">
               <div className="flex items-center justify-center gap-2 mb-4">
                 <HelpCircle className="w-6 h-6 text-primary" />
-                <Badge variant="secondary">{t("faq")}</Badge>
+                <Badge variant="secondary">{t("faq.badge")}</Badge>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance">{t("everythingYouNeed")}</h2>
-              <p className="text-lg text-muted-foreground text-pretty">{t("commonQuestions")}</p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance">
+                {t("faq.title")} <span className="text-primary">{t("faq.titleHighlight")}</span>
+              </h2>
+              <p className="text-lg text-muted-foreground text-pretty">{t("faq.subtitle")}</p>
             </div>
 
             <div className="space-y-8">
               <div className="bg-card rounded-lg px-6 py-8 space-y-4">
-                <h3 className="text-xl font-semibold">{t("faqQ1")}</h3>
-                <p className="text-muted-foreground">{t("faqA1")}</p>
+                <h3 className="text-xl font-semibold">{t("faq.q1.title")}</h3>
+                <p className="text-muted-foreground whitespace-pre-line">{t("faq.q1.answer")}</p>
               </div>
 
               <div className="bg-card rounded-lg px-6 py-8 space-y-4">
-                <h3 className="text-xl font-semibold">{t("faqQ2")}</h3>
-                <p className="text-muted-foreground">{t("faqA2")}</p>
+                <h3 className="text-xl font-semibold">{t("faq.q2.title")}</h3>
+                <p className="text-muted-foreground whitespace-pre-line">{t("faq.q2.answer")}</p>
               </div>
 
               <div className="bg-card rounded-lg px-6 py-8 space-y-4">
-                <h3 className="text-xl font-semibold">{t("faqQ3")}</h3>
-                <p className="text-muted-foreground">{t("faqA3")}</p>
+                <h3 className="text-xl font-semibold">{t("faq.q3.title")}</h3>
+                <p className="text-muted-foreground whitespace-pre-line">{t("faq.q3.answer")}</p>
               </div>
 
               <div className="bg-card rounded-lg px-6 py-8 space-y-4">
-                <h3 className="text-xl font-semibold">{t("faqQ4")}</h3>
-                <p className="text-muted-foreground">{t("faqA4")}</p>
+                <h3 className="text-xl font-semibold">{t("faq.q4.title")}</h3>
+                <p className="text-muted-foreground whitespace-pre-line">{t("faq.q4.answer")}</p>
               </div>
 
               <div className="bg-card rounded-lg px-6 py-8 space-y-4">
-                <h3 className="text-xl font-semibold">{t("faqQ5")}</h3>
-                <p className="text-muted-foreground">{t("faqA5")}</p>
+                <h3 className="text-xl font-semibold">{t("faq.q5.title")}</h3>
+                <p className="text-muted-foreground whitespace-pre-line">{t("faq.q5.answer")}</p>
               </div>
 
               <div className="bg-card rounded-lg px-6 py-8 space-y-4">
-                <h3 className="text-xl font-semibold">{t("faqQ6")}</h3>
-                <p className="text-muted-foreground">{t("faqA6")}</p>
+                <h3 className="text-xl font-semibold">{t("faq.q6.title")}</h3>
+                <p className="text-muted-foreground whitespace-pre-line">{t("faq.q6.answer")}</p>
               </div>
             </div>
           </div>
@@ -468,15 +602,15 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
         <div className="relative container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto space-y-8">
             <h2 className="text-3xl md:text-5xl font-bold text-balance">
-              {t("readyToTransform")}
-              <span className="text-primary block">{t("creativeVision")}</span>
+              {t("cta.readyToTransform")}
+              <span className="text-primary block">{t("cta.creativeVision")}</span>
             </h2>
 
-            <p className="text-xl text-muted-foreground text-pretty">{t("joinThousands")}</p>
+            <p className="text-xl text-muted-foreground text-pretty">{t("cta.joinThousands")}</p>
 
             <Button size="lg" className="glow-primary">
               <Link href="/gallery" className="flex items-center gap-2">
-                {t("startExploring")}
+                {t("cta.startExploring")}
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </Button>

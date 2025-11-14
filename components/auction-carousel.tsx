@@ -72,12 +72,11 @@ export default function AuctionCarousel({ images }: AuctionCarouselProps) {
   useEffect(() => {
     if (images.length <= 1) return
 
-    const rotateInterval = setInterval(() => {
+    // When secondsLeft hits 0, move to next image
+    if (secondsLeft === 0) {
       setCurrentImageIndex((prev) => (prev + 1) % images.length)
-    }, 30000) // 30 seconds
-
-    return () => clearInterval(rotateInterval)
-  }, [images.length])
+    }
+  }, [secondsLeft, images.length])
 
   const handleAuctionClick = (image: AuctionImage, e: React.MouseEvent) => {
     e.preventDefault()

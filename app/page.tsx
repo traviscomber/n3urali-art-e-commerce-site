@@ -3,9 +3,35 @@ import { createClient } from "@/lib/supabase/server"
 import { ClientWrapper } from "./client-wrapper"
 
 export const metadata: Metadata = {
-  title: "n3uralia360.art - Premium 360° Imagery",
+  title: "N3urali.art - Browse Premium AI-Generated 360° Photography Collection",
   description:
-    "Curated collection of premium 360° dome and equirectangular images for VR, projection mapping, and visualization.",
+    "Explore our curated marketplace of ultra high-resolution 360° AI-generated imagery. Equirectangular and fisheye dome images in 4K-16K resolution, created with proprietary noise diffusion algorithms. Perfect for VR experiences, projection mapping, architectural visualization, and immersive digital environments. Commercial licensing available.",
+  keywords: [
+    "buy 360 images",
+    "AI generated 360 photography",
+    "equirectangular images for sale",
+    "VR background images",
+    "dome projection content",
+    "360 photography marketplace",
+    "commercial 360 imagery",
+    "high resolution panoramic images",
+    "360 skybox textures",
+    "immersive environment images",
+  ],
+  openGraph: {
+    title: "Browse Premium 360° AI Photography - N3urali.art",
+    description:
+      "Explore curated collection of ultra high-resolution 360° AI-generated imagery. 4K-16K equirectangular and fisheye dome images for VR, projection mapping, and visualization.",
+    url: "https://n3urali.art",
+    images: [
+      {
+        url: "https://n3urali.art/og-home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "N3urali.art Premium 360° Photography Collection",
+      },
+    ],
+  },
 }
 
 export const revalidate = 300
@@ -46,8 +72,13 @@ export default async function HomePage() {
   if (featuredImages && featuredImages.length > 0) {
     const today = new Date()
     const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000)
-    const imageIndex = dayOfYear % featuredImages.length
-    auctionImages.push(featuredImages[imageIndex])
+    
+    // Get 5 images for auction, rotating daily
+    const auctionCount = Math.min(5, featuredImages.length)
+    for (let i = 0; i < auctionCount; i++) {
+      const imageIndex = (dayOfYear + i) % featuredImages.length
+      auctionImages.push(featuredImages[imageIndex])
+    }
   }
 
   const remainingFeaturedImages = featuredImages?.filter(img => !auctionImages.some(auctionImg => auctionImg.id === img.id)) || []

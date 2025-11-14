@@ -14,6 +14,9 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 const translations = {
   es: {
+    // Language reference for conditional rendering
+    language: "es",
+    
     // Navigation
     "nav.collection": "Colección",
     "nav.gallery": "Galería",
@@ -88,139 +91,40 @@ const translations = {
     "faq.subtitle":
       "Preguntas comunes sobre nuestras imágenes generadas por IA, licencias y especificaciones técnicas.",
 
-    "faq.q1.title": "¿Qué es la fotografía 360° y en qué se diferencia de la fotografía regular?",
+    "faq.q1.title": "¿Qué es la fotografía 360° y cómo se diferencia de las imágenes tradicionales?",
     "faq.q1.answer":
-      "La fotografía 360° captura una vista esférica completa de un entorno, permitiendo a los espectadores mirar en cualquier dirección. A diferencia de la fotografía regular que captura una sola perspectiva, las imágenes 360° proporcionan una experiencia inmersiva donde puedes explorar toda la escena. Nuestras imágenes 360° generadas por IA se crean en formatos equirectangulares y ojo de pez, haciéndolas perfectas para aplicaciones VR, mapeo de proyección y visualización arquitectónica.",
+      "La fotografía 360° captura una vista esférica completa que permite explorar un entorno en todas las direcciones. Ofrecemos formatos equirectangulares (360° x 180°) y ojo de pez, perfectos para experiencias VR, mapeo de proyección dome, y visualización arquitectónica inmersiva. A diferencia de las fotografías planas, nuestras imágenes 360° te permiten sumergirte completamente en mundos digitales con perspectiva espacial total.",
 
-    "faq.q2.title": "¿Cómo pueden las imágenes generadas por IA igualar la calidad de la fotografía profesional?",
+    "faq.q2.title": "¿Cómo crean sus imágenes con Inteligencia Artificial? Explíquenme el proceso técnico.",
     "faq.q2.answer":
-      "Nuestro proceso propietario de generación y mejora por IA crea imágenes que a menudo superan la calidad de la fotografía tradicional. Cada imagen se genera desde cero utilizando herramientas personalizadas, luego se mejora mediante post-procesamiento profesional. Este enfoque nos permite crear escenas únicas con iluminación, composición y detalle perfectos que serían imposibles o extremadamente costosos de capturar con métodos tradicionales. El resultado es una calidad suprema de imágenes en resolución 4K-16K.",
+      "Nuestro proceso propietario combina múltiples técnicas avanzadas de IA desarrolladas internamente. Comenzamos con modelos de difusión de ruido (noise diffusion) que generan imágenes desde la aleatoriedad pura, guiadas por prompts especializados y parámetros técnicos precisos. El proceso de difusión trabaja iterativamente: parte de ruido gaussiano puro y gradualmente lo 'limpia' para revelar estructuras coherentes, similar a cómo una fotografía aparece en un revelado químico tradicional. \n\nNuestros algoritmos propietarios controlan cada paso de este proceso: ajustamos la velocidad de difusión, los niveles de coherencia espacial, y la fidelidad de color para lograr resultados imposibles con métodos tradicionales. Luego aplicamos técnicas de upscaling neuronal para alcanzar resoluciones de hasta 16K, manteniendo detalles fractales perfectos. \n\nFinalmente, cada imagen pasa por post-procesamiento algorítmico: corrección de color procedural, optimización de proyección esférica, y validación de compatibilidad VR. Este pipeline completo toma horas de cómputo por imagen, resultando en calidad suprema que supera fotografía capturada tradicionalmente. Todo el sistema ha sido desarrollado desde cero por el equipo técnico de n3uralia.",
 
-    "faq.q3.title": "¿Qué opciones de licencia están disponibles y cuál debo elegir?",
+    "faq.q3.title": "¿Qué hace únicos sus algoritmos de generación de imágenes?",
     "faq.q3.answer":
-      "Ofrecemos opciones de licencia tanto exclusivas como no exclusivas. Las licencias no exclusivas son perfectas para la mayoría de los proyectos comerciales y permiten que múltiples compradores usen la misma imagen. Las licencias exclusivas te dan derechos exclusivos para usar la imagen, haciéndolas ideales para campañas de marca o proyectos únicos donde la exclusividad es importante. Todas las licencias incluyen derechos de uso comercial para mapeo de proyección, experiencias VR, visualización arquitectónica y creación de contenido digital.",
+      "Hemos desarrollado desde cero algoritmos propietarios que optimizan específicamente para geometría 360° y proyección esférica. Mientras que los modelos de difusión estándar pueden crear distorsiones en los polos de imágenes equirectangulares, nuestros algoritmos compensan matemáticamente estas distorsiones durante la generación. \n\nImplementamos técnicas de coherencia espacial adaptativa que aseguran continuidad perfecta en el horizonte 360°, eliminando costuras visibles. Además, nuestros modelos están entrenados con datasets especializados de geometría fractal y patrones arquitectónicos complejos, permitiendo generar estructuras imposibles de fotografiar en el mundo real. \n\nCada imagen es única: nunca generamos dos veces la misma composición gracias a nuestro sistema de semillas aleatorias controladas y variaciones paramétricas infinitas. Tecnología desarrollada íntegramente por n3uralia.",
 
-    "faq.q4.title": "¿Qué especificaciones técnicas y formatos proporcionan?",
+    "faq.q4.title": "¿Qué especificaciones técnicas y formatos ofrecen?",
     "faq.q4.answer":
-      "Todas las imágenes están disponibles en formatos de alta resolución que van desde 4K hasta 16K. Proporcionamos formatos tanto equirectangulares (360° x 180°) como ojo de pez para garantizar la compatibilidad con varias plataformas VR, sistemas de proyección y aplicaciones de software. Las imágenes se entregan en formatos estándar (JPEG, PNG) con metadatos completos y están optimizadas para uso inmediato en flujos de trabajo profesionales.",
+      "Entregamos imágenes en resoluciones desde 4K (3840×2160) hasta 16K (15360×8640) en formatos equirectangular y fisheye/dome. Todos los archivos incluyen:\n\n• Formatos: JPEG (alta calidad), PNG (sin pérdida), y TIFF bajo pedido\n• Espacios de color: sRGB (estándar) y ProPhoto RGB (profesional)\n• Profundidad: 8-bit estándar, 16-bit para workflows HDR\n• Metadatos XMP completos con información de proyección\n• Compatibilidad verificada con Unity, Unreal Engine, y principales software VR\n\nCada imagen está optimizada para streaming eficiente en experiencias web y rendimiento máximo en headsets VR.",
 
-    "faq.q5.title": "¿Cuáles son los mejores casos de uso para imágenes 360°?",
+    "faq.q5.title": "¿Para qué proyectos son ideales estas imágenes 360°?",
     "faq.q5.answer":
-      "Las imágenes 360° son perfectas para experiencias VR, tours virtuales, instalaciones de mapeo de proyección, visualización arquitectónica, desarrollo de juegos, campañas de marketing inmersivas y contenido educativo. Los creadores de contenido usan nuestras imágenes para videos YouTube 360°, campañas en redes sociales y presentaciones interactivas. Los desarrolladores las integran en aplicaciones VR, juegos y software de simulación. La naturaleza inmersiva las hace ideales para cualquier proyecto que requiera narración ambiental o presencia espacial.",
+      "Nuestras imágenes son perfectas para:\n\n• Experiencias VR y metaverso: Ambientes completos para Oculus, HTC Vive, PlayStation VR\n• Mapping de proyección: Shows visuales en domos planetarios, eventos inmersivos, instalaciones artísticas\n• Arquitectura y real estate: Tours virtuales, visualización de espacios, presentaciones de proyectos\n• Producción audiovisual: Backgrounds para videos 360°, YouTube VR, contenido social inmersivo\n• Gaming y simulación: Skyboxes para juegos, entornos de entrenamiento VR, simuladores profesionales\n• Arte digital: NFTs 360°, galerías virtuales, instalaciones interactivas\n\nLa naturaleza procedural de nuestras imágenes garantiza escenas únicas que no existen en el mundo físico, perfectas para proyectos que buscan diferenciación visual absoluta.",
 
-    "faq.q6.title": "¿Cómo funciona el proceso de descarga y compra?",
+    "faq.q6.title": "¿Cómo funciona el licenciamiento y proceso de compra?",
     "faq.q6.answer":
-      "Navega nuestra galería con vistas previas 360° interactivas, selecciona las imágenes deseadas, elige tu opción de licencia y completa la compra. Las descargas están disponibles inmediatamente después de la confirmación del pago. Recibirás archivos de alta resolución junto con documentación de licencia y especificaciones técnicas. Todas las compras incluyen acceso de por vida para volver a descargar tus archivos, y proporcionamos soporte al cliente para cualquier pregunta técnica sobre la implementación.",
+      "Ofrecemos dos tipos de licencia:\n\n**No Exclusiva:** Múltiples compradores pueden usar la imagen. Ideal para proyectos comerciales estándar, contenido digital, y la mayoría de casos de uso. Incluye derechos perpetuos de uso comercial sin límites de impresiones o visualizaciones.\n\n**Exclusiva:** Derechos únicos para tu proyecto. La imagen se retira permanentemente del mercado. Perfecta para campañas de marca, proyectos flagship, o cuando necesitas garantía de exclusividad visual.\n\nTodas las licencias incluyen uso comercial ilimitado, modificación permitida, y acceso de por vida para re-descargas. Tras la compra, recibes descarga inmediata de archivos full-resolution más documentación técnica y licencia legal. Soporte técnico incluido para implementación en tu proyecto.",
 
-    // Final CTA
-    "cta.final.title": "¿Listo para Transformar Tu",
-    "cta.final.titleHighlight": "Visión Creativa?",
-    "cta.final.subtitle":
-      "Únete a miles de profesionales que confían en n3uralia360.art y el grupo n3uralia para fotografía digital 360° premium y soluciones de imágenes inmersivas.",
-    "cta.final.button": "Comenzar a Explorar",
-
-    // Cart
-    "cart.title": "Carrito de Compras",
-    "cart.empty": "Tu carrito está vacío",
-    "cart.emptySubtext": "Agrega algunas imágenes increíbles a tu carrito",
-    "cart.continueShopping": "Continuar Comprando",
-    "cart.subtotal": "Subtotal",
-    "cart.checkout": "Ir al Pago",
-    "cart.remove": "Eliminar",
-    "cart.addToCart": "Agregar al Carrito",
-
-    // User Menu
-    "user.profile": "Perfil",
-    "user.downloads": "Mis Descargas",
-    "user.orders": "Mis Pedidos",
-    "user.admin": "Panel Admin",
-    "user.signOut": "Cerrar Sesión",
-    "user.signIn": "Iniciar Sesión",
-
-    // Gallery
-    "gallery.title": "Colección Completa",
-    "gallery.subtitle": "Explora nuestro catálogo completo de imágenes profesionales",
-    "gallery.filterByTags": "Filtrar por Etiquetas",
-    "gallery.searchImages": "Buscar imágenes...",
-    "gallery.allCategories": "Todas las Categorías",
-    "gallery.newestFirst": "Más Recientes",
-    "gallery.showing": "Mostrando",
-    "gallery.of": "de",
-    "gallery.images": "imágenes",
-
-    // Footer
-    "footer.description":
-      "Imágenes 360° premium generadas por IA para VR, mapeo de proyección y visualización arquitectónica.",
-    "footer.rights": "Todos los derechos reservados.",
-    "footer.platform": "Parte del grupo n3uralia - Plataforma de imágenes de calidad suprema",
-    "footer.quickLinks": "Enlaces Rápidos",
-    "footer.legal": "Legal",
-    "footer.terms": "Términos de Servicio",
-    "footer.privacy": "Política de Privacidad",
-    "footer.licensing": "Información de Licencias",
-    "footer.contact": "Contacto",
-    "footer.support": "Soporte",
-    "footer.about": "Acerca de",
-
-    premiumCollection: "Colección Premium",
-    curatedImages: "20 Imágenes 360° Seleccionadas",
-    viewCompleteCollection: "Ver Colección Completa",
-    flashAuction: "Subasta Relámpago",
-    catchBestPrices: "Atrapa los Mejores Precios",
-    pricesDropEveryMinute: "Los precios bajan cada minuto hasta el próximo reinicio horario",
-    pricesResetEveryHour: "Los precios se reinician cada hora",
-    imageOfTheDay: "Imagen del Día",
-    premium360Imagery: "Imágenes 360° Premium",
-    experienceQuality: "Experimenta la calidad y detalle de nuestras imágenes profesionales",
-    ultraHighResolution: "Ultra Alta Resolución",
-    "20PercentOffToday": "20% DCTO Hoy",
-    viewDetailsPrice: "Ver Detalles y Precio",
-    "15PercentOff": "15% DCTO",
-    collection: "Colección",
-    completeBundle: "Paquete Completo",
-    viewCollection: "Ver Colección",
-    gallery: "Galería",
-    browseAllImages: "Explorar Todas las Imágenes",
-    premiumImages: "Imágenes Premium",
-    browseGallery: "Explorar Galería",
-    signIn: "Iniciar Sesión",
-    instantDownloadAccess: "Acceso instantáneo a descargas",
-    downloadAccess: "Acceso a descargas",
-    downloadAfterPurchase: "Descarga después de comprar",
-    perfectForImmersive: "Perfecto para experiencias inmersivas",
-    featuredGallery: "Galería Destacada",
-    exploreOurPremium: "Explora Nuestra Colección Premium",
-    browseOurCurated: "Navega nuestra selección curada de imágenes",
-    faq: "Preguntas Frecuentes",
-    everythingYouNeed: "Todo lo que Necesitas Saber",
-    commonQuestions: "Preguntas comunes sobre nuestras imágenes",
-    faqQ1: "¿Qué es la fotografía 360°?",
-    faqA1:
-      "La fotografía 360° captura una vista esférica completa de un entorno, perfecta para VR y mapeo de proyección.",
-    faqQ2: "¿Cómo pueden las imágenes IA igualar la calidad profesional?",
-    faqA2: "Nuestro proceso propietario de IA crea imágenes que superan la fotografía tradicional con calidad suprema.",
-    faqQ3: "¿Qué opciones de licencia están disponibles?",
-    faqA3: "Ofrecemos licencias exclusivas y no exclusivas para diferentes necesidades de proyecto.",
-    faqQ4: "¿Qué especificaciones técnicas proporcionan?",
-    faqA4: "Todas las imágenes están disponibles en formatos de alta resolución de 4K a 16K.",
-    faqQ5: "¿Cuáles son los mejores casos de uso?",
-    faqA5: "Perfecto para experiencias VR, tours virtuales, mapeo de proyección y visualización arquitectónica.",
-    faqQ6: "¿Cómo funciona el proceso de compra?",
-    faqA6: "Las descargas están disponibles inmediatamente después de la confirmación del pago.",
-    readyToTransform: "¿Listo para Transformar Tu",
-    creativeVision: "Visión Creativa?",
-    joinThousands: "Únete a miles de profesionales que confían en n3uralia360.art",
-    startExploring: "Comenzar a Explorar",
-    dailySelection: "Selección Diaria",
-    todaysFeaturedImages: "Imágenes Destacadas de Hoy",
-    handpickedImages: "Imágenes seleccionadas especialmente para ti",
-    noImagesAvailable: "No hay imágenes disponibles",
-    checkBackSoon: "Vuelve pronto para nuevas imágenes",
-    viewDetails: "Ver Detalles",
-    "4Kto16K": "4K a 16K",
-    "360Degrees": "360°",
+    // CTA Final Section
+    "cta.readyToTransform": "¿Listo para Transformar tu",
+    "cta.creativeVision": "Visión Creativa?",
+    "cta.joinThousands": "Únete a miles de creadores que ya usan nuestras imágenes premium",
+    "cta.startExploring": "Comenzar a Explorar",
   },
   en: {
+    // Language reference for conditional rendering
+    language: "en",
+    
     // Navigation
     "nav.collection": "Collection",
     "nav.gallery": "Gallery",
@@ -293,136 +197,35 @@ const translations = {
     "faq.titleHighlight": "360° Digital Photography",
     "faq.subtitle": "Common questions about our AI-generated imagery, licensing, and technical specifications.",
 
-    "faq.q1.title": "What is 360° photography and how is it different from regular photography?",
+    "faq.q1.title": "What is 360° photography and how does it differ from traditional images?",
     "faq.q1.answer":
-      "360° photography captures a complete spherical view of an environment, allowing viewers to look in any direction. Unlike regular photography that captures a single perspective, 360° images provide an immersive experience where you can explore the entire scene. Our AI-generated 360° images are created in equirectangular and fisheye formats, making them perfect for VR applications, projection mapping, and architectural visualization.",
+      "360° photography captures a complete spherical view that allows exploring an environment in all directions. We offer equirectangular (360° x 180°) and fisheye formats, perfect for VR experiences, dome projection mapping, and immersive architectural visualization. Unlike flat photos, our 360° images let you fully immerse in digital worlds with complete spatial perspective.",
 
-    "faq.q2.title": "How can AI-generated images match professional photography quality?",
+    "faq.q2.title": "How do you create your images with Artificial Intelligence? Explain the technical process.",
     "faq.q2.answer":
-      "Our proprietary AI generation and enhancement pipeline creates images that often exceed traditional photography quality. Every image is generated from scratch using custom-built tools, then enhanced through professional post-processing. This approach allows us to create unique scenes with perfect lighting, composition, and detail that would be impossible or extremely expensive to capture with traditional methods. The result is supreme quality 4K-16K resolution imagery.",
+      "Our proprietary pipeline combines multiple advanced AI techniques developed in-house. We start with noise diffusion models that generate images from pure randomness, guided by specialized prompts and precise technical parameters. The diffusion process works iteratively: starting from pure Gaussian noise and gradually 'denoising' it to reveal coherent structures, similar to how a photograph appears in traditional chemical development.\n\nOur proprietary algorithms control every step of this process: we adjust diffusion speed, spatial coherence levels, and color fidelity to achieve results impossible with traditional methods. Then we apply neural upscaling techniques to reach up to 16K resolutions, maintaining perfect fractal details.\n\nFinally, each image undergoes algorithmic post-processing: procedural color correction, spherical projection optimization, and VR compatibility validation. This complete pipeline takes hours of computation per image, resulting in supreme quality that exceeds traditionally captured photography. The entire system has been developed from scratch by the n3uralia technical team.",
 
-    "faq.q3.title": "What licensing options are available and which should I choose?",
+    "faq.q3.title": "What makes your image generation algorithms unique?",
     "faq.q3.answer":
-      "We offer both exclusive and non-exclusive licensing options. Non-exclusive licenses are perfect for most commercial projects and allow multiple buyers to use the same image. Exclusive licenses give you sole rights to use the image, making it ideal for brand campaigns or unique projects where exclusivity is important. All licenses include commercial usage rights for projection mapping, VR experiences, architectural visualization, and digital content creation.",
+      "We have developed proprietary algorithms from scratch that specifically optimize for 360° geometry and spherical projection. While standard diffusion models can create distortions at equirectangular image poles, our algorithms mathematically compensate for these distortions during generation.\n\nWe implement adaptive spatial coherence techniques that ensure perfect continuity across the 360° horizon, eliminating visible seams. Additionally, our models are trained on specialized datasets of fractal geometry and complex architectural patterns, enabling generation of structures impossible to photograph in the real world.\n\nEach image is unique: we never generate the same composition twice thanks to our controlled random seed system and infinite parametric variations. Technology developed entirely by n3uralia.",
 
-    "faq.q4.title": "What technical specifications and formats do you provide?",
+    "faq.q4.title": "What technical specifications and formats do you offer?",
     "faq.q4.answer":
-      "All images are available in high-resolution formats ranging from 4K to 16K resolution. We provide both equirectangular (360° x 180°) and fisheye formats to ensure compatibility with various VR platforms, projection systems, and software applications. Images are delivered in standard formats (JPEG, PNG) with full metadata and are optimized for immediate use in professional workflows.",
+      "We deliver images in resolutions from 4K (3840×2160) up to 16K (15360×8640) in equirectangular and fisheye/dome formats. All files include:\n\n• Formats: JPEG (high quality), PNG (lossless), and TIFF on request\n• Color spaces: sRGB (standard) and ProPhoto RGB (professional)\n• Bit depth: 8-bit standard, 16-bit for HDR workflows\n• Complete XMP metadata with projection information\n• Verified compatibility with Unity, Unreal Engine, and major VR software\n\nEach image is optimized for efficient streaming in web experiences and maximum performance on VR headsets.",
 
-    "faq.q5.title": "What are the best use cases for 360° imagery?",
+    "faq.q5.title": "What projects are these 360° images ideal for?",
     "faq.q5.answer":
-      "360° imagery is perfect for VR experiences, virtual tours, projection mapping installations, architectural visualization, game development, immersive marketing campaigns, and educational content. Content creators use our images for YouTube 360° videos, social media campaigns, and interactive presentations. Developers integrate them into VR applications, games, and simulation software. The immersive nature makes them ideal for any project requiring environmental storytelling or spatial presence.",
+      "Our images are perfect for:\n\n• VR experiences and metaverse: Complete environments for Oculus, HTC Vive, PlayStation VR\n• Projection mapping: Visual shows in planetarium domes, immersive events, artistic installations\n• Architecture and real estate: Virtual tours, space visualization, project presentations\n• Audiovisual production: Backgrounds for 360° videos, YouTube VR, immersive social content\n• Gaming and simulation: Skyboxes for games, VR training environments, professional simulators\n• Digital art: 360° NFTs, virtual galleries, interactive installations\n\nThe procedural nature of our images guarantees unique scenes that don't exist in the physical world, perfect for projects seeking absolute visual differentiation.",
 
-    "faq.q6.title": "How does the download and purchase process work?",
+    "faq.q6.title": "How does licensing and the purchase process work?",
     "faq.q6.answer":
-      "Browse our gallery with interactive 360° previews, select your desired images, choose your licensing option, and complete the purchase. Downloads are available immediately after payment confirmation. You'll receive high-resolution files along with licensing documentation and technical specifications. All purchases include lifetime access to re-download your files, and we provide customer support for any technical questions about implementation.",
+      "We offer two types of licenses:\n\n**Non-Exclusive:** Multiple buyers can use the image. Ideal for standard commercial projects, digital content, and most use cases. Includes perpetual commercial use rights with no limits on prints or views.\n\n**Exclusive:** Unique rights for your project. The image is permanently removed from the market. Perfect for brand campaigns, flagship projects, or when you need guaranteed visual exclusivity.\n\nAll licenses include unlimited commercial use, modification permitted, and lifetime access for re-downloads. After purchase, you receive immediate download of full-resolution files plus technical documentation and legal license. Technical support included for implementation in your project.",
 
-    // Final CTA
-    "cta.final.title": "Ready to Transform Your",
-    "cta.final.titleHighlight": "Creative Vision?",
-    "cta.final.subtitle":
-      "Join thousands of professionals who trust n3uralia360.art and the n3uralia group for premium 360° digital photography and immersive imagery solutions.",
-    "cta.final.button": "Start Exploring",
-
-    // Cart
-    "cart.title": "Shopping Cart",
-    "cart.empty": "Your cart is empty",
-    "cart.emptySubtext": "Add some amazing images to your cart",
-    "cart.continueShopping": "Continue Shopping",
-    "cart.subtotal": "Subtotal",
-    "cart.checkout": "Checkout",
-    "cart.remove": "Remove",
-    "cart.addToCart": "Add to Cart",
-
-    // User Menu
-    "user.profile": "Profile",
-    "user.downloads": "My Downloads",
-    "user.orders": "My Orders",
-    "user.admin": "Admin Dashboard",
-    "user.signOut": "Sign Out",
-    "user.signIn": "Sign In",
-
-    // Gallery
-    "gallery.title": "Complete Collection",
-    "gallery.subtitle": "Browse our entire catalog of professional images",
-    "gallery.filterByTags": "Filter by Tags",
-    "gallery.searchImages": "Search images...",
-    "gallery.allCategories": "All Categories",
-    "gallery.newestFirst": "Newest First",
-    "gallery.showing": "Showing",
-    "gallery.of": "of",
-    "gallery.images": "images",
-
-    // Footer
-    "footer.description":
-      "Premium AI-generated 360° imagery for VR, projection mapping, and architectural visualization.",
-    "footer.rights": "All rights reserved.",
-    "footer.platform": "Part of the n3uralia group - Supreme quality imagery platform",
-    "footer.quickLinks": "Quick Links",
-    "footer.legal": "Legal",
-    "footer.terms": "Terms of Service",
-    "footer.privacy": "Privacy Policy",
-    "footer.licensing": "Licensing Info",
-    "footer.contact": "Contact",
-    "footer.support": "Support",
-    "footer.about": "About",
-
-    premiumCollection: "Premium Collection",
-    curatedImages: "20 Curated 360° Images",
-    viewCompleteCollection: "View Complete Collection",
-    flashAuction: "Flash Auction",
-    catchBestPrices: "Catch the Best Prices",
-    pricesDropEveryMinute: "Prices drop every minute until the next hourly reset",
-    pricesResetEveryHour: "Prices reset every hour",
-    imageOfTheDay: "Image of the Day",
-    premium360Imagery: "Premium 360° Imagery",
-    experienceQuality: "Experience the quality and detail of our professional images",
-    ultraHighResolution: "Ultra High Resolution",
-    "20PercentOffToday": "20% OFF Today",
-    viewDetailsPrice: "View Details & Price",
-    "15PercentOff": "15% OFF",
-    collection: "Collection",
-    completeBundle: "Complete Bundle",
-    viewCollection: "View Collection",
-    gallery: "Gallery",
-    browseAllImages: "Browse All Images",
-    premiumImages: "Premium Images",
-    browseGallery: "Browse Gallery",
-    signIn: "Sign In",
-    instantDownloadAccess: "Instant download access",
-    downloadAccess: "Download Access",
-    downloadAfterPurchase: "Download after purchase",
-    perfectForImmersive: "Perfect for immersive experiences",
-    featuredGallery: "Featured Gallery",
-    exploreOurPremium: "Explore Our Premium Collection",
-    browseOurCurated: "Browse our curated selection of images",
-    faq: "FAQ",
-    everythingYouNeed: "Everything You Need to Know",
-    commonQuestions: "Common questions about our imagery",
-    faqQ1: "What is 360° photography?",
-    faqA1: "360° photography captures a complete spherical view, perfect for VR and projection mapping.",
-    faqQ2: "How can AI images match professional quality?",
-    faqA2: "Our proprietary AI pipeline creates images that exceed traditional photography with supreme quality.",
-    faqQ3: "What licensing options are available?",
-    faqA3: "We offer both exclusive and non-exclusive licenses for different project needs.",
-    faqQ4: "What technical specifications do you provide?",
-    faqA4: "All images are available in high-resolution formats ranging from 4K to 16K.",
-    faqQ5: "What are the best use cases?",
-    faqA5: "Perfect for VR experiences, virtual tours, projection mapping, and architectural visualization.",
-    faqQ6: "How does the purchase process work?",
-    faqA6: "Downloads are available immediately after payment confirmation.",
-    readyToTransform: "Ready to Transform Your",
-    creativeVision: "Creative Vision?",
-    joinThousands: "Join thousands of professionals who trust n3uralia360.art",
-    startExploring: "Start Exploring",
-    dailySelection: "Daily Selection",
-    todaysFeaturedImages: "Today's Featured Images",
-    handpickedImages: "Handpicked images just for you",
-    noImagesAvailable: "No images available",
-    checkBackSoon: "Check back soon for new images",
-    viewDetails: "View Details",
-    "4Kto16K": "4K to 16K",
-    "360Degrees": "360°",
+    // CTA Final Section
+    "cta.readyToTransform": "Ready to Transform Your",
+    "cta.creativeVision": "Creative Vision?",
+    "cta.joinThousands": "Join thousands of creators already using our premium imagery",
+    "cta.startExploring": "Start Exploring",
   },
 }
 

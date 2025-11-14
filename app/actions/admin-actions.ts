@@ -124,15 +124,13 @@ const getCachedImages = unstable_cache(
       const transformedData = (images || [])
         .map((item) => {
           try {
-            const displayUrl = item.file_path
-              ? ImageUrlHandler.convertToDisplayUrl(item.file_path, { useProxy: true })
-              : item.file_path
+            const displayUrl = item.file_path || item.file_path
 
             const imageData = {
               ...item,
               image_url: displayUrl,
               thumbnail_url: displayUrl,
-              file_path: displayUrl, // Ensure file_path also uses proxy URL
+              file_path: displayUrl,
               thumbnail_large_url: item.thumbnail_large_url || displayUrl,
               thumbnail_medium_url: item.thumbnail_medium_url || displayUrl,
               thumbnail_small_url: item.thumbnail_small_url || displayUrl,
@@ -233,15 +231,13 @@ const getCachedImagesPaginated = unstable_cache(
 
       const transformedData =
         images?.map((item) => {
-          const displayUrl = item.file_path
-            ? ImageUrlHandler.convertToDisplayUrl(item.file_path, { useProxy: true })
-            : item.file_path
+          const displayUrl = item.file_path || item.file_path
 
           return {
             ...item,
             image_url: displayUrl,
             thumbnail_url: displayUrl,
-            file_path: displayUrl, // Ensure file_path also uses proxy URL
+            file_path: displayUrl,
             thumbnail_large_url: item.thumbnail_large_url || displayUrl,
             thumbnail_medium_url: item.thumbnail_medium_url || displayUrl,
             thumbnail_small_url: item.thumbnail_small_url || displayUrl,

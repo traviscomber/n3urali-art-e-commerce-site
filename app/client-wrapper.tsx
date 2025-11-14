@@ -54,88 +54,82 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
   return (
     <div className="min-h-screen bg-background">
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Ambient background with subtle gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
+        {/* Ambient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/10" />
         
-        {/* Subtle animated pattern overlay */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_50%)]" />
+        {/* Subtle pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.03]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.3),transparent_50%)]" />
         </div>
 
         <div className="relative container mx-auto px-4 py-20">
           <div className="max-w-7xl mx-auto">
             {/* Hero content */}
-            <div className="text-center space-y-8 mb-16">
-              {/* Badge with Chilean innovation context */}
-              <div className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 rounded-full px-6 py-3 backdrop-blur-sm">
+            <div className="text-center space-y-10 mb-20">
+              {/* Subtle badge */}
+              <div className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 rounded-full px-5 py-2.5 backdrop-blur-sm">
                 <Sparkles className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-primary">
-                  {t("language") === "es" ? "Innovación Chilena en IA" : "Chilean AI Innovation"}
-                </span>
+                <span className="text-sm font-medium text-primary">{t("hero.badge")}</span>
               </div>
 
-              {/* Main headline - large and impactful */}
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.1] text-balance">
-                {t("language") === "es" ? (
-                  <>
-                    Arte Digital Inmersivo
-                    <br />
-                    <span className="text-primary">360° Generado por IA</span>
-                  </>
-                ) : (
-                  <>
-                    Immersive Digital Art
-                    <br />
-                    <span className="text-primary">AI-Generated 360°</span>
-                  </>
-                )}
+              {/* Main headline - elegant and bold */}
+              <h1 className="text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-[0.95] text-balance">
+                {t("hero.title")}
+                <br />
+                <span className="text-primary">{t("hero.subtitle")}</span>
               </h1>
 
-              {/* Subtitle with cultural/technical context */}
-              <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed text-pretty">
-                {t("language") === "es"
-                  ? "Experiencias visuales de ultra alta resolución creadas con algoritmos propietarios de difusión de ruido. Desarrollado íntegramente en Chile como parte del programa nacional de innovación digital."
-                  : "Ultra high-resolution visual experiences created with proprietary noise diffusion algorithms. Entirely developed in Chile as part of the national digital innovation program."}
+              {/* Description - focus on art and uniqueness */}
+              <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed text-pretty font-light">
+                {t("hero.description")}
               </p>
 
               {/* CTA buttons */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
                 <Link href="/gallery">
-                  <Button size="lg" className="text-lg px-8 py-6 h-auto shadow-lg shadow-primary/20">
-                    {t("language") === "es" ? "Explorar Colección" : "Explore Collection"}
+                  <Button size="lg" className="text-lg px-10 py-7 h-auto shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 transition-all">
+                    {t("hero.cta.explore")}
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </Link>
                 <Link href="#featured">
-                  <Button size="lg" variant="outline" className="text-lg px-8 py-6 h-auto bg-transparent">
-                    {t("language") === "es" ? "Ver Demostración" : "View Demo"}
+                  <Button size="lg" variant="outline" className="text-lg px-10 py-7 h-auto bg-background/50 backdrop-blur-sm hover:bg-background/80">
+                    {t("hero.cta.demo")}
                   </Button>
                 </Link>
               </div>
 
-              {/* Technical badges */}
-              <div className="flex flex-wrap items-center justify-center gap-6 pt-8 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                  <span className="font-medium">4K - 16K</span>
+              {/* Technical indicators - minimal and elegant */}
+              <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                  <span className="font-medium">4K – 16K</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                  <span className="font-medium">{t("language") === "es" ? "VR Compatible" : "VR Compatible"}</span>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                  <span className="font-medium">VR Ready</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                  <span className="font-medium">
-                    {t("language") === "es" ? "Descarga Instantánea" : "Instant Download"}
-                  </span>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                  <span className="font-medium">{t("stats.instant")}</span>
                 </div>
               </div>
             </div>
 
-            {/* Featured hero image showcase - if imageOfTheDay exists */}
-            {imageOfTheDay && (
-              <div className="relative group max-w-6xl mx-auto">
-                <div className="relative aspect-[21/9] rounded-3xl overflow-hidden border border-border/50 shadow-2xl">
+            {/* Video/Hero media placeholder */}
+            <div className="relative group max-w-6xl mx-auto">
+              <div className="relative aspect-[21/9] rounded-3xl overflow-hidden border border-border/50 shadow-2xl bg-muted/20">
+                {/* Placeholder for video - can be replaced with actual video element */}
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/20 backdrop-blur-sm">
+                  <div className="text-center space-y-4 p-8">
+                    <div className="text-6xl">🎬</div>
+                    <p className="text-2xl font-semibold text-muted-foreground">{t("hero.videoPlaceholder")}</p>
+                    <p className="text-sm text-muted-foreground/70">Video demostrativo próximamente</p>
+                  </div>
+                </div>
+
+                {/* If imageOfTheDay exists, show it as fallback */}
+                {imageOfTheDay && (
                   <Image
                     src={
                       imageOfTheDay.upscaled_url ||
@@ -145,60 +139,32 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                      || "/placeholder.svg"}
                     alt={imageOfTheDay.title}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700"
                     sizes="(max-width: 1536px) 100vw, 1536px"
                     priority
                   />
+                )}
 
-                  {/* Gradient overlay for better text contrast on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                  {/* Image info overlay - shows on hover */}
-                  <div className="absolute bottom-0 left-0 right-0 p-8 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                    <div className="flex items-end justify-between gap-6 flex-wrap">
-                      <div className="space-y-3 flex-1">
-                        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-sm">
-                          <Sparkles className="w-3 h-3" />
-                          <span>{t("hero.imageOfDay")}</span>
-                        </div>
-                        <h2 className="text-3xl md:text-4xl font-bold leading-tight">{imageOfTheDay.title}</h2>
-                        <div className="flex items-center gap-3">
-                          <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/30">
-                            {imageOfTheDay.image_format}
-                          </Badge>
-                          <span className="text-white/80 text-sm">{t("stats.resolutionNote")}</span>
-                        </div>
-                      </div>
-                      <Link href={`/photo/${imageOfTheDay.id}`}>
-                        <Button size="lg" className="bg-white text-black hover:bg-white/90 shadow-xl">
-                          {t("hero.viewDetails")}
-                          <ArrowRight className="w-4 h-4 ml-2" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Glow effect on hover */}
-                <div className="absolute -inset-6 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 rounded-[2.5rem] blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
+                {/* Subtle hover overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
-            )}
+
+              {/* Glow effect */}
+              <div className="absolute -inset-6 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-[2.5rem] blur-3xl opacity-50 -z-10" />
+            </div>
           </div>
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <div className="flex flex-col items-center gap-2 text-muted-foreground">
-            <span className="text-xs uppercase tracking-wider">
-              {t("language") === "es" ? "Descubre más" : "Discover more"}
-            </span>
-            <div className="w-6 h-10 border-2 border-muted-foreground/30 rounded-full flex items-start justify-center p-2">
-              <div className="w-1 h-2 bg-muted-foreground/50 rounded-full animate-scroll" />
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
+          <div className="flex flex-col items-center gap-2 text-muted-foreground/60 animate-bounce">
+            <div className="w-6 h-10 border-2 border-current rounded-full flex items-start justify-center p-2">
+              <div className="w-1 h-2 bg-current rounded-full animate-scroll" />
             </div>
           </div>
         </div>
       </section>
-      {/* End of new hero section */}
+      {/* End of refined hero section */}
 
       {imageOfTheDay && (
         <section className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden">
@@ -225,7 +191,6 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                       imageOfTheDay.upscaled_url ||
                       imageOfTheDay.original_url ||
                       imageOfTheDay.file_path ||
-                      "/placeholder.svg" ||
                       "/placeholder.svg"
                      || "/placeholder.svg"}
                     alt={imageOfTheDay.title}

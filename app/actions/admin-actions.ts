@@ -98,7 +98,7 @@ const getCachedImages = unstable_cache(
         .from("images")
         .select(`
           id, title, description, price, file_path,
-          thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,
+          thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,upscaled_url,
           is_featured, created_at, updated_at, category_id, license_id, tags, original_file_url,
           image_format, featured_collection
         `)
@@ -124,19 +124,17 @@ const getCachedImages = unstable_cache(
       const transformedData = (images || [])
         .map((item) => {
           try {
-            const displayUrl = item.file_path
-              ? ImageUrlHandler.convertToDisplayUrl(item.file_path, { useProxy: true })
-              : item.file_path
-
             const imageData = {
               ...item,
-              image_url: displayUrl,
-              thumbnail_url: displayUrl,
-              file_path: displayUrl, // Ensure file_path also uses proxy URL
-              thumbnail_large_url: item.thumbnail_large_url || displayUrl,
-              thumbnail_medium_url: item.thumbnail_medium_url || displayUrl,
-              thumbnail_small_url: item.thumbnail_small_url || displayUrl,
-              original_url: item.original_url || displayUrl,
+              // Use the direct URLs from database without conversion
+              image_url: item.upscaled_url || item.original_url || item.file_path,
+              thumbnail_url: item.thumbnail_large_url || item.thumbnail_medium_url || item.file_path,
+              file_path: item.file_path, // Keep original file_path
+              thumbnail_large_url: item.thumbnail_large_url,
+              thumbnail_medium_url: item.thumbnail_medium_url,
+              thumbnail_small_url: item.thumbnail_small_url,
+              original_url: item.original_url,
+              upscaled_url: item.upscaled_url,
               active: true, // Default to active since we don't have this column
               featured: item.is_featured,
               categories: categoryMap.get(item.category_id),
@@ -145,6 +143,11 @@ const getCachedImages = unstable_cache(
               license_name: licenseMap.get(item.license_id)?.name,
               license_description: licenseMap.get(item.license_id)?.description,
             }
+
+            console.log("[v0] Image URL for", item.id, ":", {
+              image_url: imageData.image_url?.substring(0, 50),
+              thumbnail_url: imageData.thumbnail_url?.substring(0, 50),
+            })
 
             // Sanitize all string fields
             return sanitizeImageData(imageData)
@@ -179,7 +182,7 @@ const getCachedImagesPaginated = unstable_cache(
       let query = supabase.from("images").select(
         `
           id, title, description, price, file_path,
-          thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,
+          thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url, upscaled_url,
           is_featured, created_at, updated_at, category_id, license_id, tags, original_file_url,
           image_format, featured_collection
         `,
@@ -233,19 +236,17 @@ const getCachedImagesPaginated = unstable_cache(
 
       const transformedData =
         images?.map((item) => {
-          const displayUrl = item.file_path
-            ? ImageUrlHandler.convertToDisplayUrl(item.file_path, { useProxy: true })
-            : item.file_path
-
           return {
             ...item,
-            image_url: displayUrl,
-            thumbnail_url: displayUrl,
-            file_path: displayUrl, // Ensure file_path also uses proxy URL
-            thumbnail_large_url: item.thumbnail_large_url || displayUrl,
-            thumbnail_medium_url: item.thumbnail_medium_url || displayUrl,
-            thumbnail_small_url: item.thumbnail_small_url || displayUrl,
-            original_url: item.original_url || displayUrl,
+            // Use the direct URLs from database without conversion
+            image_url: item.upscaled_url || item.original_url || item.file_path,
+            thumbnail_url: item.thumbnail_large_url || item.thumbnail_medium_url || item.file_path,
+            file_path: item.file_path, // Keep original file_path
+            thumbnail_large_url: item.thumbnail_large_url,
+            thumbnail_medium_url: item.thumbnail_medium_url,
+            thumbnail_small_url: item.thumbnail_small_url,
+            original_url: item.original_url,
+            upscaled_url: item.upscaled_url,
             active: true, // Default to active since we don't have this column
             featured: item.is_featured,
             categories: categoryMap.get(item.category_id),

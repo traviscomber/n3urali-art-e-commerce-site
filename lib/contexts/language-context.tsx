@@ -14,16 +14,24 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 const translations = {
   es: {
+    // Language reference for conditional rendering
+    language: "es",
+    
     // Navigation
     "nav.collection": "Colección",
     "nav.gallery": "Galería",
     "nav.myOrders": "Mis Pedidos",
 
     // Hero Section
+    "hero.badge": "Preservación Cultural",
+    "hero.title": "Documentación Inmersiva",
+    "hero.subtitle": "de Patrimonio Cultural",
+    "hero.description": "Creamos experiencias visuales 360° para preservar y compartir el legado de pueblos originarios. Nuestro trabajo en Asia combina tecnología de IA con respeto profundo por las tradiciones ancestrales, generando archivos inmersivos de ultra alta resolución para educación y conservación cultural.",
+    "hero.cta.explore": "Ver Proyectos",
+    "hero.cta.demo": "Conocer Nuestro Trabajo",
+    "hero.videoPlaceholder": "[ Video Placeholder - 21:9 ]",
+    
     "hero.imageOfDay": "Imagen del Día",
-    "hero.title": "Imágenes 360°",
-    "hero.titleHighlight": "Premium",
-    "hero.subtitle": "Experimenta la calidad y detalle de nuestras imágenes profesionales generadas por IA",
     "hero.viewDetails": "Ver Detalles y Precio",
     "hero.offToday": "% DCTO Hoy",
 
@@ -38,8 +46,7 @@ const translations = {
     "auction.badge": "⚡ Subasta Rápida",
     "auction.title": "Atrapa los",
     "auction.titleHighlight": "Mejores Precios",
-    "auction.subtitle":
-      "¡Los precios bajan cada minuto! Consigue imágenes premium a precios inmejorables antes de que se reinicien",
+    "auction.subtitle": "¡Los precios bajan cada minuto! Consigue imágenes premium a precios inmejorables antes de que se reinicien",
     "auction.tip": "💡 Los precios se reinician cada hora • Mientras más descuento, mejor el trato",
     "auction.hotDeal": "¡OFERTA CALIENTE!",
     "auction.endsIn": "Termina en",
@@ -82,155 +89,48 @@ const translations = {
     "featured.subtitle": "Navega nuestra selección curada de imágenes domo, equirectangulares y de colección destacada",
 
     // FAQ Section
-    "faq.badge": "Preguntas Frecuentes",
-    "faq.title": "Todo lo que Necesitas Saber Sobre",
-    "faq.titleHighlight": "Fotografía Digital 360°",
-    "faq.subtitle":
-      "Preguntas comunes sobre nuestras imágenes generadas por IA, licencias y especificaciones técnicas.",
+    "faq.badge": "Nuestro Trabajo",
+    "faq.title": "Preservación Cultural a Través de",
+    "faq.titleHighlight": "Tecnología Inmersiva",
+    "faq.subtitle": "Cómo combinamos inteligencia artificial con respeto cultural para documentar y preservar el patrimonio de pueblos originarios.",
 
-    "faq.q1.title": "¿Qué es la fotografía 360° y en qué se diferencia de la fotografía regular?",
-    "faq.q1.answer":
-      "La fotografía 360° captura una vista esférica completa de un entorno, permitiendo a los espectadores mirar en cualquier dirección. A diferencia de la fotografía regular que captura una sola perspectiva, las imágenes 360° proporcionan una experiencia inmersiva donde puedes explorar toda la escena. Nuestras imágenes 360° generadas por IA se crean en formatos equirectangulares y ojo de pez, haciéndolas perfectas para aplicaciones VR, mapeo de proyección y visualización arquitectónica.",
+    "faq.q1.title": "¿Qué es la documentación inmersiva 360° y por qué es importante para el patrimonio cultural?",
+    "faq.q1.answer": "La documentación inmersiva 360° captura espacios y ambientes culturales completos, permitiendo que las futuras generaciones experimenten estos lugares como si estuvieran presentes físicamente. A diferencia de la fotografía tradicional que solo muestra fragmentos, nuestras capturas esféricas preservan la totalidad del contexto espacial, los detalles arquitectónicos, y la atmósfera de sitios culturales.\n\nEsto es especialmente crítico para sitios de pueblos originarios en Asia que enfrentan amenazas de urbanización, cambio climático, o simplemente el paso del tiempo. Nuestras imágenes equirectangulares permiten crear archivos digitales permanentes que pueden usarse para educación, investigación académica, y experiencias de realidad virtual que acercan estas culturas a personas de todo el mundo sin el impacto del turismo masivo.",
 
-    "faq.q2.title": "¿Cómo pueden las imágenes generadas por IA igualar la calidad de la fotografía profesional?",
-    "faq.q2.answer":
-      "Nuestro proceso propietario de generación y mejora por IA crea imágenes que a menudo superan la calidad de la fotografía tradicional. Cada imagen se genera desde cero utilizando herramientas personalizadas, luego se mejora mediante post-procesamiento profesional. Este enfoque nos permite crear escenas únicas con iluminación, composición y detalle perfectos que serían imposibles o extremadamente costosos de capturar con métodos tradicionales. El resultado es una calidad suprema de imágenes en resolución 4K-16K.",
+    "faq.q2.title": "¿Cómo utilizan la inteligencia artificial en sus proyectos de preservación cultural?",
+    "faq.q2.answer": "Nuestro enfoque combina captura fotográfica real con técnicas de IA para restauración, reconstrucción y mejora de calidad. Utilizamos algoritmos de difusión de ruido para generar reconstrucciones de alta fidelidad de espacios dañados o parcialmente perdidos, guiados siempre por documentación histórica auténtica y consulta con las comunidades locales.\n\nPara sitios bien preservados, empleamos upscaling neuronal y corrección de color algorítmica para crear archivos de hasta 16K de resolución desde capturas originales, revelando detalles imperceptibles a simple vista. En proyectos con pueblos originarios en Asia, hemos trabajado documentando templos ancestrales, sitios ceremoniales, y espacios comunitarios, siempre con pleno consentimiento y participación de las comunidades.\n\nNuestra tecnología también permite crear reconstrucciones de sitios históricos basadas en descripciones orales y memorias comunitarias, dando forma visual a patrimonio intangible que de otra forma se perdería.",
 
-    "faq.q3.title": "¿Qué opciones de licencia están disponibles y cuál debo elegir?",
-    "faq.q3.answer":
-      "Ofrecemos opciones de licencia tanto exclusivas como no exclusivas. Las licencias no exclusivas son perfectas para la mayoría de los proyectos comerciales y permiten que múltiples compradores usen la misma imagen. Las licencias exclusivas te dan derechos exclusivos para usar la imagen, haciéndolas ideales para campañas de marca o proyectos únicos donde la exclusividad es importante. Todas las licencias incluyen derechos de uso comercial para mapeo de proyección, experiencias VR, visualización arquitectónica y creación de contenido digital.",
+    "faq.q3.title": "¿Cómo garantizan el respeto cultural en su trabajo con pueblos originarios?",
+    "faq.q3.answer": "El respeto cultural es nuestro principio fundamental. Cada proyecto comienza con diálogo extenso con las comunidades, obteniendo permisos explícitos no solo para la captura, sino también para el uso y distribución de las imágenes. Reconocemos que muchos espacios tienen significado sagrado o restricciones culturales sobre quién puede acceder a ellos.\n\nEn nuestro trabajo en Asia, hemos establecido protocolos que incluyen: consulta con líderes comunitarios y autoridades culturales, capacitación de miembros locales en las técnicas de captura para que sean ellos quienes documenten sus propios espacios cuando sea apropiado, acuerdos de propiedad intelectual que reconocen los derechos de las comunidades sobre su patrimonio, y retorno de beneficios económicos a las comunidades cuando el material se comercializa.\n\nNuestras imágenes nunca se publican sin aprobación explícita, y respetamos restricciones sobre acceso a espacios sagrados o ceremoniales. La tecnología es solo una herramienta; el conocimiento y la decisión siempre permanecen en manos de las comunidades.",
 
-    "faq.q4.title": "¿Qué especificaciones técnicas y formatos proporcionan?",
-    "faq.q4.answer":
-      "Todas las imágenes están disponibles en formatos de alta resolución que van desde 4K hasta 16K. Proporcionamos formatos tanto equirectangulares (360° x 180°) como ojo de pez para garantizar la compatibilidad con varias plataformas VR, sistemas de proyección y aplicaciones de software. Las imágenes se entregan en formatos estándar (JPEG, PNG) con metadatos completos y están optimizadas para uso inmediato en flujos de trabajo profesionales.",
+    "faq.q4.title": "¿Qué especificaciones técnicas manejan para archivos de preservación cultural?",
+    "faq.q4.answer": "Para trabajos de preservación cultural, utilizamos los más altos estándares técnicos para garantizar longevidad y fidelidad de los archivos:\n\n• Resoluciones desde 8K (7680×4320) hasta 16K (15360×8640) en formato equirectangular\n• Archivos RAW sin compresión para máxima fidelidad\n• Profundidad de color de 16-bit para capturar rangos dinámicos completos\n• Metadatos exhaustivos incluyendo coordenadas GPS, fecha, condiciones de captura, y contexto cultural\n• Múltiples copias en formatos de archivo abiertos (TIFF, PNG) para evitar obsolescencia tecnológica\n• Documentación complementaria con información contextual, histórica y cultural\n\nTodos los archivos cumplen con estándares internacionales de preservación digital establecidos por UNESCO y bibliotecas nacionales. Trabajamos con instituciones académicas para asegurar que estos archivos puedan ser accedidos por investigadores durante décadas.",
 
-    "faq.q5.title": "¿Cuáles son los mejores casos de uso para imágenes 360°?",
-    "faq.q5.answer":
-      "Las imágenes 360° son perfectas para experiencias VR, tours virtuales, instalaciones de mapeo de proyección, visualización arquitectónica, desarrollo de juegos, campañas de marketing inmersivas y contenido educativo. Los creadores de contenido usan nuestras imágenes para videos YouTube 360°, campañas en redes sociales y presentaciones interactivas. Los desarrolladores las integran en aplicaciones VR, juegos y software de simulación. La naturaleza inmersiva las hace ideales para cualquier proyecto que requiera narración ambiental o presencia espacial.",
+    "faq.q5.title": "¿Qué proyectos han desarrollado con pueblos originarios en Asia?",
+    "faq.q5.answer": "Hemos colaborado con diversas comunidades en proyectos de documentación y preservación:\n\n• Templos ancestrales: Documentación 360° de arquitectura religiosa tradicional en riesgo, incluyendo detalles de tallado en madera, murales, y espacios ceremoniales\n• Sitios ceremoniales naturales: Captura de espacios sagrados en bosques y montañas, preservando tanto el entorno natural como el significado cultural\n• Reconstrucciones digitales: Recreación de espacios históricos perdidos basados en memoria oral y documentos ancestrales, trabajando estrechamente con ancianos de las comunidades\n• Educación cultural: Desarrollo de experiencias VR para escuelas locales que enseñan a las nuevas generaciones sobre sus propias tradiciones en formatos accesibles y atractivos\n\nCada proyecto es único y adaptado a las necesidades específicas de cada comunidad. Nuestro objetivo no es solo crear archivos estáticos, sino herramientas vivas que las comunidades puedan usar para educación, turismo cultural sostenible, y fortalecimiento de identidad.",
 
-    "faq.q6.title": "¿Cómo funciona el proceso de descarga y compra?",
-    "faq.q6.answer":
-      "Navega nuestra galería con vistas previas 360° interactivas, selecciona las imágenes deseadas, elige tu opción de licencia y completa la compra. Las descargas están disponibles inmediatamente después de la confirmación del pago. Recibirás archivos de alta resolución junto con documentación de licencia y especificaciones técnicas. Todas las compras incluyen acceso de por vida para volver a descargar tus archivos, y proporcionamos soporte al cliente para cualquier pregunta técnica sobre la implementación.",
-
-    // Final CTA
-    "cta.final.title": "¿Listo para Transformar Tu",
-    "cta.final.titleHighlight": "Visión Creativa?",
-    "cta.final.subtitle":
-      "Únete a miles de profesionales que confían en n3uralia360.art y el grupo n3uralia para fotografía digital 360° premium y soluciones de imágenes inmersivas.",
-    "cta.final.button": "Comenzar a Explorar",
-
-    // Cart
-    "cart.title": "Carrito de Compras",
-    "cart.empty": "Tu carrito está vacío",
-    "cart.emptySubtext": "Agrega algunas imágenes increíbles a tu carrito",
-    "cart.continueShopping": "Continuar Comprando",
-    "cart.subtotal": "Subtotal",
-    "cart.checkout": "Ir al Pago",
-    "cart.remove": "Eliminar",
-    "cart.addToCart": "Agregar al Carrito",
-
-    // User Menu
-    "user.profile": "Perfil",
-    "user.downloads": "Mis Descargas",
-    "user.orders": "Mis Pedidos",
-    "user.admin": "Panel Admin",
-    "user.signOut": "Cerrar Sesión",
-    "user.signIn": "Iniciar Sesión",
-
-    // Gallery
-    "gallery.title": "Colección Completa",
-    "gallery.subtitle": "Explora nuestro catálogo completo de imágenes profesionales",
-    "gallery.filterByTags": "Filtrar por Etiquetas",
-    "gallery.searchImages": "Buscar imágenes...",
-    "gallery.allCategories": "Todas las Categorías",
-    "gallery.newestFirst": "Más Recientes",
-    "gallery.showing": "Mostrando",
-    "gallery.of": "de",
-    "gallery.images": "imágenes",
-
-    // Footer
-    "footer.description":
-      "Imágenes 360° premium generadas por IA para VR, mapeo de proyección y visualización arquitectónica.",
-    "footer.rights": "Todos los derechos reservados.",
-    "footer.platform": "Parte del grupo n3uralia - Plataforma de imágenes de calidad suprema",
-    "footer.quickLinks": "Enlaces Rápidos",
-    "footer.legal": "Legal",
-    "footer.terms": "Términos de Servicio",
-    "footer.privacy": "Política de Privacidad",
-    "footer.licensing": "Información de Licencias",
-    "footer.contact": "Contacto",
-    "footer.support": "Soporte",
-    "footer.about": "Acerca de",
-
-    premiumCollection: "Colección Premium",
-    curatedImages: "20 Imágenes 360° Seleccionadas",
-    viewCompleteCollection: "Ver Colección Completa",
-    flashAuction: "Subasta Relámpago",
-    catchBestPrices: "Atrapa los Mejores Precios",
-    pricesDropEveryMinute: "Los precios bajan cada minuto hasta el próximo reinicio horario",
-    pricesResetEveryHour: "Los precios se reinician cada hora",
-    imageOfTheDay: "Imagen del Día",
-    premium360Imagery: "Imágenes 360° Premium",
-    experienceQuality: "Experimenta la calidad y detalle de nuestras imágenes profesionales",
-    ultraHighResolution: "Ultra Alta Resolución",
-    "20PercentOffToday": "20% DCTO Hoy",
-    viewDetailsPrice: "Ver Detalles y Precio",
-    "15PercentOff": "15% DCTO",
-    collection: "Colección",
-    completeBundle: "Paquete Completo",
-    viewCollection: "Ver Colección",
-    gallery: "Galería",
-    browseAllImages: "Explorar Todas las Imágenes",
-    premiumImages: "Imágenes Premium",
-    browseGallery: "Explorar Galería",
-    signIn: "Iniciar Sesión",
-    instantDownloadAccess: "Acceso instantáneo a descargas",
-    downloadAccess: "Acceso a descargas",
-    downloadAfterPurchase: "Descarga después de comprar",
-    perfectForImmersive: "Perfecto para experiencias inmersivas",
-    featuredGallery: "Galería Destacada",
-    exploreOurPremium: "Explora Nuestra Colección Premium",
-    browseOurCurated: "Navega nuestra selección curada de imágenes",
-    faq: "Preguntas Frecuentes",
-    everythingYouNeed: "Todo lo que Necesitas Saber",
-    commonQuestions: "Preguntas comunes sobre nuestras imágenes",
-    faqQ1: "¿Qué es la fotografía 360°?",
-    faqA1:
-      "La fotografía 360° captura una vista esférica completa de un entorno, perfecta para VR y mapeo de proyección.",
-    faqQ2: "¿Cómo pueden las imágenes IA igualar la calidad profesional?",
-    faqA2: "Nuestro proceso propietario de IA crea imágenes que superan la fotografía tradicional con calidad suprema.",
-    faqQ3: "¿Qué opciones de licencia están disponibles?",
-    faqA3: "Ofrecemos licencias exclusivas y no exclusivas para diferentes necesidades de proyecto.",
-    faqQ4: "¿Qué especificaciones técnicas proporcionan?",
-    faqA4: "Todas las imágenes están disponibles en formatos de alta resolución de 4K a 16K.",
-    faqQ5: "¿Cuáles son los mejores casos de uso?",
-    faqA5: "Perfecto para experiencias VR, tours virtuales, mapeo de proyección y visualización arquitectónica.",
-    faqQ6: "¿Cómo funciona el proceso de compra?",
-    faqA6: "Las descargas están disponibles inmediatamente después de la confirmación del pago.",
-    readyToTransform: "¿Listo para Transformar Tu",
-    creativeVision: "Visión Creativa?",
-    joinThousands: "Únete a miles de profesionales que confían en n3uralia360.art",
-    startExploring: "Comenzar a Explorar",
-    dailySelection: "Selección Diaria",
-    todaysFeaturedImages: "Imágenes Destacadas de Hoy",
-    handpickedImages: "Imágenes seleccionadas especialmente para ti",
-    noImagesAvailable: "No hay imágenes disponibles",
-    checkBackSoon: "Vuelve pronto para nuevas imágenes",
-    viewDetails: "Ver Detalles",
-    "4Kto16K": "4K a 16K",
-    "360Degrees": "360°",
+    "faq.q6.title": "¿Cómo pueden las instituciones culturales y educativas acceder a este material?",
+    "faq.q6.answer": "Trabajamos con múltiples modelos según el proyecto:\n\n**Instituciones educativas y académicas:** Acceso gratuito o de bajo costo para investigación, educación y preservación. Buscamos maximizar el impacto educativo mientras respetamos los acuerdos con las comunidades.\n\n**Museos y centros culturales:** Licencias especiales para exhibiciones, tanto físicas (proyecciones dome, instalaciones inmersivas) como virtuales. Estos proyectos incluyen material contextual y colaboración con las comunidades originarias.\n\n**Proyectos comerciales éticos:** Para documentales, producciones educativas o experiencias turísticas virtuales, ofrecemos licencias que incluyen porcentaje de beneficios que retorna directamente a las comunidades.\n\nCada caso se evalúa individualmente, priorizando siempre el respeto cultural y el beneficio para las comunidades originarias. Contacta con nosotros para discutir proyectos específicos. Las comunidades siempre tienen derecho de veto sobre el uso de imágenes de su patrimonio.",
   },
   en: {
+    // Language reference for conditional rendering
+    language: "en",
+    
     // Navigation
     "nav.collection": "Collection",
     "nav.gallery": "Gallery",
     "nav.myOrders": "My Orders",
 
     // Hero Section
+    "hero.badge": "Cultural Preservation",
+    "hero.title": "Immersive Documentation",
+    "hero.subtitle": "of Cultural Heritage",
+    "hero.description": "We create 360° visual experiences to preserve and share the legacy of indigenous peoples. Our work in Asia combines AI technology with deep respect for ancestral traditions, generating ultra-high resolution immersive archives for education and cultural conservation.",
+    "hero.cta.explore": "View Projects",
+    "hero.cta.demo": "Learn About Our Work",
+    "hero.videoPlaceholder": "[ Video Placeholder - 21:9 ]",
+    
     "hero.imageOfDay": "Image of the Day",
-    "hero.title": "Premium 360°",
-    "hero.titleHighlight": "Imagery",
-    "hero.subtitle": "Experience the quality and detail of our professional AI-generated imagery",
     "hero.viewDetails": "View Details & Price",
     "hero.offToday": "% OFF Today",
 
@@ -288,141 +188,28 @@ const translations = {
     "featured.subtitle": "Browse our curated selection of dome, equirectangular, and featured collection images",
 
     // FAQ Section
-    "faq.badge": "Frequently Asked Questions",
-    "faq.title": "Everything You Need to Know About",
-    "faq.titleHighlight": "360° Digital Photography",
-    "faq.subtitle": "Common questions about our AI-generated imagery, licensing, and technical specifications.",
+    "faq.badge": "Our Work",
+    "faq.title": "Cultural Preservation Through",
+    "faq.titleHighlight": "Immersive Technology",
+    "faq.subtitle": "How we combine artificial intelligence with cultural respect to document and preserve the heritage of indigenous peoples.",
 
-    "faq.q1.title": "What is 360° photography and how is it different from regular photography?",
-    "faq.q1.answer":
-      "360° photography captures a complete spherical view of an environment, allowing viewers to look in any direction. Unlike regular photography that captures a single perspective, 360° images provide an immersive experience where you can explore the entire scene. Our AI-generated 360° images are created in equirectangular and fisheye formats, making them perfect for VR applications, projection mapping, and architectural visualization.",
+    "faq.q1.title": "What is 360° immersive documentation and why is it important for cultural heritage?",
+    "faq.q1.answer": "360° immersive documentation captures complete cultural spaces and environments, allowing future generations to experience these places as if physically present. Unlike traditional photography that only shows fragments, our spherical captures preserve the totality of spatial context, architectural details, and atmosphere of cultural sites.\n\nThis is especially critical for indigenous sites in Asia facing threats from urbanization, climate change, or simply the passage of time. Our equirectangular images allow creating permanent digital archives that can be used for education, academic research, and virtual reality experiences that bring these cultures closer to people worldwide without the impact of mass tourism.",
 
-    "faq.q2.title": "How can AI-generated images match professional photography quality?",
-    "faq.q2.answer":
-      "Our proprietary AI generation and enhancement pipeline creates images that often exceed traditional photography quality. Every image is generated from scratch using custom-built tools, then enhanced through professional post-processing. This approach allows us to create unique scenes with perfect lighting, composition, and detail that would be impossible or extremely expensive to capture with traditional methods. The result is supreme quality 4K-16K resolution imagery.",
+    "faq.q2.title": "How do you use artificial intelligence in your cultural preservation projects?",
+    "faq.q2.answer": "Our approach combines real photographic capture with AI techniques for restoration, reconstruction, and quality enhancement. We use noise diffusion algorithms to generate high-fidelity reconstructions of damaged or partially lost spaces, always guided by authentic historical documentation and consultation with local communities.\n\nFor well-preserved sites, we employ neural upscaling and algorithmic color correction to create files up to 16K resolution from original captures, revealing details imperceptible to the naked eye. In projects with indigenous peoples in Asia, we have documented ancestral temples, ceremonial sites, and community spaces, always with full consent and participation from the communities.\n\nOur technology also enables creating reconstructions of historical sites based on oral descriptions and community memories, giving visual form to intangible heritage that would otherwise be lost.",
 
-    "faq.q3.title": "What licensing options are available and which should I choose?",
-    "faq.q3.answer":
-      "We offer both exclusive and non-exclusive licensing options. Non-exclusive licenses are perfect for most commercial projects and allow multiple buyers to use the same image. Exclusive licenses give you sole rights to use the image, making it ideal for brand campaigns or unique projects where exclusivity is important. All licenses include commercial usage rights for projection mapping, VR experiences, architectural visualization, and digital content creation.",
+    "faq.q3.title": "How do you ensure cultural respect in your work with indigenous peoples?",
+    "faq.q3.answer": "Cultural respect is our fundamental principle. Each project begins with extensive dialogue with communities, obtaining explicit permissions not only for capture, but also for use and distribution of images. We recognize that many spaces have sacred meaning or cultural restrictions on who can access them.\n\nIn our work in Asia, we have established protocols including: consultation with community leaders and cultural authorities, training of local members in capture techniques so they can document their own spaces when appropriate, intellectual property agreements recognizing communities' rights over their heritage, and return of economic benefits to communities when material is commercialized.\n\nOur images are never published without explicit approval, and we respect restrictions on access to sacred or ceremonial spaces. Technology is just a tool; knowledge and decision-making always remain in the hands of the communities.",
 
-    "faq.q4.title": "What technical specifications and formats do you provide?",
-    "faq.q4.answer":
-      "All images are available in high-resolution formats ranging from 4K to 16K resolution. We provide both equirectangular (360° x 180°) and fisheye formats to ensure compatibility with various VR platforms, projection systems, and software applications. Images are delivered in standard formats (JPEG, PNG) with full metadata and are optimized for immediate use in professional workflows.",
+    "faq.q4.title": "What technical specifications do you handle for cultural preservation files?",
+    "faq.q4.answer": "For cultural preservation work, we use the highest technical standards to ensure longevity and fidelity of files:\n\n• Resolutions from 8K (7680×4320) up to 16K (15360×8640) in equirectangular format\n• Uncompressed RAW files for maximum fidelity\n• 16-bit color depth to capture complete dynamic ranges\n• Exhaustive metadata including GPS coordinates, date, capture conditions, and cultural context\n• Multiple copies in open file formats (TIFF, PNG) to avoid technological obsolescence\n• Complementary documentation with contextual, historical, and cultural information\n\nAll files comply with international digital preservation standards established by UNESCO and national libraries. We work with academic institutions to ensure these files can be accessed by researchers for decades.",
 
-    "faq.q5.title": "What are the best use cases for 360° imagery?",
-    "faq.q5.answer":
-      "360° imagery is perfect for VR experiences, virtual tours, projection mapping installations, architectural visualization, game development, immersive marketing campaigns, and educational content. Content creators use our images for YouTube 360° videos, social media campaigns, and interactive presentations. Developers integrate them into VR applications, games, and simulation software. The immersive nature makes them ideal for any project requiring environmental storytelling or spatial presence.",
+    "faq.q5.title": "What projects have you developed with indigenous peoples in Asia?",
+    "faq.q5.answer": "We have collaborated with various communities on documentation and preservation projects:\n\n• Ancestral temples: 360° documentation of traditional religious architecture at risk, including details of wood carvings, murals, and ceremonial spaces\n• Natural ceremonial sites: Capture of sacred spaces in forests and mountains, preserving both the natural environment and cultural significance\n• Digital reconstructions: Recreation of lost historical spaces based on oral memory and ancestral documents, working closely with community elders\n• Cultural education: Development of VR experiences for local schools that teach new generations about their own traditions in accessible and engaging formats\n\nEach project is unique and adapted to the specific needs of each community. Our goal is not just to create static archives, but living tools that communities can use for education, sustainable cultural tourism, and identity strengthening.",
 
-    "faq.q6.title": "How does the download and purchase process work?",
-    "faq.q6.answer":
-      "Browse our gallery with interactive 360° previews, select your desired images, choose your licensing option, and complete the purchase. Downloads are available immediately after payment confirmation. You'll receive high-resolution files along with licensing documentation and technical specifications. All purchases include lifetime access to re-download your files, and we provide customer support for any technical questions about implementation.",
-
-    // Final CTA
-    "cta.final.title": "Ready to Transform Your",
-    "cta.final.titleHighlight": "Creative Vision?",
-    "cta.final.subtitle":
-      "Join thousands of professionals who trust n3uralia360.art and the n3uralia group for premium 360° digital photography and immersive imagery solutions.",
-    "cta.final.button": "Start Exploring",
-
-    // Cart
-    "cart.title": "Shopping Cart",
-    "cart.empty": "Your cart is empty",
-    "cart.emptySubtext": "Add some amazing images to your cart",
-    "cart.continueShopping": "Continue Shopping",
-    "cart.subtotal": "Subtotal",
-    "cart.checkout": "Checkout",
-    "cart.remove": "Remove",
-    "cart.addToCart": "Add to Cart",
-
-    // User Menu
-    "user.profile": "Profile",
-    "user.downloads": "My Downloads",
-    "user.orders": "My Orders",
-    "user.admin": "Admin Dashboard",
-    "user.signOut": "Sign Out",
-    "user.signIn": "Sign In",
-
-    // Gallery
-    "gallery.title": "Complete Collection",
-    "gallery.subtitle": "Browse our entire catalog of professional images",
-    "gallery.filterByTags": "Filter by Tags",
-    "gallery.searchImages": "Search images...",
-    "gallery.allCategories": "All Categories",
-    "gallery.newestFirst": "Newest First",
-    "gallery.showing": "Showing",
-    "gallery.of": "of",
-    "gallery.images": "images",
-
-    // Footer
-    "footer.description":
-      "Premium AI-generated 360° imagery for VR, projection mapping, and architectural visualization.",
-    "footer.rights": "All rights reserved.",
-    "footer.platform": "Part of the n3uralia group - Supreme quality imagery platform",
-    "footer.quickLinks": "Quick Links",
-    "footer.legal": "Legal",
-    "footer.terms": "Terms of Service",
-    "footer.privacy": "Privacy Policy",
-    "footer.licensing": "Licensing Info",
-    "footer.contact": "Contact",
-    "footer.support": "Support",
-    "footer.about": "About",
-
-    premiumCollection: "Premium Collection",
-    curatedImages: "20 Curated 360° Images",
-    viewCompleteCollection: "View Complete Collection",
-    flashAuction: "Flash Auction",
-    catchBestPrices: "Catch the Best Prices",
-    pricesDropEveryMinute: "Prices drop every minute until the next hourly reset",
-    pricesResetEveryHour: "Prices reset every hour",
-    imageOfTheDay: "Image of the Day",
-    premium360Imagery: "Premium 360° Imagery",
-    experienceQuality: "Experience the quality and detail of our professional images",
-    ultraHighResolution: "Ultra High Resolution",
-    "20PercentOffToday": "20% OFF Today",
-    viewDetailsPrice: "View Details & Price",
-    "15PercentOff": "15% OFF",
-    collection: "Collection",
-    completeBundle: "Complete Bundle",
-    viewCollection: "View Collection",
-    gallery: "Gallery",
-    browseAllImages: "Browse All Images",
-    premiumImages: "Premium Images",
-    browseGallery: "Browse Gallery",
-    signIn: "Sign In",
-    instantDownloadAccess: "Instant download access",
-    downloadAccess: "Download Access",
-    downloadAfterPurchase: "Download after purchase",
-    perfectForImmersive: "Perfect for immersive experiences",
-    featuredGallery: "Featured Gallery",
-    exploreOurPremium: "Explore Our Premium Collection",
-    browseOurCurated: "Browse our curated selection of images",
-    faq: "FAQ",
-    everythingYouNeed: "Everything You Need to Know",
-    commonQuestions: "Common questions about our imagery",
-    faqQ1: "What is 360° photography?",
-    faqA1: "360° photography captures a complete spherical view, perfect for VR and projection mapping.",
-    faqQ2: "How can AI images match professional quality?",
-    faqA2: "Our proprietary AI pipeline creates images that exceed traditional photography with supreme quality.",
-    faqQ3: "What licensing options are available?",
-    faqA3: "We offer both exclusive and non-exclusive licenses for different project needs.",
-    faqQ4: "What technical specifications do you provide?",
-    faqA4: "All images are available in high-resolution formats ranging from 4K to 16K.",
-    faqQ5: "What are the best use cases?",
-    faqA5: "Perfect for VR experiences, virtual tours, projection mapping, and architectural visualization.",
-    faqQ6: "How does the purchase process work?",
-    faqA6: "Downloads are available immediately after payment confirmation.",
-    readyToTransform: "Ready to Transform Your",
-    creativeVision: "Creative Vision?",
-    joinThousands: "Join thousands of professionals who trust n3uralia360.art",
-    startExploring: "Start Exploring",
-    dailySelection: "Daily Selection",
-    todaysFeaturedImages: "Today's Featured Images",
-    handpickedImages: "Handpicked images just for you",
-    noImagesAvailable: "No images available",
-    checkBackSoon: "Check back soon for new images",
-    viewDetails: "View Details",
-    "4Kto16K": "4K to 16K",
-    "360Degrees": "360°",
+    "faq.q6.title": "How can cultural and educational institutions access this material?",
+    "faq.q6.answer": "We work with multiple models depending on the project:\n\n**Educational and academic institutions:** Free or low-cost access for research, education, and preservation. We seek to maximize educational impact while respecting agreements with communities.\n\n**Museums and cultural centers:** Special licenses for exhibitions, both physical (dome projections, immersive installations) and virtual. These projects include contextual material and collaboration with indigenous communities.\n\n**Ethical commercial projects:** For documentaries, educational productions, or virtual tourism experiences, we offer licenses that include percentage of benefits returning directly to communities.\n\nEach case is evaluated individually, always prioritizing cultural respect and benefit for indigenous communities. Contact us to discuss specific projects. Communities always have veto rights over the use of images of their heritage.",
   },
 }
 

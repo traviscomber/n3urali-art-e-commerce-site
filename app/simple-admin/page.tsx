@@ -11,29 +11,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
-import {
-  Loader2,
-  Upload,
-  Eye,
-  Trash2,
-  Database,
-  BarChart3,
-  Crown,
-  Edit2,
-  Check,
-  X,
-  HardDrive,
-  Tag,
-  Tags,
-  FileText,
-  Calendar,
-  DollarSign,
-} from "lucide-react"
+import { Loader2, Upload, Eye, Trash2, Database, BarChart3, Crown, Edit2, Check, X, HardDrive, Tag, Tags, FileText, Calendar, DollarSign } from 'lucide-react'
 import { TagManagementDashboard } from "@/components/admin/tag-management-dashboard"
 import { FeaturedGalleryManager } from "@/components/admin/featured-gallery-manager"
 import { CollectionsManager } from "@/components/admin/collections-manager" // Added for Collections tab
 import { PaymentsManager } from "@/components/admin/payments-manager" // Added for Payments tab
 import { SalesAnalyticsDashboard } from "@/components/admin/sales-analytics-dashboard" // Added import for Sales Analytics
+import { BackblazeUrlManager } from "@/components/admin/backblaze-url-manager" // Added import for BackblazeUrlManager
 
 interface Image {
   id: string
@@ -898,7 +882,7 @@ export default function SimpleAdminPage() {
         )}
 
         <Tabs defaultValue="images" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             {" "}
             <TabsTrigger value="images" className="flex items-center gap-2">
               <Eye className="h-4 w-4" />
@@ -916,12 +900,14 @@ export default function SimpleAdminPage() {
               <Upload className="h-4 w-4" />
               Upload Images
             </TabsTrigger>
-            {/* New Tab Trigger for Collections */}
+            <TabsTrigger value="backblaze" className="flex items-center gap-2">
+              <HardDrive className="h-4 w-4" />
+              Backblaze URLs
+            </TabsTrigger>
             <TabsTrigger value="collections" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               Collections
             </TabsTrigger>
-            {/* New Tab Trigger for Payments */}
             <TabsTrigger value="payments" className="flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
               Payments
@@ -970,9 +956,8 @@ export default function SimpleAdminPage() {
                               "/placeholder.svg" ||
                               "/placeholder.svg" ||
                               "/placeholder.svg" ||
-                              "/placeholder.svg" ||
                               "/placeholder.svg"
-                            }
+                             || "/placeholder.svg"}
                             alt={image.title}
                             className="w-16 h-16 object-cover rounded"
                             crossOrigin="anonymous"
@@ -1421,6 +1406,10 @@ export default function SimpleAdminPage() {
           {/* New Tab Content for Payments */}
           <TabsContent value="payments" className="space-y-6">
             <PaymentsManager />
+          </TabsContent>
+
+          <TabsContent value="backblaze" className="space-y-6">
+            <BackblazeUrlManager />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">

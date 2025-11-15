@@ -3,11 +3,11 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { useParams, useRouter, useSearchParams } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Download, ShoppingCart, Eye, Crown, RotateCcw, Zap, Clock } from "lucide-react"
+import { ArrowLeft, Download, ShoppingCart, Eye, Crown, RotateCcw, Zap, Clock } from 'lucide-react'
 import { getImages } from "@/app/actions/admin-actions"
 import { useAuth } from "@/lib/contexts/auth-context"
 
@@ -28,6 +28,9 @@ interface Image {
   license_name?: string
   metadata?: any
 }
+
+export const dynamic = 'force-dynamic'
+export const dynamicParams = true
 
 export default function PhotoDetailPage() {
   const params = useParams()
@@ -351,12 +354,26 @@ export default function PhotoDetailPage() {
   useEffect(() => {
     const fetchImage = async () => {
       try {
+        console.log("[v0] Photo detail page - fetching images for ID:", params.id)
         const result = await getImages()
+        console.log("[v0] Photo detail - getImages result:", { success: result.success, count: result.data?.length })
+        
         if (result.success) {
           const foundImage = result.data.find((img: any) => img.id === params.id)
+          
           if (foundImage) {
+            console.log("[v0] Photo detail - Found image:", { 
+              id: foundImage.id, 
+              title: foundImage.title,
+              hasImageUrl: !!foundImage.image_url,
+              hasThumbnail: !!foundImage.thumbnail_url 
+            })
             setImage(foundImage)
+          } else {
+            console.error("[v0] Photo detail - Image not found. Available IDs:", result.data.map((img: any) => img.id).slice(0, 5))
           }
+        } else {
+          console.error("[v0] Photo detail - getImages failed:", result.error)
         }
       } catch (error) {
         console.error("[v0] Error fetching image:", error)

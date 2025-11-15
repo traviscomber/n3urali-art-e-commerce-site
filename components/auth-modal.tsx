@@ -1,15 +1,15 @@
 "use client"
 
 import type React from "react"
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, CheckCircle, AlertCircle } from "lucide-react"
-import { createClientSafe } from "@/lib/supabase/client"
+import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { createClient } from "@/lib/supabase/client"
 
 interface AuthModalProps {
   isOpen: boolean
@@ -23,19 +23,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
   const [loginForm, setLoginForm] = useState({ email: "", password: "" })
   const [signupForm, setSignupForm] = useState({ email: "", password: "", confirmPassword: "" })
 
-  const supabase = useMemo(() => {
-    if (!isOpen) return null
-    return createClientSafe()
-  }, [isOpen])
+  const supabase = createClient()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (!supabase) {
-      setMessage({ type: "error", text: "Authentication service is not available. Please check your configuration." })
-      return
-    }
-
     setIsLoading(true)
     setMessage(null)
 
@@ -51,9 +42,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
       setTimeout(() => {
         onClose()
         setMessage(null)
+        setLoginForm({ email: "", password: "" })
       }, 1500)
     } catch (error: any) {
-      setMessage({ type: "error", text: error.message })
+      setMessage({ type: "error", text: error.message || "Login failed" })
     } finally {
       setIsLoading(false)
     }
@@ -61,12 +53,6 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (!supabase) {
-      setMessage({ type: "error", text: "Authentication service is not available. Please check your configuration." })
-      return
-    }
-
     setIsLoading(true)
     setMessage(null)
 
@@ -92,8 +78,9 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
         type: "success",
         text: "Account created! Please check your email to confirm your account.",
       })
+      setSignupForm({ email: "", password: "", confirmPassword: "" })
     } catch (error: any) {
-      setMessage({ type: "error", text: error.message })
+      setMessage({ type: "error", text: error.message || "Registration failed" })
     } finally {
       setIsLoading(false)
     }

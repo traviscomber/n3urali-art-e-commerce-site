@@ -10,6 +10,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, Download, ShoppingCart, Eye, Crown, RotateCcw, Zap, Clock } from 'lucide-react'
 import { getImageById } from "@/app/actions/admin-actions"
 import { useAuth } from "@/lib/contexts/auth-context"
+import { useCart } from "@/lib/contexts/cart-context"
+import { useToast } from "@/hooks/use-toast"
 
 declare global {
   interface Window {
@@ -37,6 +39,8 @@ export default function PhotoDetailPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user } = useAuth()
+  const { addItem, openCart } = useCart()
+  const { toast } = useToast()
   const [image, setImage] = useState<Image | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -405,58 +409,40 @@ export default function PhotoDetailPage() {
     try {
       const finalPrice = auctionPrice || image.price
 
-      console.log("[v0] Processing purchase:", {
-        imageId: image.id,
-        regularPrice: image.price,
-        auctionPrice,
-        finalPrice,
-      })
+      console.log("[v0] Adding image to cart...")
 
-      const orderResponse = await fetch("/api/orders/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          items: [
-            {
-              id: `${image.id}-standard`,
-              imageId: image.id,
-              title: image.title,
-              price: finalPrice, // Use final price (auction or regular)
-              licenseType: "standard",
-              previewUrl: image.thumbnail_url || image.image_url,
-              category: image.category_name === "equirectangular" ? "equirectangular" : "fisheye",
-              quantity: 1,
-            },
-          ],
-          total: finalPrice, // Use final price
-          customerInfo: {
-            email: user.email,
-            firstName: user.user_metadata?.full_name?.split(" ")[0] || "Customer",
-            lastName: user.user_metadata?.full_name?.split(" ").slice(1).join(" ") || "",
-          },
-          paymentMethod: "demo",
-        }),
-      })
-
-      const orderResult = await orderResponse.json()
-
-      if (orderResult.success) {
-        console.log("[v0] Purchase completed for image:", image?.id)
-        console.log("[v0] Order created:", orderResult.data.orderNumber)
-
-        alert(
-          `Thank you! Your purchase of "${image.title}" is complete. Order #${orderResult.data.orderNumber} created. Check your account for download links.`,
-        )
-        router.push("/account/orders")
-      } else {
-        console.error("[v0] Order creation failed:", orderResult.error)
-        alert(`Purchase failed: ${orderResult.error}. Please try again.`)
+      const cartItem = {
+        id: image.id,
+        title: image.title,
+        price: finalPrice,
+        preview_image_url: image.thumbnail_url || image.image_url,
+        license_id: image.license_name || "standard",
+        license_name: image.license_name || "Standard License",
       }
+
+      addItem(cartItem)
+
+      toast({
+        title: "Added to cart!",
+        description: `${image.title} has been added to your cart.`,
+        duration: 3000,
+      })
+
+      console.log("[v0] Item added to cart successfully")
+
+      openCart()
+      
+      setTimeout(() => {
+        router.push("/checkout")
+      }, 1500)
     } catch (error) {
       console.error("[v0] Purchase error:", error)
-      alert("There was an error processing your purchase. Please try again.")
+      toast({
+        title: "Error",
+        description: "There was an error adding the item to your cart. Please try again.",
+        variant: "destructive",
+        duration: 4000,
+      })
     } finally {
       setPurchasing(false)
     }

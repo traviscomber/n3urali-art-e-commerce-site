@@ -936,18 +936,25 @@ export async function getImageById(imageId: string) {
       return { success: false, error: "Image not found", data: null }
     }
 
-    // Get category and license info
-    const { data: category } = await supabase
-      .from("categories")
-      .select("id, name")
-      .eq("id", image.category_id)
-      .single()
+    let category = null
+    if (image.category_id) {
+      const { data } = await supabase
+        .from("categories")
+        .select("id, name")
+        .eq("id", image.category_id)
+        .single()
+      category = data
+    }
 
-    const { data: license } = await supabase
-      .from("licenses")
-      .select("id, name, description")
-      .eq("id", image.license_id)
-      .single()
+    let license = null
+    if (image.license_id) {
+      const { data } = await supabase
+        .from("licenses")
+        .select("id, name, description")
+        .eq("id", image.license_id)
+        .single()
+      license = data
+    }
 
     // Transform the image data
     const displayUrl = image.file_path

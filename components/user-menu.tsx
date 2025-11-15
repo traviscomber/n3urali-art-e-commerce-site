@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -11,61 +11,23 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { User, Download, Settings, LogOut, Shield, CheckCircle } from "lucide-react"
+import { User, Download, Settings, LogOut, Shield, CheckCircle } from 'lucide-react'
 import { AuthModal } from "./auth-modal"
 import { useAuth } from "@/lib/contexts/auth-context"
-import { useRouter } from "next/navigation"
+import { useRouter } from 'next/navigation'
 
 export function UserMenu() {
-  const { user, isAuthenticated, signOut, isLoading } = useAuth()
+  const { user, isAuthenticated, isAdmin, signOut, isLoading } = useAuth()
   const router = useRouter()
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
 
   const handleSignOut = async () => {
     await signOut()
   }
 
-  const handleAdminDashboard = () => {
-    router.push("/simple-admin")
-  }
-
-  const handleProfile = () => {
-    router.push("/account/profile")
-  }
-
-  const handleDownloads = () => {
-    router.push("/account/downloads")
-  }
-
-  const handleSettings = () => {
-    router.push("/account/settings")
-  }
-
   const getInitials = (email: string) => {
     return email.substring(0, 2).toUpperCase()
   }
-
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (user?.email) {
-        try {
-          const { createClient } = await import("@/lib/supabase/client")
-          const supabase = createClient()
-
-          const { data: profile } = await supabase.from("profiles").select("role").eq("email", user.email).single()
-
-          setIsAdmin(profile?.role === "admin" || user.email === "travis@nuanu.com")
-        } catch (error) {
-          setIsAdmin(user.email === "travis@nuanu.com")
-        }
-      }
-    }
-
-    if (isAuthenticated && user) {
-      checkAdminStatus()
-    }
-  }, [user, isAuthenticated])
 
   if (isLoading) {
     return (
@@ -85,7 +47,6 @@ export function UserMenu() {
         >
           Iniciar Sesión
         </Button>
-        {/* </CHANGE> */}
         <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
       </>
     )
@@ -121,22 +82,22 @@ export function UserMenu() {
           </div>
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleProfile}>
+        <DropdownMenuItem onClick={() => router.push("/account/profile")}>
           <User className="mr-2 h-4 w-4" />
           <span>Perfil</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleDownloads}>
+        <DropdownMenuItem onClick={() => router.push("/account/downloads")}>
           <Download className="mr-2 h-4 w-4" />
           <span>Mis Descargas</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleSettings}>
+        <DropdownMenuItem onClick={() => router.push("/account/settings")}>
           <Settings className="mr-2 h-4 w-4" />
           <span>Configuración</span>
         </DropdownMenuItem>
         {isAdmin && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleAdminDashboard}>
+            <DropdownMenuItem onClick={() => router.push("/simple-admin")}>
               <Shield className="mr-2 h-4 w-4" />
               <span>Panel Admin</span>
             </DropdownMenuItem>
@@ -147,7 +108,6 @@ export function UserMenu() {
           <LogOut className="mr-2 h-4 w-4" />
           <span>Cerrar Sesión</span>
         </DropdownMenuItem>
-        {/* </CHANGE> */}
       </DropdownMenuContent>
     </DropdownMenu>
   )

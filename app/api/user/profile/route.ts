@@ -61,7 +61,7 @@ export async function PUT(request: NextRequest) {
     const supabase = await createClient()
 
     const { data: result, error } = await supabase
-      .from("profiles")
+      .from("user_profiles")
       .update({
         full_name: full_name,
         updated_at: new Date().toISOString(),
@@ -80,7 +80,7 @@ export async function PUT(request: NextRequest) {
         id: result.id,
         email: result.email,
         full_name: result.full_name,
-        is_admin: result.role === "admin",
+        is_admin: result.is_admin,
       },
     })
   } catch (error) {

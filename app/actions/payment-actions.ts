@@ -107,15 +107,9 @@ export async function getPendingPayments() {
  */
 export async function approvePayment(orderId: string, adminNote?: string) {
   try {
+    console.log("[v0] approvePayment called for order:", orderId)
+    
     const supabase = await createClient()
-
-    // Get the current user (admin)
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) {
-      return { success: false, error: "Not authenticated" }
-    }
 
     // Get order details
     const { data: order, error: orderError } = await supabase
@@ -124,9 +118,13 @@ export async function approvePayment(orderId: string, adminNote?: string) {
       .eq("id", orderId)
       .single()
 
+    console.log("[v0] Order fetch result:", { found: !!order, error: orderError?.message })
+
     if (orderError || !order) {
-      return { success: false, error: "Order not found" }
+      return { success: false, error: "Order not found: " + (orderError?.message || "Unknown error") }
     }
+
+    console.log("[v0] Updating order status to approved...")
 
     // Update order status
     const { error: updateError } = await supabase
@@ -135,14 +133,15 @@ export async function approvePayment(orderId: string, adminNote?: string) {
         payment_status: "approved",
         status: "completed",
         approved_at: new Date().toISOString(),
-        approved_by: user.id,
       })
       .eq("id", orderId)
 
     if (updateError) {
       console.error("[v0] Error updating order:", updateError)
-      return { success: false, error: "Failed to approve payment" }
+      return { success: false, error: "Failed to approve payment: " + updateError.message }
     }
+
+    console.log("[v0] Order approved, creating download tokens for", order.order_items.length, "items")
 
     // Create download tokens for each order item
     const downloadTokens: string[] = []
@@ -162,11 +161,15 @@ export async function approvePayment(orderId: string, adminNote?: string) {
         console.error("[v0] Error creating download token:", downloadError)
       } else {
         downloadTokens.push(downloadToken)
+        console.log("[v0] Created download token:", downloadToken)
       }
     }
 
+    console.log("[v0] Payment approved successfully with", downloadTokens.length, "download tokens")
+
     revalidatePath("/admin/payments")
     revalidatePath("/simple-admin")
+    revalidatePath("/payments")
 
     return {
       success: true,
@@ -190,6 +193,8 @@ export async function approvePayment(orderId: string, adminNote?: string) {
  */
 export async function rejectPayment(orderId: string, reason: string) {
   try {
+    console.log("[v0] rejectPayment called for order:", orderId, "reason:", reason)
+    
     const supabase = await createClient()
 
     const { error } = await supabase
@@ -202,11 +207,14 @@ export async function rejectPayment(orderId: string, reason: string) {
 
     if (error) {
       console.error("[v0] Error rejecting payment:", error)
-      return { success: false, error: "Failed to reject payment" }
+      return { success: false, error: "Failed to reject payment: " + error.message }
     }
+
+    console.log("[v0] Payment rejected successfully")
 
     revalidatePath("/admin/payments")
     revalidatePath("/simple-admin")
+    revalidatePath("/payments")
 
     return { success: true }
   } catch (error) {

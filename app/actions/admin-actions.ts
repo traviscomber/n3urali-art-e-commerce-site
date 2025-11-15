@@ -183,10 +183,7 @@ const getCachedImages = unstable_cache(
               license_description: licenseMap.get(item.license_id)?.description,
             }
 
-            console.log("[v0] Image URL for", item.id, ":", {
-              image_url: imageData.image_url,
-              thumbnail_url: imageData.thumbnail_url,
-            })
+            console.log("[v0] Image processed:", item.id, "has_upscaled:", !!item.upscaled_url, "has_original:", !!item.original_url, "has_file_path:", !!item.file_path)
 
             // Sanitize all string fields
             return sanitizeImageData(imageData)

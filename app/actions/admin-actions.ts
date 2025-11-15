@@ -1055,12 +1055,12 @@ export async function getImageById(imageId: string) {
       license_description: license?.description || "",
       price: Number.parseFloat(image.price) || 0,
       file_path: image.file_path || "",
-      image_url: ImageUrlHandler.getImageUrl(image, "original"),
-      thumbnail_url: ImageUrlHandler.getImageUrl(image, "thumbnail"),
-      thumbnail_large_url: ImageUrlHandler.getImageUrl(image, "large"),
-      thumbnail_medium_url: ImageUrlHandler.getImageUrl(image, "medium"),
-      thumbnail_small_url: ImageUrlHandler.getImageUrl(image, "small"),
-      original_url: ImageUrlHandler.getImageUrl(image, "original"),
+      image_url: image.file_path ? ImageUrlHandler.convertToDisplayUrl(image.file_path, { useProxy: true }) : "",
+      thumbnail_url: image.thumbnail_url ? ImageUrlHandler.convertToDisplayUrl(image.thumbnail_url, { useProxy: true }) : "",
+      thumbnail_large_url: image.thumbnail_large_url ? ImageUrlHandler.convertToDisplayUrl(image.thumbnail_large_url, { useProxy: true }) : "",
+      thumbnail_medium_url: image.thumbnail_medium_url ? ImageUrlHandler.convertToDisplayUrl(image.thumbnail_medium_url, { useProxy: true }) : "",
+      thumbnail_small_url: image.thumbnail_small_url ? ImageUrlHandler.convertToDisplayUrl(image.thumbnail_small_url, { useProxy: true }) : "",
+      original_url: image.file_path ? ImageUrlHandler.convertToDisplayUrl(image.file_path, { useProxy: true }) : "",
       upscaled_url: image.upscaled_url || null,
       is_featured: image.is_featured || false,
       featured_collection: image.featured_collection || null,
@@ -1068,18 +1068,12 @@ export async function getImageById(imageId: string) {
       updated_at: image.updated_at,
       tags: image.tags || [],
       image_format: image.image_format || "jpg",
-      metadata: image.metadata || {},
     }
 
-    console.log("[v0] Successfully transformed image data")
     return { success: true, data: transformedImage }
   } catch (error) {
-    console.error("[v0] Get image by ID error:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-      data: null,
-    }
+    console.error("[v0] Get image by ID error:", error instanceof Error ? error.message : error)
+    return { success: false, error: error instanceof Error ? error.message : "Failed to fetch image", data: null }
   }
 }
 

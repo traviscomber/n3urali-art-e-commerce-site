@@ -870,33 +870,26 @@ export async function createImageWithCategoryObject(imageData: {
 
     console.log("[v0] Using license_id:", licenseId, "for upload")
 
-    const sanitizedImageData = sanitizeImageData({
-      title: imageData.title,
-      description: imageData.description,
-      category_id: categoryId,
-      license_id: licenseId,
-      price: imageData.price,
-      file_path: imageData.image_url, // Use image_url as file_path for now
-      thumbnail_url: imageData.thumbnail_url,
-      original_file_url: imageData.original_file_url || null, // Include original_file_url
-      is_featured: false,
-      active: true,
-    })
-
-    if (!sanitizedImageData) {
-      return { success: false, error: "Failed to sanitize image data." }
-    }
-
     const { data: result, error } = await supabase
       .from("images")
       .insert([
         {
-          ...sanitizedImageData,
-          file_path: sanitizedImageData.image_url,
-          original_file_url: sanitizedImageData.original_file_url, // Explicitly include original_file_url
+          title: imageData.title,
+          description: imageData.description,
+          category_id: categoryId,
+          license_id: licenseId,
+          price: imageData.price,
+          file_path: imageData.image_url,
+          thumbnail_large_url: imageData.thumbnail_url,
+          thumbnail_medium_url: imageData.thumbnail_url,
+          thumbnail_small_url: imageData.thumbnail_url,
+          original_url: imageData.original_file_url || null,
+          original_file_url: imageData.original_file_url || null,
+          is_featured: false,
+          active: true,
         },
       ])
-      .select("*")
+      .select("id, title, description, category_id, license_id, price, file_path, created_at")
 
     if (error) {
       console.error("[v0] Database error in createImageWithCategoryObject:", error)

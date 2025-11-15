@@ -39,7 +39,7 @@ const nextConfig = {
     },
   },
   compiler: {
-    removeConsole: false, // Changed from process.env.NODE_ENV === 'production'
+    removeConsole: process.env.NODE_ENV === 'production',
   },
   reactStrictMode: false,
   onDemandEntries: {

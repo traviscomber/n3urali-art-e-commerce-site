@@ -907,6 +907,88 @@ export async function createImageWithCategoryObject(imageData: {
   }
 }
 
+export async function getImageById(imageId: string) {
+  try {
+    console.log("[v0] getImageById: Fetching image with ID:", imageId)
+    const supabase = await createClient()
+
+    const { data: image, error } = await supabase
+      .from("images")
+      .select(`
+        id, title, description, price, file_path,
+        thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,
+        is_featured, created_at, updated_at, category_id, license_id, tags, original_file_url,
+        image_format, featured_collection, upscaled_url
+      `)
+      .eq("id", imageId)
+      .single()
+
+    if (error) {
+      console.error("[v0] Database error in getImageById:", error)
+      if (error.code === 'PGRST116') {
+        return { success: false, error: "Image not found", data: null }
+      }
+      throw new Error(error.message)
+    }
+
+    if (!image) {
+      console.log("[v0] No image found with ID:", imageId)
+      return { success: false, error: "Image not found", data: null }
+    }
+
+    // Get category and license info
+    const { data: category } = await supabase
+      .from("categories")
+      .select("id, name")
+      .eq("id", image.category_id)
+      .single()
+
+    const { data: license } = await supabase
+      .from("licenses")
+      .select("id, name, description")
+      .eq("id", image.license_id)
+      .single()
+
+    // Transform the image data
+    const displayUrl = image.file_path
+      ? ImageUrlHandler.convertToDisplayUrl(image.file_path, { useProxy: true })
+      : image.file_path
+
+    const transformedImage = {
+      ...image,
+      image_url: displayUrl,
+      thumbnail_url: displayUrl,
+      file_path: displayUrl,
+      thumbnail_large_url: image.thumbnail_large_url || displayUrl,
+      thumbnail_medium_url: image.thumbnail_medium_url || displayUrl,
+      thumbnail_small_url: image.thumbnail_small_url || displayUrl,
+      original_url: image.original_url || displayUrl,
+      active: true,
+      featured: image.is_featured,
+      category_name: category?.name,
+      license_name: license?.name,
+      license_description: license?.description,
+    }
+
+    console.log("[v0] getImageById: Found image:", {
+      id: transformedImage.id,
+      title: transformedImage.title,
+      category: transformedImage.category_name,
+      hasImageUrl: !!transformedImage.image_url
+    })
+
+    return { success: true, data: sanitizeImageData(transformedImage) }
+  } catch (error) {
+    console.error("[v0] Error in getImageById:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+      data: null,
+    }
+  }
+}
+
+
 export async function getImages() {
   try {
     const data = await getCachedImages()

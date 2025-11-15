@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, Download, ShoppingCart, Eye, Crown, RotateCcw, Zap, Clock } from 'lucide-react'
-import { getImages } from "@/app/actions/admin-actions"
+import { getImageById } from "@/app/actions/admin-actions"
 import { useAuth } from "@/lib/contexts/auth-context"
 
 declare global {
@@ -39,6 +39,7 @@ export default function PhotoDetailPage() {
   const { user } = useAuth()
   const [image, setImage] = useState<Image | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [purchasing, setPurchasing] = useState(false)
   const [showQualityPreview, setShowQualityPreview] = useState(false)
   const [previewPosition, setPreviewPosition] = useState({ x: 50, y: 50 })
@@ -354,29 +355,36 @@ export default function PhotoDetailPage() {
   useEffect(() => {
     const fetchImage = async () => {
       try {
-        console.log("[v0] Photo detail page - fetching images for ID:", params.id)
-        const result = await getImages()
-        console.log("[v0] Photo detail - getImages result:", { success: result.success, count: result.data?.length })
+        const imageId = params.id as string
+        console.log("[v0] Photo detail page - fetching image with ID:", imageId)
         
-        if (result.success) {
-          const foundImage = result.data.find((img: any) => img.id === params.id)
-          
-          if (foundImage) {
-            console.log("[v0] Photo detail - Found image:", { 
-              id: foundImage.id, 
-              title: foundImage.title,
-              hasImageUrl: !!foundImage.image_url,
-              hasThumbnail: !!foundImage.thumbnail_url 
-            })
-            setImage(foundImage)
-          } else {
-            console.error("[v0] Photo detail - Image not found. Available IDs:", result.data.map((img: any) => img.id).slice(0, 5))
-          }
+        const result = await getImageById(imageId)
+        
+        console.log("[v0] Photo detail - getImageById result:", { 
+          success: result.success, 
+          hasData: !!result.data,
+          error: result.error
+        })
+        
+        if (result.success && result.data) {
+          console.log("[v0] Photo detail - Found image:", { 
+            id: result.data.id, 
+            title: result.data.title,
+            category: result.data.category_name,
+            hasImageUrl: !!result.data.image_url,
+            hasThumbnail: !!result.data.thumbnail_url 
+          })
+          setImage(result.data)
+          setError(null)
         } else {
-          console.error("[v0] Photo detail - getImages failed:", result.error)
+          console.error("[v0] Photo detail - Image not found or error:", result.error)
+          setError(result.error || "Image not found")
+          setImage(null)
         }
       } catch (error) {
         console.error("[v0] Error fetching image:", error)
+        setError("Failed to load image")
+        setImage(null)
       } finally {
         setLoading(false)
       }
@@ -503,12 +511,12 @@ export default function PhotoDetailPage() {
     )
   }
 
-  if (!image) {
+  if (error || !image) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Image Not Found</h1>
-          <p className="text-muted-foreground mb-6">The requested image could not be found.</p>
+          <p className="text-muted-foreground mb-6">{error || "The requested image could not be found."}</p>
           <Button onClick={() => router.push("/gallery")}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Gallery

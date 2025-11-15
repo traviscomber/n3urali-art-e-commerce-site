@@ -994,6 +994,96 @@ export async function createImageWithCategoryObject(imageData: {
   }
 }
 
+export async function getImageById(imageId: string) {
+  try {
+    console.log("[v0] Fetching single image by ID:", imageId)
+    const supabase = await createClient()
+    
+    // Fetch the image
+    const { data: image, error: imageError } = await supabase
+      .from("images")
+      .select("*")
+      .eq("id", imageId)
+      .single()
+
+    if (imageError) {
+      console.error("[v0] Error fetching image:", imageError)
+      // Check if it's a "not found" error
+      if (imageError.code === "PGRST116") {
+        return { success: false, error: "Image not found", data: null }
+      }
+      throw imageError
+    }
+
+    if (!image) {
+      return { success: false, error: "Image not found", data: null }
+    }
+
+    console.log("[v0] Found image:", { id: image.id, title: image.title })
+
+    // Fetch category if exists
+    let category = null
+    if (image.category_id) {
+      const { data: categoryData } = await supabase
+        .from("categories")
+        .select("id, name, description")
+        .eq("id", image.category_id)
+        .single()
+      category = categoryData
+    }
+
+    // Fetch license if exists
+    let license = null
+    if (image.license_id) {
+      const { data: licenseData } = await supabase
+        .from("licenses")
+        .select("id, name, description")
+        .eq("id", image.license_id)
+        .single()
+      license = licenseData
+    }
+
+    // Transform the image data
+    const transformedImage = {
+      id: image.id,
+      title: image.title || "Untitled",
+      description: image.description || "",
+      category_id: image.category_id,
+      category_name: category?.name || "Uncategorized",
+      license_id: image.license_id,
+      license_name: license?.name || "Standard License",
+      license_description: license?.description || "",
+      price: Number.parseFloat(image.price) || 0,
+      file_path: image.file_path || "",
+      image_url: ImageUrlHandler.getImageUrl(image, "original"),
+      thumbnail_url: ImageUrlHandler.getImageUrl(image, "thumbnail"),
+      thumbnail_large_url: ImageUrlHandler.getImageUrl(image, "large"),
+      thumbnail_medium_url: ImageUrlHandler.getImageUrl(image, "medium"),
+      thumbnail_small_url: ImageUrlHandler.getImageUrl(image, "small"),
+      original_url: ImageUrlHandler.getImageUrl(image, "original"),
+      upscaled_url: image.upscaled_url || null,
+      is_featured: image.is_featured || false,
+      featured_collection: image.featured_collection || null,
+      created_at: image.created_at,
+      updated_at: image.updated_at,
+      tags: image.tags || [],
+      image_format: image.image_format || "jpg",
+      metadata: image.metadata || {},
+    }
+
+    console.log("[v0] Successfully transformed image data")
+    return { success: true, data: transformedImage }
+  } catch (error) {
+    console.error("[v0] Get image by ID error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+      data: null,
+    }
+  }
+}
+
+
 export async function getImages() {
   try {
     const data = await getCachedImages()

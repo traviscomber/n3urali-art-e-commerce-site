@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, Download, ShoppingCart, Eye, Crown, RotateCcw, Zap, Clock } from 'lucide-react'
-import { getImages } from "@/app/actions/admin-actions"
+import { getImageById } from "@/app/actions/admin-actions"
 import { useAuth } from "@/lib/contexts/auth-context"
+import { useCart } from "@/lib/contexts/cart-context"
+import { useToast } from "@/hooks/use-toast"
 
 declare global {
   interface Window {
@@ -34,6 +36,8 @@ export default function PhotoDetailPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user } = useAuth()
+  const { addItem } = useCart()
+  const { toast } = useToast()
   const [image, setImage] = useState<Image | null>(null)
   const [loading, setLoading] = useState(true)
   const [purchasing, setPurchasing] = useState(false)
@@ -351,34 +355,22 @@ export default function PhotoDetailPage() {
   useEffect(() => {
     const fetchImage = async () => {
       try {
-        console.log("[v0] Fetching images for photo ID:", params.id)
-        const result = await getImages()
-        console.log("[v0] getImages result:", { 
+        console.log("[v0] Fetching image by ID:", params.id)
+        const result = await getImageById(params.id as string)
+        console.log("[v0] getImageById result:", { 
           success: result.success, 
-          dataLength: result.data?.length,
           hasData: !!result.data 
         })
         
-        if (result.success) {
-          console.log("[v0] First 3 image IDs from result:", result.data.slice(0, 3).map((img: any) => img.id))
-          const foundImage = result.data.find((img: any) => img.id === params.id)
-          console.log("[v0] Looking for ID:", params.id)
-          console.log("[v0] Found image:", foundImage ? {
-            id: foundImage.id,
-            title: foundImage.title,
-            hasImageUrl: !!foundImage.image_url,
-            image_url: foundImage.image_url?.substring(0, 100) + '...',
-            hasThumbnailUrl: !!foundImage.thumbnail_url
-          } : null)
-          
-          if (foundImage) {
-            setImage(foundImage)
-          } else {
-            console.error("[v0] Image not found in result data for ID:", params.id)
-            console.log("[v0] All available IDs:", result.data.map((img: any) => img.id))
-          }
+        if (result.success && result.data) {
+          console.log("[v0] Image loaded successfully:", {
+            id: result.data.id,
+            title: result.data.title,
+            hasImageUrl: !!result.data.image_url,
+          })
+          setImage(result.data)
         } else {
-          console.error("[v0] getImages failed:", result.error)
+          console.error("[v0] Image not found:", result.error)
         }
       } catch (error) {
         console.error("[v0] Error fetching image:", error)
@@ -402,58 +394,41 @@ export default function PhotoDetailPage() {
     try {
       const finalPrice = auctionPrice || image.price
 
-      console.log("[v0] Processing purchase:", {
+      console.log("[v0] Adding item to cart:", {
         imageId: image.id,
-        regularPrice: image.price,
-        auctionPrice,
-        finalPrice,
+        title: image.title,
+        price: finalPrice,
       })
 
-      const orderResponse = await fetch("/api/orders/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          items: [
-            {
-              id: `${image.id}-standard`,
-              imageId: image.id,
-              title: image.title,
-              price: finalPrice, // Use final price (auction or regular)
-              licenseType: "standard",
-              previewUrl: image.thumbnail_url || image.image_url,
-              category: image.category_name === "equirectangular" ? "equirectangular" : "fisheye",
-              quantity: 1,
-            },
-          ],
-          total: finalPrice, // Use final price
-          customerInfo: {
-            email: user.email,
-            firstName: user.user_metadata?.full_name?.split(" ")[0] || "Customer",
-            lastName: user.user_metadata?.full_name?.split(" ").slice(1).join(" ") || "",
-          },
-          paymentMethod: "demo",
-        }),
+      // Add to cart
+      addItem({
+        id: image.id,
+        imageId: image.id,
+        title: image.title,
+        price: finalPrice,
+        licenseType: "standard",
+        previewUrl: image.thumbnail_url || image.image_url,
+        category: image.category_name === "equirectangular" ? "equirectangular" : "fisheye",
+        quantity: 1,
       })
 
-      const orderResult = await orderResponse.json()
+      // Show success toast
+      toast({
+        title: "Added to cart",
+        description: `"${image.title}" has been added to your cart.`,
+      })
 
-      if (orderResult.success) {
-        console.log("[v0] Purchase completed for image:", image?.id)
-        console.log("[v0] Order created:", orderResult.data.orderNumber)
-
-        alert(
-          `Thank you! Your purchase of "${image.title}" is complete. Order #${orderResult.data.orderNumber} created. Check your account for download links.`,
-        )
-        router.push("/account/orders")
-      } else {
-        console.error("[v0] Order creation failed:", orderResult.error)
-        alert(`Purchase failed: ${orderResult.error}. Please try again.`)
-      }
+      // Redirect to checkout after brief delay
+      setTimeout(() => {
+        router.push("/checkout")
+      }, 500)
     } catch (error) {
-      console.error("[v0] Purchase error:", error)
-      alert("There was an error processing your purchase. Please try again.")
+      console.error("[v0] Add to cart error:", error)
+      toast({
+        title: "Error",
+        description: "There was an error adding the item to your cart. Please try again.",
+        variant: "destructive",
+      })
     } finally {
       setPurchasing(false)
     }

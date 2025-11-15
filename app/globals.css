@@ -123,6 +123,16 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Add minimum height for iPad compatibility */
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  /* Add iPad-specific viewport fixes */
+  @supports (-webkit-touch-callout: none) {
+    body {
+      min-height: -webkit-fill-available;
+    }
   }
 
   .text-balance {
@@ -131,6 +141,13 @@
 
   .text-pretty {
     text-wrap: pretty;
+  }
+
+  /* Fix select dropdowns on iPad */
+  select,
+  [role="combobox"] {
+    -webkit-appearance: none;
+    appearance: none;
   }
 
   /* Gallery frame effects */

@@ -105,6 +105,7 @@ export default function SimpleAdminPage() {
     originalFileUrl: "",
   })
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [categoriesLoading, setCategoriesLoading] = useState(false)
 
   useEffect(() => {
     console.log("[v0] SimpleAdmin: Authentication required")
@@ -154,6 +155,7 @@ export default function SimpleAdminPage() {
   const loadInitialData = async () => {
     console.log("[v0] SimpleAdmin: Loading initial data")
     setLoading(true)
+    setCategoriesLoading(true)
     setError(null)
 
     try {
@@ -175,9 +177,13 @@ export default function SimpleAdminPage() {
 
       if (categoriesResult.success) {
         setCategories(categoriesResult.data)
-        console.log("[v0] SimpleAdmin: Loaded", categoriesResult.data.length, "categories")
+        console.log("[v0] SimpleAdmin: Loaded", categoriesResult.data.length, "categories:", categoriesResult.data)
+        categoriesResult.data.forEach(cat => {
+          console.log("[v0] Category:", cat.id, cat.name, cat.display_name)
+        })
       } else {
         console.error("[v0] SimpleAdmin: Failed to load categories:", categoriesResult.error)
+        toast.error("Failed to load categories. Please refresh the page.")
       }
 
       if (licensesResult.success) {
@@ -196,8 +202,10 @@ export default function SimpleAdminPage() {
     } catch (error) {
       console.error("[v0] SimpleAdmin: Error loading data:", error)
       setError("Failed to load data")
+      toast.error("Failed to load admin data. Please try again.")
     } finally {
       setLoading(false)
+      setCategoriesLoading(false)
     }
   }
 
@@ -1165,22 +1173,39 @@ export default function SimpleAdminPage() {
                       <Label htmlFor="category" className="text-lg font-medium">
                         Category *
                       </Label>
-                      <Select
-                        value={newImage.category}
-                        onValueChange={(value) => setNewImage((prev) => ({ ...prev, category: value }))}
-                        required
-                      >
-                        <SelectTrigger className="h-12 text-lg">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categories.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.id} className="text-lg">
-                              {getCategoryDisplayName(cat)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      {categoriesLoading ? (
+                        <div className="flex items-center justify-center h-12 border rounded-md bg-muted">
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          <span className="text-sm text-muted-foreground">Loading categories...</span>
+                        </div>
+                      ) : categories.length === 0 ? (
+                        <div className="flex items-center justify-center h-12 border rounded-md bg-destructive/10">
+                          <span className="text-sm text-destructive">No categories available. Please contact support.</span>
+                        </div>
+                      ) : (
+                        <Select
+                          value={newImage.category}
+                          onValueChange={(value) => {
+                            console.log("[v0] Category selected:", value)
+                            setNewImage((prev) => ({ ...prev, category: value }))
+                          }}
+                          required
+                        >
+                          <SelectTrigger className="h-12 text-lg">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map((cat) => {
+                              console.log("[v0] Rendering category option:", cat.id, cat.name)
+                              return (
+                                <SelectItem key={cat.id} value={cat.id} className="text-lg">
+                                  {getCategoryDisplayName(cat)}
+                                </SelectItem>
+                              )
+                            })}
+                          </SelectContent>
+                        </Select>
+                      )}
                     </div>
 
                     <div>

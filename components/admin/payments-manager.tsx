@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, CheckCircle, XCircle, Clock, DollarSign, User, Mail, Calendar, Package } from "lucide-react"
+import { Loader2, CheckCircle, XCircle, Clock, DollarSign, User, Mail, Calendar, Package } from 'lucide-react'
 import { toast } from "sonner"
 import { getPendingPayments, approvePayment, rejectPayment, type PendingPayment } from "@/app/actions/payment-actions"
 import {
@@ -56,35 +56,57 @@ export function PaymentsManager() {
     }
 
     setProcessingId(payment.id)
+    console.log("[v0] Starting approval process for payment:", payment.id)
+    
     const result = await approvePayment(payment.id)
+    console.log("[v0] Approval result:", JSON.stringify(result, null, 2))
 
     if (result.success && result.data) {
+      console.log("[v0] Download links received:", result.data.downloadLinks?.length || 0)
+      
       toast.success(`Payment approved! Download links generated for ${payment.user_email}`)
 
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
-      const links = result.data.downloadTokens
-        .map((token, index) => `${index + 1}. ${baseUrl}/api/download/by-token/${token}`)
+      const downloadLinks = result.data.downloadLinks || []
+      
+      console.log("[v0] Building WhatsApp message with", downloadLinks.length, "links")
+
+      const linksText = downloadLinks
+        .map((link: any, index: number) => {
+          // The url property contains the full download URL
+          console.log("[v0] Link", index + 1, ":", { title: link.imageTitle, url: link.url })
+          return `${index + 1}. ${link.imageTitle}\n   ${link.url}`
+        })
         .join("\n\n")
+
+      console.log("[v0] Generated links text:\n", linksText)
 
       const message = `✅ Payment Approved - Download Links Ready
 
-Customer: ${payment.user_name}
-Email: ${payment.user_email}
-Amount: $${payment.total_amount} USDT
+Customer: ${result.data.customerName}
+Email: ${result.data.customerEmail}
+Amount: $${result.data.totalAmount} USDT
 
-High-Resolution Download Links:
-${links}
+📥 High-Resolution Download Links:
 
-⏰ Links expire in 1 year
-📥 Up to 10 downloads per image
+${linksText}
+
+⏱️ Links expire in 1 year
+🔄 Up to 10 downloads per image
 
 Please forward these links to the customer.`
 
+      console.log("[v0] Full WhatsApp message:\n", message)
+      console.log("[v0] WhatsApp message length:", message.length, "characters")
+
       const whatsappUrl = `https://wa.me/56940946660?text=${encodeURIComponent(message)}`
+      console.log("[v0] WhatsApp URL length:", whatsappUrl.length, "characters")
+      console.log("[v0] Opening WhatsApp...")
+      
       window.open(whatsappUrl, "_blank")
 
       await loadPayments()
     } else {
+      console.error("[v0] Approval failed:", result.error)
       toast.error("Failed to approve payment: " + result.error)
     }
     setProcessingId(null)

@@ -107,6 +107,7 @@ export async function getPendingPayments() {
  */
 export async function approvePayment(orderId: string, adminNote?: string) {
   try {
+    console.log("[v0] Starting payment approval for order:", orderId)
     const supabase = await createClient()
 
     // Get the current user (admin)
@@ -114,8 +115,10 @@ export async function approvePayment(orderId: string, adminNote?: string) {
       data: { user },
     } = await supabase.auth.getUser()
     if (!user) {
+      console.log("[v0] User not authenticated")
       return { success: false, error: "Not authenticated" }
     }
+    console.log("[v0] Admin user:", user.email)
 
     // Get order details
     const { data: order, error: orderError } = await supabase
@@ -125,8 +128,10 @@ export async function approvePayment(orderId: string, adminNote?: string) {
       .single()
 
     if (orderError || !order) {
+      console.error("[v0] Order not found:", orderError)
       return { success: false, error: "Order not found" }
     }
+    console.log("[v0] Order found:", { id: order.id, itemsCount: order.order_items.length })
 
     // Update order status
     const { error: updateError } = await supabase
@@ -143,11 +148,48 @@ export async function approvePayment(orderId: string, adminNote?: string) {
       console.error("[v0] Error updating order:", updateError)
       return { success: false, error: "Failed to approve payment" }
     }
+    console.log("[v0] Order status updated to approved")
+
+    const imageDetails = await Promise.all(
+      order.order_items.map(async (item: any) => {
+        const { data: image } = await supabase
+          .from("images")
+          .select("title, original_file_url, file_path")
+          .eq("id", item.image_id)
+          .single()
+        
+        console.log("[v0] Image details fetched:", { 
+          id: item.image_id, 
+          title: image?.title,
+          hasOriginalUrl: !!image?.original_file_url,
+          hasFilePath: !!image?.file_path,
+          originalUrl: image?.original_file_url?.substring(0, 50) + "..."
+        })
+        
+        return { 
+          imageId: item.image_id, 
+          title: image?.title || "Image",
+          originalFileUrl: image?.original_file_url || image?.file_path
+        }
+      })
+    )
 
     // Create download tokens for each order item
-    const downloadTokens: string[] = []
-    for (const item of order.order_items) {
+    const downloadTokens: Array<{ token: string; imageTitle: string; downloadUrl: string }> = []
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://n3uralia360.art"
+    
+    console.log("[v0] Creating download tokens with base URL:", baseUrl)
+    
+    for (let i = 0; i < order.order_items.length; i++) {
+      const item = order.order_items[i]
+      const imageDetail = imageDetails[i]
       const downloadToken = `${orderId}-${item.image_id}-${Date.now()}-${Math.random().toString(36).substring(7)}`
+
+      console.log("[v0] Creating download token for image:", {
+        imageId: item.image_id,
+        title: imageDetail.title,
+        token: downloadToken.substring(0, 30) + "..."
+      })
 
       const { error: downloadError } = await supabase.from("downloads").insert({
         download_token: downloadToken,
@@ -161,21 +203,41 @@ export async function approvePayment(orderId: string, adminNote?: string) {
       if (downloadError) {
         console.error("[v0] Error creating download token:", downloadError)
       } else {
-        downloadTokens.push(downloadToken)
+        const downloadUrl = `${baseUrl}/api/download/by-token/${downloadToken}`
+        downloadTokens.push({ 
+          token: downloadToken, 
+          imageTitle: imageDetail.title,
+          downloadUrl: downloadUrl
+        })
+        console.log("[v0] Download token created with URL:", downloadUrl.substring(0, 80) + "...")
       }
     }
 
+    console.log("[v0] Total download tokens created:", downloadTokens.length)
+    console.log("[v0] Sample download URLs:", downloadTokens.slice(0, 2).map(dt => dt.downloadUrl))
+
     revalidatePath("/admin/payments")
     revalidatePath("/simple-admin")
+    revalidatePath("/payments")
 
-    return {
+    const result = {
       success: true,
       data: {
         orderId,
-        downloadTokens,
+        downloadTokens: downloadTokens.map(dt => dt.token),
+        downloadLinks: downloadTokens.map(dt => ({
+          token: dt.token,
+          imageTitle: dt.imageTitle,
+          url: dt.downloadUrl
+        })),
         customerEmail: order.user_email,
+        customerName: order.user_name,
+        totalAmount: order.total_amount,
       },
     }
+    
+    console.log("[v0] Returning approval result with", result.data.downloadLinks.length, "download links")
+    return result
   } catch (error) {
     console.error("[v0] Error in approvePayment:", error)
     return {

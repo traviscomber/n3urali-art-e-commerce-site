@@ -19,7 +19,7 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
 
     const { data: downloadData, error: downloadError } = await supabase
       .from("downloads")
-      .select("*, images(id, title, file_path)")
+      .select("*, images(id, title, file_path, original_file_url)")
       .eq("download_token", token)
       .gt("expires_at", new Date().toISOString())
       .single()
@@ -49,8 +49,10 @@ export async function GET(request: NextRequest, { params }: { params: { token: s
 
     console.log("[v0] Download verified for image:", downloadData.images.title)
 
-    const originalImageUrl = downloadData.images.file_path
+    const originalImageUrl = downloadData.images.original_file_url || downloadData.images.file_path
     const imageTitle = downloadData.images.title
+    
+    console.log("[v0] Using high-resolution URL:", originalImageUrl ? "original_file_url" : "file_path fallback")
 
     const downloadUrl = ImageUrlHandler.convertToDownloadUrl(originalImageUrl)
     console.log("[v0] Converted URL for download:", downloadUrl)

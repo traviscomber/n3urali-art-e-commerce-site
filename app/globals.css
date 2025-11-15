@@ -76,6 +76,7 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
+/* Added missing closing brace for @theme inline block */
 @theme inline {
   /* optional: --font-sans, --font-serif, --font-mono if they are applied in the layout.tsx */
   --color-background: var(--background);

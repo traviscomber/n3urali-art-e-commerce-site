@@ -4,20 +4,34 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ShoppingCart, Menu, X } from "lucide-react"
+import { ShoppingCart, Menu, X, Trash2, Plus, Minus } from 'lucide-react'
 import { useCart } from "@/lib/contexts/cart-context"
 import { useLanguage } from "@/lib/contexts/language-context"
 import { LanguageToggle } from "@/components/language-toggle"
 import { UserMenu } from "./user-menu"
 import { ThemeToggle } from "./theme-toggle"
 import Image from "next/image"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { useRouter } from 'next/navigation'
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const { items, toggleCart } = useCart()
+  const { items, toggleCart, isOpen, removeItem, updateQuantity, total, closeCart } = useCart()
   const { t } = useLanguage()
+  const router = useRouter()
 
   const itemCount = (items || []).reduce((sum, item) => sum + (item.quantity || 0), 0)
+
+  const handleCheckout = () => {
+    closeCart()
+    router.push("/checkout")
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/20 bg-black backdrop-blur-xl supports-[backdrop-filter]:bg-black/95">
@@ -70,19 +84,99 @@ export function Header() {
             <LanguageToggle />
             <ThemeToggle />
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleCart}
-              className="relative bg-card/50 border-border/50 hover:bg-card hover:glow-accent transition-all duration-300"
-            >
-              <ShoppingCart className="h-4 w-4" />
-              {itemCount > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground animate-pulse-glow">
-                  {itemCount}
-                </Badge>
-              )}
-            </Button>
+            <Sheet open={isOpen} onOpenChange={toggleCart}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="relative bg-card/50 border-border/50 hover:bg-card hover:glow-accent transition-all duration-300"
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                  {itemCount > 0 && (
+                    <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground animate-pulse-glow">
+                      {itemCount}
+                    </Badge>
+                  )}
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="w-full sm:max-w-lg">
+                <SheetHeader>
+                  <SheetTitle>Shopping Cart ({itemCount})</SheetTitle>
+                </SheetHeader>
+                <div className="mt-8 flex flex-col h-full">
+                  {items.length === 0 ? (
+                    <div className="flex-1 flex items-center justify-center">
+                      <div className="text-center">
+                        <ShoppingCart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground">Your cart is empty</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex-1 overflow-auto space-y-4">
+                        {items.map((item) => (
+                          <div key={item.id} className="flex gap-4 p-4 border rounded-lg bg-card">
+                            <div className="relative w-20 h-20 flex-shrink-0 bg-muted rounded-md overflow-hidden">
+                              <Image
+                                src={item.preview_image_url || "/placeholder.svg"}
+                                alt={item.title}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-medium truncate">{item.title}</h4>
+                              <p className="text-sm text-muted-foreground">{item.license_name}</p>
+                              <p className="text-lg font-semibold mt-1">${item.price.toFixed(2)}</p>
+                            </div>
+                            <div className="flex flex-col items-end justify-between">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => removeItem(item.id)}
+                                className="h-8 w-8"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                              {!item.isBundle && (
+                                <div className="flex items-center gap-1">
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                    className="h-7 w-7"
+                                  >
+                                    <Minus className="h-3 w-3" />
+                                  </Button>
+                                  <span className="w-8 text-center text-sm">{item.quantity}</span>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                    className="h-7 w-7"
+                                  >
+                                    <Plus className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="border-t pt-4 mt-4 space-y-4">
+                        <div className="flex justify-between items-center text-lg font-semibold">
+                          <span>Total:</span>
+                          <span>${total.toFixed(2)}</span>
+                        </div>
+                        <Button onClick={handleCheckout} className="w-full" size="lg">
+                          Proceed to Checkout
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
 
             <UserMenu />
 

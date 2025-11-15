@@ -5,7 +5,7 @@ import { getImages, getCategories } from "@/app/actions/admin-actions"
 import { ProductGrid } from "@/components/product-grid"
 import { PanoramaViewer } from "@/components/panorama-viewer"
 import { Badge } from "@/components/ui/badge"
-import { Loader2 } from "lucide-react"
+import { Loader2 } from 'lucide-react'
 import Link from "next/link"
 
 interface Image {
@@ -50,6 +50,8 @@ export default function GalleryClient() {
   const [loading, setLoading] = useState(true)
   const [featuredImages, setFeaturedImages] = useState<Image[]>([])
   const [equirectangularImages, setEquirectangularImages] = useState<Image[]>([])
+  const [heritageImages, setHeritageImages] = useState<Image[]>([])
+  const [selectedCategory, setSelectedCategory] = useState<string>("all")
   const [viewingPanorama, setViewingPanorama] = useState<Image | null>(null)
 
   useEffect(() => {
@@ -108,12 +110,21 @@ export default function GalleryClient() {
               !img.title?.toLowerCase().includes("dome")),
         )
         setEquirectangularImages(equirectangular)
+
+        const heritage = validImages.filter(
+          (img) =>
+            img.category_name?.toLowerCase().includes("heritage") ||
+            img.categories?.name?.toLowerCase().includes("heritage") ||
+            (img.tags && Array.isArray(img.tags) && img.tags.some(tag => tag.toLowerCase() === "heritage"))
+        )
+        setHeritageImages(heritage)
       } else {
         console.error("Error loading data:", imagesResult.error || categoriesResult.error)
         setImages([])
         setCategories([])
         setFeaturedImages([])
         setEquirectangularImages([])
+        setHeritageImages([])
       }
     } catch (error) {
       console.error("Error loading data:", error)
@@ -121,6 +132,7 @@ export default function GalleryClient() {
       setCategories([])
       setFeaturedImages([])
       setEquirectangularImages([])
+      setHeritageImages([])
     } finally {
       setLoading(false)
     }
@@ -133,6 +145,8 @@ export default function GalleryClient() {
   const closePanoramaViewer = () => {
     setViewingPanorama(null)
   }
+
+  const getHeritageCategory = () => categories.find(cat => cat.name.toLowerCase() === 'heritage')
 
   if (loading) {
     return (
@@ -214,14 +228,104 @@ export default function GalleryClient() {
         </div>
       </section>
 
+      {categories.length > 0 && (
+        <section className="py-8 border-b border-border/50 bg-muted/20">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col items-center gap-4">
+              <h3 className="text-sm font-medium text-muted-foreground">Browse by Category</h3>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <Badge
+                  variant={selectedCategory === "all" ? "default" : "outline"}
+                  className="cursor-pointer text-sm py-2 px-4 transition-all hover:scale-105"
+                  onClick={() => setSelectedCategory("all")}
+                >
+                  All Images
+                </Badge>
+                {categories.map((category) => {
+                  const isHeritage = category.name.toLowerCase() === 'heritage'
+                  const imageCount = isHeritage ? heritageImages.length : 
+                    images.filter(img => img.category_id === category.id).length
+                  
+                  return (
+                    <Badge
+                      key={category.id}
+                      variant={selectedCategory === category.id ? "default" : "outline"}
+                      className={`cursor-pointer text-sm py-2 px-4 transition-all hover:scale-105 ${
+                        isHeritage ? 'border-2 border-primary/50 shadow-lg' : ''
+                      }`}
+                      onClick={() => setSelectedCategory(category.id)}
+                    >
+                      {category.name}
+                      {imageCount > 0 && (
+                        <span className="ml-2 opacity-70">({imageCount})</span>
+                      )}
+                    </Badge>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {heritageImages.length > 0 && (selectedCategory === "all" || selectedCategory === getHeritageCategory()?.id) && (
+        <section className="py-16 bg-gradient-to-b from-muted/10 to-background">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-8 space-y-3">
+              <Badge variant="default" className="bg-primary text-primary-foreground shadow-lg">
+                Featured Category
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-bold text-balance">
+                Cultural Heritage
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
+                Explore historical landmarks, monuments, and architectural wonders captured in immersive 360° detail
+              </p>
+            </div>
+            <ProductGrid 
+              initialImages={selectedCategory === getHeritageCategory()?.id ? heritageImages : heritageImages.slice(0, 8)} 
+              categoryId={getHeritageCategory()?.id}
+            />
+            {selectedCategory === "all" && heritageImages.length > 8 && (
+              <div className="flex justify-center mt-8">
+                <Link href="/gallery">
+                  <Badge 
+                    variant="outline" 
+                    className="cursor-pointer text-base py-3 px-6 hover:bg-primary hover:text-primary-foreground transition-all"
+                    onClick={() => setSelectedCategory(getHeritageCategory()?.id || "all")}
+                  >
+                    View All Heritage Images ({heritageImages.length})
+                  </Badge>
+                </Link>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="space-y-12">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">Complete Collection</h2>
-              <p className="text-muted-foreground">Browse our entire catalog of professional images</p>
+              <h2 className="text-3xl font-bold mb-4">
+                {selectedCategory === "all" 
+                  ? "Complete Collection"
+                  : `${categories.find(c => c.id === selectedCategory)?.name || "Selected"} Images`}
+              </h2>
+              <p className="text-muted-foreground">
+                {selectedCategory === "all" 
+                  ? "Browse our entire catalog of professional images"
+                  : `Discover our ${categories.find(c => c.id === selectedCategory)?.name.toLowerCase()} collection`}
+              </p>
             </div>
-            <ProductGrid initialImages={images} />
+            <ProductGrid 
+              initialImages={
+                selectedCategory === "all" 
+                  ? images 
+                  : images.filter(img => img.category_id === selectedCategory)
+              } 
+              categoryId={selectedCategory !== "all" ? selectedCategory : undefined}
+            />
           </div>
         </div>
       </section>

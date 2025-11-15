@@ -400,16 +400,14 @@ export default function PhotoDetailPage() {
         price: finalPrice,
       })
 
-      // Add to cart
+      // Use preview_image_url instead of previewUrl, and proper license_id/license_name
       addItem({
         id: image.id,
-        imageId: image.id,
         title: image.title,
         price: finalPrice,
-        licenseType: "standard",
-        previewUrl: image.thumbnail_url || image.image_url,
-        category: image.category_name === "equirectangular" ? "equirectangular" : "fisheye",
-        quantity: 1,
+        preview_image_url: image.thumbnail_url || image.image_url,
+        license_id: "standard",
+        license_name: "Standard License",
       })
 
       // Show success toast

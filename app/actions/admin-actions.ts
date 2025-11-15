@@ -127,20 +127,33 @@ const getCachedImages = unstable_cache(
             const ensureCompleteUrl = (url: string | null | undefined): string | null => {
               if (!url) return null
 
+              console.log(`[v0] Processing URL for ${item.id}:`, url.substring(0, 100))
+
               // If it's already a complete URL (http/https/data), return it as-is
-              // This includes Backblaze URLs like https://f005.backblazeb2.com/...
               if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+                console.log(`[v0] URL is complete:`, url.substring(0, 80))
                 return url
+              }
+
+              // Check if it's a Backblaze path (starts with /file/)
+              if (url.startsWith('/file/')) {
+                const backblazeUrl = `https://f005.backblazeb2.com${url}`
+                console.log(`[v0] Constructed Backblaze URL:`, backblazeUrl.substring(0, 80))
+                return backblazeUrl
               }
 
               // If it's a partial Supabase storage path, construct the full URL
               if (url.startsWith('/storage/v1/') || url.includes('uploads/')) {
                 const basePath = url.startsWith('/') ? url.slice(1) : url
-                return `https://pamfhqilohsqbifujtjz.supabase.co/${basePath}`
+                const supabaseUrl = `https://pamfhqilohsqbifujtjz.supabase.co/${basePath}`
+                console.log(`[v0] Constructed Supabase URL:`, supabaseUrl.substring(0, 80))
+                return supabaseUrl
               }
 
               // If it's just a filename or partial path, assume it's in the Supabase images bucket
-              return `https://pamfhqilohsqbifujtjz.supabase.co/storage/v1/object/public/images/${url}`
+              const fallbackUrl = `https://pamfhqilohsqbifujtjz.supabase.co/storage/v1/object/public/images/${url}`
+              console.log(`[v0] Using fallback Supabase URL:`, fallbackUrl.substring(0, 80))
+              return fallbackUrl
             }
 
             const imageData = {
@@ -164,7 +177,7 @@ const getCachedImages = unstable_cache(
               license_description: licenseMap.get(item.license_id)?.description,
             }
 
-            console.log("[v0] Image URL for", item.id, ":", {
+            console.log("[v0] Final image URLs for", item.id, ":", {
               image_url: imageData.image_url?.substring(0, 100),
               thumbnail_url: imageData.thumbnail_url?.substring(0, 100),
             })
@@ -264,7 +277,12 @@ const getCachedImagesPaginated = unstable_cache(
               return url
             }
 
-            // If it's a partial path, construct the full Supabase storage URL
+            // Check if it's a Backblaze path (starts with /file/)
+            if (url.startsWith('/file/')) {
+              return `https://f005.backblazeb2.com${url}`
+            }
+
+            // If it's a partial Supabase path, construct the full Supabase URL
             if (url.startsWith('/storage/v1/') || url.includes('uploads/')) {
               const basePath = url.startsWith('/') ? url.slice(1) : url
               return `https://pamfhqilohsqbifujtjz.supabase.co/${basePath}`

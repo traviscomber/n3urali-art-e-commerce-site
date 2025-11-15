@@ -8,10 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, Download, ShoppingCart, Eye, Crown, RotateCcw, Zap, Clock } from 'lucide-react'
-import { getImageById } from "@/app/actions/admin-actions"
+import { getImages } from "@/app/actions/admin-actions"
 import { useAuth } from "@/lib/contexts/auth-context"
-import { useCart } from "@/lib/contexts/cart-context"
-import { useToast } from "@/hooks/use-toast"
 
 declare global {
   interface Window {
@@ -31,19 +29,13 @@ interface Image {
   metadata?: any
 }
 
-export const dynamic = 'force-dynamic'
-export const dynamicParams = true
-
 export default function PhotoDetailPage() {
   const params = useParams()
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user } = useAuth()
-  const { addItem, openCart } = useCart()
-  const { toast } = useToast()
   const [image, setImage] = useState<Image | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [purchasing, setPurchasing] = useState(false)
   const [showQualityPreview, setShowQualityPreview] = useState(false)
   const [previewPosition, setPreviewPosition] = useState({ x: 50, y: 50 })
@@ -359,36 +351,37 @@ export default function PhotoDetailPage() {
   useEffect(() => {
     const fetchImage = async () => {
       try {
-        const imageId = params.id as string
-        console.log("[v0] Photo detail page - fetching image with ID:", imageId)
-        
-        const result = await getImageById(imageId)
-        
-        console.log("[v0] Photo detail - getImageById result:", { 
+        console.log("[v0] Fetching images for photo ID:", params.id)
+        const result = await getImages()
+        console.log("[v0] getImages result:", { 
           success: result.success, 
-          hasData: !!result.data,
-          error: result.error
+          dataLength: result.data?.length,
+          hasData: !!result.data 
         })
         
-        if (result.success && result.data) {
-          console.log("[v0] Photo detail - Found image:", { 
-            id: result.data.id, 
-            title: result.data.title,
-            category: result.data.category_name,
-            hasImageUrl: !!result.data.image_url,
-            hasThumbnail: !!result.data.thumbnail_url 
-          })
-          setImage(result.data)
-          setError(null)
+        if (result.success) {
+          console.log("[v0] First 3 image IDs from result:", result.data.slice(0, 3).map((img: any) => img.id))
+          const foundImage = result.data.find((img: any) => img.id === params.id)
+          console.log("[v0] Looking for ID:", params.id)
+          console.log("[v0] Found image:", foundImage ? {
+            id: foundImage.id,
+            title: foundImage.title,
+            hasImageUrl: !!foundImage.image_url,
+            image_url: foundImage.image_url?.substring(0, 100) + '...',
+            hasThumbnailUrl: !!foundImage.thumbnail_url
+          } : null)
+          
+          if (foundImage) {
+            setImage(foundImage)
+          } else {
+            console.error("[v0] Image not found in result data for ID:", params.id)
+            console.log("[v0] All available IDs:", result.data.map((img: any) => img.id))
+          }
         } else {
-          console.error("[v0] Photo detail - Image not found or error:", result.error)
-          setError(result.error || "Image not found")
-          setImage(null)
+          console.error("[v0] getImages failed:", result.error)
         }
       } catch (error) {
         console.error("[v0] Error fetching image:", error)
-        setError("Failed to load image")
-        setImage(null)
       } finally {
         setLoading(false)
       }
@@ -409,40 +402,58 @@ export default function PhotoDetailPage() {
     try {
       const finalPrice = auctionPrice || image.price
 
-      console.log("[v0] Adding image to cart...")
-
-      const cartItem = {
-        id: image.id,
-        title: image.title,
-        price: finalPrice,
-        preview_image_url: image.thumbnail_url || image.image_url,
-        license_id: image.license_name || "standard",
-        license_name: image.license_name || "Standard License",
-      }
-
-      addItem(cartItem)
-
-      toast({
-        title: "Added to cart!",
-        description: `${image.title} has been added to your cart.`,
-        duration: 3000,
+      console.log("[v0] Processing purchase:", {
+        imageId: image.id,
+        regularPrice: image.price,
+        auctionPrice,
+        finalPrice,
       })
 
-      console.log("[v0] Item added to cart successfully")
+      const orderResponse = await fetch("/api/orders/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items: [
+            {
+              id: `${image.id}-standard`,
+              imageId: image.id,
+              title: image.title,
+              price: finalPrice, // Use final price (auction or regular)
+              licenseType: "standard",
+              previewUrl: image.thumbnail_url || image.image_url,
+              category: image.category_name === "equirectangular" ? "equirectangular" : "fisheye",
+              quantity: 1,
+            },
+          ],
+          total: finalPrice, // Use final price
+          customerInfo: {
+            email: user.email,
+            firstName: user.user_metadata?.full_name?.split(" ")[0] || "Customer",
+            lastName: user.user_metadata?.full_name?.split(" ").slice(1).join(" ") || "",
+          },
+          paymentMethod: "demo",
+        }),
+      })
 
-      openCart()
-      
-      setTimeout(() => {
-        router.push("/checkout")
-      }, 1500)
+      const orderResult = await orderResponse.json()
+
+      if (orderResult.success) {
+        console.log("[v0] Purchase completed for image:", image?.id)
+        console.log("[v0] Order created:", orderResult.data.orderNumber)
+
+        alert(
+          `Thank you! Your purchase of "${image.title}" is complete. Order #${orderResult.data.orderNumber} created. Check your account for download links.`,
+        )
+        router.push("/account/orders")
+      } else {
+        console.error("[v0] Order creation failed:", orderResult.error)
+        alert(`Purchase failed: ${orderResult.error}. Please try again.`)
+      }
     } catch (error) {
       console.error("[v0] Purchase error:", error)
-      toast({
-        title: "Error",
-        description: "There was an error adding the item to your cart. Please try again.",
-        variant: "destructive",
-        duration: 4000,
-      })
+      alert("There was an error processing your purchase. Please try again.")
     } finally {
       setPurchasing(false)
     }
@@ -497,12 +508,12 @@ export default function PhotoDetailPage() {
     )
   }
 
-  if (error || !image) {
+  if (!image) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Image Not Found</h1>
-          <p className="text-muted-foreground mb-6">{error || "The requested image could not be found."}</p>
+          <p className="text-muted-foreground mb-6">The requested image could not be found.</p>
           <Button onClick={() => router.push("/gallery")}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Gallery

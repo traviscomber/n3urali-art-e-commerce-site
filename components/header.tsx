@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ShoppingCart, Menu, X } from 'lucide-react'
+import { ShoppingCart, Menu, X } from "lucide-react"
 import { useCart } from "@/lib/contexts/cart-context"
 import { useLanguage } from "@/lib/contexts/language-context"
 import { LanguageToggle } from "@/components/language-toggle"
@@ -17,7 +17,7 @@ export function Header() {
   const { items, toggleCart } = useCart()
   const { t } = useLanguage()
 
-  const itemCount = items.reduce((sum, item) => sum + (item.quantity || 0), 0)
+  const itemCount = (items || []).reduce((sum, item) => sum + (item.quantity || 0), 0)
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/20 bg-black backdrop-blur-xl supports-[backdrop-filter]:bg-black/95">
@@ -75,7 +75,6 @@ export function Header() {
               size="sm"
               onClick={toggleCart}
               className="relative bg-card/50 border-border/50 hover:bg-card hover:glow-accent transition-all duration-300"
-              aria-label={`Shopping cart with ${itemCount} items`}
             >
               <ShoppingCart className="h-4 w-4" />
               {itemCount > 0 && (

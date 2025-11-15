@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,8 +11,8 @@ export default async function DashboardPage() {
     redirect("/auth/login")
   }
 
-  // Use user data directly from auth
-  const displayName = data.user.user_metadata?.full_name || data.user.email
+  // Get user profile
+  const { data: profile } = await supabase.from("profiles").select("*").eq("id", data.user.id).single()
 
   const handleSignOut = async () => {
     "use server"
@@ -26,7 +26,7 @@ export default async function DashboardPage() {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, {displayName}</p>
+          <p className="text-muted-foreground">Welcome back, {profile?.full_name || data.user.email}</p>
         </div>
         <form action={handleSignOut}>
           <Button variant="outline" type="submit">

@@ -8,6 +8,30 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.backblazeb2.com',
+        pathname: '/file/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'f005.backblazeb2.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.supabase.co',
+        pathname: '/storage/v1/object/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'pamfhqilohsqbifujtjz.supabase.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'hebbkx1anhila5yf.public.blob.vercel-storage.com',
+      },
+    ],
   },
   experimental: {
     serverActions: {
@@ -15,7 +39,7 @@ const nextConfig = {
     },
   },
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    removeConsole: false, // Changed from process.env.NODE_ENV === 'production'
   },
   reactStrictMode: false,
   onDemandEntries: {

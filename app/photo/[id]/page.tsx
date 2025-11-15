@@ -3,11 +3,11 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Download, ShoppingCart, Eye, Crown, RotateCcw, Zap, Clock } from 'lucide-react'
+import { ArrowLeft, Download, ShoppingCart, Eye, Crown, RotateCcw, Zap, Clock } from "lucide-react"
 import { getImages } from "@/app/actions/admin-actions"
 import { useAuth } from "@/lib/contexts/auth-context"
 
@@ -351,35 +351,15 @@ export default function PhotoDetailPage() {
   useEffect(() => {
     const fetchImage = async () => {
       try {
-        console.log("[v0] Photo detail - Fetching images for ID:", params.id)
         const result = await getImages()
-        console.log("[v0] Photo detail - getImages result:", { 
-          success: result.success, 
-          dataLength: result.data?.length,
-          error: result.error 
-        })
-        
         if (result.success) {
-          console.log("[v0] Photo detail - Available image IDs:", result.data.map((img: any) => img.id).slice(0, 10))
           const foundImage = result.data.find((img: any) => img.id === params.id)
-          
           if (foundImage) {
-            console.log("[v0] Photo detail - Found image:", {
-              id: foundImage.id,
-              title: foundImage.title,
-              image_url: foundImage.image_url?.substring(0, 100),
-              thumbnail_url: foundImage.thumbnail_url?.substring(0, 100),
-            })
             setImage(foundImage)
-          } else {
-            console.error("[v0] Photo detail - Image not found in results. Looking for ID:", params.id)
-            console.error("[v0] Photo detail - Total images retrieved:", result.data.length)
           }
-        } else {
-          console.error("[v0] Photo detail - getImages failed:", result.error)
         }
       } catch (error) {
-        console.error("[v0] Photo detail - Error fetching image:", error)
+        console.error("[v0] Error fetching image:", error)
       } finally {
         setLoading(false)
       }

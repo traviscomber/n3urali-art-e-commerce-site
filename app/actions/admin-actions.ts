@@ -98,7 +98,7 @@ const getCachedImages = unstable_cache(
         .from("images")
         .select(`
           id, title, description, price, file_path,
-          thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,upscaled_url,
+          thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,
           is_featured, created_at, updated_at, category_id, license_id, tags, original_file_url,
           image_format, featured_collection
         `)
@@ -124,57 +124,20 @@ const getCachedImages = unstable_cache(
       const transformedData = (images || [])
         .map((item) => {
           try {
-            const getPublicOrSignedUrl = async (url: string | null | undefined): Promise<string | null> => {
-              if (!url) return null
-
-              // If it's a base64 data URL, return as-is
-              if (url.startsWith('data:')) {
-                return url
-              }
-
-              // If it's a Backblaze URL, return as-is (these are already public)
-              if (url.includes('backblazeb2.com') || url.includes('f005.backblazeb2.com')) {
-                return url
-              }
-
-              // If it's already a complete non-Supabase URL, return it
-              if ((url.startsWith('http://') || url.startsWith('https://')) && !url.includes('supabase.co')) {
-                return url
-              }
-
-              // For Supabase Storage URLs, extract the file path and create a public URL
-              // Format: https://pamfhqilohsqbifujtjz.supabase.co/storage/v1/object/public/images/FILEPATH
-              let filePath = url
-
-              if (url.includes('/storage/v1/object/public/images/')) {
-                // Extract just the file path after "images/"
-                filePath = url.split('/storage/v1/object/public/images/')[1]
-              } else if (url.startsWith('https://pamfhqilohsqbifujtjz.supabase.co/')) {
-                // Already complete URL, return as-is
-                return url
-              } else if (url.startsWith('/storage/v1/')) {
-                // Remove leading slash and construct complete URL
-                return `https://pamfhqilohsqbifujtjz.supabase.co${url}`
-              } else if (!url.includes('://')) {
-                // Just a filename, construct the full public URL
-                filePath = url
-              }
-
-              // Return the properly formatted public URL
-              return `https://pamfhqilohsqbifujtjz.supabase.co/storage/v1/object/public/images/${filePath}`
-            }
+            const displayUrl = item.file_path
+              ? ImageUrlHandler.convertToDisplayUrl(item.file_path, { useProxy: true })
+              : item.file_path
 
             const imageData = {
               ...item,
-              image_url: item.upscaled_url || item.original_url || item.file_path,
-              thumbnail_url: item.thumbnail_large_url || item.thumbnail_medium_url || item.thumbnail_small_url,
-              file_path: item.file_path,
-              thumbnail_large_url: item.thumbnail_large_url,
-              thumbnail_medium_url: item.thumbnail_medium_url,
-              thumbnail_small_url: item.thumbnail_small_url,
-              original_url: item.original_url,
-              upscaled_url: item.upscaled_url,
-              active: true,
+              image_url: displayUrl,
+              thumbnail_url: displayUrl,
+              file_path: displayUrl, // Ensure file_path also uses proxy URL
+              thumbnail_large_url: item.thumbnail_large_url || displayUrl,
+              thumbnail_medium_url: item.thumbnail_medium_url || displayUrl,
+              thumbnail_small_url: item.thumbnail_small_url || displayUrl,
+              original_url: item.original_url || displayUrl,
+              active: true, // Default to active since we don't have this column
               featured: item.is_featured,
               categories: categoryMap.get(item.category_id),
               licenses: licenseMap.get(item.license_id),
@@ -183,8 +146,6 @@ const getCachedImages = unstable_cache(
               license_description: licenseMap.get(item.license_id)?.description,
             }
 
-            console.log("[v0] Image processed:", item.id, "has_upscaled:", !!item.upscaled_url, "has_original:", !!item.original_url, "has_file_path:", !!item.file_path)
-
             // Sanitize all string fields
             return sanitizeImageData(imageData)
           } catch (error) {
@@ -192,7 +153,7 @@ const getCachedImages = unstable_cache(
             return null
           }
         })
-        .filter((item) => item !== null)
+        .filter((item) => item !== null) // Remove any failed transformations
 
       console.log(`[v0] getCachedImages: Retrieved ${transformedData.length} images`)
       return transformedData
@@ -218,7 +179,7 @@ const getCachedImagesPaginated = unstable_cache(
       let query = supabase.from("images").select(
         `
           id, title, description, price, file_path,
-          thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url, upscaled_url,
+          thumbnail_large_url, thumbnail_medium_url, thumbnail_small_url, original_url,
           is_featured, created_at, updated_at, category_id, license_id, tags, original_file_url,
           image_format, featured_collection
         `,
@@ -272,16 +233,19 @@ const getCachedImagesPaginated = unstable_cache(
 
       const transformedData =
         images?.map((item) => {
+          const displayUrl = item.file_path
+            ? ImageUrlHandler.convertToDisplayUrl(item.file_path, { useProxy: true })
+            : item.file_path
+
           return {
             ...item,
-            image_url: item.upscaled_url || item.original_url || item.file_path,
-            thumbnail_url: item.thumbnail_large_url || item.thumbnail_medium_url || item.thumbnail_small_url,
-            file_path: item.file_path,
-            thumbnail_large_url: item.thumbnail_large_url,
-            thumbnail_medium_url: item.thumbnail_medium_url,
-            thumbnail_small_url: item.thumbnail_small_url,
-            original_url: item.original_url,
-            upscaled_url: item.upscaled_url,
+            image_url: displayUrl,
+            thumbnail_url: displayUrl,
+            file_path: displayUrl, // Ensure file_path also uses proxy URL
+            thumbnail_large_url: item.thumbnail_large_url || displayUrl,
+            thumbnail_medium_url: item.thumbnail_medium_url || displayUrl,
+            thumbnail_small_url: item.thumbnail_small_url || displayUrl,
+            original_url: item.original_url || displayUrl,
             active: true, // Default to active since we don't have this column
             featured: item.is_featured,
             categories: categoryMap.get(item.category_id),

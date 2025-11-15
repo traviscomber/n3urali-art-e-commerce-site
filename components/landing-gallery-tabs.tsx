@@ -47,7 +47,7 @@ export default function LandingGalleryTabs({ dailyImages }: LandingGalleryTabsPr
         <p className="text-muted-foreground">{t("handpickedImages")}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {dailyImages.map((image, index) => (
           <Card
             key={image.id}
@@ -55,46 +55,48 @@ export default function LandingGalleryTabs({ dailyImages }: LandingGalleryTabsPr
             style={{ animationDelay: `${index * 50}ms` }}
           >
             <CardContent className="p-0">
-              <Link href={`/photo/${image.id}`} className="block">
-                <div className="relative aspect-[4/3]">
-                  <Image
-                    src={
-                      image.thumbnail_medium_url ||
-                      image.thumbnail_small_url ||
-                      image.thumbnail_large_url ||
-                      image.file_path ||
-                      image.original_url ||
-                      "/placeholder.svg?height=400&width=400" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg"
-                    }
-                    alt={image.title}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="absolute inset-0 flex flex-col justify-between p-4">
-                      <div className="flex items-start justify-between">
-                        <Badge variant="outline" className="text-xs bg-black/50 backdrop-blur-sm">
-                          {image.image_format || t("360Degrees")}
-                        </Badge>
-                        <Badge className="bg-gradient-to-r from-yellow-400/40 to-orange-500/40 text-black text-xs font-bold border-0">
-                          {t("10PercentOff")}
-                        </Badge>
-                      </div>
-                      <div className="space-y-3">
-                        <h3 className="font-semibold text-white text-base line-clamp-2">{image.title}</h3>
-                        <Button size="sm" variant="secondary" className="w-full">
-                          <Eye className="w-4 h-4 mr-1" />
-                          {t("viewDetails")}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+              <div className="relative aspect-square">
+                <Image
+                  src={
+                    image.thumbnail_medium_url ||
+                    image.thumbnail_small_url ||
+                    image.thumbnail_large_url ||
+                    image.file_path ||
+                    image.original_url ||
+                    "/placeholder.svg?height=400&width=400" ||
+                    "/placeholder.svg"
+                  }
+                  alt={image.title}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+                  <Button size="sm" variant="secondary" asChild>
+                    <Link href={`/photo/${image.id}`}>
+                      <Eye className="w-4 h-4 mr-1" />
+                      {t("viewDetails")}
+                    </Link>
+                  </Button>
+                  {image.upscaled_url && (
+                    <Badge variant="default" className="absolute top-2 right-2">
+                      {t("4Kto16K")}
+                    </Badge>
+                  )}
                 </div>
-              </Link>
+              </div>
+              <div className="p-3">
+                <h3 className="font-semibold text-sm line-clamp-2 mb-2">{image.title}</h3>
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline" className="text-xs">
+                    {image.image_format || t("360Degrees")}
+                  </Badge>
+                  <Badge className="bg-gradient-to-r from-yellow-400/40 to-orange-500/40 text-black text-xs font-bold border-0">
+                    {t("10PercentOff")}
+                  </Badge>
+                </div>
+              </div>
             </CardContent>
           </Card>
         ))}

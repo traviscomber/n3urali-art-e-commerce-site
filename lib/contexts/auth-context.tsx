@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useState, useEffect, useMemo } from "react"
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
 
@@ -10,13 +10,15 @@ interface AuthContextType {
   isAuthenticated: boolean
   isLoading: boolean
   signOut: () => Promise<void>
+  initializeAuth: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   const supabase = useMemo(() => {
     try {
@@ -27,37 +29,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  useEffect(() => {
-    if (!supabase) {
-      console.warn("[v0] Supabase client not available, skipping auth")
-      setIsLoading(false)
+  const initializeAuth = useCallback(async () => {
+    if (!supabase || isInitialized) {
       return
     }
 
-    const getInitialSession = async () => {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
-        setUser(session?.user ?? null)
-      } catch (error) {
-        console.error("[v0] Failed to get initial session:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+    setIsLoading(true)
+    setIsInitialized(true)
 
-    getInitialSession()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
       setUser(session?.user ?? null)
-      setIsLoading(false)
-    })
 
-    return () => subscription.unsubscribe()
-  }, [supabase])
+      // Subscribe to auth changes only after manual initialization
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange(async (event, session) => {
+        setUser(session?.user ?? null)
+      })
+
+      return () => subscription.unsubscribe()
+    } catch (error) {
+      console.error("[v0] Failed to initialize auth:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase, isInitialized])
 
   const signOut = async () => {
     if (!supabase) {
@@ -67,6 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       await supabase.auth.signOut()
+      setUser(null)
     } catch (error) {
       console.error("[v0] Failed to sign out:", error)
     }
@@ -77,6 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: !!user,
     isLoading,
     signOut,
+    initializeAuth,
   }
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>

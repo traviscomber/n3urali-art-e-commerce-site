@@ -9,7 +9,7 @@ import Image from "next/image"
 import LandingGalleryTabs from "@/components/landing-gallery-tabs"
 import AuctionCarousel from "@/components/auction-carousel"
 import { useLanguage } from "@/lib/contexts/language-context"
-import { useState, useEffect, useMemo, useCallback, memo } from "react"
+import { useState, useEffect, useMemo, useCallback, memo, useRef } from "react"
 import { ParticleTitle } from "@/components/particle-title"
 
 interface FeaturedImage {
@@ -35,6 +35,7 @@ interface ClientWrapperProps {
 export const ClientWrapper = memo(function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, dailyImages }: ClientWrapperProps) {
   const { t } = useLanguage()
   const [auctionTimeLeft, setAuctionTimeLeft] = useState({ minutes: 0, seconds: 0 })
+  const isMounted = useRef(true)
 
   const calculateTimeLeft = useCallback(() => {
     const now = new Date()
@@ -43,13 +44,34 @@ export const ClientWrapper = memo(function ClientWrapper({ imageOfTheDay, collec
   }, [])
 
   useEffect(() => {
+    isMounted.current = true
     setAuctionTimeLeft(calculateTimeLeft())
-    const interval = setInterval(() => {
-      setAuctionTimeLeft(calculateTimeLeft())
-    }, 1000)
+    
+    let animationFrameId: number
+    let lastUpdate = Date.now()
+    
+    const updateTimer = () => {
+      const now = Date.now()
+      if (now - lastUpdate >= 1000 && isMounted.current) {
+        setAuctionTimeLeft(calculateTimeLeft())
+        lastUpdate = now
+      }
+      animationFrameId = requestAnimationFrame(updateTimer)
+    }
+    
+    animationFrameId = requestAnimationFrame(updateTimer)
 
-    return () => clearInterval(interval)
+    return () => {
+      isMounted.current = false
+      cancelAnimationFrame(animationFrameId)
+    }
   }, [calculateTimeLeft])
+
+  const imageCounts = useMemo(() => ({
+    auction: auctionImages?.length || 0,
+    collection: collectionImages?.length || 0,
+    daily: dailyImages?.length || 0
+  }), [auctionImages?.length, collectionImages?.length, dailyImages?.length])
 
   return (
     <div className="min-h-screen bg-background">
@@ -608,5 +630,12 @@ export const ClientWrapper = memo(function ClientWrapper({ imageOfTheDay, collec
         </div>
       </section>
     </div>
+  )
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.imageOfTheDay?.id === nextProps.imageOfTheDay?.id &&
+    prevProps.collectionImages?.length === nextProps.collectionImages?.length &&
+    prevProps.auctionImages?.length === nextProps.auctionImages?.length &&
+    prevProps.dailyImages?.length === nextProps.dailyImages?.length
   )
 })

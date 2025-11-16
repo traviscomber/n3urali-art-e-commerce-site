@@ -1111,10 +1111,7 @@ export async function getImagesPaginated(page = 1, limit = 20, category?: string
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
-      data: {
-        images: [],
-        pagination: { currentPage: 1, totalPages: 1, totalCount: 0, hasNextPage: false, hasPreviousPage: false },
-      },
+      data: { images: [], pagination: { currentPage: 1, totalPages: 1, totalCount: 0, hasNextPage: false, hasPreviousPage: false } },
     }
   }
 }
@@ -1709,11 +1706,17 @@ export async function deleteImage(imageId: string) {
     console.log("[v0] Starting image deletion for ID:", imageId)
     const supabase = await createClient()
 
-    const orderItemsCheck = await supabase.from("order_items").select("count").eq("image_id", imageId).single()
+    const { count: orderItemCount, error: countError } = await supabase
+      .from("order_items")
+      .select("*", { count: "exact", head: true })
+      .eq("image_id", imageId)
 
-    const orderItemCount = Number.parseInt(orderItemsCheck.data?.count || "0")
+    if (countError) {
+      console.error("[v0] Error checking order items:", countError)
+      throw new Error(countError.message)
+    }
 
-    if (orderItemCount > 0) {
+    if (orderItemCount && orderItemCount > 0) {
       console.log(`[v0] Cannot delete image ${imageId}: referenced by ${orderItemCount} order items`)
       return {
         success: false,

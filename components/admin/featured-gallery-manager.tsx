@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Star, ImageIcon, Loader2, Check, X } from "lucide-react"
+import { Star, ImageIcon, Loader2, Check, X } from 'lucide-react'
 import { toast } from "sonner"
 import {
   updateImageFeaturedSettings,
@@ -35,7 +35,7 @@ interface FeaturedGalleryManagerProps {
 }
 
 export function FeaturedGalleryManager({ images: initialImages }: FeaturedGalleryManagerProps) {
-  const [images, setImages] = useState<ImageData[]>(initialImages)
+  const [images, setImages] = useState<ImageData[]>(initialImages || [])
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set())
   const [filterFormat, setFilterFormat] = useState<string>("all")
   const [filterFeatured, setFilterFeatured] = useState<string>("all")
@@ -47,6 +47,12 @@ export function FeaturedGalleryManager({ images: initialImages }: FeaturedGaller
     loadStats()
   }, [])
 
+  useEffect(() => {
+    if (initialImages) {
+      setImages(initialImages)
+    }
+  }, [initialImages])
+
   const loadStats = async () => {
     const result = await getFeaturedGalleryStats()
     if (result.success && result.stats) {
@@ -54,7 +60,7 @@ export function FeaturedGalleryManager({ images: initialImages }: FeaturedGaller
     }
   }
 
-  const filteredImages = images.filter((img) => {
+  const filteredImages = (images || []).filter((img) => {
     if (filterFormat !== "all" && img.image_format !== filterFormat) return false
     if (filterFeatured === "featured" && !img.featured_collection) return false
     if (filterFeatured === "not-featured" && img.featured_collection) return false
@@ -106,7 +112,7 @@ export function FeaturedGalleryManager({ images: initialImages }: FeaturedGaller
     }
   }
 
-  const featuredCount = images.filter((img) => img.featured_collection).length
+  const featuredCount = (images || []).filter((img) => img.featured_collection).length
 
   return (
     <div className="space-y-6">

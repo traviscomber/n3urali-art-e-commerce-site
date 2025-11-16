@@ -12,7 +12,7 @@ export function LanguageToggle() {
       variant="ghost"
       size="sm"
       onClick={() => setLanguage(language === "es" ? "en" : "es")}
-      className="relative hover:bg-card/50 transition-all duration-300 group"
+      className="relative hover:bg-accent transition-all duration-300 group"
       title={language === "es" ? "Switch to English" : "Cambiar a Español"}
     >
       <div className="flex items-center gap-2">

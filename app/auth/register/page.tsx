@@ -2,10 +2,10 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useMemo } from "react"
+import { useRouter } from 'next/navigation'
 import Link from "next/link"
-import { createBrowserClient } from "@supabase/ssr"
+import { createClient } from "@/lib/supabase/client"
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("")
@@ -16,10 +16,7 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState(false)
   const router = useRouter()
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  )
+  const supabase = useMemo(() => createClient(), [])
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -92,7 +89,7 @@ export default function RegisterPage() {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">Create Account</h1>
-          <p className="text-muted-foreground">Join N3urali.art and access professional imagery</p>
+          <p className="text-muted-foreground">Join n3uralia360.art and access professional imagery</p>
         </div>
 
         <div className="bg-card rounded-lg p-8 shadow-sm">

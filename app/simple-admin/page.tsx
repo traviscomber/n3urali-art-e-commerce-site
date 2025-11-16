@@ -346,6 +346,8 @@ export default function SimpleAdminPage() {
     setUploading(true)
     setUploadError(null)
     try {
+      const { createImageWithCategoryObject } = await import("@/app/actions/admin-actions")
+      
       console.log("[v0] Starting image upload process...")
 
       const fileSizeMB = newImage.file.size / (1024 * 1024)
@@ -413,11 +415,12 @@ export default function SimpleAdminPage() {
       const imageData = {
         title: newImage.title,
         description: newImage.description,
-        category_id: newImage.category, // Changed from category to category_id
-        rights_type: newImage.rightsType, // Changed from rightsType to rights_type
+        category_id: newImage.category,
+        rights_type: newImage.rightsType,
         price: Number.parseFloat(newImage.price) || 0,
         image_url: imageUrl,
         thumbnail_url: thumbnailBase64,
+        original_file_url: newImage.originalFileUrl || null,
         original_file_size: newImage.file.size,
       }
 
@@ -428,6 +431,7 @@ export default function SimpleAdminPage() {
       }
 
       console.log("[v0] Image saved successfully")
+      toast.success("Image uploaded successfully!")
       setNewImage({
         title: "",
         description: "",
@@ -442,6 +446,7 @@ export default function SimpleAdminPage() {
     } catch (error) {
       console.error("[v0] Upload error:", error)
       setUploadError(error instanceof Error ? error.message : "Upload failed")
+      toast.error("Upload failed")
     } finally {
       setUploading(false)
     }
@@ -591,9 +596,7 @@ export default function SimpleAdminPage() {
           if (width > maxSize) {
             height = (height * maxSize) / width
             width = maxSize
-          }
-        } else {
-          if (height > maxSize) {
+          } else {
             width = (width * maxSize) / height
             height = maxSize
           }
@@ -634,6 +637,8 @@ export default function SimpleAdminPage() {
     setUploadError(null)
 
     try {
+      const { createImageWithCategoryObject } = await import("@/app/actions/admin-actions")
+      
       console.log("[v0] Starting upload process...")
 
       const formData = new FormData()
@@ -657,8 +662,8 @@ export default function SimpleAdminPage() {
       const imageData = {
         title: newImage.title,
         description: newImage.description,
-        category_id: newImage.category, // Changed from category to category_id
-        rights_type: newImage.rightsType, // Changed from rightsType to rights_type
+        category_id: newImage.category,
+        rights_type: newImage.rightsType,
         price: Number.parseFloat(newImage.price),
         image_url: uploadResult.url,
         thumbnail_url: uploadResult.url, // This should ideally be a generated thumbnail, not the same URL
@@ -704,7 +709,7 @@ export default function SimpleAdminPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-orange-100">
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold text-orange-600">n3urali.art Admin</CardTitle>
+            <CardTitle className="text-3xl font-bold text-orange-600">n3uralia360.art Admin</CardTitle>
             <CardDescription className="text-lg">Enter password to access admin dashboard</CardDescription>
           </CardHeader>
           <CardContent>
@@ -746,7 +751,7 @@ export default function SimpleAdminPage() {
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900">n3urali.art Admin</h1>
+            <h1 className="text-4xl font-bold text-gray-900">n3uralia360.art Admin</h1>
             <p className="text-xl text-gray-600 font-medium">Full HQ Resolution Only - 4K to 16K Premium Images</p>
           </div>
           <Button onClick={handleLogout} variant="outline" className="text-lg h-12 px-6 bg-transparent">
@@ -927,195 +932,78 @@ export default function SimpleAdminPage() {
           </TabsList>
 
           <TabsContent value="images" className="space-y-6">
-            <div className="grid grid-cols-1 gap-8 h-full">
-              {/* Images List */}
-              <Card className="flex flex-col">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-2xl">
-                    <Eye className="h-6 w-6" />
-                    Uploaded Photos ({images.length})
-                  </CardTitle>
-                  <CardDescription className="text-lg">
-                    Manage your full resolution premium collection (4K-16K)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1 flex flex-col">
-                  {loading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                      <span className="text-lg">Loading images...</span>
-                    </div>
-                  ) : images.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500 text-lg">No images uploaded yet</div>
-                  ) : (
-                    <div className="space-y-4 flex-1 overflow-y-auto min-h-0">
-                      {images.map((image) => (
-                        <div key={image.id} className="flex items-center gap-4 p-3 border rounded-lg">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-2xl">
+                  <Eye className="h-5 w-5" />
+                  Image Management ({images.length} images)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {images.map((image) => (
+                      <Card key={image.id} className="overflow-hidden">
+                        <div className="aspect-video relative">
                           <img
-                            src={
-                              image.file_path ||
-                              image.image_url ||
-                              image.thumbnail_url ||
-                              "/placeholder.svg?height=64&width=64&text=No+Image" ||
-                              "/placeholder.svg" ||
-                              "/placeholder.svg" ||
-                              "/placeholder.svg" ||
-                              "/placeholder.svg" ||
-                              "/placeholder.svg" ||
-                              "/placeholder.svg" ||
-                              "/placeholder.svg" ||
-                              "/placeholder.svg"
-                             || "/placeholder.svg"}
+                            src={image.thumbnail_url || image.image_url}
                             alt={image.title}
-                            className="w-16 h-16 object-cover rounded"
-                            crossOrigin="anonymous"
-                            onError={(e) => {
-                              console.log(
-                                "[v0] Image failed to load:",
-                                image.file_path || image.image_url || image.thumbnail_url,
-                              )
-                              const currentSrc = e.currentTarget.src
-                              if (currentSrc === image.file_path && image.image_url) {
-                                e.currentTarget.src = image.image_url
-                              } else if (currentSrc === image.image_url && image.thumbnail_url) {
-                                e.currentTarget.src = image.thumbnail_url
-                              } else {
-                                e.currentTarget.src = "/placeholder.svg?height=64&width=64&text=Error"
-                              }
-                            }}
-                            onLoad={() => {
-                              console.log(
-                                "[v0] Image loaded successfully:",
-                                image.file_path || image.image_url || image.thumbnail_url,
-                              )
-                            }}
+                            className="w-full h-full object-cover"
                           />
-                          <div className="flex-1 min-w-0">
-                            {editingImage === image.id ? (
-                              <div className="space-y-2">
-                                <Input
-                                  value={editValues.title}
-                                  onChange={(e) => setEditValues((prev) => ({ ...prev, title: e.target.value }))}
-                                  placeholder="Image title"
-                                  className="text-sm"
-                                />
-                                <Textarea
-                                  value={editValues.description}
-                                  onChange={(e) => setEditValues((prev) => ({ ...prev, description: e.target.value }))}
-                                  placeholder="Description"
-                                  className="text-sm"
-                                  rows={2}
-                                />
-                                <Select
-                                  value={editValues.category}
-                                  onValueChange={(value) => setEditValues((prev) => ({ ...prev, category: value }))}
-                                >
-                                  <SelectTrigger className="text-sm">
-                                    <SelectValue placeholder="Select category" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {categories.map((cat) => (
-                                      <SelectItem key={cat.id} value={cat.id} className="text-sm">
-                                        {getCategoryDisplayName(cat)}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <Select
-                                  value={editValues.rightsType}
-                                  onValueChange={(value) => setEditValues((prev) => ({ ...prev, rightsType: value }))}
-                                >
-                                  <SelectTrigger className="text-sm">
-                                    <SelectValue placeholder="Select rights type" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="both" className="text-sm">
-                                      Both Rights Available
-                                    </SelectItem>
-                                    <SelectItem value="exclusive" className="text-sm">
-                                      Exclusive Rights
-                                    </SelectItem>
-                                    <SelectItem value="non-exclusive" className="text-sm">
-                                      Non-Exclusive Rights
-                                    </SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                  value={editValues.price}
-                                  onChange={(e) => setEditValues((prev) => ({ ...prev, price: e.target.value }))}
-                                  placeholder="Price"
-                                  className="text-sm"
-                                />
-                              </div>
-                            ) : (
-                              <>
-                                <h4 className="font-medium truncate text-lg">{image.title}</h4>
-                                {image.description && (
-                                  <p className="text-sm text-gray-600 truncate">{image.description}</p>
-                                )}
-                                <p className="text-base text-gray-500">
-                                  {getCategoryBadgeName(image.category_name || "")}
-                                </p>
-                                <div className="flex items-center gap-2">
-                                  {image.license_name?.includes("EXCLUSIVE") && (
-                                    <Crown className="h-3 w-3 text-yellow-500" />
-                                  )}
-                                  <p className="text-base font-medium">
-                                    ${image.price > 0 ? image.price : "Price TBD"}
-                                  </p>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {editingImage === image.id ? (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="default"
-                                  onClick={() => handleEditSave(image.id)}
-                                  className="h-8 w-8 bg-green-600 hover:bg-green-700"
-                                >
+                        </div>
+                        <CardContent className="p-4">
+                          {editingImage === image.id ? (
+                            <div className="space-y-2">
+                              <Input
+                                value={editValues.title}
+                                onChange={(e) => setEditValues({ ...editValues, title: e.target.value })}
+                                placeholder="Title"
+                              />
+                              <Input
+                                type="number"
+                                value={editValues.price}
+                                onChange={(e) => setEditValues({ ...editValues, price: e.target.value })}
+                                placeholder="Price"
+                              />
+                              <Textarea
+                                value={editValues.description}
+                                onChange={(e) => setEditValues({ ...editValues, description: e.target.value })}
+                                placeholder="Description"
+                              />
+                              <div className="flex gap-2">
+                                <Button size="sm" onClick={() => handleEditSave(image.id)}>
                                   <Check className="h-4 w-4" />
                                 </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={handleEditCancel}
-                                  className="h-8 w-8 bg-transparent"
-                                >
+                                <Button size="sm" variant="outline" onClick={handleEditCancel}>
                                   <X className="h-4 w-4" />
                                 </Button>
-                              </>
-                            ) : (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleEditStart(image)}
-                                className="h-8 w-8"
-                              >
-                                <Edit2 className="h-4 w-4" />
-                              </Button>
-                            )}
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleDeleteImage(image.id)}
-                              className="h-8 w-8"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <h3 className="font-semibold">{image.title}</h3>
+                              <p className="text-sm text-muted-foreground">${image.price}</p>
+                              <div className="flex gap-2 mt-2">
+                                <Button size="sm" variant="outline" onClick={() => handleEditStart(image)}>
+                                  <Edit2 className="h-4 w-4" />
+                                </Button>
+                                <Button size="sm" variant="destructive" onClick={() => handleDeleteImage(image.id)}>
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="tags" className="space-y-6">
@@ -1123,318 +1011,166 @@ export default function SimpleAdminPage() {
           </TabsContent>
 
           <TabsContent value="featured" className="space-y-6">
-            <FeaturedGalleryManager images={images} />
+            <FeaturedGalleryManager />
           </TabsContent>
 
           <TabsContent value="upload" className="space-y-6">
-            <div className="grid grid-cols-1 gap-8 h-full">
-              {/* Upload Section */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-2xl">
-                    <Upload className="h-6 w-6" />
-                    Upload New Photo
-                  </CardTitle>
-                  <CardDescription className="text-lg">
-                    Add a new full resolution image (4K-16K) to the premium gallery
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="title" className="text-lg font-medium">
-                        Title *
-                      </Label>
-                      <Input
-                        id="title"
-                        value={newImage.title}
-                        onChange={(e) => setNewImage((prev) => ({ ...prev, title: e.target.value }))}
-                        placeholder="Enter image title"
-                        className="text-lg h-12"
-                        required
-                      />
-                    </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl">Upload New Photo</CardTitle>
+                <CardDescription>Add a new full resolution image (4K-16K) to the premium gallery</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <Label htmlFor="title">Title *</Label>
+                  <Input
+                    id="title"
+                    value={newImage.title}
+                    onChange={(e) => setNewImage({ ...newImage, title: e.target.value })}
+                    placeholder="Enter image title"
+                  />
+                </div>
 
-                    <div>
-                      <Label htmlFor="description" className="text-lg font-medium">
-                        Description
-                      </Label>
-                      <Textarea
-                        id="description"
-                        value={newImage.description}
-                        onChange={(e) => setNewImage((prev) => ({ ...prev, description: e.target.value }))}
-                        placeholder="Enter image description"
-                        rows={3}
-                        className="text-lg"
-                      />
-                    </div>
+                <div>
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={newImage.description}
+                    onChange={(e) => setNewImage({ ...newImage, description: e.target.value })}
+                    placeholder="Enter image description"
+                  />
+                </div>
 
-                    <div>
-                      <Label htmlFor="category" className="text-lg font-medium">
-                        Category *
-                      </Label>
-                      {categoriesLoading ? (
-                        <div className="flex items-center justify-center h-12 border rounded-md bg-muted">
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          <span className="text-sm text-muted-foreground">Loading categories...</span>
-                        </div>
-                      ) : categories.length === 0 ? (
-                        <div className="flex items-center justify-center h-12 border rounded-md bg-destructive/10">
-                          <span className="text-sm text-destructive">No categories available. Please contact support.</span>
-                        </div>
-                      ) : (
-                        <Select
-                          value={newImage.category}
-                          onValueChange={(value) => {
-                            console.log("[v0] Category selected:", value)
-                            setNewImage((prev) => ({ ...prev, category: value }))
-                          }}
-                          required
-                        >
-                          <SelectTrigger className="h-12 text-lg">
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {categories.map((cat) => {
-                              console.log("[v0] Rendering category option:", cat.id, cat.name)
-                              return (
-                                <SelectItem key={cat.id} value={cat.id} className="text-lg">
-                                  {getCategoryDisplayName(cat)}
-                                </SelectItem>
-                              )
-                            })}
-                          </SelectContent>
-                        </Select>
-                      )}
+                <div>
+                  <Label htmlFor="category">Category *</Label>
+                  {categoriesLoading ? (
+                    <div className="flex items-center gap-2 p-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm text-muted-foreground">Loading categories...</span>
                     </div>
-
-                    <div>
-                      <Label htmlFor="rightsType" className="text-lg font-medium">
-                        Rights Type *
-                      </Label>
-                      <Select
-                        value={newImage.rightsType}
-                        onValueChange={(value) => setNewImage((prev) => ({ ...prev, rightsType: value }))}
-                        required
-                      >
-                        <SelectTrigger className="h-12 text-lg">
-                          <SelectValue placeholder="Select rights type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="both" className="text-lg">
-                            <div>
-                              <div className="font-medium">Both Rights Available</div>
-                              <div className="text-sm text-gray-500">
-                                Exclusive & Non-Exclusive - Full HQ resolution (4K-16K)
-                              </div>
-                            </div>
+                  ) : categories.length === 0 ? (
+                    <Alert>
+                      <AlertDescription>No categories found. Please add categories first.</AlertDescription>
+                    </Alert>
+                  ) : (
+                    <Select value={newImage.category} onValueChange={(value) => setNewImage({ ...newImage, category: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {getCategoryDisplayName(category)}
                           </SelectItem>
-                          <SelectItem value="exclusive" className="text-lg">
-                            <div className="flex items-center gap-2">
-                              <Crown className="h-4 w-4 text-yellow-500" />
-                              <div>
-                                <div className="font-medium">Exclusive Rights</div>
-                                <div className="text-sm text-gray-500">
-                                  Full ownership - Complete HQ resolution (4K-16K)
-                                </div>
-                              </div>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="non-exclusive" className="text-lg">
-                            <div>
-                              <div className="font-medium">Non-Exclusive Rights</div>
-                              <div className="text-sm text-gray-500">
-                                Shared licensing - Full HQ resolution (4K-16K)
-                              </div>
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <p className="text-sm text-gray-500 mt-1">
-                        All images sold at full resolution (4K-16K). Pricing based on rights type and exclusivity.
-                      </p>
-                    </div>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
 
-                    <div>
-                      <Label htmlFor="price" className="text-lg font-medium">
-                        Price (USD) *
-                      </Label>
-                      <Input
-                        id="price"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={newImage.price}
-                        onChange={(e) => setNewImage((prev) => ({ ...prev, price: e.target.value }))}
-                        placeholder="Enter price (e.g., 99.00)"
-                        className="text-lg h-12"
-                        required
-                      />
-                      <p className="text-sm text-gray-500 mt-1">
-                        Premium pricing for full HQ resolution (4K-16K). Starting from $99 for standard rights.
-                      </p>
-                    </div>
+                <div>
+                  <Label htmlFor="rightsType">Rights Type *</Label>
+                  <Select value={newImage.rightsType} onValueChange={(value) => setNewImage({ ...newImage, rightsType: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="both">Both Rights Available</SelectItem>
+                      <SelectItem value="exclusive">Exclusive & Non-Exclusive - Full HQ resolution (4K-16K)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                    <div>
-                      <Label htmlFor="originalFileUrl" className="text-lg font-medium">
-                        High-Res Download URL (Optional)
-                      </Label>
-                      <Input
-                        id="originalFileUrl"
-                        type="url"
-                        value={newImage.originalFileUrl}
-                        onChange={(e) => setNewImage((prev) => ({ ...prev, originalFileUrl: e.target.value }))}
-                        placeholder="https://your-backblaze-bucket.com/path/to/high-res-file.jpg"
-                        className="text-lg h-12"
-                      />
-                      <p className="text-sm text-gray-500 mt-1">
-                        Direct link to the final high-resolution file (e.g., from Backblaze). This link will only be
-                        accessible to customers after payment and will be sent via email with their purchase
-                        confirmation.
-                      </p>
-                    </div>
+                <div>
+                  <Label htmlFor="price">Price (USD) *</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    step="0.01"
+                    value={newImage.price}
+                    onChange={(e) => setNewImage({ ...newImage, price: e.target.value })}
+                    placeholder="Enter price (e.g., 99.00)"
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Premium pricing for full HQ resolution (4K-16K). Starting from $99 for standard rights.
+                  </p>
+                </div>
 
-                    <div>
-                      <Label className="text-lg font-medium">Image File * (Full HQ Resolution: 4K-16K)</Label>
-                      <div
-                        className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                          isDragOver
-                            ? "border-orange-500 bg-orange-50"
-                            : newImage.file
-                              ? "border-green-500 bg-green-50"
-                              : "border-gray-300 hover:border-gray-400"
-                        }`}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                      >
-                        <input
-                          id="file"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileSelect}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        />
+                <div>
+                  <Label htmlFor="originalFileUrl">High-Res Download URL (Optional)</Label>
+                  <Input
+                    id="originalFileUrl"
+                    value={newImage.originalFileUrl}
+                    onChange={(e) => setNewImage({ ...newImage, originalFileUrl: e.target.value })}
+                    placeholder="https://your-backblaze-bucket.com/path/to/high-res-file.jpg"
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Direct link to the final high-resolution file (e.g., from Backblaze). This link will only be accessible to customers after payment and will be sent via email with their purchase confirmation.
+                  </p>
+                </div>
 
-                        {newImage.file ? (
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-center">
-                              <Upload className="h-8 w-8 text-green-600" />
-                            </div>
-                            <p className="text-lg font-medium text-green-700">{newImage.file.name}</p>
-                            <p className="text-sm text-gray-500">
-                              {(newImage.file.size / (1024 * 1024)).toFixed(2)} MB
-                            </p>
-                            <p className="text-sm text-gray-500">Click or drag to replace</p>
-                            <div className="flex items-center justify-center gap-2 mt-2">
-                              <Database className="h-4 w-4 text-green-600" />
-                              <span className="text-sm text-green-600 font-medium">
-                                Will use database storage (Small file: {(newImage.file.size / (1024 * 1024)).toFixed(1)}
-                                MB)
-                              </span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-center">
-                              <Upload className={`h-8 w-8 ${isDragOver ? "text-orange-600" : "text-gray-400"}`} />
-                            </div>
-                            <p className={`text-lg font-medium ${isDragOver ? "text-orange-700" : "text-white"}`}>
-                              {isDragOver ? "Drop your HQ image here" : "Drag & drop your HQ image here (4K-16K)"}
-                            </p>
-                            <p className="text-sm text-gray-300">or click to browse files</p>
-                            <div className="text-xs text-gray-300 space-y-1">
-                              <p>High Quality Only: JPG, PNG, WebP</p>
-                              <p>• Files &lt;40MB: Database storage (fast access)</p>
-                              <p>• Files &gt;40MB: Supabase storage (unlimited, high quality)</p>
-                            </div>
-                          </div>
-                        )}
+                <div>
+                  <Label htmlFor="file">Image File * (Full HQ Resolution: 4K-16K)</Label>
+                  <div
+                    className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+                      isDragOver ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary"
+                    }`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => document.getElementById("file")?.click()}
+                  >
+                    {newImage.preview ? (
+                      <div className="space-y-4">
+                        <img src={newImage.preview || "/placeholder.svg"} alt="Preview" className="max-h-64 mx-auto rounded" />
+                        <p className="text-sm text-muted-foreground">
+                          {newImage.file ? `${(newImage.file.size / (1024 * 1024)).toFixed(2)} MB` : ""}
+                        </p>
                       </div>
-                    </div>
-
-                    {newImage.preview && (
-                      <div className="space-y-3">
-                        <Label className="text-lg font-medium">Preview</Label>
-                        <div className="border rounded-lg p-4 bg-gray-50">
-                          <div className="flex flex-col sm:flex-row gap-4">
-                            <div className="flex-shrink-0">
-                              <img
-                                src={newImage.preview || "/placeholder.svg?height=128&width=128&text=Preview"}
-                                alt="Preview"
-                                className="w-full sm:w-32 h-32 object-cover rounded border shadow-sm"
-                                crossOrigin="anonymous"
-                                onError={(e) => {
-                                  console.log("[v0] Preview image failed to load:", newImage.preview)
-                                  e.currentTarget.src = "/placeholder.svg?height=128&width=128&text=Preview+Error"
-                                }}
-                                onLoad={() => {
-                                  console.log("[v0] Preview image loaded successfully")
-                                }}
-                              />
-                            </div>
-                            <div className="flex-1 space-y-2">
-                              <div className="grid grid-cols-2 gap-2 text-sm">
-                                <div>
-                                  <span className="font-medium text-gray-600">File:</span>
-                                  <p className="text-gray-800 truncate">{newImage.file?.name}</p>
-                                </div>
-                                <div>
-                                  <span className="font-medium text-gray-600">Size:</span>
-                                  <p className="text-gray-800">
-                                    {newImage.file ? (newImage.file.size / (1024 * 1024)).toFixed(2) : "0"} MB
-                                  </p>
-                                </div>
-                                <div>
-                                  <span className="font-medium text-gray-600">Type:</span>
-                                  <p className="text-gray-800">{newImage.file?.type}</p>
-                                </div>
-                                <div>
-                                  <span className="font-medium text-gray-600">Status:</span>
-                                  <p className="text-green-600 font-medium">Ready to upload</p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
+                        <p className="text-lg">Drop your image here or click to browse</p>
+                        <p className="text-sm text-muted-foreground">Supports images up to 100MB</p>
                       </div>
                     )}
-
-                    <Button
-                      onClick={handleUpload}
-                      disabled={uploading}
-                      className="w-full bg-orange-600 hover:bg-orange-700 text-lg h-12"
-                    >
-                      {uploading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Uploading to Supabase...
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="mr-2 h-4 w-4" />
-                          Upload to Supabase (High Quality)
-                        </>
-                      )}
-                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+                  <input
+                    id="file"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                </div>
 
-          {/* New Tab Content for Collections */}
-          <TabsContent value="collections" className="space-y-6">
-            <CollectionsManager images={images} />
-          </TabsContent>
-
-          {/* New Tab Content for Payments */}
-          <TabsContent value="payments" className="space-y-6">
-            <PaymentsManager />
+                <Button onClick={handleUpload} disabled={uploading} className="w-full" size="lg">
+                  {uploading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="mr-2 h-5 w-5" />
+                      Upload Image
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="backblaze" className="space-y-6">
             <BackblazeUrlManager />
+          </TabsContent>
+
+          <TabsContent value="collections" className="space-y-6">
+            <CollectionsManager />
+          </TabsContent>
+
+          <TabsContent value="payments" className="space-y-6">
+            <PaymentsManager />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
@@ -1444,9 +1180,4 @@ export default function SimpleAdminPage() {
       </div>
     </div>
   )
-}
-
-const createImageWithCategoryObject = async (imageData: any) => {
-  const { createImageWithCategoryObject: actualFunction } = await import("@/app/actions/admin-actions")
-  return actualFunction(imageData)
 }

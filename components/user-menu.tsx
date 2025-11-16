@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { User, Download, Settings, LogOut, Shield, CheckCircle } from "lucide-react"
+import { User, Download, Settings, LogOut, Shield, CheckCircle } from 'lucide-react'
 import { AuthModal } from "./auth-modal"
 import { useAuth } from "@/lib/contexts/auth-context"
-import { useRouter } from "next/navigation"
+import { useRouter } from 'next/navigation'
 
 export function UserMenu() {
   const { user, isAuthenticated, signOut, isLoading } = useAuth()
@@ -83,7 +83,7 @@ export function UserMenu() {
           onClick={() => setIsAuthModalOpen(true)}
           className="bg-transparent text-white border-white/20 hover:bg-white/10 hover:text-white"
         >
-          Iniciar Sesión
+          Sign In
         </Button>
         {/* </CHANGE> */}
         <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
@@ -109,13 +109,13 @@ export function UserMenu() {
         <div className="flex items-center justify-start gap-2 p-2">
           <div className="flex flex-col space-y-1 leading-none">
             <div className="flex items-center gap-2">
-              <p className="font-medium text-sm">{user.user_metadata?.full_name || "Usuario"}</p>
+              <p className="font-medium text-sm">{user.user_metadata?.full_name || "User"}</p>
               {isAuthenticated && <CheckCircle className="w-3 h-3 text-green-500" />}
             </div>
             <p className="w-[200px] truncate text-xs text-muted-foreground">{user.email}</p>
             {isAdmin && (
               <Badge variant="default" className="text-xs bg-primary text-primary-foreground">
-                Acceso Admin
+                Admin Access
               </Badge>
             )}
           </div>
@@ -123,29 +123,29 @@ export function UserMenu() {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleProfile}>
           <User className="mr-2 h-4 w-4" />
-          <span>Perfil</span>
+          <span>Profile</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleDownloads}>
           <Download className="mr-2 h-4 w-4" />
-          <span>Mis Descargas</span>
+          <span>My Downloads</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleSettings}>
           <Settings className="mr-2 h-4 w-4" />
-          <span>Configuración</span>
+          <span>Settings</span>
         </DropdownMenuItem>
         {isAdmin && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleAdminDashboard}>
               <Shield className="mr-2 h-4 w-4" />
-              <span>Panel Admin</span>
+              <span>Admin Panel</span>
             </DropdownMenuItem>
           </>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Cerrar Sesión</span>
+          <span>Sign Out</span>
         </DropdownMenuItem>
         {/* </CHANGE> */}
       </DropdownMenuContent>

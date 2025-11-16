@@ -2,30 +2,35 @@ import type { Metadata } from "next"
 import GalleryClient from "./gallery-client"
 
 export const metadata: Metadata = {
-  title: "Gallery - Premium 360° Image Collection",
+  title: "Browse Premium 360° Assets | Licensed AI Environments for VR, Games & Production",
   description:
-    "Browse our complete gallery of AI-generated equirectangular and fisheye images. High-resolution 4K-16K imagery perfect for VR, projection mapping, and professional visualization projects.",
+    "Curated collection of premium AI-generated 360° environments ready for immediate use. Heritage landmarks, futuristic cities, atmospheric variations. Full commercial licensing with indemnification. Perfect for game development, VR/AR, virtual production, metaverse, and architectural projects. 8K-16K resolution, instant download.",
   keywords: [
-    "360 gallery",
-    "equirectangular images",
-    "fisheye photography",
-    "VR images",
-    "projection mapping",
-    "immersive gallery",
-    "panoramic collection",
+    "buy 360 panorama commercial license",
+    "VR game environment assets",
+    "licensed skybox images",
+    "virtual production 360 backgrounds",
+    "HDRI for architectural visualization",
+    "metaverse environment assets",
+    "game development skybox",
+    "360 stock images commercial use",
+    "heritage 360 photography",
+    "futuristic panorama images",
+    "licensed AI 360 imagery",
+    "instant download panoramic assets",
   ],
   openGraph: {
-    title: "Gallery - Premium 360° Image Collection | N3urali.art",
+    title: "Premium 360° Asset Gallery | Licensed for Commercial Use",
     description:
-      "Browse our complete gallery of AI-generated equirectangular and fisheye images. High-resolution 4K-16K imagery perfect for VR, projection mapping, and professional visualization projects.",
+      "Browse curated, production-ready 360° environments. Instant download, full licensing, 16K resolution. Heritage, futuristic, and atmospheric collections.",
     type: "website",
     url: "https://www.n3uralia360.art/gallery",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Gallery - Premium 360° Image Collection | N3urali.art",
+    title: "Premium 360° Asset Gallery - Licensed & Production-Ready",
     description:
-      "Browse our complete gallery of AI-generated equirectangular and fisheye images. High-resolution 4K-16K imagery perfect for VR, projection mapping, and professional visualization projects.",
+      "Curated AI-generated 360° environments for VR, games, and virtual production. Instant download with full commercial licensing.",
   },
   alternates: {
     canonical: "https://www.n3uralia360.art/gallery",

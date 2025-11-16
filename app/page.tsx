@@ -3,32 +3,35 @@ import { createClient } from "@/lib/supabase/server"
 import { ClientWrapper } from "./client-wrapper"
 
 export const metadata: Metadata = {
-  title: "N3urali.art - Browse Premium AI-Generated 360° Photography Collection",
+  title: "n3uralia360.art - Premium AI-Generated 360° Environments | Ready-to-Use Assets",
   description:
-    "Explore our curated marketplace of ultra high-resolution 360° AI-generated imagery. Equirectangular and fisheye dome images in 4K-16K resolution, created with proprietary noise diffusion algorithms. Perfect for VR experiences, projection mapping, architectural visualization, and immersive digital environments. Commercial licensing available.",
+    "Stop generating, start creating. Premium 360° environments (8K-16K) powered by proprietary AI algorithms. Instant download, full commercial licensing, indemnification included. Perfect for VR/AR, game development, virtual production, metaverse, and architectural visualization. No prompts, no limits, no copyright uncertainty.",
   keywords: [
-    "buy 360 images",
-    "AI generated 360 photography",
-    "equirectangular images for sale",
-    "VR background images",
-    "dome projection content",
-    "360 photography marketplace",
-    "commercial 360 imagery",
-    "high resolution panoramic images",
-    "360 skybox textures",
-    "immersive environment images",
+    "premium 360 assets",
+    "buy 360 panorama",
+    "VR game skybox",
+    "licensed AI imagery",
+    "360 stock photography",
+    "production ready HDRI",
+    "commercial 360 license",
+    "virtual production backgrounds",
+    "metaverse environments",
+    "architectural visualization assets",
+    "AI generated 360",
+    "game development skybox",
+    "instant download panorama",
   ],
   openGraph: {
-    title: "Browse Premium 360° AI Photography - N3urali.art",
+    title: "n3uralia360.art - Premium 360° AI Assets for Professionals",
     description:
-      "Explore curated collection of ultra high-resolution 360° AI-generated imagery. 4K-16K equirectangular and fisheye dome images for VR, projection mapping, and visualization.",
-    url: "https://n3urali.art",
+      "Instant, production-ready 360° environments. Full licensing, 16K resolution, algorithmically perfected. For VR, games, virtual production, and metaverse projects.",
+    url: "https://n3uralia360.art",
     images: [
       {
-        url: "https://n3urali.art/og-home.jpg",
+        url: "https://n3uralia360.art/og-home.jpg",
         width: 1200,
         height: 630,
-        alt: "N3urali.art Premium 360° Photography Collection",
+        alt: "n3uralia360.art - Premium AI-Generated 360° Environments",
       },
     ],
   },

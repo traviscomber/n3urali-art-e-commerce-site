@@ -63,7 +63,7 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
             <div className="text-center space-y-4 p-8 opacity-30">
               <div className="text-6xl">🎬</div>
               <p className="text-2xl font-semibold text-muted-foreground">{t("hero.videoPlaceholder")}</p>
-              <p className="text-sm text-muted-foreground/70">Video demostrativo próximamente</p>
+              <p className="text-sm text-muted-foreground/70">{t("hero.demoPlaceholder")}</p>
             </div>
           </div>
 
@@ -100,19 +100,19 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                 <span className="text-sm font-medium text-primary">{t("hero.badge")}</span>
               </div>
 
-              {/* Main headline - elegant and bold */}
               <h1 className="text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-[0.95] text-balance text-white drop-shadow-2xl">
                 {t("hero.title")}
                 <br />
-                <span className="text-primary">{t("hero.subtitle")}</span>
+                <span className="text-primary">{t("hero.titleHighlight")}</span>
               </h1>
 
-              {/* Description - focus on art and uniqueness */}
-              <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed text-pretty font-light drop-shadow-lg">
-                {t("hero.description")}
+              <p className="text-xl md:text-2xl text-white/90 max-w-4xl mx-auto leading-relaxed text-pretty font-light drop-shadow-lg">
+                {t("hero.subtitle")}
+                <span className="block mt-2 text-lg text-white/80">
+                  {t("hero.description")}
+                </span>
               </p>
 
-              {/* CTA buttons */}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
                 <Link href="/gallery">
                   <Button size="lg" className="text-lg px-10 py-7 h-auto shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 transition-all">
@@ -120,26 +120,29 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </Link>
-                <Link href="#featured">
+                <Link href="#use-cases">
                   <Button size="lg" variant="outline" className="text-lg px-10 py-7 h-auto bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border-white/20 hover:border-white/40">
                     {t("hero.cta.demo")}
                   </Button>
                 </Link>
               </div>
 
-              {/* Technical indicators - minimal and elegant */}
               <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-white/80">
                 <div className="flex items-center gap-2.5">
                   <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                  <span className="font-medium">4K – 16K</span>
+                  <span className="font-medium">{t("comparison.ourPro5").split(" ")[0]} {t("comparison.ourPro5").split(" ")[1]}</span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                  <span className="font-medium">VR Ready</span>
+                  <span className="font-medium">{t("gallery.stats.resolution")} {t("stats.resolutionNote")}</span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                  <span className="font-medium">{t("stats.instant")}</span>
+                  <span className="font-medium">{t("stats.instantNote")}</span>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                  <span className="font-medium">{t("stats.vrNote")}</span>
                 </div>
               </div>
             </div>
@@ -193,7 +196,7 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
 
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="text-white/20 text-6xl md:text-8xl lg:text-9xl font-bold tracking-wider transform -rotate-12 select-none">
-                      N3URALIA360.ART
+                      n3uralia360.art
                     </div>
                   </div>
 
@@ -376,177 +379,181 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
         </section>
       )}
 
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <Link href="/collection" className="group">
-              <Card className="h-full hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
-                <CardContent className="p-8 space-y-6 h-full flex flex-col">
-                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <Sparkles className="w-8 h-8 text-primary" />
-                  </div>
-
-                  <div className="flex-1 space-y-3">
-                    <h2 className="text-3xl font-bold">{t("cta.collection.title")}</h2>
-                    <p className="text-muted-foreground text-lg">{t("cta.collection.subtitle")}</p>
-                    <div className="pt-2">
-                      <div className="text-4xl font-bold text-primary">{t("cta.collection.price")}</div>
-                      <div className="text-sm text-muted-foreground">{t("cta.collection.priceNote")}</div>
-                    </div>
-                  </div>
-
-                  <Button
-                    className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
-                    size="lg"
-                  >
-                    {t("cta.collection.button")}
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/gallery" className="group">
-              <Card className="h-full hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
-                <CardContent className="p-8 space-y-6 h-full flex flex-col">
-                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <Grid3x3 className="w-8 h-8 text-primary" />
-                  </div>
-
-                  <div className="flex-1 space-y-3">
-                    <h2 className="text-3xl font-bold">{t("cta.gallery.title")}</h2>
-                    <p className="text-muted-foreground text-lg">{t("cta.gallery.subtitle")}</p>
-                    <div className="pt-2">
-                      <div className="text-4xl font-bold">{t("cta.gallery.count")}</div>
-                      <div className="text-sm text-muted-foreground">{t("cta.gallery.countNote")}</div>
-                    </div>
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    className="w-full group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors bg-transparent"
-                    size="lg"
-                  >
-                    {t("cta.gallery.button")}
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/auth/login" className="group">
-              <Card className="h-full hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
-                <CardContent className="p-8 space-y-6 h-full flex flex-col">
-                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <User className="w-8 h-8 text-primary" />
-                  </div>
-
-                  <div className="flex-1 space-y-3">
-                    <h2 className="text-3xl font-bold">{t("cta.signIn.title")}</h2>
-                    <p className="text-muted-foreground text-lg">{t("cta.signIn.subtitle")}</p>
-                    <div className="pt-2">
-                      <div className="text-lg font-semibold">{t("cta.signIn.access")}</div>
-                      <div className="text-sm text-muted-foreground">{t("cta.signIn.accessNote")}</div>
-                    </div>
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    className="w-full group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors bg-transparent"
-                    size="lg"
-                  >
-                    {t("cta.signIn.button")}
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </CardContent>
-              </Card>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="grid md:grid-cols-3 gap-12 text-center">
-              <div className="space-y-3">
-                <div className="text-4xl font-bold text-primary">{t("stats.resolution")}</div>
-                <p className="text-muted-foreground">{t("stats.resolutionNote")}</p>
-              </div>
-              <div className="space-y-3">
-                <div className="text-4xl font-bold">{t("stats.instant")}</div>
-                <p className="text-muted-foreground">{t("stats.instantNote")}</p>
-              </div>
-              <div className="space-y-3">
-                <div className="text-4xl font-bold text-primary">{t("stats.vr")}</div>
-                <p className="text-muted-foreground">{t("stats.vrNote")}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24 bg-background">
+      <section id="use-cases" className="py-24 bg-gradient-to-b from-background via-muted/10 to-background">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <Badge variant="secondary" className="mb-4 animate-pulse-glow">
-                {t("featured.badge")}
+            <div className="text-center mb-16 space-y-4">
+              <Badge variant="secondary" className="mb-2">
+                {t("useCases.badge")}
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance">
-                {t("featured.title")} <span className="text-primary">{t("featured.titleHighlight")}</span>
+              <h2 className="text-4xl md:text-5xl font-bold text-balance">
+                {t("useCases.title")}
+                <span className="text-primary block mt-1">{t("useCases.titleHighlight")}</span>
               </h2>
-              <p className="text-lg text-muted-foreground text-pretty">{t("featured.subtitle")}</p>
+              <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-pretty">
+                {t("useCases.subtitle")}
+              </p>
             </div>
 
-            <LandingGalleryTabs dailyImages={dailyImages} />
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <Card className="p-6 space-y-4 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10">
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">🎮</span>
+                </div>
+                <h3 className="text-xl font-semibold">{t("useCases.gameDev")}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {t("useCases.gameDevDesc")}
+                </p>
+              </Card>
+
+              <Card className="p-6 space-y-4 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10">
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">🎬</span>
+                </div>
+                <h3 className="text-xl font-semibold">{t("useCases.virtualProd")}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {t("useCases.virtualProdDesc")}
+                </p>
+              </Card>
+
+              <Card className="p-6 space-y-4 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10">
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">🏗️</span>
+                </div>
+                <h3 className="text-xl font-semibold">{t("useCases.archViz")}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {t("useCases.archVizDesc")}
+                </p>
+              </Card>
+
+              <Card className="p-6 space-y-4 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10">
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">🌐</span>
+                </div>
+                <h3 className="text-xl font-semibold">{t("useCases.metaverse")}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {t("useCases.metaverseDesc")}
+                </p>
+              </Card>
+
+              <Card className="p-6 space-y-4 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10">
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">🎨</span>
+                </div>
+                <h3 className="text-xl font-semibold">{t("useCases.digitalArt")}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {t("useCases.digitalArtDesc")}
+                </p>
+              </Card>
+
+              <Card className="p-6 space-y-4 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10">
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">🏛️</span>
+                </div>
+                <h3 className="text-xl font-semibold">{t("useCases.education")}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {t("useCases.educationDesc")}
+                </p>
+              </Card>
+            </div>
           </div>
         </div>
       </section>
 
       <section className="py-24 bg-muted/20">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-16">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <HelpCircle className="w-6 h-6 text-primary" />
-                <Badge variant="secondary">{t("faq.badge")}</Badge>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance">
-                {t("faq.title")} <span className="text-primary">{t("faq.titleHighlight")}</span>
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-16 space-y-4">
+              <Badge variant="default" className="mb-2">
+                {t("comparison.ourPlatform")}
+              </Badge>
+              <h2 className="text-4xl md:text-5xl font-bold text-balance">
+                {t("comparison.title")}
+                <span className="text-primary block mt-1">{t("comparison.titleHighlight")}</span>
               </h2>
-              <p className="text-lg text-muted-foreground text-pretty">{t("faq.subtitle")}</p>
             </div>
 
-            <div className="space-y-8">
-              <div className="bg-card rounded-lg px-6 py-8 space-y-4">
-                <h3 className="text-xl font-semibold">{t("faq.q1.title")}</h3>
-                <p className="text-muted-foreground whitespace-pre-line">{t("faq.q1.answer")}</p>
-              </div>
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card className="p-8 space-y-6 border-2">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center">
+                      <span className="text-xl">❌</span>
+                    </div>
+                    <h3 className="text-xl font-bold">{t("comparison.genTools")}</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground italic">{t("comparison.genToolsNote")}</p>
+                </div>
+                <ul className="space-y-3 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500 mt-0.5">•</span>
+                    <span>{t("comparison.genToolCon1")}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500 mt-0.5">•</span>
+                    <span>{t("comparison.genToolCon2")}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500 mt-0.5">•</span>
+                    <span>{t("comparison.genToolCon3")}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500 mt-0.5">•</span>
+                    <span>{t("comparison.genToolCon4")}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-red-500 mt-0.5">•</span>
+                    <span>{t("comparison.genToolCon5")}</span>
+                  </li>
+                </ul>
+              </Card>
 
-              <div className="bg-card rounded-lg px-6 py-8 space-y-4">
-                <h3 className="text-xl font-semibold">{t("faq.q2.title")}</h3>
-                <p className="text-muted-foreground whitespace-pre-line">{t("faq.q2.answer")}</p>
-              </div>
+              <Card className="p-8 space-y-6 border-2 border-primary/50 bg-primary/5">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+                      <span className="text-xl">✓</span>
+                    </div>
+                    <h3 className="text-xl font-bold">{t("comparison.ourPlatform")}</h3>
+                  </div>
+                  <p className="text-sm text-primary font-medium">{t("comparison.ourPlatformNote")}</p>
+                </div>
+                <ul className="space-y-3 text-sm">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">✓</span>
+                    <span className="font-medium">{t("comparison.ourPro1")}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">✓</span>
+                    <span className="font-medium">{t("comparison.ourPro2")}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">✓</span>
+                    <span className="font-medium">{t("comparison.ourPro3")}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">✓</span>
+                    <span className="font-medium">{t("comparison.ourPro4")}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">✓</span>
+                    <span className="font-medium">{t("comparison.ourPro5")}</span>
+                  </li>
+                </ul>
+              </Card>
+            </div>
 
-              <div className="bg-card rounded-lg px-6 py-8 space-y-4">
-                <h3 className="text-xl font-semibold">{t("faq.q3.title")}</h3>
-                <p className="text-muted-foreground whitespace-pre-line">{t("faq.q3.answer")}</p>
-              </div>
-
-              <div className="bg-card rounded-lg px-6 py-8 space-y-4">
-                <h3 className="text-xl font-semibold">{t("faq.q4.title")}</h3>
-                <p className="text-muted-foreground whitespace-pre-line">{t("faq.q4.answer")}</p>
-              </div>
-
-              <div className="bg-card rounded-lg px-6 py-8 space-y-4">
-                <h3 className="text-xl font-semibold">{t("faq.q5.title")}</h3>
-                <p className="text-muted-foreground whitespace-pre-line">{t("faq.q5.answer")}</p>
-              </div>
-
-              <div className="bg-card rounded-lg px-6 py-8 space-y-4">
-                <h3 className="text-xl font-semibold">{t("faq.q6.title")}</h3>
-                <p className="text-muted-foreground whitespace-pre-line">{t("faq.q6.answer")}</p>
+            <div className="mt-12 p-8 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-2xl border border-primary/20">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <span className="text-2xl">🛡️</span>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold">{t("comparison.legalTitle")}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {t("comparison.legalDesc")}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -564,12 +571,12 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
 
             <p className="text-xl text-muted-foreground text-pretty">{t("cta.joinThousands")}</p>
 
-            <Button size="lg" className="glow-primary">
-              <Link href="/gallery" className="flex items-center gap-2">
+            <Link href="/gallery">
+              <Button size="lg" className="glow-primary flex items-center gap-2">
                 {t("cta.startExploring")}
                 <ArrowRight className="w-4 h-4" />
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

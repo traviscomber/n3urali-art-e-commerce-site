@@ -34,7 +34,7 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/20 bg-black backdrop-blur-xl supports-[backdrop-filter]:bg-black/95">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           <Link href="/" className="flex items-center group">
@@ -59,21 +59,21 @@ export function Header() {
           <nav className="hidden md:flex items-center space-x-12">
             <Link
               href="/collection"
-              className="relative text-sm font-medium text-white hover:text-primary transition-all duration-300 group"
+              className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"
             >
               {t("nav.collection")}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
               href="/gallery"
-              className="relative text-sm font-medium text-white hover:text-primary transition-all duration-300 group"
+              className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"
             >
               {t("nav.gallery")}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
             </Link>
             <Link
               href="/account/orders"
-              className="relative text-sm font-medium text-gray-300 hover:text-primary transition-all duration-300 group"
+              className="relative text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-300 group"
             >
               {t("nav.myOrders")}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
@@ -101,14 +101,14 @@ export function Header() {
               </SheetTrigger>
               <SheetContent className="w-full sm:max-w-lg">
                 <SheetHeader>
-                  <SheetTitle>Shopping Cart ({itemCount})</SheetTitle>
+                  <SheetTitle>{t("header.shoppingCart")} ({itemCount})</SheetTitle>
                 </SheetHeader>
                 <div className="mt-8 flex flex-col h-full">
                   {items.length === 0 ? (
                     <div className="flex-1 flex items-center justify-center">
                       <div className="text-center">
                         <ShoppingCart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">Your cart is empty</p>
+                        <p className="text-muted-foreground">{t("header.cartEmpty")}</p>
                       </div>
                     </div>
                   ) : (
@@ -165,11 +165,11 @@ export function Header() {
                       </div>
                       <div className="border-t pt-4 mt-4 space-y-4">
                         <div className="flex justify-between items-center text-lg font-semibold">
-                          <span>Total:</span>
+                          <span>{t("header.total")}</span>
                           <span>${total.toFixed(2)}</span>
                         </div>
                         <Button onClick={handleCheckout} className="w-full" size="lg">
-                          Proceed to Checkout
+                          {t("header.proceedToCheckout")}
                         </Button>
                       </div>
                     </>
@@ -192,25 +192,25 @@ export function Header() {
         </div>
 
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-border/20 py-6 bg-black/95 backdrop-blur-sm rounded-b-lg">
+          <div className="md:hidden border-t py-6 bg-background/95 backdrop-blur-sm rounded-b-lg">
             <nav className="flex flex-col space-y-6">
               <Link
                 href="/collection"
-                className="text-base font-medium text-white hover:text-primary transition-colors px-2"
+                className="text-base font-medium text-foreground hover:text-primary transition-colors px-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {t("nav.collection")}
               </Link>
               <Link
                 href="/gallery"
-                className="text-base font-medium text-white hover:text-primary transition-colors px-2"
+                className="text-base font-medium text-foreground hover:text-primary transition-colors px-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {t("nav.gallery")}
               </Link>
               <Link
                 href="/account/orders"
-                className="text-base font-medium text-gray-300 hover:text-primary transition-colors px-2"
+                className="text-base font-medium text-muted-foreground hover:text-primary transition-colors px-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {t("nav.myOrders")}

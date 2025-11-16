@@ -7,6 +7,7 @@ import { PanoramaViewer } from "@/components/panorama-viewer"
 import { Badge } from "@/components/ui/badge"
 import { Loader2 } from 'lucide-react'
 import Link from "next/link"
+import { useLanguage } from "@/lib/contexts/language-context"
 
 interface Image {
   id: string
@@ -45,6 +46,7 @@ interface Category {
 }
 
 export default function GalleryClient() {
+  const { t } = useLanguage()
   const [images, setImages] = useState<Image[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -156,14 +158,14 @@ export default function GalleryClient() {
           <div className="relative container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center space-y-6">
               <Badge variant="secondary" className="animate-pulse-glow">
-                Professional Collection
+                {t("gallery.badge")}
               </Badge>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-balance">
-                Immersive
-                <span className="text-primary block">Image Gallery</span>
+                {t("gallery.title")}
+                <span className="text-primary block">{t("gallery.titleHighlight")}</span>
               </h1>
               <p className="text-xl text-muted-foreground text-pretty">
-                Discover our curated collection of high-resolution equirectangular and fisheye images.
+                {t("gallery.subtitle")}
               </p>
             </div>
           </div>
@@ -173,7 +175,7 @@ export default function GalleryClient() {
           <div className="container mx-auto px-4">
             <div className="flex flex-col items-center justify-center py-20 space-y-4">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <p className="text-muted-foreground">Loading gallery images...</p>
+              <p className="text-muted-foreground">{t("loading")}</p>
             </div>
           </div>
         </section>
@@ -183,63 +185,77 @@ export default function GalleryClient() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative py-16 bg-gradient-to-b from-muted/30 to-background overflow-hidden">
+      <section className="relative py-24 bg-gradient-to-b from-muted/30 via-background to-background overflow-hidden">
         <div className="absolute inset-0">
           <div
-            className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 animate-pulse"
-            style={{ animationDuration: "4s" }}
-          />
-          <div
-            className="absolute top-20 left-10 w-24 h-24 bg-primary/8 rounded-full animate-pulse"
-            style={{ animationDuration: "6s" }}
-          />
-          <div
-            className="absolute bottom-20 right-20 w-20 h-20 bg-secondary/8 rounded-full animate-pulse"
+            className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 animate-pulse"
             style={{ animationDuration: "8s" }}
           />
+          <div className="absolute top-1/4 left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-float" />
+          <div className="absolute bottom-1/4 right-20 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-float-delayed" />
         </div>
 
         <div className="absolute inset-0 grid-pattern opacity-10" />
         <div className="relative container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <Badge variant="secondary">Professional Collection</Badge>
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <Badge variant="secondary" className="text-sm px-4 py-2">
+              {t("gallery.badge")}
+            </Badge>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-balance">
-              Full Image
-              <span className="text-primary block">Gallery</span>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-balance leading-tight">
+              {t("gallery.title")}
+              <span className="text-primary block mt-2">{t("gallery.titleHighlight")}</span>
             </h1>
 
-            <p className="text-xl text-muted-foreground text-pretty">
-              Browse and purchase individual 360° images. Looking for our curated bundle?{" "}
-              <Link href="/collection" className="text-primary hover:underline">
-                View the Featured Collection
-              </Link>
+            <p className="text-xl md:text-2xl text-muted-foreground text-pretty leading-relaxed max-w-3xl mx-auto">
+              {t("gallery.subtitle")}
             </p>
 
-            <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
-              <span>{images.length} Total Images</span>
-              <span>•</span>
-              <span>{featuredImages.length} Featured</span>
-              <span>•</span>
-              <span>{equirectangularImages.length} 360° Images</span>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8 max-w-3xl mx-auto">
+              <div className="space-y-2">
+                <div className="text-3xl font-bold text-primary">{t("gallery.stats.resolution")}</div>
+                <div className="text-sm text-muted-foreground">{t("gallery.stats.resolutionLabel")}</div>
+              </div>
+              <div className="space-y-2">
+                <div className="text-3xl font-bold text-primary">{images.length}+</div>
+                <div className="text-sm text-muted-foreground">{t("gallery.stats.assets")}</div>
+              </div>
+              <div className="space-y-2">
+                <div className="text-3xl font-bold text-primary">{t("gallery.stats.waitTime")}</div>
+                <div className="text-sm text-muted-foreground">{t("gallery.stats.waitTimeLabel")}</div>
+              </div>
+              <div className="space-y-2">
+                <div className="text-3xl font-bold text-primary">{t("gallery.stats.licensed")}</div>
+                <div className="text-sm text-muted-foreground">{t("gallery.stats.licensedLabel")}</div>
+              </div>
+            </div>
+
+            <div className="pt-4">
+              <p className="text-sm text-muted-foreground/80 max-w-2xl mx-auto">
+                {t("gallery.algorithmNote")}
+              </p>
             </div>
           </div>
         </div>
       </section>
 
       {categories.length > 0 && (
-        <section className="py-8 border-b border-border/50 bg-muted/20">
+        <section className="py-10 border-b border-border/50 bg-muted/20">
           <div className="container mx-auto px-4">
-            <div className="flex flex-col items-center gap-4">
-              <h3 className="text-sm font-medium text-muted-foreground">Browse by Category</h3>
+            <div className="flex flex-col items-center gap-6">
+              <div className="text-center space-y-2">
+                <h3 className="text-base font-semibold text-foreground">{t("gallery.exploreDataset")}</h3>
+                <p className="text-sm text-muted-foreground max-w-xl">
+                  {t("gallery.datasetNote")}
+                </p>
+              </div>
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <Badge
                   variant={selectedCategory === "all" ? "default" : "outline"}
-                  className="cursor-pointer text-sm py-2 px-4 transition-all hover:scale-105"
+                  className="cursor-pointer text-sm py-2 px-5 transition-all hover:scale-105 hover:shadow-md"
                   onClick={() => setSelectedCategory("all")}
                 >
-                  All Images
+                  {t("gallery.allCollections")}
                 </Badge>
                 {categories.map((category) => {
                   const isHeritage = category.name.toLowerCase() === 'heritage'
@@ -250,8 +266,8 @@ export default function GalleryClient() {
                     <Badge
                       key={category.id}
                       variant={selectedCategory === category.id ? "default" : "outline"}
-                      className={`cursor-pointer text-sm py-2 px-4 transition-all hover:scale-105 ${
-                        isHeritage ? 'border-2 border-primary/50 shadow-lg' : ''
+                      className={`cursor-pointer text-sm py-2 px-5 transition-all hover:scale-105 hover:shadow-md ${
+                        isHeritage ? 'border-2 border-primary/60 shadow-lg shadow-primary/20' : ''
                       }`}
                       onClick={() => setSelectedCategory(category.id)}
                     >
@@ -269,32 +285,48 @@ export default function GalleryClient() {
       )}
 
       {heritageImages.length > 0 && (selectedCategory === "all" || selectedCategory === getHeritageCategory()?.id) && (
-        <section className="py-16 bg-gradient-to-b from-muted/10 to-background">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-8 space-y-3">
-              <Badge variant="default" className="bg-primary text-primary-foreground shadow-lg">
-                Featured Category
+        <section className="py-20 bg-gradient-to-b from-muted/10 via-background to-background relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.05),transparent_50%)]" />
+          <div className="relative container mx-auto px-4">
+            <div className="text-center mb-12 space-y-4">
+              <Badge variant="default" className="bg-primary text-primary-foreground shadow-lg px-4 py-2">
+                {t("gallery.heritageTitle").split(" ")[0]} {t("gallery.heritageTitle").split(" ")[1]}
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold text-balance">
-                Cultural Heritage
+              <h2 className="text-4xl md:text-5xl font-bold text-balance">
+                {t("gallery.heritageTitle")}
+                <span className="text-primary block mt-1">{t("gallery.heritageSubtitle")}</span>
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-                Explore historical landmarks, monuments, and architectural wonders captured in immersive 360° detail
+              <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto text-pretty leading-relaxed">
+                {t("gallery.heritageDescription")} {t("gallery.heritageUseCase")}
               </p>
+              <div className="flex items-center justify-center gap-8 pt-4 text-sm flex-wrap">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                  <span className="text-muted-foreground">{t("gallery.multiEraStyles")}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                  <span className="text-muted-foreground">{t("gallery.temporalLighting")}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                  <span className="text-muted-foreground">{t("gallery.materialTexture")}</span>
+                </div>
+              </div>
             </div>
             <ProductGrid 
               initialImages={selectedCategory === getHeritageCategory()?.id ? heritageImages : heritageImages.slice(0, 8)} 
               categoryId={getHeritageCategory()?.id}
             />
             {selectedCategory === "all" && heritageImages.length > 8 && (
-              <div className="flex justify-center mt-8">
+              <div className="flex justify-center mt-10">
                 <Link href="/gallery">
                   <Badge 
                     variant="outline" 
-                    className="cursor-pointer text-base py-3 px-6 hover:bg-primary hover:text-primary-foreground transition-all"
+                    className="cursor-pointer text-base py-3 px-8 hover:bg-primary hover:text-primary-foreground transition-all shadow-md"
                     onClick={() => setSelectedCategory(getHeritageCategory()?.id || "all")}
                   >
-                    View All Heritage Images ({heritageImages.length})
+                    {t("gallery.exploreHeritage")} ({heritageImages.length})
                   </Badge>
                 </Link>
               </div>
@@ -303,19 +335,19 @@ export default function GalleryClient() {
         </section>
       )}
 
-      <section className="py-16">
+      <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="space-y-12">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">
+            <div className="text-center mb-16 space-y-4">
+              <h2 className="text-4xl md:text-5xl font-bold">
                 {selectedCategory === "all" 
-                  ? "Complete Collection"
-                  : `${categories.find(c => c.id === selectedCategory)?.name || "Selected"} Images`}
+                  ? t("gallery.exploreDatasetTitle")
+                  : `${categories.find(c => c.id === selectedCategory)?.name || "Selected"} Collection`}
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-pretty">
                 {selectedCategory === "all" 
-                  ? "Browse our entire catalog of professional images"
-                  : `Discover our ${categories.find(c => c.id === selectedCategory)?.name.toLowerCase()} collection`}
+                  ? t("gallery.datasetDescription")
+                  : `Browse the ${categories.find(c => c.id === selectedCategory)?.name.toLowerCase()} collection`}
               </p>
             </div>
             <ProductGrid 

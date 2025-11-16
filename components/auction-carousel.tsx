@@ -96,7 +96,7 @@ export default function AuctionCarousel({ images }: AuctionCarouselProps) {
   if (!images || images.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        No hay imágenes en subasta en este momento
+        No auction images available at this time
       </div>
     )
   }
@@ -130,7 +130,7 @@ export default function AuctionCarousel({ images }: AuctionCarouselProps) {
         <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0">
           <Badge className="bg-[#392A48]/90 text-white hover:bg-[#392A48] text-base px-4 py-2 border border-[#392A48]/50 backdrop-blur-md font-light">
             <Clock className="w-4 h-4 mr-2" />
-            {secondsLeft}s restantes
+            {secondsLeft}s remaining
           </Badge>
         </div>
 
@@ -153,7 +153,7 @@ export default function AuctionCarousel({ images }: AuctionCarouselProps) {
                 </div>
                 {discountPercent > 0 && (
                   <div className="text-sm text-yellow-400/90 font-medium">
-                    {discountPercent}% de descuento
+                    {discountPercent}% off
                   </div>
                 )}
               </div>
@@ -162,7 +162,7 @@ export default function AuctionCarousel({ images }: AuctionCarouselProps) {
                 className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20 font-normal"
                 onClick={(e) => handleAuctionClick(currentImage, e)}
               >
-                Ver Detalles
+                View Details
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
@@ -184,7 +184,7 @@ export default function AuctionCarousel({ images }: AuctionCarouselProps) {
                     ? "w-8 bg-white/80"
                     : "w-1.5 bg-white/30 hover:bg-white/50"
                 }`}
-                aria-label={`Ver imagen ${index + 1}`}
+                aria-label={`View image ${index + 1}`}
               />
             ))}
           </div>

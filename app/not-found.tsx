@@ -2,8 +2,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
 export const metadata = {
-  title: "Page Not Found | N3urali.art",
-  description: "The page you're looking for doesn't exist on N3urali.art - Premium 360° Digital Photography platform.",
+  title: "Page Not Found | n3uralia360.art",
+  description: "The page you're looking for doesn't exist on n3uralia360.art - Premium 360° Digital Photography platform.",
 }
 
 export default function NotFound() {
@@ -13,7 +13,7 @@ export default function NotFound() {
         <h1 className="text-6xl font-bold text-primary">404</h1>
         <h2 className="text-2xl font-semibold text-foreground">Page Not Found</h2>
         <p className="text-muted-foreground">
-          The page you're looking for doesn't exist on N3urali.art. Explore our premium 360° digital photography
+          The page you're looking for doesn't exist on n3uralia360.art. Explore our premium 360° digital photography
           collection instead.
         </p>
         <div className="space-y-4">

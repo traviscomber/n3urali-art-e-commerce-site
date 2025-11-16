@@ -238,11 +238,11 @@ export default function PhotoDetailPage() {
     `
 
     const topLeftWatermark = document.createElement("div")
-    topLeftWatermark.textContent = "n3urali.art"
+    topLeftWatermark.textContent = "n3uralia360.art"
     topLeftWatermark.style.cssText = `${watermarkStyles} left: 5%; top: 5%;`
 
     const bottomRightWatermark = document.createElement("div")
-    bottomRightWatermark.textContent = "n3urali.art"
+    bottomRightWatermark.textContent = "n3uralia360.art"
     bottomRightWatermark.style.cssText = `${watermarkStyles} right: 5%; bottom: 5%;`
 
     watermarkOverlay.appendChild(topLeftWatermark)
@@ -620,7 +620,7 @@ export default function PhotoDetailPage() {
                                 MozUserSelect: "none",
                               }}
                             >
-                              n3urali.art
+                              n3uralia360.art
                             </div>
                             <div
                               className="absolute text-white/20 font-bold text-sm transform -rotate-45 select-none pointer-events-none"
@@ -635,7 +635,7 @@ export default function PhotoDetailPage() {
                                 MozUserSelect: "none",
                               }}
                             >
-                              n3urali.art
+                              n3uralia360.art
                             </div>
                           </div>
                         </div>

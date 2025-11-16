@@ -3,7 +3,7 @@
 import { useCart } from "@/lib/contexts/cart-context"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { Trash2, ShoppingCart, Plus, Minus, Package } from "lucide-react"
+import { Trash2, ShoppingCart, Plus, Minus, Package } from 'lucide-react'
 import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -27,7 +27,7 @@ export function CartSidebar() {
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
-            Carrito de Compras ({state.items.length})
+            Shopping Cart ({state.items.length})
           </SheetTitle>
           {/* </CHANGE> */}
         </SheetHeader>
@@ -37,9 +37,9 @@ export function CartSidebar() {
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground mb-2">Tu carrito está vacío</p>
+                <p className="text-muted-foreground mb-2">Your cart is empty</p>
                 <Button variant="outline" onClick={closeCart}>
-                  Continuar Comprando
+                  Continue Shopping
                 </Button>
                 {/* </CHANGE> */}
               </div>
@@ -54,7 +54,7 @@ export function CartSidebar() {
                         <div className="absolute top-2 left-2">
                           <Badge variant="default" className="flex items-center gap-1">
                             <Package className="h-3 w-3" />
-                            Paquete
+                            Bundle
                           </Badge>
                         </div>
                       )}
@@ -66,7 +66,7 @@ export function CartSidebar() {
                             "/placeholder.svg?height=64&width=64&query=360 panoramic thumbnail" ||
                             "/placeholder.svg" ||
                             "/placeholder.svg"
-                          }
+                           || "/placeholder.svg"}
                           alt={item.title}
                           fill
                           className="object-cover rounded"
@@ -76,7 +76,7 @@ export function CartSidebar() {
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm truncate">{item.title}</h4>
                         {item.isBundle && item.bundleImageCount ? (
-                          <p className="text-xs text-muted-foreground">{item.bundleImageCount} imágenes incluidas</p>
+                          <p className="text-xs text-muted-foreground">{item.bundleImageCount} images included</p>
                         ) : (
                           <p className="text-xs text-muted-foreground">{item.license_name}</p>
                         )}
@@ -130,11 +130,11 @@ export function CartSidebar() {
                 <div className="space-y-2">
                   <Link href="/checkout" onClick={closeCart}>
                     <Button className="w-full" size="lg">
-                      Ir al Pago
+                      Proceed to Checkout
                     </Button>
                   </Link>
                   <Button variant="outline" className="w-full bg-transparent" onClick={closeCart}>
-                    Continuar Comprando
+                    Continue Shopping
                   </Button>
                   {/* </CHANGE> */}
                 </div>

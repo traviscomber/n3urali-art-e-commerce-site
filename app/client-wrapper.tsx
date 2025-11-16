@@ -9,7 +9,7 @@ import Image from "next/image"
 import LandingGalleryTabs from "@/components/landing-gallery-tabs"
 import AuctionCarousel from "@/components/auction-carousel"
 import { useLanguage } from "@/lib/contexts/language-context"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useCallback, memo } from "react"
 import { ParticleTitle } from "@/components/particle-title"
 
 interface FeaturedImage {
@@ -32,32 +32,28 @@ interface ClientWrapperProps {
   dailyImages: FeaturedImage[]
 }
 
-export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, dailyImages }: ClientWrapperProps) {
+export const ClientWrapper = memo(function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, dailyImages }: ClientWrapperProps) {
   const { t } = useLanguage()
   const [auctionTimeLeft, setAuctionTimeLeft] = useState({ minutes: 0, seconds: 0 })
 
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      const now = new Date()
-      const secondsLeft = 59 - now.getSeconds()
-      return { minutes: 0, seconds: secondsLeft }
-    }
+  const calculateTimeLeft = useCallback(() => {
+    const now = new Date()
+    const secondsLeft = 59 - now.getSeconds()
+    return { minutes: 0, seconds: secondsLeft }
+  }, [])
 
+  useEffect(() => {
     setAuctionTimeLeft(calculateTimeLeft())
     const interval = setInterval(() => {
       setAuctionTimeLeft(calculateTimeLeft())
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [])
-
-  console.log('[v0] ClientWrapper rendering, imageOfTheDay exists:', !!imageOfTheDay)
-  console.log('[v0] Translation key test - cta.readyToTransform:', t("cta.readyToTransform"))
+  }, [calculateTimeLeft])
 
   return (
     <div className="min-h-screen bg-background">
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Video background */}
         <div className="absolute inset-0 z-0">
           <video
             autoPlay
@@ -71,20 +67,16 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
             Your browser does not support the video tag.
           </video>
 
-          {/* Dark gradient overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60" />
         </div>
 
-        {/* Subtle pattern overlay */}
         <div className="absolute inset-0 opacity-[0.03] z-[1]">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.3),transparent_50%)]" />
         </div>
 
         <div className="relative container mx-auto px-4 py-20 z-10">
           <div className="max-w-7xl mx-auto">
-            {/* Hero content */}
             <div className="text-center space-y-10 mb-20">
-              {/* Subtle badge */}
               <div className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 rounded-full px-5 py-2.5 backdrop-blur-sm">
                 <Sparkles className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium text-primary">{t("hero.badge")}</span>
@@ -102,22 +94,6 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                   {t("hero.description")}
                 </span>
               </p>
-
-              {/* 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
-                <Link href="/gallery">
-                  <Button size="lg" className="text-lg px-10 py-7 h-auto shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 transition-all">
-                    {t("hero.cta.explore")}
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
-                </Link>
-                <Link href="#use-cases">
-                  <Button size="lg" variant="outline" className="text-lg px-10 py-7 h-auto bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border-white/20 hover:border-white/40">
-                    {t("hero.cta.demo")}
-                  </Button>
-                </Link>
-              </div>
-              */}
 
               <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-white/80">
                 <div className="flex items-center gap-2.5">
@@ -141,7 +117,6 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
           </div>
         </div>
 
-        {/* Scroll indicator */}
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10">
           <div className="flex flex-col items-center gap-2 text-white/60 animate-bounce">
             <div className="w-6 h-10 border-2 border-current rounded-full flex items-start justify-center p-2">
@@ -150,7 +125,6 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
           </div>
         </div>
       </section>
-      {/* End of refined hero section */}
 
       {imageOfTheDay && (
         <section className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden">
@@ -218,7 +192,6 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                       </div>
                     </div>
                   </div>
-                  {/* End of change */}
                 </div>
 
                 <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
@@ -372,7 +345,6 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
       )}
 
       <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-primary/5 to-background">
-        {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           {imageOfTheDay ? (
             <>
@@ -395,14 +367,11 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-accent/20" />
           )}
           
-          {/* Animated gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-accent/20 animate-pulse" />
         </div>
 
-        {/* Content */}
         <div className="relative container mx-auto px-4 py-24 z-10">
           <div className="max-w-5xl mx-auto text-center space-y-12">
-            {/* Badge */}
             <div className="inline-flex items-center gap-2.5 bg-primary/30 border-2 border-primary/50 rounded-full px-8 py-4 backdrop-blur-lg shadow-2xl">
               <Grid3x3 className="w-6 h-6 text-primary" />
               <span className="text-base font-bold text-white">{t("cta.startExploring")}</span>
@@ -422,7 +391,6 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
               {t("cta.joinThousands")}
             </p>
 
-            {/* MASSIVE CTA Button */}
             <div className="pt-10">
               <Link href="/gallery">
                 <Button 
@@ -434,13 +402,11 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                     <ArrowRight className="w-10 h-10 md:w-12 md:h-12 group-hover:translate-x-3 transition-transform duration-300" />
                   </span>
                   
-                  {/* Animated shine effect */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 </Button>
               </Link>
             </div>
 
-            {/* Stats/Features with better visibility */}
             <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10 pt-10 text-base md:text-lg">
               <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-6 py-3 rounded-full border border-white/20">
                 <div className="w-2.5 h-2.5 bg-primary rounded-full animate-pulse shadow-lg shadow-primary/50" />
@@ -458,10 +424,8 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
           </div>
         </div>
 
-        {/* Bottom fade */}
         <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background via-background/50 to-transparent z-[5]" />
       </section>
-      {/* End of enhanced CTA section */}
 
       <section id="use-cases" className="py-24 bg-gradient-to-b from-background via-muted/10 to-background">
         <div className="container mx-auto px-4">
@@ -645,4 +609,4 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
       </section>
     </div>
   )
-}
+})

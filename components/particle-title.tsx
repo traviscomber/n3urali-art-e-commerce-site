@@ -65,8 +65,8 @@ export function ParticleTitle({ children, className = '' }: ParticleTitleProps) 
       }
     }
 
-    // Initialize particles
-    const particleCount = 80
+    // Initialize particles - fewer on mobile devices
+    const particleCount = window.innerWidth < 768 ? 30 : 50
     for (let i = 0; i < particleCount; i++) {
       particlesRef.current.push(createParticle())
     }
@@ -97,17 +97,19 @@ export function ParticleTitle({ children, className = '' }: ParticleTitleProps) 
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
         ctx.fill()
         
-        // Add glow effect
-        const gradient = ctx.createRadialGradient(
-          particle.x, particle.y, 0,
-          particle.x, particle.y, particle.size * 2
-        )
-        gradient.addColorStop(0, particle.color)
-        gradient.addColorStop(1, 'transparent')
-        ctx.fillStyle = gradient
-        ctx.beginPath()
-        ctx.arc(particle.x, particle.y, particle.size * 2, 0, Math.PI * 2)
-        ctx.fill()
+        if (window.innerWidth >= 768) {
+          // Add glow effect (desktop only)
+          const gradient = ctx.createRadialGradient(
+            particle.x, particle.y, 0,
+            particle.x, particle.y, particle.size * 2
+          )
+          gradient.addColorStop(0, particle.color)
+          gradient.addColorStop(1, 'transparent')
+          ctx.fillStyle = gradient
+          ctx.beginPath()
+          ctx.arc(particle.x, particle.y, particle.size * 2, 0, Math.PI * 2)
+          ctx.fill()
+        }
         ctx.restore()
 
         // Replace dead particles
@@ -117,6 +119,7 @@ export function ParticleTitle({ children, className = '' }: ParticleTitleProps) 
       })
 
       // Draw connections between nearby particles
+      const connectionDistance = window.innerWidth < 768 ? 80 : 120
       ctx.save()
       particlesRef.current.forEach((p1, i) => {
         particlesRef.current.slice(i + 1).forEach((p2) => {
@@ -124,8 +127,8 @@ export function ParticleTitle({ children, className = '' }: ParticleTitleProps) 
           const dy = p1.y - p2.y
           const distance = Math.sqrt(dx * dx + dy * dy)
 
-          if (distance < 120) {
-            ctx.globalAlpha = (1 - distance / 120) * 0.15
+          if (distance < connectionDistance) {
+            ctx.globalAlpha = (1 - distance / connectionDistance) * 0.15
             ctx.strokeStyle = 'rgba(139, 92, 246, 0.3)'
             ctx.lineWidth = 0.5
             ctx.beginPath()

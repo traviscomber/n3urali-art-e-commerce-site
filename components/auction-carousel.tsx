@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback, memo } from "react"
 import { useRouter } from 'next/navigation'
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
@@ -22,36 +22,31 @@ interface AuctionCarouselProps {
   images: AuctionImage[]
 }
 
-export default function AuctionCarousel({ images }: AuctionCarouselProps) {
+export default memo(function AuctionCarousel({ images }: AuctionCarouselProps) {
   const router = useRouter()
   const [currentPrices, setCurrentPrices] = useState<Record<string, number>>({})
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [secondsLeft, setSecondsLeft] = useState(0)
 
-  const calculateDynamicPrice = (basePrice: number) => {
+  const calculateDynamicPrice = useCallback((basePrice: number) => {
     const now = new Date()
     const minutesInHour = now.getMinutes()
     const secondsInMinute = now.getSeconds()
     const totalSeconds = minutesInHour * 60 + secondsInMinute
-
-    // Price multiplier: starts at 1.5x and decreases to 1.0x at minute 59
     const priceMultiplier = 1.5 - totalSeconds / 3600
-
     return basePrice * priceMultiplier
-  }
+  }, [])
 
-  const calculateSecondsLeft = () => {
+  const calculateSecondsLeft = useCallback(() => {
     const now = new Date()
     return 59 - now.getSeconds()
-  }
+  }, [])
 
-  const calculateDiscountPercent = () => {
+  const calculateDiscountPercent = useCallback(() => {
     const now = new Date()
     const minutesInHour = now.getMinutes()
-    
-    // Discount increases from 0% to 33% as we approach minute 59
     return Math.floor((minutesInHour / 59) * 33)
-  }
+  }, [])
 
   useEffect(() => {
     const updatePrices = () => {
@@ -67,31 +62,23 @@ export default function AuctionCarousel({ images }: AuctionCarouselProps) {
     const interval = setInterval(updatePrices, 1000)
 
     return () => clearInterval(interval)
-  }, [images])
+  }, [images, calculateDynamicPrice, calculateSecondsLeft])
 
   useEffect(() => {
     if (images.length <= 1) return
 
-    // When secondsLeft hits 0, move to next image
     if (secondsLeft === 0) {
       setCurrentImageIndex((prev) => (prev + 1) % images.length)
     }
   }, [secondsLeft, images.length])
 
-  const handleAuctionClick = (image: AuctionImage, e: React.MouseEvent) => {
+  const handleAuctionClick = useCallback((image: AuctionImage, e: React.MouseEvent) => {
     e.preventDefault()
     const capturedPrice = currentPrices[image.id] || image.price
     const capturedTimestamp = new Date().toISOString()
 
-    console.log("[v0] Last-minute auction clicked - navigating to photo page:", {
-      imageId: image.id,
-      capturedPrice,
-      capturedTimestamp,
-      secondsLeft,
-    })
-
     router.push(`/photo/${image.id}?auctionPrice=${capturedPrice.toFixed(2)}&auctionTimestamp=${capturedTimestamp}`)
-  }
+  }, [currentPrices, router])
 
   if (!images || images.length === 0) {
     return (
@@ -192,4 +179,4 @@ export default function AuctionCarousel({ images }: AuctionCarouselProps) {
       </div>
     </div>
   )
-}
+})

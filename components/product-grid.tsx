@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Search, X, Tag } from "lucide-react"
+import { Search, X, Tag } from 'lucide-react'
 import { useTagFilter } from "@/lib/contexts/tag-filter-context"
 
 interface Image {
@@ -61,10 +61,28 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
 
   useEffect(() => {
     loadCategories()
-    loadImages()
+    if (!initialImages || initialImages.length === 0) {
+      loadImages()
+    } else {
+      console.log('[v0] Using initialImages, count:', initialImages.length)
+      setLoading(false)
+      setHasMoreInDB(false)
+    }
   }, [])
 
   useEffect(() => {
+    if (initialImages && initialImages.length > 0) {
+      console.log('[v0] Updating images from initialImages prop:', initialImages.length)
+      setImages(initialImages)
+      setHasMoreInDB(false)
+      setLoading(false)
+    }
+  }, [initialImages])
+
+  useEffect(() => {
+    if (initialImages && initialImages.length > 0) {
+      return
+    }
     setImages([])
     setHasMoreInDB(true)
     loadImages()
@@ -105,6 +123,13 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
   }
 
   const loadImages = async (append = false) => {
+    if (initialImages && initialImages.length > 0 && !append) {
+      console.log('[v0] Using pre-filtered images, skipping DB load')
+      setLoading(false)
+      setHasMoreInDB(false)
+      return
+    }
+
     if (append) {
       setLoadingMore(true)
     } else {

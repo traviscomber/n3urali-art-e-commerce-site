@@ -113,12 +113,27 @@ export default function GalleryClient() {
         )
         setEquirectangularImages(equirectangular)
 
+        const heritageCategory = allCategories.find(cat => cat.name.toLowerCase() === 'heritage')
         const heritage = validImages.filter(
-          (img) =>
-            img.category_name?.toLowerCase().includes("heritage") ||
-            img.categories?.name?.toLowerCase().includes("heritage") ||
-            (img.tags && Array.isArray(img.tags) && img.tags.some(tag => tag.toLowerCase() === "heritage"))
+          (img) => {
+            // Match by category_id
+            if (heritageCategory && img.category_id === heritageCategory.id) {
+              return true
+            }
+            // Match by category name
+            if (img.category_name?.toLowerCase().includes("heritage") ||
+                img.categories?.name?.toLowerCase().includes("heritage")) {
+              return true
+            }
+            // Match by tags
+            if (img.tags && Array.isArray(img.tags) && 
+                img.tags.some(tag => tag.toLowerCase() === "heritage")) {
+              return true
+            }
+            return false
+          }
         )
+        console.log(`[v0] Found ${heritage.length} Heritage images`)
         setHeritageImages(heritage)
       } else {
         console.error("Error loading data:", imagesResult.error || categoriesResult.error)
@@ -259,8 +274,14 @@ export default function GalleryClient() {
                 </Badge>
                 {categories.map((category) => {
                   const isHeritage = category.name.toLowerCase() === 'heritage'
-                  const imageCount = isHeritage ? heritageImages.length : 
-                    images.filter(img => img.category_id === category.id).length
+                  let imageCount = 0
+                  if (isHeritage) {
+                    imageCount = heritageImages.length
+                  } else if (category.name.toLowerCase().includes('equirectangular')) {
+                    imageCount = equirectangularImages.length
+                  } else {
+                    imageCount = images.filter(img => img.category_id === category.id).length
+                  }
                   
                   return (
                     <Badge

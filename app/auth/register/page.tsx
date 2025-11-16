@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import { useRouter } from 'next/navigation'
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
@@ -15,8 +15,6 @@ export default function RegisterPage() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
   const router = useRouter()
-
-  const supabase = useMemo(() => createClient(), [])
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,6 +34,8 @@ export default function RegisterPage() {
     }
 
     try {
+      const supabase = createClient()
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,

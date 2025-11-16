@@ -405,22 +405,21 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
             {/* Badge */}
             <div className="inline-flex items-center gap-2.5 bg-primary/30 border-2 border-primary/50 rounded-full px-8 py-4 backdrop-blur-lg shadow-2xl">
               <Grid3x3 className="w-6 h-6 text-primary" />
-              <span className="text-base font-bold text-white">Ready to Create?</span>
+              <span className="text-base font-bold text-white">{t("cta.startExploring")}</span>
             </div>
 
             <ParticleTitle className="min-h-[250px] flex items-center justify-center">
               <h2 className="text-5xl md:text-6xl lg:text-8xl font-black tracking-tight text-white drop-shadow-2xl text-balance leading-[1.1]">
-                Ready to Transform
+                {t("cta.readyToTransform")}
                 <br />
                 <span className="text-primary drop-shadow-[0_0_30px_rgba(139,92,246,0.5)]">
-                  Your Creative Vision?
+                  {t("cta.creativeVision")}
                 </span>
               </h2>
             </ParticleTitle>
 
-            {/* Description */}
             <p className="text-xl md:text-2xl lg:text-3xl text-white/95 max-w-3xl mx-auto leading-relaxed text-pretty drop-shadow-xl font-medium">
-              Join thousands of creators who trust n3uralia360.art for their immersive projects
+              {t("cta.joinThousands")}
             </p>
 
             {/* MASSIVE CTA Button */}
@@ -431,7 +430,7 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                   className="text-3xl md:text-4xl px-20 md:px-28 py-12 md:py-16 h-auto font-black shadow-2xl shadow-primary/60 hover:shadow-[0_0_80px_rgba(139,92,246,0.8)] transition-all duration-500 hover:scale-110 bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-primary group relative overflow-hidden"
                 >
                   <span className="relative z-10 flex items-center gap-4">
-                    Explore Gallery Now
+                    {t("gallery.badge").split(".")[0]} {/* Using "Gallery" part from badge */}
                     <ArrowRight className="w-10 h-10 md:w-12 md:h-12 group-hover:translate-x-3 transition-transform duration-300" />
                   </span>
                   
@@ -445,15 +444,15 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
             <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10 pt-10 text-base md:text-lg">
               <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-6 py-3 rounded-full border border-white/20">
                 <div className="w-2.5 h-2.5 bg-primary rounded-full animate-pulse shadow-lg shadow-primary/50" />
-                <span className="font-bold text-white">132+ Premium Assets</span>
+                <span className="font-bold text-white">132+ {t("gallery.stats.assets")}</span>
               </div>
               <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-6 py-3 rounded-full border border-white/20">
                 <div className="w-2.5 h-2.5 bg-primary rounded-full animate-pulse shadow-lg shadow-primary/50" />
-                <span className="font-bold text-white">Instant Download</span>
+                <span className="font-bold text-white">{t("stats.instantNote")}</span>
               </div>
               <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-6 py-3 rounded-full border border-white/20">
                 <div className="w-2.5 h-2.5 bg-primary rounded-full animate-pulse shadow-lg shadow-primary/50" />
-                <span className="font-bold text-white">Commercial License</span>
+                <span className="font-bold text-white">{t("comparison.ourPro5").split(" ").slice(0, 2).join(" ")}</span>
               </div>
             </div>
           </div>

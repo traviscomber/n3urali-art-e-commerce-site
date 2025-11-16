@@ -10,6 +10,7 @@ import LandingGalleryTabs from "@/components/landing-gallery-tabs"
 import AuctionCarousel from "@/components/auction-carousel"
 import { useLanguage } from "@/lib/contexts/language-context"
 import { useState, useEffect } from "react"
+import { ParticleTitle } from "@/components/particle-title"
 
 interface FeaturedImage {
   id: string
@@ -92,7 +93,7 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
               <h1 className="text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-[0.95] text-balance text-white drop-shadow-2xl">
                 {t("hero.title")}
                 <br />
-                <span className="text-primary">{t("hero.titleHighlight")}</span>
+                <span className="text-primary drop-shadow-[0_0_40px_rgba(139,92,246,0.8)]">{t("hero.titleHighlight")}</span>
               </h1>
 
               <p className="text-xl md:text-2xl text-white/90 max-w-4xl mx-auto leading-relaxed text-pretty font-light drop-shadow-lg">
@@ -102,6 +103,7 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                 </span>
               </p>
 
+              {/* 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
                 <Link href="/gallery">
                   <Button size="lg" className="text-lg px-10 py-7 h-auto shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 transition-all">
@@ -115,6 +117,7 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
                   </Button>
                 </Link>
               </div>
+              */}
 
               <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-white/80">
                 <div className="flex items-center gap-2.5">
@@ -405,14 +408,15 @@ export function ClientWrapper({ imageOfTheDay, collectionImages, auctionImages, 
               <span className="text-base font-bold text-white">Ready to Create?</span>
             </div>
 
-            {/* Heading */}
-            <h2 className="text-5xl md:text-6xl lg:text-8xl font-black tracking-tight text-white drop-shadow-2xl text-balance leading-[1.1]">
-              Ready to Transform
-              <br />
-              <span className="text-primary drop-shadow-[0_0_30px_rgba(139,92,246,0.5)]">
-                Your Creative Vision?
-              </span>
-            </h2>
+            <ParticleTitle className="min-h-[250px] flex items-center justify-center">
+              <h2 className="text-5xl md:text-6xl lg:text-8xl font-black tracking-tight text-white drop-shadow-2xl text-balance leading-[1.1]">
+                Ready to Transform
+                <br />
+                <span className="text-primary drop-shadow-[0_0_30px_rgba(139,92,246,0.5)]">
+                  Your Creative Vision?
+                </span>
+              </h2>
+            </ParticleTitle>
 
             {/* Description */}
             <p className="text-xl md:text-2xl lg:text-3xl text-white/95 max-w-3xl mx-auto leading-relaxed text-pretty drop-shadow-xl font-medium">

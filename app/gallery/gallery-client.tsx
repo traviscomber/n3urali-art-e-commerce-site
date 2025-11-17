@@ -125,7 +125,6 @@ export default function GalleryClient({ initialImages, initialCategories }: Gall
 
   const getHeritageCategory = () => categories.find(cat => cat.name.toLowerCase() === 'heritage')
 
-
   return (
     <div className="min-h-screen bg-background">
       <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
@@ -208,7 +207,6 @@ export default function GalleryClient({ initialImages, initialCategories }: Gall
               </div>
               
               <div className="flex flex-col gap-6 w-full max-w-4xl">
-                {/* All Collections Button */}
                 <div className="flex justify-center">
                   <Badge
                     variant={selectedCategory === "all" ? "default" : "outline"}
@@ -249,38 +247,6 @@ export default function GalleryClient({ initialImages, initialCategories }: Gall
                             {category.name}
                             {imageCount > 0 && (
                               <span className="ml-2 opacity-70">({imageCount})</span>
-                            )}
-                          </Badge>
-                        )
-                      })}
-                  </div>
-                </div>
-
-                {/* Collections Section - Featured Heritage */}
-                <div className="space-y-3">
-                  <div className="text-center">
-                    <h4 className="text-sm font-semibold text-foreground">{t("gallery.collections")}</h4>
-                    <p className="text-xs text-muted-foreground">{t("gallery.collectionsNote")}</p>
-                  </div>
-                  <div className="flex flex-wrap items-center justify-center gap-3">
-                    {categories
-                      .filter(category => {
-                        const name = category.name.toLowerCase()
-                        return name === 'heritage'
-                      })
-                      .map((category) => {
-                        const imageCount = heritageImages.length
-                        
-                        return (
-                          <Badge
-                            key={category.id}
-                            variant={selectedCategory === category.id ? "default" : "outline"}
-                            className="cursor-pointer text-base py-3 px-6 transition-all hover:scale-105 hover:shadow-lg border-2 border-primary/60 shadow-lg shadow-primary/20 bg-gradient-to-r from-primary/10 to-primary/5"
-                            onClick={() => setSelectedCategory(category.id)}
-                          >
-                            ⭐ {category.name}
-                            {imageCount > 0 && (
-                              <span className="ml-2 opacity-90 font-semibold">({imageCount})</span>
                             )}
                           </Badge>
                         )

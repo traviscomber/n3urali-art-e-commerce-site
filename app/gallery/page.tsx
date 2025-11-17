@@ -2,6 +2,8 @@ import type { Metadata } from "next"
 import GalleryClient from "./gallery-client"
 import { getImages, getCategories } from "@/app/actions/admin-actions"
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: "Browse Premium 360° Assets | Licensed AI Environments for VR, Games & Production",
   description:

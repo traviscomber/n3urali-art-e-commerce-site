@@ -10,6 +10,7 @@ import { useLanguage } from "@/lib/contexts/language-context"
 import { LanguageToggle } from "@/components/language-toggle"
 import { UserMenu } from "./user-menu"
 import { ThemeToggle } from "./theme-toggle"
+import { useAuth } from "@/lib/contexts/auth-context"
 import Image from "next/image"
 import {
   Sheet,
@@ -24,6 +25,7 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { items, toggleCart, isOpen, removeItem, updateQuantity, total, closeCart } = useCart()
   const { t } = useLanguage()
+  const { isAuthenticated } = useAuth()
   const router = useRouter()
 
   const itemCount = (items || []).reduce((sum, item) => sum + (item.quantity || 0), 0)
@@ -71,13 +73,15 @@ export function Header() {
               {t("nav.gallery")}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
             </Link>
-            <Link
-              href="/account/orders"
-              className="relative text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-300 group"
-            >
-              {t("nav.myOrders")}
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
-            </Link>
+            {isAuthenticated && (
+              <Link
+                href="/account/orders"
+                className="relative text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-300 group"
+              >
+                {t("nav.myOrders")}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
+              </Link>
+            )}
           </nav>
 
           <div className="flex items-center space-x-4">
@@ -208,13 +212,15 @@ export function Header() {
               >
                 {t("nav.gallery")}
               </Link>
-              <Link
-                href="/account/orders"
-                className="text-base font-medium text-muted-foreground hover:text-primary transition-colors px-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {t("nav.myOrders")}
-              </Link>
+              {isAuthenticated && (
+                <Link
+                  href="/account/orders"
+                  className="text-base font-medium text-muted-foreground hover:text-primary transition-colors px-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {t("nav.myOrders")}
+                </Link>
+              )}
             </nav>
           </div>
         )}

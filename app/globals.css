@@ -66,11 +66,12 @@
   }
 
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
 
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     min-height: 100vh;
     min-height: 100dvh;
   }
@@ -99,55 +100,56 @@
 
   /* Gallery frame effects */
   .gallery-frame {
-    @apply bg-gradient-to-br from-card to-muted border border-border;
+    background: linear-gradient(to bottom right, hsl(var(--card)), hsl(var(--muted)));
+    border: 1px solid hsl(var(--border));
     box-shadow: 
       0 4px 6px -1px rgba(0, 0, 0, 0.1), 
       0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 
   .gallery-frame:hover {
-    @apply border-primary/50;
+    border-color: hsl(var(--primary) / 0.5);
     box-shadow:
       0 10px 15px -3px rgba(0, 0, 0, 0.1), 
       0 4px 6px -2px rgba(0, 0, 0, 0.05), 
-      0 0 0 1px color-mix(in srgb, var(--color-primary) 40%, transparent);
+      0 0 0 1px hsl(var(--primary) / 0.4);
   }
 
   /* Glow effects */
   .glow-primary {
-    box-shadow: 0 0 15px color-mix(in srgb, var(--color-primary) 40%, transparent);
+    box-shadow: 0 0 15px hsl(var(--primary) / 0.4);
   }
 
   .glow-accent {
-    box-shadow: 0 0 12px color-mix(in srgb, var(--color-accent) 60%, transparent);
+    box-shadow: 0 0 12px hsl(var(--accent) / 0.6);
   }
 
   .premium-backdrop {
-    @apply backdrop-blur-lg;
+    backdrop-filter: blur(16px);
     background: radial-gradient(
       ellipse at center, 
-      color-mix(in srgb, var(--color-background) 85%, transparent) 0%, 
-      color-mix(in srgb, var(--color-background) 92%, transparent) 100%
+      hsl(var(--background) / 0.85) 0%, 
+      hsl(var(--background) / 0.92) 100%
     );
   }
 
   /* Grid pattern */
   .grid-pattern {
     background-image: 
-      linear-gradient(color-mix(in srgb, var(--color-foreground) 10%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in srgb, var(--color-foreground) 10%, transparent) 1px, transparent 1px);
+      linear-gradient(hsl(var(--foreground) / 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.1) 1px, transparent 1px);
     background-size: 20px 20px;
   }
 
   /* Dark theme enhancements */
   :root.dark .glow-primary {
-    box-shadow: 0 0 20px color-mix(in srgb, var(--color-primary) 50%, transparent), 
-                0 0 35px color-mix(in srgb, var(--color-primary) 30%, transparent);
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.5), 
+                0 0 35px hsl(var(--primary) / 0.3);
   }
 
   :root.dark .glow-accent {
-    box-shadow: 0 0 15px color-mix(in srgb, var(--color-accent) 60%, transparent), 
-                0 0 25px color-mix(in srgb, var(--color-accent) 40%, transparent);
+    box-shadow: 0 0 15px hsl(var(--accent) / 0.6), 
+                0 0 25px hsl(var(--accent) / 0.4);
   }
 }
 
@@ -173,13 +175,13 @@
 @keyframes pulse-glow {
   0%, 100% {
     opacity: 1;
-    box-shadow: 0 0 5px color-mix(in srgb, var(--color-primary) 50%, transparent);
+    box-shadow: 0 0 5px hsl(var(--primary) / 0.5);
   }
   50% {
     opacity: 0.8;
     box-shadow: 
-      0 0 20px color-mix(in srgb, var(--color-primary) 80%, transparent), 
-      0 0 30px color-mix(in srgb, var(--color-primary) 60%, transparent);
+      0 0 20px hsl(var(--primary) / 0.8), 
+      0 0 30px hsl(var(--primary) / 0.6);
   }
 }
 

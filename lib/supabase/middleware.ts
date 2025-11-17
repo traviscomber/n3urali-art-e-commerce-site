@@ -10,20 +10,9 @@ export async function updateSession(request: NextRequest) {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn("[v0] Supabase environment variables not found, skipping auth middleware")
-    console.warn("[v0] NEXT_PUBLIC_SUPABASE_URL:", supabaseUrl ? "✓ Set" : "✗ Missing")
-    console.warn("[v0] NEXT_PUBLIC_SUPABASE_ANON_KEY:", supabaseAnonKey ? "✓ Set" : "✗ Missing")
-    console.warn(
-      "[v0] Available env vars:",
-      Object.keys(process.env).filter((key) => key.includes("SUPABASE")),
-    )
     return supabaseResponse
   }
 
-  console.log("[v0] Supabase middleware initialized with URL:", supabaseUrl.substring(0, 30) + "...")
-
-  // With Fluid compute, don't put this client in a global environment
-  // variable. Always create a new one on each request.
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
@@ -39,21 +28,13 @@ export async function updateSession(request: NextRequest) {
     },
   })
 
-  // Do not run code between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
-
-  // IMPORTANT: If you remove getUser() and you use server-side rendering
-  // with the Supabase client, your users may be randomly logged out.
   let user = null
   try {
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser()
     user = authUser
-    console.log("[v0] User authentication check:", user ? "✓ Authenticated" : "✗ Not authenticated")
   } catch (error) {
-    console.warn("[v0] Failed to get user in middleware:", error)
     return supabaseResponse
   }
 
@@ -65,8 +46,6 @@ export async function updateSession(request: NextRequest) {
       request.nextUrl.pathname.startsWith("/admin") ||
       request.nextUrl.pathname.startsWith("/account"))
   ) {
-    // no user, potentially respond by redirecting the user to the login page
-    console.log("[v0] Redirecting unauthenticated user to login")
     const url = request.nextUrl.clone()
     url.pathname = "/auth/login"
     return NextResponse.redirect(url)
@@ -76,23 +55,18 @@ export async function updateSession(request: NextRequest) {
     try {
       let isAdmin = false
 
-      // First check if user is travis@nuanu.com (always admin)
       if (user.email === "travis@nuanu.com") {
         isAdmin = true
-        console.log("[v0] Granting admin access to travis@nuanu.com")
       } else {
-        // Check profiles table (with role column)
         try {
           const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
           if (profile?.role === "admin") {
             isAdmin = true
-            console.log("[v0] Admin access granted via profiles.role")
           }
         } catch (error) {
-          console.log("[v0] profiles table not found or accessible, trying user_profiles")
+          // Profiles table not found, try user_profiles
         }
 
-        // If not admin yet, check user_profiles table (with is_admin column)
         if (!isAdmin) {
           try {
             const { data: userProfile } = await supabase
@@ -102,26 +76,20 @@ export async function updateSession(request: NextRequest) {
               .single()
             if (userProfile?.is_admin) {
               isAdmin = true
-              console.log("[v0] Admin access granted via user_profiles.is_admin")
             }
           } catch (error) {
-            console.log("[v0] user_profiles table not found or accessible")
+            // User profiles table not found
           }
         }
       }
 
       if (!isAdmin) {
-        console.log("[v0] User lacks admin privileges, redirecting to dashboard")
         const url = request.nextUrl.clone()
         url.pathname = "/dashboard"
         return NextResponse.redirect(url)
       }
     } catch (error) {
-      console.warn("[v0] Failed to check admin privileges:", error)
-      // Allow access if we can't check admin status for travis@nuanu.com
-      if (user.email === "travis@nuanu.com") {
-        console.log("[v0] Allowing admin access for travis@nuanu.com despite error")
-      } else {
+      if (user.email !== "travis@nuanu.com") {
         const url = request.nextUrl.clone()
         url.pathname = "/dashboard"
         return NextResponse.redirect(url)
@@ -129,6 +97,5 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // IMPORTANT: You *must* return the supabaseResponse object as it is.
   return supabaseResponse
 }

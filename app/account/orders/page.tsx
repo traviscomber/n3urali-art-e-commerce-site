@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ShoppingBag, Eye, Calendar, Package, Download, CreditCard } from "lucide-react"
+import { ShoppingBag, Eye, Calendar, Package, Download, CreditCard } from 'lucide-react'
 import { toast } from "sonner"
 import { getOrders } from "@/app/actions/admin-actions"
 import { useAuth } from "@/lib/contexts/auth-context"
@@ -41,39 +41,23 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true)
   const { user, isAuthenticated } = useAuth()
 
-  console.log("[v0] OrdersPage component mounting...")
-  console.log("[v0] Auth state - isAuthenticated:", isAuthenticated, "user:", user)
-
   useEffect(() => {
-    console.log("[v0] OrdersPage useEffect starting...")
-
     const fetchOrders = async () => {
       try {
         const userEmail = user?.email
         if (!isAuthenticated || !userEmail) {
-          console.log(
-            "[v0] User not authenticated, skipping orders fetch - isAuthenticated:",
-            isAuthenticated,
-            "userEmail:",
-            userEmail,
-          )
           setLoading(false)
           return
         }
 
-        console.log("[v0] Fetching orders for user:", userEmail)
         const result = await getOrders(userEmail)
-        console.log("[v0] getOrders result:", result)
 
         if (result.success && result.data) {
           setOrders(result.data)
-          console.log("[v0] Loaded", result.data.length, "orders")
         } else {
-          console.error("[v0] Failed to fetch orders:", result.error)
           toast.error("Failed to load orders")
         }
       } catch (error) {
-        console.error("[v0] Error fetching orders:", error)
         toast.error("Failed to load orders")
       } finally {
         setLoading(false)
@@ -111,8 +95,6 @@ export default function OrdersPage() {
 
   const handleDownload = async (item: OrderItem) => {
     try {
-      console.log("[v0] Starting download for item:", item.id)
-
       const response = await fetch(`/api/download/${item.image_id}`, {
         method: "POST",
         headers: {
@@ -124,22 +106,11 @@ export default function OrdersPage() {
         }),
       })
 
-      console.log("[v0] Download response status:", response.status)
-      console.log("[v0] Download response ok:", response.ok)
-      console.log("[v0] Download response headers:", Object.fromEntries(response.headers.entries()))
-
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error("[v0] Download API error response:", errorText)
-        throw new Error(`Download failed: ${response.status} - ${errorText}`)
+        throw new Error(`Download failed: ${response.status}`)
       }
 
-      const contentType = response.headers.get("content-type")
-      console.log("[v0] Response content type:", contentType)
-
       const blob = await response.blob()
-      console.log("[v0] Blob size:", blob.size, "bytes")
-      console.log("[v0] Blob type:", blob.type)
 
       if (blob.size === 0) {
         throw new Error("Downloaded file is empty")
@@ -156,26 +127,20 @@ export default function OrdersPage() {
       document.body.removeChild(a)
 
       toast.success(`Downloaded ${item.images.title}`)
-      console.log("[v0] Download completed for:", item.images.title)
     } catch (error) {
-      console.error("[v0] Download error:", error)
       toast.error("Download failed. Please try again.")
     }
   }
 
   const handlePreview = (item: OrderItem) => {
-    console.log("[v0] Opening preview for item:", item.id)
-    // Open the image detail page in a new tab for preview
     window.open(`/photo/${item.image_id}`, "_blank")
   }
 
   const handleViewOrder = (orderId: string) => {
     toast.info(`Viewing order details for ${orderId}`)
-    // In a real app, this would navigate to order details page
   }
 
   if (!isAuthenticated) {
-    console.log("[v0] Showing unauthenticated message")
     return (
       <div className="container mx-auto px-4 py-8">
         <Card>
@@ -191,7 +156,6 @@ export default function OrdersPage() {
   }
 
   if (loading) {
-    console.log("[v0] Showing loading state")
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-4">
@@ -210,8 +174,6 @@ export default function OrdersPage() {
       </div>
     )
   }
-
-  console.log("[v0] Rendering orders page with", orders.length, "orders")
 
   return (
     <div className="container mx-auto px-4 py-8">

@@ -76,7 +76,6 @@ export default async function HomePage() {
     const today = new Date()
     const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000)
     
-    // Get 5 images for auction, rotating daily
     const auctionCount = Math.min(5, featuredImages.length)
     for (let i = 0; i < auctionCount; i++) {
       const imageIndex = (dayOfYear + i) % featuredImages.length
@@ -116,12 +115,6 @@ export default async function HomePage() {
 
   const availableForDaily = allActiveImages?.filter(img => !usedImageIds.has(img.id)) || []
   const dailyImages = availableForDaily.length > 0 ? getDailyImageSelection(availableForDaily, 16) : []
-
-  console.log("[v0] Images distribution:", {
-    auctionCount: auctionImages?.length || 0,
-    collectionCount: collectionImages?.length || 0,
-    dailyCount: dailyImages?.length || 0,
-  })
 
   return (
     <ClientWrapper

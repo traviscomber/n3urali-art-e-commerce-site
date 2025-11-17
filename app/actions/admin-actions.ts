@@ -1,9 +1,11 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createServiceRoleClient } from "@/lib/supabase/service-role"
 import { unstable_cache } from "next/cache"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { ImageUrlHandler } from "@/lib/image-url-handler"
+import { put } from "@vercel/blob"
 
 const CACHE_TAGS = {
   IMAGES: "images",
@@ -540,7 +542,6 @@ const getCachedTags = unstable_cache(
           *,
           tag_categories!inner(name, color, icon)
         `)
-        .eq("active", true)
         .order("usage_count", { ascending: false })
 
       if (categoryId) {
@@ -1194,19 +1195,20 @@ export async function getOrdersOptimized(userEmail?: string, page = 1, limit = 2
 
 export async function getCategories() {
   try {
-    const data = await getCachedCategories()
-    console.log(
-      "[v0] getCategories returning",
-      data.length,
-      "categories:",
-      data.map((c) => c.name),
-    )
-    return { success: true, data }
+    const supabase = await createClient()
+    const { data, error } = await supabase.from("categories").select("*").order("name")
+
+    if (error) {
+      return { success: false, error: error.message, data: [] }
+    }
+
+    const categories = data.map((cat) => cat.name)
+    return { success: true, data: categories }
   } catch (error) {
-    console.error("[v0] Get categories error:", error)
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: error instanceof Error ? error.message : "Failed to fetch categories",
+      data: [],
     }
   }
 }

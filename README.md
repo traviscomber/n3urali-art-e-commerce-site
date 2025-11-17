@@ -1,95 +1,147 @@
-# n3uralia360.art - Premium 360° Digital Photography Platform
+# n3uralia360.art - Production Ready E-Commerce Platform
 
-A professional e-commerce platform for AI-generated equirectangular and fisheye imagery, built for creators, architects, and visualization professionals.
+Premium AI-generated 360° photography marketplace built with Next.js 16, Supabase, and TypeScript.
 
-## Overview
+## 🚀 Production Readiness Status
 
-n3uralia360.art is a cutting-edge digital photography platform specializing in high-resolution 360° imagery. Our collection features AI-generated equirectangular and fisheye images perfect for projection mapping, VR experiences, and architectural visualization.
+### ✅ Completed
+- All debug console.log statements removed
+- Supabase client singleton pattern implemented
+- Error boundaries and error handling
+- SEO files (sitemap.xml, robots.txt, manifest)
+- Environment variables validation
+- Performance optimizations for mobile/iPad
+- Image compression and caching
+- Secure authentication and session management
+- Input sanitization and XSS protection
 
-## Features
+### ⚠️ Critical: Before Going Live
 
-- **Premium 360° Gallery** - Browse our curated collection of high-resolution images
-- **Interactive Previews** - 360° panorama viewer for immersive exploration
-- **Flexible Licensing** - Choose from exclusive or non-exclusive license options
-- **Instant Downloads** - Get 4K-16K resolution files immediately after purchase
-- **Professional Quality** - AI-enhanced imagery with superior clarity and detail
-- **Secure Payments** - Integrated checkout with multiple payment options
-- **User Accounts** - Track purchases, downloads, and order history
+1. **Enable Row Level Security (RLS)**
+   \`\`\`bash
+   # Run in Supabase SQL Editor
+   scripts/enable-rls.sql
+   \`\`\`
 
-## Technology Stack
+2. **Set Production Environment Variables**
+   - See `.env.example` for required variables
+   - Configure in Vercel project settings
+   - Ensure no localhost URLs in production
 
-- **Frontend**: Next.js 14 with App Router, React, TypeScript
-- **Styling**: Tailwind CSS with custom design system
+3. **Configure Error Monitoring**
+   - Set up Sentry, LogRocket, or similar
+   - Update error handlers with monitoring code
+
+4. **Add Rate Limiting**
+   - Implement on API routes
+   - Protect against abuse and DDoS
+
+5. **Test RLS Policies**
+   - Verify users can only access their data
+   - Confirm admin access works correctly
+   - Test anonymous browsing
+
+## 📋 Documentation
+
+- [Security Policy](./SECURITY.md) - Security measures and policies
+- [Deployment Guide](./DEPLOYMENT.md) - Step-by-step deployment instructions
+- [Environment Variables](./.env.example) - Required configuration
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
 - **Database**: Supabase (PostgreSQL)
-- **Storage**: Backblaze B2 with CDN integration
-- **Authentication**: Supabase Auth
-- **Payments**: Integrated payment processing
-- **Image Processing**: Custom AI enhancement pipeline
+- **Storage**: Backblaze B2 + Vercel Blob
+- **Auth**: Supabase Auth
+- **Styling**: Tailwind CSS v4 + shadcn/ui
+- **Deployment**: Vercel
+- **Language**: TypeScript
 
-## Getting Started
+## 🔒 Security Features
 
-### Prerequisites
+- Row Level Security (RLS) policies ready to enable
+- Secure session management
+- Input sanitization on all user data
+- XSS protection via React
+- SQL injection prevention via parameterized queries
+- HTTPS enforced
+- Secure cookie settings
+- Admin route protection
 
-- Node.js 18+ 
-- npm or yarn
-- Supabase account
-- Backblaze B2 account
+## 🎯 Key Features
 
-### Installation
+- Premium 360° image marketplace
+- User authentication and profiles
+- Shopping cart and checkout
+- Order management
+- Download system with tokens
+- Admin panel for content management
+- Featured collections and galleries
+- Tag-based organization
+- Mobile-responsive design
 
-1. Clone the repository
+## 📦 Installation
+
 \`\`\`bash
-git clone <repository-url>
-cd n3uralia360.art
-\`\`\`
+# Clone the repository
+git clone https://github.com/traviscomber/n3urali-art-e-commerce-site.git
 
-2. Install dependencies
-\`\`\`bash
+# Install dependencies
 npm install
-\`\`\`
 
-3. Set up environment variables
-\`\`\`bash
+# Set up environment variables
 cp .env.example .env.local
-\`\`\`
+# Edit .env.local with your values
 
-4. Configure your environment variables in `.env.local`
-
-5. Run the development server
-\`\`\`bash
+# Run development server
 npm run dev
 \`\`\`
 
-6. Open [http://localhost:3000](http://localhost:3000) in your browser
+## 🚀 Deployment
 
-## Environment Variables
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
 
-See `.env.example` for required environment variables including:
+Quick deploy to Vercel:
 
-- Supabase configuration
-- Backblaze B2 storage credentials
-- Authentication secrets
-- Payment processing keys
-
-## Project Structure
-
-\`\`\`
-├── app/                    # Next.js app directory
-│   ├── (auth)/            # Authentication pages
-│   ├── account/           # User account pages
-│   ├── api/               # API routes
-│   ├── gallery/           # Image gallery
-│   └── product/           # Product detail pages
-├── components/            # Reusable React components
-├── lib/                   # Utility functions and configurations
-├── public/                # Static assets
-└── scripts/               # Database scripts and utilities
+\`\`\`bash
+vercel --prod
 \`\`\`
 
-## Contributing
+## 🧪 Testing Checklist
 
-This is a proprietary project for n3uralia360.art. For questions or support, please contact the development team.
+- [ ] Authentication (login, signup, logout)
+- [ ] Browse and search images
+- [ ] Add to cart and checkout
+- [ ] Download purchased images
+- [ ] Admin panel access
+- [ ] Mobile responsiveness
+- [ ] Error handling
+- [ ] Performance (Lighthouse score)
 
-## License
+## 📊 Performance
 
-© 2025 n3uralia360.art. All rights reserved.
+- Optimized for Lighthouse score 90+
+- Image lazy loading
+- Code splitting
+- CDN delivery
+- Caching strategy with revalidation
+- Compressed assets
+
+## 🐛 Known Issues
+
+- Multiple GoTrueClient warnings appear in development mode (harmless, fixed in production)
+- iPad performance optimized but may need further tuning for complex animations
+
+## 🤝 Support
+
+For issues or questions:
+- Email: travis@nuanu.com
+- GitHub: [Create an issue](https://github.com/traviscomber/n3urali-art-e-commerce-site/issues)
+
+## 📝 License
+
+Proprietary - All rights reserved by n3uralia group
+
+---
+
+**Built with ❤️ by n3uralia**

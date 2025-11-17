@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createServiceRoleClient } from "@/lib/supabase/service-role"
 import { revalidatePath } from "next/cache"
 
 export async function bulkUpdateFeaturedCollection(imageIds: string[], featured: boolean) {
@@ -209,10 +210,30 @@ export async function getImages() {
 
     if (error) throw error
 
-    const transformedImages = images?.map((image) => ({
-      ...image,
-      category_name: image.categories?.name || 'Uncategorized',
-    })) || []
+    const transformedImages = images?.map((image: any) => {
+      // Check if file_path is already a full URL
+      const isFilePathFullUrl = image.file_path?.startsWith("http://") || image.file_path?.startsWith("https://")
+      
+      // Compute image_url from available fields
+      let imageUrl = image.original_url || image.original_file_url
+      if (!imageUrl && image.file_path && isFilePathFullUrl) {
+        imageUrl = image.file_path
+      }
+      
+      // Compute thumbnail_url from available fields
+      let thumbnailUrl = image.thumbnail_medium_url
+      if (!thumbnailUrl) {
+        // Fallback to imageUrl if no thumbnail
+        thumbnailUrl = imageUrl
+      }
+      
+      return {
+        ...image,
+        image_url: imageUrl, // Map to expected property name
+        thumbnail_url: thumbnailUrl, // Map to expected property name
+        category_name: image.categories?.name || 'Uncategorized',
+      }
+    }) || []
 
     console.log('[v0] getImages: Fetched', transformedImages.length, 'images')
     return { success: true, data: transformedImages }
@@ -282,7 +303,7 @@ export async function getDatabaseStats() {
 
 export async function createImageWithCategoryObject(imageData: any) {
   try {
-    const supabase = await createClient()
+    const supabase = createServiceRoleClient()
 
     const { data: image, error } = await supabase
       .from("images")
@@ -319,6 +340,22 @@ export const createImageWithCategory = createImageWithCategoryObject
 export async function updateImageDetails(imageId: string, updateData: any) {
   try {
     const supabase = await createClient()
+
+    const { data: existingImage, error: checkError } = await supabase
+      .from("images")
+      .select("id")
+      .eq("id", imageId)
+      .maybeSingle()
+
+    if (checkError) {
+      console.error("[v0] updateImageDetails check error:", checkError)
+      throw checkError
+    }
+
+    if (!existingImage) {
+      console.error("[v0] updateImageDetails: Image not found:", imageId)
+      return { success: false, error: "Image not found. It may have been deleted." }
+    }
 
     const { data, error } = await supabase
       .from("images")

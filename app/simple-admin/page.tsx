@@ -459,6 +459,8 @@ export default function SimpleAdminPage() {
     if (!confirm("Are you sure you want to delete this image?")) return
 
     try {
+      setImages(prevImages => prevImages.filter(img => img.id !== imageId))
+      
       const { deleteImage } = await import("@/app/actions/admin-actions")
       const result = await deleteImage(imageId)
 
@@ -470,10 +472,12 @@ export default function SimpleAdminPage() {
       } else {
         console.error("[v0] Client: Delete failed:", result.error)
         toast.error(result.error || "Failed to delete image")
+        await loadInitialData()
       }
     } catch (error) {
       console.error("[v0] SimpleAdmin: Delete error:", error)
       toast.error("Failed to delete image")
+      await loadInitialData()
     }
   }
 

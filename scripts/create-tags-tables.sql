@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS tag_categories (
   description TEXT,
   color TEXT DEFAULT '#3B82F6',
   icon TEXT,
-  active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -20,7 +19,6 @@ CREATE TABLE IF NOT EXISTS tags (
   category_id UUID REFERENCES tag_categories(id) ON DELETE SET NULL,
   usage_count INTEGER DEFAULT 0,
   is_featured BOOLEAN DEFAULT false,
-  active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(name, category_id)
@@ -43,13 +41,13 @@ CREATE INDEX IF NOT EXISTS idx_image_tags_image_id ON image_tags(image_id);
 CREATE INDEX IF NOT EXISTS idx_image_tags_tag_id ON image_tags(tag_id);
 
 -- Insert default tag categories
-INSERT INTO tag_categories (name, slug, description, color, icon, active) VALUES
-  ('Subject', 'subject', 'Main subject or focus of the image', '#3B82F6', 'Eye', true),
-  ('Style', 'style', 'Artistic style or technique', '#8B5CF6', 'Palette', true),
-  ('Color', 'color', 'Dominant colors in the image', '#EC4899', 'Droplet', true),
-  ('Mood', 'mood', 'Emotional tone or atmosphere', '#F59E0B', 'Smile', true),
-  ('Location', 'location', 'Geographic location or setting', '#10B981', 'MapPin', true),
-  ('Time', 'time', 'Time period or season', '#06B6D4', 'Clock', true)
+INSERT INTO tag_categories (name, slug, description, color, icon) VALUES
+  ('Subject', 'subject', 'Main subject or focus of the image', '#3B82F6', 'Eye'),
+  ('Style', 'style', 'Artistic style or technique', '#8B5CF6', 'Palette'),
+  ('Color', 'color', 'Dominant colors in the image', '#EC4899', 'Droplet'),
+  ('Mood', 'mood', 'Emotional tone or atmosphere', '#F59E0B', 'Smile'),
+  ('Location', 'location', 'Geographic location or setting', '#10B981', 'MapPin'),
+  ('Time', 'time', 'Time period or season', '#06B6D4', 'Clock')
 ON CONFLICT (slug) DO NOTHING;
 
 -- Create function to update tag usage counts
@@ -78,6 +76,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Drop existing trigger before recreating to avoid "already exists" error
+DROP TRIGGER IF EXISTS trigger_update_tag_usage ON image_tags;
+
 CREATE TRIGGER trigger_update_tag_usage
 AFTER INSERT OR DELETE ON image_tags
 FOR EACH ROW EXECUTE FUNCTION update_tag_usage_on_image_tag_change();
@@ -90,6 +91,10 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Drop existing triggers before recreating to avoid conflicts
+DROP TRIGGER IF EXISTS update_tags_updated_at ON tags;
+DROP TRIGGER IF EXISTS update_tag_categories_updated_at ON tag_categories;
 
 CREATE TRIGGER update_tags_updated_at
 BEFORE UPDATE ON tags

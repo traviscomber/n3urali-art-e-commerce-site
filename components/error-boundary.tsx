@@ -26,11 +26,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    // Log error to monitoring service in production
-    if (process.env.NODE_ENV === 'production') {
-      // TODO: Send to error monitoring service (Sentry, LogRocket, etc.)
-      console.error('Error caught by boundary:', error, errorInfo)
-    }
+    console.error('Error caught by boundary:', error, errorInfo)
   }
 
   render() {
@@ -38,6 +34,8 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) {
         return this.props.fallback
       }
+
+      const isDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost'
 
       return (
         <div className="min-h-screen flex items-center justify-center p-4">
@@ -52,7 +50,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {isDevelopment && this.state.error && (
                 <div className="p-4 bg-muted rounded-md">
                   <p className="text-sm font-mono text-destructive">
                     {this.state.error.message}

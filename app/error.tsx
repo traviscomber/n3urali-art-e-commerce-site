@@ -13,12 +13,10 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    // Log error to monitoring service in production
-    if (process.env.NODE_ENV === 'production') {
-      // TODO: Send to error monitoring service
-      console.error('Global error:', error)
-    }
+    console.error('Global error:', error)
   }, [error])
+
+  const isDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost'
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -33,7 +31,7 @@ export default function Error({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {process.env.NODE_ENV === 'development' && (
+          {isDevelopment && (
             <div className="p-4 bg-muted rounded-md">
               <p className="text-sm font-mono text-destructive">
                 {error.message}

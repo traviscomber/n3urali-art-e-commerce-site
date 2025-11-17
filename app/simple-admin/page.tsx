@@ -453,17 +453,23 @@ export default function SimpleAdminPage() {
   }
 
   const handleDeleteImage = async (imageId: string) => {
+    console.log("[v0] Client: Attempting to delete image with ID:", imageId)
+    console.log("[v0] Client: Image exists in current images array:", images.some(img => img.id === imageId))
+    
     if (!confirm("Are you sure you want to delete this image?")) return
 
     try {
       const { deleteImage } = await import("@/app/actions/admin-actions")
       const result = await deleteImage(imageId)
 
+      console.log("[v0] Client: Delete result:", result)
+
       if (result.success) {
         toast.success("Image deleted successfully")
         await loadInitialData()
       } else {
-        toast.error("Failed to delete image")
+        console.error("[v0] Client: Delete failed:", result.error)
+        toast.error(result.error || "Failed to delete image")
       }
     } catch (error) {
       console.error("[v0] SimpleAdmin: Delete error:", error)
@@ -948,12 +954,21 @@ export default function SimpleAdminPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {images.map((image) => (
                       <Card key={image.id} className="overflow-hidden">
-                        <div className="aspect-video relative">
+                        <div className="aspect-video relative group">
                           <img
                             src={image.thumbnail_url || image.image_url}
                             alt={image.title}
                             className="w-full h-full object-cover"
                           />
+                          {/* Delete button overlay - visible on hover */}
+                          <Button
+                            size="icon"
+                            variant="destructive"
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                            onClick={() => handleDeleteImage(image.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                         <CardContent className="p-4">
                           {editingImage === image.id ? (
@@ -975,26 +990,29 @@ export default function SimpleAdminPage() {
                                 placeholder="Description"
                               />
                               <div className="flex gap-2">
-                                <Button size="sm" onClick={() => handleEditSave(image.id)}>
-                                  <Check className="h-4 w-4" />
+                                <Button size="sm" onClick={() => handleEditSave(image.id)} className="flex-1">
+                                  <Check className="h-4 w-4 mr-1" />
+                                  Save
                                 </Button>
-                                <Button size="sm" variant="outline" onClick={handleEditCancel}>
-                                  <X className="h-4 w-4" />
+                                <Button size="sm" variant="outline" onClick={handleEditCancel} className="flex-1">
+                                  <X className="h-4 w-4 mr-1" />
+                                  Cancel
                                 </Button>
                               </div>
                             </div>
                           ) : (
                             <>
-                              <h3 className="font-semibold">{image.title}</h3>
-                              <p className="text-sm text-muted-foreground">${image.price}</p>
-                              <div className="flex gap-2 mt-2">
-                                <Button size="sm" variant="outline" onClick={() => handleEditStart(image)}>
-                                  <Edit2 className="h-4 w-4" />
-                                </Button>
-                                <Button size="sm" variant="destructive" onClick={() => handleDeleteImage(image.id)}>
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
+                              <h3 className="font-semibold text-lg mb-1">{image.title}</h3>
+                              <p className="text-sm text-muted-foreground mb-3">${image.price}</p>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => handleEditStart(image)}
+                                className="w-full"
+                              >
+                                <Edit2 className="h-4 w-4 mr-1" />
+                                Edit
+                              </Button>
                             </>
                           )}
                         </CardContent>

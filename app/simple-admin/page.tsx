@@ -707,6 +707,7 @@ export default function SimpleAdminPage() {
         price: Number.parseFloat(newImage.price),
         image_url: uploadResult.url, // Maps to original_url in DB
         thumbnail_url: thumbnailBase64, // Maps to thumbnail_medium_url in DB
+        file_path: uploadResult.path, // Required NOT NULL field from Supabase upload
         original_file_url: newImage.originalFileUrl || null,
         active: true,
         featured: false,

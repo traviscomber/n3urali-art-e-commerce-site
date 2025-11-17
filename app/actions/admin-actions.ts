@@ -308,6 +308,7 @@ export async function createImageWithCategoryObject(imageData: any) {
       category_id: imageData.category_id,
       has_image_url: !!imageData.image_url,
       has_thumbnail_url: !!imageData.thumbnail_url,
+      has_file_path: !!imageData.file_path, // Added file_path logging
     })
 
     const supabase = createServiceRoleClient()
@@ -321,7 +322,7 @@ export async function createImageWithCategoryObject(imageData: any) {
       original_url: imageData.image_url || imageData.original_url,
       original_file_url: imageData.original_file_url || null,
       thumbnail_medium_url: imageData.thumbnail_url || imageData.thumbnail_medium_url,
-      file_path: imageData.file_path || null,
+      file_path: imageData.file_path || imageData.image_url || 'unknown', // Fallback to image_url or 'unknown' to satisfy NOT NULL
       active: imageData.active ?? true,
       is_featured: imageData.featured ?? false,
     }
@@ -330,6 +331,7 @@ export async function createImageWithCategoryObject(imageData: any) {
       ...dbRecord,
       original_url: dbRecord.original_url?.substring(0, 50) + "...",
       thumbnail_medium_url: dbRecord.thumbnail_medium_url?.substring(0, 50) + "...",
+      file_path: dbRecord.file_path?.substring(0, 50) + "...", // Added file_path logging
     })
 
     const { data: image, error } = await supabase

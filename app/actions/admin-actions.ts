@@ -383,7 +383,7 @@ export async function updateImageDetails(imageId: string, updateData: any) {
 
 export async function deleteImage(imageId: string) {
   try {
-    const supabase = await createClient()
+    const supabase = createServiceRoleClient()
 
     // Check if image exists first
     const { data: image, error: fetchError } = await supabase

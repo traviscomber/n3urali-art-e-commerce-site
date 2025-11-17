@@ -303,27 +303,47 @@ export async function getDatabaseStats() {
 
 export async function createImageWithCategoryObject(imageData: any) {
   try {
+    console.log("[v0] createImageWithCategoryObject: Starting with data:", {
+      title: imageData.title,
+      category_id: imageData.category_id,
+      has_image_url: !!imageData.image_url,
+      has_thumbnail_url: !!imageData.thumbnail_url,
+    })
+
     const supabase = createServiceRoleClient()
+
+    const dbRecord = {
+      title: imageData.title,
+      description: imageData.description || null,
+      category_id: imageData.category_id,
+      license_id: imageData.license_id || null,
+      price: imageData.price,
+      original_url: imageData.image_url || imageData.original_url,
+      original_file_url: imageData.original_file_url || null,
+      thumbnail_medium_url: imageData.thumbnail_url || imageData.thumbnail_medium_url,
+      file_path: imageData.file_path || null,
+      active: imageData.active ?? true,
+      is_featured: imageData.featured ?? false,
+    }
+
+    console.log("[v0] createImageWithCategoryObject: Inserting record:", {
+      ...dbRecord,
+      original_url: dbRecord.original_url?.substring(0, 50) + "...",
+      thumbnail_medium_url: dbRecord.thumbnail_medium_url?.substring(0, 50) + "...",
+    })
 
     const { data: image, error } = await supabase
       .from("images")
-      .insert([{
-        title: imageData.title,
-        description: imageData.description || null,
-        category_id: imageData.category_id,
-        license_id: imageData.license_id,
-        price: imageData.price,
-        original_url: imageData.original_url || imageData.image_url,
-        original_file_url: imageData.original_file_url,
-        thumbnail_medium_url: imageData.thumbnail_medium_url || imageData.thumbnail_url,
-        file_path: imageData.file_path,
-        active: imageData.active ?? true,
-        is_featured: imageData.featured ?? false,
-      }])
+      .insert([dbRecord])
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error("[v0] createImageWithCategoryObject: Insert error:", error)
+      throw error
+    }
+
+    console.log("[v0] createImageWithCategoryObject: Success! Created image ID:", image.id)
 
     revalidatePath("/simple-admin")
     revalidatePath("/gallery")

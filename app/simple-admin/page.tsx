@@ -353,9 +353,6 @@ export default function SimpleAdminPage() {
       const fileSizeMB = newImage.file.size / (1024 * 1024)
       console.log(`[v0] Original file size: ${fileSizeMB.toFixed(2)}MB`)
 
-      let imageUrl: string
-      let thumbnailBase64: string
-
       console.log("[v0] Using Supabase storage for high-quality uploads...")
 
       const formData = new FormData()
@@ -373,8 +370,7 @@ export default function SimpleAdminPage() {
       }
 
       const { url } = await uploadResponse.json()
-      imageUrl = url
-      console.log("[v0] File uploaded successfully to Supabase:", imageUrl)
+      console.log("[v0] File uploaded successfully to Supabase:", url)
 
       // Generate thumbnail from the uploaded image
       console.log("[v0] Generating thumbnail...")
@@ -384,7 +380,7 @@ export default function SimpleAdminPage() {
       await new Promise((resolve, reject) => {
         img.onload = resolve
         img.onerror = reject
-        img.src = imageUrl
+        img.src = url
       })
 
       const canvas = document.createElement("canvas")
@@ -408,20 +404,21 @@ export default function SimpleAdminPage() {
       canvas.width = width
       canvas.height = height
       ctx.drawImage(img, 0, 0, width, height)
-      thumbnailBase64 = canvas.toDataURL("image/jpeg", 0.8)
+      const thumbnailBase64 = canvas.toDataURL("image/jpeg", 0.8)
 
       console.log("[v0] Thumbnail generated successfully")
 
       const imageData = {
         title: newImage.title,
         description: newImage.description,
-        category_id: newImage.category,
-        rights_type: newImage.rightsType,
+        category_name: newImage.category,
+        license_name: newImage.rightsType,
         price: Number.parseFloat(newImage.price) || 0,
-        image_url: imageUrl,
+        image_url: url,
         thumbnail_url: thumbnailBase64,
         original_file_url: newImage.originalFileUrl || null,
-        original_file_size: newImage.file.size,
+        active: true,
+        featured: false,
       }
 
       const result = await createImageWithCategoryObject(imageData)
@@ -526,8 +523,8 @@ export default function SimpleAdminPage() {
         title: editValues.title.trim(),
         price: price,
         description: editValues.description.trim(),
-        category: editValues.category,
-        rightsType: editValues.rightsType,
+        category_name: editValues.category,
+        license_name: editValues.rightsType,
       })
 
       if (result.success) {
@@ -649,25 +646,58 @@ export default function SimpleAdminPage() {
     try {
       const { createImageWithCategoryObject } = await import("@/app/actions/admin-actions")
       
-      console.log("[v0] Starting upload process...")
+      console.log("[v0] SimpleAdmin: Starting upload process...")
 
       const formData = new FormData()
       formData.append("file", newImage.file)
 
-      console.log("[v0] Uploading to Supabase...")
+      console.log("[v0] SimpleAdmin: Uploading to Supabase...")
       const uploadResponse = await fetch("/api/supabase/upload", {
         method: "POST",
         body: formData,
       })
 
       const uploadResult = await uploadResponse.json()
-      console.log("[v0] Upload result:", uploadResult)
+      console.log("[v0] SimpleAdmin: Upload result:", uploadResult)
 
       if (!uploadResult.success) {
         throw new Error(uploadResult.error || "Upload failed")
       }
 
-      console.log("[v0] File uploaded successfully, saving to database...")
+      console.log("[v0] SimpleAdmin: Generating thumbnail...")
+      const img = new Image()
+      img.crossOrigin = "anonymous"
+
+      await new Promise((resolve, reject) => {
+        img.onload = resolve
+        img.onerror = reject
+        img.src = uploadResult.url
+      })
+
+      const canvas = document.createElement("canvas")
+      const ctx = canvas.getContext("2d")!
+
+      // Calculate thumbnail dimensions (max 400px)
+      const maxSize = 400
+      let { width, height } = img
+      if (width > height) {
+        if (width > maxSize) {
+          height = (height * maxSize) / width
+          width = maxSize
+        }
+      } else {
+        if (height > maxSize) {
+          width = (width * maxSize) / height
+          height = maxSize
+        }
+      }
+
+      canvas.width = width
+      canvas.height = height
+      ctx.drawImage(img, 0, 0, width, height)
+      const thumbnailBase64 = canvas.toDataURL("image/jpeg", 0.8)
+
+      console.log("[v0] SimpleAdmin: Thumbnail generated, saving to database...")
 
       const imageData = {
         title: newImage.title,
@@ -675,18 +705,19 @@ export default function SimpleAdminPage() {
         category_id: newImage.category,
         rights_type: newImage.rightsType,
         price: Number.parseFloat(newImage.price),
-        image_url: uploadResult.url,
-        thumbnail_url: uploadResult.url, // This should ideally be a generated thumbnail, not the same URL
+        image_url: uploadResult.url, // Maps to original_url in DB
+        thumbnail_url: thumbnailBase64, // Maps to thumbnail_medium_url in DB
         original_file_url: newImage.originalFileUrl || null,
         active: true,
         featured: false,
       }
 
+      console.log("[v0] SimpleAdmin: Calling createImageWithCategoryObject...")
       const result = await createImageWithCategoryObject(imageData)
 
       if (result.success) {
-        toast.success("Image uploaded successfully to Supabase!")
-        console.log("[v0] Image saved to database successfully")
+        toast.success("Image uploaded successfully!")
+        console.log("[v0] SimpleAdmin: Image saved successfully, ID:", result.data.id)
 
         // Reset form
         setNewImage({
@@ -703,12 +734,13 @@ export default function SimpleAdminPage() {
         // Refresh images list
         await loadInitialData()
       } else {
+        console.error("[v0] SimpleAdmin: Failed to save image:", result.error)
         throw new Error(result.error || "Failed to save image")
       }
     } catch (error) {
-      console.error("[v0] Upload error:", error)
+      console.error("[v0] SimpleAdmin: Upload error:", error)
       setUploadError(error instanceof Error ? error.message : "Upload failed")
-      toast.error("Upload failed")
+      toast.error("Upload failed: " + (error instanceof Error ? error.message : "Unknown error"))
     } finally {
       setUploading(false)
     }

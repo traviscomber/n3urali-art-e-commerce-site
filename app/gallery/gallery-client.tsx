@@ -45,11 +45,15 @@ interface Category {
   description: string
 }
 
-export default function GalleryClient() {
+interface GalleryClientProps {
+  initialImages: Image[]
+  initialCategories: Category[]
+}
+
+export default function GalleryClient({ initialImages, initialCategories }: GalleryClientProps) {
   const { t } = useLanguage()
-  const [images, setImages] = useState<Image[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
+  const [images, setImages] = useState<Image[]>(initialImages)
+  const [categories, setCategories] = useState<Category[]>(initialCategories)
   const [featuredImages, setFeaturedImages] = useState<Image[]>([])
   const [equirectangularImages, setEquirectangularImages] = useState<Image[]>([])
   const [heritageImages, setHeritageImages] = useState<Image[]>([])
@@ -57,102 +61,58 @@ export default function GalleryClient() {
   const [viewingPanorama, setViewingPanorama] = useState<Image | null>(null)
 
   useEffect(() => {
-    loadData()
+    processImages(initialImages, initialCategories)
   }, [])
 
-  const loadData = async () => {
-    try {
-      const [imagesResult, categoriesResult] = await Promise.all([
-        getImages().catch((error) => {
-          console.error("Error fetching images:", error)
-          return { success: false, error: error.message, data: [] }
-        }),
-        getCategories().catch((error) => {
-          console.error("Error fetching categories:", error)
-          return { success: false, error: error.message, data: [] }
-        }),
-      ])
+  const processImages = (allImages: Image[], allCategories: Category[]) => {
+    const validImages = allImages.filter((img) => {
+      return img && img.id && img.title
+    })
 
-      if (imagesResult.success && categoriesResult.success) {
-        const allImages = imagesResult.data || []
-        const allCategories = categoriesResult.data || []
+    console.log(`[v0] Loaded ${validImages.length} valid images out of ${allImages.length} total`)
 
-        const validImages = allImages.filter((img) => {
-          return img && img.id && img.title
-        })
-
-        console.log(`[v0] Loaded ${validImages.length} valid images out of ${allImages.length} total`)
-
-        if (validImages.length > 0) {
-          console.log("[v0] First image data:", validImages[0])
-          console.log("[v0] First image thumbnail URLs:", {
-            thumbnail_large_url: validImages[0].thumbnail_large_url,
-            thumbnail_medium_url: validImages[0].thumbnail_medium_url,
-            thumbnail_small_url: validImages[0].thumbnail_small_url,
-            original_url: validImages[0].original_url,
-            file_path: validImages[0].file_path,
-          })
-        }
-
-        setImages(validImages)
-        setCategories(allCategories)
-        setFeaturedImages(validImages.filter((img) => img.featured || img.is_featured))
-
-        const equirectangular = validImages.filter(
-          (img) =>
-            img.category_name?.toLowerCase().includes("equirectangular") ||
-            img.categories?.name?.toLowerCase().includes("equirectangular") ||
-            (img.category_name?.toLowerCase().includes("360") &&
-              !img.category_name?.toLowerCase().includes("fisheye")) ||
-            (img.categories?.name?.toLowerCase().includes("360") &&
-              !img.categories?.name?.toLowerCase().includes("fisheye")) ||
-            (img.title?.toLowerCase().includes("360") &&
-              !img.title?.toLowerCase().includes("fisheye") &&
-              !img.title?.toLowerCase().includes("180") &&
-              !img.title?.toLowerCase().includes("dome")),
-        )
-        setEquirectangularImages(equirectangular)
-
-        const heritageCategory = allCategories.find(cat => cat.name.toLowerCase() === 'heritage')
-        const heritage = validImages.filter(
-          (img) => {
-            // Match by category_id
-            if (heritageCategory && img.category_id === heritageCategory.id) {
-              return true
-            }
-            // Match by category name
-            if (img.category_name?.toLowerCase().includes("heritage") ||
-                img.categories?.name?.toLowerCase().includes("heritage")) {
-              return true
-            }
-            // Match by tags
-            if (img.tags && Array.isArray(img.tags) && 
-                img.tags.some(tag => tag.toLowerCase() === "heritage")) {
-              return true
-            }
-            return false
-          }
-        )
-        console.log(`[v0] Found ${heritage.length} Heritage images`)
-        setHeritageImages(heritage)
-      } else {
-        console.error("Error loading data:", imagesResult.error || categoriesResult.error)
-        setImages([])
-        setCategories([])
-        setFeaturedImages([])
-        setEquirectangularImages([])
-        setHeritageImages([])
-      }
-    } catch (error) {
-      console.error("Error loading data:", error)
-      setImages([])
-      setCategories([])
-      setFeaturedImages([])
-      setEquirectangularImages([])
-      setHeritageImages([])
-    } finally {
-      setLoading(false)
+    if (validImages.length > 0) {
+      console.log("[v0] First image data:", validImages[0])
     }
+
+    setImages(validImages)
+    setCategories(allCategories)
+    setFeaturedImages(validImages.filter((img) => img.featured || img.is_featured))
+
+    const equirectangular = validImages.filter(
+      (img) =>
+        img.category_name?.toLowerCase().includes("equirectangular") ||
+        img.categories?.name?.toLowerCase().includes("equirectangular") ||
+        (img.category_name?.toLowerCase().includes("360") &&
+          !img.category_name?.toLowerCase().includes("fisheye")) ||
+        (img.categories?.name?.toLowerCase().includes("360") &&
+          !img.categories?.name?.toLowerCase().includes("fisheye")) ||
+        (img.title?.toLowerCase().includes("360") &&
+          !img.title?.toLowerCase().includes("fisheye") &&
+          !img.title?.toLowerCase().includes("180") &&
+          !img.title?.toLowerCase().includes("dome")),
+    )
+    setEquirectangularImages(equirectangular)
+
+    const heritageCategory = allCategories.find(cat => cat.name.toLowerCase() === 'heritage')
+    const heritage = validImages.filter(
+      (img) => {
+        if (heritageCategory && img.category_id === heritageCategory.id) {
+          return true
+        }
+        if (img.category_name?.toLowerCase().includes("heritage") ||
+            img.categories?.name?.toLowerCase().includes("heritage")) {
+          return true
+        }
+        if (img.tags && Array.isArray(img.tags) && 
+            img.tags.some(tag => tag.toLowerCase() === "heritage")) {
+          return true
+        }
+        return false
+      }
+    )
+    console.log(`[v0] Found ${heritage.length} Heritage images`)
+    setHeritageImages(heritage)
   }
 
   const handleView360 = (image: Image) => {
@@ -165,88 +125,70 @@ export default function GalleryClient() {
 
   const getHeritageCategory = () => categories.find(cat => cat.name.toLowerCase() === 'heritage')
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <section className="relative py-16 bg-gradient-to-b from-muted/30 to-background">
-          <div className="absolute inset-0 grid-pattern opacity-20" />
-          <div className="relative container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center space-y-6">
-              <Badge variant="secondary" className="animate-pulse-glow">
-                {t("gallery.badge")}
-              </Badge>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-balance">
-                {t("gallery.title")}
-                <span className="text-primary block">{t("gallery.titleHighlight")}</span>
-              </h1>
-              <p className="text-xl text-muted-foreground text-pretty">
-                {t("gallery.subtitle")}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col items-center justify-center py-20 space-y-4">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <p className="text-muted-foreground">{t("loading")}</p>
-            </div>
-          </div>
-        </section>
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-background">
-      <section className="relative py-24 bg-gradient-to-b from-muted/30 via-background to-background overflow-hidden">
-        <div className="absolute inset-0">
-          <div
-            className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 animate-pulse"
-            style={{ animationDuration: "8s" }}
-          />
-          <div className="absolute top-1/4 left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-float" />
-          <div className="absolute bottom-1/4 right-20 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-float-delayed" />
+      <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ objectFit: 'cover' }}
+          >
+            <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/WebBackdrop360-2-u6TrAzn6S3wsmynX3nuZZiVu1GcPpp.mov" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+
+          <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60" />
         </div>
 
-        <div className="absolute inset-0 grid-pattern opacity-10" />
-        <div className="relative container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
-            <Badge variant="secondary" className="text-sm px-4 py-2">
+        <div className="absolute inset-0 opacity-[0.03] z-[1]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.3),transparent_50%)]" />
+        </div>
+
+        <div className="relative container mx-auto px-4 py-20 z-10">
+          <div className="max-w-5xl mx-auto text-center space-y-8">
+            <Badge variant="secondary" className="bg-primary/10 backdrop-blur-sm border-primary/20 text-sm px-4 py-2">
               {t("gallery.badge")}
             </Badge>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-balance leading-tight">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance leading-tight text-white drop-shadow-2xl">
               {t("gallery.title")}
-              <span className="text-primary block mt-2">{t("gallery.titleHighlight")}</span>
+              <br />
+              <span className="text-primary drop-shadow-[0_0_40px_rgba(139,92,246,0.8)]">{t("gallery.titleHighlight")}</span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-muted-foreground text-pretty leading-relaxed max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed text-pretty drop-shadow-lg">
               {t("gallery.subtitle")}
             </p>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8 max-w-3xl mx-auto">
-              <div className="space-y-2">
-                <div className="text-3xl font-bold text-primary">{t("gallery.stats.resolution")}</div>
-                <div className="text-sm text-muted-foreground">{t("gallery.stats.resolutionLabel")}</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 pt-8 max-w-4xl mx-auto">
+              <div className="space-y-2 bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
+                <div className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">{t("gallery.stats.resolution")}</div>
+                <div className="text-xs md:text-sm text-white/80 font-medium">{t("gallery.stats.resolutionLabel")}</div>
               </div>
-              <div className="space-y-2">
-                <div className="text-3xl font-bold text-primary">{images.length}+</div>
-                <div className="text-sm text-muted-foreground">{t("gallery.stats.assets")}</div>
+
+              <div className="space-y-2 bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
+                <div className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">{images.length}+</div>
+                <div className="text-xs md:text-sm text-white/80 font-medium">{t("gallery.stats.assets")}</div>
               </div>
-              <div className="space-y-2">
-                <div className="text-3xl font-bold text-primary">{t("gallery.stats.waitTime")}</div>
-                <div className="text-sm text-muted-foreground">{t("gallery.stats.waitTimeLabel")}</div>
+
+              <div className="space-y-2 bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
+                <div className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">{t("gallery.stats.waitTime")}</div>
+                <div className="text-xs md:text-sm text-white/80 font-medium">{t("gallery.stats.waitTimeLabel")}</div>
               </div>
-              <div className="space-y-2">
-                <div className="text-3xl font-bold text-primary">{t("gallery.stats.licensed")}</div>
-                <div className="text-sm text-muted-foreground">{t("gallery.stats.licensedLabel")}</div>
+
+              <div className="space-y-2 bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
+                <div className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">{t("gallery.stats.licensed")}</div>
+                <div className="text-xs md:text-sm text-white/80 font-medium">{t("gallery.stats.licensedLabel")}</div>
               </div>
             </div>
 
             <div className="pt-4">
-              <p className="text-sm text-muted-foreground/80 max-w-2xl mx-auto">
+              <p className="text-sm text-white/70 max-w-2xl mx-auto drop-shadow-lg">
                 {t("gallery.algorithmNote")}
               </p>
             </div>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import GalleryClient from "./gallery-client"
+import { getImages, getCategories } from "@/app/actions/admin-actions"
 
 export const metadata: Metadata = {
   title: "Browse Premium 360° Assets | Licensed AI Environments for VR, Games & Production",
@@ -37,6 +38,21 @@ export const metadata: Metadata = {
   },
 }
 
-export default function GalleryPage() {
-  return <GalleryClient />
+export default async function GalleryPage() {
+  // Fetch data on server side to prevent loading state on client
+  const [imagesResult, categoriesResult] = await Promise.all([
+    getImages().catch((error) => {
+      console.error("Error fetching images:", error)
+      return { success: false, error: error.message, data: [] }
+    }),
+    getCategories().catch((error) => {
+      console.error("Error fetching categories:", error)
+      return { success: false, error: error.message, data: [] }
+    }),
+  ])
+
+  const initialImages = imagesResult.success ? imagesResult.data || [] : []
+  const initialCategories = categoriesResult.success ? categoriesResult.data || [] : []
+
+  return <GalleryClient initialImages={initialImages} initialCategories={initialCategories} />
 }

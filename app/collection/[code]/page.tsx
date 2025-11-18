@@ -100,8 +100,9 @@ export default async function CollectionDetailPage({ params }: Props) {
 
   return (
     <div className="min-h-screen">
-      {collection.music_url && (
+      {(collection.music_playlist || collection.music_url) && (
         <CollectionMusicPlayer
+          musicPlaylist={collection.music_playlist}
           musicUrl={collection.music_url}
           collectionTitle={collection.title}
           variant="minimal"

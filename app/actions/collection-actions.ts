@@ -13,7 +13,8 @@ export interface Collection {
   is_auto_curated: boolean
   code: string
   is_active: boolean
-  music_url?: string // Added music_url parameter
+  music_url?: string
+  music_playlist?: string[] | null // Added music_playlist field for multiple tracks
 }
 
 export interface CollectionImage {
@@ -132,7 +133,8 @@ export async function createCollection(data: {
   bundle_price: number
   image_ids: string[]
   code?: string // Optional, will auto-generate if not provided
-  music_url?: string // Added music_url parameter
+  music_url?: string
+  music_playlist?: string[] | null // Added music_playlist parameter
 }) {
   const supabase = createAdminClient()
 
@@ -151,6 +153,7 @@ export async function createCollection(data: {
       is_auto_curated: false,
       is_active: true,
       music_url: data.music_url || null,
+      music_playlist: data.music_playlist || null, // Include music_playlist in the insert
     })
     .select()
     .single()
@@ -188,7 +191,8 @@ export async function updateCollection(
     end_date?: string
     bundle_price?: number
     is_active?: boolean
-    music_url?: string | null // Added music_url parameter
+    music_url?: string | null
+    music_playlist?: string[] | null // Added music_playlist parameter
   },
 ) {
   const supabase = createAdminClient()
@@ -379,13 +383,14 @@ export async function duplicateCollection(collectionId: string) {
     bundle_price: original.bundle_price,
     image_ids: imageIds,
     code: newCode,
-    music_url: original.music_url // Include music_url in the duplicate
+    music_url: original.music_url, // Include music_url in the duplicate
+    music_playlist: original.music_playlist // Include music_playlist in the duplicate
   })
 
   return result
 }
 
-// Fetch collection by code with music_url
+// Fetch collection by code with music_url and music_playlist
 export async function getCollectionByCode(code: string) {
   const supabase = await createClient()
 

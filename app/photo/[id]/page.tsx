@@ -12,6 +12,7 @@ import { getImageById } from "@/app/actions/admin-actions"
 import { useAuth } from "@/lib/contexts/auth-context"
 import { useCart } from "@/lib/contexts/cart-context"
 import { useToast } from "@/hooks/use-toast"
+import { CollectionMusicPlayer } from "@/components/collection-music-player"
 
 declare global {
   interface Window {
@@ -39,6 +40,11 @@ export default function PhotoDetailPage() {
   const { addItem } = useCart()
   const { toast } = useToast()
   const [image, setImage] = useState<Image | null>(null)
+  const [collectionMusic, setCollectionMusic] = useState<{
+    playlist?: string[]
+    url?: string
+    title?: string
+  } | null>(null)
   const [loading, setLoading] = useState(true)
   const [purchasing, setPurchasing] = useState(false)
   const [showQualityPreview, setShowQualityPreview] = useState(false)
@@ -369,6 +375,34 @@ export default function PhotoDetailPage() {
             hasImageUrl: !!result.data.image_url,
           })
           setImage(result.data)
+          
+          const { createClient } = await import("@/lib/supabase/client")
+          const supabase = createClient()
+          
+          const { data: collectionData } = await supabase
+            .from("collection_images")
+            .select(`
+              collection:collections (
+                music_url,
+                music_playlist,
+                title
+              )
+            `)
+            .eq("image_id", result.data.id)
+            .single()
+          
+          if (collectionData?.collection) {
+            const collection = Array.isArray(collectionData.collection) 
+              ? collectionData.collection[0] 
+              : collectionData.collection
+            
+            setCollectionMusic({
+              playlist: collection.music_playlist,
+              url: collection.music_url,
+              title: collection.title,
+            })
+            console.log("[v0] Collection music loaded:", collection.title)
+          }
         } else {
           console.error("[v0] Image not found:", result.error)
         }
@@ -505,6 +539,15 @@ export default function PhotoDetailPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {collectionMusic && (collectionMusic.playlist || collectionMusic.url) && (
+        <CollectionMusicPlayer
+          musicPlaylist={collectionMusic.playlist}
+          musicUrl={collectionMusic.url}
+          collectionTitle={collectionMusic.title || "Collection"}
+          variant="minimal"
+        />
+      )}
+
       {/* Header */}
       <div className="border-b bg-white/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">

@@ -12,6 +12,7 @@ import { ToastProvider } from "@/components/toast-notifications"
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Suspense } from "react"
+import { MusicPlayerProvider } from "@/lib/contexts/music-player-context"
 
 export const metadata: Metadata = {
   title: {
@@ -312,15 +313,17 @@ export default function RootLayout({
             <CartProvider>
               <TagFilterProvider>
                 <LanguageProvider>
-                  <ToastProvider>
-                    <Suspense fallback={null}>
-                      <Header />
-                      {children}
-                      <CartSidebar />
-                      <Analytics />
-                      <SpeedInsights />
-                    </Suspense>
-                  </ToastProvider>
+                  <MusicPlayerProvider>
+                    <ToastProvider>
+                      <Suspense fallback={null}>
+                        <Header />
+                        {children}
+                        <CartSidebar />
+                        <Analytics />
+                        <SpeedInsights />
+                      </Suspense>
+                    </ToastProvider>
+                  </MusicPlayerProvider>
                 </LanguageProvider>
               </TagFilterProvider>
             </CartProvider>

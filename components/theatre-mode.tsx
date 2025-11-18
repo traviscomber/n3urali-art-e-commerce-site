@@ -28,7 +28,6 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
   const [isCrossfading, setIsCrossfading] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [isZoomed, setIsZoomed] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -119,7 +118,6 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
 
     // Reset progress
     setProgress(0)
-    setIsZoomed(false)
 
     // Update progress every 100ms for smooth animation
     progressIntervalRef.current = setInterval(() => {
@@ -128,10 +126,6 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
         return newProgress >= 100 ? 100 : newProgress
       })
     }, 100)
-
-    setTimeout(() => {
-      setIsZoomed(true)
-    }, 1000)
 
     const crossfadeTimeout = setTimeout(() => {
       const nextIndex = (currentImageIndex + 1) % images.length
@@ -343,14 +337,16 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
           alt={currentImage?.title || 'Collection image'}
           fill
           className={`object-cover transition-all duration-[29000ms] ease-in-out ${
-            isZoomed ? 'scale-110' : 'scale-100'
-          } ${isCrossfading ? 'opacity-0' : 'opacity-100'}`}
+            isPaused ? 'pause-animation' : ''
+          }`}
           style={{
             pointerEvents: 'none',
             userSelect: 'none',
             WebkitUserSelect: 'none',
-            transitionProperty: 'transform, opacity',
-            transitionDuration: isCrossfading ? '5000ms' : '29000ms',
+            opacity: isCrossfading ? 0 : 1,
+            animation: 'kenBurnsZoom 30s ease-in-out infinite',
+            transitionProperty: 'opacity',
+            transitionDuration: '5000ms',
           }}
           draggable={false}
           priority
@@ -363,12 +359,15 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
             src={nextImageUrl || "/placeholder.svg"}
             alt={nextImage_data?.title || 'Next collection image'}
             fill
-            className="object-cover scale-100 opacity-0 animate-in fade-in duration-[5000ms]"
+            className={`object-cover transition-all duration-[29000ms] ease-in-out ${
+              isPaused ? 'pause-animation' : ''
+            }`}
             style={{
               pointerEvents: 'none',
               userSelect: 'none',
               WebkitUserSelect: 'none',
               opacity: 1,
+              animation: 'kenBurnsZoom 30s ease-in-out infinite',
               transitionProperty: 'opacity',
               transitionDuration: '5000ms',
             }}

@@ -292,7 +292,12 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
       className="fixed inset-0 z-[100] bg-black"
       style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
     >
-      <div className="absolute inset-0 pointer-events-none bg-gradient-radial from-transparent via-transparent to-black/60" />
+      <div 
+        className="absolute inset-0 pointer-events-none" 
+        style={{
+          background: 'radial-gradient(circle at center, transparent 0%, transparent 40%, rgba(0, 0, 0, 0.6) 100%)'
+        }}
+      />
 
       {/* Image with fade transition and zoom effect */}
       <div 

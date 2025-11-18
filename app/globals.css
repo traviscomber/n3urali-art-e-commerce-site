@@ -133,6 +133,11 @@
     );
   }
 
+  /* Added radial gradient utility for theatre mode vignette effect */
+  .bg-gradient-radial {
+    background: radial-gradient(circle at center, var(--tw-gradient-stops));
+  }
+
   /* Grid pattern */
   .grid-pattern {
     background-image: 
@@ -539,6 +544,8 @@
   .duration-300 {
     animation-duration: 300ms;
   }
+
+  /* Removed invalid @utility play-state-* directive that was causing the error */
 }
 
 .animate-float {

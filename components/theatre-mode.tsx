@@ -26,6 +26,8 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [isZoomed, setIsZoomed] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -89,6 +91,17 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
   }, [isOpen])
 
   useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+    }
+  }, [])
+
+  useEffect(() => {
     if (!isOpen || isPaused) {
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
@@ -103,6 +116,7 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
 
     // Reset progress
     setProgress(0)
+    setIsZoomed(false)
 
     // Update progress every 100ms for smooth animation
     progressIntervalRef.current = setInterval(() => {
@@ -111,6 +125,10 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
         return newProgress >= 100 ? 100 : newProgress
       })
     }, 100)
+
+    setTimeout(() => {
+      setIsZoomed(true)
+    }, 1000)
 
     // Transition to next image after 30 seconds
     intervalRef.current = setInterval(() => {
@@ -200,6 +218,18 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
     }
   }
 
+  const handleImageClick = async () => {
+    if (!containerRef.current) return
+    
+    try {
+      if (!document.fullscreenElement) {
+        await containerRef.current.requestFullscreen()
+      }
+    } catch (err) {
+      console.error('[v0] Failed to enter fullscreen:', err)
+    }
+  }
+
   const currentImage = images[currentImageIndex]
   
   console.log('[v0] Theatre Mode - Current Image:', {
@@ -228,6 +258,20 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
   
   console.log('[v0] Theatre Mode - Image URL being used:', imageUrl)
 
+  const toggleFullscreen = async () => {
+    if (!containerRef.current) return
+
+    try {
+      if (!document.fullscreenElement) {
+        await containerRef.current.requestFullscreen()
+      } else {
+        await document.exitFullscreen()
+      }
+    } catch (err) {
+      console.error('[v0] Failed to toggle fullscreen:', err)
+    }
+  }
+
   if (!isOpen) {
     return (
       <Button
@@ -248,14 +292,21 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
       className="fixed inset-0 z-[100] bg-black"
       style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
     >
-      {/* Image with fade transition */}
-      <div className="relative w-full h-full">
+      <div className="absolute inset-0 pointer-events-none bg-gradient-radial from-transparent via-transparent to-black/60" />
+
+      {/* Image with fade transition and zoom effect */}
+      <div 
+        className="relative w-full h-full cursor-pointer overflow-hidden"
+        onClick={handleImageClick}
+      >
         <Image
           key={currentImageIndex}
           src={imageUrl || "/placeholder.svg"}
           alt={currentImage?.title || 'Collection image'}
           fill
-          className="object-contain animate-in fade-in duration-1000"
+          className={`object-cover animate-in fade-in duration-1000 transition-transform duration-[29000ms] ease-in-out ${
+            isZoomed ? 'scale-110' : 'scale-100'
+          }`}
           style={{
             pointerEvents: 'none',
             userSelect: 'none',
@@ -268,139 +319,166 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
         {/* Watermark overlay */}
         <div className="absolute inset-0 pointer-events-none">
           {/* Top watermark */}
-          <div className="absolute top-8 left-1/2 -translate-x-1/2 text-white/40 font-bold text-2xl tracking-wider">
+          <div className="absolute top-8 left-1/2 -translate-x-1/2 text-white/40 font-bold text-2xl tracking-wider drop-shadow-2xl">
             N3URALIA360.ART
           </div>
 
           {/* Center watermark */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/20 font-bold text-6xl tracking-wider rotate-[-30deg]">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/20 font-bold text-6xl tracking-wider rotate-[-30deg] drop-shadow-2xl">
             N3URALIA360.ART
           </div>
 
           {/* Bottom watermark */}
-          <div className="absolute bottom-24 left-1/2 -translate-x-1/2 text-white/40 font-bold text-xl tracking-wider">
+          <div className="absolute bottom-24 left-1/2 -translate-x-1/2 text-white/40 font-bold text-xl tracking-wider drop-shadow-2xl">
             {collectionTitle}
           </div>
         </div>
 
+        {!document.fullscreenElement && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/60 text-lg animate-pulse pointer-events-none">
+            Click to enter fullscreen
+          </div>
+        )}
+
         {/* Image title and counter */}
-        <div className="absolute top-8 left-8 text-white space-y-2 bg-black/50 backdrop-blur-sm rounded-lg px-6 py-3">
+        <div className="absolute top-8 left-8 text-white space-y-2 bg-black/50 backdrop-blur-sm rounded-lg px-6 py-3 pointer-events-none">
           <div className="text-2xl font-bold">{currentImage?.title}</div>
           <div className="text-sm text-white/80">
             Image {currentImageIndex + 1} of {images.length}
           </div>
         </div>
 
-        {/* Exit button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={exitTheatreMode}
-          className="absolute top-8 right-8 h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm"
-        >
-          <X className="h-6 w-6" />
-        </Button>
+        <div className="absolute top-8 right-8 flex items-center gap-3 pointer-events-auto">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleFullscreen}
+            className="h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm"
+            title={isFullscreen ? "Exit fullscreen (F11)" : "Enter fullscreen (F11)"}
+          >
+            <Maximize className="h-6 w-6" />
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={exitTheatreMode}
+            className="h-12 w-12 rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm"
+          >
+            <X className="h-6 w-6" />
+          </Button>
+        </div>
 
         {/* Navigation and playback controls */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-black/70 backdrop-blur-lg rounded-full px-8 py-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={previousImage}
-            className="h-10 w-10 rounded-full text-white hover:bg-white/20"
-          >
-            <SkipBack className="h-5 w-5" />
-          </Button>
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-auto">
+          <div className="text-xs text-white/60 font-medium tracking-wider uppercase">
+            Slideshow
+          </div>
+          <div className="flex items-center gap-4 bg-black/70 backdrop-blur-lg rounded-full px-8 py-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={previousImage}
+              className="h-10 w-10 rounded-full text-white hover:bg-white/20"
+            >
+              <SkipBack className="h-5 w-5" />
+            </Button>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={togglePause}
-            className="h-12 w-12 rounded-full text-white hover:bg-white/20"
-          >
-            {isPaused ? (
-              <Play className="h-6 w-6 fill-current" />
-            ) : (
-              <Pause className="h-6 w-6 fill-current" />
-            )}
-          </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={togglePause}
+              className="h-12 w-12 rounded-full text-white hover:bg-white/20"
+            >
+              {isPaused ? (
+                <Play className="h-6 w-6 fill-current" />
+              ) : (
+                <Pause className="h-6 w-6 fill-current" />
+              )}
+            </Button>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={nextImage}
-            className="h-10 w-10 rounded-full text-white hover:bg-white/20"
-          >
-            <SkipForward className="h-5 w-5" />
-          </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={nextImage}
+              className="h-10 w-10 rounded-full text-white hover:bg-white/20"
+            >
+              <SkipForward className="h-5 w-5" />
+            </Button>
 
-          {/* Progress bar */}
-          <div className="w-48 h-2 bg-white/30 rounded-full overflow-hidden mx-4">
-            <div
-              className="h-full bg-white/90 transition-all duration-100"
-              style={{ width: `${progress}%` }}
-            />
+            {/* Progress bar */}
+            <div className="w-48 h-2 bg-white/30 rounded-full overflow-hidden mx-4">
+              <div
+                className="h-full bg-white/90 transition-all duration-100"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
           </div>
         </div>
 
         {/* Music controls */}
         {playlist.length > 0 && (
-          <div className="absolute bottom-8 right-8 flex items-center gap-3 bg-black/70 backdrop-blur-lg rounded-full px-6 py-3">
-            {playlist.length > 1 && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={playPreviousTrack}
-                className="h-8 w-8 rounded-full text-white hover:bg-white/20"
-              >
-                <SkipBack className="h-4 w-4" />
-              </Button>
-            )}
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleMusicPlayPause}
-              className="h-9 w-9 rounded-full text-white hover:bg-white/20"
-            >
-              {isMusicPlaying ? (
-                <Pause className="h-5 w-5 fill-current" />
-              ) : (
-                <Play className="h-5 w-5 fill-current" />
-              )}
-            </Button>
-
-            {playlist.length > 1 && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={playNextTrack}
-                className="h-8 w-8 rounded-full text-white hover:bg-white/20"
-              >
-                <SkipForward className="h-4 w-4" />
-              </Button>
-            )}
-
-            <div className="flex items-center gap-2 ml-2">
-              {volume === 0 ? (
-                <VolumeX className="h-4 w-4 text-white/80" />
-              ) : (
-                <Volume2 className="h-4 w-4 text-white/80" />
-              )}
-              <Slider
-                value={[volume]}
-                onValueChange={handleVolumeChange}
-                max={1}
-                step={0.01}
-                className="w-20"
-              />
+          <div className="absolute bottom-8 right-8 flex flex-col items-center gap-2 pointer-events-auto">
+            <div className="text-xs text-white/60 font-medium tracking-wider uppercase">
+              Music
             </div>
+            <div className="flex items-center gap-3 bg-black/70 backdrop-blur-lg rounded-full px-6 py-3">
+              {playlist.length > 1 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={playPreviousTrack}
+                  className="h-8 w-8 rounded-full text-white hover:bg-white/20"
+                >
+                  <SkipBack className="h-4 w-4" />
+                </Button>
+              )}
 
-            {playlist.length > 1 && (
-              <div className="text-xs text-white/80 pl-3 border-l border-white/30">
-                {currentTrackIndex + 1}/{playlist.length}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleMusicPlayPause}
+                className="h-9 w-9 rounded-full text-white hover:bg-white/20"
+              >
+                {isMusicPlaying ? (
+                  <Pause className="h-5 w-5 fill-current" />
+                ) : (
+                  <Play className="h-5 w-5 fill-current" />
+                )}
+              </Button>
+
+              {playlist.length > 1 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={playNextTrack}
+                  className="h-8 w-8 rounded-full text-white hover:bg-white/20"
+                >
+                  <SkipForward className="h-4 w-4" />
+                </Button>
+              )}
+
+              <div className="flex items-center gap-2 ml-2">
+                {volume === 0 ? (
+                  <VolumeX className="h-4 w-4 text-white/80" />
+                ) : (
+                  <Volume2 className="h-4 w-4 text-white/80" />
+                )}
+                <Slider
+                  value={[volume]}
+                  onValueChange={handleVolumeChange}
+                  max={1}
+                  step={0.01}
+                  className="w-20"
+                />
               </div>
-            )}
+
+              {playlist.length > 1 && (
+                <div className="text-xs text-white/80 pl-3 border-l border-white/30">
+                  {currentTrackIndex + 1}/{playlist.length}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

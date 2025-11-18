@@ -38,6 +38,7 @@ export default async function CollectionsPage() {
 
       // Step 2: Fetch actual image data if we have IDs
       let images: any[] = []
+      let allImagesWithPrices: any[] = []
       if (collectionImageLinks && collectionImageLinks.length > 0) {
         const imageIds = collectionImageLinks.map(ci => ci.image_id)
         const { data: imageData } = await supabase
@@ -47,6 +48,23 @@ export default async function CollectionsPage() {
           .eq("active", true)
         
         images = imageData || []
+
+        // Fetch ALL images with prices for calculation
+        const { data: allCollectionImages } = await supabase
+          .from("collection_images")
+          .select("image_id")
+          .eq("collection_id", collection.id)
+
+        if (allCollectionImages && allCollectionImages.length > 0) {
+          const allImageIds = allCollectionImages.map(ci => ci.image_id)
+          const { data: allImageData } = await supabase
+            .from("images")
+            .select("id, price")
+            .in("id", allImageIds)
+            .eq("active", true)
+          
+          allImagesWithPrices = allImageData || []
+        }
       }
 
       // Get total count
@@ -55,10 +73,18 @@ export default async function CollectionsPage() {
         .select("*", { count: "exact", head: true })
         .eq("collection_id", collection.id)
 
+      const individualTotal = allImagesWithPrices.reduce((sum, img) => sum + parseFloat(img.price || '0'), 0)
+      const bundlePrice = parseFloat(collection.bundle_price || '0')
+      const savings = individualTotal - bundlePrice
+      const savingsPercent = individualTotal > 0 ? Math.round((savings / individualTotal) * 100) : 0
+
       return {
         ...collection,
         previewImages: images,
         imageCount: count || 0,
+        individualTotal,
+        savings,
+        savingsPercent,
       }
     })
   )
@@ -204,21 +230,47 @@ export default async function CollectionsPage() {
                         </div>
 
                         {collection.description && (
-                          <p className="text-lg text-muted-foreground leading-relaxed">
+                          <p className="text-lg text-muted-foreground leading-relaxed line-clamp-4">
                             {collection.description}
                           </p>
                         )}
 
-                        <div className="flex flex-wrap items-center gap-6 pt-4">
-                          {collection.bundle_price && (
-                            <div className="space-y-1">
-                              <div className="text-sm text-muted-foreground">Bundle Price</div>
-                              <div className="text-3xl font-bold text-primary">
-                                ${collection.bundle_price}
+                        {collection.individualTotal > 0 && (
+                          <div className="rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 p-8 shadow-lg">
+                            <div className="grid grid-cols-3 gap-6 text-center">
+                              <div className="space-y-2">
+                                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Individual Purchase</div>
+                                <div className="text-xl font-semibold line-through text-muted-foreground opacity-70">
+                                  ${collection.individualTotal.toFixed(2)}
+                                </div>
+                                <div className="text-xs text-muted-foreground leading-tight">Buying all {collection.imageCount} photos separately</div>
+                              </div>
+                              
+                              <div className="space-y-2 relative">
+                                <div className="absolute -inset-3 bg-primary/10 rounded-xl blur-xl" />
+                                <div className="relative space-y-2">
+                                  <div className="text-xs font-bold text-primary uppercase tracking-wide">Bundle Price</div>
+                                  <div className="text-5xl font-black text-primary drop-shadow-sm">
+                                    ${collection.bundle_price}
+                                  </div>
+                                  <div className="text-xs font-medium text-primary/80">Complete collection</div>
+                                </div>
+                              </div>
+                              
+                              <div className="space-y-2">
+                                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">You Save</div>
+                                <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                                  ${collection.savings.toFixed(2)}
+                                </div>
+                                <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-sm font-bold">
+                                  {collection.savingsPercent}% OFF
+                                </div>
                               </div>
                             </div>
-                          )}
-                          
+                          </div>
+                        )}
+
+                        <div className="flex flex-wrap items-center gap-6 pt-2">
                           <div className="space-y-1">
                             <div className="text-sm text-muted-foreground">Format</div>
                             <div className="font-semibold">360° Panoramic</div>

@@ -18,7 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar, Plus, Trash2, Loader2, Edit2, Copy, Eye, Search, Filter, GripVertical, Check, X } from "lucide-react"
+import { Calendar, Plus, Trash2, Loader2, Edit2, Copy, Eye, Search, Filter, GripVertical, Check, X } from 'lucide-react'
 import { toast } from "sonner"
 import {
   createCollection,
@@ -61,6 +61,7 @@ export function CollectionsManager({ images }: CollectionsManagerProps) {
     end_date: "",
     bundle_price: "199",
     code: "",
+    music_url: "", // Added music_url field
   })
 
   useEffect(() => {
@@ -109,6 +110,7 @@ export function CollectionsManager({ images }: CollectionsManagerProps) {
         ...newCollection,
         bundle_price: Number.parseFloat(newCollection.bundle_price),
         image_ids: selectedImages,
+        music_url: newCollection.music_url || undefined, // Include music_url
       })
 
       if (result.success) {
@@ -120,6 +122,7 @@ export function CollectionsManager({ images }: CollectionsManagerProps) {
           end_date: "",
           bundle_price: "199",
           code: "",
+          music_url: "", // Reset music_url
         })
         setSelectedImages([])
         await loadCollections()
@@ -148,6 +151,7 @@ export function CollectionsManager({ images }: CollectionsManagerProps) {
           end_date: result.data.end_date.slice(0, 16),
           bundle_price: result.data.bundle_price.toString(),
           code: result.data.code || "",
+          music_url: result.data.music_url || "", // Include music_url when editing
         })
       } else {
         toast.error("Failed to load collection")
@@ -186,6 +190,7 @@ export function CollectionsManager({ images }: CollectionsManagerProps) {
           start_date: newCollection.start_date,
           end_date: newCollection.end_date,
           bundle_price: Number.parseFloat(newCollection.bundle_price),
+          music_url: newCollection.music_url || null, // Include music_url in update
         })
 
         if (!updateResult.success) {
@@ -206,6 +211,7 @@ export function CollectionsManager({ images }: CollectionsManagerProps) {
           ...newCollection,
           bundle_price: Number.parseFloat(newCollection.bundle_price),
           image_ids: selectedImages,
+          music_url: newCollection.music_url || undefined, // Include music_url in creation
         })
 
         if (!result.success) {
@@ -223,6 +229,7 @@ export function CollectionsManager({ images }: CollectionsManagerProps) {
         end_date: "",
         bundle_price: "199",
         code: "",
+        music_url: "", // Reset music_url
       })
       setSelectedImages([])
       setEditingCollection(null)
@@ -471,6 +478,22 @@ export function CollectionsManager({ images }: CollectionsManagerProps) {
             />
           </div>
 
+          <div>
+            <Label htmlFor="music_url">
+              Ambient Music URL (Optional)
+            </Label>
+            <Input
+              id="music_url"
+              type="url"
+              value={newCollection.music_url}
+              onChange={(e) => setNewCollection((prev) => ({ ...prev, music_url: e.target.value }))}
+              placeholder="YouTube URL or MP3/WAV file URL"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Add YouTube video URL or direct MP3/WAV file link for ambient music
+            </p>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="start_date">Start Date *</Label>
@@ -611,6 +634,7 @@ export function CollectionsManager({ images }: CollectionsManagerProps) {
                     end_date: "",
                     bundle_price: "199",
                     code: "",
+                    music_url: "", // Reset music_url
                   })
                   generateCollectionCode().then((code) => setNewCollection((prev) => ({ ...prev, code })))
                 }}

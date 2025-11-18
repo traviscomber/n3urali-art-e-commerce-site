@@ -13,6 +13,7 @@ export interface Collection {
   is_auto_curated: boolean
   code: string
   is_active: boolean
+  music_url?: string // Added music_url parameter
 }
 
 export interface CollectionImage {
@@ -131,13 +132,13 @@ export async function createCollection(data: {
   bundle_price: number
   image_ids: string[]
   code?: string // Optional, will auto-generate if not provided
+  music_url?: string // Added music_url parameter
 }) {
   const supabase = createAdminClient()
 
   // Auto-generate code if not provided
   const collectionCode = data.code || (await generateCollectionCode())
 
-  // Create collection
   const { data: collection, error: collectionError } = await supabase
     .from("collections")
     .insert({
@@ -149,6 +150,7 @@ export async function createCollection(data: {
       bundle_price: data.bundle_price,
       is_auto_curated: false,
       is_active: true,
+      music_url: data.music_url || null,
     })
     .select()
     .single()
@@ -186,6 +188,7 @@ export async function updateCollection(
     end_date?: string
     bundle_price?: number
     is_active?: boolean
+    music_url?: string | null // Added music_url parameter
   },
 ) {
   const supabase = createAdminClient()
@@ -376,7 +379,64 @@ export async function duplicateCollection(collectionId: string) {
     bundle_price: original.bundle_price,
     image_ids: imageIds,
     code: newCode,
+    music_url: original.music_url // Include music_url in the duplicate
   })
 
   return result
+}
+
+// Fetch collection by code with music_url
+export async function getCollectionByCode(code: string) {
+  const supabase = await createClient()
+
+  const { data: collection, error: collectionError } = await supabase
+    .from("collections")
+    .select("*")
+    .eq("code", code)
+    .eq("is_active", true)
+    .single()
+
+  if (collectionError || !collection) {
+    return { success: false, error: "Collection not found", data: null }
+  }
+
+  const images = await getCollectionImages(collection.id)
+
+  return {
+    success: true,
+    data: {
+      ...collection,
+      images,
+    },
+  }
+}
+
+// Fetch all active collections with music_url for listing page
+export async function getAllActiveCollections() {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("collections")
+    .select("*")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false })
+
+  if (error) {
+    console.error("[v0] Error fetching active collections:", error)
+    return []
+  }
+
+  // Get image counts and first images for each collection
+  const collectionsWithImages = await Promise.all(
+    data.map(async (collection) => {
+      const images = await getCollectionImages(collection.id)
+      return {
+        ...collection,
+        imageCount: images.length,
+        previewImages: images.slice(0, 6),
+      }
+    })
+  )
+
+  return collectionsWithImages
 }

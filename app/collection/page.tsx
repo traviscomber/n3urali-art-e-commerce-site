@@ -91,6 +91,7 @@ export default async function CollectionsPage() {
 
   return (
     <div className="min-h-screen">
+
       <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden bg-background">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-background to-background" />
         

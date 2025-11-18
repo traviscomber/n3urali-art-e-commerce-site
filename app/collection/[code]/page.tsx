@@ -6,6 +6,7 @@ import { ArrowLeft, Download, Eye, Sparkles } from 'lucide-react'
 import Link from "next/link"
 import Image from "next/image"
 import { BuyCollectionBundleButton } from "@/components/buy-collection-bundle-button"
+import { CollectionMusicPlayer } from "@/components/collection-music-player"
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from 'next/navigation'
 
@@ -99,6 +100,14 @@ export default async function CollectionDetailPage({ params }: Props) {
 
   return (
     <div className="min-h-screen">
+      {collection.music_url && (
+        <CollectionMusicPlayer
+          musicUrl={collection.music_url}
+          collectionTitle={collection.title}
+          variant="minimal"
+        />
+      )}
+
       <section className="relative min-h-[60vh] flex items-end overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/30 to-background" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />

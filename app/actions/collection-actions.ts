@@ -286,6 +286,21 @@ export async function updateCollectionImages(collectionId: string, imageIds: str
     return { success: false, error: insertError.message }
   }
 
+  const { data: calculatedPrice, error: priceError } = await supabase.rpc(
+    'calculate_collection_bundle_price',
+    { collection_id_param: collectionId }
+  )
+
+  if (!priceError && calculatedPrice !== null) {
+    await supabase
+      .from('collections')
+      .update({ 
+        bundle_price: calculatedPrice,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', collectionId)
+  }
+
   revalidatePath("/collection")
   revalidatePath("/simple-admin")
 

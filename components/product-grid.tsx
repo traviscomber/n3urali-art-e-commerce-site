@@ -5,11 +5,11 @@ import { PanoramaViewer } from "./panorama-viewer"
 import { useState, useEffect, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Search, X, Tag } from 'lucide-react'
+import { X, Tag, Search } from 'lucide-react'
 import { useTagFilter } from "@/lib/contexts/tag-filter-context"
+import { Input } from "@/components/ui/input"
 
 interface Image {
   id: string
@@ -44,9 +44,8 @@ interface ProductGridProps {
 export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps) {
   const [images, setImages] = useState<Image[]>(initialImages)
   const [loading, setLoading] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
   const [sortBy, setSortBy] = useState("created_at")
-  const [selectedCategory, setSelectedCategory] = useState<string>(categoryId || "all")
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
   const [viewingPanorama, setViewingPanorama] = useState<Image | null>(null)
   const [availableTags, setAvailableTags] = useState<string[]>([])
@@ -60,7 +59,6 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
   const supabase = useMemo(() => createClient(), [])
 
   useEffect(() => {
-    loadCategories()
     if (!initialImages || initialImages.length === 0) {
       loadImages()
     } else {
@@ -86,7 +84,7 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
     setImages([])
     setHasMoreInDB(true)
     loadImages()
-  }, [selectedCategory, sortBy])
+  }, [sortBy])
 
   useEffect(() => {
     const tags = new Set<string>()
@@ -97,30 +95,6 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
     })
     setAvailableTags(Array.from(tags).sort())
   }, [images])
-
-  const loadCategories = async () => {
-    try {
-      const { data, error } = await supabase.from("categories").select("id, name").order("name")
-
-      if (error) throw error
-
-      const filteredCategories = (data || []).filter((category) => {
-        const name = category.name
-        if (
-          name.toLowerCase() === "equirectangular" ||
-          name.toLowerCase() === "fisheye" ||
-          name.toLowerCase() === "standard"
-        ) {
-          return name[0] === name[0].toUpperCase()
-        }
-        return true
-      })
-
-      setCategories(filteredCategories)
-    } catch (error) {
-      console.error("Error loading categories:", error)
-    }
-  }
 
   const loadImages = async (append = false) => {
     if (initialImages && initialImages.length > 0 && !append) {
@@ -161,10 +135,6 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
         `)
         .eq("active", true)
         .range(startIndex, endIndex)
-
-      if (selectedCategory !== "all") {
-        query = query.eq("category_id", selectedCategory)
-      }
 
       switch (sortBy) {
         case "price_asc":
@@ -221,12 +191,9 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
 
   const filteredImages = images.filter((image) => {
     const matchesSearch =
-      searchTerm === "" ||
-      image.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      image.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (image.tags &&
-        Array.isArray(image.tags) &&
-        image.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())))
+      !searchQuery ||
+      image.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (image.description && image.description.toLowerCase().includes(searchQuery.toLowerCase()))
 
     const matchesTags =
       selectedTags.length === 0 ||
@@ -240,9 +207,8 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
   const hasMore = displayCount < sortedAndFilteredImages.length
 
   const clearFilters = () => {
-    setSearchTerm("")
-    setSelectedCategory("all")
     setSortBy("created_at")
+    setSearchQuery("")
     clearTags()
   }
 
@@ -255,19 +221,16 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
   }
 
   const loadMore = () => {
-    // If we have more filtered images to show, just increase display count
     if (hasMore) {
       setDisplayCount((prev) => Math.min(prev + 20, sortedAndFilteredImages.length))
-    }
-    // If we've shown all filtered images but there might be more in DB, load next batch
-    else if (hasMoreInDB && !loadingMore) {
+    } else if (hasMoreInDB && !loadingMore) {
       loadImages(true)
     }
   }
 
   useEffect(() => {
     setDisplayCount(20)
-  }, [searchTerm, selectedCategory, sortBy, selectedTags])
+  }, [sortBy, selectedTags])
 
   useEffect(() => {
     if (
@@ -284,6 +247,16 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
   return (
     <div className="space-y-6">
       <div className="bg-card/30 rounded-lg p-4 space-y-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search images by title or description..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 bg-background/50"
+          />
+        </div>
+
         {availableTags.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm font-medium">
@@ -310,29 +283,7 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search images..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="All Categories" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {categories.map((category) => (
-                <SelectItem key={category.id} value={category.id}>
-                  {category.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex justify-end">
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="Sort by" />
@@ -346,19 +297,13 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
           </Select>
         </div>
 
-        {(searchTerm || selectedCategory !== "all" || sortBy !== "created_at" || hasActiveTags) && (
+        {(sortBy !== "created_at" || hasActiveTags || searchQuery) && (
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm text-muted-foreground">Active filters:</span>
-            {searchTerm && (
-              <Badge variant="secondary">
-                Search: {searchTerm}
-                <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => setSearchTerm("")} />
-              </Badge>
-            )}
-            {selectedCategory !== "all" && (
-              <Badge variant="secondary">
-                Category: {categories.find((c) => c.id === selectedCategory)?.name}
-                <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => setSelectedCategory("all")} />
+            {searchQuery && (
+              <Badge variant="default" className="bg-primary text-primary-foreground">
+                Search: "{searchQuery}"
+                <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => setSearchQuery("")} />
               </Badge>
             )}
             {selectedTags.map((tag) => (
@@ -381,9 +326,9 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
           ) : (
             <>
               Showing {displayedImages.length} of {sortedAndFilteredImages.length} images
-              {hasActiveTags && (
+              {(hasActiveTags || searchQuery) && (
                 <span className="ml-2 text-primary">
-                  (filtered by {selectedTags.length} tag{selectedTags.length !== 1 ? "s" : ""})
+                  (filtered by {[searchQuery && "search", hasActiveTags && `${selectedTags.length} tag${selectedTags.length !== 1 ? "s" : ""}`].filter(Boolean).join(" and ")})
                 </span>
               )}
             </>
@@ -424,9 +369,9 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
       ) : (
         <div className="text-center py-12">
           <p className="text-muted-foreground">No images found matching your criteria.</p>
-          {hasActiveTags && (
+          {(hasActiveTags || searchQuery) && (
             <p className="text-sm text-muted-foreground mt-2">
-              Try removing some tag filters or search for different terms.
+              Try {searchQuery && "changing your search term"}{searchQuery && hasActiveTags && " or "}{ hasActiveTags && "removing some tag filters"}.
             </p>
           )}
           <Button variant="outline" onClick={clearFilters} className="mt-4 bg-transparent">

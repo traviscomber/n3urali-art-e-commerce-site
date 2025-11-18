@@ -37,6 +37,7 @@ interface Image {
   thumbnail_url?: string
   category_name?: string
   featured?: boolean
+  image_format?: string
 }
 
 interface Category {
@@ -56,8 +57,8 @@ export default function GalleryClient({ initialImages, initialCategories }: Gall
   const [categories, setCategories] = useState<Category[]>(initialCategories)
   const [featuredImages, setFeaturedImages] = useState<Image[]>([])
   const [equirectangularImages, setEquirectangularImages] = useState<Image[]>([])
-  const [heritageImages, setHeritageImages] = useState<Image[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<string>("all")
+  const [fisheyeImages, setFisheyeImages] = useState<Image[]>([])
+  const [selectedFormat, setSelectedFormat] = useState<string>("all")
   const [viewingPanorama, setViewingPanorama] = useState<Image | null>(null)
 
   useEffect(() => {
@@ -83,36 +84,22 @@ export default function GalleryClient({ initialImages, initialCategories }: Gall
       (img) =>
         img.category_name?.toLowerCase().includes("equirectangular") ||
         img.categories?.name?.toLowerCase().includes("equirectangular") ||
+        img.image_format?.toLowerCase().includes("equirectangular") ||
         (img.category_name?.toLowerCase().includes("360") &&
-          !img.category_name?.toLowerCase().includes("fisheye")) ||
-        (img.categories?.name?.toLowerCase().includes("360") &&
-          !img.categories?.name?.toLowerCase().includes("fisheye")) ||
-        (img.title?.toLowerCase().includes("360") &&
-          !img.title?.toLowerCase().includes("fisheye") &&
-          !img.title?.toLowerCase().includes("180") &&
-          !img.title?.toLowerCase().includes("dome")),
+          !img.category_name?.toLowerCase().includes("fisheye"))
     )
     setEquirectangularImages(equirectangular)
 
-    const heritageCategory = allCategories.find(cat => cat.name.toLowerCase() === 'heritage')
-    const heritage = validImages.filter(
-      (img) => {
-        if (heritageCategory && img.category_id === heritageCategory.id) {
-          return true
-        }
-        if (img.category_name?.toLowerCase().includes("heritage") ||
-            img.categories?.name?.toLowerCase().includes("heritage")) {
-          return true
-        }
-        if (img.tags && Array.isArray(img.tags) && 
-            img.tags.some(tag => tag.toLowerCase() === "heritage")) {
-          return true
-        }
-        return false
-      }
+    const fisheye = validImages.filter(
+      (img) =>
+        img.category_name?.toLowerCase().includes("fisheye") ||
+        img.categories?.name?.toLowerCase().includes("fisheye") ||
+        img.image_format?.toLowerCase().includes("fisheye") ||
+        img.category_name?.toLowerCase().includes("180")
     )
-    console.log(`[v0] Found ${heritage.length} Heritage images`)
-    setHeritageImages(heritage)
+    setFisheyeImages(fisheye)
+
+    console.log(`[v0] Found ${equirectangular.length} Equirectangular and ${fisheye.length} Fisheye images`)
   }
 
   const handleView360 = (image: Image) => {
@@ -122,8 +109,6 @@ export default function GalleryClient({ initialImages, initialCategories }: Gall
   const closePanoramaViewer = () => {
     setViewingPanorama(null)
   }
-
-  const getHeritageCategory = () => categories.find(cat => cat.name.toLowerCase() === 'heritage')
 
   return (
     <div className="min-h-screen bg-background">
@@ -185,155 +170,62 @@ export default function GalleryClient({ initialImages, initialCategories }: Gall
                 <div className="text-xs md:text-sm text-white/80 font-medium">{t("gallery.stats.licensedLabel")}</div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            <div className="pt-4">
-              <p className="text-sm text-white/70 max-w-2xl mx-auto drop-shadow-lg">
-                {t("gallery.algorithmNote")}
+      <section className="py-10 border-b border-border/50 bg-muted/20">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col items-center gap-6">
+            <div className="text-center space-y-2">
+              <h3 className="text-2xl font-bold text-foreground">{t("gallery.formats")}</h3>
+              <p className="text-sm text-muted-foreground max-w-2xl">
+                {t("gallery.formatsNote")}
               </p>
+            </div>
+            
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <Badge
+                variant={selectedFormat === "all" ? "default" : "outline"}
+                className="cursor-pointer text-base py-3 px-6 transition-all hover:scale-105 hover:shadow-lg font-medium"
+                onClick={() => setSelectedFormat("all")}
+              >
+                {t("gallery.allFormats")}
+                <span className="ml-2 opacity-80 font-normal">({images.length})</span>
+              </Badge>
+              <Badge
+                variant={selectedFormat === "equirectangular" ? "default" : "outline"}
+                className="cursor-pointer text-base py-3 px-6 transition-all hover:scale-105 hover:shadow-lg font-medium"
+                onClick={() => setSelectedFormat("equirectangular")}
+              >
+                {t("gallery.equirectangular")}
+                <span className="ml-2 opacity-80 font-normal">({equirectangularImages.length})</span>
+              </Badge>
+              <Badge
+                variant={selectedFormat === "fisheye" ? "default" : "outline"}
+                className="cursor-pointer text-base py-3 px-6 transition-all hover:scale-105 hover:shadow-lg font-medium"
+                onClick={() => setSelectedFormat("fisheye")}
+              >
+                {t("gallery.fisheye")}
+                <span className="ml-2 opacity-80 font-normal">({fisheyeImages.length})</span>
+              </Badge>
             </div>
           </div>
         </div>
       </section>
 
-      {categories.length > 0 && (
-        <section className="py-10 border-b border-border/50 bg-muted/20">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col items-center gap-8">
-              <div className="text-center space-y-2">
-                <h3 className="text-base font-semibold text-foreground">{t("gallery.exploreDataset")}</h3>
-                <p className="text-sm text-muted-foreground max-w-xl">
-                  {t("gallery.datasetNote")}
-                </p>
-              </div>
-              
-              <div className="flex flex-col gap-6 w-full max-w-4xl">
-                <div className="flex justify-center">
-                  <Badge
-                    variant={selectedCategory === "all" ? "default" : "outline"}
-                    className="cursor-pointer text-base py-3 px-6 transition-all hover:scale-105 hover:shadow-md"
-                    onClick={() => setSelectedCategory("all")}
-                  >
-                    {t("gallery.allCollections")}
-                  </Badge>
-                </div>
-
-                {/* Formats Section */}
-                <div className="space-y-3">
-                  <div className="text-center">
-                    <h4 className="text-sm font-semibold text-foreground">{t("gallery.formats")}</h4>
-                    <p className="text-xs text-muted-foreground">{t("gallery.formatsNote")}</p>
-                  </div>
-                  <div className="flex flex-wrap items-center justify-center gap-3">
-                    {categories
-                      .filter(category => {
-                        const name = category.name.toLowerCase()
-                        return name.includes('equirectangular') || name.includes('fisheye')
-                      })
-                      .map((category) => {
-                        let imageCount = 0
-                        if (category.name.toLowerCase().includes('equirectangular')) {
-                          imageCount = equirectangularImages.length
-                        } else {
-                          imageCount = images.filter(img => img.category_id === category.id).length
-                        }
-                        
-                        return (
-                          <Badge
-                            key={category.id}
-                            variant={selectedCategory === category.id ? "default" : "outline"}
-                            className="cursor-pointer text-sm py-2 px-5 transition-all hover:scale-105 hover:shadow-md"
-                            onClick={() => setSelectedCategory(category.id)}
-                          >
-                            {category.name}
-                            {imageCount > 0 && (
-                              <span className="ml-2 opacity-70">({imageCount})</span>
-                            )}
-                          </Badge>
-                        )
-                      })}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {heritageImages.length > 0 && (selectedCategory === "all" || selectedCategory === getHeritageCategory()?.id) && (
-        <section className="py-20 bg-gradient-to-b from-muted/10 via-background to-background relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.05),transparent_50%)]" />
-          <div className="relative container mx-auto px-4">
-            <div className="text-center mb-12 space-y-4">
-              <Badge variant="default" className="bg-primary text-primary-foreground shadow-lg px-4 py-2">
-                {t("gallery.heritageTitle").split(" ")[0]} {t("gallery.heritageTitle").split(" ")[1]}
-              </Badge>
-              <h2 className="text-4xl md:text-5xl font-bold text-balance">
-                {t("gallery.heritageTitle")}
-                <span className="text-primary block mt-1">{t("gallery.heritageSubtitle")}</span>
-              </h2>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto text-pretty leading-relaxed">
-                {t("gallery.heritageDescription")} {t("gallery.heritageUseCase")}
-              </p>
-              <div className="flex items-center justify-center gap-8 pt-4 text-sm flex-wrap">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                  <span className="text-muted-foreground">{t("gallery.multiEraStyles")}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                  <span className="text-muted-foreground">{t("gallery.temporalLighting")}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                  <span className="text-muted-foreground">{t("gallery.materialTexture")}</span>
-                </div>
-              </div>
-            </div>
-            <ProductGrid 
-              initialImages={selectedCategory === getHeritageCategory()?.id ? heritageImages : heritageImages.slice(0, 8)} 
-              categoryId={getHeritageCategory()?.id}
-            />
-            {selectedCategory === "all" && heritageImages.length > 8 && (
-              <div className="flex justify-center mt-10">
-                <Link href="/gallery">
-                  <Badge 
-                    variant="outline" 
-                    className="cursor-pointer text-base py-3 px-8 hover:bg-primary hover:text-primary-foreground transition-all shadow-md"
-                    onClick={() => setSelectedCategory(getHeritageCategory()?.id || "all")}
-                  >
-                    {t("gallery.exploreHeritage")} ({heritageImages.length})
-                  </Badge>
-                </Link>
-              </div>
-            )}
-          </div>
-        </section>
-      )}
-
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <div className="space-y-12">
-            <div className="text-center mb-16 space-y-4">
-              <h2 className="text-4xl md:text-5xl font-bold">
-                {selectedCategory === "all" 
-                  ? t("gallery.exploreDatasetTitle")
-                  : `${categories.find(c => c.id === selectedCategory)?.name || "Selected"} Collection`}
-              </h2>
-              <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-pretty">
-                {selectedCategory === "all" 
-                  ? t("gallery.datasetDescription")
-                  : `Browse the ${categories.find(c => c.id === selectedCategory)?.name.toLowerCase()} collection`}
-              </p>
-            </div>
-            <ProductGrid 
-              initialImages={
-                selectedCategory === "all" 
-                  ? images 
-                  : images.filter(img => img.category_id === selectedCategory)
-              } 
-              categoryId={selectedCategory !== "all" ? selectedCategory : undefined}
-            />
-          </div>
+          <ProductGrid 
+            initialImages={
+              selectedFormat === "all" 
+                ? images 
+                : selectedFormat === "equirectangular"
+                  ? equirectangularImages
+                  : fisheyeImages
+            } 
+            categoryId={undefined}
+          />
         </div>
       </section>
 

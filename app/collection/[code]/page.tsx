@@ -2,12 +2,12 @@ import type { Metadata } from "next"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Eye, Star, ArrowLeft } from "lucide-react"
+import { Eye, Star, ArrowLeft } from 'lucide-react'
 import Link from "next/link"
 import Image from "next/image"
 import { BuyCollectionBundleButton } from "@/components/buy-collection-bundle-button"
 import { createClient } from "@/lib/supabase/server"
-import { notFound } from "next/navigation"
+import { notFound } from 'next/navigation'
 
 type Props = {
   params: Promise<{ code: string }>
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { data: collection } = await supabase
     .from("collections")
     .select("title, description")
-    .or(`code.eq.${code},id.eq.${code}`)
+    .eq("code", code)
     .eq("is_active", true)
     .single()
 
@@ -45,7 +45,7 @@ export default async function CollectionDetailPage({ params }: Props) {
   const { data: collection, error: collectionError } = await supabase
     .from("collections")
     .select("*")
-    .or(`code.eq.${code},id.eq.${code}`)
+    .eq("code", code)
     .eq("is_active", true)
     .single()
 
@@ -56,12 +56,23 @@ export default async function CollectionDetailPage({ params }: Props) {
 
   const { data: collectionImages, error: imagesError } = await supabase
     .from("collection_images")
-    .select(
-      `
+    .select(`
       position,
-      images (*)
-    `,
-    )
+      image_id,
+      images (
+        id,
+        title,
+        description,
+        price,
+        image_format,
+        thumbnail_small_url,
+        thumbnail_medium_url,
+        thumbnail_large_url,
+        file_path,
+        original_url,
+        active
+      )
+    `)
     .eq("collection_id", collection.id)
     .order("position", { ascending: true })
 
@@ -69,7 +80,10 @@ export default async function CollectionDetailPage({ params }: Props) {
     console.error("[v0] Error fetching collection images:", imagesError)
   }
 
-  const images = collectionImages?.map((ci: any) => ci.images).filter(Boolean) || []
+  const images =
+    collectionImages
+      ?.map((ci: any) => ci.images)
+      .filter((img: any) => img && img.active) || []
 
   return (
     <div className="min-h-screen bg-background">

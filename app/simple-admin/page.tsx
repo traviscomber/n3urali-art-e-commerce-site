@@ -1221,7 +1221,7 @@ export default function SimpleAdminPage() {
           </TabsContent>
 
           <TabsContent value="collections" className="space-y-6">
-            <CollectionsManager />
+            <CollectionsManager images={images} />
           </TabsContent>
 
           <TabsContent value="payments" className="space-y-6">

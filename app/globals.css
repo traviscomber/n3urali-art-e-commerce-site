@@ -330,6 +330,42 @@
   }
 }
 
+@keyframes slideInFromStart {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromEnd {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutToStart {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes slideOutToEnd {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
 /* Converted @utility declarations to regular CSS classes for Tailwind v4 compatibility */
 @layer utilities {
   .animate-in {
@@ -473,6 +509,27 @@
   .slide-out-to-right-full {
     animation-name: slideOutToRight;
     animation-duration: 300ms;
+  }
+
+  /* Adding start/end animation classes for navigation menu */
+  .slide-in-from-start-52 {
+    animation-name: slideInFromStart;
+    animation-duration: 520ms;
+  }
+
+  .slide-in-from-end-52 {
+    animation-name: slideInFromEnd;
+    animation-duration: 520ms;
+  }
+
+  .slide-out-to-start-52 {
+    animation-name: slideOutToStart;
+    animation-duration: 520ms;
+  }
+
+  .slide-out-to-end-52 {
+    animation-name: slideOutToEnd;
+    animation-duration: 520ms;
   }
 
   .duration-200 {

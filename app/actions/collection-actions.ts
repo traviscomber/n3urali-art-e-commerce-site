@@ -1,6 +1,6 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
 export interface Collection {
@@ -132,7 +132,7 @@ export async function createCollection(data: {
   image_ids: string[]
   code?: string // Optional, will auto-generate if not provided
 }) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Auto-generate code if not provided
   const collectionCode = data.code || (await generateCollectionCode())
@@ -188,7 +188,7 @@ export async function updateCollection(
     is_active?: boolean
   },
 ) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { error } = await supabase.from("collections").update(data).eq("id", collectionId)
 
@@ -204,7 +204,7 @@ export async function updateCollection(
 
 // Delete collection
 export async function deleteCollection(collectionId: string) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { error } = await supabase.from("collections").delete().eq("id", collectionId)
 
@@ -220,7 +220,7 @@ export async function deleteCollection(collectionId: string) {
 
 // Get all collections (for admin)
 export async function getAllCollections() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from("collections")
@@ -237,7 +237,7 @@ export async function getAllCollections() {
 
 // Auto-generate collection code function
 export async function generateCollectionCode(prefix = "COL"): Promise<string> {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Get the latest collection with this prefix
   const { data: collections } = await supabase
@@ -264,7 +264,7 @@ export async function generateCollectionCode(prefix = "COL"): Promise<string> {
 
 // Update collection images function for reordering/adding/removing images
 export async function updateCollectionImages(collectionId: string, imageIds: string[]) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Delete existing collection images
   const { error: deleteError } = await supabase.from("collection_images").delete().eq("collection_id", collectionId)
@@ -294,7 +294,7 @@ export async function updateCollectionImages(collectionId: string, imageIds: str
 
 // Get collection with images for editing
 export async function getCollectionWithImages(collectionId: string) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data: collection, error: collectionError } = await supabase
     .from("collections")
@@ -319,7 +319,7 @@ export async function getCollectionWithImages(collectionId: string) {
 
 // Bulk operations
 export async function bulkUpdateCollectionStatus(collectionIds: string[], isActive: boolean) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { error } = await supabase.from("collections").update({ is_active: isActive }).in("id", collectionIds)
 
@@ -334,7 +334,7 @@ export async function bulkUpdateCollectionStatus(collectionIds: string[], isActi
 }
 
 export async function duplicateCollection(collectionId: string) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Get original collection
   const { data: original, error: fetchError } = await supabase

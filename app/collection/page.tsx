@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
-import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Sparkles, ArrowRight, Package2, Calendar, Images } from 'lucide-react'
+import { Sparkles, ArrowRight, Package2 } from 'lucide-react'
 import Link from "next/link"
 import Image from "next/image"
 import { createClient } from "@/lib/supabase/server"
@@ -10,8 +9,7 @@ import { createClient } from "@/lib/supabase/server"
 export const metadata: Metadata = {
   title: "Curated Collections - Premium 360° Images | n3uralia360.art",
   description:
-    "Explore our curated collections of premium 360° images. Heritage landmarks, futuristic landscapes, and thematic sets. High-quality immersive environments ready for your projects.",
-  keywords: ["360 collections", "heritage collection", "VR collections", "panoramic sets", "premium 360 bundles"],
+    "Discover our curated collections of premium 360° images. Each collection tells a unique visual story, perfect for VR experiences, architectural visualization, and immersive projects.",
 }
 
 export const dynamic = 'force-dynamic'
@@ -24,28 +22,34 @@ export default async function CollectionsPage() {
     .from("collections")
     .select("*")
     .eq("is_active", true)
-    .order("created_at", { ascending: true }) // Heritage will be first
+    .order("created_at", { ascending: true })
 
   const collectionsData = collections || []
 
   const collectionsWithPreviews = await Promise.all(
     collectionsData.map(async (collection) => {
-      const { data: collectionImages } = await supabase
+      // Step 1: Get image IDs from collection_images
+      const { data: collectionImageLinks } = await supabase
         .from("collection_images")
-        .select(`
-          image_id,
-          images (
-            id,
-            title,
-            thumbnail_large_url,
-            thumbnail_medium_url,
-            original_url
-          )
-        `)
+        .select("image_id, position")
         .eq("collection_id", collection.id)
-        .limit(4)
+        .order("position", { ascending: true })
+        .limit(6)
 
-      const images = collectionImages?.map((ci: any) => ci.images).filter(Boolean) || []
+      // Step 2: Fetch actual image data if we have IDs
+      let images: any[] = []
+      if (collectionImageLinks && collectionImageLinks.length > 0) {
+        const imageIds = collectionImageLinks.map(ci => ci.image_id)
+        const { data: imageData } = await supabase
+          .from("images")
+          .select("id, title, thumbnail_large_url, thumbnail_medium_url, original_url, file_path")
+          .in("id", imageIds)
+          .eq("active", true)
+        
+        images = imageData || []
+      }
+
+      // Get total count
       const { count } = await supabase
         .from("collection_images")
         .select("*", { count: "exact", head: true })
@@ -60,179 +64,200 @@ export default async function CollectionsPage() {
   )
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-b from-muted/30 to-background overflow-hidden">
-        <div className="absolute inset-0">
-          <div
-            className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 animate-pulse"
-            style={{ animationDuration: "4s" }}
-          />
-        </div>
-
-        <div className="absolute inset-0 grid-pattern opacity-10" />
-        <div className="relative container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center space-y-6">
-            <Badge variant="default" className="animate-pulse-glow">
-              <Sparkles className="h-3 w-3 mr-1" />
+    <div className="min-h-screen">
+      <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden bg-background">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-background to-background" />
+        
+        <div className="relative container mx-auto px-4 py-20">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <Badge variant="outline" className="text-sm px-4 py-1">
+              <Sparkles className="h-3 w-3 mr-2" />
               Curated Collections
             </Badge>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-balance">
-              Explore Thematic
-              <span className="text-primary block">360° Collections</span>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance">
+              Visual Stories in
+              <span className="block text-primary mt-2">Immersive Detail</span>
             </h1>
 
-            <p className="text-xl text-muted-foreground text-pretty max-w-2xl mx-auto">
-              Discover our carefully curated collections of premium 360° images. Each collection tells a unique story,
-              from heritage landmarks to futuristic landscapes, ready for professional use with full commercial licensing.
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed text-pretty">
+              Each collection is a carefully crafted narrative—from ancient monuments preserving human heritage
+              to futuristic landscapes imagining tomorrow. Discover thematic sets designed for creators who
+              value artistry and authenticity.
             </p>
 
-            <div className="flex items-center justify-center gap-8 text-sm pt-4">
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-3xl font-bold">{collectionsData.length}</span>
-                <span className="text-muted-foreground">Collections</span>
+            <div className="flex flex-wrap items-center justify-center gap-6 pt-4">
+              <div className="text-center">
+                <div className="text-3xl font-bold">{collectionsData.length}</div>
+                <div className="text-sm text-muted-foreground">Collections</div>
               </div>
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-3xl font-bold">8K-16K</span>
-                <span className="text-muted-foreground">Resolution</span>
+              <div className="h-12 w-px bg-border" />
+              <div className="text-center">
+                <div className="text-3xl font-bold">8K–16K</div>
+                <div className="text-sm text-muted-foreground">Resolution</div>
               </div>
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-3xl font-bold">Bundle</span>
-                <span className="text-muted-foreground">Pricing</span>
+              <div className="h-12 w-px bg-border" />
+              <div className="text-center">
+                <div className="text-3xl font-bold">VR Ready</div>
+                <div className="text-sm text-muted-foreground">Format</div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Collections Grid */}
-      <section className="py-16">
+      <section className="py-24 bg-muted/20">
         <div className="container mx-auto px-4">
           {collectionsWithPreviews.length === 0 ? (
-            <div className="text-center py-12">
-              <Package2 className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-xl font-semibold mb-2">No Collections Yet</h3>
-              <p className="text-muted-foreground mb-6">Collections are being curated. Check back soon!</p>
-              <Button asChild>
-                <Link href="/gallery">Browse Gallery</Link>
+            <div className="text-center py-20 max-w-lg mx-auto space-y-6">
+              <div className="w-20 h-20 mx-auto rounded-full bg-muted flex items-center justify-center">
+                <Package2 className="h-10 w-10 text-muted-foreground" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-semibold">Coming Soon</h3>
+                <p className="text-muted-foreground">
+                  Our curators are assembling extraordinary collections. Check back soon to discover immersive visual narratives.
+                </p>
+              </div>
+              <Button size="lg" asChild>
+                <Link href="/gallery">
+                  Explore Individual Images
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-              {collectionsWithPreviews.map((collection) => (
-                <Link
+            <div className="space-y-32">
+              {collectionsWithPreviews.map((collection, index) => (
+                <article
                   key={collection.id}
-                  href={`/collection/${collection.code}`}
-                  className="group block"
+                  className="group max-w-7xl mx-auto"
                 >
-                  <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 hover:border-primary/50 h-full">
-                    {/* Preview Images Grid */}
-                    <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-                      {collection.previewImages.length > 0 ? (
-                        <div className="grid grid-cols-2 gap-1 h-full">
-                          {collection.previewImages.slice(0, 4).map((image: any, idx: number) => (
-                            <div key={image.id} className="relative overflow-hidden">
-                              <Image
-                                src={
+                  <Link href={`/collection/${collection.code}`} className="block">
+                    <div className={`grid lg:grid-cols-2 gap-8 lg:gap-12 items-center ${index % 2 === 1 ? 'lg:grid-flow-dense' : ''}`}>
+                      {/* Image Showcase */}
+                      <div className={`relative ${index % 2 === 1 ? 'lg:col-start-2' : ''}`}>
+                        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
+                          {collection.previewImages.length > 0 ? (
+                            <div className="grid grid-cols-3 gap-1 h-full">
+                              {collection.previewImages.slice(0, 6).map((image: any, idx: number) => {
+                                const imageUrl = 
                                   image.thumbnail_large_url ||
                                   image.thumbnail_medium_url ||
+                                  image.file_path ||
                                   image.original_url ||
-                                  "/placeholder.svg?height=400&width=600"
-                                 || "/placeholder.svg"}
-                                alt={image.title}
-                                fill
-                                className="object-cover transition-transform duration-700 group-hover:scale-110"
-                                sizes="(max-width: 1024px) 100vw, 50vw"
-                              />
+                                  `/placeholder.svg?height=600&width=800&text=${encodeURIComponent(image.title || 'Heritage Image')}`
+                                
+                                return (
+                                  <div
+                                    key={image.id}
+                                    className="relative overflow-hidden"
+                                    style={{
+                                      gridColumn: idx === 0 ? 'span 2' : undefined,
+                                      gridRow: idx === 0 ? 'span 2' : undefined,
+                                    }}
+                                  >
+                                    <Image
+                                      src={imageUrl || "/placeholder.svg"}
+                                      alt={image.title || 'Collection image'}
+                                      fill
+                                      className="object-cover transition-all duration-700 group-hover:scale-105"
+                                      sizes="(max-width: 1024px) 100vw, 50vw"
+                                    />
+                                  </div>
+                                )
+                              })}
                             </div>
-                          ))}
+                          ) : (
+                            <div className="flex items-center justify-center h-full bg-muted">
+                              <Package2 className="h-20 w-20 text-muted-foreground" />
+                            </div>
+                          )}
+                          
+                          {/* Hover overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-center p-8">
+                            <Button size="lg" variant="secondary" className="gap-2">
+                              Explore Collection
+                              <ArrowRight className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
-                      ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <Package2 className="h-16 w-16 text-muted-foreground" />
-                        </div>
-                      )}
-                      
-                      {/* Overlay on hover */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    </div>
 
-                    {/* Collection Info */}
-                    <div className="p-6 space-y-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="space-y-2 flex-1">
+                        {/* Floating badge */}
+                        <div className="absolute -top-4 -right-4 bg-primary text-primary-foreground px-6 py-3 rounded-full shadow-lg">
+                          <div className="text-sm font-semibold">{collection.imageCount} Images</div>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className={`space-y-6 ${index % 2 === 1 ? 'lg:col-start-1 lg:row-start-1' : ''}`}>
+                        <div className="space-y-3">
                           {collection.code && (
-                            <Badge variant="secondary" className="text-xs font-mono">
+                            <Badge variant="outline" className="font-mono text-xs">
                               {collection.code}
                             </Badge>
                           )}
-                          <h3 className="text-2xl font-bold group-hover:text-primary transition-colors">
+                          
+                          <h2 className="text-4xl md:text-5xl font-bold tracking-tight group-hover:text-primary transition-colors">
                             {collection.title}
-                          </h3>
+                          </h2>
                         </div>
-                        {collection.bundle_price && (
-                          <div className="text-right">
-                            <div className="text-xs text-muted-foreground">Bundle Price</div>
-                            <div className="text-2xl font-bold text-primary">${collection.bundle_price}</div>
-                          </div>
+
+                        {collection.description && (
+                          <p className="text-lg text-muted-foreground leading-relaxed">
+                            {collection.description}
+                          </p>
                         )}
-                      </div>
 
-                      {collection.description && (
-                        <p className="text-muted-foreground line-clamp-3">
-                          {collection.description}
-                        </p>
-                      )}
+                        <div className="flex flex-wrap items-center gap-6 pt-4">
+                          {collection.bundle_price && (
+                            <div className="space-y-1">
+                              <div className="text-sm text-muted-foreground">Bundle Price</div>
+                              <div className="text-3xl font-bold text-primary">
+                                ${collection.bundle_price}
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div className="space-y-1">
+                            <div className="text-sm text-muted-foreground">Format</div>
+                            <div className="font-semibold">360° Panoramic</div>
+                          </div>
 
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2">
-                        <div className="flex items-center gap-1">
-                          <Images className="h-4 w-4" />
-                          <span>{collection.imageCount} images</span>
+                          <div className="space-y-1">
+                            <div className="text-sm text-muted-foreground">License</div>
+                            <div className="font-semibold">Commercial Use</div>
+                          </div>
                         </div>
-                        {collection.is_auto_curated && (
-                          <Badge variant="outline" className="text-xs">
-                            <Sparkles className="h-3 w-3 mr-1" />
-                            Auto-Curated
-                          </Badge>
-                        )}
-                        {collection.start_date && (
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            <span>{new Date(collection.start_date).toLocaleDateString()}</span>
-                          </div>
-                        )}
-                      </div>
 
-                      <Button 
-                        className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-all"
-                        variant="outline"
-                      >
-                        View Collection
-                        <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                      </Button>
+                        <Button size="lg" className="gap-2 group/btn mt-6">
+                          View Full Collection
+                          <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                        </Button>
+                      </div>
                     </div>
-                  </Card>
-                </Link>
+                  </Link>
+                </article>
               ))}
             </div>
           )}
         </div>
       </section>
 
-      {/* Browse Gallery CTA */}
-      <section className="py-16 bg-muted/30">
+      <section className="py-24 bg-background">
         <div className="container mx-auto px-4">
-          <div className="text-center space-y-4 max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold mb-4">Explore Individual Images</h2>
-            <p className="text-muted-foreground mb-6">
-              Not looking for a collection? Browse our complete gallery with advanced filtering options
-              to find the perfect 360° image for your project.
+          <div className="max-w-3xl mx-auto text-center space-y-6">
+            <h2 className="text-3xl md:text-4xl font-bold">
+              Prefer Individual Images?
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Browse our complete gallery to find specific 360° images with advanced filtering by format,
+              theme, and style. Perfect for single-use projects.
             </p>
-            <Button variant="outline" size="lg" asChild>
+            <Button size="lg" variant="outline" className="gap-2" asChild>
               <Link href="/gallery">
-                View Full Gallery
-                <ArrowRight className="ml-2 h-4 w-4" />
+                Browse Gallery
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
           </div>

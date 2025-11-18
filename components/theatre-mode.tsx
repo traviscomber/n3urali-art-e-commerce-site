@@ -24,6 +24,8 @@ interface TheatreModeProps {
 export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart = false }: TheatreModeProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [nextImageIndex, setNextImageIndex] = useState(1) // Added nextImageIndex for crossfade effect
+  const [isCrossfading, setIsCrossfading] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [progress, setProgress] = useState(0)
   const [isZoomed, setIsZoomed] = useState(false)
@@ -44,6 +46,7 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
   } = useMusicPlayer()
 
   const TRANSITION_DURATION = 30000 // 30 seconds
+  const CROSSFADE_DURATION = 5000 // 5 seconds // Added 5 second crossfade duration
 
   useEffect(() => {
     if (!isOpen) return
@@ -130,15 +133,23 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
       setIsZoomed(true)
     }, 1000)
 
+    const crossfadeTimeout = setTimeout(() => {
+      const nextIndex = (currentImageIndex + 1) % images.length
+      setNextImageIndex(nextIndex)
+      setIsCrossfading(true)
+    }, TRANSITION_DURATION - CROSSFADE_DURATION)
+
     // Transition to next image after 30 seconds
     intervalRef.current = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % images.length)
+      setIsCrossfading(false)
       setProgress(0)
     }, TRANSITION_DURATION)
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
       if (progressIntervalRef.current) clearInterval(progressIntervalRef.current)
+      clearTimeout(crossfadeTimeout)
     }
   }, [isOpen, isPaused, images.length, currentImageIndex])
 
@@ -180,13 +191,27 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
   }
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % images.length)
-    setProgress(0)
+    const nextIdx = (currentImageIndex + 1) % images.length
+    setNextImageIndex(nextIdx)
+    setIsCrossfading(true)
+    
+    setTimeout(() => {
+      setCurrentImageIndex(nextIdx)
+      setIsCrossfading(false)
+      setProgress(0)
+    }, CROSSFADE_DURATION)
   }
 
   const previousImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
-    setProgress(0)
+    const prevIdx = (currentImageIndex - 1 + images.length) % images.length
+    setNextImageIndex(prevIdx)
+    setIsCrossfading(true)
+    
+    setTimeout(() => {
+      setCurrentImageIndex(prevIdx)
+      setIsCrossfading(false)
+      setProgress(0)
+    }, CROSSFADE_DURATION)
   }
 
   const toggleMusicPlayPause = () => {
@@ -231,7 +256,22 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
   }
 
   const currentImage = images[currentImageIndex]
+  const nextImage_data = images[nextImageIndex]
   
+  const imageUrl =
+    currentImage?.original_url ||
+    currentImage?.file_path ||
+    currentImage?.thumbnail_large_url ||
+    currentImage?.thumbnail_medium_url ||
+    '/placeholder.svg'
+  
+  const nextImageUrl =
+    nextImage_data?.original_url ||
+    nextImage_data?.file_path ||
+    nextImage_data?.thumbnail_large_url ||
+    nextImage_data?.thumbnail_medium_url ||
+    '/placeholder.svg'
+
   console.log('[v0] Theatre Mode - Current Image:', {
     index: currentImageIndex,
     id: currentImage?.id,
@@ -248,13 +288,6 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
     isPlaying: isMusicPlaying,
     hasAudioRef: !!audioRef.current,
   })
-  
-  const imageUrl =
-    currentImage?.original_url ||
-    currentImage?.file_path ||
-    currentImage?.thumbnail_large_url ||
-    currentImage?.thumbnail_medium_url ||
-    '/placeholder.svg'
   
   console.log('[v0] Theatre Mode - Image URL being used:', imageUrl)
 
@@ -299,27 +332,50 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
         }}
       />
 
-      {/* Image with fade transition and zoom effect */}
       <div 
         className="relative w-full h-full cursor-pointer overflow-hidden"
         onClick={handleImageClick}
       >
+        {/* Current image */}
         <Image
-          key={currentImageIndex}
+          key={`current-${currentImageIndex}`}
           src={imageUrl || "/placeholder.svg"}
           alt={currentImage?.title || 'Collection image'}
           fill
-          className={`object-cover animate-in fade-in duration-1000 transition-transform duration-[29000ms] ease-in-out ${
+          className={`object-cover transition-all duration-[29000ms] ease-in-out ${
             isZoomed ? 'scale-110' : 'scale-100'
-          }`}
+          } ${isCrossfading ? 'opacity-0' : 'opacity-100'}`}
           style={{
             pointerEvents: 'none',
             userSelect: 'none',
             WebkitUserSelect: 'none',
+            transitionProperty: 'transform, opacity',
+            transitionDuration: isCrossfading ? '5000ms' : '29000ms',
           }}
           draggable={false}
           priority
         />
+
+        {/* Next image for crossfade */}
+        {isCrossfading && (
+          <Image
+            key={`next-${nextImageIndex}`}
+            src={nextImageUrl || "/placeholder.svg"}
+            alt={nextImage_data?.title || 'Next collection image'}
+            fill
+            className="object-cover scale-100 opacity-0 animate-in fade-in duration-[5000ms]"
+            style={{
+              pointerEvents: 'none',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              opacity: 1,
+              transitionProperty: 'opacity',
+              transitionDuration: '5000ms',
+            }}
+            draggable={false}
+            priority
+          />
+        )}
 
         {/* Watermark overlay */}
         <div className="absolute inset-0 pointer-events-none">

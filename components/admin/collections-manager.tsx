@@ -527,7 +527,7 @@ export function CollectionsManager({ images }: CollectionsManagerProps) {
             {selectedImages.length > 0 && (
               <div className="mb-4 p-4 border rounded-lg bg-muted/30">
                 <h4 className="text-sm font-medium mb-2">Selected Images (Drag to reorder)</h4>
-                <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-10 gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
                   {selectedImages.map((imageId, index) => {
                     const image = images.find((img) => img.id === imageId)
                     if (!image) return null
@@ -549,7 +549,7 @@ export function CollectionsManager({ images }: CollectionsManagerProps) {
                           alt={image.title}
                           fill
                           className="object-cover"
-                          sizes="100px"
+                          sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, (max-width: 1024px) 16vw, (max-width: 1280px) 12vw, 10vw"
                         />
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                           <GripVertical className="h-6 w-6 text-white" />
@@ -573,7 +573,7 @@ export function CollectionsManager({ images }: CollectionsManagerProps) {
             )}
 
             {/* Available Images */}
-            <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 max-h-96 overflow-y-auto border rounded-lg p-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 max-h-96 overflow-y-auto border rounded-lg p-3">
               {images.map((image) => {
                 const isSelected = selectedImages.includes(image.id)
                 const imageUrl =
@@ -594,7 +594,7 @@ export function CollectionsManager({ images }: CollectionsManagerProps) {
                       alt={image.title}
                       fill
                       className="object-cover"
-                      sizes="100px"
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 16vw, 12vw"
                     />
                     {isSelected && (
                       <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">

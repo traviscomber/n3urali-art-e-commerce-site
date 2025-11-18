@@ -73,6 +73,13 @@ export function Header() {
               {t("nav.gallery")}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
             </Link>
+            <Link
+              href="/theatre"
+              className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"
+            >
+              Theatre
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
+            </Link>
             {isAuthenticated && (
               <Link
                 href="/account/orders"
@@ -211,6 +218,13 @@ export function Header() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {t("nav.gallery")}
+              </Link>
+              <Link
+                href="/theatre"
+                className="text-base font-medium text-foreground hover:text-primary transition-colors px-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Theatre
               </Link>
               {isAuthenticated && (
                 <Link

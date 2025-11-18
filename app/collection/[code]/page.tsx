@@ -7,6 +7,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { BuyCollectionBundleButton } from "@/components/buy-collection-bundle-button"
 import { CollectionMusicPlayer } from "@/components/collection-music-player"
+import { TheatreMode } from "@/components/theatre-mode"
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from 'next/navigation'
 
@@ -281,6 +282,20 @@ export default async function CollectionDetailPage({ params }: Props) {
                   </p>
                 </div>
               )}
+
+              <div className="flex justify-center mb-12">
+                <TheatreMode
+                  images={images.map((img: any) => ({
+                    id: img.id,
+                    title: img.title,
+                    thumbnail_large_url: img.thumbnail_large_url,
+                    thumbnail_medium_url: img.thumbnail_medium_url,
+                    file_path: img.file_path,
+                    original_url: img.original_url,
+                  }))}
+                  collectionTitle={collection.title}
+                />
+              </div>
 
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {images.map((image: any, index: number) => {

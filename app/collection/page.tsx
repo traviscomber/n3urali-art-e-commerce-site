@@ -266,7 +266,7 @@ export default async function CollectionsPage() {
                         </div>
 
                         {collection.description && (
-                          <p className="text-lg text-muted-foreground leading-relaxed">
+                          <p className="text-lg text-muted-foreground leading-relaxed line-clamp-2">
                             {collection.description}
                           </p>
                         )}
@@ -377,7 +377,7 @@ export default async function CollectionsPage() {
                           </div>
 
                           {collection.description && (
-                            <p className="text-lg text-muted-foreground leading-relaxed line-clamp-4">
+                            <p className="text-lg text-muted-foreground leading-relaxed line-clamp-2">
                               {collection.description}
                             </p>
                           )}

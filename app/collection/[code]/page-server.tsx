@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from 'next/navigation'
-import { CollectionPageClient } from "./collection-page-client"
+import CollectionDetailPage from "./page"
 
 type Props = {
   params: Promise<{ code: string }>
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export const revalidate = 300
 
-export default async function CollectionDetailPage({ params }: Props) {
+export default async function Page({ params }: Props) {
   const { code } = await params
   const supabase = await createClient()
 
@@ -77,5 +77,5 @@ export default async function CollectionDetailPage({ params }: Props) {
     images = imageData || []
   }
 
-  return <CollectionPageClient collection={collection} images={images} code={code} />
+  return <CollectionDetailPage collection={collection} images={images} />
 }

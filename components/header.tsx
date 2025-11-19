@@ -1,16 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ShoppingCart, Menu, X, Trash2, Plus, Minus } from 'lucide-react'
+import { ShoppingCart, Menu, X, Trash2, Plus, Minus, Play, Pause, Volume2, VolumeX } from 'lucide-react'
 import { useCart } from "@/lib/contexts/cart-context"
 import { useLanguage } from "@/lib/contexts/language-context"
 import { LanguageToggle } from "@/components/language-toggle"
 import { UserMenu } from "./user-menu"
 import { ThemeToggle } from "./theme-toggle"
 import { useAuth } from "@/lib/contexts/auth-context"
+import { useMusicPlayer } from "@/lib/contexts/music-player-context"
 import Image from "next/image"
 import {
   Sheet,
@@ -19,20 +20,142 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
-export function Header() {
+interface HeaderProps {
+  videoContext?: {
+    videoUrl: string
+    collectionTitle: string
+    videoRef: React.RefObject<HTMLVideoElement>
+  }
+}
+
+export function Header({ videoContext }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [showVideoPlayer, setShowVideoPlayer] = useState(false)
+  const [showAudioPlayer, setShowAudioPlayer] = useState(false)
+  const [musicHasStarted, setMusicHasStarted] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isMuted, setIsMuted] = useState(false)
+  const [isAudioMuted, setIsAudioMuted] = useState(false)
+  
   const { items, toggleCart, isOpen, removeItem, updateQuantity, total, closeCart } = useCart()
   const { t } = useLanguage()
   const { isAuthenticated } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
+
+  const musicPlayer = useMusicPlayer()
 
   const itemCount = (items || []).reduce((sum, item) => sum + (item.quantity || 0), 0)
+
+  useEffect(() => {
+    if (!videoContext) return
+
+    const handleScroll = () => {
+      setShowVideoPlayer(window.scrollY > window.innerHeight * 0.8)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [videoContext])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowAudioPlayer(
+        window.scrollY > 400 && 
+        musicHasStarted && 
+        musicPlayer.playlist.length > 0
+      )
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    
+    // Also check on musicHasStarted state change
+    handleScroll()
+    
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [musicHasStarted, musicPlayer.playlist.length])
+
+  useEffect(() => {
+    if (musicPlayer.isPlaying && musicPlayer.playlist.length > 0) {
+      setMusicHasStarted(true)
+    }
+  }, [musicPlayer.isPlaying, musicPlayer.playlist.length])
+
+  useEffect(() => {
+    if (!videoContext?.videoRef.current) return
+
+    const video = videoContext.videoRef.current
+    const updatePlayingState = () => setIsPlaying(!video.paused)
+    
+    video.addEventListener('play', updatePlayingState)
+    video.addEventListener('pause', updatePlayingState)
+    
+    return () => {
+      video.removeEventListener('play', updatePlayingState)
+      video.removeEventListener('pause', updatePlayingState)
+    }
+  }, [videoContext])
+
+  useEffect(() => {
+    if (!musicPlayer.audioRef.current) return
+
+    const audio = musicPlayer.audioRef.current
+    const updateMuteState = () => setIsAudioMuted(audio.muted)
+    
+    // Set initial state
+    updateMuteState()
+    
+    // Listen for volumechange events (includes mute changes)
+    audio.addEventListener('volumechange', updateMuteState)
+    
+    return () => {
+      audio.removeEventListener('volumechange', updateMuteState)
+    }
+  }, [musicPlayer.audioRef])
 
   const handleCheckout = () => {
     closeCart()
     router.push("/checkout")
+  }
+
+  const togglePlayPause = () => {
+    if (videoContext && videoContext.videoRef.current) {
+      const video = videoContext.videoRef.current
+      if (video.paused) {
+        video.play()
+      } else {
+        video.pause()
+      }
+    }
+  }
+
+  const toggleMute = () => {
+    if (videoContext && videoContext.videoRef.current) {
+      const video = videoContext.videoRef.current
+      video.muted = !video.muted
+      setIsMuted(video.muted)
+    }
+  }
+
+  const toggleAudioPlayPause = () => {
+    if (!musicPlayer.audioRef.current) return
+
+    if (musicPlayer.isPlaying) {
+      musicPlayer.audioRef.current.pause()
+      musicPlayer.setIsPlaying(false)
+    } else {
+      musicPlayer.audioRef.current.play().then(() => {
+        musicPlayer.setIsPlaying(true)
+      })
+    }
+  }
+
+  const toggleAudioMute = () => {
+    if (!musicPlayer.audioRef.current) return
+    musicPlayer.audioRef.current.muted = !musicPlayer.audioRef.current.muted
+    setIsAudioMuted(musicPlayer.audioRef.current.muted)
   }
 
   return (
@@ -59,6 +182,72 @@ export function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center space-x-12">
+            {videoContext && showVideoPlayer && (
+              <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border/50 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={togglePlayPause}
+                  >
+                    {isPlaying ? (
+                      <Pause className="h-4 w-4" />
+                    ) : (
+                      <Play className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={toggleMute}
+                  >
+                    {isMuted ? (
+                      <VolumeX className="h-4 w-4" />
+                    ) : (
+                      <Volume2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                <div className="h-4 w-px bg-border" />
+                <span className="text-sm font-medium">{videoContext.collectionTitle}</span>
+              </div>
+            )}
+            
+            {showAudioPlayer && !videoContext && (
+              <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border/50 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={toggleAudioPlayPause}
+                  >
+                    {musicPlayer.isPlaying ? (
+                      <Pause className="h-4 w-4" />
+                    ) : (
+                      <Play className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={toggleAudioMute}
+                  >
+                    {isAudioMuted ? (
+                      <VolumeX className="h-4 w-4" />
+                    ) : (
+                      <Volume2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                <div className="h-4 w-px bg-border" />
+                <span className="text-sm font-medium">{musicPlayer.collectionTitle || 'Collection Music'}</span>
+              </div>
+            )}
+            
             <Link
               href="/collection"
               className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"

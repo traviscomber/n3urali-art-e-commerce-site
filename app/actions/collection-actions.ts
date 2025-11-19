@@ -15,6 +15,7 @@ export interface Collection {
   is_active: boolean
   music_url?: string
   music_playlist?: string[] | null // Added music_playlist field for multiple tracks
+  parent_collection_id?: string | null // Added parent_collection_id field
 }
 
 export interface CollectionImage {
@@ -135,6 +136,7 @@ export async function createCollection(data: {
   code?: string // Optional, will auto-generate if not provided
   music_url?: string
   music_playlist?: string[] | null // Added music_playlist parameter
+  parent_collection_id?: string | null // Added parent_collection_id parameter
 }) {
   const supabase = createAdminClient()
 
@@ -154,6 +156,7 @@ export async function createCollection(data: {
       is_active: true,
       music_url: data.music_url || null,
       music_playlist: data.music_playlist || null, // Include music_playlist in the insert
+      parent_collection_id: data.parent_collection_id || null // Include parent_collection_id in the insert
     })
     .select()
     .single()
@@ -193,6 +196,7 @@ export async function updateCollection(
     is_active?: boolean
     music_url?: string | null
     music_playlist?: string[] | null // Added music_playlist parameter
+    parent_collection_id?: string | null // Added parent_collection_id parameter
   },
 ) {
   const supabase = createAdminClient()
@@ -225,13 +229,13 @@ export async function deleteCollection(collectionId: string) {
   return { success: true }
 }
 
-// Get all collections (for admin)
+// Get all collections (for admin) with parent-child relationships
 export async function getAllCollections() {
   const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from("collections")
-    .select("*, collection_images(count)")
+    .select("*, collection_images(count), parent:parent_collection_id(id, code, title)")
     .order("start_date", { ascending: false })
 
   if (error) {
@@ -384,7 +388,8 @@ export async function duplicateCollection(collectionId: string) {
     image_ids: imageIds,
     code: newCode,
     music_url: original.music_url, // Include music_url in the duplicate
-    music_playlist: original.music_playlist // Include music_playlist in the duplicate
+    music_playlist: original.music_playlist, // Include music_playlist in the duplicate
+    parent_collection_id: original.parent_collection_id // Include parent_collection_id in the duplicate
   })
 
   return result
@@ -444,4 +449,23 @@ export async function getAllActiveCollections() {
   )
 
   return collectionsWithImages
+}
+
+// Get child collections
+export async function getChildCollections(parentId: string) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("collections")
+    .select("*, collection_images(count)")
+    .eq("parent_collection_id", parentId)
+    .eq("is_active", true)
+    .order("created_at", { ascending: true })
+
+  if (error) {
+    console.error("[v0] Error fetching child collections:", error)
+    return []
+  }
+
+  return data
 }

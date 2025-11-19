@@ -98,6 +98,9 @@ export default async function CollectionDetailPage({ params }: Props) {
   const savingsPercentage = totalIndividualPrice > 0 ? Math.round((savings / totalIndividualPrice) * 100) : 0
 
   const isHeritageCollection = code === 'HERITAGE'
+  
+  const hasVideoHero = collection.video_url || (isHeritageCollection && code === 'HERITAGE')
+  const videoUrl = collection.video_url || (isHeritageCollection ? 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/WebBackdrop360-Indo-4fdOMPgmKIo8kx6ChokBLM8nUyCef3.mov' : null)
 
   return (
     <div className="min-h-screen">
@@ -110,98 +113,218 @@ export default async function CollectionDetailPage({ params }: Props) {
         />
       )}
 
-      <section className="relative min-h-[60vh] flex items-end overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/30 to-background" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
-        
-        <div className="relative container mx-auto px-4 pb-16 pt-8">
-          <Button variant="ghost" size="sm" className="mb-8" asChild>
-            <Link href="/collection">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              All Collections
-            </Link>
-          </Button>
+      {hasVideoHero && videoUrl ? (
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 z-0">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ objectFit: 'cover' }}
+            >
+              <source src={videoUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
 
-          <div className="max-w-4xl space-y-6">
-            <div className="flex flex-wrap items-center gap-3">
-              {collection.code && (
-                <Badge variant="outline" className="font-mono">
-                  {collection.code}
-                </Badge>
-              )}
-              {collection.is_auto_curated && (
-                <Badge variant="default" className="gap-1">
-                  <Sparkles className="h-3 w-3" />
-                  Curated
-                </Badge>
-              )}
-            </div>
-
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance">
-              {collection.title}
-            </h1>
-
-            {collection.description && (
-              <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl text-pretty">
-                {collection.description}
-              </p>
-            )}
-
-            <div className="flex flex-wrap items-center gap-8 pt-4">
-              <div className="space-y-1">
-                <div className="text-4xl font-bold">{images.length}</div>
-                <div className="text-sm text-muted-foreground">Premium Images</div>
-              </div>
-              <div className="h-12 w-px bg-border" />
-              <div className="space-y-1">
-                <div className="text-4xl font-bold text-primary">${bundlePrice.toFixed(0)}</div>
-                <div className="text-sm text-muted-foreground">Complete Bundle</div>
-              </div>
-              <div className="h-12 w-px bg-border" />
-              <div className="space-y-1">
-                <div className="text-4xl font-bold">8K+</div>
-                <div className="text-sm text-muted-foreground">Resolution</div>
-              </div>
-            </div>
-
-            {images.length > 0 && (
-              <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-background">
-                <CardContent className="p-6">
-                  <div className="grid md:grid-cols-3 gap-6 text-center">
-                    <div className="space-y-2">
-                      <div className="text-sm text-muted-foreground">Individual Purchase</div>
-                      <div className="text-2xl font-bold text-muted-foreground line-through">
-                        ${totalIndividualPrice.toFixed(2)}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Buying all {images.length} photos separately
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="text-sm font-medium text-primary">Bundle Price</div>
-                      <div className="text-4xl font-bold text-primary">
-                        ${bundlePrice.toFixed(2)}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Complete collection discount
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="text-sm text-green-600 dark:text-green-400">You Save</div>
-                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                        ${savings.toFixed(2)}
-                      </div>
-                      <Badge variant="secondary" className="bg-green-500/10 text-green-600 dark:text-green-400">
-                        {savingsPercentage}% OFF
-                      </Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/70" />
           </div>
-        </div>
-      </section>
+
+          <div className="absolute inset-0 opacity-[0.03] z-[1]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.3),transparent_50%)]" />
+          </div>
+
+          <div className="relative container mx-auto px-4 py-20 z-10">
+            <Button variant="ghost" size="sm" className="mb-8 text-white/80 hover:text-white hover:bg-white/10" asChild>
+              <Link href="/collection">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                All Collections
+              </Link>
+            </Button>
+
+            <div className="max-w-5xl space-y-8">
+              <div className="flex flex-wrap items-center gap-3">
+                {collection.code && (
+                  <Badge variant="outline" className="font-mono bg-white/10 text-white border-white/20 backdrop-blur-sm">
+                    {collection.code}
+                  </Badge>
+                )}
+                {collection.is_auto_curated && (
+                  <Badge variant="default" className="gap-1 bg-primary/30 text-white border-primary/50 backdrop-blur-sm">
+                    <Sparkles className="h-3 w-3" />
+                    Curated
+                  </Badge>
+                )}
+              </div>
+
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance text-white drop-shadow-2xl">
+                {collection.title}
+              </h1>
+
+              {collection.description && (
+                <p className="text-xl md:text-2xl text-white/90 leading-relaxed max-w-3xl text-pretty drop-shadow-lg font-light">
+                  {collection.description}
+                </p>
+              )}
+
+              <div className="flex flex-wrap items-center gap-8 pt-4">
+                <div className="space-y-1">
+                  <div className="text-4xl font-bold text-white drop-shadow-lg">{images.length}</div>
+                  <div className="text-sm text-white/80">Premium Images</div>
+                </div>
+                <div className="h-12 w-px bg-white/20" />
+                <div className="space-y-1">
+                  <div className="text-4xl font-bold text-primary drop-shadow-[0_0_20px_rgba(139,92,246,0.8)]">${bundlePrice.toFixed(0)}</div>
+                  <div className="text-sm text-white/80">Complete Bundle</div>
+                </div>
+                <div className="h-12 w-px bg-white/20" />
+                <div className="space-y-1">
+                  <div className="text-4xl font-bold text-white drop-shadow-lg">8K+</div>
+                  <div className="text-sm text-white/80">Resolution</div>
+                </div>
+              </div>
+
+              {images.length > 0 && (
+                <Card className="border-2 border-primary/30 bg-gradient-to-br from-black/40 to-black/60 backdrop-blur-md">
+                  <CardContent className="p-6">
+                    <div className="grid md:grid-cols-3 gap-6 text-center">
+                      <div className="space-y-2">
+                        <div className="text-sm text-white/70">Individual Purchase</div>
+                        <div className="text-2xl font-bold text-white/60 line-through">
+                          ${totalIndividualPrice.toFixed(2)}
+                        </div>
+                        <div className="text-xs text-white/60">
+                          Buying all {images.length} photos separately
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium text-primary">Bundle Price</div>
+                        <div className="text-4xl font-bold text-white drop-shadow-lg">
+                          ${bundlePrice.toFixed(2)}
+                        </div>
+                        <div className="text-xs text-white/70">
+                          Complete collection discount
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="text-sm text-green-400">You Save</div>
+                        <div className="text-2xl font-bold text-green-400">
+                          ${savings.toFixed(2)}
+                        </div>
+                        <Badge variant="secondary" className="bg-green-500/20 text-green-300 border-green-400/30">
+                          {savingsPercentage}% OFF
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10">
+            <div className="flex flex-col items-center gap-2 text-white/60 animate-bounce">
+              <div className="w-6 h-10 border-2 border-current rounded-full flex items-start justify-center p-2">
+                <div className="w-1 h-2 bg-current rounded-full animate-scroll" />
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="relative min-h-[60vh] flex items-end overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/30 to-background" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
+          
+          <div className="relative container mx-auto px-4 pb-16 pt-8">
+            <Button variant="ghost" size="sm" className="mb-8" asChild>
+              <Link href="/collection">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                All Collections
+              </Link>
+            </Button>
+
+            <div className="max-w-4xl space-y-6">
+              <div className="flex flex-wrap items-center gap-3">
+                {collection.code && (
+                  <Badge variant="outline" className="font-mono">
+                    {collection.code}
+                  </Badge>
+                )}
+                {collection.is_auto_curated && (
+                  <Badge variant="default" className="gap-1">
+                    <Sparkles className="h-3 w-3" />
+                    Curated
+                  </Badge>
+                )}
+              </div>
+
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance">
+                {collection.title}
+              </h1>
+
+              {collection.description && (
+                <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-3xl text-pretty">
+                  {collection.description}
+                </p>
+              )}
+
+              <div className="flex flex-wrap items-center gap-8 pt-4">
+                <div className="space-y-1">
+                  <div className="text-4xl font-bold">{images.length}</div>
+                  <div className="text-sm text-muted-foreground">Premium Images</div>
+                </div>
+                <div className="h-12 w-px bg-border" />
+                <div className="space-y-1">
+                  <div className="text-4xl font-bold text-primary">${bundlePrice.toFixed(0)}</div>
+                  <div className="text-sm text-muted-foreground">Complete Bundle</div>
+                </div>
+                <div className="h-12 w-px bg-border" />
+                <div className="space-y-1">
+                  <div className="text-4xl font-bold">8K+</div>
+                  <div className="text-sm text-muted-foreground">Resolution</div>
+                </div>
+              </div>
+
+              {images.length > 0 && (
+                <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-background">
+                  <CardContent className="p-6">
+                    <div className="grid md:grid-cols-3 gap-6 text-center">
+                      <div className="space-y-2">
+                        <div className="text-sm text-muted-foreground">Individual Purchase</div>
+                        <div className="text-2xl font-bold text-muted-foreground line-through">
+                          ${totalIndividualPrice.toFixed(2)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Buying all {images.length} photos separately
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium text-primary">Bundle Price</div>
+                        <div className="text-4xl font-bold text-primary">
+                          ${bundlePrice.toFixed(2)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Complete collection discount
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="text-sm text-green-600 dark:text-green-400">You Save</div>
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                          ${savings.toFixed(2)}
+                        </div>
+                        <Badge variant="secondary" className="bg-green-500/10 text-green-600 dark:text-green-400">
+                          {savingsPercentage}% OFF
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {isHeritageCollection && images.length > 0 && (
         <section className="py-20 bg-gradient-to-b from-muted/20 to-background">
@@ -352,31 +475,6 @@ export default async function CollectionDetailPage({ params }: Props) {
 
       {images.length > 0 && (
         <section className="py-24 bg-muted/20">
-          <div className="container mx-auto px-4">
-            <div className="max-w-5xl mx-auto">
-              <div className="grid md:grid-cols-3 gap-12 text-center">
-                <div className="space-y-3">
-                  <div className="text-5xl font-bold">8K–16K</div>
-                  <div className="text-muted-foreground">Ultra-high resolution for professional projects</div>
-                </div>
-                <div className="space-y-3">
-                  <div className="text-5xl font-bold flex items-center justify-center gap-2">
-                    <Download className="h-10 w-10" />
-                  </div>
-                  <div className="text-muted-foreground">Instant download after purchase</div>
-                </div>
-                <div className="space-y-3">
-                  <div className="text-5xl font-bold">VR</div>
-                  <div className="text-muted-foreground">Perfect for immersive experiences</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {images.length > 0 && (
-        <section className="py-24">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto">
               <div className="text-center space-y-6 mb-12">

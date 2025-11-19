@@ -22,48 +22,89 @@ export default async function CollectionsPage() {
     .from("collections")
     .select("*")
     .eq("is_active", true)
+    .is("parent_collection_id", null) // Only get parent/top-level collections
     .order("created_at", { ascending: true })
 
   const collectionsData = collections || []
 
   const collectionsWithPreviews = await Promise.all(
     collectionsData.map(async (collection) => {
-      // Step 1: Get image IDs from collection_images
-      const { data: collectionImageLinks } = await supabase
-        .from("collection_images")
-        .select("image_id, position")
-        .eq("collection_id", collection.id)
-        .order("position", { ascending: true })
-        .limit(6)
+      const { data: childCollections, count: childCount } = await supabase
+        .from("collections")
+        .select("*", { count: "exact" })
+        .eq("parent_collection_id", collection.id)
+        .eq("is_active", true)
+        .order("created_at", { ascending: true })
 
-      // Step 2: Fetch actual image data if we have IDs
       let images: any[] = []
       let allImagesWithPrices: any[] = []
-      if (collectionImageLinks && collectionImageLinks.length > 0) {
-        const imageIds = collectionImageLinks.map(ci => ci.image_id)
-        const { data: imageData } = await supabase
-          .from("images")
-          .select("id, title, thumbnail_large_url, thumbnail_medium_url, original_url, file_path")
-          .in("id", imageIds)
-          .eq("active", true)
+      
+      if (childCount && childCount > 0) {
+        // Get preview images from each child collection
+        const childPreviewPromises = childCollections.map(async (child: any) => {
+          const { data: childImageLinks } = await supabase
+            .from("collection_images")
+            .select("image_id")
+            .eq("collection_id", child.id)
+            .order("position", { ascending: true })
+            .limit(4) // Fetch 4 per child to have enough options
+
+          if (childImageLinks && childImageLinks.length > 0) {
+            const imageIds = childImageLinks.map(ci => ci.image_id)
+            const { data: imageData } = await supabase
+              .from("images")
+              .select("id, title, thumbnail_large_url, thumbnail_medium_url, original_url, file_path")
+              .in("id", imageIds)
+              .eq("active", true)
+            
+            return imageData || []
+          }
+          return []
+        })
+
+        const childPreviews = await Promise.all(childPreviewPromises)
+        const allImages = childPreviews.flat()
         
-        images = imageData || []
-
-        // Fetch ALL images with prices for calculation
-        const { data: allCollectionImages } = await supabase
+        // Remove duplicates by keeping only unique image IDs
+        const uniqueImages = Array.from(
+          new Map(allImages.map(img => [img.id, img])).values()
+        )
+        
+        images = uniqueImages.slice(0, 6) // Take max 6 unique images for grid
+      } else {
+        const { data: collectionImageLinks } = await supabase
           .from("collection_images")
-          .select("image_id")
+          .select("image_id, position")
           .eq("collection_id", collection.id)
+          .order("position", { ascending: true })
+          .limit(6)
 
-        if (allCollectionImages && allCollectionImages.length > 0) {
-          const allImageIds = allCollectionImages.map(ci => ci.image_id)
-          const { data: allImageData } = await supabase
+        if (collectionImageLinks && collectionImageLinks.length > 0) {
+          const imageIds = collectionImageLinks.map(ci => ci.image_id)
+          const { data: imageData } = await supabase
             .from("images")
-            .select("id, price")
-            .in("id", allImageIds)
+            .select("id, title, thumbnail_large_url, thumbnail_medium_url, original_url, file_path")
+            .in("id", imageIds)
             .eq("active", true)
           
-          allImagesWithPrices = allImageData || []
+          images = imageData || []
+
+          // Fetch ALL images with prices for calculation
+          const { data: allCollectionImages } = await supabase
+            .from("collection_images")
+            .select("image_id")
+            .eq("collection_id", collection.id)
+
+          if (allCollectionImages && allCollectionImages.length > 0) {
+            const allImageIds = allCollectionImages.map(ci => ci.image_id)
+            const { data: allImageData } = await supabase
+              .from("images")
+              .select("id, price")
+              .in("id", allImageIds)
+              .eq("active", true)
+            
+            allImagesWithPrices = allImageData || []
+          }
         }
       }
 
@@ -85,6 +126,8 @@ export default async function CollectionsPage() {
         individualTotal,
         savings,
         savingsPercent,
+        childCollections: childCollections || [],
+        childCount: childCount || 0,
       }
     })
   )
@@ -160,10 +203,10 @@ export default async function CollectionsPage() {
                   key={collection.id}
                   className="group max-w-7xl mx-auto"
                 >
-                  <Link href={`/collection/${collection.code}`} className="block">
-                    <div className={`grid lg:grid-cols-2 gap-8 lg:gap-12 items-center ${index % 2 === 1 ? 'lg:grid-flow-dense' : ''}`}>
-                      {/* Image Showcase */}
-                      <div className={`relative ${index % 2 === 1 ? 'lg:col-start-2' : ''}`}>
+                  {collection.childCount > 0 ? (
+                    <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+                      {/* Image Showcase - same as regular collections */}
+                      <div className="relative">
                         <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
                           {collection.previewImages.length > 0 ? (
                             <div className="grid grid-cols-3 gap-1 h-full">
@@ -173,12 +216,12 @@ export default async function CollectionsPage() {
                                   image.thumbnail_medium_url ||
                                   image.file_path ||
                                   image.original_url ||
-                                  `/placeholder.svg?height=600&width=800&text=${encodeURIComponent(image.title || 'Heritage Image')}`
-                                
+                                  `/placeholder.svg?height=600&width=800&text=${encodeURIComponent(image.title || 'Image')}`
+                              
                                 return (
                                   <div
                                     key={image.id}
-                                    className="relative overflow-hidden"
+                                    className="relative overflow-hidden bg-muted"
                                     style={{
                                       gridColumn: idx === 0 ? 'span 2' : undefined,
                                       gridRow: idx === 0 ? 'span 2' : undefined,
@@ -188,8 +231,8 @@ export default async function CollectionsPage() {
                                       src={imageUrl || "/placeholder.svg"}
                                       alt={image.title || 'Collection image'}
                                       fill
-                                      className="object-cover transition-all duration-700 group-hover:scale-105"
-                                      sizes="(max-width: 1024px) 100vw, 50vw"
+                                      className="object-contain transition-all duration-700 group-hover:scale-105"
+                                      sizes="(max-width: 1024px) 100vw, 25vw"
                                     />
                                   </div>
                                 )
@@ -200,24 +243,16 @@ export default async function CollectionsPage() {
                               <Package2 className="h-20 w-20 text-muted-foreground" />
                             </div>
                           )}
-                          
-                          {/* Hover overlay */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-center p-8">
-                            <Button size="lg" variant="secondary" className="gap-2">
-                              Explore Collection
-                              <ArrowRight className="h-4 w-4" />
-                            </Button>
-                          </div>
                         </div>
 
-                        {/* Floating badge */}
+                        {/* Floating badge with sub-collection count */}
                         <div className="absolute -top-4 -right-4 bg-primary text-primary-foreground px-6 py-3 rounded-full shadow-lg">
-                          <div className="text-sm font-semibold">{collection.imageCount} Images</div>
+                          <div className="text-sm font-semibold">{collection.childCount} Collections</div>
                         </div>
                       </div>
 
-                      {/* Content */}
-                      <div className={`space-y-6 ${index % 2 === 1 ? 'lg:col-start-1 lg:row-start-1' : ''}`}>
+                      {/* Content - matching single collection style */}
+                      <div className="space-y-6">
                         <div className="space-y-3">
                           {collection.code && (
                             <Badge variant="outline" className="font-mono text-xs">
@@ -225,51 +260,41 @@ export default async function CollectionsPage() {
                             </Badge>
                           )}
                           
-                          <h2 className="text-4xl md:text-5xl font-bold tracking-tight group-hover:text-primary transition-colors">
+                          <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
                             {collection.title}
                           </h2>
                         </div>
 
                         {collection.description && (
-                          <p className="text-lg text-muted-foreground leading-relaxed line-clamp-4">
+                          <p className="text-lg text-muted-foreground leading-relaxed">
                             {collection.description}
                           </p>
                         )}
 
-                        {collection.individualTotal > 0 && (
-                          <div className="rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 p-8 shadow-lg">
-                            <div className="grid grid-cols-3 gap-6 text-center">
-                              <div className="space-y-2">
-                                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Individual Purchase</div>
-                                <div className="text-xl font-semibold line-through text-muted-foreground opacity-70">
-                                  ${collection.individualTotal.toFixed(2)}
-                                </div>
-                                <div className="text-xs text-muted-foreground leading-tight">Buying all {collection.imageCount} photos separately</div>
-                              </div>
-                              
-                              <div className="space-y-2 relative">
-                                <div className="absolute -inset-3 bg-primary/10 rounded-xl blur-xl" />
-                                <div className="relative space-y-2">
-                                  <div className="text-xs font-bold text-primary uppercase tracking-wide">Bundle Price</div>
-                                  <div className="text-5xl font-black text-primary drop-shadow-sm">
-                                    ${collection.bundle_price}
+                        {/* Child Collections List */}
+                        <div className="space-y-3 pt-4">
+                          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                            Explore Sub-Collections
+                          </h3>
+                          <div className="space-y-3">
+                            {collection.childCollections.map((child: any) => (
+                              <Link 
+                                key={child.id} 
+                                href={`/collection/${child.code}`}
+                                className="group/child block"
+                              >
+                                <div className="rounded-lg border-2 border-border hover:border-primary transition-all duration-300 p-4 hover:shadow-lg hover:bg-primary/5">
+                                  <div className="flex items-center justify-between">
+                                    <h4 className="text-lg font-semibold group-hover/child:text-primary transition-colors">
+                                      {child.title}
+                                    </h4>
+                                    <ArrowRight className="h-5 w-5 text-muted-foreground group-hover/child:text-primary group-hover/child:translate-x-1 transition-all" />
                                   </div>
-                                  <div className="text-xs font-medium text-primary/80">Complete collection</div>
                                 </div>
-                              </div>
-                              
-                              <div className="space-y-2">
-                                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">You Save</div>
-                                <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
-                                  ${collection.savings.toFixed(2)}
-                                </div>
-                                <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-sm font-bold">
-                                  {collection.savingsPercent}% OFF
-                                </div>
-                              </div>
-                            </div>
+                              </Link>
+                            ))}
                           </div>
-                        )}
+                        </div>
 
                         <div className="flex flex-wrap items-center gap-6 pt-2">
                           <div className="space-y-1">
@@ -282,14 +307,136 @@ export default async function CollectionsPage() {
                             <div className="font-semibold">Commercial Use</div>
                           </div>
                         </div>
-
-                        <Button size="lg" className="gap-2 group/btn mt-6">
-                          View Full Collection
-                          <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
-                        </Button>
                       </div>
                     </div>
-                  </Link>
+                  ) : (
+                    /* Existing single collection display */
+                    <Link href={`/collection/${collection.code}`} className="block">
+                      <div className={`grid lg:grid-cols-2 gap-8 lg:gap-12 items-center ${index % 2 === 1 ? 'lg:grid-flow-dense' : ''}`}>
+                        {/* Image Showcase */}
+                        <div className={`relative ${index % 2 === 1 ? 'lg:col-start-2' : ''}`}>
+                          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
+                            {collection.previewImages.length > 0 ? (
+                              <div className="grid grid-cols-3 gap-1 h-full">
+                                {collection.previewImages.slice(0, 6).map((image: any, idx: number) => {
+                                  const imageUrl = 
+                                    image.thumbnail_large_url ||
+                                    image.thumbnail_medium_url ||
+                                    image.file_path ||
+                                    image.original_url ||
+                                    `/placeholder.svg?height=600&width=800&text=${encodeURIComponent(image.title || 'Heritage Image')}`
+                                
+                                  return (
+                                    <div
+                                      key={image.id}
+                                      className="relative overflow-hidden"
+                                      style={{
+                                        gridColumn: idx === 0 ? 'span 2' : undefined,
+                                        gridRow: idx === 0 ? 'span 2' : undefined,
+                                      }}
+                                    >
+                                      <Image
+                                        src={imageUrl || "/placeholder.svg"}
+                                        alt={image.title || 'Collection image'}
+                                        fill
+                                        className="object-contain transition-all duration-700 group-hover:scale-105"
+                                        sizes="(max-width: 1024px) 100vw, 50vw"
+                                      />
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-center h-full bg-muted">
+                                <Package2 className="h-20 w-20 text-muted-foreground" />
+                              </div>
+                            )}
+                            
+                            {/* Hover overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-center p-8">
+                              <Button size="lg" variant="secondary" className="gap-2">
+                                Explore Collection
+                                <ArrowRight className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className={`space-y-6 ${index % 2 === 1 ? 'lg:col-start-1 lg:row-start-1' : ''}`}>
+                          <div className="space-y-3">
+                            {collection.code && (
+                              <Badge variant="outline" className="font-mono text-xs">
+                                {collection.code}
+                              </Badge>
+                            )}
+                            
+                            <h2 className="text-4xl md:text-5xl font-bold tracking-tight group-hover:text-primary transition-colors">
+                              {collection.title}
+                            </h2>
+                          </div>
+
+                          {collection.description && (
+                            <p className="text-lg text-muted-foreground leading-relaxed line-clamp-4">
+                              {collection.description}
+                            </p>
+                          )}
+
+                          {collection.individualTotal > 0 && (
+                            <div className="rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 p-8 shadow-lg">
+                              <div className="grid grid-cols-3 gap-6 text-center">
+                                <div className="space-y-2">
+                                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Individual Purchase</div>
+                                  <div className="text-xl font-semibold line-through text-muted-foreground opacity-70">
+                                    ${collection.individualTotal.toFixed(2)}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground leading-tight">Buying all {collection.imageCount} photos separately</div>
+                                </div>
+                                
+                                <div className="space-y-2 relative">
+                                  <div className="absolute -inset-3 bg-primary/10 rounded-xl blur-xl" />
+                                  <div className="relative space-y-2">
+                                    <div className="text-xs font-bold text-primary uppercase tracking-wide">Bundle Price</div>
+                                    <div className="text-5xl font-black text-primary drop-shadow-sm">
+                                      ${collection.bundle_price}
+                                    </div>
+                                    <div className="text-xs font-medium text-primary/80">Complete collection</div>
+                                  </div>
+                                </div>
+                                
+                                <div className="space-y-2">
+                                  <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">You Save</div>
+                                  <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                                    ${collection.savings.toFixed(2)}
+                                  </div>
+                                  <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-sm font-bold">
+                                    {collection.savingsPercent}% OFF
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="flex flex-wrap items-center gap-6 pt-2">
+                            <div className="space-y-1">
+                              <div className="text-sm text-muted-foreground">Format</div>
+                              <div className="font-semibold">360° Panoramic</div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <div className="text-sm text-muted-foreground">License</div>
+                              <div className="font-semibold">Commercial Use</div>
+                            </div>
+                          </div>
+
+                          <Button size="lg" className="gap-2 group/btn mt-6">
+                            View Full Collection
+                            <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+                          </Button>
+                        </div>
+                      </div>
+                    </Link>
+                  )}
                 </article>
               ))}
             </div>
@@ -310,7 +457,7 @@ export default async function CollectionsPage() {
             <Button size="lg" variant="outline" className="gap-2" asChild>
               <Link href="/gallery">
                 Browse Gallery
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>

@@ -66,6 +66,7 @@ export default function LandingGalleryTabs({ dailyImages }: LandingGalleryTabsPr
                       image.original_url ||
                       "/placeholder.svg?height=400&width=400" ||
                       "/placeholder.svg" ||
+                      "/placeholder.svg" ||
                       "/placeholder.svg"
                     }
                     alt={image.title}
@@ -80,7 +81,7 @@ export default function LandingGalleryTabs({ dailyImages }: LandingGalleryTabsPr
                         <Badge variant="outline" className="text-xs bg-black/50 backdrop-blur-sm">
                           {image.image_format || t("360Degrees")}
                         </Badge>
-                        <Badge className="bg-gradient-to-r from-yellow-400/40 to-orange-500/40 text-black text-xs font-bold border-0">
+                        <Badge className="bg-gradient-to-r from-yellow-400/40 to-orange-500/40 text-foreground text-xs font-bold border-0">
                           {t("10PercentOff")}
                         </Badge>
                       </div>

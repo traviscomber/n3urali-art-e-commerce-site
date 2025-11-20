@@ -41,7 +41,7 @@ const translations = {
 
     // Collection Section
     "collection.badge": "Colección Premium",
-    "collection.title": "Imagenes Destacadas",
+    "collection.title": "Colecciones",
     "collection.titleHighlight": "Curadas",
     "collection.viewComplete": "Ver Colección Completa",
     "collection.off": "% DCTO",
@@ -341,7 +341,7 @@ const translations = {
 
     // Collection Section
     "collection.badge": "Premium Collection",
-    "collection.title": "Featured Images",
+    "collection.title": "Collections",
     "collection.titleHighlight": "Curated",
     "collection.viewComplete": "View Complete Collection",
     "collection.off": "% OFF",

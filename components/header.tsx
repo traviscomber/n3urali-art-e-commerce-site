@@ -341,7 +341,7 @@ export function Header({ videoContext }: HeaderProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden hover:bg-card/50 transition-all duration-300 text-white hover:text-primary"
+              className="md:hidden hover:bg-accent/50 transition-all duration-300"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

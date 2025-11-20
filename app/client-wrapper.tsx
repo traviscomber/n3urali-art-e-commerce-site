@@ -108,7 +108,7 @@ export const ClientWrapper = memo(
                 <span className="text-sm font-medium text-primary">{t("hero.badge")}</span>
               </div> */}
 
-                <h1 className="text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-[0.95] text-balance text-white drop-shadow-2xl">
+                <h1 className="text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-[0.95] text-balance text-foreground drop-shadow-2xl">
                   {t("hero.title")}
                   <br />
                   <span className="text-primary drop-shadow-[0_0_40px_rgba(139,92,246,0.8)]">
@@ -116,12 +116,12 @@ export const ClientWrapper = memo(
                   </span>
                 </h1>
 
-                <p className="text-xl md:text-2xl text-white/90 max-w-4xl mx-auto leading-relaxed text-pretty font-light drop-shadow-lg">
+                <p className="text-xl md:text-2xl text-foreground/90 max-w-4xl mx-auto leading-relaxed text-pretty font-light drop-shadow-lg">
                   {t("hero.subtitle")}
-                  <span className="block mt-2 text-lg text-white/80">{t("hero.description")}</span>
+                  <span className="block mt-2 text-lg text-muted-foreground">{t("hero.description")}</span>
                 </p>
 
-                <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-white/80">
+                <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2.5">
                     <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
                     <span className="font-medium">
@@ -148,7 +148,7 @@ export const ClientWrapper = memo(
           </div>
 
           <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10">
-            <div className="flex flex-col items-center gap-2 text-white/60 animate-bounce">
+            <div className="flex flex-col items-center gap-2 text-muted-foreground animate-bounce">
               <div className="w-6 h-10 border-2 border-current rounded-full flex items-start justify-center p-2">
                 <div className="w-1 h-2 bg-current rounded-full animate-scroll" />
               </div>
@@ -186,6 +186,13 @@ export const ClientWrapper = memo(
                         "/placeholder.svg" ||
                         "/placeholder.svg" ||
                         "/placeholder.svg" ||
+                        "/placeholder.svg" ||
+                        "/placeholder.svg" ||
+                        "/placeholder.svg" ||
+                        "/placeholder.svg" ||
+                        "/placeholder.svg" ||
+                        "/placeholder.svg" ||
+                        "/placeholder.svg" ||
                         "/placeholder.svg"
                       }
                       alt={imageOfTheDay.title}
@@ -196,14 +203,14 @@ export const ClientWrapper = memo(
                     />
 
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="text-white/20 text-6xl md:text-8xl lg:text-9xl font-bold tracking-wider transform -rotate-12 select-none">
+                      <div className="text-foreground/10 text-6xl md:text-8xl lg:text-9xl font-bold tracking-wider transform -rotate-12 select-none">
                         n3uralia360.art
                       </div>
                     </div>
 
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                    <div className="absolute bottom-0 left-0 right-0 p-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute bottom-0 left-0 right-0 p-8 text-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div className="flex items-end justify-between gap-4 flex-wrap">
                         <div className="space-y-2">
                           <h2 className="text-2xl md:text-3xl font-bold">{imageOfTheDay.title}</h2>
@@ -211,7 +218,7 @@ export const ClientWrapper = memo(
                             {/* <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/30">
                             {imageOfTheDay.image_format}
                           </Badge> */}
-                            <span className="text-white/80">{t("stats.resolutionNote")}</span>
+                            <span className="text-muted-foreground">{t("stats.resolutionNote")}</span>
                           </div>
                         </div>
                         <div className="text-right space-y-2">
@@ -240,7 +247,7 @@ export const ClientWrapper = memo(
           <section className="py-16 bg-background overflow-hidden">
             <div className="container mx-auto px-4 mb-8">
               <div className="text-center space-y-3">
-                <h2 className="text-2xl md:text-3xl font-bold">
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground">
                   {t("collection.title")} <span className="text-primary">{t("collection.titleHighlight")}</span>
                 </h2>
               </div>
@@ -268,13 +275,13 @@ export const ClientWrapper = memo(
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                     </div>
 
-                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white space-y-2">
+                    <div className="absolute bottom-0 left-0 right-0 p-6 text-foreground space-y-2">
                       <h3 className="font-bold text-xl line-clamp-1">{image.title}</h3>
                       {image.description && (
-                        <p className="text-sm text-white/80 line-clamp-2 leading-relaxed">{image.description}</p>
+                        <p className="text-sm text-foreground/80 line-clamp-2 leading-relaxed">{image.description}</p>
                       )}
                       <div className="flex items-center justify-between pt-2">
-                        <span className="text-sm text-white/60">{image.image_format}</span>
+                        <span className="text-sm text-muted-foreground">{image.image_format}</span>
                         <span
                           className="text-lg font-bold"
                           style={{
@@ -306,13 +313,13 @@ export const ClientWrapper = memo(
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                     </div>
 
-                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white space-y-2">
+                    <div className="absolute bottom-0 left-0 right-0 p-6 text-foreground space-y-2">
                       <h3 className="font-bold text-xl line-clamp-1">{image.title}</h3>
                       {image.description && (
-                        <p className="text-sm text-white/80 line-clamp-2 leading-relaxed">{image.description}</p>
+                        <p className="text-sm text-foreground/80 line-clamp-2 leading-relaxed">{image.description}</p>
                       )}
                       <div className="flex items-center justify-between pt-2">
-                        <span className="text-sm text-white/60">{image.image_format}</span>
+                        <span className="text-sm text-muted-foreground">{image.image_format}</span>
                         <span
                           className="text-lg font-bold"
                           style={{
@@ -331,7 +338,11 @@ export const ClientWrapper = memo(
 
             <div className="text-center mt-8">
               <Link href="/collection">
-                <Button size="lg" variant="outline" className="group bg-transparent">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="group bg-transparent text-foreground border-foreground/20 hover:bg-foreground/10 hover:text-foreground hover:border-foreground/40"
+                >
                   {t("collection.viewComplete")}
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
@@ -348,8 +359,11 @@ export const ClientWrapper = memo(
               <div className="max-w-5xl mx-auto">
                 <div className="text-center space-y-8 mb-16">
                   <div className="space-y-4">
-                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-                      {t("auction.title")} <span className="text-primary">{t("auction.titleHighlight")}</span>
+                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                      {t("auction.title")}{" "}
+                      <span className="text-primary drop-shadow-[0_0_20px_rgba(139,92,246,0.8)]">
+                        {t("auction.titleHighlight")}
+                      </span>
                     </h2>
 
                     <div className="flex justify-center mt-8">
@@ -392,6 +406,13 @@ export const ClientWrapper = memo(
                     "/placeholder.svg" ||
                     "/placeholder.svg" ||
                     "/placeholder.svg" ||
+                    "/placeholder.svg" ||
+                    "/placeholder.svg" ||
+                    "/placeholder.svg" ||
+                    "/placeholder.svg" ||
+                    "/placeholder.svg" ||
+                    "/placeholder.svg" ||
+                    "/placeholder.svg" ||
                     "/placeholder.svg"
                   }
                   alt="Explore Gallery Background"
@@ -413,34 +434,61 @@ export const ClientWrapper = memo(
             <div className="max-w-5xl mx-auto text-center space-y-12">
               <div className="inline-flex items-center gap-2.5 bg-primary/30 border-2 border-primary/50 rounded-full px-8 py-4 backdrop-blur-lg shadow-2xl">
                 <Grid3x3 className="w-6 h-6 text-primary" />
-                <span className="text-base font-bold text-white">{t("cta.startExploring")}</span>
+                <span className="text-base font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                  {t("cta.startExploring")}
+                </span>
               </div>
 
               <ParticleTitle className="min-h-[250px] flex items-center justify-center">
-                <h2 className="text-5xl md:text-6xl lg:text-8xl font-black tracking-tight text-white drop-shadow-2xl text-balance leading-[1.1]">
-                  {t("cta.readyToTransform")}
+                <h2 className="text-5xl md:text-6xl lg:text-8xl font-black tracking-tight drop-shadow-[0_4px_20px_rgba(0,0,0,1)] text-balance leading-[1.1]">
+                  <span className="text-white drop-shadow-[0_4px_20px_rgba(0,0,0,1)]">{t("cta.readyToTransform")}</span>
                   <br />
-                  <span className="text-primary drop-shadow-[0_0_30px_rgba(139,92,246,0.5)]">
+                  <span className="text-white drop-shadow-[0_0_40px_rgba(255,255,255,0.3)] drop-shadow-[0_4px_20px_rgba(0,0,0,1)]">
                     {t("cta.creativeVision")}
                   </span>
                 </h2>
               </ParticleTitle>
 
-              <p className="text-xl md:text-2xl lg:text-3xl text-white/95 max-w-3xl mx-auto leading-relaxed text-pretty drop-shadow-xl font-medium">
+              <p className="text-xl md:text-2xl lg:text-3xl text-foreground max-w-3xl mx-auto leading-relaxed text-pretty drop-shadow-[0_2px_12px_rgba(0,0,0,1)] font-medium">
                 {t("cta.joinThousands")}
               </p>
 
-              <div className="pt-10">
+              <div className="pt-10 flex flex-wrap items-center justify-center gap-6">
+                <Link href="/collection">
+                  <Button
+                    size="lg"
+                    className="text-2xl md:text-3xl px-12 md:px-16 py-10 md:py-12 h-auto font-black shadow-2xl shadow-primary/60 hover:shadow-[0_0_80px_rgba(139,92,246,0.8)] transition-all duration-500 hover:scale-110 bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-primary group relative overflow-hidden"
+                  >
+                    <span className="relative z-10 flex items-center gap-3">
+                      {t("collection.title").split(" ")[0]} {/* "Imagenes" or "Featured" */}
+                      <ArrowRight className="w-8 h-8 md:w-10 md:h-10 group-hover:translate-x-3 transition-transform duration-300" />
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                  </Button>
+                </Link>
+
                 <Link href="/gallery">
                   <Button
                     size="lg"
-                    className="text-3xl md:text-4xl px-20 md:px-28 py-12 md:py-16 h-auto font-black shadow-2xl shadow-primary/60 hover:shadow-[0_0_80px_rgba(139,92,246,0.8)] transition-all duration-500 hover:scale-110 bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-primary group relative overflow-hidden"
+                    className="text-2xl md:text-3xl px-12 md:px-16 py-10 md:py-12 h-auto font-black shadow-2xl shadow-primary/60 hover:shadow-[0_0_80px_rgba(139,92,246,0.8)] transition-all duration-500 hover:scale-110 bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-primary group relative overflow-hidden"
                   >
-                    <span className="relative z-10 flex items-center gap-4">
-                      {t("gallery.badge").split(".")[0]} {/* Using "Gallery" part from badge */}
-                      <ArrowRight className="w-10 h-10 md:w-12 md:h-12 group-hover:translate-x-3 transition-transform duration-300" />
+                    <span className="relative z-10 flex items-center gap-3">
+                      Gallery
+                      <ArrowRight className="w-8 h-8 md:w-10 md:h-10 group-hover:translate-x-3 transition-transform duration-300" />
                     </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                  </Button>
+                </Link>
 
+                <Link href="/collection/theatre">
+                  <Button
+                    size="lg"
+                    className="text-2xl md:text-3xl px-12 md:px-16 py-10 md:py-12 h-auto font-black shadow-2xl shadow-primary/60 hover:shadow-[0_0_80px_rgba(139,92,246,0.8)] transition-all duration-500 hover:scale-110 bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-primary group relative overflow-hidden"
+                  >
+                    <span className="relative z-10 flex items-center gap-3">
+                      Theatre
+                      <ArrowRight className="w-8 h-8 md:w-10 md:h-10 group-hover:translate-x-3 transition-transform duration-300" />
+                    </span>
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                   </Button>
                 </Link>

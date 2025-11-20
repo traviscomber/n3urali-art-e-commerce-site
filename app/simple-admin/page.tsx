@@ -11,7 +11,24 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
-import { Loader2, Upload, Eye, Trash2, Database, BarChart3, Crown, Edit2, Check, X, HardDrive, Tag, Tags, FileText, Calendar, DollarSign } from 'lucide-react'
+import {
+  Loader2,
+  Upload,
+  Eye,
+  Trash2,
+  Database,
+  BarChart3,
+  Crown,
+  Edit2,
+  Check,
+  X,
+  HardDrive,
+  Tag,
+  Tags,
+  FileText,
+  Calendar,
+  DollarSign,
+} from "lucide-react"
 import { TagManagementDashboard } from "@/components/admin/tag-management-dashboard"
 import { FeaturedGalleryManager } from "@/components/admin/featured-gallery-manager"
 import { CollectionsManager } from "@/components/admin/collections-manager" // Added for Collections tab
@@ -178,7 +195,7 @@ export default function SimpleAdminPage() {
       if (categoriesResult.success) {
         setCategories(categoriesResult.data)
         console.log("[v0] SimpleAdmin: Loaded", categoriesResult.data.length, "categories:", categoriesResult.data)
-        categoriesResult.data.forEach(cat => {
+        categoriesResult.data.forEach((cat) => {
           console.log("[v0] Category:", cat.id, cat.name, cat.display_name)
         })
       } else {
@@ -347,7 +364,7 @@ export default function SimpleAdminPage() {
     setUploadError(null)
     try {
       const { createImageWithCategoryObject } = await import("@/app/actions/admin-actions")
-      
+
       console.log("[v0] Starting image upload process...")
 
       const fileSizeMB = newImage.file.size / (1024 * 1024)
@@ -451,13 +468,16 @@ export default function SimpleAdminPage() {
 
   const handleDeleteImage = async (imageId: string) => {
     console.log("[v0] Client: Attempting to delete image with ID:", imageId)
-    console.log("[v0] Client: Image exists in current images array:", images.some(img => img.id === imageId))
-    
+    console.log(
+      "[v0] Client: Image exists in current images array:",
+      images.some((img) => img.id === imageId),
+    )
+
     if (!confirm("Are you sure you want to delete this image?")) return
 
     try {
-      setImages(prevImages => prevImages.filter(img => img.id !== imageId))
-      
+      setImages((prevImages) => prevImages.filter((img) => img.id !== imageId))
+
       const { deleteImage } = await import("@/app/actions/admin-actions")
       const result = await deleteImage(imageId)
 
@@ -645,7 +665,7 @@ export default function SimpleAdminPage() {
 
     try {
       const { createImageWithCategoryObject } = await import("@/app/actions/admin-actions")
-      
+
       console.log("[v0] SimpleAdmin: Starting upload process...")
 
       const formData = new FormData()
@@ -794,8 +814,10 @@ export default function SimpleAdminPage() {
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900">n3uralia360.art Admin</h1>
-            <p className="text-xl text-gray-600 font-medium">Full HQ Resolution Only - 4K to 16K Premium Images</p>
+            <h1 className="text-4xl font-bold text-foreground">n3uralia360.art Admin</h1>
+            <p className="text-xl text-muted-foreground font-medium">
+              Full HQ Resolution Only - 4K to 16K Premium Images
+            </p>
           </div>
           <Button onClick={handleLogout} variant="outline" className="text-lg h-12 px-6 bg-transparent">
             Logout
@@ -1031,7 +1053,12 @@ export default function SimpleAdminPage() {
                                   <Check className="h-4 w-4 mr-1" />
                                   Save
                                 </Button>
-                                <Button size="sm" variant="outline" onClick={handleEditCancel} className="flex-1">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={handleEditCancel}
+                                  className="flex-1 bg-transparent"
+                                >
                                   <X className="h-4 w-4 mr-1" />
                                   Cancel
                                 </Button>
@@ -1041,9 +1068,9 @@ export default function SimpleAdminPage() {
                             <>
                               <h3 className="font-semibold text-lg mb-1">{image.title}</h3>
                               <p className="text-sm text-muted-foreground mb-3">${image.price}</p>
-                              <Button 
-                                size="sm" 
-                                variant="outline" 
+                              <Button
+                                size="sm"
+                                variant="outline"
                                 onClick={() => handleEditStart(image)}
                                 className="w-full"
                               >
@@ -1108,7 +1135,10 @@ export default function SimpleAdminPage() {
                       <AlertDescription>No categories found. Please add categories first.</AlertDescription>
                     </Alert>
                   ) : (
-                    <Select value={newImage.category} onValueChange={(value) => setNewImage({ ...newImage, category: value })}>
+                    <Select
+                      value={newImage.category}
+                      onValueChange={(value) => setNewImage({ ...newImage, category: value })}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
@@ -1125,7 +1155,10 @@ export default function SimpleAdminPage() {
 
                 <div>
                   <Label htmlFor="rightsType">Rights Type *</Label>
-                  <Select value={newImage.rightsType} onValueChange={(value) => setNewImage({ ...newImage, rightsType: value })}>
+                  <Select
+                    value={newImage.rightsType}
+                    onValueChange={(value) => setNewImage({ ...newImage, rightsType: value })}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -1160,7 +1193,8 @@ export default function SimpleAdminPage() {
                     placeholder="https://your-backblaze-bucket.com/path/to/high-res-file.jpg"
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    Direct link to the final high-resolution file (e.g., from Backblaze). This link will only be accessible to customers after payment and will be sent via email with their purchase confirmation.
+                    Direct link to the final high-resolution file (e.g., from Backblaze). This link will only be
+                    accessible to customers after payment and will be sent via email with their purchase confirmation.
                   </p>
                 </div>
 
@@ -1177,7 +1211,11 @@ export default function SimpleAdminPage() {
                   >
                     {newImage.preview ? (
                       <div className="space-y-4">
-                        <img src={newImage.preview || "/placeholder.svg"} alt="Preview" className="max-h-64 mx-auto rounded" />
+                        <img
+                          src={newImage.preview || "/placeholder.svg"}
+                          alt="Preview"
+                          className="max-h-64 mx-auto rounded"
+                        />
                         <p className="text-sm text-muted-foreground">
                           {newImage.file ? `${(newImage.file.size / (1024 * 1024)).toFixed(2)} MB` : ""}
                         </p>
@@ -1190,13 +1228,7 @@ export default function SimpleAdminPage() {
                       </div>
                     )}
                   </div>
-                  <input
-                    id="file"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
+                  <input id="file" type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
                 </div>
 
                 <Button onClick={handleUpload} disabled={uploading} className="w-full" size="lg">

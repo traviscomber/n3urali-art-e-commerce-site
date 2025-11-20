@@ -163,11 +163,8 @@ export const ClientWrapper = memo(
             <div className="relative container mx-auto px-4">
               <div className="max-w-7xl mx-auto space-y-12">
                 <div className="text-center space-y-6">
-                  {/* <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20 text-sm px-4 py-2">
-                  {t("hero.imageOfDay")}
-                </Badge> */}
                   <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance">
-                    {t("hero.title")} <span className="text-primary">{t("hero.titleHighlight")}</span>
+                    {t("cta.readyToTransform")} <span className="text-primary">{t("cta.creativeVision")}</span>
                   </h1>
                   <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-pretty">
                     {t("hero.subtitle")}
@@ -181,6 +178,7 @@ export const ClientWrapper = memo(
                         imageOfTheDay.upscaled_url ||
                         imageOfTheDay.original_url ||
                         imageOfTheDay.file_path ||
+                        "/placeholder.svg" ||
                         "/placeholder.svg" ||
                         "/placeholder.svg" ||
                         "/placeholder.svg" ||
@@ -402,6 +400,7 @@ export const ClientWrapper = memo(
                     imageOfTheDay.original_url ||
                     imageOfTheDay.file_path ||
                     "/placeholder.svg?height=1080&width=1920&query=immersive 360 panoramic futuristic landscape" ||
+                    "/placeholder.svg" ||
                     "/placeholder.svg" ||
                     "/placeholder.svg" ||
                     "/placeholder.svg" ||

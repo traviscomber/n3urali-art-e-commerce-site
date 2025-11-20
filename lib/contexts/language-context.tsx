@@ -209,8 +209,8 @@ const translations = {
       "A diferencia de bibliotecas de stock genéricas donde el contenido generado por IA crea incertidumbre de derechos de autor, cada imagen de n3uralia360.art viene con licencia comercial completa e indemnización.",
 
     // CTA
-    "cta.readyToTransform": "¿Listo para Transformar tu",
-    "cta.creativeVision": "Visión Creativa?",
+    "cta.readyToTransform": "Eleva tus Proyectos con",
+    "cta.creativeVision": "Activos 360° Premium",
     "cta.joinThousands": "Únete a miles de creadores que confían en n3uralia360.art para sus proyectos inmersivos",
     "cta.startExploring": "Comenzar a Explorar",
 
@@ -459,7 +459,7 @@ const translations = {
     "gallery.exploreHeritage": "Explore Full Heritage Collection",
     "gallery.exploreDatasetTitle": "Explore Rich Dataset Diversity",
     "gallery.datasetDescription":
-      "Beyond heritage, our algorithmic engine has mastered dystopian futures, surreal dreamscapes, urban sprawl, natural phenomena, and speculative environments.",
+      "Beyond heritage, our algorithmic engine has mastered dystopian futures, dreamscapes surreal, urban sprawl, natural phenomena, and speculative environments.",
 
     // Use Cases Section
     "useCases.badge": "Industry Applications",
@@ -508,8 +508,8 @@ const translations = {
       "Unlike generic stock libraries where AI-generated content creates copyright uncertainty, every n3uralia360.art image comes with full commercial licensing and indemnification.",
 
     // CTA
-    "cta.readyToTransform": "Ready to Transform Your",
-    "cta.creativeVision": "Creative Vision?",
+    "cta.readyToTransform": "Elevate Your Projects with",
+    "cta.creativeVision": "Premium 360° Assets",
     "cta.joinThousands": "Join thousands of creators who trust n3uralia360.art for their immersive projects",
     "cta.startExploring": "Start Exploring",
 

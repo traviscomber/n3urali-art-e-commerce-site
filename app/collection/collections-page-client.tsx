@@ -15,12 +15,7 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
 
         <div className="relative container mx-auto px-4 py-20">
           <div className="max-w-4xl mx-auto text-center space-y-8">
-            {/* <Badge variant="outline" className="text-sm px-4 py-1">
-              <Sparkles className="h-3 w-3 mr-2" />
-              {t("collections.badge")}
-            </Badge> */}
-
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance text-foreground">
               {t("collections.title")}
               <span className="block text-primary mt-2">{t("collections.titleHighlight")}</span>
             </h1>
@@ -31,17 +26,17 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
 
             <div className="flex flex-wrap items-center justify-center gap-6 pt-4">
               <div className="text-center">
-                <div className="text-3xl font-bold">{collectionsWithPreviews.length}</div>
+                <div className="text-3xl font-bold text-foreground">{collectionsWithPreviews.length}</div>
                 <div className="text-sm text-muted-foreground">{t("collections.stats.collections")}</div>
               </div>
               <div className="h-12 w-px bg-border" />
               <div className="text-center">
-                <div className="text-3xl font-bold">8K–16K</div>
+                <div className="text-3xl font-bold text-foreground">8K–16K</div>
                 <div className="text-sm text-muted-foreground">{t("collections.stats.resolution")}</div>
               </div>
               <div className="h-12 w-px bg-border" />
               <div className="text-center">
-                <div className="text-3xl font-bold">VR Ready</div>
+                <div className="text-3xl font-bold text-foreground">VR Ready</div>
                 <div className="text-sm text-muted-foreground">{t("collections.stats.format")}</div>
               </div>
             </div>
@@ -49,7 +44,7 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
         </div>
       </section>
 
-      <section className="py-24 bg-muted/20">
+      <section className="py-24 bg-background">
         <div className="container mx-auto px-4">
           {collectionsWithPreviews.length === 0 ? (
             <div className="text-center py-20 max-w-lg mx-auto space-y-6">
@@ -75,36 +70,82 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
                     <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
                       {/* Image Showcase - same as regular collections */}
                       <div className="relative">
-                        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
+                        <div className="relative aspect-[16/9] rounded-2xl overflow-hidden">
                           {collection.previewImages.length > 0 ? (
-                            <div className="grid grid-cols-3 gap-1 h-full">
-                              {collection.previewImages.slice(0, 6).map((image: any, idx: number) => {
-                                const imageUrl =
-                                  image.thumbnail_large_url ||
-                                  image.thumbnail_medium_url ||
-                                  image.file_path ||
-                                  image.original_url ||
-                                  `/placeholder.svg?height=600&width=800&text=${encodeURIComponent(image.title || "Image")}`
-
-                                return (
-                                  <div
-                                    key={image.id}
-                                    className="relative overflow-hidden bg-muted"
-                                    style={{
-                                      gridColumn: idx === 0 ? "span 2" : undefined,
-                                      gridRow: idx === 0 ? "span 2" : undefined,
-                                    }}
-                                  >
-                                    <Image
-                                      src={imageUrl || "/placeholder.svg"}
-                                      alt={image.title || "Collection image"}
-                                      fill
-                                      className="object-contain transition-all duration-700 group-hover:scale-105"
-                                      sizes="(max-width: 1024px) 100vw, 25vw"
-                                    />
+                            <div className="flex flex-col gap-4 h-full">
+                              {/* EQUIRECTANGULAR SECTION - Top section with label */}
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <div className="text-xs font-bold uppercase tracking-wider text-primary">
+                                    Equirectangular Format
                                   </div>
-                                )
-                              })}
+                                  <div className="h-px flex-1 bg-primary/20" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  {/* Two large equirectangular panoramic images */}
+                                  {collection.previewImages.slice(0, 2).map((image: any, idx: number) => (
+                                    <div
+                                      key={idx}
+                                      className="relative aspect-[2/1] overflow-hidden rounded-lg bg-muted"
+                                    >
+                                      <Image
+                                        src={
+                                          image?.thumbnail_large_url ||
+                                          image?.thumbnail_medium_url ||
+                                          image?.file_path ||
+                                          image?.original_url ||
+                                          `/placeholder.svg?height=400&width=800&text=${encodeURIComponent(image?.title || "Equirectangular")}`
+                                        }
+                                        alt={image?.title || "Equirectangular panorama"}
+                                        fill
+                                        className="object-cover transition-all duration-700 group-hover:scale-105"
+                                        sizes="(max-width: 1024px) 50vw, 25vw"
+                                      />
+                                      <div className="absolute top-2 left-2 bg-primary/90 backdrop-blur-sm text-primary-foreground px-3 py-1.5 rounded-full shadow-lg border border-primary-foreground/20">
+                                        <div className="text-[10px] font-bold uppercase tracking-wider">
+                                          360° Panoramic
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* DOME SECTION - Bottom section with label */}
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <div className="text-xs font-bold uppercase tracking-wider text-secondary-foreground">
+                                    Dome Format
+                                  </div>
+                                  <div className="h-px flex-1 bg-secondary/20" />
+                                </div>
+                                <div className="grid grid-cols-4 gap-2">
+                                  {/* Four square dome format images */}
+                                  {collection.previewImages.slice(2, 6).map((image: any, idx: number) => (
+                                    <div
+                                      key={idx}
+                                      className="relative aspect-square overflow-hidden rounded-lg bg-muted"
+                                    >
+                                      <Image
+                                        src={
+                                          image?.thumbnail_large_url ||
+                                          image?.thumbnail_medium_url ||
+                                          image?.file_path ||
+                                          image?.original_url ||
+                                          `/placeholder.svg?height=400&width=400&text=${encodeURIComponent(image?.title || "Dome")}`
+                                        }
+                                        alt={image?.title || "Dome projection"}
+                                        fill
+                                        className="object-cover transition-all duration-700 group-hover:scale-105"
+                                        sizes="(max-width: 1024px) 25vw, 12vw"
+                                      />
+                                      <div className="absolute top-1.5 left-1.5 bg-secondary/90 backdrop-blur-sm text-secondary-foreground px-2 py-1 rounded-full shadow-md border border-secondary-foreground/20">
+                                        <div className="text-[9px] font-bold uppercase tracking-wider">Dome</div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
                             </div>
                           ) : (
                             <div className="flex items-center justify-center h-full bg-muted">
@@ -130,7 +171,9 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
                             </Badge>
                           )} */}
 
-                          <h2 className="text-4xl md:text-5xl font-bold tracking-tight">{collection.title}</h2>
+                          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
+                            {collection.title}
+                          </h2>
                         </div>
 
                         {collection.description && (
@@ -147,7 +190,7 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
                           <div className="space-y-3">
                             {collection.childCollections.map((child: any) => (
                               <Link key={child.id} href={`/collection/${child.code}`} className="group/child block">
-                                <div className="rounded-lg border-2 border-border hover:border-primary transition-all duration-300 p-4 hover:shadow-lg hover:bg-primary/5">
+                                <div className="rounded-lg border-2 border-border hover:border-primary transition-all duration-300 p-4 hover:shadow-lg hover:bg-primary/5 bg-card">
                                   <div className="flex items-center justify-between">
                                     <h4 className="text-lg font-semibold group-hover/child:text-primary transition-colors">
                                       {child.title}
@@ -163,12 +206,12 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
                         <div className="flex flex-wrap items-center gap-6 pt-2">
                           <div className="space-y-1">
                             <div className="text-sm text-muted-foreground">{t("collections.format")}</div>
-                            <div className="font-semibold">{t("collections.format.360")}</div>
+                            <div className="font-semibold text-foreground">{t("collections.format.360")}</div>
                           </div>
 
                           <div className="space-y-1">
                             <div className="text-sm text-muted-foreground">{t("collections.license")}</div>
-                            <div className="font-semibold">{t("collections.license.commercial")}</div>
+                            <div className="font-semibold text-foreground">{t("collections.license.commercial")}</div>
                           </div>
                         </div>
                       </div>
@@ -176,41 +219,85 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
                   ) : (
                     /* Existing single collection display */
                     <Link href={`/collection/${collection.code}`} className="block">
-                      <div
-                        className={`grid lg:grid-cols-2 gap-8 lg:gap-12 items-center ${index % 2 === 1 ? "lg:grid-flow-dense" : ""}`}
-                      >
-                        {/* Image Showcase */}
-                        <div className={`relative ${index % 2 === 1 ? "lg:col-start-2" : ""}`}>
-                          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
+                      <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+                        {/* Image Showcase - Always on the left */}
+                        <div className="relative">
+                          <div className="relative aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl">
                             {collection.previewImages.length > 0 ? (
-                              <div className="grid grid-cols-3 gap-1 h-full">
-                                {collection.previewImages.slice(0, 6).map((image: any, idx: number) => {
-                                  const imageUrl =
-                                    image.thumbnail_large_url ||
-                                    image.thumbnail_medium_url ||
-                                    image.file_path ||
-                                    image.original_url ||
-                                    `/placeholder.svg?height=600&width=800&text=${encodeURIComponent(image.title || "Heritage Image")}`
-
-                                  return (
-                                    <div
-                                      key={image.id}
-                                      className="relative overflow-hidden"
-                                      style={{
-                                        gridColumn: idx === 0 ? "span 2" : undefined,
-                                        gridRow: idx === 0 ? "span 2" : undefined,
-                                      }}
-                                    >
-                                      <Image
-                                        src={imageUrl || "/placeholder.svg"}
-                                        alt={image.title || "Collection image"}
-                                        fill
-                                        className="object-contain transition-all duration-700 group-hover:scale-105"
-                                        sizes="(max-width: 1024px) 100vw, 50vw"
-                                      />
+                              <div className="flex flex-col gap-4 h-full">
+                                {/* EQUIRECTANGULAR SECTION - Top section with label */}
+                                <div className="space-y-2">
+                                  <div className="flex items-center gap-2">
+                                    <div className="text-xs font-bold uppercase tracking-wider text-primary">
+                                      Equirectangular Format
                                     </div>
-                                  )
-                                })}
+                                    <div className="h-px flex-1 bg-primary/20" />
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    {/* Two large equirectangular panoramic images */}
+                                    {collection.previewImages.slice(0, 2).map((image: any, idx: number) => (
+                                      <div
+                                        key={idx}
+                                        className="relative aspect-[2/1] overflow-hidden rounded-lg bg-muted"
+                                      >
+                                        <Image
+                                          src={
+                                            image?.thumbnail_large_url ||
+                                            image?.thumbnail_medium_url ||
+                                            image?.file_path ||
+                                            image?.original_url ||
+                                            `/placeholder.svg?height=400&width=800&text=${encodeURIComponent(image?.title || "Equirectangular")}`
+                                          }
+                                          alt={image?.title || "Equirectangular panorama"}
+                                          fill
+                                          className="object-cover transition-all duration-700 group-hover:scale-105"
+                                          sizes="(max-width: 1024px) 50vw, 25vw"
+                                        />
+                                        <div className="absolute top-2 left-2 bg-primary/90 backdrop-blur-sm text-primary-foreground px-3 py-1.5 rounded-full shadow-lg border border-primary-foreground/20">
+                                          <div className="text-[10px] font-bold uppercase tracking-wider">
+                                            360° Panoramic
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* DOME SECTION - Bottom section with label */}
+                                <div className="space-y-2">
+                                  <div className="flex items-center gap-2">
+                                    <div className="text-xs font-bold uppercase tracking-wider text-secondary-foreground">
+                                      Dome Format
+                                    </div>
+                                    <div className="h-px flex-1 bg-secondary/20" />
+                                  </div>
+                                  <div className="grid grid-cols-4 gap-2">
+                                    {/* Four square dome format images */}
+                                    {collection.previewImages.slice(2, 6).map((image: any, idx: number) => (
+                                      <div
+                                        key={idx}
+                                        className="relative aspect-square overflow-hidden rounded-lg bg-muted"
+                                      >
+                                        <Image
+                                          src={
+                                            image?.thumbnail_large_url ||
+                                            image?.thumbnail_medium_url ||
+                                            image?.file_path ||
+                                            image?.original_url ||
+                                            `/placeholder.svg?height=400&width=400&text=${encodeURIComponent(image?.title || "Dome")}`
+                                          }
+                                          alt={image?.title || "Dome projection"}
+                                          fill
+                                          className="object-cover transition-all duration-700 group-hover:scale-105"
+                                          sizes="(max-width: 1024px) 25vw, 12vw"
+                                        />
+                                        <div className="absolute top-1.5 left-1.5 bg-secondary/90 backdrop-blur-sm text-secondary-foreground px-2 py-1 rounded-full shadow-md border border-secondary-foreground/20">
+                                          <div className="text-[9px] font-bold uppercase tracking-wider">Dome</div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
                               </div>
                             ) : (
                               <div className="flex items-center justify-center h-full bg-muted">
@@ -228,8 +315,8 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
                           </div>
                         </div>
 
-                        {/* Content */}
-                        <div className={`space-y-6 ${index % 2 === 1 ? "lg:col-start-1 lg:row-start-1" : ""}`}>
+                        {/* Content - Always on the right */}
+                        <div className="space-y-6">
                           <div className="space-y-3">
                             {/* {collection.code && (
                               <Badge variant="outline" className="font-mono text-xs">
@@ -237,7 +324,7 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
                               </Badge>
                             )} */}
 
-                            <h2 className="text-4xl md:text-5xl font-bold tracking-tight group-hover:text-primary transition-colors">
+                            <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
                               {collection.title}
                             </h2>
                           </div>
@@ -249,7 +336,7 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
                           )}
 
                           {collection.individualTotal > 0 && (
-                            <div className="rounded-xl border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 p-8 shadow-lg">
+                            <div className="rounded-xl border-2 border-primary/20 bg-card bg-gradient-to-br from-primary/5 to-primary/10 p-8 shadow-lg">
                               <div className="grid grid-cols-3 gap-6 text-center">
                                 <div className="space-y-2">
                                   <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -282,13 +369,13 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
                                 </div>
 
                                 <div className="space-y-2">
-                                  <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">
+                                  <div className="text-xs font-medium text-emerald-700 dark:text-emerald-300 uppercase tracking-wide">
                                     {t("collections.youSave")}
                                   </div>
-                                  <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                                  <div className="text-xl font-bold text-emerald-700 dark:text-emerald-300">
                                     ${collection.savings.toFixed(2)}
                                   </div>
-                                  <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-sm font-bold">
+                                  <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 text-sm font-bold">
                                     {collection.savingsPercent}% OFF
                                   </div>
                                 </div>
@@ -299,12 +386,12 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
                           <div className="flex flex-wrap items-center gap-6 pt-2">
                             <div className="space-y-1">
                               <div className="text-sm text-muted-foreground">{t("collections.format")}</div>
-                              <div className="font-semibold">{t("collections.format.360")}</div>
+                              <div className="font-semibold text-foreground">{t("collections.format.360")}</div>
                             </div>
 
                             <div className="space-y-1">
                               <div className="text-sm text-muted-foreground">{t("collections.license")}</div>
-                              <div className="font-semibold">{t("collections.license.commercial")}</div>
+                              <div className="font-semibold text-foreground">{t("collections.license.commercial")}</div>
                             </div>
                           </div>
 
@@ -326,7 +413,7 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
       <section className="py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold">{t("collections.preferIndividual")}</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground">{t("collections.preferIndividual")}</h2>
             <p className="text-lg text-muted-foreground">{t("collections.browseGallery")}</p>
             <Button size="lg" variant="outline" className="gap-2 bg-transparent" asChild>
               <Link href="/gallery">

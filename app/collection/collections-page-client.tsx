@@ -184,15 +184,15 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
 
                         {/* Child Collections List */}
                         <div className="space-y-3 pt-4">
-                          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
                             {t("collections.subcollections")}
                           </h3>
                           <div className="space-y-3">
                             {collection.childCollections.map((child: any) => (
                               <Link key={child.id} href={`/collection/${child.code}`} className="group/child block">
-                                <div className="rounded-lg border-2 border-border hover:border-primary transition-all duration-300 p-4 hover:shadow-lg hover:bg-primary/5 bg-card">
+                                <div className="rounded-lg border-2 border-border hover:border-primary transition-all duration-300 p-4 hover:shadow-lg hover:bg-primary/5 bg-muted/30">
                                   <div className="flex items-center justify-between">
-                                    <h4 className="text-lg font-semibold group-hover/child:text-primary transition-colors">
+                                    <h4 className="text-lg font-semibold text-foreground group-hover/child:text-primary transition-colors">
                                       {child.title}
                                     </h4>
                                     <ArrowRight className="h-5 w-5 text-muted-foreground group-hover/child:text-primary group-hover/child:translate-x-1 transition-all" />

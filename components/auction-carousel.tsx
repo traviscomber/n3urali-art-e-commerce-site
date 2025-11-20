@@ -2,11 +2,11 @@
 
 import type React from "react"
 import { useEffect, useState, useCallback, memo } from "react"
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Clock } from 'lucide-react'
+import { ArrowRight, Clock } from "lucide-react"
 
 interface AuctionImage {
   id: string
@@ -72,20 +72,19 @@ export default memo(function AuctionCarousel({ images }: AuctionCarouselProps) {
     }
   }, [secondsLeft, images.length])
 
-  const handleAuctionClick = useCallback((image: AuctionImage, e: React.MouseEvent) => {
-    e.preventDefault()
-    const capturedPrice = currentPrices[image.id] || image.price
-    const capturedTimestamp = new Date().toISOString()
+  const handleAuctionClick = useCallback(
+    (image: AuctionImage, e: React.MouseEvent) => {
+      e.preventDefault()
+      const capturedPrice = currentPrices[image.id] || image.price
+      const capturedTimestamp = new Date().toISOString()
 
-    router.push(`/photo/${image.id}?auctionPrice=${capturedPrice.toFixed(2)}&auctionTimestamp=${capturedTimestamp}`)
-  }, [currentPrices, router])
+      router.push(`/photo/${image.id}?auctionPrice=${capturedPrice.toFixed(2)}&auctionTimestamp=${capturedTimestamp}`)
+    },
+    [currentPrices, router],
+  )
 
   if (!images || images.length === 0) {
-    return (
-      <div className="text-center py-12 text-muted-foreground">
-        No auction images available at this time
-      </div>
-    )
+    return <div className="text-center py-12 text-muted-foreground">No auction images available at this time</div>
   }
 
   const currentImage = images[currentImageIndex]
@@ -126,7 +125,10 @@ export default memo(function AuctionCarousel({ images }: AuctionCarouselProps) {
           <div className="flex items-end justify-between gap-6 flex-wrap">
             <div className="space-y-3 flex-1">
               <div className="flex items-center gap-3">
-                <Badge variant="secondary" className="bg-white/10 text-white hover:bg-white/20 text-sm backdrop-blur-md border-0 font-light">
+                <Badge
+                  variant="secondary"
+                  className="bg-white/10 text-white hover:bg-white/20 text-sm backdrop-blur-md border-0 font-light"
+                >
                   {currentImage.image_format}
                 </Badge>
               </div>
@@ -135,17 +137,29 @@ export default memo(function AuctionCarousel({ images }: AuctionCarouselProps) {
 
             <div className="text-right space-y-3">
               <div className="space-y-1">
-                <div className="text-6xl font-bold bg-gradient-to-r from-yellow-200 to-orange-400 bg-clip-text text-transparent">
+                <div
+                  className="text-6xl font-bold tabular-nums"
+                  style={{
+                    color: "#7851A9",
+                    textShadow: "0 0 10px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 0, 0, 0.5)",
+                  }}
+                >
                   ${currentPrice.toFixed(2)}
                 </div>
                 {discountPercent > 0 && (
-                  <div className="text-sm text-yellow-400/90 font-medium">
+                  <div
+                    className="text-sm font-medium"
+                    style={{
+                      color: "#7851A9",
+                      textShadow: "0 0 8px rgba(0, 0, 0, 0.8), 0 0 12px rgba(0, 0, 0, 0.6)",
+                    }}
+                  >
                     {discountPercent}% off
                   </div>
                 )}
               </div>
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20 font-normal"
                 onClick={(e) => handleAuctionClick(currentImage, e)}
               >
@@ -167,9 +181,7 @@ export default memo(function AuctionCarousel({ images }: AuctionCarouselProps) {
                   setCurrentImageIndex(index)
                 }}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
-                  index === currentImageIndex
-                    ? "w-8 bg-white/80"
-                    : "w-1.5 bg-white/30 hover:bg-white/50"
+                  index === currentImageIndex ? "w-8 bg-white/80" : "w-1.5 bg-white/30 hover:bg-white/50"
                 }`}
                 aria-label={`View image ${index + 1}`}
               />

@@ -65,17 +65,17 @@ export default async function HomePage() {
   const { data: featuredImages } = await supabase
     .from("images")
     .select(
-      "id, title, file_path, original_url, upscaled_url, price, image_format, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url",
+      "id, title, description, file_path, original_url, upscaled_url, price, image_format, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url",
     )
     .eq("featured_collection", true)
     .eq("active", true)
     .order("created_at", { ascending: false })
 
-  let auctionImages: typeof featuredImages = []
+  const auctionImages: typeof featuredImages = []
   if (featuredImages && featuredImages.length > 0) {
     const today = new Date()
     const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000)
-    
+
     const auctionCount = Math.min(5, featuredImages.length)
     for (let i = 0; i < auctionCount; i++) {
       const imageIndex = (dayOfYear + i) % featuredImages.length
@@ -83,9 +83,10 @@ export default async function HomePage() {
     }
   }
 
-  const remainingFeaturedImages = featuredImages?.filter(img => !auctionImages.some(auctionImg => auctionImg.id === img.id)) || []
+  const remainingFeaturedImages =
+    featuredImages?.filter((img) => !auctionImages.some((auctionImg) => auctionImg.id === img.id)) || []
 
-  const usedImageIds = new Set(auctionImages.map(img => img.id).filter(Boolean))
+  const usedImageIds = new Set(auctionImages.map((img) => img.id).filter(Boolean))
   let collectionImages: typeof featuredImages = []
   if (remainingFeaturedImages.length > 0) {
     const today = new Date()
@@ -102,22 +103,23 @@ export default async function HomePage() {
     collectionImages = shuffled.slice(0, Math.min(20, shuffled.length))
   }
 
-  collectionImages?.forEach(img => usedImageIds.add(img.id))
+  collectionImages?.forEach((img) => usedImageIds.add(img.id))
 
   const { data: allActiveImages } = await supabase
     .from("images")
     .select(
-      "id, title, thumbnail_medium_url, thumbnail_small_url, thumbnail_large_url, file_path, original_url, upscaled_url, image_format, price",
+      "id, title, description, thumbnail_medium_url, thumbnail_small_url, thumbnail_large_url, file_path, original_url, upscaled_url, image_format, price",
     )
     .eq("active", true)
     .order("created_at", { ascending: false })
     .limit(100)
 
-  const availableForDaily = allActiveImages?.filter(img => !usedImageIds.has(img.id)) || []
+  const availableForDaily = allActiveImages?.filter((img) => !usedImageIds.has(img.id)) || []
   const dailyImages = availableForDaily.length > 0 ? getDailyImageSelection(availableForDaily, 16) : []
 
   return (
     <ClientWrapper
+      imageOfTheDay={featuredImages?.[0] || null}
       auctionImages={auctionImages || []}
       collectionImages={collectionImages || []}
       dailyImages={dailyImages}

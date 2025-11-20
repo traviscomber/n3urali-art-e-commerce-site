@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Download, Eye, Sparkles } from 'lucide-react'
+import { ArrowLeft, Eye } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { BuyCollectionBundleButton } from "@/components/buy-collection-bundle-button"
@@ -19,15 +19,15 @@ type CollectionPageClientProps = {
 }
 
 export function CollectionPageClient({ collection, images, code }: CollectionPageClientProps) {
-  const totalIndividualPrice = images.reduce((sum, img) => sum + parseFloat(img.price || '0'), 0)
-  const bundlePrice = parseFloat(collection.bundle_price || '0')
+  const totalIndividualPrice = images.reduce((sum, img) => sum + Number.parseFloat(img.price || "0"), 0)
+  const bundlePrice = Number.parseFloat(collection.bundle_price || "0")
   const savings = totalIndividualPrice - bundlePrice
   const savingsPercentage = totalIndividualPrice > 0 ? Math.round((savings / totalIndividualPrice) * 100) : 0
 
-  const isHeritageCollection = code === 'HERITAGE'
-  
-  const hasVideoHero = collection.video_url || (isHeritageCollection && code === 'HERITAGE')
-  const videoUrl = collection.video_url || (isHeritageCollection ? 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/WebBackdrop360-Indo-4fdOMPgmKIo8kx6ChokBLM8nUyCef3.mov' : null)
+  const isHeritageCollection = code === "HERITAGE"
+
+  const hasVideoHero = collection.video_url || (isHeritageCollection && code === "HERITAGE")
+  const videoUrl = collection.video_url || (isHeritageCollection ? "/images/webbackdrop360-indo.mov" : null)
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const { audioRef, setIsPlaying } = useMusicPlayer()
@@ -37,19 +37,20 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
     const handleScroll = () => {
       if (window.scrollY > 400 && !hasStartedMusic.current && audioRef?.current) {
         hasStartedMusic.current = true
-        audioRef.current.play()
+        audioRef.current
+          .play()
           .then(() => {
             setIsPlaying(true)
-            console.log('[v0] Started playing music on scroll')
+            console.log("[v0] Started playing music on scroll")
           })
           .catch((err) => {
-            console.log('[v0] Auto-play blocked by browser:', err)
+            console.log("[v0] Auto-play blocked by browser:", err)
           })
       }
     }
 
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [audioRef, setIsPlaying])
 
   return (
@@ -74,7 +75,7 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
                 muted
                 playsInline
                 className="absolute inset-0 w-full h-full object-cover"
-                style={{ objectFit: 'cover' }}
+                style={{ objectFit: "cover" }}
               >
                 <source src={videoUrl} type="video/mp4" />
                 Your browser does not support the video tag.
@@ -88,7 +89,12 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
             </div>
 
             <div className="relative container mx-auto px-4 py-20 z-10">
-              <Button variant="ghost" size="sm" className="mb-8 text-white/80 hover:text-white hover:bg-white/10" asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mb-8 text-white/80 hover:text-white hover:bg-white/10"
+                asChild
+              >
                 <Link href="/collection">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   All Collections
@@ -96,20 +102,6 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
               </Button>
 
               <div className="max-w-2xl ml-auto mr-8 lg:mr-16 space-y-8">
-                <div className="flex flex-wrap items-center gap-3">
-                  {collection.code && (
-                    <Badge variant="outline" className="font-mono bg-white/10 text-white border-white/20 backdrop-blur-sm">
-                      {collection.code}
-                    </Badge>
-                  )}
-                  {collection.is_auto_curated && (
-                    <Badge variant="default" className="gap-1 bg-primary/30 text-white border-primary/50 backdrop-blur-sm">
-                      <Sparkles className="h-3 w-3" />
-                      Curated
-                    </Badge>
-                  )}
-                </div>
-
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance text-white drop-shadow-2xl">
                   {collection.title}
                 </h1>
@@ -127,7 +119,9 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
                   </div>
                   <div className="h-12 w-px bg-white/20" />
                   <div className="space-y-1">
-                    <div className="text-4xl font-bold text-primary drop-shadow-[0_0_20px_rgba(139,92,246,0.8)]">${bundlePrice.toFixed(0)}</div>
+                    <div className="text-4xl font-bold text-primary drop-shadow-[0_0_20px_rgba(139,92,246,0.8)]">
+                      ${bundlePrice.toFixed(0)}
+                    </div>
                     <div className="text-sm text-white/80">Complete Bundle</div>
                   </div>
                   <div className="h-12 w-px bg-white/20" />
@@ -146,24 +140,16 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
                           <div className="text-2xl font-bold text-white/60 line-through">
                             ${totalIndividualPrice.toFixed(2)}
                           </div>
-                          <div className="text-xs text-white/60">
-                            Buying all {images.length} photos separately
-                          </div>
+                          <div className="text-xs text-white/60">Buying all {images.length} photos separately</div>
                         </div>
                         <div className="space-y-2">
                           <div className="text-sm font-medium text-primary">Bundle Price</div>
-                          <div className="text-4xl font-bold text-white drop-shadow-lg">
-                            ${bundlePrice.toFixed(2)}
-                          </div>
-                          <div className="text-xs text-white/70">
-                            Complete collection discount
-                          </div>
+                          <div className="text-4xl font-bold text-white drop-shadow-lg">${bundlePrice.toFixed(2)}</div>
+                          <div className="text-xs text-white/70">Complete collection discount</div>
                         </div>
                         <div className="space-y-2">
                           <div className="text-sm text-green-400">You Save</div>
-                          <div className="text-2xl font-bold text-green-400">
-                            ${savings.toFixed(2)}
-                          </div>
+                          <div className="text-2xl font-bold text-green-400">${savings.toFixed(2)}</div>
                           <Badge variant="secondary" className="bg-green-500/20 text-green-300 border-green-400/30">
                             {savingsPercentage}% OFF
                           </Badge>
@@ -187,7 +173,7 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
           <section className="relative min-h-[60vh] flex items-end overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/30 to-background" />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
-            
+
             <div className="relative container mx-auto px-4 pb-16 pt-8">
               <Button variant="ghost" size="sm" className="mb-8" asChild>
                 <Link href="/collection">
@@ -197,20 +183,6 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
               </Button>
 
               <div className="max-w-4xl space-y-6">
-                <div className="flex flex-wrap items-center gap-3">
-                  {collection.code && (
-                    <Badge variant="outline" className="font-mono">
-                      {collection.code}
-                    </Badge>
-                  )}
-                  {collection.is_auto_curated && (
-                    <Badge variant="default" className="gap-1">
-                      <Sparkles className="h-3 w-3" />
-                      Curated
-                    </Badge>
-                  )}
-                </div>
-
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance">
                   {collection.title}
                 </h1>
@@ -253,12 +225,8 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
                         </div>
                         <div className="space-y-2">
                           <div className="text-sm font-medium text-primary">Bundle Price</div>
-                          <div className="text-4xl font-bold text-primary">
-                            ${bundlePrice.toFixed(2)}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            Complete collection discount
-                          </div>
+                          <div className="text-4xl font-bold text-primary">${bundlePrice.toFixed(2)}</div>
+                          <div className="text-xs text-muted-foreground">Complete collection discount</div>
                         </div>
                         <div className="space-y-2">
                           <div className="text-sm text-green-600 dark:text-green-400">You Save</div>
@@ -283,9 +251,7 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
             <div className="container mx-auto px-4">
               <div className="max-w-4xl mx-auto space-y-12">
                 <div className="text-center space-y-4">
-                  <h2 className="text-3xl md:text-4xl font-bold">
-                    A Living Testament to Indonesian Heritage
-                  </h2>
+                  <h2 className="text-3xl md:text-4xl font-bold">A Living Testament to Indonesian Heritage</h2>
                   <p className="text-lg text-muted-foreground leading-relaxed">
                     Every stone tells a story. Every carving preserves a memory.
                   </p>
@@ -296,7 +262,10 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
                     <CardContent className="p-6 space-y-3">
                       <h3 className="text-xl font-semibold">Borobudur Temple</h3>
                       <p className="text-muted-foreground leading-relaxed">
-                        Built in the 8th-9th century during the Sailendra dynasty, Borobudur stands as the world's largest Buddhist monument. Its nine stacked platforms represent the path to enlightenment, adorned with 2,672 relief panels and 504 Buddha statues that have witnessed over a millennium of history.
+                        Built in the 8th-9th century during the Sailendra dynasty, Borobudur stands as the world's
+                        largest Buddhist monument. Its nine stacked platforms represent the path to enlightenment,
+                        adorned with 2,672 relief panels and 504 Buddha statues that have witnessed over a millennium of
+                        history.
                       </p>
                     </CardContent>
                   </Card>
@@ -305,7 +274,9 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
                     <CardContent className="p-6 space-y-3">
                       <h3 className="text-xl font-semibold">Prambanan Complex</h3>
                       <p className="text-muted-foreground leading-relaxed">
-                        Rising majestically since 850 CE, Prambanan's towering spires celebrate the Hindu Trimurti. The largest temple compound in Indonesia features 240 temples, with intricate carvings depicting the Ramayana epic across its sacred walls.
+                        Rising majestically since 850 CE, Prambanan's towering spires celebrate the Hindu Trimurti. The
+                        largest temple compound in Indonesia features 240 temples, with intricate carvings depicting the
+                        Ramayana epic across its sacred walls.
                       </p>
                     </CardContent>
                   </Card>
@@ -314,7 +285,9 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
                     <CardContent className="p-6 space-y-3">
                       <h3 className="text-xl font-semibold">Sacred Landscapes</h3>
                       <p className="text-muted-foreground leading-relaxed">
-                        Nestled within volcanic terrain, these monuments embody the Indonesian philosophy of harmony between humanity, nature, and the divine. Each site reflects centuries of artistic mastery and spiritual devotion.
+                        Nestled within volcanic terrain, these monuments embody the Indonesian philosophy of harmony
+                        between humanity, nature, and the divine. Each site reflects centuries of artistic mastery and
+                        spiritual devotion.
                       </p>
                     </CardContent>
                   </Card>
@@ -323,7 +296,9 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
                     <CardContent className="p-6 space-y-3">
                       <h3 className="text-xl font-semibold">Cultural Preservation</h3>
                       <p className="text-muted-foreground leading-relaxed">
-                        These UNESCO World Heritage sites represent Indonesia's commitment to preserving its cultural legacy. Through advanced 360° imaging, we help share these treasures with the world while supporting their conservation.
+                        These UNESCO World Heritage sites represent Indonesia's commitment to preserving its cultural
+                        legacy. Through advanced 360° imaging, we help share these treasures with the world while
+                        supporting their conservation.
                       </p>
                     </CardContent>
                   </Card>
@@ -339,7 +314,8 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
               <div className="text-center py-20 max-w-lg mx-auto space-y-4">
                 <h3 className="text-2xl font-semibold">Curating Excellence</h3>
                 <p className="text-muted-foreground">
-                  This collection is being carefully assembled. Each image is selected to tell part of a greater story. Check back soon.
+                  This collection is being carefully assembled. Each image is selected to tell part of a greater story.
+                  Check back soon.
                 </p>
                 <Button asChild>
                   <Link href="/gallery">Browse Gallery</Link>
@@ -349,11 +325,10 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
               <div className="space-y-16">
                 {isHeritageCollection && (
                   <div className="text-center space-y-4 max-w-3xl mx-auto mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold">
-                      The Complete Collection
-                    </h2>
+                    <h2 className="text-3xl md:text-4xl font-bold">The Complete Collection</h2>
                     <p className="text-lg text-muted-foreground">
-                      {images.length} meticulously captured 360° panoramic images showcasing the finest examples of Indonesian architectural heritage.
+                      {images.length} meticulously captured 360° panoramic images showcasing the finest examples of
+                      Indonesian architectural heritage.
                     </p>
                   </div>
                 )}
@@ -383,11 +358,7 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
                       `/placeholder.svg?height=400&width=400&text=${encodeURIComponent(image.title || `Image ${index + 1}`)}`
 
                     return (
-                      <Link
-                        key={image.id}
-                        href={`/product/${image.id}`}
-                        className="group block"
-                      >
+                      <Link key={image.id} href={`/product/${image.id}`} className="group block">
                         <div className="relative aspect-square rounded-lg overflow-hidden bg-muted shadow-md hover:shadow-2xl transition-all duration-500">
                           <Image
                             src={imageUrl || "/placeholder.svg"}
@@ -396,11 +367,11 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
                             className="object-cover transition-transform duration-700 group-hover:scale-110"
                             sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                           />
-                          
+
                           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-end p-4">
                             <p className="text-white text-sm font-medium text-center mb-2">{image.title}</p>
                             <div className="text-white/90 text-lg font-bold mb-1">
-                              ${parseFloat(image.price || '0').toFixed(2)}
+                              ${Number.parseFloat(image.price || "0").toFixed(2)}
                             </div>
                             <div className="flex items-center gap-2 text-white/90 text-xs">
                               <Eye className="h-3 w-3" />
@@ -409,11 +380,11 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
                           </div>
 
                           <Badge variant="secondary" className="absolute top-2 left-2 text-xs font-mono">
-                            #{String(index + 1).padStart(2, '0')}
+                            #{String(index + 1).padStart(2, "0")}
                           </Badge>
 
                           <Badge variant="default" className="absolute top-2 right-2 text-xs font-semibold">
-                            ${parseFloat(image.price || '0').toFixed(0)}
+                            ${Number.parseFloat(image.price || "0").toFixed(0)}
                           </Badge>
                         </div>
                       </Link>
@@ -430,11 +401,10 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
             <div className="container mx-auto px-4">
               <div className="max-w-3xl mx-auto">
                 <div className="text-center space-y-6 mb-12">
-                  <h2 className="text-3xl md:text-4xl font-bold">
-                    Get the Complete Collection
-                  </h2>
+                  <h2 className="text-3xl md:text-4xl font-bold">Get the Complete Collection</h2>
                   <p className="text-lg text-muted-foreground">
-                    Save ${savings.toFixed(2)} ({savingsPercentage}% off) with the bundle price. All {images.length} high-resolution images, ready for commercial use.
+                    Save ${savings.toFixed(2)} ({savingsPercentage}% off) with the bundle price. All {images.length}{" "}
+                    high-resolution images, ready for commercial use.
                   </p>
                   <div className="bg-muted/50 rounded-lg p-6 space-y-3">
                     <div className="flex justify-between items-center text-muted-foreground">
@@ -451,7 +421,7 @@ export function CollectionPageClient({ collection, images, code }: CollectionPag
                     </div>
                   </div>
                 </div>
-                
+
                 <BuyCollectionBundleButton
                   images={images.map((img: any) => ({
                     id: img.id,

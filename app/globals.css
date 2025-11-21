@@ -312,6 +312,19 @@
   }
 }
 
+/* Updated Ken Burns animation to 60 seconds for auction images */
+@keyframes kenBurnsAuction {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.15) translate(-2%, -1%);
+  }
+  100% {
+    transform: scale(1.1) translate(-4%, -2%);
+  }
+}
+
 /* Adding missing animation utilities for shadcn components */
 @keyframes fadeIn {
   from {
@@ -668,4 +681,9 @@
 
 .animate-kenBurnsZoom {
   animation: kenBurnsZoom 10s ease-out forwards;
+}
+
+/* Added 60-second Ken Burns animation class for auction */
+.animate-kenBurnsAuction {
+  animation: kenBurnsAuction 60s ease-in-out forwards;
 }

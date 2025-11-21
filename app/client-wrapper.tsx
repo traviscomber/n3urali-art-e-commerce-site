@@ -41,6 +41,7 @@ interface ClientWrapperProps {
 
 export const ClientWrapper = memo(
   function ClientWrapper({ imageOfTheDay, auctionImages, collectionImages, dailyImages }: ClientWrapperProps) {
+    console.log("[v0] ClientWrapper render started")
     const { t } = useLanguage()
     const [auctionTimeLeft, setAuctionTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 })
     const swiperRef = useRef<SwiperType | null>(null)
@@ -190,6 +191,7 @@ export const ClientWrapper = memo(
                           imageOfTheDay.upscaled_url ||
                           imageOfTheDay.original_url ||
                           imageOfTheDay.file_path ||
+                          "/placeholder.svg" ||
                           "/placeholder.svg" ||
                           "/placeholder.svg" ||
                           "/placeholder.svg" ||
@@ -451,7 +453,7 @@ export const ClientWrapper = memo(
                   </Card>
 
                   <Card className="p-6 space-y-4 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/20 bg-card">
-                    <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center">
+                    <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">
                       <span className="text-2xl">✓</span>
                     </div>
                     <h3 className="text-lg font-bold">{t("comparison.ourPro5")}</h3>
@@ -581,6 +583,7 @@ export const ClientWrapper = memo(
                       imageOfTheDay.original_url ||
                       imageOfTheDay.file_path ||
                       "/placeholder.svg?height=1080&width=1920&query=immersive 360 panoramic futuristic landscape" ||
+                      "/placeholder.svg" ||
                       "/placeholder.svg" ||
                       "/placeholder.svg" ||
                       "/placeholder.svg" ||

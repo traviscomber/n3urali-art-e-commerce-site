@@ -27,6 +27,7 @@ export default memo(function AuctionCarousel({ images }: AuctionCarouselProps) {
   const [currentPrices, setCurrentPrices] = useState<Record<string, number>>({})
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [secondsLeft, setSecondsLeft] = useState(0)
+  const [imageKey, setImageKey] = useState(0)
 
   const calculateDynamicPrice = useCallback((basePrice: number) => {
     const now = new Date()
@@ -67,8 +68,12 @@ export default memo(function AuctionCarousel({ images }: AuctionCarouselProps) {
   useEffect(() => {
     if (images.length <= 1) return
 
+    console.log("[v0] Auction timer - Seconds left:", secondsLeft)
+
     if (secondsLeft === 0) {
+      console.log("[v0] Changing auction image and restarting Ken Burns animation")
       setCurrentImageIndex((prev) => (prev + 1) % images.length)
+      setImageKey((prev) => prev + 1)
     }
   }, [secondsLeft, images.length])
 
@@ -98,10 +103,11 @@ export default memo(function AuctionCarousel({ images }: AuctionCarouselProps) {
         onClick={(e) => handleAuctionClick(currentImage, e)}
       >
         <Image
+          key={imageKey}
           src={currentImage.upscaled_url || currentImage.original_url || currentImage.file_path || "/placeholder.svg"}
           alt={currentImage.title}
           fill
-          className="object-cover group-hover:scale-105 transition-transform duration-700"
+          className="object-cover animate-kenBurnsAuction"
           sizes="(max-width: 1400px) 100vw, 1400px"
           priority
         />

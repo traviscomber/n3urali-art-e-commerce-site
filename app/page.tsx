@@ -60,7 +60,11 @@ function getDailyImageSelection(images: any[], count: number): any[] {
 }
 
 export default async function HomePage() {
+  console.log("[v0] Homepage load started")
+  const startTime = Date.now()
+
   const supabase = await createClient()
+  console.log("[v0] Supabase client created:", Date.now() - startTime, "ms")
 
   const { data: featuredImages } = await supabase
     .from("images")
@@ -70,6 +74,8 @@ export default async function HomePage() {
     .eq("featured_collection", true)
     .eq("active", true)
     .order("created_at", { ascending: false })
+
+  console.log("[v0] Featured images fetched:", Date.now() - startTime, "ms", featuredImages?.length, "images")
 
   const auctionImages: typeof featuredImages = []
   if (featuredImages && featuredImages.length > 0) {
@@ -114,8 +120,12 @@ export default async function HomePage() {
     .order("created_at", { ascending: false })
     .limit(100)
 
+  console.log("[v0] All active images fetched:", Date.now() - startTime, "ms", allActiveImages?.length, "images")
+
   const availableForDaily = allActiveImages?.filter((img) => !usedImageIds.has(img.id)) || []
   const dailyImages = availableForDaily.length > 0 ? getDailyImageSelection(availableForDaily, 16) : []
+
+  console.log("[v0] Homepage data processing complete:", Date.now() - startTime, "ms")
 
   return (
     <ClientWrapper

@@ -151,7 +151,7 @@ export function Header({ videoContext }: HeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-black/80 backdrop-blur-xl supports-[backdrop-filter]:bg-black/80">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           <Link href="/" className="flex items-center group">
@@ -162,14 +162,30 @@ export function Header({ videoContext }: HeaderProps) {
               <div className="absolute top-0 right-0 w-12 h-16 flex items-center justify-center pointer-events-none">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 animate-gentle-pulse opacity-60" />
               </div>
-              <Image
-                src="/images/n3uralia-logo.png"
-                alt="n3uralia 360°"
-                width={320}
-                height={64}
-                className="h-16 w-auto object-contain group-hover:opacity-80 transition-opacity duration-300"
-                priority
-              />
+              <svg
+                width="200"
+                height="64"
+                viewBox="0 0 200 64"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-16 w-auto group-hover:opacity-80 transition-opacity duration-300"
+              >
+                <text
+                  x="10"
+                  y="42"
+                  fontFamily="Montserrat, sans-serif"
+                  fontSize="32"
+                  fontWeight="700"
+                  fill="white"
+                  letterSpacing="-0.02em"
+                >
+                  N3urali
+                  <tspan fill="#8B5CF6">.art</tspan>
+                </text>
+                <circle cx="180" cy="32" r="8" fill="#8B5CF6" opacity="0.6">
+                  <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite" />
+                </circle>
+              </svg>
             </div>
           </Link>
 
@@ -350,7 +366,7 @@ export function Header({ videoContext }: HeaderProps) {
         </div>
 
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t py-6 bg-background/95 backdrop-blur-sm rounded-b-lg">
+          <div className="md:hidden border-t border-border/50 py-6 bg-black/80 backdrop-blur-xl rounded-b-lg">
             <nav className="flex flex-col space-y-6">
               <Link
                 href="/collection"

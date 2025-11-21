@@ -1,5 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
+import { Montserrat } from "next/font/google"
 import "./globals.css"
 import { CartProvider } from "@/lib/contexts/cart-context"
 import { AuthProvider } from "@/lib/contexts/auth-context"
@@ -13,6 +14,12 @@ import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Suspense } from "react"
 import { MusicPlayerProvider } from "@/lib/contexts/music-player-context"
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   title: {
@@ -128,7 +135,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="antialiased">
+    <html lang="en" className={`antialiased ${montserrat.variable}`}>
       <head>
         <meta name="theme-color" content="#000000" />
         <meta name="msapplication-TileColor" content="#000000" />

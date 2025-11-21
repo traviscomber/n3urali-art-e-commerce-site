@@ -41,7 +41,7 @@
   --radius: 0.5rem;
 
   /* Font families - configured in layout.tsx */
-  --font-sans: "Geist", "Geist Fallback";
+  --font-sans: var(--font-sans), "Montserrat", system-ui, -apple-system, sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback";
 
   /* Light mode colors */

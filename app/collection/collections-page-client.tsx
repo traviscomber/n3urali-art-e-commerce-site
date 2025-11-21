@@ -101,11 +101,6 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
                                         className="object-cover transition-all duration-700 group-hover:scale-105"
                                         sizes="(max-width: 1024px) 50vw, 25vw"
                                       />
-                                      <div className="absolute top-2 left-2 bg-primary/90 backdrop-blur-sm text-primary-foreground px-3 py-1.5 rounded-full shadow-lg border border-primary-foreground/20">
-                                        <div className="text-[10px] font-bold uppercase tracking-wider">
-                                          360° Panoramic
-                                        </div>
-                                      </div>
                                     </div>
                                   ))}
                                 </div>
@@ -139,9 +134,6 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
                                         className="object-cover transition-all duration-700 group-hover:scale-105"
                                         sizes="(max-width: 1024px) 25vw, 12vw"
                                       />
-                                      <div className="absolute top-1.5 left-1.5 bg-secondary/90 backdrop-blur-sm text-secondary-foreground px-2 py-1 rounded-full shadow-md border border-secondary-foreground/20">
-                                        <div className="text-[9px] font-bold uppercase tracking-wider">Dome</div>
-                                      </div>
                                     </div>
                                   ))}
                                 </div>
@@ -253,11 +245,6 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
                                           className="object-cover transition-all duration-700 group-hover:scale-105"
                                           sizes="(max-width: 1024px) 50vw, 25vw"
                                         />
-                                        <div className="absolute top-2 left-2 bg-primary/90 backdrop-blur-sm text-primary-foreground px-3 py-1.5 rounded-full shadow-lg border border-primary-foreground/20">
-                                          <div className="text-[10px] font-bold uppercase tracking-wider">
-                                            360° Panoramic
-                                          </div>
-                                        </div>
                                       </div>
                                     ))}
                                   </div>
@@ -291,9 +278,6 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
                                           className="object-cover transition-all duration-700 group-hover:scale-105"
                                           sizes="(max-width: 1024px) 25vw, 12vw"
                                         />
-                                        <div className="absolute top-1.5 left-1.5 bg-secondary/90 backdrop-blur-sm text-secondary-foreground px-2 py-1 rounded-full shadow-md border border-secondary-foreground/20">
-                                          <div className="text-[9px] font-bold uppercase tracking-wider">Dome</div>
-                                        </div>
                                       </div>
                                     ))}
                                   </div>
@@ -415,7 +399,7 @@ export default function CollectionsPageClient({ collectionsWithPreviews }: { col
           <div className="max-w-3xl mx-auto text-center space-y-6">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground">{t("collections.preferIndividual")}</h2>
             <p className="text-lg text-muted-foreground">{t("collections.browseGallery")}</p>
-            <Button size="lg" variant="outline" className="gap-2 bg-transparent" asChild>
+            <Button size="lg" variant="default" className="gap-2" asChild>
               <Link href="/gallery">
                 {t("collections.browseButton")}
                 <ArrowRight className="ml-2 h-4 w-4" />

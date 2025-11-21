@@ -192,6 +192,7 @@ export const ClientWrapper = memo(
                           imageOfTheDay.original_url ||
                           imageOfTheDay.file_path ||
                           "/placeholder.svg" ||
+                          "/placeholder.svg" ||
                           "/placeholder.svg"
                         }
                         alt={imageOfTheDay.title}
@@ -568,6 +569,7 @@ export const ClientWrapper = memo(
                       imageOfTheDay.original_url ||
                       imageOfTheDay.file_path ||
                       "/placeholder.svg?height=1080&width=1920&query=immersive 360 panoramic futuristic landscape" ||
+                      "/placeholder.svg" ||
                       "/placeholder.svg"
                     }
                     alt="Premium 360° Assets Background"

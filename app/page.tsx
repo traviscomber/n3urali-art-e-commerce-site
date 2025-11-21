@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const revalidate = 300
+export const revalidate = 600
 
 function getDailyImageSelection(images: any[], count: number): any[] {
   if (images.length <= count) return images
@@ -60,22 +60,15 @@ function getDailyImageSelection(images: any[], count: number): any[] {
 }
 
 export default async function HomePage() {
-  console.log("[v0] Homepage load started")
-  const startTime = Date.now()
-
   const supabase = await createClient()
-  console.log("[v0] Supabase client created:", Date.now() - startTime, "ms")
 
   const { data: featuredImages } = await supabase
     .from("images")
-    .select(
-      "id, title, description, file_path, original_url, upscaled_url, price, image_format, thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url",
-    )
+    .select("id, title, file_path, original_url, upscaled_url, price, image_format, thumbnail_medium_url")
     .eq("featured_collection", true)
     .eq("active", true)
     .order("created_at", { ascending: false })
-
-  console.log("[v0] Featured images fetched:", Date.now() - startTime, "ms", featuredImages?.length, "images")
+    .limit(30)
 
   const auctionImages: typeof featuredImages = []
   if (featuredImages && featuredImages.length > 0) {
@@ -106,26 +99,20 @@ export default async function HomePage() {
       ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
     }
 
-    collectionImages = shuffled.slice(0, Math.min(20, shuffled.length))
+    collectionImages = shuffled.slice(0, Math.min(15, shuffled.length))
   }
 
   collectionImages?.forEach((img) => usedImageIds.add(img.id))
 
   const { data: allActiveImages } = await supabase
     .from("images")
-    .select(
-      "id, title, description, thumbnail_medium_url, thumbnail_small_url, thumbnail_large_url, file_path, original_url, upscaled_url, image_format, price",
-    )
+    .select("id, title, thumbnail_medium_url, file_path, original_url, upscaled_url, image_format, price")
     .eq("active", true)
     .order("created_at", { ascending: false })
-    .limit(100)
-
-  console.log("[v0] All active images fetched:", Date.now() - startTime, "ms", allActiveImages?.length, "images")
+    .limit(30)
 
   const availableForDaily = allActiveImages?.filter((img) => !usedImageIds.has(img.id)) || []
-  const dailyImages = availableForDaily.length > 0 ? getDailyImageSelection(availableForDaily, 16) : []
-
-  console.log("[v0] Homepage data processing complete:", Date.now() - startTime, "ms")
+  const dailyImages = availableForDaily.length > 0 ? getDailyImageSelection(availableForDaily, 12) : []
 
   return (
     <ClientWrapper

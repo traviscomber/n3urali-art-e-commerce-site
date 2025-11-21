@@ -486,8 +486,7 @@ export const ClientWrapper = memo(
             </div>
           </section>
 
-          <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
-            {/* Background Image */}
+          {/* <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
             <div className="absolute inset-0 z-0">
               <Image
                 src="/placeholder.svg?height=600&width=1920"
@@ -499,7 +498,6 @@ export const ClientWrapper = memo(
               <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
             </div>
 
-            {/* Content */}
             <div className="relative z-10 container mx-auto px-4 py-32 text-center">
               <div className="max-w-4xl mx-auto space-y-8">
                 <h2 className="text-5xl md:text-6xl lg:text-7xl font-black text-white drop-shadow-[0_0_8px_rgba(0,0,0,0.8)] text-balance leading-tight">
@@ -535,7 +533,6 @@ export const ClientWrapper = memo(
                   </Link>
                 </div>
 
-                {/* Stats */}
                 <div className="flex flex-wrap items-center justify-center gap-8 pt-12">
                   <div className="text-center">
                     <div className="text-4xl md:text-5xl font-black text-white drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]">
@@ -571,9 +568,8 @@ export const ClientWrapper = memo(
               </div>
             </div>
 
-            {/* Bottom gradient fade */}
             <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-[5]" />
-          </section>
+          </section> */}
 
           <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-primary/5 to-background">
             <div className="absolute inset-0 z-0">

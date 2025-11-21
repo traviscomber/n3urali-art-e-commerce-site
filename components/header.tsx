@@ -155,37 +155,14 @@ export function Header({ videoContext }: HeaderProps) {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           <Link href="/" className="flex items-center group">
-            <div className="relative h-16 w-auto">
-              <div className="absolute top-0 left-0 w-48 h-16 flex items-center justify-center pointer-events-none">
-                <div className="w-40 h-12 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 animate-neuralia-pulse opacity-40" />
-              </div>
-              <div className="absolute top-0 right-0 w-12 h-16 flex items-center justify-center pointer-events-none">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 animate-gentle-pulse opacity-60" />
-              </div>
-              <svg
-                width="200"
-                height="64"
-                viewBox="0 0 200 64"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-16 w-auto group-hover:opacity-80 transition-opacity duration-300"
-              >
-                <text
-                  x="10"
-                  y="42"
-                  fontFamily="Montserrat, sans-serif"
-                  fontSize="32"
-                  fontWeight="700"
-                  fill="white"
-                  letterSpacing="-0.02em"
-                >
-                  N3urali
-                  <tspan fill="#8B5CF6">.art</tspan>
-                </text>
-                <circle cx="180" cy="32" r="8" fill="#8B5CF6" opacity="0.6">
-                  <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite" />
-                </circle>
-              </svg>
+            <div className="relative h-12 w-48">
+              <Image
+                src="/images/n3uralia-logo.png"
+                alt="N3uralia.art"
+                fill
+                className="object-contain brightness-0 invert group-hover:opacity-80 transition-opacity duration-300"
+                priority
+              />
             </div>
           </Link>
 
@@ -261,7 +238,7 @@ export function Header({ videoContext }: HeaderProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="relative bg-card/50 border-border/50 hover:bg-card hover:glow-accent transition-all duration-300"
+                  className="relative bg-card/50 border-border/50 text-foreground hover:bg-card hover:glow-accent transition-all duration-300"
                 >
                   <ShoppingCart className="h-4 w-4" />
                   {itemCount > 0 && (

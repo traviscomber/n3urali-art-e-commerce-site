@@ -192,26 +192,11 @@ export const ClientWrapper = memo(
                           imageOfTheDay.original_url ||
                           imageOfTheDay.file_path ||
                           "/placeholder.svg" ||
-                          "/placeholder.svg" ||
-                          "/placeholder.svg" ||
-                          "/placeholder.svg" ||
-                          "/placeholder.svg" ||
-                          "/placeholder.svg" ||
-                          "/placeholder.svg" ||
-                          "/placeholder.svg" ||
-                          "/placeholder.svg" ||
-                          "/placeholder.svg" ||
-                          "/placeholder.svg" ||
-                          "/placeholder.svg" ||
-                          "/placeholder.svg" ||
-                          "/placeholder.svg" ||
-                          "/placeholder.svg" ||
-                          "/placeholder.svg" ||
                           "/placeholder.svg"
                         }
                         alt={imageOfTheDay.title}
                         fill
-                        className="object-cover"
+                        className="object-cover animate-kenBurnsAuction"
                         sizes="(max-width: 1400px) 100vw, 1400px"
                         priority
                       />
@@ -453,7 +438,7 @@ export const ClientWrapper = memo(
                   </Card>
 
                   <Card className="p-6 space-y-4 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/20 bg-card">
-                    <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 bg-primary/30 rounded-xl flex items-center justify-center flex-shrink-0">
                       <span className="text-2xl">✓</span>
                     </div>
                     <h3 className="text-lg font-bold">{t("comparison.ourPro5")}</h3>
@@ -583,25 +568,11 @@ export const ClientWrapper = memo(
                       imageOfTheDay.original_url ||
                       imageOfTheDay.file_path ||
                       "/placeholder.svg?height=1080&width=1920&query=immersive 360 panoramic futuristic landscape" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg" ||
-                      "/placeholder.svg" ||
                       "/placeholder.svg"
                     }
-                    alt="Explore Gallery Background"
+                    alt="Premium 360° Assets Background"
                     fill
-                    className="object-cover opacity-40"
+                    className="object-cover opacity-40 animate-kenBurnsAuction"
                     sizes="100vw"
                     priority={false}
                   />

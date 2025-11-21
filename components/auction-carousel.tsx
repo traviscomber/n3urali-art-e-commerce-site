@@ -68,10 +68,7 @@ export default memo(function AuctionCarousel({ images }: AuctionCarouselProps) {
   useEffect(() => {
     if (images.length <= 1) return
 
-    console.log("[v0] Auction timer - Seconds left:", secondsLeft)
-
     if (secondsLeft === 0) {
-      console.log("[v0] Changing auction image and restarting Ken Burns animation")
       setCurrentImageIndex((prev) => (prev + 1) % images.length)
       setImageKey((prev) => prev + 1)
     }
@@ -112,22 +109,16 @@ export default memo(function AuctionCarousel({ images }: AuctionCarouselProps) {
           priority
         />
 
-        {/* Clean image by default - only subtle gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent transition-opacity duration-300" />
 
-        {/* Full overlay appears on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-        {/* Timer badge - hidden by default, shows on hover */}
-        <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0">
+        <div className="absolute top-6 right-6 transition-all duration-500">
           <Badge className="bg-[#392A48]/90 text-white hover:bg-[#392A48] text-base px-4 py-2 border border-[#392A48]/50 backdrop-blur-md font-light">
             <Clock className="w-4 h-4 mr-2" />
             {secondsLeft}s remaining
           </Badge>
         </div>
 
-        {/* All info hidden by default, shows elegantly on hover */}
-        <div className="absolute bottom-0 left-0 right-0 p-8 text-white opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+        <div className="absolute bottom-0 left-0 right-0 p-8 text-white transition-all duration-500">
           <div className="flex items-end justify-between gap-6 flex-wrap">
             <div className="space-y-3 flex-1">
               <div className="flex items-center gap-3">
@@ -138,7 +129,9 @@ export default memo(function AuctionCarousel({ images }: AuctionCarouselProps) {
                   {currentImage.image_format}
                 </Badge>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-balance">{currentImage.title}</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-balance drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]">
+                {currentImage.title}
+              </h2>
             </div>
 
             <div className="text-right space-y-3">
@@ -185,6 +178,7 @@ export default memo(function AuctionCarousel({ images }: AuctionCarouselProps) {
                 onClick={(e) => {
                   e.stopPropagation()
                   setCurrentImageIndex(index)
+                  setImageKey((prev) => prev + 1)
                 }}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
                   index === currentImageIndex ? "w-8 bg-white/80" : "w-1.5 bg-white/30 hover:bg-white/50"

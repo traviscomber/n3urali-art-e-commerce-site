@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import GalleryClient from "./gallery-client"
 import { getCategories, getGalleryStats } from "@/app/actions/admin-actions"
 
+export const dynamic = "force-dynamic"
 export const revalidate = 600 // 10 minutes
 
 export const metadata: Metadata = {

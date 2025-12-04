@@ -156,7 +156,7 @@ export async function createCollection(data: {
       is_active: true,
       music_url: data.music_url || null,
       music_playlist: data.music_playlist || null, // Include music_playlist in the insert
-      parent_collection_id: data.parent_collection_id || null // Include parent_collection_id in the insert
+      parent_collection_id: data.parent_collection_id || null, // Include parent_collection_id in the insert
     })
     .select()
     .single()
@@ -297,19 +297,18 @@ export async function updateCollectionImages(collectionId: string, imageIds: str
     return { success: false, error: insertError.message }
   }
 
-  const { data: calculatedPrice, error: priceError } = await supabase.rpc(
-    'calculate_collection_bundle_price',
-    { collection_id_param: collectionId }
-  )
+  const { data: calculatedPrice, error: priceError } = await supabase.rpc("calculate_collection_bundle_price", {
+    collection_id_param: collectionId,
+  })
 
   if (!priceError && calculatedPrice !== null) {
     await supabase
-      .from('collections')
-      .update({ 
+      .from("collections")
+      .update({
         bundle_price: calculatedPrice,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
-      .eq('id', collectionId)
+      .eq("id", collectionId)
   }
 
   revalidatePath("/collection")
@@ -389,7 +388,7 @@ export async function duplicateCollection(collectionId: string) {
     code: newCode,
     music_url: original.music_url, // Include music_url in the duplicate
     music_playlist: original.music_playlist, // Include music_playlist in the duplicate
-    parent_collection_id: original.parent_collection_id // Include parent_collection_id in the duplicate
+    parent_collection_id: original.parent_collection_id, // Include parent_collection_id in the duplicate
   })
 
   return result
@@ -404,7 +403,7 @@ export async function getCollectionByCode(code: string) {
     .select("*")
     .eq("code", code)
     .eq("is_active", true)
-    .single()
+    .maybeSingle()
 
   if (collectionError || !collection) {
     return { success: false, error: "Collection not found", data: null }
@@ -445,7 +444,7 @@ export async function getAllActiveCollections() {
         imageCount: images.length,
         previewImages: images.slice(0, 6),
       }
-    })
+    }),
   )
 
   return collectionsWithImages

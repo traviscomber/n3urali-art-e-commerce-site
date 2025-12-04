@@ -1,12 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { getImages, getCategories } from "@/app/actions/admin-actions"
+import { useState, useMemo, memo } from "react"
 import { ProductGrid } from "@/components/product-grid"
 import { PanoramaViewer } from "@/components/panorama-viewer"
 import { Badge } from "@/components/ui/badge"
-import { Loader2 } from 'lucide-react'
-import Link from "next/link"
 import { useLanguage } from "@/lib/contexts/language-context"
 
 interface Image {
@@ -49,58 +46,39 @@ interface Category {
 interface GalleryClientProps {
   initialImages: Image[]
   initialCategories: Category[]
+  galleryStats: {
+    total: number
+    equirectangular: number
+    fisheye: number
+  }
 }
 
-export default function GalleryClient({ initialImages, initialCategories }: GalleryClientProps) {
+function GalleryClientComponent({ initialImages, initialCategories, galleryStats }: GalleryClientProps) {
   const { t } = useLanguage()
-  const [images, setImages] = useState<Image[]>(initialImages)
+  const [images, setImages] = useState<Image[]>([])
   const [categories, setCategories] = useState<Category[]>(initialCategories)
-  const [featuredImages, setFeaturedImages] = useState<Image[]>([])
-  const [equirectangularImages, setEquirectangularImages] = useState<Image[]>([])
-  const [fisheyeImages, setFisheyeImages] = useState<Image[]>([])
   const [selectedFormat, setSelectedFormat] = useState<string>("all")
   const [viewingPanorama, setViewingPanorama] = useState<Image | null>(null)
 
-  useEffect(() => {
-    processImages(initialImages, initialCategories)
-  }, [])
-
-  const processImages = (allImages: Image[], allCategories: Category[]) => {
-    const validImages = allImages.filter((img) => {
-      return img && img.id && img.title
-    })
-
-    console.log(`[v0] Loaded ${validImages.length} valid images out of ${allImages.length} total`)
-
-    if (validImages.length > 0) {
-      console.log("[v0] First image data:", validImages[0])
-    }
-
-    setImages(validImages)
-    setCategories(allCategories)
-    setFeaturedImages(validImages.filter((img) => img.featured || img.is_featured))
-
-    const equirectangular = validImages.filter(
+  const { equirectangularImages, fisheyeImages } = useMemo(() => {
+    const equirectangular = images.filter(
       (img) =>
         img.category_name?.toLowerCase().includes("equirectangular") ||
         img.categories?.name?.toLowerCase().includes("equirectangular") ||
         img.image_format?.toLowerCase().includes("equirectangular") ||
-        (img.category_name?.toLowerCase().includes("360") &&
-          !img.category_name?.toLowerCase().includes("fisheye"))
+        (img.category_name?.toLowerCase().includes("360") && !img.category_name?.toLowerCase().includes("fisheye")),
     )
-    setEquirectangularImages(equirectangular)
 
-    const fisheye = validImages.filter(
+    const fisheye = images.filter(
       (img) =>
         img.category_name?.toLowerCase().includes("fisheye") ||
         img.categories?.name?.toLowerCase().includes("fisheye") ||
         img.image_format?.toLowerCase().includes("fisheye") ||
-        img.category_name?.toLowerCase().includes("180")
+        img.category_name?.toLowerCase().includes("180"),
     )
-    setFisheyeImages(fisheye)
 
-    console.log(`[v0] Found ${equirectangular.length} Equirectangular and ${fisheye.length} Fisheye images`)
-  }
+    return { equirectangularImages: equirectangular, fisheyeImages: fisheye }
+  }, [images])
 
   const handleView360 = (image: Image) => {
     setViewingPanorama(image)
@@ -109,6 +87,12 @@ export default function GalleryClient({ initialImages, initialCategories }: Gall
   const closePanoramaViewer = () => {
     setViewingPanorama(null)
   }
+
+  const displayedImages = useMemo(() => {
+    if (selectedFormat === "equirectangular") return equirectangularImages
+    if (selectedFormat === "fisheye") return fisheyeImages
+    return images
+  }, [selectedFormat, images, equirectangularImages, fisheyeImages])
 
   return (
     <div className="min-h-screen bg-background">
@@ -120,7 +104,7 @@ export default function GalleryClient({ initialImages, initialCategories }: Gall
             muted
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ objectFit: 'cover' }}
+            style={{ objectFit: "cover" }}
           >
             <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/WebBackdrop360-2-u6TrAzn6S3wsmynX3nuZZiVu1GcPpp.mov" type="video/mp4" />
             Your browser does not support the video tag.
@@ -142,7 +126,9 @@ export default function GalleryClient({ initialImages, initialCategories }: Gall
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance leading-tight text-white drop-shadow-2xl">
               {t("gallery.title")}
               <br />
-              <span className="text-primary drop-shadow-[0_0_40px_rgba(139,92,246,0.8)]">{t("gallery.titleHighlight")}</span>
+              <span className="text-primary drop-shadow-[0_0_40px_rgba(139,92,246,0.8)]">
+                {t("gallery.titleHighlight")}
+              </span>
             </h1>
 
             <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed text-pretty drop-shadow-lg">
@@ -151,22 +137,30 @@ export default function GalleryClient({ initialImages, initialCategories }: Gall
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 pt-8 max-w-4xl mx-auto">
               <div className="space-y-2 bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-                <div className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">{t("gallery.stats.resolution")}</div>
+                <div className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
+                  {t("gallery.stats.resolution")}
+                </div>
                 <div className="text-xs md:text-sm text-white/80 font-medium">{t("gallery.stats.resolutionLabel")}</div>
               </div>
 
               <div className="space-y-2 bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-                <div className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">{images.length}+</div>
+                <div className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
+                  {galleryStats.total > 0 ? `${galleryStats.total}+` : "..."}
+                </div>
                 <div className="text-xs md:text-sm text-white/80 font-medium">{t("gallery.stats.assets")}</div>
               </div>
 
               <div className="space-y-2 bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-                <div className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">{t("gallery.stats.waitTime")}</div>
+                <div className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
+                  {t("gallery.stats.waitTime")}
+                </div>
                 <div className="text-xs md:text-sm text-white/80 font-medium">{t("gallery.stats.waitTimeLabel")}</div>
               </div>
 
               <div className="space-y-2 bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-                <div className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">{t("gallery.stats.licensed")}</div>
+                <div className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
+                  {t("gallery.stats.licensed")}
+                </div>
                 <div className="text-xs md:text-sm text-white/80 font-medium">{t("gallery.stats.licensedLabel")}</div>
               </div>
             </div>
@@ -179,11 +173,9 @@ export default function GalleryClient({ initialImages, initialCategories }: Gall
           <div className="flex flex-col items-center gap-6">
             <div className="text-center space-y-2">
               <h3 className="text-2xl font-bold text-foreground">{t("gallery.formats")}</h3>
-              <p className="text-sm text-muted-foreground max-w-2xl">
-                {t("gallery.formatsNote")}
-              </p>
+              <p className="text-sm text-muted-foreground max-w-2xl">{t("gallery.formatsNote")}</p>
             </div>
-            
+
             <div className="flex flex-wrap items-center justify-center gap-4">
               <Badge
                 variant={selectedFormat === "all" ? "default" : "outline"}
@@ -191,7 +183,7 @@ export default function GalleryClient({ initialImages, initialCategories }: Gall
                 onClick={() => setSelectedFormat("all")}
               >
                 {t("gallery.allFormats")}
-                <span className="ml-2 opacity-80 font-normal">({images.length})</span>
+                <span className="ml-2 opacity-80 font-normal">({galleryStats.total})</span>
               </Badge>
               <Badge
                 variant={selectedFormat === "equirectangular" ? "default" : "outline"}
@@ -199,7 +191,7 @@ export default function GalleryClient({ initialImages, initialCategories }: Gall
                 onClick={() => setSelectedFormat("equirectangular")}
               >
                 {t("gallery.equirectangular")}
-                <span className="ml-2 opacity-80 font-normal">({equirectangularImages.length})</span>
+                <span className="ml-2 opacity-80 font-normal">({galleryStats.equirectangular})</span>
               </Badge>
               <Badge
                 variant={selectedFormat === "fisheye" ? "default" : "outline"}
@@ -207,7 +199,7 @@ export default function GalleryClient({ initialImages, initialCategories }: Gall
                 onClick={() => setSelectedFormat("fisheye")}
               >
                 {t("gallery.fisheye")}
-                <span className="ml-2 opacity-80 font-normal">({fisheyeImages.length})</span>
+                <span className="ml-2 opacity-80 font-normal">({galleryStats.fisheye})</span>
               </Badge>
             </div>
           </div>
@@ -216,16 +208,7 @@ export default function GalleryClient({ initialImages, initialCategories }: Gall
 
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <ProductGrid 
-            initialImages={
-              selectedFormat === "all" 
-                ? images 
-                : selectedFormat === "equirectangular"
-                  ? equirectangularImages
-                  : fisheyeImages
-            } 
-            categoryId={undefined}
-          />
+          <ProductGrid initialImages={[]} categoryId={undefined} />
         </div>
       </section>
 
@@ -239,3 +222,5 @@ export default function GalleryClient({ initialImages, initialCategories }: Gall
     </div>
   )
 }
+
+export default memo(GalleryClientComponent)

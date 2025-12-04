@@ -28,17 +28,12 @@ export async function updateImageFeaturedSettings(
     image_format?: "dome" | "equirectangular" | null
     featured_collection?: boolean
     upscaled_url?: string | null
-  }
+  },
 ) {
   const supabase = await createClient()
 
   try {
-    const { data, error } = await supabase
-      .from("images")
-      .update(settings)
-      .eq("id", imageId)
-      .select()
-      .single()
+    const { data, error } = await supabase.from("images").update(settings).eq("id", imageId).select().single()
 
     if (error) throw error
 
@@ -90,6 +85,47 @@ export async function getFeaturedGalleryStats() {
   }
 }
 
+export async function getGalleryStats() {
+  const supabase = await createClient()
+
+  try {
+    // Get total count of all active images
+    const { count: totalCount } = await supabase
+      .from("images")
+      .select("*", { count: "exact", head: true })
+      .eq("active", true)
+
+    // Get count of equirectangular images (360° panoramas) based on image_format field
+    const { count: equirectangularCount } = await supabase
+      .from("images")
+      .select("*", { count: "exact", head: true })
+      .eq("active", true)
+      .eq("image_format", "equirectangular")
+
+    // Get count of fisheye images (180° images) based on image_format field
+    const { count: fisheyeCount } = await supabase
+      .from("images")
+      .select("*", { count: "exact", head: true })
+      .eq("active", true)
+      .eq("image_format", "fisheye")
+
+    return {
+      success: true,
+      stats: {
+        total: totalCount || 0,
+        equirectangular: equirectangularCount || 0,
+        fisheye: fisheyeCount || 0,
+      },
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to get gallery stats",
+      stats: { total: 0, equirectangular: 0, fisheye: 0 },
+    }
+  }
+}
+
 export async function getImageById(imageId: string) {
   try {
     const supabase = await createClient()
@@ -113,7 +149,8 @@ export async function getImageById(imageId: string) {
         created_at,
         updated_at,
         categories(name),
-        licenses(name)
+        licenses(name),
+        image_format
       `)
       .eq("id", imageId)
       .single()
@@ -129,22 +166,22 @@ export async function getImageById(imageId: string) {
     }
 
     let imageUrl = image.original_url || image.original_file_url
-    
+
     if (!imageUrl && image.file_path) {
       // Check if file_path is already a full URL
-      if (image.file_path.startsWith('http://') || image.file_path.startsWith('https://')) {
+      if (image.file_path.startsWith("http://") || image.file_path.startsWith("https://")) {
         imageUrl = image.file_path
       } else {
         // It's a relative path, construct the full URL
         imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/${image.file_path}`
       }
     }
-    
+
     let thumbnailUrl = image.thumbnail_medium_url
     if (!thumbnailUrl) {
       // Use imageUrl as fallback for thumbnail
       thumbnailUrl = imageUrl
-    } else if (thumbnailUrl && !thumbnailUrl.startsWith('http://') && !thumbnailUrl.startsWith('https://')) {
+    } else if (thumbnailUrl && !thumbnailUrl.startsWith("http://") && !thumbnailUrl.startsWith("https://")) {
       // Construct full URL if thumbnail is a relative path
       thumbnailUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/${thumbnailUrl}`
     }
@@ -161,8 +198,8 @@ export async function getImageById(imageId: string) {
       price: image.price,
       image_url: imageUrl,
       thumbnail_url: thumbnailUrl,
-      category_name: image.categories?.name || 'Uncategorized',
-      license_name: image.licenses?.name || 'Standard License',
+      category_name: image.categories?.name || "Uncategorized",
+      license_name: image.licenses?.name || "Standard License",
       active: image.active,
       is_featured: image.is_featured,
       featured_collection: image.featured_collection,
@@ -171,14 +208,15 @@ export async function getImageById(imageId: string) {
       file_path: image.file_path,
       created_at: image.created_at,
       updated_at: image.updated_at,
+      image_format: image.image_format,
     }
 
     return { success: true, data: transformedImage }
   } catch (error) {
     console.error("[v0] getImageById catch error:", error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : "Failed to fetch image" 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to fetch image",
     }
   }
 }
@@ -191,7 +229,6 @@ export async function getImages() {
       .select(`
         id,
         title,
-        description,
         price,
         original_url,
         original_file_url,
@@ -201,41 +238,37 @@ export async function getImages() {
         is_featured,
         featured_collection,
         category_id,
-        license_id,
         created_at,
-        updated_at,
-        categories(name)
+        categories(name),
+        image_format
       `)
+      .eq("active", true)
       .order("created_at", { ascending: false })
 
     if (error) throw error
 
-    const transformedImages = images?.map((image: any) => {
-      // Check if file_path is already a full URL
-      const isFilePathFullUrl = image.file_path?.startsWith("http://") || image.file_path?.startsWith("https://")
-      
-      // Compute image_url from available fields
-      let imageUrl = image.original_url || image.original_file_url
-      if (!imageUrl && image.file_path && isFilePathFullUrl) {
-        imageUrl = image.file_path
-      }
-      
-      // Compute thumbnail_url from available fields
-      let thumbnailUrl = image.thumbnail_medium_url
-      if (!thumbnailUrl) {
-        // Fallback to imageUrl if no thumbnail
-        thumbnailUrl = imageUrl
-      }
-      
-      return {
-        ...image,
-        image_url: imageUrl, // Map to expected property name
-        thumbnail_url: thumbnailUrl, // Map to expected property name
-        category_name: image.categories?.name || 'Uncategorized',
-      }
-    }) || []
+    const transformedImages =
+      images?.map((image: any) => {
+        const isFilePathFullUrl = image.file_path?.startsWith("http://") || image.file_path?.startsWith("https://")
 
-    console.log('[v0] getImages: Fetched', transformedImages.length, 'images')
+        let imageUrl = image.original_url || image.original_file_url
+        if (!imageUrl && image.file_path && isFilePathFullUrl) {
+          imageUrl = image.file_path
+        }
+
+        let thumbnailUrl = image.thumbnail_medium_url
+        if (!thumbnailUrl) {
+          thumbnailUrl = imageUrl
+        }
+
+        return {
+          ...image,
+          image_url: imageUrl,
+          thumbnail_url: thumbnailUrl,
+          category_name: image.categories?.name || "Uncategorized",
+        }
+      }) || []
+
     return { success: true, data: transformedImages }
   } catch (error) {
     console.error("[v0] getImages error:", error)
@@ -246,10 +279,7 @@ export async function getImages() {
 export async function getCategories() {
   try {
     const supabase = await createClient()
-    const { data, error } = await supabase
-      .from("categories")
-      .select("*")
-      .order("name", { ascending: true })
+    const { data, error } = await supabase.from("categories").select("*").order("name", { ascending: true })
 
     if (error) throw error
 
@@ -263,10 +293,7 @@ export async function getCategories() {
 export async function getLicenses() {
   try {
     const supabase = await createClient()
-    const { data, error } = await supabase
-      .from("licenses")
-      .select("*")
-      .order("name", { ascending: true })
+    const { data, error } = await supabase.from("licenses").select("*").order("name", { ascending: true })
 
     if (error) throw error
 
@@ -297,7 +324,11 @@ export async function getDatabaseStats() {
     }
   } catch (error) {
     console.error("[v0] getDatabaseStats error:", error)
-    return { success: false, data: { images: 0, categories: 0, orders: 0 }, error: error instanceof Error ? error.message : "Failed to fetch stats" }
+    return {
+      success: false,
+      data: { images: 0, categories: 0, orders: 0 },
+      error: error instanceof Error ? error.message : "Failed to fetch stats",
+    }
   }
 }
 
@@ -322,7 +353,7 @@ export async function createImageWithCategoryObject(imageData: any) {
       original_url: imageData.image_url || imageData.original_url,
       original_file_url: imageData.original_file_url || null,
       thumbnail_medium_url: imageData.thumbnail_url || imageData.thumbnail_medium_url,
-      file_path: imageData.file_path || imageData.image_url || 'unknown', // Fallback to image_url or 'unknown' to satisfy NOT NULL
+      file_path: imageData.file_path || imageData.image_url || "unknown", // Fallback to image_url or 'unknown' to satisfy NOT NULL
       active: imageData.active ?? true,
       is_featured: imageData.featured ?? false,
     }
@@ -334,11 +365,7 @@ export async function createImageWithCategoryObject(imageData: any) {
       file_path: dbRecord.file_path?.substring(0, 50) + "...", // Added file_path logging
     })
 
-    const { data: image, error } = await supabase
-      .from("images")
-      .insert([dbRecord])
-      .select()
-      .single()
+    const { data: image, error } = await supabase.from("images").insert([dbRecord]).select().single()
 
     if (error) {
       console.error("[v0] createImageWithCategoryObject: Insert error:", error)
@@ -419,10 +446,7 @@ export async function deleteImage(imageId: string) {
     }
 
     // Perform the delete
-    const { error: deleteError } = await supabase
-      .from("images")
-      .delete()
-      .eq("id", imageId)
+    const { error: deleteError } = await supabase.from("images").delete().eq("id", imageId)
 
     if (deleteError) throw deleteError
 
@@ -464,11 +488,15 @@ export async function migrateFilesToOptimalStorage() {
     return {
       success: true,
       data: { migrated: 0, skipped: 0, errors: 0, total: 0 },
-      message: "File migration not implemented yet"
+      message: "File migration not implemented yet",
     }
   } catch (error) {
     console.error("[v0] migrateFilesToOptimalStorage error:", error)
-    return { success: false, data: { migrated: 0, skipped: 0, errors: 0, total: 0 }, error: error instanceof Error ? error.message : "Migration failed" }
+    return {
+      success: false,
+      data: { migrated: 0, skipped: 0, errors: 0, total: 0 },
+      error: error instanceof Error ? error.message : "Migration failed",
+    }
   }
 }
 
@@ -485,7 +513,7 @@ export async function migrateExistingTags() {
 export async function getOrders(userEmail: string) {
   try {
     const supabase = await createClient()
-    
+
     const { data: orders, error } = await supabase
       .from("orders")
       .select(`

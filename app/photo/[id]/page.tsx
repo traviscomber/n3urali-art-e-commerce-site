@@ -3,11 +3,11 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Download, ShoppingCart, Eye, Crown, RotateCcw, Zap, Clock } from 'lucide-react'
+import { ArrowLeft, Download, ShoppingCart, Eye, Crown, RotateCcw, Zap, Clock } from "lucide-react"
 import { getImageById } from "@/app/actions/admin-actions"
 import { useAuth } from "@/lib/contexts/auth-context"
 import { useCart } from "@/lib/contexts/cart-context"
@@ -60,6 +60,16 @@ export default function PhotoDetailPage() {
   const [auctionPrice, setAuctionPrice] = useState<number | null>(null)
   const [auctionTimestamp, setAuctionTimestamp] = useState<Date | null>(null)
   const [auctionTimeLeft, setAuctionTimeLeft] = useState<number>(0)
+
+  const isAdmin = user?.email === "travis@nuanu.com"
+
+  useEffect(() => {
+    console.log("[v0] Photo Page - Auth State:", {
+      hasUser: !!user,
+      userEmail: user?.email,
+      isAdmin: isAdmin,
+    })
+  }, [user, isAdmin])
 
   useEffect(() => {
     const priceParam = searchParams.get("auctionPrice")
@@ -200,7 +210,7 @@ export default function PhotoDetailPage() {
   }
 
   const addEnhancedWatermarkOverlay = () => {
-    if (!viewerRef.current) return
+    if (!viewerRef.current || isAdmin) return
 
     const canvas = viewerRef.current.querySelector("canvas")
     if (!canvas) return
@@ -281,6 +291,8 @@ export default function PhotoDetailPage() {
   }
 
   const startWatermarkRefresh = () => {
+    if (isAdmin) return
+
     if (watermarkRefreshInterval.current) {
       clearInterval(watermarkRefreshInterval.current)
     }
@@ -289,7 +301,7 @@ export default function PhotoDetailPage() {
       if (viewerRef.current && show360Viewer) {
         addEnhancedWatermarkOverlay()
       }
-    }, 5000) // Refresh every 5 seconds
+    }, 5000)
   }
 
   const stopWatermarkRefresh = () => {
@@ -363,11 +375,11 @@ export default function PhotoDetailPage() {
       try {
         console.log("[v0] Fetching image by ID:", params.id)
         const result = await getImageById(params.id as string)
-        console.log("[v0] getImageById result:", { 
-          success: result.success, 
-          hasData: !!result.data 
+        console.log("[v0] getImageById result:", {
+          success: result.success,
+          hasData: !!result.data,
         })
-        
+
         if (result.success && result.data) {
           console.log("[v0] Image loaded successfully:", {
             id: result.data.id,
@@ -375,10 +387,10 @@ export default function PhotoDetailPage() {
             hasImageUrl: !!result.data.image_url,
           })
           setImage(result.data)
-          
+
           const { createClient } = await import("@/lib/supabase/client")
           const supabase = createClient()
-          
+
           const { data: collectionData } = await supabase
             .from("collection_images")
             .select(`
@@ -390,12 +402,12 @@ export default function PhotoDetailPage() {
             `)
             .eq("image_id", result.data.id)
             .single()
-          
+
           if (collectionData?.collection) {
-            const collection = Array.isArray(collectionData.collection) 
-              ? collectionData.collection[0] 
+            const collection = Array.isArray(collectionData.collection)
+              ? collectionData.collection[0]
               : collectionData.collection
-            
+
             setCollectionMusic({
               playlist: collection.music_playlist,
               url: collection.music_url,
@@ -770,9 +782,11 @@ export default function PhotoDetailPage() {
                   )}
                 </>
               )}
-              <span className="block mt-1 text-xs text-red-600">
-                ⚠️ Original images are protected with watermarks - Purchase required for clean, commercial-use files
-              </span>
+              {!isAdmin && (
+                <span className="block mt-1 text-xs text-red-600">
+                  ⚠️ Original images are protected with watermarks - Purchase required for clean, commercial-use files
+                </span>
+              )}
             </div>
           </div>
 

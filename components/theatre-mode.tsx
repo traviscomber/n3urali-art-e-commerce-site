@@ -1,11 +1,12 @@
-'use client'
+"use client"
 
-import { useState, useEffect, useRef } from 'react'
-import { Button } from '@/components/ui/button'
-import { Play, Pause, X, Volume2, VolumeX, SkipForward, SkipBack, Maximize } from 'lucide-react'
-import { Slider } from '@/components/ui/slider'
-import { useMusicPlayer } from '@/lib/contexts/music-player-context'
-import Image from 'next/image'
+import { useState, useEffect, useRef } from "react"
+import { Button } from "@/components/ui/button"
+import { Play, Pause, X, Volume2, VolumeX, SkipForward, SkipBack, Maximize } from "lucide-react"
+import { Slider } from "@/components/ui/slider"
+import { useMusicPlayer } from "@/lib/contexts/music-player-context"
+import { useAuth } from "@/lib/contexts/auth-context"
+import Image from "next/image"
 
 interface TheatreModeProps {
   images: Array<{
@@ -44,6 +45,9 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
     playlist,
   } = useMusicPlayer()
 
+  const { user } = useAuth()
+  const isAdmin = user?.email === "travis@nuanu.com"
+
   const TRANSITION_DURATION = 30000 // 30 seconds
   const CROSSFADE_DURATION = 5000 // 5 seconds // Added 5 second crossfade duration
 
@@ -60,17 +64,17 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Prevent Print Screen, Win+Shift+S, Cmd+Shift+4, etc.
       if (
-        e.key === 'PrintScreen' ||
-        (e.metaKey && e.shiftKey && (e.key === '3' || e.key === '4' || e.key === '5')) ||
-        (e.ctrlKey && e.shiftKey && e.key === 'S') ||
-        (e.metaKey && e.shiftKey && e.key === 'S')
+        e.key === "PrintScreen" ||
+        (e.metaKey && e.shiftKey && (e.key === "3" || e.key === "4" || e.key === "5")) ||
+        (e.ctrlKey && e.shiftKey && e.key === "S") ||
+        (e.metaKey && e.shiftKey && e.key === "S")
       ) {
         e.preventDefault()
         return false
       }
-      
+
       // ESC to exit
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         exitTheatreMode()
       }
     }
@@ -81,14 +85,14 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
       return false
     }
 
-    document.addEventListener('contextmenu', handleContextMenu)
-    document.addEventListener('keydown', handleKeyDown)
-    document.addEventListener('dragstart', handleDragStart)
+    document.addEventListener("contextmenu", handleContextMenu)
+    document.addEventListener("keydown", handleKeyDown)
+    document.addEventListener("dragstart", handleDragStart)
 
     return () => {
-      document.removeEventListener('contextmenu', handleContextMenu)
-      document.removeEventListener('keydown', handleKeyDown)
-      document.removeEventListener('dragstart', handleDragStart)
+      document.removeEventListener("contextmenu", handleContextMenu)
+      document.removeEventListener("keydown", handleKeyDown)
+      document.removeEventListener("dragstart", handleDragStart)
     }
   }, [isOpen])
 
@@ -97,9 +101,9 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
       setIsFullscreen(!!document.fullscreenElement)
     }
 
-    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    document.addEventListener("fullscreenchange", handleFullscreenChange)
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+      document.removeEventListener("fullscreenchange", handleFullscreenChange)
     }
   }, [])
 
@@ -153,6 +157,15 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
     }
   }, [autoStart, images.length])
 
+  useEffect(() => {
+    console.log("[v0] Theatre Mode - Auth State:", {
+      hasUser: !!user,
+      userEmail: user?.email,
+      isAdmin: isAdmin,
+      fullUser: user,
+    })
+  }, [user, isAdmin])
+
   const enterTheatreMode = async () => {
     setIsOpen(true)
     setCurrentImageIndex(0)
@@ -164,7 +177,7 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
       try {
         await containerRef.current.requestFullscreen()
       } catch (err) {
-        console.log('[v0] Fullscreen not supported:', err)
+        console.log("[v0] Fullscreen not supported:", err)
       }
     }
   }
@@ -188,7 +201,7 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
     const nextIdx = (currentImageIndex + 1) % images.length
     setNextImageIndex(nextIdx)
     setIsCrossfading(true)
-    
+
     setTimeout(() => {
       setCurrentImageIndex(nextIdx)
       setIsCrossfading(false)
@@ -200,7 +213,7 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
     const prevIdx = (currentImageIndex - 1 + images.length) % images.length
     setNextImageIndex(prevIdx)
     setIsCrossfading(true)
-    
+
     setTimeout(() => {
       setCurrentImageIndex(prevIdx)
       setIsCrossfading(false)
@@ -239,34 +252,34 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
 
   const handleImageClick = async () => {
     if (!containerRef.current) return
-    
+
     try {
       if (!document.fullscreenElement) {
         await containerRef.current.requestFullscreen()
       }
     } catch (err) {
-      console.error('[v0] Failed to enter fullscreen:', err)
+      console.error("[v0] Failed to enter fullscreen:", err)
     }
   }
 
   const currentImage = images[currentImageIndex]
   const nextImage_data = images[nextImageIndex]
-  
+
   const imageUrl =
     currentImage?.original_url ||
     currentImage?.file_path ||
     currentImage?.thumbnail_large_url ||
     currentImage?.thumbnail_medium_url ||
-    '/placeholder.svg'
-  
+    "/placeholder.svg"
+
   const nextImageUrl =
     nextImage_data?.original_url ||
     nextImage_data?.file_path ||
     nextImage_data?.thumbnail_large_url ||
     nextImage_data?.thumbnail_medium_url ||
-    '/placeholder.svg'
+    "/placeholder.svg"
 
-  console.log('[v0] Theatre Mode - Current Image:', {
+  console.log("[v0] Theatre Mode - Current Image:", {
     index: currentImageIndex,
     id: currentImage?.id,
     title: currentImage?.title,
@@ -275,15 +288,15 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
     thumbnail_large_url: currentImage?.thumbnail_large_url,
     thumbnail_medium_url: currentImage?.thumbnail_medium_url,
   })
-  
-  console.log('[v0] Theatre Mode - Music Player:', {
+
+  console.log("[v0] Theatre Mode - Music Player:", {
     playlistLength: playlist.length,
     currentTrack: currentTrackIndex,
     isPlaying: isMusicPlaying,
     hasAudioRef: !!audioRef.current,
   })
-  
-  console.log('[v0] Theatre Mode - Image URL being used:', imageUrl)
+
+  console.log("[v0] Theatre Mode - Image URL being used:", imageUrl)
 
   const toggleFullscreen = async () => {
     if (!containerRef.current) return
@@ -295,18 +308,13 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
         await document.exitFullscreen()
       }
     } catch (err) {
-      console.error('[v0] Failed to toggle fullscreen:', err)
+      console.error("[v0] Failed to toggle fullscreen:", err)
     }
   }
 
   if (!isOpen) {
     return (
-      <Button
-        size="lg"
-        onClick={enterTheatreMode}
-        className="gap-2"
-        disabled={images.length === 0}
-      >
+      <Button size="lg" onClick={enterTheatreMode} className="gap-2" disabled={images.length === 0}>
         <Maximize className="h-5 w-5" />
         Theatre Mode
       </Button>
@@ -317,36 +325,31 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
     <div
       ref={containerRef}
       className="fixed inset-0 z-[100] bg-black"
-      style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+      style={{ userSelect: "none", WebkitUserSelect: "none" }}
     >
-      <div 
-        className="absolute inset-0 pointer-events-none" 
+      <div
+        className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(circle at center, transparent 0%, transparent 40%, rgba(0, 0, 0, 0.6) 100%)'
+          background: "radial-gradient(circle at center, transparent 0%, transparent 40%, rgba(0, 0, 0, 0.6) 100%)",
         }}
       />
 
-      <div 
-        className="relative w-full h-full cursor-pointer overflow-hidden"
-        onClick={handleImageClick}
-      >
+      <div className="relative w-full h-full cursor-pointer overflow-hidden" onClick={handleImageClick}>
         {/* Current image */}
         <Image
           key={`current-${currentImageIndex}`}
           src={imageUrl || "/placeholder.svg"}
-          alt={currentImage?.title || 'Collection image'}
+          alt={currentImage?.title || "Collection image"}
           fill
-          className={`object-cover transition-all duration-[29000ms] ease-in-out ${
-            isPaused ? 'pause-animation' : ''
-          }`}
+          className={`object-cover transition-all duration-[29000ms] ease-in-out ${isPaused ? "pause-animation" : ""}`}
           style={{
-            pointerEvents: 'none',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
+            pointerEvents: "none",
+            userSelect: "none",
+            WebkitUserSelect: "none",
             opacity: isCrossfading ? 0 : 1,
-            animation: 'kenBurnsZoom 30s ease-in-out infinite',
-            transitionProperty: 'opacity',
-            transitionDuration: '5000ms',
+            animation: "kenBurnsZoom 30s ease-in-out infinite",
+            transitionProperty: "opacity",
+            transitionDuration: "5000ms",
           }}
           draggable={false}
           priority
@@ -357,19 +360,19 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
           <Image
             key={`next-${nextImageIndex}`}
             src={nextImageUrl || "/placeholder.svg"}
-            alt={nextImage_data?.title || 'Next collection image'}
+            alt={nextImage_data?.title || "Next collection image"}
             fill
             className={`object-cover transition-all duration-[29000ms] ease-in-out ${
-              isPaused ? 'pause-animation' : ''
+              isPaused ? "pause-animation" : ""
             }`}
             style={{
-              pointerEvents: 'none',
-              userSelect: 'none',
-              WebkitUserSelect: 'none',
+              pointerEvents: "none",
+              userSelect: "none",
+              WebkitUserSelect: "none",
               opacity: 1,
-              animation: 'kenBurnsZoom 30s ease-in-out infinite',
-              transitionProperty: 'opacity',
-              transitionDuration: '5000ms',
+              animation: "kenBurnsZoom 30s ease-in-out infinite",
+              transitionProperty: "opacity",
+              transitionDuration: "5000ms",
             }}
             draggable={false}
             priority
@@ -377,22 +380,24 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
         )}
 
         {/* Watermark overlay */}
-        <div className="absolute inset-0 pointer-events-none">
-          {/* Top watermark */}
-          <div className="absolute top-8 left-1/2 -translate-x-1/2 text-white/40 font-bold text-2xl tracking-wider drop-shadow-2xl">
-            N3URALIA360.ART
-          </div>
+        {!isAdmin && (
+          <div className="absolute inset-0 pointer-events-none">
+            {/* Top watermark */}
+            <div className="absolute top-8 left-1/2 -translate-x-1/2 text-white/40 font-bold text-2xl tracking-wider drop-shadow-2xl">
+              N3URALIA360.ART
+            </div>
 
-          {/* Center watermark */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/20 font-bold text-6xl tracking-wider rotate-[-30deg] drop-shadow-2xl">
-            N3URALIA360.ART
-          </div>
+            {/* Center watermark */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/20 font-bold text-6xl tracking-wider rotate-[-30deg] drop-shadow-2xl">
+              N3URALIA360.ART
+            </div>
 
-          {/* Bottom watermark */}
-          <div className="absolute bottom-24 left-1/2 -translate-x-1/2 text-white/40 font-bold text-xl tracking-wider drop-shadow-2xl">
-            {collectionTitle}
+            {/* Bottom watermark */}
+            <div className="absolute bottom-24 left-1/2 -translate-x-1/2 text-white/40 font-bold text-xl tracking-wider drop-shadow-2xl">
+              {collectionTitle}
+            </div>
           </div>
-        </div>
+        )}
 
         {!document.fullscreenElement && (
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/60 text-lg animate-pulse pointer-events-none">
@@ -403,9 +408,11 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
         {/* Image title and counter */}
         <div className="absolute top-8 left-8 text-white space-y-2 bg-black/50 backdrop-blur-sm rounded-lg px-6 py-3 pointer-events-none">
           <div className="text-2xl font-bold">{currentImage?.title}</div>
-          <div className="text-sm text-white/80">
-            Image {currentImageIndex + 1} of {images.length}
-          </div>
+          {!isAdmin && (
+            <div className="text-sm text-white/80">
+              Image {currentImageIndex + 1} of {images.length}
+            </div>
+          )}
         </div>
 
         <div className="absolute top-8 right-8 flex items-center gap-3 pointer-events-auto">
@@ -418,7 +425,7 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
           >
             <Maximize className="h-6 w-6" />
           </Button>
-          
+
           <Button
             variant="ghost"
             size="icon"
@@ -431,9 +438,7 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
 
         {/* Navigation and playback controls */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-auto">
-          <div className="text-xs text-white/60 font-medium tracking-wider uppercase">
-            Slideshow
-          </div>
+          {!isAdmin && <div className="text-xs text-white/60 font-medium tracking-wider uppercase">Slideshow</div>}
           <div className="flex items-center gap-4 bg-black/70 backdrop-blur-lg rounded-full px-8 py-4">
             <Button
               variant="ghost"
@@ -450,11 +455,7 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
               onClick={togglePause}
               className="h-12 w-12 rounded-full text-white hover:bg-white/20"
             >
-              {isPaused ? (
-                <Play className="h-6 w-6 fill-current" />
-              ) : (
-                <Pause className="h-6 w-6 fill-current" />
-              )}
+              {isPaused ? <Play className="h-6 w-6 fill-current" /> : <Pause className="h-6 w-6 fill-current" />}
             </Button>
 
             <Button
@@ -466,22 +467,19 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
               <SkipForward className="h-5 w-5" />
             </Button>
 
-            {/* Progress bar */}
-            <div className="w-48 h-2 bg-white/30 rounded-full overflow-hidden mx-4">
-              <div
-                className="h-full bg-white/90 transition-all duration-100"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
+            {/* Progress bar - hidden for admin */}
+            {!isAdmin && (
+              <div className="w-48 h-2 bg-white/30 rounded-full overflow-hidden mx-4">
+                <div className="h-full bg-white/90 transition-all duration-100" style={{ width: `${progress}%` }} />
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Music controls */}
-        {playlist.length > 0 && (
+        {/* Music controls - hidden for admin */}
+        {!isAdmin && playlist.length > 0 && (
           <div className="absolute bottom-8 right-8 flex flex-col items-center gap-2 pointer-events-auto">
-            <div className="text-xs text-white/60 font-medium tracking-wider uppercase">
-              Music
-            </div>
+            <div className="text-xs text-white/60 font-medium tracking-wider uppercase">Music</div>
             <div className="flex items-center gap-3 bg-black/70 backdrop-blur-lg rounded-full px-6 py-3">
               {playlist.length > 1 && (
                 <Button
@@ -524,13 +522,7 @@ export function TheatreMode({ images, collectionTitle, musicPlaylist, autoStart 
                 ) : (
                   <Volume2 className="h-4 w-4 text-white/80" />
                 )}
-                <Slider
-                  value={[volume]}
-                  onValueChange={handleVolumeChange}
-                  max={1}
-                  step={0.01}
-                  className="w-20"
-                />
+                <Slider value={[volume]} onValueChange={handleVolumeChange} max={1} step={0.01} className="w-20" />
               </div>
 
               {playlist.length > 1 && (

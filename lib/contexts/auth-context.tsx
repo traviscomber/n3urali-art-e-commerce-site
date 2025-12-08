@@ -17,7 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [isInitialized, setIsInitialized] = useState(false)
 
   const supabase = useMemo(() => {
@@ -41,12 +41,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const {
         data: { session },
       } = await supabase.auth.getSession()
+
+      console.log("[v0] Auth initialized:", {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        userEmail: session?.user?.email,
+      })
+
       setUser(session?.user ?? null)
 
       // Subscribe to auth changes only after manual initialization
       const {
         data: { subscription },
       } = supabase.auth.onAuthStateChange(async (event, session) => {
+        console.log("[v0] Auth state changed:", {
+          event,
+          hasUser: !!session?.user,
+          userEmail: session?.user?.email,
+        })
         setUser(session?.user ?? null)
       })
 
@@ -57,6 +69,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false)
     }
   }, [supabase, isInitialized])
+
+  useEffect(() => {
+    initializeAuth()
+  }, [initializeAuth])
 
   const signOut = async () => {
     if (!supabase) {

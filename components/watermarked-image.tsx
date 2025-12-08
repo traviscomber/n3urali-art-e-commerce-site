@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { useAuth } from "@/lib/contexts/auth-context"
 
 import { useEffect, useRef, useState } from "react"
 
@@ -31,6 +32,17 @@ export function WatermarkedImage({
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(false)
 
+  const { user } = useAuth()
+  const isAdmin = user?.email === "travis@nuanu.com"
+
+  useEffect(() => {
+    console.log("[v0] WatermarkedImage - Auth State:", {
+      hasUser: !!user,
+      userEmail: user?.email,
+      isAdmin: isAdmin,
+    })
+  }, [user, isAdmin])
+
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas || !src) return
@@ -55,6 +67,12 @@ export function WatermarkedImage({
 
       // Draw the original image
       ctx.drawImage(img, 0, 0)
+
+      if (isAdmin) {
+        setIsLoading(false)
+        onLoad?.()
+        return
+      }
 
       // Load and draw the N3u360 logo watermark
       const logo = new Image()
@@ -139,7 +157,7 @@ export function WatermarkedImage({
       canvas.removeEventListener("dragstart", preventDrag)
       canvas.removeEventListener("selectstart", preventDrag)
     }
-  }, [src, onLoad, imageType])
+  }, [src, onLoad, imageType, isAdmin])
 
   if (error) {
     return (

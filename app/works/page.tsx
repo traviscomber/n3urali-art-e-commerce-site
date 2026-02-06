@@ -8,8 +8,9 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
-import { getAllWorks } from '@/app/actions/works-actions'
+import { getWorks } from '@/app/actions/works-actions'
 import type { Work } from '@/types/works'
+import { getAllWorks } from '@/app/actions/works-actions' // Import getAllWorks
 
 export default function WorksPage() {
   const [works, setWorks] = useState<Work[]>([])
@@ -22,9 +23,9 @@ export default function WorksPage() {
     const loadWorks = async () => {
       try {
         setIsLoading(true)
-        const data = await getAllWorks()
-        setWorks(data)
-        setFilteredWorks(data)
+        const response = await getWorks(50, 0)
+        setWorks(response.works)
+        setFilteredWorks(response.works)
       } catch (error) {
         console.error('[v0] Failed to load works:', error)
       } finally {

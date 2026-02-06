@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/contexts/auth-context'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Mail, MapPin, Calendar, User, Briefcase, DollarSign, Clock } from 'lucide-react'
-import { supabase } from '@/lib/supabase/client'
+
+const supabase = createClient()
 
 interface Commission {
   id: string
@@ -32,8 +34,20 @@ export default function CommissionsAdminPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [selectedStatus, setSelectedStatus] = useState<string>('new')
   const [searchQuery, setSearchQuery] = useState('')
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient> | null>(null)
 
   useEffect(() => {
+    try {
+      if (typeof window !== "undefined") {
+        setSupabase(createClient())
+      }
+    } catch (error) {
+      console.error("[v0] Failed to create Supabase client:", error)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!supabase) return
     // Redirect if not admin
     if (user?.email !== 'travis@nuanu.com') {
       window.location.href = '/'
@@ -41,7 +55,7 @@ export default function CommissionsAdminPage() {
     }
 
     loadCommissions()
-  }, [user])
+  }, [user, supabase])
 
   const loadCommissions = async () => {
     try {

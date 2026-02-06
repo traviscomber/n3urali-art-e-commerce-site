@@ -9,8 +9,10 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowLeft, Download, ShoppingCart } from 'lucide-react'
-import { getWorkById } from '@/app/actions/works-actions'
+import { getWorkDetail } from '@/app/actions/works-actions'
 import type { Work } from '@/types/works'
+
+const getWorkById = getWorkDetail; // Declare the variable here
 
 export default function WorkDetailPage() {
   const params = useParams()
@@ -23,8 +25,8 @@ export default function WorkDetailPage() {
     const loadWork = async () => {
       try {
         setIsLoading(true)
-        const data = await getWorkById(workId)
-        setWork(data)
+        const data = await getWorkDetail(workId)
+        setWork(data as Work | null)
       } catch (err) {
         console.error('[v0] Failed to load work:', err)
         setError('Failed to load work details')

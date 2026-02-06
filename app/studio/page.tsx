@@ -12,12 +12,12 @@ export default function StudioPage() {
       <section className="container mx-auto px-4 py-20">
         <div className="max-w-3xl">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">
-            N3uralia Studio
+            N3uralia360 Studio
           </h1>
           <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-            We create immersive experiences at the intersection of cultural storytelling, artistic vision, and cutting-edge technology. 
-            Every work begins with deep research into cultural narratives, evolves through creative worldbuilding, and finds expression 
-            across multiple formats—from dome installations to VR environments to performance loops.
+            We are a cultural immersive media studio. We author experiences—not generate them. Each work represents deep cultural research, 
+            collaborative artistic vision, and meticulous craft across multiple formats. We believe immersive media should preserve heritage, 
+            celebrate artistic expression, and create genuine human connection.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/studio/process">
@@ -38,9 +38,10 @@ export default function StudioPage() {
       {/* Values Section */}
       <section className="container mx-auto px-4 py-20 border-t border-border">
         <div className="mb-12">
-          <h2 className="text-3xl font-bold tracking-tight mb-4">Our Approach</h2>
+          <h2 className="text-3xl font-bold tracking-tight mb-4">Our Philosophy</h2>
           <p className="text-muted-foreground max-w-2xl">
-            We believe immersive media should serve cultural understanding, artistic expression, and human connection.
+            Immersive media is a medium for truth-telling. Whether preserving endangered cultural heritage or exploring speculative futures, 
+            we work with intentionality, respect, and artistic rigor.
           </p>
         </div>
         
@@ -49,9 +50,9 @@ export default function StudioPage() {
             <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
               <span className="text-2xl font-bold text-primary">🌍</span>
             </div>
-            <h3 className="text-xl font-bold mb-2">Cultural Research</h3>
+            <h3 className="text-xl font-bold mb-2">Research</h3>
             <p className="text-muted-foreground">
-              Every work begins with immersive research into cultural narratives, sacred geometries, and artistic traditions.
+              Deep cultural immersion and collaboration with communities, historians, and cultural authorities to authentically ground each work.
             </p>
           </Card>
 
@@ -59,9 +60,9 @@ export default function StudioPage() {
             <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
               <span className="text-2xl font-bold text-primary">🎨</span>
             </div>
-            <h3 className="text-xl font-bold mb-2">Artistic Direction</h3>
+            <h3 className="text-xl font-bold mb-2">Authorship</h3>
             <p className="text-muted-foreground">
-              Our team guides the aesthetic vision through collaborative art direction and iterative creative refinement.
+              Human-led creative direction with careful attention to visual language, narrative structure, and aesthetic integrity across all formats.
             </p>
           </Card>
 
@@ -69,9 +70,9 @@ export default function StudioPage() {
             <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
               <span className="text-2xl font-bold text-primary">🔄</span>
             </div>
-            <h3 className="text-xl font-bold mb-2">Format Translation</h3>
+            <h3 className="text-xl font-bold mb-2">Translation</h3>
             <p className="text-muted-foreground">
-              Each work is adapted across multiple formats—dome experiences, VR environments, performance loops, and social cuts.
+              Each work is adapted across venues and platforms—dome installations, VR environments, performance loops, social media—each optimized for its context.
             </p>
           </Card>
         </div>

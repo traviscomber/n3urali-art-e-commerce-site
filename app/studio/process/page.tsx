@@ -11,27 +11,27 @@ export default function StudioProcessPage() {
   const steps = [
     {
       number: 1,
-      title: 'Cultural Research',
-      description: 'Deep exploration of cultural narratives, mythology, and artistic traditions',
-      details: 'We collaborate with cultural advisors, historians, and community leaders to authentically represent cultural stories.',
+      title: 'Research',
+      description: 'Understanding: Deep exploration of narrative, culture, place, and history',
+      details: 'We collaborate with cultural advisors, historians, and communities to ground the work in authentic knowledge and respect.',
     },
     {
       number: 2,
-      title: 'Worldbuilding',
-      description: 'Creation of immersive environments and narrative frameworks',
-      details: 'Visual language, color palettes, spatial design, and interactive elements are carefully crafted.',
+      title: 'Conception',
+      description: 'Worldbuilding: Creation of immersive environments and narrative frameworks',
+      details: 'Visual language, color, spatial design, and emotional tone are carefully crafted through iterative artistic development.',
     },
     {
       number: 3,
-      title: 'Art Direction',
-      description: 'Development of visual aesthetics and cinematic direction',
-      details: 'Mood, lighting, composition, and artistic vision guide the immersive experience.',
+      title: 'Creation',
+      description: 'Authorship: Development of visual aesthetics and experiential direction',
+      details: 'Mood, light, composition, and artistic vision guide the immersive experience. We leverage technology as a tool, not a replacement for creativity.',
     },
     {
       number: 4,
-      title: 'Format Translation',
-      description: 'Adaptation across multiple platforms and venues',
-      details: 'Dome films, VR environments, performance loops, and social content—each optimized for its context.',
+      title: 'Curation',
+      description: 'Translation: Adaptation across multiple formats and exhibition contexts',
+      details: 'Dome experiences, VR environments, performance loops, and social content—each format is thoughtfully adapted for its venue and audience.',
     },
   ]
 
@@ -41,10 +41,10 @@ export default function StudioProcessPage() {
       <section className="relative py-20 md:py-32 px-4 bg-gradient-to-b from-primary/5 to-background">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 text-balance">
-            How We Create Immersive Works
+            How We Create
           </h1>
           <p className="text-xl text-muted-foreground mb-8 text-pretty">
-            A human-led creative process that transforms cultural narratives into borderless immersive experiences
+            A human-led creative process that transforms stories and visions into immersive experiences across domes, VR, performance, and spatial media.
           </p>
         </div>
       </section>

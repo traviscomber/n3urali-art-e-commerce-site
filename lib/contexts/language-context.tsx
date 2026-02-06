@@ -614,7 +614,7 @@ const translations = {
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("es")
+  const [language, setLanguageState] = useState<Language>("en")
 
   useEffect(() => {
     // Load saved language preference or default to Spanish

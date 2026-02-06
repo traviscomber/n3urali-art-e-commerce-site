@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -22,10 +22,20 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login" }: AuthModalPr
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [loginForm, setLoginForm] = useState({ email: "", password: "" })
   const [signupForm, setSignupForm] = useState({ email: "", password: "", confirmPassword: "" })
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClientSafe> | null>(null)
 
-  const supabase = useMemo(() => {
-    if (!isOpen) return null
-    return createClientSafe()
+  useEffect(() => {
+    if (!isOpen) {
+      setSupabase(null)
+      return
+    }
+    try {
+      if (typeof window !== "undefined") {
+        setSupabase(createClientSafe())
+      }
+    } catch (error) {
+      console.error("[v0] Failed to create Supabase client:", error)
+    }
   }, [isOpen])
 
   const handleLogin = async (e: React.FormEvent) => {

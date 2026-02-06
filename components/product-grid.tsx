@@ -52,17 +52,26 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
   const [displayCount, setDisplayCount] = useState(20)
   const [hasMoreInDB, setHasMoreInDB] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient> | null>(null)
   const BATCH_SIZE = 30
 
   const { selectedTags, clearTags, hasActiveTags, toggleTag } = useTagFilter()
 
-  const supabase = useMemo(() => createClient(), [])
+  // Initialize Supabase client only in browser
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined") {
+        setSupabase(createClient())
+      }
+    } catch (error) {
+      console.error('[v0] Failed to create Supabase client:', error)
+    }
+  }, [])
 
   useEffect(() => {
     if (!initialImages || initialImages.length === 0) {
       loadImages()
     } else {
-      console.log('[v0] Using initialImages, count:', initialImages.length)
       setLoading(false)
       setHasMoreInDB(false)
     }
@@ -70,7 +79,6 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
 
   useEffect(() => {
     if (initialImages && initialImages.length > 0) {
-      console.log('[v0] Updating images from initialImages prop:', initialImages.length)
       setImages(initialImages)
       setHasMoreInDB(false)
       setLoading(false)

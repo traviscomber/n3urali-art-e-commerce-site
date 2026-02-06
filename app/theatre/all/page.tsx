@@ -1,5 +1,5 @@
 import { getAllCollections } from "@/app/actions/collection-actions"
-import { getGalleryImages } from "@/app/actions/gallery-actions"
+import { getImages } from "@/app/actions/admin-actions"
 import TheatreMode from "@/components/theatre-mode"
 
 export const metadata = {
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic"
 export default async function AllCollectionsTheatrePage() {
   const [collections, galleryImages] = await Promise.all([
     getAllCollections(),
-    getGalleryImages(),
+    getImages(),
   ])
 
   const activeCollections = collections.filter(

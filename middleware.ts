@@ -1,7 +1,29 @@
 import { updateSession } from "@/lib/supabase/middleware"
+import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
+// Development-only paths that should be hidden in production
+const DEV_ONLY_PATHS = [
+  "/debug-images",
+  "/setup-cors",
+  "/setup-backblaze-cors",
+  "/admin-simple",
+  "/simple-admin",
+  "/test-image-access",
+  "/test-payment-flow",
+  "/fix-cors",
+]
+
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+
+  // Hide development paths in production
+  if (process.env.NODE_ENV === "production") {
+    if (DEV_ONLY_PATHS.some((path) => pathname.startsWith(path))) {
+      return NextResponse.redirect(new URL("/", request.url), { status: 307 })
+    }
+  }
+
   return await updateSession(request)
 }
 

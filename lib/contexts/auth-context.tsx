@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSupabase(createClient())
       }
     } catch (error) {
-      console.error("[v0] Failed to create Supabase client:", error)
+      // Silently fail - Supabase not available yet
       setSupabase(null)
     }
   }, [])
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return () => subscription.unsubscribe()
     } catch (error) {
-      console.error("[v0] Failed to initialize auth:", error)
+      // Auth initialization failed silently
     } finally {
       setIsLoading(false)
     }
@@ -69,7 +69,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     if (!supabase) {
-      console.warn("[v0] Cannot sign out: Supabase client not available")
       return
     }
 
@@ -77,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await supabase.auth.signOut()
       setUser(null)
     } catch (error) {
-      console.error("[v0] Failed to sign out:", error)
+      // Sign out failed silently
     }
   }
 

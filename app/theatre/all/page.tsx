@@ -1,14 +1,23 @@
 import { getAllCollections } from "@/app/actions/collection-actions"
+import { getGalleryImages } from "@/app/actions/gallery-actions"
 import TheatreMode from "@/components/theatre-mode"
 
 export const metadata = {
-  title: "All Collections - Theatre Mode",
-  description: "Experience all collections in one continuous immersive journey",
+  title: "All Collections & Gallery - Theatre Mode",
+  description: "Experience all collections and gallery images in one continuous immersive journey",
 }
 
+export const dynamic = "force-dynamic"
+
 export default async function AllCollectionsTheatrePage() {
-  const collections = await getAllCollections()
-  const activeCollections = collections.filter((c) => c.is_active && c.collection_images && c.collection_images[0]?.count > 0)
+  const [collections, galleryImages] = await Promise.all([
+    getAllCollections(),
+    getGalleryImages(),
+  ])
+
+  const activeCollections = collections.filter(
+    (c) => c.is_active && c.collection_images && c.collection_images[0]?.count > 0
+  )
 
   // Fetch all images from all collections
   const allCollectionData = await Promise.all(
@@ -20,15 +29,33 @@ export default async function AllCollectionsTheatrePage() {
   )
 
   // Combine all images from all collections
-  const allImages = allCollectionData
+  const allCollectionImages = allCollectionData
     .filter(Boolean)
-    .flatMap((collection) => 
+    .flatMap((collection) =>
       collection.images.map((img) => ({
         ...img.image,
         collectionTitle: collection.title,
         collectionCode: collection.code,
       }))
     )
+
+  // Combine gallery images
+  const formattedGalleryImages = galleryImages.map((img: any) => ({
+    id: img.id,
+    title: img.title,
+    description: img.description,
+    thumbnail_medium_url: img.thumbnail_medium_url,
+    thumbnail_small_url: img.thumbnail_small_url,
+    file_path: img.file_path,
+    original_url: img.original_url,
+    price: img.price,
+    image_format: img.image_format,
+    collectionTitle: "Gallery",
+    collectionCode: "gallery",
+  }))
+
+  // Combine all images
+  const allImages = [...allCollectionImages, ...formattedGalleryImages]
 
   // Combine all music playlists
   const allMusicTracks = allCollectionData
@@ -47,7 +74,7 @@ export default async function AllCollectionsTheatrePage() {
   return (
     <TheatreMode
       images={allImages}
-      collectionTitle="All Collections"
+      collectionTitle="All Collections & Gallery"
       musicPlaylist={allMusicTracks}
     />
   )

@@ -239,7 +239,6 @@ export async function getAllCollections() {
     .order("start_date", { ascending: false })
 
   if (error) {
-    console.error("[v0] Error fetching collections:", error)
     return []
   }
 

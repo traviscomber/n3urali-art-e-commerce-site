@@ -41,7 +41,6 @@ interface ClientWrapperProps {
 
 export const ClientWrapper = memo(
   function ClientWrapper({ imageOfTheDay, auctionImages, collectionImages, dailyImages }: ClientWrapperProps) {
-    console.log("[v0] ClientWrapper render started")
     const { t } = useLanguage()
     const [auctionTimeLeft, setAuctionTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 })
     const swiperRef = useRef<SwiperType | null>(null)
@@ -194,7 +193,7 @@ export const ClientWrapper = memo(
                           "/placeholder.svg" ||
                           "/placeholder.svg" ||
                           "/placeholder.svg"
-                        }
+                         || "/placeholder.svg"}
                         alt={imageOfTheDay.title}
                         fill
                         className="object-cover animate-kenBurnsAuction"
@@ -571,7 +570,7 @@ export const ClientWrapper = memo(
                       "/placeholder.svg?height=1080&width=1920&query=immersive 360 panoramic futuristic landscape" ||
                       "/placeholder.svg" ||
                       "/placeholder.svg"
-                    }
+                     || "/placeholder.svg"}
                     alt="Premium 360° Assets Background"
                     fill
                     className="object-cover opacity-40 animate-kenBurnsAuction"

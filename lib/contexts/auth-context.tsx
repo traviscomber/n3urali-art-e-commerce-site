@@ -24,7 +24,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Initialize Supabase client only in browser, not during render
   useEffect(() => {
     try {
-      setSupabase(createClient())
+      if (typeof window !== "undefined") {
+        setSupabase(createClient())
+      }
     } catch (error) {
       console.error("[v0] Failed to create Supabase client:", error)
       setSupabase(null)
@@ -44,23 +46,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: { session },
       } = await supabase.auth.getSession()
 
-      console.log("[v0] Auth initialized:", {
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        userEmail: session?.user?.email,
-      })
-
       setUser(session?.user ?? null)
 
       // Subscribe to auth changes only after manual initialization
       const {
         data: { subscription },
       } = supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log("[v0] Auth state changed:", {
-          event,
-          hasUser: !!session?.user,
-          userEmail: session?.user?.email,
-        })
         setUser(session?.user ?? null)
       })
 

@@ -19,13 +19,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isInitialized, setIsInitialized] = useState(false)
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient> | null>(null)
 
-  const supabase = useMemo(() => {
+  // Initialize Supabase client only in browser, not during render
+  useEffect(() => {
     try {
-      return createClient()
+      setSupabase(createClient())
     } catch (error) {
       console.error("[v0] Failed to create Supabase client:", error)
-      return null
+      setSupabase(null)
     }
   }, [])
 

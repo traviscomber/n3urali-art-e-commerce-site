@@ -1,11 +1,14 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { useLanguage } from "@/lib/contexts/language-context"
 import { Mail, MapPin, Clock } from "lucide-react"
+import { EmailContactModal } from "./email-contact-modal"
 
 export function Footer() {
   const { t } = useLanguage()
+  const [emailModalOpen, setEmailModalOpen] = useState(false)
   const currentYear = new Date().getFullYear()
 
   const footerSections = [
@@ -60,12 +63,12 @@ export function Footer() {
             <div className="space-y-3">
               <div className="flex items-start gap-2">
                 <Mail className="w-4 h-4 text-muted-foreground mt-1 flex-shrink-0" />
-                <a
-                  href="mailto:info@n3uralia360.art"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                <button
+                  onClick={() => setEmailModalOpen(true)}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors text-left"
                 >
                   info@n3uralia360.art
-                </a>
+                </button>
               </div>
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-muted-foreground mt-1 flex-shrink-0" />
@@ -148,6 +151,9 @@ export function Footer() {
           }),
         }}
       />
+
+      {/* Email Contact Modal */}
+      <EmailContactModal isOpen={emailModalOpen} onClose={() => setEmailModalOpen(false)} />
     </footer>
   )
 }

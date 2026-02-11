@@ -46,27 +46,6 @@ const nextConfig = {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
   },
-  webpack: (config, { isServer }) => {
-    // Disable manifest conflict detection
-    if (!isServer) {
-      config.module.rules.push({
-        test: /\.webmanifest$/,
-        type: 'asset/resource',
-      })
-    }
-    return config
-  },
-  // Explicitly disable PWA auto-detection
-  async redirects() {
-    return []
-  },
-  async rewrites() {
-    return {
-      beforeFiles: [],
-      afterFiles: [],
-      fallback: [],
-    }
-  },
 }
 
 export default nextConfig

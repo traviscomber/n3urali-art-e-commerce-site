@@ -55,7 +55,7 @@ interface GalleryClientProps {
 
 function GalleryClientComponent({ initialImages, initialCategories, galleryStats }: GalleryClientProps) {
   const { t } = useLanguage()
-  const [images, setImages] = useState<Image[]>([])
+  const [images, setImages] = useState<Image[]>(initialImages)
   const [categories, setCategories] = useState<Category[]>(initialCategories)
   const [selectedFormat, setSelectedFormat] = useState<string>("all")
   const [viewingPanorama, setViewingPanorama] = useState<Image | null>(null)
@@ -106,7 +106,7 @@ function GalleryClientComponent({ initialImages, initialCategories, galleryStats
             className="absolute inset-0 w-full h-full object-cover"
             style={{ objectFit: "cover" }}
           >
-            <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/WebBackdrop360-2-u6TrAzn6S3wsmynX3nuZZiVu1GcPpp.mov" type="video/mp4" />
+            <source src="/images/webbackdrop360-2.mov" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
 
@@ -208,7 +208,7 @@ function GalleryClientComponent({ initialImages, initialCategories, galleryStats
 
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <ProductGrid initialImages={[]} categoryId={undefined} />
+          <ProductGrid initialImages={displayedImages} categoryId={undefined} />
         </div>
       </section>
 

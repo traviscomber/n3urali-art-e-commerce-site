@@ -37,6 +37,7 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
+    nodeMiddleware: true,
   },
   compiler: {
     removeConsole: false,
@@ -46,14 +47,7 @@ const nextConfig = {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
   },
-  // Turbopack-compatible configuration to disable manifest conflicts
-  turbo: {
-    rules: {
-      '*.webmanifest': {
-        as: 'text',
-      },
-    },
-  },
+  skipMiddlewareUrlNormalization: false,
 }
 
 export default nextConfig

@@ -39,12 +39,15 @@ const nextConfig = {
     },
   },
   compiler: {
-    removeConsole: false, // Changed from process.env.NODE_ENV === 'production'
+    removeConsole: false,
   },
   reactStrictMode: false,
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
+  },
+  webpack: (config, { isServer }) => {
+    return config
   },
 }
 

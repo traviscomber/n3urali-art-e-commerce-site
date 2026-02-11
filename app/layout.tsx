@@ -148,7 +148,6 @@ export default function RootLayout({
         <meta name="application-name" content="n3uralia360.art" />
         <meta property="og:site_name" content="n3uralia360.art" />
         <meta name="format-detection" content="telephone=no" />
-        <link rel="manifest" href="/manifest.json" />
 
         <script
           type="application/ld+json"

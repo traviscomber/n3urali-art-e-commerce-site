@@ -127,7 +127,6 @@ export const metadata: Metadata = {
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "black-translucent",
   },
-  manifest: "/manifest.json",
 }
 
 export default function RootLayout({

@@ -3,35 +3,34 @@ import { createClient } from "@/lib/supabase/server"
 import { ClientWrapper } from "./client-wrapper"
 
 export const metadata: Metadata = {
-  title: "n3uralia360.art - Premium AI-Generated 360° Environments | Ready-to-Use Assets",
+  title: "n3uralia360 — Immersive Worlds. Cultural Stories.",
   description:
-    "Stop generating, start creating. Premium 360° environments (8K-16K) powered by proprietary AI algorithms. Instant download, full commercial licensing, indemnification included. Perfect for VR/AR, game development, virtual production, metaverse, and architectural visualization. No prompts, no limits, no copyright uncertainty.",
+    "N3uralia is a cultural immersive media studio. We author experiences across dome installations, VR environments, performance loops, and spatial media. Each work begins with deep cultural research and unfolds through collaborative artistic vision. Explore curated collections or commission custom immersive works for museums, planetariums, and institutions.",
   keywords: [
-    "premium 360 assets",
-    "buy 360 panorama",
-    "VR game skybox",
-    "licensed AI imagery",
-    "360 stock photography",
-    "production ready HDRI",
-    "commercial 360 license",
-    "virtual production backgrounds",
-    "metaverse environments",
-    "architectural visualization assets",
-    "AI generated 360",
-    "game development skybox",
-    "instant download panorama",
+    "immersive art",
+    "cultural storytelling",
+    "360 environments",
+    "dome installation",
+    "VR experience",
+    "performance loops",
+    "spatial media",
+    "cultural narratives",
+    "immersive experience",
+    "artistic vision",
+    "contemporary art",
+    "cultural research",
   ],
   openGraph: {
-    title: "n3uralia360.art - Premium 360° AI Assets for Professionals",
+    title: "n3uralia360 — Immersive Worlds. Cultural Stories.",
     description:
-      "Instant, production-ready 360° environments. Full licensing, 16K resolution, algorithmically perfected. For VR, games, virtual production, and metaverse projects.",
+      "A cultural media studio creating immersive experiences across dome installations, VR, performance loops, and spatial media. Human-led artistic vision meets cultural narrative.",
     url: "https://n3uralia360.art",
     images: [
       {
         url: "https://n3uralia360.art/og-home.jpg",
         width: 1200,
         height: 630,
-        alt: "n3uralia360.art - Premium AI-Generated 360° Environments",
+        alt: "n3uralia360 — Immersive Worlds",
       },
     ],
   },

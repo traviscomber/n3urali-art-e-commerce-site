@@ -198,6 +198,13 @@ export function Header({ videoContext }: HeaderProps) {
             )}
 
             <Link
+              href="/studio/process"
+              className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"
+            >
+              Studio
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
+            </Link>
+            <Link
               href="/collection"
               className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"
             >
@@ -216,6 +223,13 @@ export function Header({ videoContext }: HeaderProps) {
               className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"
             >
               {t("nav.theatre")}
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
+            </Link>
+            <Link
+              href="/commission"
+              className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"
+            >
+              Commission
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
             </Link>
             {isAuthenticated && (
@@ -346,6 +360,13 @@ export function Header({ videoContext }: HeaderProps) {
           <div className="md:hidden border-t border-border/50 py-6 bg-black/80 backdrop-blur-xl rounded-b-lg">
             <nav className="flex flex-col space-y-6">
               <Link
+                href="/studio/process"
+                className="text-base font-medium text-foreground hover:text-primary transition-colors px-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Studio
+              </Link>
+              <Link
                 href="/collection"
                 className="text-base font-medium text-foreground hover:text-primary transition-colors px-2"
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -365,6 +386,13 @@ export function Header({ videoContext }: HeaderProps) {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {t("nav.theatre")}
+              </Link>
+              <Link
+                href="/commission"
+                className="text-base font-medium text-foreground hover:text-primary transition-colors px-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Commission
               </Link>
               {isAuthenticated && (
                 <Link

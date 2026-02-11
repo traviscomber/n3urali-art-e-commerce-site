@@ -186,11 +186,6 @@ export async function getImageById(imageId: string) {
       thumbnailUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/images/${thumbnailUrl}`
     }
 
-    console.log("[v0] getImageById computed URLs:", {
-      imageUrl,
-      thumbnailUrl,
-    })
-
     const transformedImage = {
       id: image.id,
       title: image.title,
@@ -334,50 +329,30 @@ export async function getDatabaseStats() {
 
 export async function createImageWithCategoryObject(imageData: any) {
   try {
-    console.log("[v0] createImageWithCategoryObject: Starting with data:", {
-      title: imageData.title,
-      category_id: imageData.category_id,
-      has_image_url: !!imageData.image_url,
-      has_thumbnail_url: !!imageData.thumbnail_url,
-      has_file_path: !!imageData.file_path, // Added file_path logging
-    })
+    const supabase = await createClient()
 
-    const supabase = createServiceRoleClient()
+    const { data: insertedData, error: insertError } = await supabase
+      .from("images")
+      .insert([imageData])
+      .select()
+      .single()
 
-    const dbRecord = {
-      title: imageData.title,
-      description: imageData.description || null,
-      category_id: imageData.category_id,
-      license_id: imageData.license_id || null,
-      price: imageData.price,
-      original_url: imageData.image_url || imageData.original_url,
-      original_file_url: imageData.original_file_url || null,
-      thumbnail_medium_url: imageData.thumbnail_url || imageData.thumbnail_medium_url,
-      file_path: imageData.file_path || imageData.image_url || "unknown", // Fallback to image_url or 'unknown' to satisfy NOT NULL
-      active: imageData.active ?? true,
-      is_featured: imageData.featured ?? false,
+    if (insertError) {
+      console.error("[v0] Error creating image:", insertError.message)
+      return { success: false, error: insertError.message, code: "INSERT_ERROR" }
     }
 
     console.log("[v0] createImageWithCategoryObject: Inserting record:", {
-      ...dbRecord,
-      original_url: dbRecord.original_url?.substring(0, 50) + "...",
-      thumbnail_medium_url: dbRecord.thumbnail_medium_url?.substring(0, 50) + "...",
-      file_path: dbRecord.file_path?.substring(0, 50) + "...", // Added file_path logging
+      ...imageData,
+      original_url: imageData.original_url?.substring(0, 50) + "...",
+      thumbnail_medium_url: imageData.thumbnail_medium_url?.substring(0, 50) + "...",
+      file_path: imageData.file_path?.substring(0, 50) + "...", // Added file_path logging
     })
-
-    const { data: image, error } = await supabase.from("images").insert([dbRecord]).select().single()
-
-    if (error) {
-      console.error("[v0] createImageWithCategoryObject: Insert error:", error)
-      throw error
-    }
-
-    console.log("[v0] createImageWithCategoryObject: Success! Created image ID:", image.id)
 
     revalidatePath("/simple-admin")
     revalidatePath("/gallery")
 
-    return { success: true, data: image }
+    return { success: true, data: insertedData }
   } catch (error) {
     console.error("[v0] createImageWithCategoryObject error:", error)
     return { success: false, error: error instanceof Error ? error.message : "Failed to create image" }
@@ -406,7 +381,7 @@ export async function updateImageDetails(imageId: string, updateData: any) {
       return { success: false, error: "Image not found. It may have been deleted." }
     }
 
-    const { data, error } = await supabase
+    const { data, error: updateError } = await supabase
       .from("images")
       .update({
         title: updateData.title,
@@ -418,7 +393,7 @@ export async function updateImageDetails(imageId: string, updateData: any) {
       .select()
       .single()
 
-    if (error) throw error
+    if (updateError) throw updateError
 
     revalidatePath("/simple-admin")
     revalidatePath("/gallery")

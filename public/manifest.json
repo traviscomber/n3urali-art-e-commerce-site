@@ -1,38 +1,38 @@
 {
-  "name": "n3uralia360.art - Premium 360° Digital Photography & AI-Generated Imagery",
-  "short_name": "n3uralia360.art",
-  "description": "Discover our curated collection of AI-generated equirectangular and fisheye images, perfect for projection mapping, VR experiences, and architectural visualization. Professional quality 4K-16K resolution.",
+  "name": "N3uralia360 - Immersive Worlds. Cultural Stories.",
+  "short_name": "N3uralia360",
+  "description": "A cultural immersive media studio creating experiences across dome installations, VR environments, performance loops, and spatial media.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "portrait-primary",
   "scope": "/",
-  "id": "n3uralia360-art-360-photography",
+  "id": "n3uralia360-studio",
   "icons": [
     {
-      "src": "/images/n3uralia-logo.png",
+      "src": "/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/images/n3uralia-logo.png",
+      "src": "/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
     }
   ],
-  "categories": ["photography", "art", "business", "productivity"],
+  "categories": ["art", "media", "entertainment"],
   "lang": "en",
   "dir": "ltr",
   "screenshots": [
     {
-      "src": "/images/n3uralia-logo.png",
+      "src": "/screenshot-1280x720.png",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "n3uralia360.art Gallery View"
+      "label": "N3uralia360 Studio - Immersive Experiences"
     }
   ]
 }

@@ -30,21 +30,16 @@ export default function DownloadsPage() {
 
   const fetchDownloads = async () => {
     try {
-      console.log("[v0] Fetching user downloads...")
       const response = await fetch("/api/downloads/user")
-      console.log("[v0] Downloads response status:", response.status)
 
       if (!response.ok) {
         const errorText = await response.text()
-        console.error("[v0] Downloads fetch failed:", errorText)
         throw new Error("Failed to fetch downloads")
       }
 
       const data = await response.json()
-      console.log("[v0] Downloads data:", data)
       setDownloads(data.downloads)
     } catch (error) {
-      console.error("[v0] Error fetching downloads:", error)
       toast.error("Failed to load downloads")
     } finally {
       setLoading(false)
@@ -67,22 +62,17 @@ export default function DownloadsPage() {
       return
     }
 
-    console.log("[v0] Starting download for order item:", orderItemId)
     setDownloadingIds((prev) => new Set(prev).add(orderItemId))
 
     try {
-      console.log("[v0] Generating download token...")
       const response = await fetch("/api/download/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderItemId }),
       })
 
-      console.log("[v0] Generate token response status:", response.status)
-
       if (!response.ok) {
         const errorText = await response.text()
-        console.error("[v0] Token generation failed:", errorText)
 
         if (response.status === 403) {
           toast.error("Download limit exceeded or order not found")
@@ -95,10 +85,8 @@ export default function DownloadsPage() {
       }
 
       const data = await response.json()
-      console.log("[v0] Token generation successful:", data)
 
       // Open download in new tab
-      console.log("[v0] Opening download URL:", data.downloadUrl)
       window.open(data.downloadUrl, "_blank")
 
       const remainingDownloads = downloadLimit - downloadCount - 1
@@ -111,8 +99,6 @@ export default function DownloadsPage() {
       // Refresh downloads to update counts
       setTimeout(fetchDownloads, 1000)
     } catch (error) {
-      console.error("[v0] Download error:", error)
-      console.error("[v0] Download error details:", error instanceof Error ? error.message : String(error))
       toast.error("Failed to start download")
     } finally {
       setDownloadingIds((prev) => {

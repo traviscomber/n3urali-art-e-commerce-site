@@ -24,38 +24,38 @@ const translations = {
     "nav.myOrders": "Mis Pedidos",
 
     // Hero Section
-    "hero.badge": "Activos Premium Listos para Usar",
-    "hero.title": "Deja de Generar,",
-    "hero.titleHighlight": "Empieza a Crear",
+    "hero.badge": "Inmersivo. Cultural. Autoral.",
+    "hero.title": "Mundos Inmersivos.",
+    "hero.titleHighlight": "Historias Culturales.",
     "hero.subtitle":
-      "Ambientes 360° premium creados por algoritmos de IA propietarios que comprenden movimiento, atmósfera y profundidad.",
+      "N3uralia360 es un estudio de medios inmersivos culturales. Autorizamos experiencias a través de instalaciones domo, ambientes VR, loops de performance y medios espaciales. Cada trabajo comienza con investigación cultural profunda y se desarrolla a través de visión artística colaborativa.",
     "hero.description":
-      "Sin prompts. Sin límites de generación. Sin incertidumbre de derechos de autor. Solo activos inmersivos instantáneos y listos para producción.",
-    "hero.cta.explore": "Ver Proyectos",
-    "hero.cta.demo": "Ver Casos de Uso",
-    "hero.videoPlaceholder": "[ Placeholder de Video - 21:9 ]",
+      "Desde preservación de patrimonio hasta futuros especulativos, desde comisiones institucionales hasta colecciones públicas curadas—creamos narrativas inmersivas que trascienden fronteras y comprometen audiencias en la intersección de cultura, arte y tecnología.",
+    "hero.cta.explore": "Explorar Obras",
+    "hero.cta.demo": "Ver Nuestro Estudio",
+    "hero.videoPlaceholder": "[ Trasfondo de Ambiente Inmersivo ]",
 
-    "hero.imageOfDay": "Imagen del Día",
-    "hero.viewDetails": "Ver Detalles y Precio",
-    "hero.offToday": "% DCTO Hoy",
+    "hero.imageOfDay": "Obra Destacada",
+    "hero.viewDetails": "Ver Detalles y Licencia",
+    "hero.offToday": "% Disponible",
 
     // Collection Section
-    "collection.badge": "Colección Premium",
+    "collection.badge": "Colecciones Destacadas",
     "collection.title": "Colecciones",
-    "collection.titleHighlight": "Curadas",
+    "collection.titleHighlight": "Culturales",
     "collection.viewComplete": "Ver Colección Completa",
-    "collection.off": "% DCTO",
+    "collection.off": "% Licencia",
 
     // Auction Section
-    "auction.badge": "⚡ Subasta Rápida",
-    "auction.title": "Atrapa los",
-    "auction.titleHighlight": "Mejores Precios",
+    "auction.badge": "⚡ Edición Limitada",
+    "auction.title": "Obras",
+    "auction.titleHighlight": "Destacadas",
     "auction.subtitle":
-      "¡Los precios bajan cada minuto! Consigue imágenes premium a precios inmejorables antes de que se reinicien",
-    "auction.tip": "💡 Los precios se reinician cada hora • Mientras más descuento, mejor el trato",
-    "auction.hotDeal": "¡OFERTA CALIENTE!",
-    "auction.endsIn": "Termina en",
-    "auction.buyNow": "Comprar Ahora",
+      "Obras inmersivas curadas de nuestra investigación creativa más reciente. Cada mes destacamos obras que exploran nuevas narrativas y territorios culturales.",
+    "auction.tip": "✨ Curado por directores del estudio • Cada obra lleva contexto cultural y procedencia artística",
+    "auction.hotDeal": "¡DESTACADO!",
+    "auction.endsIn": "Destacado Hasta",
+    "auction.buyNow": "Ver Obra",
     left: "restante", // Adding "left" translation for auction countdown timer
     minutes: "Minutos",
     seconds: "Segundos",
@@ -63,29 +63,29 @@ const translations = {
     instant: "Instantáneo",
 
     // CTA Cards
-    "cta.collection.title": "Colección",
-    "cta.collection.subtitle": "20 imágenes premium curadas",
-    "cta.collection.price": "$999",
-    "cta.collection.priceNote": "Paquete completo",
-    "cta.collection.button": "Ver Colección",
+    "cta.collection.title": "Colecciones",
+    "cta.collection.subtitle": "Obras temáticas curadas",
+    "cta.collection.price": "$299+",
+    "cta.collection.priceNote": "Por nivel de licencia",
+    "cta.collection.button": "Explorar Colecciones",
     "cta.gallery.title": "Galería",
-    "cta.gallery.subtitle": "Explora todas las imágenes individuales",
-    "cta.gallery.count": "130+",
-    "cta.gallery.countNote": "Imágenes premium",
+    "cta.gallery.subtitle": "Navega todas las obras y formatos",
+    "cta.gallery.count": "50+",
+    "cta.gallery.countNote": "Obras inmersivas",
     "cta.gallery.button": "Explorar Galería",
-    "cta.signIn.title": "Iniciar Sesión",
-    "cta.signIn.subtitle": "Accede a tu cuenta y pedidos",
-    "cta.signIn.access": "Acceso",
-    "cta.signIn.accessNote": "Descarga instantánea",
+    "cta.signIn.title": "Cuenta",
+    "cta.signIn.subtitle": "Accede a tus licencias y descargas",
+    "cta.signIn.access": "Seguro",
+    "cta.signIn.accessNote": "Gestión de licencias",
     "cta.signIn.button": "Iniciar Sesión",
 
     // Stats Section
-    "stats.resolution": "4K-16K",
-    "stats.resolutionNote": "Ultra alta resolución",
-    "stats.instant": "Instantáneo",
-    "stats.instantNote": "Descarga después de comprar",
-    "stats.vr": "Listo para VR",
-    "stats.vrNote": "Perfecto para experiencias inmersivas",
+    "stats.resolution": "8K-16K",
+    "stats.resolutionNote": "Ultra resolución",
+    "stats.instant": "Seguro",
+    "stats.instantNote": "Entrega Licenciada",
+    "stats.vr": "Espacial",
+    "stats.vrNote": "Domo, VR, Performance",
 
     // Featured Gallery
     "featured.badge": "Galería Destacada",
@@ -324,37 +324,37 @@ const translations = {
     "nav.myOrders": "My Orders",
 
     // Hero Section
-    "hero.badge": "Ready-to-Use Premium Assets",
-    "hero.title": "Stop Generating,",
-    "hero.titleHighlight": "Start Creating",
+    "hero.badge": "Immersive. Cultural. Authorial.",
+    "hero.title": "Immersive Worlds.",
+    "hero.titleHighlight": "Cultural Stories.",
     "hero.subtitle":
-      "Premium 360° environments crafted by proprietary AI algorithms that understand movement, atmosphere, and depth.",
+      "N3uralia360 is a cultural immersive media studio. We author experiences across dome installations, VR environments, performance loops, and spatial media. Each work begins with deep cultural research and unfolds through collaborative artistic vision.",
     "hero.description":
-      "No prompts. No generation limits. No copyright uncertainty. Just instant, production-ready immersive assets.",
-    "hero.cta.explore": "View Projects",
-    "hero.cta.demo": "See Use Cases",
-    "hero.videoPlaceholder": "[ Video Placeholder - 21:9 ]",
+      "From heritage preservation to speculative futures, from institutional commissions to curated public collections—we create immersive narratives that transcend boundaries and engage audiences at the intersection of culture, art, and technology.",
+    "hero.cta.explore": "Explore Works",
+    "hero.cta.demo": "View Our Studio",
+    "hero.videoPlaceholder": "[ Immersive Environment Backdrop ]",
 
-    "hero.imageOfDay": "Image of the Day",
-    "hero.viewDetails": "View Details & Price",
-    "hero.offToday": "% OFF Today",
+    "hero.imageOfDay": "Featured Work",
+    "hero.viewDetails": "View Details & License",
+    "hero.offToday": "% Available",
 
     // Collection Section
-    "collection.badge": "Premium Collection",
-    "collection.title": "Collections",
-    "collection.titleHighlight": "Curated",
-    "collection.viewComplete": "View Complete Collection",
-    "collection.off": "% OFF",
+    "collection.badge": "Featured Collections",
+    "collection.title": "Cultural",
+    "collection.titleHighlight": "Collections",
+    "collection.viewComplete": "View Full Collection",
+    "collection.off": "% Licensing",
 
     // Auction Section
-    "auction.badge": "⚡ Flash Auction",
-    "auction.title": "Catch the",
-    "auction.titleHighlight": "Best Prices",
-    "auction.subtitle": "Prices drop every minute! Grab premium images at unbeatable prices before they reset",
-    "auction.tip": "💡 Prices reset every hour • The deeper the discount, the better the deal",
-    "auction.hotDeal": "HOT DEAL!",
-    "auction.endsIn": "Ends in",
-    "auction.buyNow": "Buy Now",
+    "auction.badge": "⚡ Limited Edition",
+    "auction.title": "Exclusive",
+    "auction.titleHighlight": "Featured Works",
+    "auction.subtitle": "Curated immersive works from our latest creative research. Each month we spotlight works exploring new narratives and cultural territories.",
+    "auction.tip": "✨ Curated by studio directors • Each work carries cultural context and artistic provenance",
+    "auction.hotDeal": "FEATURED!",
+    "auction.endsIn": "Featured Until",
+    "auction.buyNow": "View Work",
     left: "left", // Adding "left" translation for auction countdown timer
     minutes: "Minutes",
     seconds: "Seconds",
@@ -362,29 +362,29 @@ const translations = {
     instant: "Instant",
 
     // CTA Cards
-    "cta.collection.title": "Collection",
-    "cta.collection.subtitle": "20 curated premium images",
-    "cta.collection.price": "$999",
-    "cta.collection.priceNote": "Complete bundle",
-    "cta.collection.button": "View Collection",
+    "cta.collection.title": "Collections",
+    "cta.collection.subtitle": "Curated thematic works",
+    "cta.collection.price": "$299+",
+    "cta.collection.priceNote": "Per license tier",
+    "cta.collection.button": "Explore Collections",
     "cta.gallery.title": "Gallery",
-    "cta.gallery.subtitle": "Browse all individual images",
-    "cta.gallery.count": "130+",
-    "cta.gallery.countNote": "Premium images",
+    "cta.gallery.subtitle": "Browse all works & formats",
+    "cta.gallery.count": "50+",
+    "cta.gallery.countNote": "Immersive works",
     "cta.gallery.button": "Browse Gallery",
-    "cta.signIn.title": "Sign In",
-    "cta.signIn.subtitle": "Access your account and orders",
-    "cta.signIn.access": "Instant",
-    "cta.signIn.accessNote": "Download access",
+    "cta.signIn.title": "Account",
+    "cta.signIn.subtitle": "Access your licenses & downloads",
+    "cta.signIn.access": "Secure",
+    "cta.signIn.accessNote": "License management",
     "cta.signIn.button": "Sign In",
 
     // Stats Section
-    "stats.resolution": "4K-16K",
-    "stats.resolutionNote": "Ultra high resolution",
-    "stats.instant": "Instant",
-    "stats.instantNote": "Download after purchase",
-    "stats.vr": "VR Ready",
-    "stats.vrNote": "Perfect for immersive experiences",
+    "stats.resolution": "8K-16K",
+    "stats.resolutionNote": "Ultra resolution",
+    "stats.instant": "Secure",
+    "stats.instantNote": "Licensed delivery",
+    "stats.vr": "Spatial",
+    "stats.vrNote": "Dome, VR, Performance",
 
     // Featured Gallery
     "featured.badge": "Featured Gallery",
@@ -614,7 +614,7 @@ const translations = {
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("es")
+  const [language, setLanguageState] = useState<Language>("en")
 
   useEffect(() => {
     // Load saved language preference or default to Spanish

@@ -127,6 +127,7 @@ export const metadata: Metadata = {
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "black-translucent",
   },
+  manifest: "/manifest.json",
 }
 
 export default function RootLayout({
@@ -135,7 +136,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`antialiased ${montserrat.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`antialiased ${montserrat.variable}`}>
       <head>
         <meta name="theme-color" content="#000000" />
         <meta name="msapplication-TileColor" content="#000000" />

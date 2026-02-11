@@ -19,13 +19,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isInitialized, setIsInitialized] = useState(false)
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient> | null>(null)
 
-  const supabase = useMemo(() => {
+  // Initialize Supabase client only in browser, not during render
+  useEffect(() => {
     try {
-      return createClient()
+      if (typeof window !== "undefined") {
+        setSupabase(createClient())
+      }
     } catch (error) {
-      console.error("[v0] Failed to create Supabase client:", error)
-      return null
+      // Silently fail - Supabase not available yet
+      setSupabase(null)
     }
   }, [])
 
@@ -42,29 +46,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: { session },
       } = await supabase.auth.getSession()
 
-      console.log("[v0] Auth initialized:", {
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        userEmail: session?.user?.email,
-      })
-
       setUser(session?.user ?? null)
 
       // Subscribe to auth changes only after manual initialization
       const {
         data: { subscription },
       } = supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log("[v0] Auth state changed:", {
-          event,
-          hasUser: !!session?.user,
-          userEmail: session?.user?.email,
-        })
         setUser(session?.user ?? null)
       })
 
       return () => subscription.unsubscribe()
     } catch (error) {
-      console.error("[v0] Failed to initialize auth:", error)
+      // Auth initialization failed silently
     } finally {
       setIsLoading(false)
     }
@@ -76,7 +69,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     if (!supabase) {
-      console.warn("[v0] Cannot sign out: Supabase client not available")
       return
     }
 
@@ -84,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await supabase.auth.signOut()
       setUser(null)
     } catch (error) {
-      console.error("[v0] Failed to sign out:", error)
+      // Sign out failed silently
     }
   }
 

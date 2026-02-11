@@ -9,10 +9,22 @@ import { useEffect, useState } from "react"
 export function AuthButton() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient> | null>(null)
   const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
+    try {
+      if (typeof window !== "undefined") {
+        setSupabase(createClient())
+      }
+    } catch (error) {
+      console.error("[v0] Failed to create Supabase client:", error)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!supabase) return
+
     const getUser = async () => {
       const {
         data: { user },
@@ -31,7 +43,7 @@ export function AuthButton() {
     })
 
     return () => subscription.unsubscribe()
-  }, [supabase.auth])
+  }, [supabase]) // Updated dependency array to [supabase]
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()

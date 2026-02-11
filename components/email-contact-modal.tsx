@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useContext } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Mail, Copy, Check } from "lucide-react"
+import { LanguageContext } from "@/lib/contexts/language-context"
 
 interface EmailContactModalProps {
   isOpen: boolean
@@ -12,6 +13,13 @@ interface EmailContactModalProps {
 
 export function EmailContactModal({ isOpen, onClose }: EmailContactModalProps) {
   const [copied, setCopied] = useState(false)
+  const languageContext = useContext(LanguageContext)
+  
+  if (!languageContext) {
+    throw new Error("EmailContactModal must be used within LanguageProvider")
+  }
+
+  const { t } = languageContext
   const email = "info@n3uralia360.art"
 
   const handleCopyEmail = () => {
@@ -26,17 +34,17 @@ export function EmailContactModal({ isOpen, onClose }: EmailContactModalProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Mail className="w-5 h-5" />
-            Contact Us
+            {t("contact.title")}
           </DialogTitle>
           <DialogDescription>
-            Get in touch with N3uralia360
+            {t("contact.description")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           {/* Email Display */}
           <div className="bg-background border rounded-lg p-4">
-            <p className="text-sm text-muted-foreground mb-2">Email Address</p>
+            <p className="text-sm text-muted-foreground mb-2">{t("contact.emailLabel")}</p>
             <div className="flex items-center gap-2">
               <code className="text-lg font-mono font-semibold break-all flex-1">
                 {email}
@@ -50,12 +58,12 @@ export function EmailContactModal({ isOpen, onClose }: EmailContactModalProps) {
                 {copied ? (
                   <>
                     <Check className="w-4 h-4 mr-1" />
-                    Copied
+                    {t("contact.copied")}
                   </>
                 ) : (
                   <>
                     <Copy className="w-4 h-4 mr-1" />
-                    Copy
+                    {t("contact.copy")}
                   </>
                 )}
               </Button>
@@ -64,51 +72,51 @@ export function EmailContactModal({ isOpen, onClose }: EmailContactModalProps) {
 
           {/* Quotation Request Guide */}
           <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 space-y-3">
-            <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">Request a Quotation</p>
+            <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">{t("contact.quotationTitle")}</p>
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              When requesting a quotation for our services or products, please include:
+              {t("contact.quotationIntro")}
             </p>
             <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-2 list-disc list-inside">
-              <li>Project type (dome installation, VR environment, spatial media, etc.)</li>
-              <li>Venue size and specifications</li>
-              <li>Timeline and budget range (if applicable)</li>
-              <li>Your contact information and preferred communication method</li>
-              <li>Any reference images, inspiration, or detailed requirements</li>
+              <li>{t("contact.quotationItem1")}</li>
+              <li>{t("contact.quotationItem2")}</li>
+              <li>{t("contact.quotationItem3")}</li>
+              <li>{t("contact.quotationItem4")}</li>
+              <li>{t("contact.quotationItem5")}</li>
             </ul>
             <p className="text-xs text-blue-700 dark:text-blue-300 pt-2">
-              Our team will provide a tailored quotation within 24-48 hours.
+              {t("contact.quotationResponse")}
             </p>
           </div>
 
           {/* Instructions */}
           <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-            <p className="text-sm font-semibold">How to Contact Us</p>
+            <p className="text-sm font-semibold">{t("contact.instructionsTitle")}</p>
             <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-              <li>Copy the email address above</li>
-              <li>Open your preferred email client (Gmail, Outlook, Apple Mail, etc.)</li>
-              <li>Paste the email address in the "To" field</li>
-              <li>Write your message with the details above and send</li>
+              <li>{t("contact.instruction1")}</li>
+              <li>{t("contact.instruction2")}</li>
+              <li>{t("contact.instruction3")}</li>
+              <li>{t("contact.instruction4")}</li>
             </ol>
             <p className="text-xs text-muted-foreground pt-2">
-              We typically respond within 24 hours during business days.
+              {t("contact.responseTime")}
             </p>
           </div>
 
           {/* Benefits */}
           <div className="space-y-2">
-            <p className="text-sm font-semibold">Why use your email client?</p>
+            <p className="text-sm font-semibold">{t("contact.benefitsTitle")}</p>
             <ul className="text-sm text-muted-foreground space-y-1">
-              <li>✓ Use any email provider (Gmail, Outlook, Apple Mail, etc.)</li>
-              <li>✓ Maintain your email history and sent messages</li>
-              <li>✓ Faster response and better communication</li>
-              <li>✓ Your privacy and security</li>
+              <li>{t("contact.benefit1")}</li>
+              <li>{t("contact.benefit2")}</li>
+              <li>{t("contact.benefit3")}</li>
+              <li>{t("contact.benefit4")}</li>
             </ul>
           </div>
         </div>
 
         {/* Close Button */}
         <Button onClick={onClose} className="w-full mt-4">
-          Close
+          {t("contact.closeButton")}
         </Button>
       </DialogContent>
     </Dialog>

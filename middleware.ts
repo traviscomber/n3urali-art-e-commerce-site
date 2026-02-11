@@ -2,6 +2,9 @@ import { updateSession } from "@/lib/supabase/middleware"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
+// Run middleware in Node.js runtime to support Supabase libraries
+export const runtime = "nodejs"
+
 // Development-only paths that should be hidden in production
 const DEV_ONLY_PATHS = [
   "/debug-images",

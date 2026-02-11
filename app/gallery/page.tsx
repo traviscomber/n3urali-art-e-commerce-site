@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import GalleryClient from "./gallery-client"
-import { getCategories, getGalleryStats } from "@/app/actions/admin-actions"
+import { getCategories, getGalleryStats, getImages } from "@/app/actions/admin-actions"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 600 // 10 minutes
@@ -42,7 +42,11 @@ export const metadata: Metadata = {
 }
 
 export default async function GalleryPage() {
-  const [categoriesResult, statsResult] = await Promise.all([
+  const [imagesResult, categoriesResult, statsResult] = await Promise.all([
+    getImages().catch((error) => {
+      console.error("Error fetching images:", error)
+      return { success: false, error: error.message, data: [] }
+    }),
     getCategories().catch((error) => {
       console.error("Error fetching categories:", error)
       return { success: false, error: error.message, data: [] }
@@ -53,8 +57,9 @@ export default async function GalleryPage() {
     }),
   ])
 
+  const initialImages = imagesResult.success ? imagesResult.data || [] : []
   const initialCategories = categoriesResult.success ? categoriesResult.data || [] : []
   const galleryStats = statsResult.success ? statsResult.stats : { total: 0, equirectangular: 0, fisheye: 0 }
 
-  return <GalleryClient initialImages={[]} initialCategories={initialCategories} galleryStats={galleryStats} />
+  return <GalleryClient initialImages={initialImages} initialCategories={initialCategories} galleryStats={galleryStats} />
 }

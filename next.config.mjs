@@ -37,9 +37,6 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
-    // Disable automatic metadata file detection to prevent manifest conflicts
-    disableStaticImages: false,
-    skipMiddlewareUrlNormalization: false,
   },
   compiler: {
     removeConsole: false,
@@ -49,22 +46,13 @@ const nextConfig = {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
   },
-  // Use custom build output to prevent manifest conflicts
-  outputFileTracingIncludes: {},
-  // Prevent Next.js from auto-detecting and generating manifest routes
-  webpack: (config, { isServer }) => {
-    // Override module rules to prevent .webmanifest from being treated as a route
-    config.module.rules = config.module.rules.map((rule) => {
-      if (rule.test?.toString().includes('webmanifest')) {
-        return {
-          ...rule,
-          type: 'asset/resource',
-        }
-      }
-      return rule
-    })
-    
-    return config
+  // Turbopack-compatible configuration to disable manifest conflicts
+  turbo: {
+    rules: {
+      '*.webmanifest': {
+        as: 'text',
+      },
+    },
   },
 }
 

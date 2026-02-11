@@ -23,11 +23,16 @@ const montserrat = Montserrat({
 
 export const metadata: Metadata = {
   title: {
-    default: "n3uralia360.art - Premium AI-Generated 360° Photography | Equirectangular & Dome Images",
-    template: "%s | n3uralia360.art",
+    default: "N3uralia360 - Immersive Worlds. Cultural Stories.",
+    template: "%s | N3uralia360",
   },
   description:
-    "Discover ultra high-resolution 360° AI-generated photography perfect for VR experiences, projection mapping, and immersive visualization. Browse our curated collection of equirectangular and fisheye dome images in 4K-16K resolution. Part of the n3uralia group, delivering supreme professional quality digital imagery with proprietary noise diffusion algorithms.",
+    "A cultural immersive media studio creating experiences across dome installations, VR environments, performance loops, and spatial media.",
+  metadataBase: new URL("https://n3uralia360.art"),
+  icons: {
+    icon: '/icon.svg',
+    apple: '/apple-icon.png',
+  },
   keywords: [
     "360 photography",
     "AI generated 360 images",

@@ -211,7 +211,7 @@ export default function RootLayout({
                   contactPoint: {
                     "@type": "ContactPoint",
                     contactType: "Customer Service",
-                    email: "hello@n3uralia360.art",
+                    email: "info@n3uralia360.art",
                     availableLanguage: ["English", "Spanish"],
                     areaServed: "Worldwide",
                   },

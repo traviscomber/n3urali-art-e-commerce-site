@@ -109,7 +109,7 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-semibold mb-1">Email</h3>
                     {/* Updated email domain to www.n3uralia360.art */}
-                    <p className="text-muted-foreground">hello@n3uralia360.art</p>
+                    <p className="text-muted-foreground">info@n3uralia360.art</p>
                     <p className="text-sm text-muted-foreground">We'll respond within 24 hours</p>
                   </div>
                 </div>

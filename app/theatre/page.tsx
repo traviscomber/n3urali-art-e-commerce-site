@@ -4,8 +4,8 @@ import { Film } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 
 export const metadata = {
-  title: "Theatre Mode - Immersive Collection Viewing",
-  description: "Experience our collections in fullscreen theatre mode with ambient music and automatic slideshow transitions",
+  title: "Theatre Mode - Full-Screen Immersive Viewing",
+  description: "Experience our immersive worlds in full-screen Theatre Mode. Preview before you program. Test new atmospheres. No special hardware required.",
 }
 
 export default async function TheatrePage() {
@@ -19,16 +19,35 @@ export default async function TheatrePage() {
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6">
-              <Film className="w-8 h-8 text-primary" />
+          <div className="text-center mb-12 space-y-6">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-cyan-500/10 border border-cyan-500/30 mb-6">
+              <Film className="w-8 h-8 text-cyan-400" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Theatre Mode
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Immerse yourself in our curated collections with fullscreen viewing, ambient music, and automatic slideshow transitions
-            </p>
+            <div>
+              <h1 className="text-5xl md:text-6xl font-bold mb-4 text-white">
+                See It Like Your
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">
+                  Audience Will
+                </span>
+              </h1>
+              <p className="text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed font-light">
+                Open Theatre Mode to experience our worlds in full-screen immersive format.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-sm text-slate-400 max-w-3xl mx-auto">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full" />
+                Preview before you program
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
+                Plan your themed nights
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full" />
+                Test new atmospheres
+              </div>
+            </div>
           </div>
 
           {activeCollections.length > 1 && (

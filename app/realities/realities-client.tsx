@@ -61,16 +61,48 @@ export function RealitiesClient({ initialContent }: RealitiesClientProps) {
             </div>
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
-              R3alities<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">
-                Cinematic Dome Stories
+              Cinematic Dome Stories
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">
+                With Timing
               </span>
             </h1>
 
             <p className="text-lg text-slate-300 max-w-3xl mx-auto">
-              Immersive seamless loops designed for full-dome installations, festivals, VR venues, and branded
-              experiences. Each story unfolds across 360 degrees.
+              Not loops. Not static backdrops. Real stories that unfold.
             </p>
+
+            <p className="text-base text-slate-400 max-w-3xl mx-auto leading-relaxed">
+              Realities are AI-animated immersive experiences with progression, rhythm, and visual timing. Designed as mini-shows that hold audience attention from beginning to end.
+            </p>
+
+            <div className="mt-8 bg-slate-800/50 border border-slate-700 rounded-xl p-6 max-w-3xl mx-auto">
+              <h3 className="text-lg font-bold text-white mb-4">Perfect for:</h3>
+              <ul className="grid md:grid-cols-2 gap-3 text-slate-300">
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full" />
+                  School dome programming
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
+                  Festival headline segments
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full" />
+                  Branded immersive presentations
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
+                  Themed event openings
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-8 bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 border border-cyan-500/20 rounded-xl p-6 max-w-3xl mx-auto">
+              <p className="text-slate-300 font-semibold mb-2">Each Reality includes:</p>
+              <p className="text-slate-400 text-sm">
+                Full-dome fisheye version • Optional VR equirectangular edition • Structured runtime with narrative flow • Clean projection-ready delivery
+              </p>
+            </div>
 
             <div className="flex items-center justify-center gap-4 pt-4">
               <Link href="/studio">

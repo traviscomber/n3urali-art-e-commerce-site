@@ -97,7 +97,7 @@ export const ClientWrapper = memo(
     return (
       <div className="min-h-screen bg-background">
         <main>
-          {/* Hero Section - "Endless Immersive Backdrops" */}
+          {/* Hero Section - "Full-Dome Worlds Built to Perform" */}
           <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20">
             {/* Atmospheric background */}
             <div className="absolute inset-0 z-0">
@@ -111,15 +111,17 @@ export const ClientWrapper = memo(
                 {/* Main tagline */}
                 <div className="space-y-4">
                   <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-[1.1] text-balance text-white">
-                    Endless Immersive
+                    Full-Dome Worlds
                     <span className="block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-emerald-400 to-teal-400">
-                      Backdrops
+                      Built to Perform
                     </span>
                   </h1>
 
-                  <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed font-light">
-                    Full-dome cinema, VR environments, and seamless performance loops. Crafted for immersive venues,
-                    festivals, and branded experiences.
+                  <p className="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed font-light">
+                    Cinematic dome stories, seamless immersive loops, and VR-ready environments — crafted for dome operators, immersive events, and live performance.
+                  </p>
+                  <p className="text-base md:text-lg text-slate-400 max-w-3xl mx-auto">
+                    Projection-ready. Dome-correct. Built to impress.
                   </p>
                 </div>
 
@@ -127,7 +129,7 @@ export const ClientWrapper = memo(
                 <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
                   <Link href="/realities">
                     <Button size="lg" className="bg-cyan-600 hover:bg-cyan-700 text-white">
-                      Explore R3alities
+                      Explore Worlds
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </Link>
@@ -136,7 +138,7 @@ export const ClientWrapper = memo(
                     variant="outline"
                     className="border-slate-600 text-slate-200 hover:bg-slate-800/50"
                   >
-                    Get Those Loops!
+                    Open Theatre Mode
                   </Button>
                 </div>
 
@@ -144,15 +146,74 @@ export const ClientWrapper = memo(
                 <div className="flex flex-wrap items-center justify-center gap-6 pt-8 text-sm text-slate-400">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-cyan-400 rounded-full" />
-                    Full-Dome Ready
+                    Full-Dome Fisheye
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-emerald-400 rounded-full" />
-                    VR Compatible
+                    Seamless Loops
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-cyan-400 rounded-full" />
-                    Seamless Loops
+                    VR Ready
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Studio Section */}
+          <section className="py-24 px-4 bg-gradient-to-b from-slate-900/50 to-background">
+            <div className="container mx-auto max-w-6xl">
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white">
+                    A New Studio.
+                    <span className="block text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
+                      Built on 20+ Years of Experience.
+                    </span>
+                  </h2>
+                  <p className="text-lg md:text-xl text-slate-300 max-w-3xl leading-relaxed">
+                    N3uralia360 is a content creation studio combining advanced AI worldbuilding with human art direction and real production tools.
+                  </p>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <h3 className="text-2xl font-bold text-white mb-4">We create:</h3>
+                    <ul className="space-y-3 text-slate-300">
+                      <li className="flex items-start gap-3">
+                        <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
+                        <span>Full-dome cinematic stories</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-2 flex-shrink-0" />
+                        <span>Seamless dome environments & loops</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
+                        <span>VR-ready immersive worlds</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-2 flex-shrink-0" />
+                        <span>Educational & cultural series</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full mt-2 flex-shrink-0" />
+                        <span>Custom immersive productions</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
+                      <h3 className="text-xl font-bold text-white mb-3">We design for one thing first:</h3>
+                      <p className="text-lg text-emerald-300 font-semibold">How it feels inside the dome.</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700 rounded-xl p-6">
+                      <p className="text-slate-300 leading-relaxed">
+                        Every project is guided by understanding the immersive experience from the audience's perspective. We don't just create content — we craft presence.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

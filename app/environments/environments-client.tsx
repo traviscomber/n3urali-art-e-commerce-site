@@ -56,14 +56,40 @@ export function EnvironmentsClient({ initialContent }: EnvironmentsClientProps) 
         <div className="relative z-10 container mx-auto max-w-6xl">
           <div className="text-center space-y-6 mb-12">
             <h1 className="text-5xl md:text-6xl font-bold text-white">
-              Living Immersive
+              Endless Immersive
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
-                Catalog
+                Backdrops
               </span>
             </h1>
-            <p className="text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              Continuous atmospheric loops optimized for dome perception. Flexible, regularly updated environments ready for any immersive venue.
+            <p className="text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed font-light">
+              Seamless dome loops designed for performance and programming.
             </p>
+
+            <p className="text-base text-slate-400 max-w-3xl mx-auto leading-relaxed">
+              Environments are continuous immersive loops crafted using professional motion tools — rotation, zoom, distortion, layered effects — tuned specifically for dome perception.
+            </p>
+
+            <div className="grid md:grid-cols-3 gap-6 mt-10 max-w-4xl mx-auto">
+              <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
+                <h3 className="font-bold text-emerald-300 mb-2">For dome owners:</h3>
+                <p className="text-sm text-slate-400">Endless themed nights without rebuilding your show.</p>
+              </div>
+              <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
+                <h3 className="font-bold text-emerald-300 mb-2">For VJs:</h3>
+                <p className="text-sm text-slate-400">Clean, seamless material ready to layer and mix.</p>
+              </div>
+              <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
+                <h3 className="font-bold text-emerald-300 mb-2">For event producers:</h3>
+                <p className="text-sm text-slate-400">Ambient premium visuals that elevate any space.</p>
+              </div>
+            </div>
+
+            <div className="mt-10 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-xl p-6 max-w-3xl mx-auto">
+              <p className="text-slate-300 font-semibold mb-3">Features:</p>
+              <p className="text-slate-400 text-sm">
+                True seamless structure • Dome-correct center mapping • Clean motion (no artifact noise) • Ready for long-duration projection
+              </p>
+            </div>
           </div>
 
           {/* Search and Filter Section */}

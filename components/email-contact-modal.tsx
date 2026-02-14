@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useContext } from "react"
+import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Mail, Copy, Check } from "lucide-react"
-import { LanguageContext } from "@/lib/contexts/language-context"
+import { useLanguage } from "@/lib/contexts/language-context"
 
 interface EmailContactModalProps {
   isOpen: boolean
@@ -13,13 +13,7 @@ interface EmailContactModalProps {
 
 export function EmailContactModal({ isOpen, onClose }: EmailContactModalProps) {
   const [copied, setCopied] = useState(false)
-  const languageContext = useContext(LanguageContext)
-  
-  if (!languageContext) {
-    throw new Error("EmailContactModal must be used within LanguageProvider")
-  }
-
-  const { t } = languageContext
+  const { t } = useLanguage()
   const email = "info@n3uralia360.art"
 
   const handleCopyEmail = () => {

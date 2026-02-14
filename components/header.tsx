@@ -166,79 +166,56 @@ export function Header({ videoContext }: HeaderProps) {
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center space-x-12">
-            {videoContext && showVideoPlayer && (
-              <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border/50 animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={togglePlayPause}>
-                    {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleMute}>
-                    {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                  </Button>
-                </div>
-                <div className="h-4 w-px bg-border" />
-                <span className="text-sm font-medium">{videoContext.collectionTitle}</span>
-              </div>
-            )}
-
-            {showAudioPlayer && !videoContext && (
-              <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50 border border-border/50 animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleAudioPlayPause}>
-                    {musicPlayer.isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleAudioMute}>
-                    {isAudioMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                  </Button>
-                </div>
-                <div className="h-4 w-px bg-border" />
-                <span className="text-sm font-medium">{musicPlayer.collectionTitle || "Collection Music"}</span>
-              </div>
-            )}
-
+          <nav className="hidden md:flex items-center space-x-1">
             <Link
-              href="/studio/process"
-              className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"
+              href="/realities"
+              className="relative text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-4 py-2"
             >
-              Studio
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
+              R3alities
+              <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
             </Link>
             <Link
-              href="/collection"
-              className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"
+              href="/environments"
+              className="relative text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-4 py-2"
             >
-              {t("nav.collection")}
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
-            </Link>
-            <Link
-              href="/gallery"
-              className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"
-            >
-              {t("nav.gallery")}
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
+              Environments
+              <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
             </Link>
             <Link
               href="/theatre"
-              className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"
+              className="relative text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-4 py-2"
             >
-              {t("nav.theatre")}
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
+              Theatre
+              <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
             </Link>
             <Link
-              href="/commission"
-              className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"
+              href="/studio"
+              className="relative text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-4 py-2"
             >
-              Commission
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
+              Studio
+              <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
+            </Link>
+            <Link
+              href="/tools"
+              className="relative text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-4 py-2"
+            >
+              Tools
+              <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
+            </Link>
+            <Link
+              href="/gallery"
+              className="relative text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-4 py-2"
+            >
+              Gallery
+              <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
             </Link>
             {isAuthenticated && (
               <Link
                 href="/account/orders"
-                className="relative text-sm font-medium text-muted-foreground hover:text-primary transition-all duration-300 group"
+                className="relative text-sm font-medium text-slate-400 hover:text-cyan-400 transition-all duration-300 group px-4 py-2"
               >
-                {t("nav.myOrders")}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
+                Orders
+                <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
               </Link>
             )}
           </nav>
@@ -357,50 +334,57 @@ export function Header({ videoContext }: HeaderProps) {
         </div>
 
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-border/50 py-6 bg-black/80 backdrop-blur-xl rounded-b-lg">
-            <nav className="flex flex-col space-y-6">
+          <div className="md:hidden border-t border-slate-700 py-6 bg-slate-900/80 backdrop-blur-xl rounded-b-lg">
+            <nav className="flex flex-col space-y-2">
               <Link
-                href="/studio/process"
-                className="text-base font-medium text-foreground hover:text-primary transition-colors px-2"
+                href="/realities"
+                className="text-base font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-3"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                R3alities
+              </Link>
+              <Link
+                href="/environments"
+                className="text-base font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-3"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Environments
+              </Link>
+              <Link
+                href="/theatre"
+                className="text-base font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-3"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Theatre
+              </Link>
+              <Link
+                href="/studio"
+                className="text-base font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-3"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Studio
               </Link>
               <Link
-                href="/collection"
-                className="text-base font-medium text-foreground hover:text-primary transition-colors px-2"
+                href="/tools"
+                className="text-base font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-3"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                {t("nav.collection")}
+                Tools
               </Link>
               <Link
                 href="/gallery"
-                className="text-base font-medium text-foreground hover:text-primary transition-colors px-2"
+                className="text-base font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-3"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                {t("nav.gallery")}
-              </Link>
-              <Link
-                href="/theatre"
-                className="text-base font-medium text-foreground hover:text-primary transition-colors px-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {t("nav.theatre")}
-              </Link>
-              <Link
-                href="/commission"
-                className="text-base font-medium text-foreground hover:text-primary transition-colors px-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Commission
+                Gallery
               </Link>
               {isAuthenticated && (
                 <Link
                   href="/account/orders"
-                  className="text-base font-medium text-muted-foreground hover:text-primary transition-colors px-2"
+                  className="text-base font-medium text-slate-400 hover:text-cyan-400 transition-colors px-4 py-3"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  {t("nav.myOrders")}
+                  Orders
                 </Link>
               )}
             </nav>

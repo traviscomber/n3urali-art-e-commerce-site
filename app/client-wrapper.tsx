@@ -5,15 +5,9 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { ArrowRight, Grid3x3, ChevronLeft, ChevronRight } from "lucide-react"
-import AuctionCarousel from "@/components/auction-carousel"
+import { ArrowRight, Play, Zap, Users, Palette, LayoutGrid } from "lucide-react"
 import { useLanguage } from "@/lib/contexts/language-context"
-import { ParticleTitle } from "@/components/particle-title"
-import { AnimatedCountdown } from "@/components/animated-countdown"
 import { Footer } from "@/components/footer"
-import { Swiper, SwiperSlide } from "swiper/react"
-import { Navigation, A11y } from "swiper/modules"
-import type { Swiper as SwiperType } from "swiper"
 import "swiper/css"
 import "swiper/css/navigation"
 import "swiper/css/pagination"
@@ -42,370 +36,249 @@ interface ClientWrapperProps {
 export const ClientWrapper = memo(
   function ClientWrapper({ imageOfTheDay, auctionImages, collectionImages, dailyImages }: ClientWrapperProps) {
     const { t } = useLanguage()
-    const [auctionTimeLeft, setAuctionTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 })
-    const swiperRef = useRef<SwiperType | null>(null)
     const isMounted = useRef(true)
-
-    const calculateTimeLeft = useCallback(() => {
-      const now = new Date()
-      const secondsLeft = 59 - now.getSeconds()
-      return { hours: 0, minutes: 0, seconds: secondsLeft }
-    }, [])
 
     useEffect(() => {
       isMounted.current = true
-      setAuctionTimeLeft(calculateTimeLeft())
-
-      let animationFrameId: number
-      let lastUpdate = Date.now()
-
-      const updateTimer = () => {
-        const now = Date.now()
-        if (now - lastUpdate >= 1000 && isMounted.current) {
-          setAuctionTimeLeft(calculateTimeLeft())
-          lastUpdate = now
-        }
-        animationFrameId = requestAnimationFrame(updateTimer)
-      }
-
-      animationFrameId = requestAnimationFrame(updateTimer)
-
       return () => {
         isMounted.current = false
-        cancelAnimationFrame(animationFrameId)
       }
-    }, [calculateTimeLeft])
+    }, [])
 
-    const imageCounts = useMemo(
-      () => ({
-        auction: auctionImages?.length || 0,
-        collection: collectionImages?.length || 0,
-        daily: dailyImages?.length || 0,
-      }),
-      [auctionImages?.length, collectionImages?.length, dailyImages?.length],
-    )
+    // Core product sections
+    const productSections = [
+      {
+        id: "realities",
+        title: "R3alities",
+        subtitle: "Cinematic Dome Stories",
+        description: "Seamless immersive loops designed for full-dome cinema, festivals, and branded experiences.",
+        icon: Play,
+        color: "from-cyan-500/20 to-blue-500/20",
+        href: "/realities",
+      },
+      {
+        id: "environments",
+        title: "Environments",
+        subtitle: "Living Immersive Catalog",
+        description: "Continuous atmospheric loops optimized for dome perception and flexible integration.",
+        icon: LayoutGrid,
+        color: "from-emerald-500/20 to-teal-500/20",
+        href: "/environments",
+      },
+      {
+        id: "theatre",
+        title: "Theatre",
+        subtitle: "Full-Dome VR Ready",
+        description: "Fisheye environments, seamless editions, and VR-ready productions for immersive venues.",
+        icon: Palette,
+        color: "from-purple-500/20 to-pink-500/20",
+        href: "/theatre",
+      },
+      {
+        id: "studio",
+        title: "Studio",
+        subtitle: "Custom Productions",
+        description: "Full dome environments with AI-enhanced motion design. Custom immersive works on demand.",
+        icon: Zap,
+        color: "from-orange-500/20 to-red-500/20",
+        href: "/studio",
+      },
+      {
+        id: "tools",
+        title: "Tools",
+        subtitle: "AI-Powered Creation",
+        description: "Public and proprietary AI tools built for dome creators. Launch your immersive vision.",
+        icon: Users,
+        color: "from-indigo-500/20 to-blue-500/20",
+        href: "/tools",
+      },
+    ]
 
     return (
       <div className="min-h-screen bg-background">
         <main>
-          {/* Hero Section */}
-          <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+          {/* Hero Section - "Endless Immersive Backdrops" */}
+          <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20">
+            {/* Atmospheric background */}
             <div className="absolute inset-0 z-0">
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ objectFit: "cover" }}
-              >
-                <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/WebBackdrop360-ZzzGJhNrvLJpQ71ipTgLfyRV3xYdB4.mov" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-
-              <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60" />
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
+              <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-gradient-radial from-cyan-500/10 via-transparent to-transparent blur-3xl" />
+              <div className="absolute bottom-0 left-0 w-1/3 h-2/3 bg-gradient-radial from-emerald-500/5 via-transparent to-transparent blur-3xl" />
             </div>
 
-            <div className="absolute inset-0 opacity-[0.03] z-[1]">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.3),transparent_50%)]" />
-            </div>
-
-            <div className="relative container mx-auto px-4 py-20 z-10">
-              <div className="max-w-7xl mx-auto">
-                <div className="text-center space-y-10 mb-20">
-                  {/* <div className="inline-flex items-center gap-2 bg-primary/5 border border-primary/10 rounded-full px-5 py-2.5 backdrop-blur-sm">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-medium text-primary">{t("hero.badge")}</span>
-                </div> */}
-
-                  <h1 className="text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tight leading-[0.95] text-balance text-white drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]">
-                    {t("hero.title")}
-                    <br />
-                    <span className="text-primary drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]">
-                      {t("hero.titleHighlight")}
+            <div className="relative container mx-auto px-4 z-10 max-w-6xl">
+              <div className="text-center space-y-8">
+                {/* Main tagline */}
+                <div className="space-y-4">
+                  <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-[1.1] text-balance text-white">
+                    Endless Immersive
+                    <span className="block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-emerald-400 to-teal-400">
+                      Backdrops
                     </span>
                   </h1>
 
-                  <p className="text-xl md:text-2xl text-white max-w-4xl mx-auto leading-relaxed text-pretty font-light drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]">
-                    {t("hero.subtitle")}
-                    <span className="block mt-2 text-lg text-white/80 drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]">
-                      {t("hero.description")}
-                    </span>
+                  <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed font-light">
+                    Full-dome cinema, VR environments, and seamless performance loops. Crafted for immersive venues,
+                    festivals, and branded experiences.
                   </p>
-
-                  <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                      <span className="font-medium">
-                        {t("comparison.ourPro5").split(" ")[0]} {t("comparison.ourPro5").split(" ")[1]}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                      <span className="font-medium">
-                        {t("gallery.stats.resolution")} {t("stats.resolutionNote")}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                      <span className="font-medium">{t("stats.instantNote")}</span>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                      <span className="font-medium">{t("stats.vrNote")}</span>
-                    </div>
-                  </div>
                 </div>
-              </div>
-            </div>
 
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10">
-              <div className="flex flex-col items-center gap-2 text-muted-foreground animate-bounce">
-                <div className="w-6 h-10 border-2 border-current rounded-full flex items-start justify-center p-2">
-                  <div className="w-1 h-2 bg-current rounded-full animate-scroll" />
+                {/* CTA Buttons */}
+                <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+                  <Link href="/realities">
+                    <Button size="lg" className="bg-cyan-600 hover:bg-cyan-700 text-white">
+                      Explore R3alities
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-slate-600 text-slate-200 hover:bg-slate-800/50"
+                  >
+                    Get Those Loops!
+                  </Button>
+                </div>
+
+                {/* Key features */}
+                <div className="flex flex-wrap items-center justify-center gap-6 pt-8 text-sm text-slate-400">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-cyan-400 rounded-full" />
+                    Full-Dome Ready
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-emerald-400 rounded-full" />
+                    VR Compatible
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-cyan-400 rounded-full" />
+                    Seamless Loops
+                  </div>
                 </div>
               </div>
             </div>
           </section>
 
-          {imageOfTheDay && (
-            <section className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
-
-              <div className="relative container mx-auto px-4">
-                <div className="max-w-7xl mx-auto space-y-12">
-                  <div className="text-center space-y-6">
-                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-balance">
-                      {t("cta.readyToTransform")} <span className="text-primary">{t("cta.creativeVision")}</span>
-                    </h1>
-                    <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-pretty">
-                      {t("hero.subtitle")}
-                    </p>
-                  </div>
-
-                  <div className="relative group">
-                    <div className="relative aspect-[21/9] rounded-2xl overflow-hidden border border-border/50 shadow-2xl">
-                      <Image
-                        src={
-                          imageOfTheDay.upscaled_url ||
-                          imageOfTheDay.original_url ||
-                          imageOfTheDay.file_path ||
-                          "/placeholder.svg" ||
-                          "/placeholder.svg" ||
-                          "/placeholder.svg"
-                         || "/placeholder.svg"}
-                        alt={imageOfTheDay.title}
-                        fill
-                        className="object-cover animate-kenBurnsAuction"
-                        sizes="(max-width: 1400px) 100vw, 1400px"
-                        priority
-                      />
-
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="text-foreground/10 text-6xl md:text-8xl lg:text-9xl font-bold tracking-wider transform -rotate-12 select-none">
-                          n3uralia360.art
-                        </div>
-                      </div>
-
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300" />
-
-                      <div className="absolute bottom-0 left-0 right-0 p-8 text-foreground md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="flex items-end justify-between gap-4 flex-wrap">
-                          <div className="space-y-2">
-                            <h2 className="text-2xl md:text-3xl font-bold">{imageOfTheDay.title}</h2>
-                            <div className="flex items-center gap-3 text-sm">
-                              {/* <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/30">
-                              {imageOfTheDay.image_format}
-                            </Badge> */}
-                              <span className="text-muted-foreground">{t("stats.resolutionNote")}</span>
-                            </div>
-                          </div>
-                          <div className="text-right space-y-2">
-                            {/* <Badge className="bg-gradient-to-r from-yellow-400/40 to-orange-500/40 text-black font-bold text-lg px-4 py-2 border-0 animate-pulse">
-                            20{t("hero.offToday")}
-                          </Badge> */}
-                            <Link href={`/photo/${imageOfTheDay.id}`}>
-                              <Button size="lg" className="bg-primary hover:bg-primary/90 w-full mt-2">
-                                {t("hero.viewDetails")}
-                                <ArrowRight className="w-4 h-4 ml-2" />
-                              </Button>
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* Collections Carousel with Navigation Arrows */}
-          {collectionImages.length > 0 && (
-            <section className="py-16 bg-background overflow-hidden">
-              <div className="container mx-auto px-4 mb-8">
-                <div className="text-center space-y-3">
-                  <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-                    {t("collection.title")} <span className="text-primary">{t("collection.titleHighlight")}</span>
-                  </h2>
-                </div>
-              </div>
-
-              <div className="relative">
-                <button
-                  onClick={() => swiperRef.current?.slidePrev()}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/70 hover:bg-black/90 text-white p-3 rounded-full backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-110 shadow-lg"
-                  aria-label="Previous slide"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-
-                <button
-                  onClick={() => swiperRef.current?.slideNext()}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/70 hover:bg-black/90 text-white p-3 rounded-full backdrop-blur-sm border border-white/20 transition-all duration-300 hover:scale-110 shadow-lg"
-                  aria-label="Next slide"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-
-                <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-                <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-
-                <Swiper
-                  modules={[Navigation, A11y]}
-                  spaceBetween={24}
-                  slidesPerView="auto"
-                  loop={true}
-                  speed={800}
-                  onSwiper={(swiper) => {
-                    swiperRef.current = swiper
-                  }}
-                  className="!overflow-visible"
-                >
-                  {collectionImages.map((image) => (
-                    <SwiperSlide key={image.id} className="!w-[500px]">
-                      <Link
-                        href={`/photo/${image.id}`}
-                        className="group block relative rounded-xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
-                      >
-                        <div className="relative h-80">
-                          <Image
-                            src={image.upscaled_url || image.original_url || image.file_path || "/placeholder.svg"}
-                            alt={image.title}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-500"
-                            sizes="500px"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                        </div>
-
-                        <div className="absolute bottom-0 left-0 right-0 p-6 text-foreground space-y-2">
-                          <h3 className="font-bold text-xl line-clamp-1">{image.title}</h3>
-                          {image.description && (
-                            <p className="text-sm text-foreground/80 line-clamp-2 leading-relaxed">
-                              {image.description}
-                            </p>
-                          )}
-                          <div className="flex items-center justify-between pt-2">
-                            <span className="text-sm text-muted-foreground">{image.image_format}</span>
-                            <span
-                              className="text-lg font-bold"
-                              style={{
-                                color: "#7851A9",
-                                textShadow: "0 0 8px rgba(0, 0, 0, 0.8), 0 0 12px rgba(0, 0, 0, 0.6)",
-                              }}
-                            >
-                              ${Number.parseFloat(image.price || "0").toFixed(0)}
-                            </span>
-                          </div>
-                        </div>
-                      </Link>
-                    </SwiperSlide>
-                  ))}
-                </Swiper>
-              </div>
-
-              <div className="text-center mt-8">
-                <Link href="/collection">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="group bg-transparent text-foreground border-foreground/20 hover:bg-foreground/10 hover:text-foreground hover:border-foreground/40"
-                  >
-                    {t("collection.viewComplete")}
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-              </div>
-            </section>
-          )}
-
-          {auctionImages && auctionImages.length > 0 && (
-            <section className="py-24 bg-gradient-to-b from-background via-muted/20 to-background overflow-hidden relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 via-orange-500/5 to-yellow-500/5 pointer-events-none" />
-
-              <div className="container mx-auto px-4 relative">
-                <div className="max-w-5xl mx-auto">
-                  <div className="text-center space-y-8 mb-16">
-                    <div className="space-y-4">
-                      <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                        {t("auction.title")}{" "}
-                        <span className="text-primary drop-shadow-[0_0_20px_rgba(139,92,246,0.8)]">
-                          {t("auction.titleHighlight")}
-                        </span>
-                      </h2>
-
-                      <div className="flex justify-center mt-8">
-                        <AnimatedCountdown seconds={auctionTimeLeft.seconds} label={t("seconds")} />
-                      </div>
-
-                      <div className="text-sm text-muted-foreground mt-6">{t("untilPricesReset")}</div>
-
-                      <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mt-6">
-                        {t("auction.subtitle")}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-12">
-                <AuctionCarousel images={auctionImages} />
-              </div>
-
-              <div className="text-center mt-12">
-                <p className="text-sm text-muted-foreground bg-muted/50 inline-block px-6 py-3 rounded-full backdrop-blur-sm border border-border/50">
-                  {t("auction.tip")}
+          {/* Product Sections Grid */}
+          <section className="py-24 px-4 bg-gradient-to-b from-background via-slate-900/30 to-background">
+            <div className="container mx-auto max-w-6xl">
+              <div className="text-center mb-16 space-y-3">
+                <h2 className="text-4xl md:text-5xl font-bold text-white">Our Immersive Platform</h2>
+                <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+                  Choose Your Experience: From curated content to custom productions.
                 </p>
               </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {productSections.map((section) => {
+                  const Icon = section.icon
+                  return (
+                    <Link key={section.id} href={section.href}>
+                      <Card className="group relative h-full overflow-hidden bg-slate-800/40 border-slate-700 hover:border-slate-600 transition-all duration-300 hover:shadow-xl hover:shadow-slate-700/20 cursor-pointer">
+                        {/* Gradient background */}
+                        <div className={`absolute inset-0 bg-gradient-to-br ${section.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+
+                        <div className="relative p-8 h-full flex flex-col">
+                          {/* Icon */}
+                          <div className="w-12 h-12 rounded-lg bg-slate-700/50 flex items-center justify-center group-hover:bg-slate-600/50 transition-colors mb-4">
+                            <Icon className="w-6 h-6 text-cyan-400" />
+                          </div>
+
+                          {/* Content */}
+                          <div className="flex-1">
+                            <h3 className="text-2xl font-bold text-white mb-1">{section.title}</h3>
+                            <p className="text-sm text-cyan-400 font-semibold mb-3">{section.subtitle}</p>
+                            <p className="text-slate-300 text-sm leading-relaxed">{section.description}</p>
+                          </div>
+
+                          {/* Arrow indicator */}
+                          <div className="flex items-center gap-2 mt-6 text-cyan-400 group-hover:translate-x-1 transition-transform">
+                            <span className="text-sm font-semibold">Explore</span>
+                            <ArrowRight className="w-4 h-4" />
+                          </div>
+                        </div>
+                      </Card>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          </section>
+
+          {/* Featured Content Showcase */}
+          {collectionImages && collectionImages.length > 0 && (
+            <section className="py-24 px-4 bg-background">
+              <div className="container mx-auto max-w-6xl">
+                <div className="mb-12">
+                  <h2 className="text-4xl md:text-5xl font-bold text-white mb-3">Featured Collections</h2>
+                  <p className="text-slate-400 text-lg">Discover our curated immersive experiences</p>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {collectionImages.slice(0, 6).map((image) => (
+                    <Link key={image.id} href={`/photo/${image.id}`}>
+                      <div className="group relative h-64 rounded-xl overflow-hidden border border-slate-700 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20">
+                        <Image
+                          src={image.upscaled_url || image.original_url || image.file_path || "/placeholder.svg"}
+                          alt={image.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                          <h3 className="text-white font-bold text-lg mb-1">{image.title}</h3>
+                          <p className="text-cyan-300 text-sm">{image.image_format}</p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+
+                <div className="text-center mt-12">
+                  <Link href="/gallery">
+                    <Button
+                      size="lg"
+                      className="bg-slate-700 hover:bg-slate-600 text-white border-0"
+                    >
+                      View All Collections
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             </section>
           )}
 
-          <section className="py-24 bg-gradient-to-b from-muted/10 via-background to-background">
-            <div className="container mx-auto px-4">
-              <div className="max-w-6xl mx-auto">
-                <div className="text-center mb-16 space-y-4">
-                  <h2 className="text-4xl md:text-5xl font-bold text-balance">
-                    {t("comparison.title")}
-                    <span className="text-primary block mt-1">{t("comparison.titleHighlight")}</span>
-                  </h2>
-                  <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-pretty">
-                    {t("comparison.ourPlatformNote")}
-                  </p>
+          {/* CTA Section - Request Special Offer */}
+          <section className="py-24 px-4 bg-gradient-to-b from-slate-900/50 via-slate-900/30 to-background">
+            <div className="container mx-auto max-w-4xl">
+              <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-slate-700 p-12 text-center space-y-6">
+                <h2 className="text-3xl md:text-4xl font-bold text-white">Need Custom Immersive Content?</h2>
+                <p className="text-slate-300 text-lg">
+                  Work with our studio for bespoke dome environments, VR experiences, and seamless loop productions.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+                  <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                    Request Special Offer
+                  </Button>
+                  <Link href="/studio">
+                    <Button size="lg" variant="outline" className="border-slate-600 text-slate-200 hover:bg-slate-800/50">
+                      Learn About Studio
+                    </Button>
+                  </Link>
                 </div>
+              </div>
+            </div>
+          </section>
+        </main>
 
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                  <Card className="p-6 space-y-4 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/20 bg-card">
-                    <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center">
-                      <span className="text-2xl">✓</span>
-                    </div>
-                    <h3 className="text-lg font-bold">{t("comparison.ourPro1")}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Skip the AI generation hassle. Get production-ready 360° images instantly.
-                    </p>
-                  </Card>
+        <Footer />
+      </div>
+    )
+  }
+)
 
                   <Card className="p-6 space-y-4 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/20 bg-card">
                     <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center">

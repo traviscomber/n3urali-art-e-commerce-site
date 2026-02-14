@@ -1,4 +1,3 @@
-/* Cache busted v2 */
 "use client"
 
 import { useState } from "react"
@@ -25,94 +24,53 @@ export function EmailContactModal({ isOpen, onClose }: EmailContactModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Mail className="w-5 h-5" />
-            {t("contact.title")}
+            Contact Us
           </DialogTitle>
           <DialogDescription>
-            {t("contact.description")}
+            Get in touch with our team at N3uralia360
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          {/* Email Display */}
-          <div className="bg-background border rounded-lg p-4">
-            <p className="text-sm text-muted-foreground mb-2">{t("contact.emailLabel")}</p>
-            <div className="flex items-center gap-2">
-              <code className="text-lg font-mono font-semibold break-all flex-1">
-                {email}
-              </code>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCopyEmail}
-                className="flex-shrink-0 bg-transparent"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4 mr-1" />
-                    {t("contact.copied")}
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4 mr-1" />
-                    {t("contact.copy")}
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-
-          {/* Quotation Request Guide */}
-          <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 space-y-3">
-            <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">{t("contact.quotationTitle")}</p>
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              {t("contact.quotationIntro")}
+        <div className="space-y-4">
+          <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4">
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">
+              Email Address
             </p>
-            <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-2 list-disc list-inside">
-              <li>{t("contact.quotationItem1")}</li>
-              <li>{t("contact.quotationItem2")}</li>
-              <li>{t("contact.quotationItem3")}</li>
-              <li>{t("contact.quotationItem4")}</li>
-              <li>{t("contact.quotationItem5")}</li>
-            </ul>
-            <p className="text-xs text-blue-700 dark:text-blue-300 pt-2">
-              {t("contact.quotationResponse")}
+            <p className="text-lg font-semibold text-slate-900 dark:text-white break-all">
+              {email}
             </p>
           </div>
 
-          {/* Instructions */}
-          <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-            <p className="text-sm font-semibold">{t("contact.instructionsTitle")}</p>
-            <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
-              <li>{t("contact.instruction1")}</li>
-              <li>{t("contact.instruction2")}</li>
-              <li>{t("contact.instruction3")}</li>
-              <li>{t("contact.instruction4")}</li>
-            </ol>
-            <p className="text-xs text-muted-foreground pt-2">
-              {t("contact.responseTime")}
-            </p>
-          </div>
+          <Button
+            onClick={handleCopyEmail}
+            className="w-full flex items-center justify-center gap-2"
+            variant="default"
+          >
+            {copied ? (
+              <>
+                <Check className="w-4 h-4" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <Copy className="w-4 h-4" />
+                Copy Email
+              </>
+            )}
+          </Button>
 
-          {/* Benefits */}
-          <div className="space-y-2">
-            <p className="text-sm font-semibold">{t("contact.benefitsTitle")}</p>
-            <ul className="text-sm text-muted-foreground space-y-1">
-              <li>{t("contact.benefit1")}</li>
-              <li>{t("contact.benefit2")}</li>
-              <li>{t("contact.benefit3")}</li>
-              <li>{t("contact.benefit4")}</li>
-            </ul>
-          </div>
+          <Button
+            onClick={onClose}
+            className="w-full"
+            variant="outline"
+          >
+            Close
+          </Button>
         </div>
-
-        {/* Close Button */}
-        <Button onClick={onClose} className="w-full mt-4">
-          {t("contact.closeButton")}
-        </Button>
       </DialogContent>
     </Dialog>
   )

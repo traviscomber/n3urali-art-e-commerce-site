@@ -8,7 +8,7 @@ interface CategoryCard {
   title: string
   label: string
   link: string
-  imageUrl: string
+  imageUrl: string | null
   accentColor: 'gold' | 'purple' | 'green' | 'orange'
 }
 

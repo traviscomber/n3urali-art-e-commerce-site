@@ -40,12 +40,12 @@ export default async function HomePage() {
     { key: 'theatre', title: 'THEATRE', label: 'Online', link: '/theatre', accent: 'orange' as const },
   ]
 
-  // Fallback images for each category
-  const fallbackImages: Record<string, string> = {
+  // Fallback images for each category - using existing images or skip if none available
+  const fallbackImages: Record<string, string | null> = {
     realities: '/images/R3alities.png',
-    studio: '/images/studio-fallback.png',
-    environments: '/images/environments-fallback.png',
-    theatre: '/images/theatre-fallback.png',
+    studio: null,
+    environments: null,
+    theatre: null,
   }
 
   const categoryCards = await Promise.all(
@@ -59,14 +59,14 @@ export default async function HomePage() {
         .limit(1)
         .single()
 
-      const imageUrl = data?.upscaled_url || data?.original_url || fallbackImages[cat.key] || null
+      const imageUrl = data?.upscaled_url || data?.original_url || fallbackImages[cat.key]
 
       return {
         id: cat.key,
         title: cat.title,
         label: cat.label,
         link: cat.link,
-        imageUrl: imageUrl || undefined,
+        imageUrl: imageUrl || null,
         accentColor: cat.accent,
       }
     })

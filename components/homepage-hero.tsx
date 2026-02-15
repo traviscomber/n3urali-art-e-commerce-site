@@ -29,8 +29,6 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
     video.muted = true
     video.loop = true
     video.playsInline = true
-    video.crossOrigin = 'anonymous'
-    video.src = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_y3EtHhRvrMrVloUmW5CqlaLbJnts/GYNIQtHrIQqvBJJr6x0oWq/public/videos/mossy-hero.mp4'
 
     // When metadata loads, try to autoplay
     const handleLoadedMetadata = () => {
@@ -99,8 +97,14 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
               <video
                 ref={videoRef}
                 controls
+                muted
+                loop
+                playsInline
                 className="w-full h-full object-cover bg-black"
-              />
+              >
+                <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_y3EtHhRvrMrVloUmW5CqlaLbJnts/GYNIQtHrIQqvBJJr6x0oWq/public/videos/mossy-hero.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
 
               {/* Play button overlay if not playing */}
               {!isPlaying && (

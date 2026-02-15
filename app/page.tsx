@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 import { HomepageHero } from "@/components/homepage-hero"
 import { CategoryCardsGrid } from "@/components/category-cards-grid"
 import { RealitiesSection } from "@/components/realities-section"
+import { EnvironmentsSection } from "@/components/environments-section"
 
 export const metadata: Metadata = {
   title: "n3uralia360 — Immersive Worlds. Cultural Stories.",
@@ -78,6 +79,9 @@ export default async function HomePage() {
 
       {/* Realities Section */}
       <RealitiesSection />
+
+      {/* Environments Section */}
+      <EnvironmentsSection />
     </main>
   )
 }

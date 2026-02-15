@@ -11,7 +11,7 @@ interface HomepageHeroProps {
 }
 
 export function HomepageHero({ featuredImage }: HomepageHeroProps) {
-  const [videoUrl, setVideoUrl] = useState<string>('https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_y3EtHhRvrMrVloUmW5CqlaLbJnts/GYNIQtHrIQqvBJJr6x0oWq/public/videos/mossy-hero.mp4')
+  const [videoUrl, setVideoUrl] = useState<string>('/videos/hero.mp4')
   const [isLoading, setIsLoading] = useState(true)
 
   const features = [

@@ -1,27 +1,58 @@
-import { Metadata } from "next"
-import { createClient } from "@/lib/supabase/server"
-import { EnvironmentsClient } from "./environments-client"
+import type { Metadata } from 'next'
+import { createClient } from '@/lib/supabase/server'
+import { CategoryHeroBlock } from '@/components/category-hero-block'
+import { CategoryGalleryBlock } from '@/components/category-gallery-block'
+import { RelatedCategoriesBlock } from '@/components/related-categories-block'
 
 export const metadata: Metadata = {
-  title: "Environments — Living Immersive Catalog | N3uralia360",
-  description:
-    "Continuous atmospheric loops optimized for dome perception. Flexible immersive environments ready for integration into any venue or experience.",
-  keywords: ["dome environments", "atmospheric loops", "immersive catalog", "continuous loops", "dome installation"],
+  title: 'Environments - N3uralia360',
+  description: '360-degree immersive environments designed for projection mapping, dome installations, and VR experiences.',
 }
 
-export const revalidate = 600
+export const revalidate = 3600
 
 export default async function EnvironmentsPage() {
   const supabase = await createClient()
 
-  // Fetch Environments content from database
-  const { data: environmentsContent } = await supabase
-    .from("images")
-    .select("id, title, file_path, original_url, upscaled_url, price, image_format, thumbnail_medium_url, description")
-    .eq("featured_collection", true)
-    .eq("active", true)
-    .order("created_at", { ascending: false })
-    .limit(20)
+  const { data: images } = await supabase
+    .from('images')
+    .select('id, title, thumbnail_medium_url, original_url, upscaled_url')
+    .eq('content_category', 'environments')
+    .eq('active', true)
+    .order('created_at', { ascending: false })
 
-  return <EnvironmentsClient initialContent={environmentsContent || []} />
+  const featuredImage = images?.[0]
+
+  const environmentsFeatures = [
+    'Dome-optimized 360° content',
+    'VR-ready equirectangular formats',
+    'Projection mapping compatible',
+    'Seamless loop environments',
+    'Museum & venue installation',
+  ]
+
+  return (
+    <main className="min-h-screen w-full bg-background">
+      <CategoryHeroBlock
+        category="environments"
+        title="Environments"
+        subtitle="Living Immersive Spaces"
+        description="Continuous atmospheric loops optimized for dome perception. Flexible immersive environments ready for integration into any venue or experience. Projection-ready, instantly deployable."
+        features={environmentsFeatures}
+        featuredImage={
+          featuredImage ? {
+            url: featuredImage.upscaled_url || featuredImage.original_url || '',
+            alt: featuredImage.title || 'Environments featured work'
+          } : undefined
+        }
+      />
+
+      <CategoryGalleryBlock
+        images={images || []}
+        category="environments"
+      />
+
+      <RelatedCategoriesBlock currentCategory="environments" />
+    </main>
+  )
 }

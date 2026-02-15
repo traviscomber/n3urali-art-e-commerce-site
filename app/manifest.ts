@@ -1,5 +1,8 @@
 import type { MetadataRoute } from 'next'
 
+// Force static generation to prevent route/metadata conflicts
+export const dynamic = 'force-static'
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'N3uralia360 - Immersive Worlds. Cultural Stories.',

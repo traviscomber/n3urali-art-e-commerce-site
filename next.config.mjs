@@ -37,6 +37,7 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
+    nodeMiddleware: true,
   },
   compiler: {
     removeConsole: false,

@@ -12,7 +12,7 @@ interface HomepageHeroProps {
 
 export function HomepageHero({ featuredImage }: HomepageHeroProps) {
   const [videoUrl, setVideoUrl] = useState<string>('/videos/hero.mp4')
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
 
   const features = [
     'Full-dome immersive content',
@@ -23,20 +23,20 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
   ]
 
   useEffect(() => {
-    // Fetch studio video from database
+    // Fetch studio video from database (optional - fallback to local)
     const fetchStudioVideo = async () => {
       try {
+        console.log('[v0] Fetching studio video from database')
         const response = await fetch('/api/collections/studio')
         if (response.ok) {
           const data = await response.json()
           if (data.video_url) {
+            console.log('[v0] Using database video URL:', data.video_url)
             setVideoUrl(data.video_url)
           }
         }
       } catch (error) {
-        console.log('[v0] Using fallback video:', error)
-      } finally {
-        setIsLoading(false)
+        console.log('[v0] Database fetch failed, using local video:', error)
       }
     }
 
@@ -71,14 +71,13 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
           {/* Center Column: Featured Video */}
           <div className="flex justify-center">
             <div className="relative w-full max-w-sm aspect-square rounded-lg overflow-hidden bg-gradient-to-br from-gray-900 to-black shadow-2xl">
-              {!isLoading && (
-                <VideoPlayer
-                  src={videoUrl}
-                  loop={true}
-                  muted={true}
-                  className="w-full h-full object-cover"
-                />
-              )}
+              <VideoPlayer
+                src={videoUrl}
+                loop={true}
+                muted={true}
+                autoPlay={true}
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
 

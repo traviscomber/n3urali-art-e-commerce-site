@@ -244,9 +244,12 @@ export function VideoPlayer({
         preload="auto"
         poster={poster}
         controls={controls}
+        autoPlay={autoPlay}
         crossOrigin="anonymous"
         className={className}
-      />
+      >
+        <source src={src} type="video/mp4" />
+      </video>
 
       {/* Loading State */}
       {!isLoaded && !error && (

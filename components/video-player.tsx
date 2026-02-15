@@ -30,7 +30,18 @@ export function VideoPlayer({
     const video = videoRef.current
     if (!video) return
 
+    console.log('[v0] Video player initialized, src:', src)
+
+    const handleLoadStart = () => {
+      console.log('[v0] Video load started')
+    }
+
+    const handleLoadedMetadata = () => {
+      console.log('[v0] Video metadata loaded, duration:', video.duration)
+    }
+
     const handleLoadedData = () => {
+      console.log('[v0] Video data loaded, ready to play')
       setIsLoaded(true)
       if (autoPlay) {
         video.play().catch(() => {
@@ -39,23 +50,50 @@ export function VideoPlayer({
       }
     }
 
-    const handlePlay = () => setIsPlaying(true)
-    const handlePause = () => setIsPlaying(false)
+    const handleCanPlay = () => {
+      console.log('[v0] Video can play')
+      if (!isLoaded) {
+        setIsLoaded(true)
+      }
+    }
+
+    const handlePlay = () => {
+      console.log('[v0] Video playing')
+      setIsPlaying(true)
+    }
+
+    const handlePause = () => {
+      console.log('[v0] Video paused')
+      setIsPlaying(false)
+    }
+
     const handleError = () => {
-      console.error('[v0] Video error:', video.error?.message)
+      console.error('[v0] Video error:', video.error?.code, video.error?.message)
       setHasError(true)
     }
 
+    const handleDurationChange = () => {
+      console.log('[v0] Video duration:', video.duration)
+    }
+
+    video.addEventListener('loadstart', handleLoadStart)
+    video.addEventListener('loadedmetadata', handleLoadedMetadata)
     video.addEventListener('loadeddata', handleLoadedData)
+    video.addEventListener('canplay', handleCanPlay)
     video.addEventListener('play', handlePlay)
     video.addEventListener('pause', handlePause)
     video.addEventListener('error', handleError)
+    video.addEventListener('durationchange', handleDurationChange)
 
     return () => {
+      video.removeEventListener('loadstart', handleLoadStart)
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
       video.removeEventListener('loadeddata', handleLoadedData)
+      video.removeEventListener('canplay', handleCanPlay)
       video.removeEventListener('play', handlePlay)
       video.removeEventListener('pause', handlePause)
       video.removeEventListener('error', handleError)
+      video.removeEventListener('durationchange', handleDurationChange)
     }
   }, [autoPlay])
 
@@ -88,7 +126,7 @@ export function VideoPlayer({
         muted={muted}
         loop={loop}
         playsInline
-        preload="metadata"
+        preload="auto"
         poster={poster}
         controls={controls}
         className={className}

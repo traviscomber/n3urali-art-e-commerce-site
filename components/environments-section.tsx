@@ -122,21 +122,34 @@ function EnvironmentCollection({
         </div>
       </div>
 
-      {/* Image Grid - 3 Circular Images */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 justify-items-center">
-        {images.map((image, index) => (
-          <div
-            key={index}
-            className="relative w-full max-w-xs aspect-square rounded-full overflow-hidden"
-          >
-            <Image
-              src={image.src}
-              alt={image.alt}
-              fill
-              className="object-cover"
-            />
-          </div>
-        ))}
+      {/* Image Grid - 3 Circular Images with Center Highlighted */}
+      <div className="flex items-center justify-center gap-6 md:gap-8 flex-wrap">
+        {images.map((image, index) => {
+          const isCenter = index === 1
+          const sizeClass = isCenter ? 'max-w-sm md:max-w-md' : 'max-w-xs'
+          
+          return (
+            <button
+              key={index}
+              onClick={() => window.location.href = ctaLink}
+              className={`relative aspect-square rounded-full overflow-hidden transform transition-all duration-300 hover:scale-110 hover:shadow-2xl cursor-pointer ${
+                isCenter ? 'ring-2 ring-cyan-400/30 hover:ring-cyan-400/60' : ''
+              }`}
+            >
+              <div className={`relative w-full h-full ${sizeClass}`}>
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  fill
+                  className="object-cover"
+                  priority={isCenter}
+                />
+              </div>
+              {/* Hover overlay */}
+              <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity duration-300" />
+            </button>
+          )
+        })}
       </div>
     </div>
   )

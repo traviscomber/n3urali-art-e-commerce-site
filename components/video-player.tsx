@@ -23,100 +23,74 @@ export function VideoPlayer({
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(autoPlay)
-  const [isLoaded, setIsLoaded] = useState(false)
-  const [hasError, setHasError] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(autoPlay) // Start as loaded if autoplaying
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
 
-    console.log('[v0] Video player initialized, src:', src)
+    console.log('[v0] Video player mounted, src:', src)
 
-    const handleLoadStart = () => {
-      console.log('[v0] Video load started')
+    // Set events for state tracking
+    const handlePlay = () => {
+      console.log('[v0] Video play event')
+      setIsPlaying(true)
     }
 
-    const handleLoadedMetadata = () => {
-      console.log('[v0] Video metadata loaded, duration:', video.duration)
+    const handlePause = () => {
+      console.log('[v0] Video pause event')
+      setIsPlaying(false)
     }
 
-    const handleLoadedData = () => {
-      console.log('[v0] Video data loaded, ready to play')
-      setIsLoaded(true)
-      if (autoPlay) {
-        video.play().catch(() => {
-          console.log('[v0] Autoplay blocked, user interaction required')
-        })
+    // Use progress event which fires when video is being fetched
+    const handleProgress = () => {
+      if (video.buffered.length > 0 && !isLoaded) {
+        console.log('[v0] Video data available')
+        setIsLoaded(true)
       }
     }
 
     const handleCanPlay = () => {
       console.log('[v0] Video can play')
-      if (!isLoaded) {
-        setIsLoaded(true)
-      }
+      setIsLoaded(true)
     }
 
-    const handlePlay = () => {
-      console.log('[v0] Video playing')
-      setIsPlaying(true)
-    }
-
-    const handlePause = () => {
-      console.log('[v0] Video paused')
-      setIsPlaying(false)
+    const handleLoadedData = () => {
+      console.log('[v0] Video loaded data')
+      setIsLoaded(true)
     }
 
     const handleError = () => {
-      console.error('[v0] Video error:', video.error?.code, video.error?.message)
-      setHasError(true)
+      console.error('[v0] Video error:', video.error)
     }
 
-    const handleDurationChange = () => {
-      console.log('[v0] Video duration:', video.duration)
-    }
-
-    video.addEventListener('loadstart', handleLoadStart)
-    video.addEventListener('loadedmetadata', handleLoadedMetadata)
-    video.addEventListener('loadeddata', handleLoadedData)
-    video.addEventListener('canplay', handleCanPlay)
-    video.addEventListener('play', handlePlay)
-    video.addEventListener('pause', handlePause)
-    video.addEventListener('error', handleError)
-    video.addEventListener('durationchange', handleDurationChange)
+    video.addEventListener('play', handlePlay, { once: false })
+    video.addEventListener('pause', handlePause, { once: false })
+    video.addEventListener('progress', handleProgress, { once: false })
+    video.addEventListener('canplay', handleCanPlay, { once: false })
+    video.addEventListener('loadeddata', handleLoadedData, { once: false })
+    video.addEventListener('error', handleError, { once: false })
 
     return () => {
-      video.removeEventListener('loadstart', handleLoadStart)
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
-      video.removeEventListener('loadeddata', handleLoadedData)
-      video.removeEventListener('canplay', handleCanPlay)
       video.removeEventListener('play', handlePlay)
       video.removeEventListener('pause', handlePause)
+      video.removeEventListener('progress', handleProgress)
+      video.removeEventListener('canplay', handleCanPlay)
+      video.removeEventListener('loadeddata', handleLoadedData)
       video.removeEventListener('error', handleError)
-      video.removeEventListener('durationchange', handleDurationChange)
     }
-  }, [autoPlay])
+  }, [])
 
   const togglePlayPause = () => {
     if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause()
-      } else {
-        videoRef.current.play().catch(() => {
-          console.log('[v0] Play failed')
+      if (videoRef.current.paused) {
+        videoRef.current.play().catch((err) => {
+          console.error('[v0] Play error:', err)
         })
+      } else {
+        videoRef.current.pause()
       }
     }
-  }
-
-  if (hasError) {
-    return (
-      <div className={`${className} bg-gray-900 flex items-center justify-center`}>
-        <div className="text-center text-gray-400">
-          <p className="text-sm">Video unavailable</p>
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -130,6 +104,7 @@ export function VideoPlayer({
         poster={poster}
         controls={controls}
         className={className}
+        crossOrigin="anonymous"
       >
         <source src={src} type="video/mp4" />
       </video>
@@ -148,7 +123,7 @@ export function VideoPlayer({
       {!controls && !isPlaying && isLoaded && (
         <button
           onClick={togglePlayPause}
-          className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center"
+          className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center cursor-pointer"
           aria-label="Play video"
         >
           <div className="w-16 h-16 bg-blue-300 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">

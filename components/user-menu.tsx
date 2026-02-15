@@ -27,7 +27,7 @@ export function UserMenu() {
   }
 
   const handleAdminDashboard = () => {
-    router.push("/admin")
+    router.push("/admin/upload-video")
   }
 
   const handleProfile = () => {

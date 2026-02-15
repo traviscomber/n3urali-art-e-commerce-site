@@ -8,13 +8,12 @@ import { AuthProvider } from "@/lib/contexts/auth-context"
 import { TagFilterProvider } from "@/lib/contexts/tag-filter-context"
 import { LanguageProvider } from "@/lib/contexts/language-context"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Header } from "@/components/header"
 import { CartSidebar } from "@/components/cart-sidebar"
 import { ToastProvider } from "@/components/toast-notifications"
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { MusicPlayerProvider } from "@/lib/contexts/music-player-context"
-import { headers } from "next/headers"
-import Header from "@/components/header"
 
 const montserrat = Montserrat({
   subsets: ["latin"],

@@ -210,22 +210,13 @@ export function Header({ videoContext }: HeaderProps) {
               <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
             </Link>
             {isAuthenticated && (
-              <>
-                <Link
-                  href="/admin/simple-admin"
-                  className="relative text-sm font-medium text-slate-400 hover:text-cyan-400 transition-all duration-300 group px-4 py-2"
-                >
-                  Admin
-                  <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
-                </Link>
-                <Link
-                  href="/account/orders"
-                  className="relative text-sm font-medium text-slate-400 hover:text-cyan-400 transition-all duration-300 group px-4 py-2"
-                >
-                  Orders
-                  <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
-                </Link>
-              </>
+              <Link
+                href="/account/orders"
+                className="relative text-sm font-medium text-slate-400 hover:text-cyan-400 transition-all duration-300 group px-4 py-2"
+              >
+                Orders
+                <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
+              </Link>
             )}
           </nav>
 
@@ -388,22 +379,13 @@ export function Header({ videoContext }: HeaderProps) {
                 Gallery
               </Link>
               {isAuthenticated && (
-                <>
-                  <Link
-                    href="/admin/simple-admin"
-                    className="text-base font-medium text-slate-400 hover:text-cyan-400 transition-colors px-4 py-3"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Admin
-                  </Link>
-                  <Link
-                    href="/account/orders"
-                    className="text-base font-medium text-slate-400 hover:text-cyan-400 transition-colors px-4 py-3"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Orders
-                  </Link>
-                </>
+                <Link
+                  href="/account/orders"
+                  className="text-base font-medium text-slate-400 hover:text-cyan-400 transition-colors px-4 py-3"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Orders
+                </Link>
               )}
             </nav>
           </div>

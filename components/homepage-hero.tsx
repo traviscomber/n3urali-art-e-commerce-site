@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { VideoPlayer } from './video-player'
 
 interface HomepageHeroProps {
   featuredImage?: {
@@ -10,9 +10,6 @@ interface HomepageHeroProps {
 }
 
 export function HomepageHero({ featuredImage }: HomepageHeroProps) {
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const [isPlaying, setIsPlaying] = useState(true)
-
   const features = [
     'Full-dome immersive content',
     'Dome & VR environments',
@@ -20,56 +17,6 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
     'Educational and cultural series',
     'Custom immersive productions',
   ]
-
-  useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
-
-    console.log('[v0] Video element found, initializing...')
-
-    const handlePlay = () => {
-      console.log('[v0] Video playing')
-      setIsPlaying(true)
-    }
-
-    const handlePause = () => {
-      console.log('[v0] Video paused')
-      setIsPlaying(false)
-    }
-
-    const handleLoadedMetadata = () => {
-      console.log('[v0] Video metadata loaded, duration:', video.duration)
-    }
-
-    const handleCanPlay = () => {
-      console.log('[v0] Video can play')
-      // Attempt autoplay
-      video.play().catch((err) => {
-        console.log('[v0] Autoplay failed:', err.message)
-      })
-    }
-
-    const handleError = () => {
-      console.log('[v0] Video error:', video.error?.code, video.error?.message)
-    }
-
-    video.addEventListener('play', handlePlay)
-    video.addEventListener('pause', handlePause)
-    video.addEventListener('loadedmetadata', handleLoadedMetadata)
-    video.addEventListener('canplay', handleCanPlay)
-    video.addEventListener('error', handleError)
-
-    console.log('[v0] Video src:', video.src)
-    console.log('[v0] Video readyState:', video.readyState)
-
-    return () => {
-      video.removeEventListener('play', handlePlay)
-      video.removeEventListener('pause', handlePause)
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
-      video.removeEventListener('canplay', handleCanPlay)
-      video.removeEventListener('error', handleError)
-    }
-  }, [])
 
   return (
     <section className="w-full bg-black py-24 px-4 sm:px-6 lg:px-8">
@@ -99,52 +46,12 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
           {/* Center Column: Featured Video */}
           <div className="flex justify-center">
             <div className="relative w-full max-w-sm aspect-square rounded-lg overflow-hidden bg-gradient-to-br from-gray-900 to-black shadow-2xl">
-              <video
-                ref={videoRef}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
+              <VideoPlayer
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_y3EtHhRvrMrVloUmW5CqlaLbJnts/GYNIQtHrIQqvBJJr6x0oWq/public/videos/mossy-hero.mp4"
+                loop={true}
+                muted={true}
                 className="w-full h-full object-cover"
-              >
-                <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_y3EtHhRvrMrVloUmW5CqlaLbJnts/GYNIQtHrIQqvBJJr6x0oWq/public/videos/mossy-hero.mp4" type="video/mp4" />
-              </video>
-
-              {/* Play/Pause Button */}
-              <button
-                onClick={() => {
-                  if (videoRef.current) {
-                    if (isPlaying) {
-                      videoRef.current.pause()
-                    } else {
-                      videoRef.current.play()
-                    }
-                  }
-                }}
-                className={`absolute bottom-4 right-4 w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                  isPlaying
-                    ? 'bg-blue-300/80 hover:bg-blue-300'
-                    : 'bg-blue-400/80 hover:bg-blue-400'
-                }`}
-                aria-label={isPlaying ? 'Pause video' : 'Play video'}
-              >
-                {isPlaying ? (
-                  <svg
-                    className="w-5 h-5 ml-0.5 text-black fill-current"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                  </svg>
-                ) : (
-                  <svg
-                    className="w-5 h-5 ml-0.5 text-black fill-current"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                )}
-              </button>
+              />
             </div>
           </div>
 

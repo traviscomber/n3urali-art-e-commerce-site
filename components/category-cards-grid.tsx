@@ -16,23 +16,16 @@ interface CategoryCardsGridProps {
   cards: CategoryCard[]
 }
 
-const accentColorMap = {
-  gold: 'from-yellow-500/30 to-yellow-600/20',
-  purple: 'from-purple-500/30 to-purple-600/20',
-  green: 'from-cyan-500/30 to-green-600/20',
-  orange: 'from-orange-500/30 to-orange-600/20',
-}
-
 export function CategoryCardsGrid({ cards }: CategoryCardsGridProps) {
   return (
     <section className="w-full bg-black py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-6">
           {cards.map((card) => (
             <Link
               key={card.id}
               href={card.link}
-              className="group relative h-80 rounded-lg overflow-hidden cursor-pointer transform transition-transform duration-300 hover:scale-105"
+              className="group relative h-80 rounded-lg overflow-hidden cursor-pointer transform transition-transform duration-300 hover:scale-105 shadow-lg"
             >
               {/* Background Image */}
               <Image
@@ -43,11 +36,8 @@ export function CategoryCardsGrid({ cards }: CategoryCardsGridProps) {
                 priority={card.id === 'studio' || card.id === 'realities'}
               />
 
-              {/* Overlay Gradient */}
-              <div className={`absolute inset-0 bg-gradient-to-t ${accentColorMap[card.accentColor]} transition-all duration-300 group-hover:opacity-80`} />
-
-              {/* Dark overlay at bottom */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+              {/* Subtle Dark Overlay */}
+              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-300" />
             </Link>
           ))}
         </div>

@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
 
 interface HomepageHeroProps {
   featuredImage?: {
@@ -12,8 +11,7 @@ interface HomepageHeroProps {
 
 export function HomepageHero({ featuredImage }: HomepageHeroProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const [videoLoaded, setVideoLoaded] = useState(false)
-  const [autoplayFailed, setAutoplayFailed] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
 
   const features = [
     'Full-dome immersive content',
@@ -23,45 +21,42 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
     'Custom immersive productions',
   ]
 
-  // Handle when video metadata is loaded and ready to play
-  const handleCanPlay = () => {
-    console.log('[v0] Video can play - attempting autoplay')
-    setVideoLoaded(true)
-    
-    const video = videoRef.current
-    if (video) {
-      video.muted = true
-      const playPromise = video.play()
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            console.log('[v0] Video autoplay successful')
-            setAutoplayFailed(false)
-          })
-          .catch((error) => {
-            console.log('[v0] Video autoplay failed:', error.message)
-            setAutoplayFailed(true)
-          })
-      }
-    }
-  }
-
-  // Handle video load error
-  const handleError = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    console.log('[v0] Video load error:', e.currentTarget.error?.message)
-  }
-
   useEffect(() => {
     const video = videoRef.current
-    if (video) {
-      // Set muted immediately
-      video.muted = true
-      video.loop = true
-      video.playsInline = true
-      
-      // Try to load the video
-      video.load()
-      console.log('[v0] Video element initialized and load() called')
+    if (!video) return
+
+    // Configure video element
+    video.muted = true
+    video.loop = true
+    video.playsInline = true
+    video.src = '/videos/mossy-hero.mp4'
+
+    // When metadata loads, try to autoplay
+    const handleLoadedMetadata = () => {
+      console.log('[v0] Video metadata loaded')
+      video.play().catch(() => {
+        console.log('[v0] Autoplay blocked - will show play button')
+      })
+    }
+
+    // Track when video is actually playing
+    const handlePlay = () => {
+      console.log('[v0] Video playing')
+      setIsPlaying(true)
+    }
+
+    const handlePause = () => {
+      setIsPlaying(false)
+    }
+
+    video.addEventListener('loadedmetadata', handleLoadedMetadata)
+    video.addEventListener('play', handlePlay)
+    video.addEventListener('pause', handlePause)
+
+    return () => {
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
+      video.removeEventListener('play', handlePlay)
+      video.removeEventListener('pause', handlePause)
     }
   }, [])
 
@@ -90,29 +85,37 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
             </div>
           </div>
 
-          {/* Center Column: Featured Video/Image */}
+          {/* Center Column: Featured Video */}
           <div className="flex justify-center">
             <div className="relative w-full max-w-sm aspect-square rounded-lg overflow-hidden bg-gray-900">
               <video
                 ref={videoRef}
-                preload="metadata"
-                muted
-                loop
-                playsInline
-                controls={autoplayFailed}
-                onCanPlay={handleCanPlay}
-                onError={handleError}
                 className="w-full h-full object-cover"
-              >
-                <source src="/videos/mossy-hero.mp4" type="video/mp4; codecs='avc1.42E01E'" />
-                Your browser does not support the video tag.
-              </video>
-              
-              {/* Loading state indicator */}
-              {!videoLoaded && (
-                <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
-                  <div className="text-gray-500 text-sm">Loading video...</div>
-                </div>
+              />
+
+              {/* Play button overlay if not playing */}
+              {!isPlaying && (
+                <button
+                  onClick={() => {
+                    if (videoRef.current) {
+                      videoRef.current.play().catch(() => {
+                        console.log('[v0] Manual play triggered')
+                      })
+                    }
+                  }}
+                  className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/50 transition-colors cursor-pointer group"
+                  aria-label="Play video"
+                >
+                  <div className="w-16 h-16 bg-blue-300 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg
+                      className="w-8 h-8 ml-1 text-black"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                    </svg>
+                  </div>
+                </button>
               )}
             </div>
           </div>

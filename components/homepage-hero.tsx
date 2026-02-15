@@ -35,25 +35,17 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
             </div>
           </div>
 
-          {/* Right Column: Video Placeholder */}
+          {/* Right Column: Video */}
           <div className="flex justify-center">
-            <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-900 shadow-2xl border border-gray-700/50 flex items-center justify-center group">
-              {/* Video Placeholder Content */}
-              <div className="flex flex-col items-center justify-center gap-4 text-center px-6">
-                <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
-                  <svg className="w-8 h-8 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm md:text-base text-gray-400 font-light">
-                    Video Placeholder
-                  </p>
-                  <p className="text-xs text-gray-600 mt-1">
-                    Studio showcase video
-                  </p>
-                </div>
-              </div>
+            <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-black shadow-2xl border border-gray-700/50">
+              <video
+                src="/videos/hero.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
         </div>

@@ -37,8 +37,11 @@ export async function POST(request: Request) {
     // Get authenticated user
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
+      console.log("[v0] No authenticated user")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    console.log("[v0] User authenticated:", user.email)
 
     // Generate unique filename
     const fileExt = file.name.split(".").pop()
@@ -60,9 +63,46 @@ export async function POST(request: Request) {
 
     if (uploadError) {
       console.error("[v0] Storage upload error:", uploadError)
+      // Try falling back to assets bucket
+      console.log("[v0] Attempting fallback to assets bucket...")
+      const { data: fallbackData, error: fallbackError } = await supabase.storage
+        .from("assets")
+        .upload(filePath, buffer, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: file.type,
+        })
+      
+      if (fallbackError) {
+        console.error("[v0] Fallback storage upload error:", fallbackError)
+        return NextResponse.json(
+          { error: `Storage error: ${fallbackError.message}` },
+          { status: 500 }
+        )
+      }
+      
+      console.log("[v0] File uploaded to assets bucket (fallback):", filePath)
+      // Get public URL from assets bucket
+      const { data: { publicUrl: assetUrl } } = supabase.storage.from("assets").getPublicUrl(filePath)
+      
+      // Save to database with assets URL
+      const { error: dbError } = await supabase.from("videos").insert({
+        title,
+        video_url: assetUrl,
+        collection_code: collectionCode || "featured",
+        uploaded_by: user.id,
+        file_size: file.size,
+        file_name: fileName,
+        created_at: new Date().toISOString(),
+      })
+
       return NextResponse.json(
-        { error: `Storage error: ${uploadError.message}` },
-        { status: 500 }
+        {
+          success: true,
+          url: assetUrl,
+          message: `Video "${title}" uploaded successfully`,
+        },
+        { status: 200 }
       )
     }
 

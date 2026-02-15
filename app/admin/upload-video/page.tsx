@@ -61,63 +61,90 @@ export default function SimpleAdminPage() {
     setError(null)
     setUploadProgress(0)
 
-    try {
+    return new Promise<void>((resolve) => {
+      const xhr = new XMLHttpRequest()
       const formData = new FormData()
       formData.append('file', file)
       formData.append('title', title)
       formData.append('collectionCode', collectionCode || 'featured')
 
-      // Simulate progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          const next = prev + Math.random() * 30
-          return next > 90 ? 90 : next
-        })
-      }, 500)
-
-      const response = await fetch('/api/admin/videos/upload', {
-        method: 'POST',
-        body: formData,
+      // Track upload progress
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable) {
+          const percentComplete = (e.loaded / e.total) * 100
+          setUploadProgress(percentComplete)
+          console.log('[v0] Upload progress:', percentComplete.toFixed(2) + '%')
+        }
       })
 
-      clearInterval(progressInterval)
+      // Handle completion
+      xhr.addEventListener('load', () => {
+        console.log('[v0] Upload complete, status:', xhr.status)
+        
+        if (xhr.status === 200) {
+          try {
+            const data = JSON.parse(xhr.responseText) as VideoUploadResponse
+            console.log('[v0] Upload response:', data)
+            
+            setUploadProgress(100)
+            setUploadedVideo(data)
+            toast({
+              title: 'Success',
+              description: 'Video uploaded successfully!',
+            })
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Network error' }))
-        const errorMsg = errorData.error || `Upload failed (${response.status})`
-        throw new Error(errorMsg)
-      }
+            // Reset form
+            setFile(null)
+            setTitle('')
+            const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+            if (fileInput) fileInput.value = ''
 
-      const data = (await response.json()) as VideoUploadResponse
-
-      setUploadProgress(100)
-      setUploadedVideo(data)
-      toast({
-        title: 'Success',
-        description: 'Video uploaded successfully!',
+            // Reset progress after 2 seconds
+            setTimeout(() => setUploadProgress(0), 2000)
+          } catch (parseErr) {
+            console.error('[v0] Response parse error:', parseErr)
+            setError('Server response invalid - check console logs')
+          }
+        } else {
+          try {
+            const errorData = JSON.parse(xhr.responseText)
+            const errorMsg = errorData.error || `Upload failed (${xhr.status})`
+            setError(errorMsg)
+            console.error('[v0] Upload error response:', errorData)
+          } catch (e) {
+            setError(`Upload failed (${xhr.status}): ${xhr.statusText}`)
+            console.error('[v0] Response text:', xhr.responseText)
+          }
+        }
+        
+        setUploadProgress(0)
+        setIsUploading(false)
+        resolve()
       })
 
-      // Reset form
-      setFile(null)
-      setTitle('')
-      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
-      if (fileInput) fileInput.value = ''
-
-      // Reset progress after 2 seconds
-      setTimeout(() => setUploadProgress(0), 2000)
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Upload failed'
-      setError(errorMsg)
-      console.error('[v0] Upload error:', err)
-      toast({
-        title: 'Error',
-        description: errorMsg,
-        variant: 'destructive',
+      // Handle error
+      xhr.addEventListener('error', () => {
+        const errorMsg = 'Network error - check browser console'
+        setError(errorMsg)
+        console.error('[v0] XHR error:', xhr.statusText)
+        setUploadProgress(0)
+        setIsUploading(false)
+        resolve()
       })
-      setUploadProgress(0)
-    } finally {
-      setIsUploading(false)
-    }
+
+      // Handle abort
+      xhr.addEventListener('abort', () => {
+        setError('Upload cancelled')
+        setUploadProgress(0)
+        setIsUploading(false)
+        resolve()
+      })
+
+      // Start upload
+      console.log('[v0] Starting upload to /api/admin/videos/upload')
+      xhr.open('POST', '/api/admin/videos/upload', true)
+      xhr.send(formData)
+    })
   }
 
   const handleCleanupDatabase = async () => {

@@ -44,9 +44,9 @@ export function EnvironmentsSection() {
             title="Heritage Environments"
             subtitle="Travel like never before!"
             images={[
-              { src: '', alt: 'Heritage 1' },
-              { src: '', alt: 'Heritage 2' },
-              { src: '', alt: 'Heritage 3' },
+              { src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EH1-Dqv4I3pSMeCK9NxLTaFxtb1VANTGwj.png', alt: 'Modern City Dome' },
+              { src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EH2-4IhImlQqz5kKqrpXG4E82X3st6cOxq.png', alt: 'Heritage Temple' },
+              { src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EH3-wOIyeBtXJHkwkfy0iotkQWUkSQ5Ibg.png', alt: 'Urban Architecture' },
             ]}
             ctaText="Choose environment"
             ctaLink="/environments/heritage"

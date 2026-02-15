@@ -960,43 +960,52 @@ export default function SimpleAdminPage() {
         )}
 
         <Tabs defaultValue="images" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9">
+          <TabsList className="grid w-full grid-cols-4 md:grid-cols-5 lg:grid-cols-9 gap-1 h-auto">
             {" "}
-            <TabsTrigger value="images" className="flex items-center gap-2">
+            <TabsTrigger value="images" className="flex items-center gap-2 text-xs md:text-sm px-2 md:px-4">
               <Eye className="h-4 w-4" />
-              Image Management
+              <span className="hidden md:inline">Image Management</span>
+              <span className="md:hidden">Images</span>
             </TabsTrigger>
-            <TabsTrigger value="tags" className="flex items-center gap-2">
+            <TabsTrigger value="tags" className="flex items-center gap-2 text-xs md:text-sm px-2 md:px-4">
               <Tag className="h-4 w-4" />
-              Tag Management
+              <span className="hidden md:inline">Tag Management</span>
+              <span className="md:hidden">Tags</span>
             </TabsTrigger>
-            <TabsTrigger value="featured" className="flex items-center gap-2">
+            <TabsTrigger value="featured" className="flex items-center gap-2 text-xs md:text-sm px-2 md:px-4">
               <Crown className="h-4 w-4" />
-              Featured Gallery
+              <span className="hidden md:inline">Featured Gallery</span>
+              <span className="md:hidden">Featured</span>
             </TabsTrigger>
-            <TabsTrigger value="upload" className="flex items-center gap-2">
+            <TabsTrigger value="upload" className="flex items-center gap-2 text-xs md:text-sm px-2 md:px-4">
               <Upload className="h-4 w-4" />
-              Upload Images
+              <span className="hidden md:inline">Upload Images</span>
+              <span className="md:hidden">Images</span>
             </TabsTrigger>
-            <TabsTrigger value="videos" className="flex items-center gap-2">
+            <TabsTrigger value="videos" className="flex items-center gap-2 text-xs md:text-sm px-2 md:px-4 bg-cyan-600/20 border border-cyan-500">
               <Upload className="h-4 w-4" />
-              Upload Videos
+              <span className="hidden md:inline">Upload Videos</span>
+              <span className="md:hidden">Videos</span>
             </TabsTrigger>
-            <TabsTrigger value="backblaze" className="flex items-center gap-2">
+            <TabsTrigger value="backblaze" className="flex items-center gap-2 text-xs md:text-sm px-2 md:px-4">
               <HardDrive className="h-4 w-4" />
-              Backblaze URLs
+              <span className="hidden lg:inline">Backblaze URLs</span>
+              <span className="lg:hidden">Backblaze</span>
             </TabsTrigger>
-            <TabsTrigger value="collections" className="flex items-center gap-2">
+            <TabsTrigger value="collections" className="flex items-center gap-2 text-xs md:text-sm px-2 md:px-4">
               <Calendar className="h-4 w-4" />
-              Collections
+              <span className="hidden lg:inline">Collections</span>
+              <span className="lg:hidden">Collections</span>
             </TabsTrigger>
-            <TabsTrigger value="payments" className="flex items-center gap-2">
+            <TabsTrigger value="payments" className="flex items-center gap-2 text-xs md:text-sm px-2 md:px-4">
               <DollarSign className="h-4 w-4" />
-              Payments
+              <span className="hidden lg:inline">Payments</span>
+              <span className="lg:hidden">Payments</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
+            <TabsTrigger value="analytics" className="flex items-center gap-2 text-xs md:text-sm px-2 md:px-4">
               <BarChart3 className="h-4 w-4" />
-              Sales Analytics
+              <span className="hidden lg:inline">Sales Analytics</span>
+              <span className="lg:hidden">Analytics</span>
             </TabsTrigger>
           </TabsList>
 

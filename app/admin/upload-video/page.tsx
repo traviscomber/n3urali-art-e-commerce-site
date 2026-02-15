@@ -20,6 +20,7 @@ export default function SimpleAdminPage() {
   const [title, setTitle] = useState('')
   const [collectionCode, setCollectionCode] = useState('')
   const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
   const [isCleaningDB, setIsCleaningDB] = useState(false)
   const [uploadedVideo, setUploadedVideo] = useState<VideoUploadResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -58,6 +59,7 @@ export default function SimpleAdminPage() {
 
     setIsUploading(true)
     setError(null)
+    setUploadProgress(0)
 
     try {
       const formData = new FormData()
@@ -65,36 +67,54 @@ export default function SimpleAdminPage() {
       formData.append('title', title)
       formData.append('collectionCode', collectionCode || 'featured')
 
+      // Simulate progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => {
+          const next = prev + Math.random() * 30
+          return next > 90 ? 90 : next
+        })
+      }, 500)
+
       const response = await fetch('/api/admin/videos/upload', {
         method: 'POST',
         body: formData,
       })
 
+      clearInterval(progressInterval)
+
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Upload failed')
+        const errorData = await response.json().catch(() => ({ error: 'Network error' }))
+        const errorMsg = errorData.error || `Upload failed (${response.status})`
+        throw new Error(errorMsg)
       }
 
       const data = (await response.json()) as VideoUploadResponse
 
+      setUploadProgress(100)
       setUploadedVideo(data)
       toast({
         title: 'Success',
         description: 'Video uploaded successfully!',
       })
 
+      // Reset form
       setFile(null)
       setTitle('')
       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
       if (fileInput) fileInput.value = ''
+
+      // Reset progress after 2 seconds
+      setTimeout(() => setUploadProgress(0), 2000)
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Upload failed'
       setError(errorMsg)
+      console.error('[v0] Upload error:', err)
       toast({
         title: 'Error',
         description: errorMsg,
         variant: 'destructive',
       })
+      setUploadProgress(0)
     } finally {
       setIsUploading(false)
     }
@@ -255,6 +275,22 @@ export default function SimpleAdminPage() {
                     Defaults to featured collection if empty
                   </p>
                 </div>
+
+                {/* Progress Bar */}
+                {isUploading && uploadProgress > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-300">Uploading</span>
+                      <span className="text-cyan-400 font-semibold">{Math.round(uploadProgress)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-cyan-500 to-blue-500 h-full transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Error Display */}
                 {error && (

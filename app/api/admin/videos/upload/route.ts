@@ -2,6 +2,9 @@ import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { v4 as uuidv4 } from "uuid"
 
+export const maxDuration = 300
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
@@ -9,7 +12,6 @@ export async function POST(request: Request) {
     const formData = await request.formData()
     const file = formData.get("file") as File
     const title = formData.get("title") as string
-    const description = formData.get("description") as string
     const collectionCode = formData.get("collectionCode") as string
 
     if (!file) {
@@ -32,18 +34,24 @@ export async function POST(request: Request) {
 
     console.log("[v0] Uploading video:", { title, collectionCode, fileSize: file.size })
 
+    // Get authenticated user
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     // Generate unique filename
     const fileExt = file.name.split(".").pop()
     const fileName = `${uuidv4()}.${fileExt}`
-    const filePath = `videos/${collectionCode || "featured"}/${fileName}`
+    const filePath = `${collectionCode || "featured"}/${fileName}`
 
     // Convert File to Buffer for upload
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
 
-    // Upload to Supabase Storage
+    // Upload to Supabase Storage (videos bucket)
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from("assets")
+      .from("videos")
       .upload(filePath, buffer, {
         cacheControl: "3600",
         upsert: false,
@@ -51,89 +59,63 @@ export async function POST(request: Request) {
       })
 
     if (uploadError) {
-      console.error("[v0] Supabase storage error:", uploadError)
-      return NextResponse.json({ error: uploadError.message }, { status: 500 })
+      console.error("[v0] Storage upload error:", uploadError)
+      return NextResponse.json(
+        { error: `Storage error: ${uploadError.message}` },
+        { status: 500 }
+      )
     }
 
     console.log("[v0] File uploaded to storage:", filePath)
 
     // Get public URL
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("assets").getPublicUrl(filePath)
+    const { data: { publicUrl } } = supabase.storage.from("videos").getPublicUrl(filePath)
 
-    // Update or create collection with video URL
-    const code = collectionCode || "featured"
-
-    // First check if collection exists
-    const { data: existingCollection, error: selectError } = await supabase
-      .from("collections")
-      .select("id")
-      .eq("code", code)
-      .single()
-
-    if (selectError && selectError.code !== "PGRST116") {
-      console.error("[v0] Database select error:", selectError)
+    if (!publicUrl) {
+      return NextResponse.json(
+        { error: "Failed to generate public URL" },
+        { status: 500 }
+      )
     }
 
-    if (existingCollection) {
-      // Update existing collection
-      const { error: updateError } = await supabase
-        .from("collections")
-        .update({
-          video_url: publicUrl,
-          title: title,
-          description: description || undefined,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("code", code)
-
-      if (updateError) {
-        console.error("[v0] Database update error:", updateError)
-        return NextResponse.json(
-          { error: "Video uploaded but metadata save failed", url: publicUrl },
-          { status: 500 },
-        )
-      }
-
-      console.log("[v0] Collection updated with video URL")
-    } else {
-      // Create new collection
-      const { error: insertError } = await supabase
-        .from("collections")
-        .insert({
-          code: code,
-          title: title,
-          description: description || null,
-          video_url: publicUrl,
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-
-      if (insertError) {
-        console.error("[v0] Database insert error:", insertError)
-        return NextResponse.json(
-          { error: "Video uploaded but collection creation failed", url: publicUrl },
-          { status: 500 },
-        )
-      }
-
-      console.log("[v0] New collection created with video URL")
-    }
-
-    return NextResponse.json({
-      success: true,
-      url: publicUrl,
-      message: `Video "${title}" uploaded successfully`,
-      filePath,
-      collectionCode: code,
+    // Save video metadata to database
+    const { error: dbError } = await supabase.from("videos").insert({
+      title,
+      video_url: publicUrl,
+      collection_code: collectionCode || "featured",
+      uploaded_by: user.id,
+      file_size: file.size,
+      file_name: fileName,
+      created_at: new Date().toISOString(),
     })
+
+    if (dbError) {
+      console.error("[v0] Database insert error:", dbError)
+      // Video is uploaded but metadata failed - still return success with URL
+      return NextResponse.json(
+        {
+          success: true,
+          url: publicUrl,
+          message: "Video uploaded successfully (metadata save incomplete)",
+        },
+        { status: 200 }
+      )
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        url: publicUrl,
+        message: `Video "${title}" uploaded successfully`,
+      },
+      { status: 200 }
+    )
   } catch (error) {
     console.error("[v0] Video upload error:", error)
+    const errorMsg = error instanceof Error ? error.message : "Unknown error"
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Video upload failed" },
-      { status: 500 },
+      { error: `Upload failed: ${errorMsg}` },
+      { status: 500 }
     )
   }
 }

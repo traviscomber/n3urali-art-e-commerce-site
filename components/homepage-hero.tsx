@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 
 interface HomepageHeroProps {
   featuredImage?: {
@@ -10,9 +10,6 @@ interface HomepageHeroProps {
 }
 
 export function HomepageHero({ featuredImage }: HomepageHeroProps) {
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
-
   const features = [
     'Full-dome immersive content',
     'Dome & VR environments',
@@ -21,55 +18,8 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
     'Custom immersive productions',
   ]
 
-  useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
-
-    // Configure video element
-    video.muted = true
-    video.loop = true
-    video.playsInline = true
-    video.crossOrigin = 'anonymous'
-    video.src = '/videos/mossy-hero.mp4'
-
-    // When metadata loads, try to autoplay
-    const handleLoadedMetadata = () => {
-      console.log('[v0] Video metadata loaded, duration:', video.duration)
-      video.play().catch((err) => {
-        console.log('[v0] Autoplay blocked:', err.message)
-      })
-    }
-
-    // Track when video is actually playing
-    const handlePlay = () => {
-      console.log('[v0] Video playing')
-      setIsPlaying(true)
-    }
-
-    const handlePause = () => {
-      console.log('[v0] Video paused')
-      setIsPlaying(false)
-    }
-
-    const handleError = () => {
-      console.log('[v0] Video error:', video.error?.message)
-    }
-
-    video.addEventListener('loadedmetadata', handleLoadedMetadata)
-    video.addEventListener('play', handlePlay)
-    video.addEventListener('pause', handlePause)
-    video.addEventListener('error', handleError)
-
-    return () => {
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
-      video.removeEventListener('play', handlePlay)
-      video.removeEventListener('pause', handlePause)
-      video.removeEventListener('error', handleError)
-    }
-  }, [])
-
   return (
-    <section className="w-full bg-black py-24 px-4 sm:px-6 lg:px-8">
+    <section className="w-full bg-black py-24 px-4 sm:px-6 lg:px-8 border-b border-gray-600/60">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16 items-center">
           {/* Left Column: Title, Subtitle, Description */}
@@ -93,39 +43,16 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
             </div>
           </div>
 
-          {/* Center Column: Featured Video */}
+          {/* Center Column: Featured Image */}
           <div className="flex justify-center">
-            <div className="relative w-full max-w-sm aspect-square rounded-lg overflow-hidden bg-gray-900">
-              <video
-                ref={videoRef}
-                controls
-                className="w-full h-full object-cover bg-black"
+            <div className="relative w-full max-w-sm aspect-square rounded-lg overflow-hidden bg-gradient-to-br from-gray-900 to-black shadow-2xl">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000f2d4720eae5b83444e157277-apnWSNe9S9zAGRXCiRyHS4dK9QdLb0.png"
+                alt="Studio - Immersive forest environment"
+                fill
+                className="w-full h-full object-cover"
+                priority
               />
-
-              {/* Play button overlay if not playing */}
-              {!isPlaying && (
-                <button
-                  onClick={() => {
-                    if (videoRef.current) {
-                      videoRef.current.play().catch((err) => {
-                        console.log('[v0] Manual play failed:', err.message)
-                      })
-                    }
-                  }}
-                  className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/50 transition-colors cursor-pointer group"
-                  aria-label="Play video"
-                >
-                  <div className="w-16 h-16 bg-blue-300 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg
-                      className="w-8 h-8 ml-1 text-black"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                    </svg>
-                  </div>
-                </button>
-              )}
             </div>
           </div>
 

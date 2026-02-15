@@ -1,11 +1,11 @@
 import { MetadataRoute } from 'next'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://n3uralia360.art'
   
   try {
-    const supabase = await createClient()
+    const supabase = createAdminClient()
     
     // Get all active images
     const { data: images } = await supabase

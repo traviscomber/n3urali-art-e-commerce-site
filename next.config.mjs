@@ -37,11 +37,6 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
-    turbopack: {
-      resolveAlias: {
-        // Prevent manifest conflicts
-      },
-    },
   },
   compiler: {
     removeConsole: false,
@@ -51,7 +46,6 @@ const nextConfig = {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
   },
-  // Ensure static files take precedence over generated routes
   staticPageGenerationTimeout: 120,
 }
 

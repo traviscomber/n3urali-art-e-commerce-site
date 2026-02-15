@@ -24,12 +24,12 @@ export const revalidate = 3600
 export default async function HomePage() {
   const supabase = await createClient()
 
-  // Fetch featured image for hero
-  const { data: featuredImage } = await supabase
-    .from("images")
-    .select("id, title, original_url, upscaled_url, thumbnail_large_url")
-    .eq("featured_collection", true)
-    .eq("active", true)
+  // Fetch featured collection with video URL
+  const { data: featuredCollection } = await supabase
+    .from("collections")
+    .select("id, title, description, video_url, featured_image_url")
+    .eq("is_featured", true)
+    .eq("is_active", true)
     .single()
 
   // Fetch first image from each category for the category cards
@@ -39,6 +39,14 @@ export default async function HomePage() {
     { key: 'environments', title: 'FULL DOME', label: 'Environments', link: '/environments', accent: 'green' as const },
     { key: 'theatre', title: 'THEATRE', label: 'Online', link: '/theatre', accent: 'orange' as const },
   ]
+
+  // Fallback images for each category
+  const fallbackImages: Record<string, string> = {
+    realities: '/images/R3alities.png',
+    studio: '/images/studio-fallback.png',
+    environments: '/images/environments-fallback.png',
+    theatre: '/images/theatre-fallback.png',
+  }
 
   const categoryCards = await Promise.all(
     categories.map(async (cat) => {
@@ -51,17 +59,14 @@ export default async function HomePage() {
         .limit(1)
         .single()
 
-      // Use fallback images for specific categories
-      const fallbackImages: Record<string, string> = {
-        realities: '/images/R3alities.png',
-      }
+      const imageUrl = data?.upscaled_url || data?.original_url || fallbackImages[cat.key] || null
 
       return {
         id: cat.key,
         title: cat.title,
         label: cat.label,
         link: cat.link,
-        imageUrl: data?.upscaled_url || data?.original_url || fallbackImages[cat.key] || '',
+        imageUrl: imageUrl || undefined,
         accentColor: cat.accent,
       }
     })
@@ -71,16 +76,11 @@ export default async function HomePage() {
     <main className="min-h-screen w-full bg-black">
       {/* Homepage Hero Section */}
       <HomepageHero
-        featuredImage={
-          featuredImage ? {
-            url: featuredImage.upscaled_url || featuredImage.original_url || '',
-            alt: featuredImage.title || 'Featured work'
-          } : undefined
-        }
+        videoUrl={featuredCollection?.video_url}
       />
 
       {/* Category Cards Grid */}
-      <CategoryCardsGrid cards={categoryCards} />
+      <CategoryCardsGrid cards={categoryCards.filter(card => card.imageUrl)} />
 
       {/* Realities Section */}
       <RealitiesSection />

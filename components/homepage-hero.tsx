@@ -3,13 +3,10 @@
 import Image from 'next/image'
 
 interface HomepageHeroProps {
-  featuredImage?: {
-    url: string
-    alt: string
-  }
+  videoUrl?: string
 }
 
-export function HomepageHero({ featuredImage }: HomepageHeroProps) {
+export function HomepageHero({ videoUrl }: HomepageHeroProps) {
   return (
     <section className="w-full bg-black py-24 px-4 sm:px-6 lg:px-8 border-b border-gray-600/60">
       <div className="max-w-7xl mx-auto">
@@ -38,14 +35,26 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
           {/* Right Column: Video */}
           <div className="flex justify-center">
             <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-black shadow-2xl border border-gray-700/50">
-              <video
-                src="/videos/hero.mp4"
-                muted
-                loop
-                playsInline
-                autoPlay
-                className="w-full h-full object-cover"
-              />
+              {videoUrl ? (
+                <video
+                  src={videoUrl}
+                  muted
+                  loop
+                  playsInline
+                  autoPlay
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
+                  <div className="text-center">
+                    <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-gray-400 text-sm">Video not available</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

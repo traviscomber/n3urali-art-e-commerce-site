@@ -51,12 +51,17 @@ export default async function HomePage() {
         .limit(1)
         .single()
 
+      // Use fallback images for specific categories
+      const fallbackImages: Record<string, string> = {
+        realities: '/images/R3alities.png',
+      }
+
       return {
         id: cat.key,
         title: cat.title,
         label: cat.label,
         link: cat.link,
-        imageUrl: data?.upscaled_url || data?.original_url || '',
+        imageUrl: data?.upscaled_url || data?.original_url || fallbackImages[cat.key] || '',
         accentColor: cat.accent,
       }
     })

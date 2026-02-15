@@ -12,7 +12,6 @@ interface HomepageHeroProps {
 export function HomepageHero({ featuredImage }: HomepageHeroProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(true)
-  const [videoError, setVideoError] = useState(false)
 
   const features = [
     'Full-dome immersive content',
@@ -26,17 +25,6 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
     const video = videoRef.current
     if (!video) return
 
-    // Configure video element
-    video.muted = true
-    video.loop = true
-    video.playsInline = true
-    video.autoplay = true
-
-    const handleError = (e: Event) => {
-      console.log('[v0] Video error:', video.error?.message)
-      setVideoError(true)
-    }
-
     const handlePlay = () => {
       setIsPlaying(true)
     }
@@ -45,17 +33,10 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
       setIsPlaying(false)
     }
 
-    video.addEventListener('error', handleError)
     video.addEventListener('play', handlePlay)
     video.addEventListener('pause', handlePause)
 
-    // Try to play
-    video.play().catch((err) => {
-      console.log('[v0] Autoplay failed:', err.message)
-    })
-
     return () => {
-      video.removeEventListener('error', handleError)
       video.removeEventListener('play', handlePlay)
       video.removeEventListener('pause', handlePause)
     }
@@ -89,63 +70,52 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
           {/* Center Column: Featured Video */}
           <div className="flex justify-center">
             <div className="relative w-full max-w-sm aspect-square rounded-lg overflow-hidden bg-gradient-to-br from-gray-900 to-black shadow-2xl">
-              {videoError ? (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-900/20 to-gray-900">
-                  <div className="text-center text-gray-400">
-                    <p className="text-sm">Video unavailable</p>
-                  </div>
-                </div>
-              ) : (
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="auto"
-                  className="w-full h-full object-cover"
-                  onError={() => setVideoError(true)}
-                >
-                  <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_y3EtHhRvrMrVloUmW5CqlaLbJnts/GYNIQtHrIQqvBJJr6x0oWq/public/videos/mossy-hero.mp4" type="video/mp4" />
-                </video>
-              )}
+              <video
+                ref={videoRef}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                className="w-full h-full object-cover"
+              >
+                <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_y3EtHhRvrMrVloUmW5CqlaLbJnts/GYNIQtHrIQqvBJJr6x0oWq/public/videos/mossy-hero.mp4" type="video/mp4" />
+              </video>
 
               {/* Play/Pause Button */}
-              {!videoError && (
-                <button
-                  onClick={() => {
-                    if (videoRef.current) {
-                      if (isPlaying) {
-                        videoRef.current.pause()
-                      } else {
-                        videoRef.current.play()
-                      }
+              <button
+                onClick={() => {
+                  if (videoRef.current) {
+                    if (isPlaying) {
+                      videoRef.current.pause()
+                    } else {
+                      videoRef.current.play()
                     }
-                  }}
-                  className={`absolute bottom-4 right-4 w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                    isPlaying
-                      ? 'bg-blue-300/80 hover:bg-blue-300'
-                      : 'bg-blue-400/80 hover:bg-blue-400'
-                  }`}
-                  aria-label={isPlaying ? 'Pause video' : 'Play video'}
-                >
-                  {isPlaying ? (
-                    <svg
-                      className="w-5 h-5 ml-0.5 text-black fill-current"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                    </svg>
-                  ) : (
-                    <svg
-                      className="w-5 h-5 ml-0.5 text-black fill-current"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  )}
-                </button>
-              )}
+                  }
+                }}
+                className={`absolute bottom-4 right-4 w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                  isPlaying
+                    ? 'bg-blue-300/80 hover:bg-blue-300'
+                    : 'bg-blue-400/80 hover:bg-blue-400'
+                }`}
+                aria-label={isPlaying ? 'Pause video' : 'Play video'}
+              >
+                {isPlaying ? (
+                  <svg
+                    className="w-5 h-5 ml-0.5 text-black fill-current"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-5 h-5 ml-0.5 text-black fill-current"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                )}
+              </button>
             </div>
           </div>
 

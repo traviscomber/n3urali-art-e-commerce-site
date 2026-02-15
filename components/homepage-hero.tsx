@@ -1,7 +1,6 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useRef } from 'react'
 
 interface HomepageHeroProps {
   featuredImage?: {
@@ -11,17 +10,6 @@ interface HomepageHeroProps {
 }
 
 export function HomepageHero({ featuredImage }: HomepageHeroProps) {
-  const videoRef = useRef<HTMLVideoElement>(null)
-
-  useEffect(() => {
-    if (videoRef.current) {
-      console.log('[v0] Video element found:', videoRef.current.src)
-      console.log('[v0] Video can play:', videoRef.current.canPlayType('video/mp4'))
-      videoRef.current.play().catch((err) => {
-        console.log('[v0] Video autoplay error:', err)
-      })
-    }
-  }, [])
   return (
     <section className="w-full bg-black py-24 px-4 sm:px-6 lg:px-8 border-b border-gray-600/60">
       <div className="max-w-7xl mx-auto">
@@ -51,16 +39,12 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
           <div className="flex justify-center">
             <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-black shadow-2xl border border-gray-700/50">
               <video
-                ref={videoRef}
                 src="/videos/hero.mp4"
-                autoPlay
                 muted
                 loop
                 playsInline
+                autoPlay
                 className="w-full h-full object-cover"
-                onLoadedMetadata={() => console.log('[v0] Video metadata loaded')}
-                onPlay={() => console.log('[v0] Video playing')}
-                onError={(e) => console.log('[v0] Video error:', e)}
               />
             </div>
           </div>

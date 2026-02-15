@@ -11,6 +11,7 @@ INSERT INTO images (
   original_url,
   upscaled_url,
   thumbnail_large_url,
+  file_path,
   content_category,
   active,
   created_at
@@ -21,6 +22,7 @@ VALUES (
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Studio-F5dlmXiAmybWa59xZ5v3ZfVclowXES.png',
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Studio-F5dlmXiAmybWa59xZ5v3ZfVclowXES.png',
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Studio-F5dlmXiAmybWa59xZ5v3ZfVclowXES.png',
+  'assets/images/studio.png',
   'studio',
   true,
   NOW()
@@ -33,6 +35,7 @@ INSERT INTO images (
   original_url,
   upscaled_url,
   thumbnail_large_url,
+  file_path,
   content_category,
   active,
   created_at
@@ -43,6 +46,7 @@ VALUES (
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/R3alities%20-xYgwUsP7q8Z7tSTYKvDLGaMo9GbctW.png',
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/R3alities%20-xYgwUsP7q8Z7tSTYKvDLGaMo9GbctW.png',
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/R3alities%20-xYgwUsP7q8Z7tSTYKvDLGaMo9GbctW.png',
+  'assets/images/realities.png',
   'realities',
   true,
   NOW()
@@ -55,6 +59,7 @@ INSERT INTO images (
   original_url,
   upscaled_url,
   thumbnail_large_url,
+  file_path,
   content_category,
   active,
   created_at
@@ -65,6 +70,7 @@ VALUES (
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Enve%CC%81s-w0foyLE584bjdidbZ7siakzp3ZJmoj.png',
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Enve%CC%81s-w0foyLE584bjdidbZ7siakzp3ZJmoj.png',
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Enve%CC%81s-w0foyLE584bjdidbZ7siakzp3ZJmoj.png',
+  'assets/images/environments.png',
   'environments',
   true,
   NOW()
@@ -77,6 +83,7 @@ INSERT INTO images (
   original_url,
   upscaled_url,
   thumbnail_large_url,
+  file_path,
   content_category,
   active,
   created_at
@@ -87,6 +94,7 @@ VALUES (
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatre-5R15ZYCfjpoGwinPlAne8bFdN0cpPr.png',
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatre-5R15ZYCfjpoGwinPlAne8bFdN0cpPr.png',
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatre-5R15ZYCfjpoGwinPlAne8bFdN0cpPr.png',
+  'assets/images/theatre.png',
   'theatre',
   true,
   NOW()

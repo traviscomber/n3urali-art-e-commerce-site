@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import Image from 'next/image'
 
 interface HomepageHeroProps {
@@ -10,6 +11,8 @@ interface HomepageHeroProps {
 }
 
 export function HomepageHero({ featuredImage }: HomepageHeroProps) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
   const features = [
     'Full-dome immersive content',
     'Dome & VR environments',
@@ -17,6 +20,21 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
     'Educational and cultural series',
     'Custom immersive productions',
   ]
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (video) {
+      // Ensure video is muted before attempting to play
+      video.muted = true
+      // Try to play the video
+      const playPromise = video.play()
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.log('[v0] Video autoplay failed:', error)
+        })
+      }
+    }
+  }, [])
 
   return (
     <section className="w-full bg-black py-24 px-4 sm:px-6 lg:px-8">
@@ -47,7 +65,7 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
           <div className="flex justify-center">
             <div className="relative w-full max-w-sm aspect-square rounded-lg overflow-hidden bg-gray-900">
               <video
-                autoPlay
+                ref={videoRef}
                 muted
                 loop
                 playsInline

@@ -126,26 +126,26 @@ function EnvironmentCollection({
       <div className="flex items-center justify-center gap-6 md:gap-8 flex-wrap">
         {images.map((image, index) => {
           const isCenter = index === 1
-          const sizeClass = isCenter ? 'w-64 h-64 md:w-80 md:h-80' : 'w-48 h-48 md:w-56 md:h-56'
+          const size = isCenter ? 320 : 224
           
           return (
             <button
               key={index}
               onClick={() => window.location.href = ctaLink}
-              className={`relative rounded-full overflow-hidden transform transition-all duration-300 hover:scale-110 hover:shadow-2xl cursor-pointer flex-shrink-0 ${sizeClass} ${
+              className={`relative rounded-full overflow-hidden transform transition-all duration-300 hover:scale-110 hover:shadow-2xl cursor-pointer flex-shrink-0 ${
                 isCenter ? 'ring-2 ring-cyan-400/30 hover:ring-cyan-400/60' : ''
               }`}
             >
               <Image
                 src={image.src}
                 alt={image.alt}
-                fill
-                className="object-cover"
+                width={size}
+                height={size}
+                className="object-cover rounded-full"
                 priority={isCenter}
-                sizes={isCenter ? "(max-width: 768px) 256px, 320px" : "(max-width: 768px) 192px, 224px"}
               />
               {/* Hover overlay */}
-              <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-full" />
             </button>
           )
         })}

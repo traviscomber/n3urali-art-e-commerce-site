@@ -21,30 +21,14 @@ export default async function EnvironmentsPage() {
     .eq('active', true)
     .order('created_at', { ascending: false })
 
-  const featuredImage = images?.[0]
-
-  const environmentsFeatures = [
-    'Dome-optimized 360° content',
-    'VR-ready equirectangular formats',
-    'Projection mapping compatible',
-    'Seamless loop environments',
-    'Museum & venue installation',
-  ]
-
   return (
     <main className="min-h-screen w-full bg-background">
       <CategoryHeroBlock
         category="environments"
-        title="Environments"
-        subtitle="Living Immersive Spaces"
+        title="Heritage Environments"
         description="Continuous atmospheric loops optimized for dome perception. Flexible immersive environments ready for integration into any venue or experience. Projection-ready, instantly deployable."
-        features={environmentsFeatures}
-        featuredImage={
-          featuredImage ? {
-            url: featuredImage.upscaled_url || featuredImage.original_url || '',
-            alt: featuredImage.title || 'Environments featured work'
-          } : undefined
-        }
+        imageCount={images?.length || 0}
+        heroImage="/mountain-panorama-360-sunrise.png"
       />
 
       <CategoryGalleryBlock

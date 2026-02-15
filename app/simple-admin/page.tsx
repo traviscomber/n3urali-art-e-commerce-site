@@ -960,7 +960,7 @@ export default function SimpleAdminPage() {
         )}
 
         <Tabs defaultValue="images" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-9">
             {" "}
             <TabsTrigger value="images" className="flex items-center gap-2">
               <Eye className="h-4 w-4" />
@@ -977,6 +977,10 @@ export default function SimpleAdminPage() {
             <TabsTrigger value="upload" className="flex items-center gap-2">
               <Upload className="h-4 w-4" />
               Upload Images
+            </TabsTrigger>
+            <TabsTrigger value="videos" className="flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              Upload Videos
             </TabsTrigger>
             <TabsTrigger value="backblaze" className="flex items-center gap-2">
               <HardDrive className="h-4 w-4" />
@@ -1244,6 +1248,27 @@ export default function SimpleAdminPage() {
                     </>
                   )}
                 </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="videos" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl">Upload Videos</CardTitle>
+                <CardDescription>Upload videos for collections and hero sections</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <Alert>
+                    <AlertDescription>
+                      Go to <a href="/admin/simple-admin" className="font-semibold underline hover:opacity-80">Admin Video Manager</a> to upload and manage videos for your collections.
+                    </AlertDescription>
+                  </Alert>
+                  <Button asChild className="w-full">
+                    <a href="/admin/simple-admin">Open Video Manager</a>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

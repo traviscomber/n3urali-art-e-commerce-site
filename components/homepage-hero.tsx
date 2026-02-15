@@ -43,20 +43,21 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
             </div>
           </div>
 
-          {/* Center Column: Featured Image */}
-          {featuredImage && (
-            <div className="flex justify-center">
-              <div className="relative w-full max-w-sm aspect-square rounded-lg overflow-hidden">
-                <Image
-                  src={featuredImage.url}
-                  alt={featuredImage.alt}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
+          {/* Center Column: Featured Video/Image */}
+          <div className="flex justify-center">
+            <div className="relative w-full max-w-sm aspect-square rounded-lg overflow-hidden bg-gray-900">
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full h-full object-cover"
+              >
+                <source src="/videos/mossy-hero.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
             </div>
-          )}
+          </div>
 
           {/* Right Column: Features List */}
           <div className="flex flex-col gap-4">

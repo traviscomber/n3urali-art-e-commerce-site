@@ -27,7 +27,7 @@ export function UserMenu() {
   }
 
   const handleAdminDashboard = () => {
-    router.push("/simple-admin")
+    router.push("/admin")
   }
 
   const handleProfile = () => {

@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { VideoPlayer } from './video-player'
+import Image from 'next/image'
 
 interface HomepageHeroProps {
   featuredImage?: {
@@ -11,9 +10,6 @@ interface HomepageHeroProps {
 }
 
 export function HomepageHero({ featuredImage }: HomepageHeroProps) {
-  const [videoUrl, setVideoUrl] = useState<string>('/videos/hero.mp4')
-  const [isLoading, setIsLoading] = useState(false)
-
   const features = [
     'Full-dome immersive content',
     'Dome & VR environments',
@@ -21,25 +17,6 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
     'Educational and cultural series',
     'Custom immersive productions',
   ]
-
-  useEffect(() => {
-    // Fetch studio video from database (optional - fallback to local)
-    const fetchStudioVideo = async () => {
-      try {
-        const response = await fetch('/api/collections/studio')
-        if (response.ok) {
-          const data = await response.json()
-          if (data.video_url) {
-            setVideoUrl(data.video_url)
-          }
-        }
-      } catch (error) {
-        // Use fallback video if database unavailable
-      }
-    }
-
-    fetchStudioVideo()
-  }, [])
 
   return (
     <section className="w-full bg-black py-24 px-4 sm:px-6 lg:px-8">
@@ -66,15 +43,15 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
             </div>
           </div>
 
-          {/* Center Column: Featured Video */}
+          {/* Center Column: Featured Image */}
           <div className="flex justify-center">
             <div className="relative w-full max-w-sm aspect-square rounded-lg overflow-hidden bg-gradient-to-br from-gray-900 to-black shadow-2xl">
-              <VideoPlayer
-                src={videoUrl}
-                loop={true}
-                muted={true}
-                autoPlay={true}
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Studio-F5dlmXiAmybWa59xZ5v3ZfVclowXES.png"
+                alt="Studio"
+                fill
                 className="w-full h-full object-cover"
+                priority
               />
             </div>
           </div>

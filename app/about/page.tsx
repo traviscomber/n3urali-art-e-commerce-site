@@ -1,39 +1,62 @@
 import type { Metadata } from "next"
-import AboutClientPage from "./client-page"
+import { AboutHeroBlock } from "@/components/about-hero-block"
+import { AboutStoryBlock } from "@/components/about-story-block"
+import { AboutValuesBlock } from "@/components/about-values-block"
+import { AboutStatsBlock } from "@/components/about-stats-block"
 
 export const metadata: Metadata = {
-  title: "About n3uralia360.art - AI-Powered 360° Photography Pioneers",
-  description:
-    "Learn how n3uralia360.art revolutionizes immersive imagery with AI-generated 360° photography. Part of the n3uralia group, discover our mission, technology, and commitment to professional-grade visual content for VR, projection mapping, and architectural visualization.",
-  keywords: [
-    "about n3uralia360.art",
-    "n3uralia group",
-    "AI photography company",
-    "360 degree photography pioneers",
-    "immersive imagery technology",
-    "professional VR content creation",
-    "who creates 360 images",
-    "AI generated photography company",
-    "equirectangular image specialists",
-  ],
-  openGraph: {
-    title: "About n3uralia360.art - AI-Powered 360° Photography Pioneers",
-    description:
-      "Learn how n3uralia360.art revolutionizes immersive imagery with AI-generated 360° photography for professional applications. Part of the n3uralia group.",
-    type: "website",
-    url: "https://www.n3uralia360.art/about",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "About n3uralia360.art - AI-Powered 360° Photography Pioneers",
-    description:
-      "Learn how n3uralia360.art revolutionizes immersive imagery with AI-generated 360° photography for professional applications. Part of the n3uralia group.",
-  },
-  alternates: {
-    canonical: "https://www.n3uralia360.art/about",
-  },
+  title: "About N3uralia360 - Immersive Media Studio",
+  description: "N3uralia360 is a cultural immersive media studio creating experiences across dome installations, VR environments, performance loops, and spatial media.",
+  keywords: ["about N3uralia360", "immersive media", "360 photography", "cultural storytelling", "dome installation", "VR experience"],
 }
 
 export default function AboutPage() {
-  return <AboutClientPage />
+  const values = [
+    {
+      icon: "🌍",
+      title: "Cultural Research",
+      description: "Deep cultural immersion and collaboration with communities to authentically ground each work.",
+    },
+    {
+      icon: "🎨",
+      title: "Human Authorship",
+      description: "Creative direction with careful attention to visual language, narrative structure, and aesthetic integrity.",
+    },
+    {
+      icon: "🔄",
+      title: "Artistic Translation",
+      description: "Each work is adapted across venues and platforms, optimized for its unique context and purpose.",
+    },
+  ]
+
+  const stats = [
+    { number: "4+", label: "Years Creating" },
+    { number: "100+", label: "Works Produced" },
+    { number: "50+", label: "Collections" },
+    { number: "∞", label: "Immersive Possibilities" },
+  ]
+
+  const storyContent = [
+    "N3uralia360 is a cultural immersive media studio. We author experiences—not generate them. Each work represents deep cultural research, collaborative artistic vision, and meticulous craft across multiple formats.",
+    "We believe immersive media should preserve heritage, celebrate artistic expression, and create genuine human connection. Whether preserving endangered cultural narratives or exploring speculative futures, we work with intentionality, respect, and artistic rigor.",
+    "Our team includes artists, technologists, and cultural researchers who collaborate on every project. We create experiences that transcend traditional boundaries between physical and digital, creating new cultural dimensions.",
+  ]
+
+  return (
+    <main className="min-h-screen w-full bg-background">
+      <AboutHeroBlock
+        title="About N3uralia360"
+        subtitle="We are a cultural immersive media studio, authoring experiences across dome installations, VR environments, performance loops, and spatial media."
+      />
+
+      <AboutStoryBlock
+        title="Our Story"
+        content={storyContent}
+      />
+
+      <AboutValuesBlock values={values} />
+
+      <AboutStatsBlock stats={stats} />
+    </main>
+  )
 }

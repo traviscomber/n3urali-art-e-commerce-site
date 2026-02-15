@@ -1,53 +1,74 @@
 import type { Metadata } from "next"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Mail, Clock, MapPin, HelpCircle } from "lucide-react"
+import { ContactHeroBlock } from "@/components/contact-hero-block"
+import { ContactMethodsBlock } from "@/components/contact-methods-block"
+import { ContactFormBlock } from "@/components/contact-form-block"
+import { ContactFAQBlock } from "@/components/contact-faq-block"
 
 export const metadata: Metadata = {
-  title: "Contact N3urali.art - Get Professional 360° Photography Solutions",
-  description:
-    "Contact N3urali.art for custom 360° imagery projects, enterprise solutions, technical support, and partnership opportunities. Professional AI-generated immersive photography for VR, projection mapping, and visualization.",
-  keywords: [
-    "contact n3urali.art",
-    "360 photography support",
-    "custom VR imagery projects",
-    "enterprise immersive solutions",
-    "professional 360 photography help",
-    "AI photography consultation",
-    "projection mapping imagery support",
-    "architectural visualization contact",
-  ],
-  openGraph: {
-    title: "Contact N3urali.art - Get Professional 360° Photography Solutions",
-    description:
-      "Contact N3urali.art for custom 360° imagery projects, enterprise solutions, and professional support.",
-    type: "website",
-    url: "https://www.n3uralia360.art/contact",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Contact N3urali.art - Get Professional 360° Photography Solutions",
-    description:
-      "Contact N3urali.art for custom 360° imagery projects, enterprise solutions, and professional support.",
-  },
-  alternates: {
-    canonical: "https://www.n3uralia360.art/contact",
-  },
+  title: "Contact N3uralia360",
+  description: "Get in touch with N3uralia360 for commissions, inquiries, and partnerships.",
+  keywords: ["contact", "commission", "inquiry", "partnership"],
 }
 
 export default function ContactPage() {
+  const contactMethods = [
+    {
+      icon: "✉️",
+      title: "Email",
+      value: "hello@n3uralia360.art",
+      link: "mailto:hello@n3uralia360.art",
+    },
+    {
+      icon: "📱",
+      title: "Phone",
+      value: "+1 (555) 123-4567",
+    },
+    {
+      icon: "🌐",
+      title: "Visit Us",
+      value: "www.n3uralia360.art",
+      link: "https://n3uralia360.art",
+    },
+  ]
+
+  const faqs = [
+    {
+      question: "What is the typical timeline for a commission?",
+      answer:
+        "Commission timelines depend on scope and complexity. Most projects take 3-6 months from initial brief to final delivery. We'll provide a detailed timeline after the discovery phase.",
+    },
+    {
+      question: "Do you work with international clients?",
+      answer:
+        "Yes, we work with cultural institutions, museums, and brands worldwide. We have experience with projects across multiple continents.",
+    },
+    {
+      question: "What formats can you deliver in?",
+      answer:
+        "We deliver in all major formats: 360 equirectangular, fisheye, dome-optimized, VR-ready, and performance loops. We also create social media cuts and promotional materials.",
+    },
+    {
+      question: "How do commissions start?",
+      answer:
+        "Start by filling out our contact form or emailing us directly. We'll schedule a discovery call to understand your vision, venue, and requirements.",
+    },
+  ]
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <Badge variant="secondary" className="mb-6">
-              Contact Us
-            </Badge>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-balance">
-              Let's Create Something
-              <span className="text-primary"> Amazing</span>
+    <main className="min-h-screen w-full bg-background">
+      <ContactHeroBlock
+        title="Get in Touch"
+        subtitle="We'd love to hear about your project or inquiry. Reach out to us through any of the methods below."
+      />
+
+      <ContactMethodsBlock methods={contactMethods} />
+
+      <ContactFormBlock />
+
+      <ContactFAQBlock faqs={faqs} />
+    </main>
+  )
+}
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto text-pretty">
               Have questions about our services or need custom imagery solutions? We'd love to hear from you and help

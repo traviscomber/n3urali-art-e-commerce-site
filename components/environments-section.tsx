@@ -59,9 +59,9 @@ export function EnvironmentsSection() {
             title="Mythical Universe"
             subtitle="Find yourself inside the legends"
             images={[
-              { src: '', alt: 'Mythical 1' },
-              { src: '', alt: 'Mythical 2' },
-              { src: '', alt: 'Mythical 3' },
+              { src: '/images/MossyCircle2.png', alt: 'Mythical 1' },
+              { src: '/images/MossyCircle2.png', alt: 'Mythical 2' },
+              { src: '/images/MossyCircle2.png', alt: 'Mythical 3' },
             ]}
             ctaText="Get Those Loops!"
             ctaLink="/environments/mythical"
@@ -72,9 +72,9 @@ export function EnvironmentsSection() {
             title="Art Spaces"
             subtitle="Dreams you can choose"
             images={[
-              { src: '', alt: 'Art 1' },
-              { src: '', alt: 'Art 2' },
-              { src: '', alt: 'Art 3' },
+              { src: '/images/AH1.png', alt: 'Art 1' },
+              { src: '/images/AH2.png', alt: 'Art 2' },
+              { src: '/images/AH3.png', alt: 'Art 3' },
             ]}
             ctaText="Choose environment"
             ctaLink="/environments/art"

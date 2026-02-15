@@ -30,7 +30,7 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
     video.loop = true
     video.playsInline = true
     video.crossOrigin = 'anonymous'
-    video.src = '/videos/mossy-hero.mp4'
+    video.src = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_y3EtHhRvrMrVloUmW5CqlaLbJnts/GYNIQtHrIQqvBJJr6x0oWq/public/videos/mossy-hero.mp4'
 
     // When metadata loads, try to autoplay
     const handleLoadedMetadata = () => {

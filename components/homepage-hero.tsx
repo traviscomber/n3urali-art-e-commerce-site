@@ -47,8 +47,8 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
           <div className="flex justify-center">
             <div className="relative w-full max-w-sm aspect-square rounded-lg overflow-hidden bg-gradient-to-br from-gray-900 to-black shadow-2xl">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Studio-F5dlmXiAmybWa59xZ5v3ZfVclowXES.png"
-                alt="Studio"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000f2d4720eae5b83444e157277-apnWSNe9S9zAGRXCiRyHS4dK9QdLb0.png"
+                alt="Studio - Immersive forest environment"
                 fill
                 className="w-full h-full object-cover"
                 priority

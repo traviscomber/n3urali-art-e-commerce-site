@@ -59,9 +59,9 @@ export function EnvironmentsSection() {
             title="Mythical Universe"
             subtitle="Find yourself inside the legends"
             images={[
-              { src: '/images/MossyCircle2.png', alt: 'Mythical 1' },
-              { src: '/images/MossyCircle2.png', alt: 'Mythical 2' },
-              { src: '/images/MossyCircle2.png', alt: 'Mythical 3' },
+              { src: '/images/MH1.png', alt: 'Mythical Dragons' },
+              { src: '/images/MH2.png', alt: 'Mythical Beast' },
+              { src: '/images/MH3.png', alt: 'Forest Dweller' },
             ]}
             ctaText="Get Those Loops!"
             ctaLink="/environments/mythical"

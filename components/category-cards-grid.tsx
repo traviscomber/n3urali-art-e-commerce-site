@@ -23,13 +23,6 @@ const accentColorMap = {
   orange: 'from-orange-500/30 to-orange-600/20',
 }
 
-const accentTextMap = {
-  gold: 'text-yellow-400',
-  purple: 'text-purple-400',
-  green: 'text-cyan-400',
-  orange: 'text-orange-400',
-}
-
 export function CategoryCardsGrid({ cards }: CategoryCardsGridProps) {
   return (
     <section className="w-full bg-black py-20 px-4 sm:px-6 lg:px-8">
@@ -55,16 +48,6 @@ export function CategoryCardsGrid({ cards }: CategoryCardsGridProps) {
 
               {/* Dark overlay at bottom */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-
-              {/* Content */}
-              <div className="absolute inset-0 flex flex-col justify-end p-6">
-                <h3 className={`text-3xl md:text-4xl font-bold ${accentTextMap[card.accentColor]} mb-1 transition-colors duration-300`}>
-                  {card.title}
-                </h3>
-                <p className="text-gray-300 text-sm font-light">
-                  {card.label}
-                </p>
-              </div>
             </Link>
           ))}
         </div>

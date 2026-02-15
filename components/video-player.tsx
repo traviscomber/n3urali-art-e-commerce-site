@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Hls from 'hls.js'
 
 interface VideoPlayerProps {
-  src: string
+  src: string // Can be HLS .m3u8 URL or direct MP4 URL
   poster?: string
   autoPlay?: boolean
   loop?: boolean
@@ -23,63 +24,138 @@ export function VideoPlayer({
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(autoPlay)
-  const [isLoaded, setIsLoaded] = useState(autoPlay) // Start as loaded if autoplaying
+  const [isLoaded, setIsLoaded] = useState(autoPlay)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
 
     console.log('[v0] Video player mounted, src:', src)
+    setError(null)
 
-    // Set events for state tracking
-    const handlePlay = () => {
-      console.log('[v0] Video play event')
-      setIsPlaying(true)
-    }
+    // Check if it's an HLS URL
+    const isHls = src.includes('.m3u8')
 
-    const handlePause = () => {
-      console.log('[v0] Video pause event')
-      setIsPlaying(false)
-    }
+    // Safari/iOS native HLS support
+    if (isHls && video.canPlayType('application/vnd.apple.mpegurl')) {
+      console.log('[v0] Using native HLS support')
+      video.src = src
 
-    // Use progress event which fires when video is being fetched
-    const handleProgress = () => {
-      if (video.buffered.length > 0 && !isLoaded) {
-        console.log('[v0] Video data available')
+      const handleCanPlay = () => {
+        console.log('[v0] Native HLS can play')
         setIsLoaded(true)
+        if (autoPlay) {
+          video.play().catch(() => {
+            console.log('[v0] Autoplay blocked by browser')
+          })
+        }
+      }
+
+      const handleError = () => {
+        console.error('[v0] Video error:', video.error?.message)
+        setError('Video failed to load')
+      }
+
+      video.addEventListener('canplay', handleCanPlay)
+      video.addEventListener('error', handleError)
+      video.addEventListener('play', () => setIsPlaying(true))
+      video.addEventListener('pause', () => setIsPlaying(false))
+
+      return () => {
+        video.removeEventListener('canplay', handleCanPlay)
+        video.removeEventListener('error', handleError)
+        video.removeEventListener('play', () => setIsPlaying(true))
+        video.removeEventListener('pause', () => setIsPlaying(false))
       }
     }
+
+    // Chrome/Firefox/Edge with hls.js for HLS
+    if (isHls && Hls.isSupported()) {
+      console.log('[v0] Using hls.js library')
+      const hls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: false,
+        backBufferLength: 90,
+        maxBufferLength: 120,
+        maxMaxBufferLength: 300,
+        capLevelToPlayerSize: true,
+        startLevel: -1,
+      })
+
+      hls.loadSource(src)
+      hls.attachMedia(video)
+
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        console.log('[v0] HLS manifest parsed')
+        setIsLoaded(true)
+        if (autoPlay) {
+          video.play().catch(() => {
+            console.log('[v0] Autoplay blocked by browser')
+          })
+        }
+      })
+
+      hls.on(Hls.Events.ERROR, (_evt, data) => {
+        if (!data.fatal) return
+
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+          console.log('[v0] Network error, attempting recovery')
+          hls.startLoad()
+          return
+        }
+        if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+          console.log('[v0] Media error, attempting recovery')
+          hls.recoverMediaError()
+          return
+        }
+
+        console.error('[v0] Fatal HLS error:', data)
+        hls.destroy()
+        setError('Video playback error')
+      })
+
+      video.addEventListener('play', () => setIsPlaying(true))
+      video.addEventListener('pause', () => setIsPlaying(false))
+
+      return () => {
+        hls.destroy()
+        video.removeEventListener('play', () => setIsPlaying(true))
+        video.removeEventListener('pause', () => setIsPlaying(false))
+      }
+    }
+
+    // Fallback: direct MP4 or other formats
+    console.log('[v0] Using direct video source')
+    video.src = src
 
     const handleCanPlay = () => {
       console.log('[v0] Video can play')
       setIsLoaded(true)
-    }
-
-    const handleLoadedData = () => {
-      console.log('[v0] Video loaded data')
-      setIsLoaded(true)
+      if (autoPlay) {
+        video.play().catch(() => {
+          console.log('[v0] Autoplay blocked by browser')
+        })
+      }
     }
 
     const handleError = () => {
-      console.error('[v0] Video error:', video.error)
+      console.error('[v0] Video error:', video.error?.message)
+      setError('Video failed to load')
     }
 
-    video.addEventListener('play', handlePlay, { once: false })
-    video.addEventListener('pause', handlePause, { once: false })
-    video.addEventListener('progress', handleProgress, { once: false })
-    video.addEventListener('canplay', handleCanPlay, { once: false })
-    video.addEventListener('loadeddata', handleLoadedData, { once: false })
-    video.addEventListener('error', handleError, { once: false })
+    video.addEventListener('canplay', handleCanPlay)
+    video.addEventListener('error', handleError)
+    video.addEventListener('play', () => setIsPlaying(true))
+    video.addEventListener('pause', () => setIsPlaying(false))
 
     return () => {
-      video.removeEventListener('play', handlePlay)
-      video.removeEventListener('pause', handlePause)
-      video.removeEventListener('progress', handleProgress)
       video.removeEventListener('canplay', handleCanPlay)
-      video.removeEventListener('loadeddata', handleLoadedData)
       video.removeEventListener('error', handleError)
+      video.removeEventListener('play', () => setIsPlaying(true))
+      video.removeEventListener('pause', () => setIsPlaying(false))
     }
-  }, [])
+  }, [src, autoPlay])
 
   const togglePlayPause = () => {
     if (videoRef.current) {
@@ -94,7 +170,17 @@ export function VideoPlayer({
   }
 
   return (
-    <div className="relative w-full h-full group">
+    <div className="relative w-full h-full bg-black rounded-lg overflow-hidden group">
+      {/* Error State */}
+      {error && (
+        <div className="absolute inset-0 bg-black flex items-center justify-center z-10">
+          <div className="text-center text-red-400">
+            <p className="text-sm">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Video Element */}
       <video
         ref={videoRef}
         muted={muted}
@@ -103,15 +189,13 @@ export function VideoPlayer({
         preload="auto"
         poster={poster}
         controls={controls}
-        className={className}
         crossOrigin="anonymous"
-      >
-        <source src={src} type="video/mp4" />
-      </video>
+        className={className}
+      />
 
       {/* Loading State */}
-      {!isLoaded && (
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
+      {!isLoaded && !error && (
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-black flex items-center justify-center z-10">
           <div className="text-center">
             <div className="w-8 h-8 border-2 border-blue-300 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
             <p className="text-xs text-gray-400">Loading...</p>
@@ -119,11 +203,11 @@ export function VideoPlayer({
         </div>
       )}
 
-      {/* Play Button Overlay - Only show if not controls and video is not playing */}
-      {!controls && !isPlaying && isLoaded && (
+      {/* Play Button Overlay */}
+      {!controls && !isPlaying && isLoaded && !error && (
         <button
           onClick={togglePlayPause}
-          className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center cursor-pointer"
+          className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center cursor-pointer z-5"
           aria-label="Play video"
         >
           <div className="w-16 h-16 bg-blue-300 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">

@@ -76,7 +76,7 @@ export default async function HomePage() {
     <main className="min-h-screen w-full bg-black">
       {/* Homepage Hero Section */}
       <HomepageHero
-        videoUrl={featuredCollection?.video_url}
+        videoUrl={featuredCollection?.video_url || 'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/cogvideo_1770587069211.mp4'}
       />
 
       {/* Category Cards Grid */}

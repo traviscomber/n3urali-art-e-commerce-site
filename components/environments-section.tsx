@@ -65,6 +65,7 @@ export function EnvironmentsSection() {
             ]}
             ctaText="Get Those Loops!"
             ctaLink="/environments/mythical"
+            highlightIndex={2}
           />
 
           {/* Collection 3: Art Spaces */}
@@ -78,6 +79,7 @@ export function EnvironmentsSection() {
             ]}
             ctaText="Choose environment"
             ctaLink="/environments/art"
+            highlightIndex={0}
           />
         </div>
       </div>
@@ -91,6 +93,7 @@ interface EnvironmentCollectionProps {
   images: Array<{ src: string; alt: string }>
   ctaText: string
   ctaLink: string
+  highlightIndex?: number
 }
 
 function EnvironmentCollection({
@@ -99,6 +102,7 @@ function EnvironmentCollection({
   images,
   ctaText,
   ctaLink,
+  highlightIndex = 1,
 }: EnvironmentCollectionProps) {
   return (
     <div className="space-y-8 pb-12 border-b border-gray-600/60">
@@ -127,15 +131,15 @@ function EnvironmentCollection({
       {/* Image Grid - 3 Circular Images with Center Highlighted */}
       <div className="flex items-center justify-center gap-6 md:gap-8 flex-wrap">
         {images.map((image, index) => {
-          const isCenter = index === 1
-          const size = isCenter ? 320 : 224
+          const isHighlighted = index === highlightIndex
+          const size = isHighlighted ? 320 : 224
           
           return (
             <button
               key={index}
               onClick={() => window.location.href = ctaLink}
               className={`relative rounded-full overflow-hidden transform transition-all duration-300 hover:scale-110 hover:shadow-2xl cursor-pointer flex-shrink-0 ${
-                isCenter ? 'ring-2 ring-cyan-400/30 hover:ring-cyan-400/60' : ''
+                isHighlighted ? 'ring-2 ring-cyan-400/30 hover:ring-cyan-400/60' : ''
               }`}
             >
               <Image
@@ -144,7 +148,7 @@ function EnvironmentCollection({
                 width={size}
                 height={size}
                 className="object-cover rounded-full"
-                priority={isCenter}
+                priority={isHighlighted}
               />
               {/* Hover overlay */}
               <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-full" />

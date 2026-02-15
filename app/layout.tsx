@@ -144,10 +144,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const headerList = headers()
-  const pathname = headerList.get("x-pathname") || ""
-  const isAdminPage = pathname?.includes("/admin") || pathname?.includes("simple-admin")
-
   return (
     <html lang="en" suppressHydrationWarning className={`antialiased ${montserrat.variable}`}>
       <head>
@@ -338,9 +334,9 @@ export default function RootLayout({
                   <MusicPlayerProvider>
                     <ToastProvider>
                       <Suspense fallback={null}>
-                        {!isAdminPage && <Header />}
+                        <Header />
                         {children}
-                        {!isAdminPage && <CartSidebar />}
+                        <CartSidebar />
                         <Analytics />
                         <SpeedInsights />
                       </Suspense>

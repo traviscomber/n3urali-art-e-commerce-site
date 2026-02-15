@@ -25,20 +25,49 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
     const video = videoRef.current
     if (!video) return
 
+    console.log('[v0] Video element found, initializing...')
+
     const handlePlay = () => {
+      console.log('[v0] Video playing')
       setIsPlaying(true)
     }
 
     const handlePause = () => {
+      console.log('[v0] Video paused')
       setIsPlaying(false)
+    }
+
+    const handleLoadedMetadata = () => {
+      console.log('[v0] Video metadata loaded, duration:', video.duration)
+    }
+
+    const handleCanPlay = () => {
+      console.log('[v0] Video can play')
+      // Attempt autoplay
+      video.play().catch((err) => {
+        console.log('[v0] Autoplay failed:', err.message)
+      })
+    }
+
+    const handleError = () => {
+      console.log('[v0] Video error:', video.error?.code, video.error?.message)
     }
 
     video.addEventListener('play', handlePlay)
     video.addEventListener('pause', handlePause)
+    video.addEventListener('loadedmetadata', handleLoadedMetadata)
+    video.addEventListener('canplay', handleCanPlay)
+    video.addEventListener('error', handleError)
+
+    console.log('[v0] Video src:', video.src)
+    console.log('[v0] Video readyState:', video.readyState)
 
     return () => {
       video.removeEventListener('play', handlePlay)
       video.removeEventListener('pause', handlePause)
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
+      video.removeEventListener('canplay', handleCanPlay)
+      video.removeEventListener('error', handleError)
     }
   }, [])
 

@@ -29,13 +29,14 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
     video.muted = true
     video.loop = true
     video.playsInline = true
+    video.crossOrigin = 'anonymous'
     video.src = '/videos/mossy-hero.mp4'
 
     // When metadata loads, try to autoplay
     const handleLoadedMetadata = () => {
-      console.log('[v0] Video metadata loaded')
-      video.play().catch(() => {
-        console.log('[v0] Autoplay blocked - will show play button')
+      console.log('[v0] Video metadata loaded, duration:', video.duration)
+      video.play().catch((err) => {
+        console.log('[v0] Autoplay blocked:', err.message)
       })
     }
 
@@ -46,17 +47,24 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
     }
 
     const handlePause = () => {
+      console.log('[v0] Video paused')
       setIsPlaying(false)
+    }
+
+    const handleError = () => {
+      console.log('[v0] Video error:', video.error?.message)
     }
 
     video.addEventListener('loadedmetadata', handleLoadedMetadata)
     video.addEventListener('play', handlePlay)
     video.addEventListener('pause', handlePause)
+    video.addEventListener('error', handleError)
 
     return () => {
       video.removeEventListener('loadedmetadata', handleLoadedMetadata)
       video.removeEventListener('play', handlePlay)
       video.removeEventListener('pause', handlePause)
+      video.removeEventListener('error', handleError)
     }
   }, [])
 
@@ -90,7 +98,8 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
             <div className="relative w-full max-w-sm aspect-square rounded-lg overflow-hidden bg-gray-900">
               <video
                 ref={videoRef}
-                className="w-full h-full object-cover"
+                controls
+                className="w-full h-full object-cover bg-black"
               />
 
               {/* Play button overlay if not playing */}
@@ -98,8 +107,8 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
                 <button
                   onClick={() => {
                     if (videoRef.current) {
-                      videoRef.current.play().catch(() => {
-                        console.log('[v0] Manual play triggered')
+                      videoRef.current.play().catch((err) => {
+                        console.log('[v0] Manual play failed:', err.message)
                       })
                     }
                   }}

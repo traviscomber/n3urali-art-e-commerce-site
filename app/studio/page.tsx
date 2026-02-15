@@ -21,15 +21,30 @@ export default async function StudioPage() {
     .eq('active', true)
     .order('created_at', { ascending: false })
 
-  const imageCount = images?.length || 0
+  const featuredImage = images?.[0]
+
+  const studioFeatures = [
+    'Full-dome immersive content',
+    'Dome & VR environments',
+    'Seamless performance loops',
+    'Educational and cultural series',
+    'Custom immersive productions',
+  ]
 
   return (
     <main className="min-h-screen w-full bg-background">
       <CategoryHeroBlock
         category="studio"
         title="Studio"
-        description="Creative workspace and production environment where immersive experiences come to life through collaborative artistic vision."
-        imageCount={imageCount}
+        subtitle="Built to Perform"
+        description="Cinematic dome stories, seamless immersive loops, and VR-ready environments — crafted for dome operators, immersive events, and live performance. Projection-ready. Dome-correct. Instantly deployable."
+        features={studioFeatures}
+        featuredImage={
+          featuredImage ? {
+            url: featuredImage.upscaled_url || featuredImage.original_url || '',
+            alt: featuredImage.title || 'Studio featured work'
+          } : undefined
+        }
       />
 
       <CategoryGalleryBlock

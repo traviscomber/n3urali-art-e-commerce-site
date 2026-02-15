@@ -21,15 +21,30 @@ export default async function TheatrePage() {
     .eq('active', true)
     .order('created_at', { ascending: false })
 
-  const imageCount = images?.length || 0
+  const featuredImage = images?.[0]
+
+  const theatreFeatures = [
+    'Live performance integration',
+    'Theatre venue optimization',
+    'Performance loop sequences',
+    'Cultural event experiences',
+    'Custom venue solutions',
+  ]
 
   return (
     <main className="min-h-screen w-full bg-background">
       <CategoryHeroBlock
         category="theatre"
         title="Theatre"
-        description="Performance-focused immersive experiences designed for live venues, cultural institutions, and theatrical spaces."
-        imageCount={imageCount}
+        subtitle="Performance-Ready Experiences"
+        description="Performance-focused immersive experiences designed for live venues, cultural institutions, and theatrical spaces. Built for seamless integration with live events and performances."
+        features={theatreFeatures}
+        featuredImage={
+          featuredImage ? {
+            url: featuredImage.upscaled_url || featuredImage.original_url || '',
+            alt: featuredImage.title || 'Theatre featured work'
+          } : undefined
+        }
       />
 
       <CategoryGalleryBlock

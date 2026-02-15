@@ -21,15 +21,30 @@ export default async function RealitiesPage() {
     .eq('active', true)
     .order('created_at', { ascending: false })
 
-  const imageCount = images?.length || 0
+  const featuredImage = images?.[0]
+
+  const realitiesFeatures = [
+    'Cinematic dome stories',
+    'Full-dome installations',
+    'VR-ready environments',
+    'Educational narratives',
+    'Cultural storytelling',
+  ]
 
   return (
     <main className="min-h-screen w-full bg-background">
       <CategoryHeroBlock
         category="realities"
         title="Realities"
-        description="Digital narratives that blur the line between physical and virtual spaces, creating new cultural dimensions."
-        imageCount={imageCount}
+        subtitle="Cinematic Dome Stories"
+        description="Immersive cinematic experiences designed for full-dome installations. Seamless performance loops, VR-ready environments, and cultural narratives. Professional grade, instantly deployable."
+        features={realitiesFeatures}
+        featuredImage={
+          featuredImage ? {
+            url: featuredImage.upscaled_url || featuredImage.original_url || '',
+            alt: featuredImage.title || 'Realities featured work'
+          } : undefined
+        }
       />
 
       <CategoryGalleryBlock

@@ -21,15 +21,30 @@ export default async function EnvironmentsPage() {
     .eq('active', true)
     .order('created_at', { ascending: false })
 
-  const imageCount = images?.length || 0
+  const featuredImage = images?.[0]
+
+  const environmentsFeatures = [
+    'Dome-optimized 360° content',
+    'VR-ready equirectangular formats',
+    'Projection mapping compatible',
+    'Seamless loop environments',
+    'Museum & venue installation',
+  ]
 
   return (
     <main className="min-h-screen w-full bg-background">
       <CategoryHeroBlock
         category="environments"
         title="Environments"
-        description="360-degree immersive environments designed for projection mapping, dome installations, and VR experiences."
-        imageCount={imageCount}
+        subtitle="Living Immersive Spaces"
+        description="Continuous atmospheric loops optimized for dome perception. Flexible immersive environments ready for integration into any venue or experience. Projection-ready, instantly deployable."
+        features={environmentsFeatures}
+        featuredImage={
+          featuredImage ? {
+            url: featuredImage.upscaled_url || featuredImage.original_url || '',
+            alt: featuredImage.title || 'Environments featured work'
+          } : undefined
+        }
       />
 
       <CategoryGalleryBlock

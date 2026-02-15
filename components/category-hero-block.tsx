@@ -1,91 +1,89 @@
 'use client'
 
-import { useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
 
 interface CategoryHeroBlockProps {
   category: 'studio' | 'environments' | 'realities' | 'theatre'
   title: string
+  subtitle: string
   description: string
-  imageCount: number
+  features: string[]
+  featuredImage?: {
+    url: string
+    alt: string
+  }
 }
 
 const categoryConfig = {
   studio: {
-    color: 'from-blue-600 to-blue-900',
-    icon: '🎬',
-    accent: 'border-blue-500',
+    textColor: 'text-blue-400',
   },
   environments: {
-    color: 'from-green-600 to-green-900',
-    icon: '🌍',
-    accent: 'border-green-500',
+    textColor: 'text-green-400',
   },
   realities: {
-    color: 'from-purple-600 to-purple-900',
-    icon: '✨',
-    accent: 'border-purple-500',
+    textColor: 'text-purple-400',
   },
   theatre: {
-    color: 'from-orange-600 to-orange-900',
-    icon: '🎭',
-    accent: 'border-orange-500',
+    textColor: 'text-orange-400',
   },
 }
 
 export function CategoryHeroBlock({
   category,
   title,
+  subtitle,
   description,
-  imageCount,
+  features,
+  featuredImage,
 }: CategoryHeroBlockProps) {
   const config = categoryConfig[category]
 
   return (
-    <section className={`relative w-full min-h-80 md:min-h-96 bg-gradient-to-br ${config.color} overflow-hidden`}>
-      {/* Decorative background element */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-10 right-10 w-96 h-96 rounded-full blur-3xl bg-white" />
-      </div>
+    <section className="w-full min-h-screen bg-black py-20 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16 items-center">
+          {/* Left Column: Title, Subtitle, Description */}
+          <div className="flex flex-col gap-6">
+            <div>
+              <h1 className={`text-5xl md:text-6xl font-bold ${config.textColor} mb-2`}>
+                {title}
+              </h1>
+              <p className="text-lg md:text-xl text-gray-400 font-light">
+                {subtitle}
+              </p>
+            </div>
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <div className="flex flex-col gap-6">
-          {/* Icon and title */}
-          <div className="flex items-center gap-4">
-            <span className="text-5xl">{config.icon}</span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white text-balance">
-              {title}
-            </h1>
+            <p className="text-sm md:text-base text-gray-300 leading-relaxed max-w-sm">
+              {description}
+            </p>
           </div>
 
-          {/* Description */}
-          <p className="text-lg md:text-xl text-gray-100 max-w-2xl leading-relaxed">
-            {description}
-          </p>
-
-          {/* Stats and CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center pt-4">
-            <div className="text-sm md:text-base text-gray-200">
-              <span className="font-semibold text-white">{imageCount}</span> works in this collection
+          {/* Center Column: Featured Image */}
+          {featuredImage && (
+            <div className="flex justify-center">
+              <div className="relative w-full aspect-square rounded-lg overflow-hidden">
+                <Image
+                  src={featuredImage.url}
+                  alt={featuredImage.alt}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
             </div>
+          )}
 
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <Link
-                href={`/gallery?category=${category}`}
-                className={`inline-flex items-center gap-2 px-6 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors`}
-              >
-                Explore Gallery
-                <ArrowRight size={18} />
-              </Link>
-              <Link
-                href="/commission"
-                className={`inline-flex items-center gap-2 px-6 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition-colors`}
-              >
-                Commission
-              </Link>
-            </div>
+          {/* Right Column: Features List */}
+          <div className="flex flex-col gap-4">
+            {features.map((feature, index) => (
+              <div key={index} className="flex gap-3 items-start">
+                <span className="text-gray-500 text-sm flex-shrink-0 mt-1">•</span>
+                <p className="text-sm md:text-base text-gray-300">
+                  {feature}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

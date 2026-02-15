@@ -276,25 +276,33 @@ export const ClientWrapper = memo(
                 </div>
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {collectionImages.slice(0, 6).map((image) => (
-                    <Link key={image.id} href={`/photo/${image.id}`}>
-                      <div className="group relative h-64 rounded-xl overflow-hidden border border-slate-700 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20">
-                        <Image
-                          src={image.upscaled_url || image.original_url || image.file_path || "/placeholder.svg"}
-                          alt={image.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                  {collectionImages
+                    .filter(image => image.upscaled_url || image.original_url || image.file_path)
+                    .slice(0, 6)
+                    .map((image) => {
+                      const imageSrc = image.upscaled_url || image.original_url || image.file_path
+                      if (!imageSrc) return null
+                      
+                      return (
+                        <Link key={image.id} href={`/photo/${image.id}`}>
+                          <div className="group relative h-64 rounded-xl overflow-hidden border border-slate-700 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20">
+                            <Image
+                              src={imageSrc}
+                              alt={image.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-500"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-                        <div className="absolute bottom-0 left-0 right-0 p-4">
-                          <h3 className="text-white font-bold text-lg mb-1">{image.title}</h3>
-                          <p className="text-cyan-300 text-sm">{image.image_format}</p>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                            <div className="absolute bottom-0 left-0 right-0 p-4">
+                              <h3 className="text-white font-bold text-lg mb-1">{image.title}</h3>
+                              <p className="text-cyan-300 text-sm">{image.image_format}</p>
+                            </div>
+                          </div>
+                        </Link>
+                      )
+                    })}
                 </div>
 
                 <div className="text-center mt-12">

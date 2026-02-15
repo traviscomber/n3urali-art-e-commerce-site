@@ -142,6 +142,7 @@ function EnvironmentCollection({
                 fill
                 className="object-cover"
                 priority={isCenter}
+                sizes={isCenter ? "(max-width: 768px) 256px, 320px" : "(max-width: 768px) 192px, 224px"}
               />
               {/* Hover overlay */}
               <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity duration-300" />

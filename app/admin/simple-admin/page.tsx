@@ -3,96 +3,99 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Video, Image, Settings } from 'lucide-react'
+import { Video, Settings, ArrowRight } from 'lucide-react'
 
 export default function SimpleAdminPage() {
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen w-full bg-black py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-gray-600">Manage your content and configurations</p>
+          <h1 className="text-4xl lg:text-5xl font-light text-white mb-2 tracking-tight">
+            Admin Dashboard
+          </h1>
+          <p className="text-lg text-gray-400 font-light">
+            Manage your immersive content and collections
+          </p>
         </div>
 
-        {/* Admin Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Main Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Video Upload Card */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
+          <Card className="bg-gray-900/50 border border-gray-800 hover:border-gray-700 transition-colors">
+            <CardHeader className="pb-4">
               <div className="flex items-center gap-3 mb-2">
-                <Video className="h-6 w-6 text-blue-500" />
-                <CardTitle>Upload Videos</CardTitle>
+                <Video className="h-6 w-6 text-cyan-400" />
+                <CardTitle className="text-white">Upload Videos</CardTitle>
               </div>
-              <CardDescription>
-                Upload videos to Supabase Storage and link them to collections
+              <CardDescription className="text-gray-400">
+                Upload hero videos and collection media to Vercel Blob
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 mb-4">
-                Support for MP4, WebM, and other video formats. Max 500MB per file.
+            <CardContent className="space-y-4">
+              <p className="text-sm text-gray-400">
+                MP4, WebM formats. Videos will be linked to collections automatically.
               </p>
-              <Button asChild className="w-full">
-                <Link href="/admin/videos">Go to Video Upload</Link>
+              <Button asChild className="w-full bg-cyan-600 hover:bg-cyan-700 text-white">
+                <Link href="/admin/videos" className="flex items-center justify-between">
+                  Go to Video Upload
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
               </Button>
             </CardContent>
           </Card>
 
-          {/* Featured Images Card */}
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader>
+          {/* Collections Settings Card */}
+          <Card className="bg-gray-900/50 border border-gray-800 hover:border-gray-700 transition-colors">
+            <CardHeader className="pb-4">
               <div className="flex items-center gap-3 mb-2">
-                <Image className="h-6 w-6 text-purple-500" />
-                <CardTitle>Featured Images</CardTitle>
+                <Settings className="h-6 w-6 text-purple-400" />
+                <CardTitle className="text-white">Collections</CardTitle>
               </div>
-              <CardDescription>
-                Manage and upload featured images for collections
+              <CardDescription className="text-gray-400">
+                Manage featured collections and settings
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 mb-4">
-                Upload high-quality images for your featured content.
+            <CardContent className="space-y-4">
+              <p className="text-sm text-gray-400">
+                Configure which collections are featured on the homepage.
               </p>
-              <Button asChild className="w-full">
-                <Link href="/admin/featured-images">Go to Featured Images</Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Settings Card */}
-          <Card className="hover:shadow-lg transition-shadow md:col-span-2">
-            <CardHeader>
-              <div className="flex items-center gap-3 mb-2">
-                <Settings className="h-6 w-6 text-gray-500" />
-                <CardTitle>Collections</CardTitle>
-              </div>
-              <CardDescription>
-                View and manage your collections, videos, and configurations
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 mb-4">
-                Access detailed analytics and manage all your collections from here.
-              </p>
-              <Button asChild variant="outline" className="w-full">
-                <Link href="/admin">Go to Full Admin Panel</Link>
+              <Button asChild variant="outline" className="w-full border-gray-700 text-gray-300 hover:bg-gray-800/50">
+                <Link href="/admin" className="flex items-center justify-between">
+                  Go to Full Admin
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
               </Button>
             </CardContent>
           </Card>
         </div>
 
-        {/* Quick Start Section */}
-        <div className="mt-12 p-6 bg-blue-50 rounded-lg border border-blue-200">
-          <h2 className="text-xl font-semibold mb-3">Quick Start: Upload a Video</h2>
-          <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
-            <li>Click "Go to Video Upload" above</li>
-            <li>Select your video file (MP4 or WebM)</li>
-            <li>Add optional title, description, and collection code (e.g., "studio")</li>
-            <li>Click "Upload Video"</li>
-            <li>Copy the public URL from the success message</li>
-            <li>The video will be linked to your collection automatically</li>
-          </ol>
-        </div>
+        {/* Quick Start Guide */}
+        <Card className="bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border border-cyan-800/30">
+          <CardHeader>
+            <CardTitle className="text-white">Quick Start: Upload Hero Video</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ol className="space-y-3 text-sm text-gray-300">
+              <li className="flex gap-3">
+                <span className="text-cyan-400 font-semibold flex-shrink-0 w-6">1.</span>
+                <span>Click "Go to Video Upload" above</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-cyan-400 font-semibold flex-shrink-0 w-6">2.</span>
+                <span>Select your video file (MP4 or WebM format)</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-cyan-400 font-semibold flex-shrink-0 w-6">3.</span>
+                <span>Add a title and mark as featured collection</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-cyan-400 font-semibold flex-shrink-0 w-6">4.</span>
+                <span>Click Upload - video will appear on homepage automatically</span>
+              </li>
+            </ol>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

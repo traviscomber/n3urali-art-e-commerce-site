@@ -29,13 +29,18 @@ export function VideoPlayer({
 
   useEffect(() => {
     const video = videoRef.current
-    if (!video) return
+    if (!video || !src) return
 
-    console.log('[v0] Video player mounted, src:', src)
+    console.log('[v0] Video player initializing, src:', src)
     setError(null)
 
     // Check if it's an HLS URL
     const isHls = src.includes('.m3u8')
+
+    // Add CORS headers for Supabase URLs
+    if (src.includes('supabase') || src.includes('.co')) {
+      video.setAttribute('crossOrigin', 'anonymous')
+    }
 
     // Safari/iOS native HLS support
     if (isHls && video.canPlayType('application/vnd.apple.mpegurl')) {
@@ -57,22 +62,25 @@ export function VideoPlayer({
         setError('Video failed to load')
       }
 
+      const handlePlaying = () => setIsPlaying(true)
+      const handlePaused = () => setIsPlaying(false)
+
       video.addEventListener('canplay', handleCanPlay)
       video.addEventListener('error', handleError)
-      video.addEventListener('play', () => setIsPlaying(true))
-      video.addEventListener('pause', () => setIsPlaying(false))
+      video.addEventListener('playing', handlePlaying)
+      video.addEventListener('pause', handlePaused)
 
       return () => {
         video.removeEventListener('canplay', handleCanPlay)
         video.removeEventListener('error', handleError)
-        video.removeEventListener('play', () => setIsPlaying(true))
-        video.removeEventListener('pause', () => setIsPlaying(false))
+        video.removeEventListener('playing', handlePlaying)
+        video.removeEventListener('pause', handlePaused)
       }
     }
 
     // Chrome/Firefox/Edge with hls.js for HLS
     if (isHls && Hls.isSupported()) {
-      console.log('[v0] Using hls.js library')
+      console.log('[v0] Using hls.js for adaptive streaming')
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: false,
@@ -87,17 +95,20 @@ export function VideoPlayer({
       hls.attachMedia(video)
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        console.log('[v0] HLS manifest parsed')
+        console.log('[v0] HLS manifest parsed, ready to play')
         setIsLoaded(true)
         if (autoPlay) {
           video.play().catch(() => {
-            console.log('[v0] Autoplay blocked by browser')
+            console.log('[v0] Autoplay blocked by browser policy')
           })
         }
       })
 
       hls.on(Hls.Events.ERROR, (_evt, data) => {
-        if (!data.fatal) return
+        if (!data.fatal) {
+          console.warn('[v0] Non-fatal HLS error:', data.type)
+          return
+        }
 
         if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
           console.log('[v0] Network error, attempting recovery')
@@ -115,26 +126,29 @@ export function VideoPlayer({
         setError('Video playback error')
       })
 
-      video.addEventListener('play', () => setIsPlaying(true))
-      video.addEventListener('pause', () => setIsPlaying(false))
+      const handlePlaying = () => setIsPlaying(true)
+      const handlePaused = () => setIsPlaying(false)
+
+      video.addEventListener('playing', handlePlaying)
+      video.addEventListener('pause', handlePaused)
 
       return () => {
+        video.removeEventListener('playing', handlePlaying)
+        video.removeEventListener('pause', handlePaused)
         hls.destroy()
-        video.removeEventListener('play', () => setIsPlaying(true))
-        video.removeEventListener('pause', () => setIsPlaying(false))
       }
     }
 
-    // Fallback: direct MP4 or other formats
-    console.log('[v0] Using direct video source')
+    // Fallback: direct MP4 or other formats (Supabase URLs, local files, etc.)
+    console.log('[v0] Using direct video playback')
     video.src = src
 
     const handleCanPlay = () => {
-      console.log('[v0] Video can play')
+      console.log('[v0] Video ready to play')
       setIsLoaded(true)
       if (autoPlay) {
         video.play().catch(() => {
-          console.log('[v0] Autoplay blocked by browser')
+          console.log('[v0] Autoplay blocked by browser policy')
         })
       }
     }
@@ -144,16 +158,22 @@ export function VideoPlayer({
       setError('Video failed to load')
     }
 
+    const handlePlaying = () => setIsPlaying(true)
+    const handlePaused = () => setIsPlaying(false)
+    const handleLoadStart = () => console.log('[v0] Video loading started')
+
     video.addEventListener('canplay', handleCanPlay)
     video.addEventListener('error', handleError)
-    video.addEventListener('play', () => setIsPlaying(true))
-    video.addEventListener('pause', () => setIsPlaying(false))
+    video.addEventListener('playing', handlePlaying)
+    video.addEventListener('pause', handlePaused)
+    video.addEventListener('loadstart', handleLoadStart)
 
     return () => {
       video.removeEventListener('canplay', handleCanPlay)
       video.removeEventListener('error', handleError)
-      video.removeEventListener('play', () => setIsPlaying(true))
-      video.removeEventListener('pause', () => setIsPlaying(false))
+      video.removeEventListener('playing', handlePlaying)
+      video.removeEventListener('pause', handlePaused)
+      video.removeEventListener('loadstart', handleLoadStart)
     }
   }, [src, autoPlay])
 

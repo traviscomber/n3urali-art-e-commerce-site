@@ -36,6 +36,9 @@ export default async function AdminLayout({
                 <Link href="/admin">Dashboard</Link>
               </Button>
               <Button variant="ghost" asChild>
+                <Link href="/admin/videos">Videos</Link>
+              </Button>
+              <Button variant="ghost" asChild>
                 <Link href="/admin/featured-images">Featured Images</Link>
               </Button>
               <Button variant="ghost" asChild>

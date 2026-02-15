@@ -57,6 +57,12 @@ export default function SimpleAdminPage() {
       return
     }
 
+    // Warn if file is larger than 4.5MB (Vercel limit)
+    if (file.size > 4.5 * 1024 * 1024) {
+      setError('File exceeds Vercel platform limit of 4.5MB. Try compressing the video or uploading a smaller file.')
+      return
+    }
+
     setIsUploading(true)
     setError(null)
     setUploadProgress(0)
@@ -105,6 +111,9 @@ export default function SimpleAdminPage() {
             console.error('[v0] Response parse error:', parseErr)
             setError('Server response invalid - check console logs')
           }
+        } else if (xhr.status === 413) {
+          setError('File too large for upload (Vercel 4.5MB limit). Try a smaller video file.')
+          console.error('[v0] 413 Payload Too Large - file exceeds platform limit')
         } else {
           try {
             const errorData = JSON.parse(xhr.responseText)
@@ -124,9 +133,8 @@ export default function SimpleAdminPage() {
 
       // Handle error
       xhr.addEventListener('error', () => {
-        const errorMsg = 'Network error - check browser console'
-        setError(errorMsg)
-        console.error('[v0] XHR error:', xhr.statusText)
+        setError('Network error - unable to reach upload server. Check browser console for details.')
+        console.error('[v0] XHR error:', xhr.statusText, 'status:', xhr.status)
         setUploadProgress(0)
         setIsUploading(false)
         resolve()
@@ -141,7 +149,7 @@ export default function SimpleAdminPage() {
       })
 
       // Start upload
-      console.log('[v0] Starting upload to /api/admin/videos/upload')
+      console.log('[v0] Starting upload to /api/admin/videos/upload', { fileSize: file.size, fileName: file.name })
       xhr.open('POST', '/api/admin/videos/upload', true)
       xhr.send(formData)
     })

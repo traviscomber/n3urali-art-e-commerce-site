@@ -84,6 +84,10 @@ export default function VideoUploadAdmin() {
         throw new Error(data.error || "Upload failed")
       }
 
+      console.log('[v0] Video upload successful')
+      console.log('[v0] Public URL:', data.publicUrl)
+      console.log('[v0] File path:', data.filePath)
+
       setUploadedVideo(data)
       toast({
         title: "Success",

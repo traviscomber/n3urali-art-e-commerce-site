@@ -31,15 +31,26 @@ export function VideoPlayer({
     const video = videoRef.current
     if (!video || !src) return
 
-    console.log('[v0] Video player initializing, src:', src)
+    console.log('[v0] Video player initializing')
+    console.log('[v0] Video source URL:', src)
+    console.log('[v0] Video source length:', src.length, 'bytes')
     setError(null)
 
     // Check if it's an HLS URL
     const isHls = src.includes('.m3u8')
 
-    // Add CORS headers for Supabase URLs
-    if (src.includes('supabase') || src.includes('.co')) {
+    // Add CORS headers for Supabase URLs and other external sources
+    if (src.includes('supabase') || src.includes('.co') || src.includes('http')) {
+      console.log('[v0] Setting crossOrigin to anonymous for external URL')
       video.setAttribute('crossOrigin', 'anonymous')
+    }
+
+    // Validate URL format
+    try {
+      new URL(src)
+      console.log('[v0] URL is valid')
+    } catch (e) {
+      console.warn('[v0] URL might be invalid:', e)
     }
 
     // Safari/iOS native HLS support
@@ -154,8 +165,31 @@ export function VideoPlayer({
     }
 
     const handleError = () => {
-      console.error('[v0] Video error:', video.error?.message)
-      setError('Video failed to load')
+      const videoError = video.error
+      let errorMsg = 'Video failed to load'
+      
+      if (videoError) {
+        console.error('[v0] Video error code:', videoError.code, 'message:', videoError.message)
+        
+        // Detailed error codes from HTML5 video
+        switch (videoError.code) {
+          case 1:
+            errorMsg = 'Video loading aborted'
+            break
+          case 2:
+            errorMsg = 'Network error - check video URL and CORS settings'
+            break
+          case 3:
+            errorMsg = 'Video loading was interrupted'
+            break
+          case 4:
+            errorMsg = 'Unsupported video format or file size too large'
+            break
+        }
+      }
+      
+      console.error('[v0] Final error message:', errorMsg)
+      setError(errorMsg)
     }
 
     const handlePlaying = () => setIsPlaying(true)
@@ -194,8 +228,9 @@ export function VideoPlayer({
       {/* Error State */}
       {error && (
         <div className="absolute inset-0 bg-black flex items-center justify-center z-10">
-          <div className="text-center text-red-400">
-            <p className="text-sm">{error}</p>
+          <div className="text-center text-red-400 p-4">
+            <p className="text-sm font-semibold mb-2">{error}</p>
+            <p className="text-xs text-gray-400 break-all">URL: {src.substring(0, 100)}...</p>
           </div>
         </div>
       )}

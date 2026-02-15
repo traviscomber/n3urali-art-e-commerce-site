@@ -30,8 +30,13 @@ export const metadata: Metadata = {
     "A cultural immersive media studio creating experiences across dome installations, VR environments, performance loops, and spatial media.",
   metadataBase: new URL("https://n3uralia360.art"),
   icons: {
-    icon: '/icon.svg',
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
+      { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
     apple: '/apple-icon.png',
+    shortcut: '/favicon.ico',
   },
   keywords: [
     "360 photography",

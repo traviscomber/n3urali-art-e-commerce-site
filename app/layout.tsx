@@ -69,7 +69,7 @@ export const metadata: Metadata = {
   category: "Digital Photography & AI Art",
   classification: "Premium AI-Generated 360° Photography Marketplace",
   verification: {
-    google: "your-google-verification-code",
+    google: "p5sNNIH96OzQuBRzDra19uy9f04pzkPrb1hhKaRk4qI",
   },
   robots: {
     index: true,
@@ -142,6 +142,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`antialiased ${montserrat.variable}`}>
       <head>
+        <meta name="google-site-verification" content="p5sNNIH96OzQuBRzDra19uy9f04pzkPrb1hhKaRk4qI" />
         <meta name="theme-color" content="#000000" />
         <meta name="msapplication-TileColor" content="#000000" />
         <meta name="apple-mobile-web-app-title" content="n3uralia360.art" />

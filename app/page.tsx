@@ -54,7 +54,7 @@ export default async function HomePage() {
         title: cat.title,
         label: cat.label,
         link: cat.link,
-        imageUrl: data?.upscaled_url || data?.original_url || '/placeholder.svg',
+        imageUrl: data?.upscaled_url || data?.original_url || '',
         accentColor: cat.accent,
       }
     })

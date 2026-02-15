@@ -25,7 +25,6 @@ export async function GET(
 
     return NextResponse.json(data)
   } catch (error) {
-    console.error("[v0] Collection fetch error:", error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Failed to fetch collection" },
       { status: 500 }

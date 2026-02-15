@@ -1,7 +1,154 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Hls from 'hls.js'
+
+interface VideoPlayerProps {
+  src: string
+  poster?: string
+  autoPlay?: boolean
+  loop?: boolean
+  muted?: boolean
+  controls?: boolean
+  className?: string
+}
+
+export function VideoPlayer({
+  src,
+  poster,
+  autoPlay = false,
+  loop = true,
+  muted = true,
+  controls = false,
+  className = 'w-full h-full object-cover',
+}: VideoPlayerProps) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [isPlaying, setIsPlaying] = useState(autoPlay)
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video || !src) return
+
+    setError(null)
+
+    const handleCanPlay = () => {
+      setIsLoaded(true)
+      if (autoPlay) {
+        video.play().catch(() => {
+          // Autoplay blocked by browser policy
+        })
+      }
+    }
+
+    const handleError = () => {
+      const videoError = video.error
+      let errorMsg = 'Video failed to load'
+      
+      if (videoError) {
+        switch (videoError.code) {
+          case 1:
+            errorMsg = 'Video loading aborted'
+            break
+          case 2:
+            errorMsg = 'Network error - check video URL'
+            break
+          case 3:
+            errorMsg = 'Video loading was interrupted'
+            break
+          case 4:
+            errorMsg = 'Unsupported video format'
+            break
+        }
+      }
+      
+      setError(errorMsg)
+    }
+
+    const handlePlaying = () => setIsPlaying(true)
+    const handlePaused = () => setIsPlaying(false)
+
+    video.addEventListener('canplay', handleCanPlay)
+    video.addEventListener('error', handleError)
+    video.addEventListener('playing', handlePlaying)
+    video.addEventListener('pause', handlePaused)
+
+    return () => {
+      video.removeEventListener('canplay', handleCanPlay)
+      video.removeEventListener('error', handleError)
+      video.removeEventListener('playing', handlePlaying)
+      video.removeEventListener('pause', handlePaused)
+    }
+  }, [src, autoPlay])
+
+  const togglePlayPause = () => {
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play()
+      } else {
+        videoRef.current.pause()
+      }
+    }
+  }
+
+  return (
+    <div className="relative w-full h-full bg-black rounded-lg overflow-hidden group">
+      {/* Error State */}
+      {error && (
+        <div className="absolute inset-0 bg-black flex items-center justify-center z-10">
+          <div className="text-center text-red-400 p-4">
+            <p className="text-sm font-semibold mb-2">{error}</p>
+            <p className="text-xs text-gray-400 break-all">URL: {src.substring(0, 80)}...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Video Element */}
+      <video
+        ref={videoRef}
+        muted={muted}
+        loop={loop}
+        playsInline
+        preload="auto"
+        poster={poster}
+        controls={controls}
+        autoPlay={autoPlay}
+        crossOrigin="anonymous"
+        className={className}
+      >
+        <source src={src} type="video/mp4" />
+      </video>
+
+      {/* Loading State */}
+      {!isLoaded && !error && (
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 to-black flex items-center justify-center z-10">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-blue-300 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+            <p className="text-xs text-gray-400">Loading video...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Play Button Overlay */}
+      {!controls && !isPlaying && isLoaded && !error && (
+        <button
+          onClick={togglePlayPause}
+          className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors flex items-center justify-center cursor-pointer z-5"
+          aria-label="Play video"
+        >
+          <div className="w-16 h-16 bg-blue-300 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+            <svg
+              className="w-8 h-8 ml-1 text-black fill-current"
+              viewBox="0 0 24 24"
+            >
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+        </button>
+      )}
+    </div>
+  )
+}
 
 interface VideoPlayerProps {
   src: string // Can be HLS .m3u8 URL or direct MP4 URL

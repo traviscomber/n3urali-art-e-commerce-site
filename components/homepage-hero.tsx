@@ -165,4 +165,3 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
     </section>
   )
 }
-}

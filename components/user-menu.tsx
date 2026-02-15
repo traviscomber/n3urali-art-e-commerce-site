@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -24,10 +25,6 @@ export function UserMenu() {
 
   const handleSignOut = async () => {
     await signOut()
-  }
-
-  const handleAdminDashboard = () => {
-    router.push("/admin/upload-video")
   }
 
   const handleProfile = () => {
@@ -136,9 +133,11 @@ export function UserMenu() {
         {isAdmin && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleAdminDashboard}>
-              <Shield className="mr-2 h-4 w-4" />
-              <span>Admin Panel</span>
+            <DropdownMenuItem asChild>
+              <Link href="/admin/upload-video" className="cursor-pointer">
+                <Shield className="mr-2 h-4 w-4" />
+                <span>Admin Panel</span>
+              </Link>
             </DropdownMenuItem>
           </>
         )}

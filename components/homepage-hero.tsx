@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 
 interface HomepageHeroProps {
@@ -12,6 +12,8 @@ interface HomepageHeroProps {
 
 export function HomepageHero({ featuredImage }: HomepageHeroProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [videoLoaded, setVideoLoaded] = useState(false)
+  const [autoplayFailed, setAutoplayFailed] = useState(false)
 
   const features = [
     'Full-dome immersive content',
@@ -21,18 +23,45 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
     'Custom immersive productions',
   ]
 
+  // Handle when video metadata is loaded and ready to play
+  const handleCanPlay = () => {
+    console.log('[v0] Video can play - attempting autoplay')
+    setVideoLoaded(true)
+    
+    const video = videoRef.current
+    if (video) {
+      video.muted = true
+      const playPromise = video.play()
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log('[v0] Video autoplay successful')
+            setAutoplayFailed(false)
+          })
+          .catch((error) => {
+            console.log('[v0] Video autoplay failed:', error.message)
+            setAutoplayFailed(true)
+          })
+      }
+    }
+  }
+
+  // Handle video load error
+  const handleError = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    console.log('[v0] Video load error:', e.currentTarget.error?.message)
+  }
+
   useEffect(() => {
     const video = videoRef.current
     if (video) {
-      // Ensure video is muted before attempting to play
+      // Set muted immediately
       video.muted = true
-      // Try to play the video
-      const playPromise = video.play()
-      if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.log('[v0] Video autoplay failed:', error)
-        })
-      }
+      video.loop = true
+      video.playsInline = true
+      
+      // Try to load the video
+      video.load()
+      console.log('[v0] Video element initialized and load() called')
     }
   }, [])
 
@@ -66,14 +95,25 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
             <div className="relative w-full max-w-sm aspect-square rounded-lg overflow-hidden bg-gray-900">
               <video
                 ref={videoRef}
+                preload="metadata"
                 muted
                 loop
                 playsInline
+                controls={autoplayFailed}
+                onCanPlay={handleCanPlay}
+                onError={handleError}
                 className="w-full h-full object-cover"
               >
-                <source src="/videos/mossy-hero.mp4" type="video/mp4" />
+                <source src="/videos/mossy-hero.mp4" type="video/mp4; codecs='avc1.42E01E'" />
                 Your browser does not support the video tag.
               </video>
+              
+              {/* Loading state indicator */}
+              {!videoLoaded && (
+                <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
+                  <div className="text-gray-500 text-sm">Loading video...</div>
+                </div>
+              )}
             </div>
           </div>
 

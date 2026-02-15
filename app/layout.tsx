@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import type React from "react"
 import type { Metadata } from "next"
 import { Montserrat } from "next/font/google"
@@ -7,13 +8,13 @@ import { AuthProvider } from "@/lib/contexts/auth-context"
 import { TagFilterProvider } from "@/lib/contexts/tag-filter-context"
 import { LanguageProvider } from "@/lib/contexts/language-context"
 import { ThemeProvider } from "@/components/theme-provider"
-import { Header } from "@/components/header"
 import { CartSidebar } from "@/components/cart-sidebar"
 import { ToastProvider } from "@/components/toast-notifications"
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
-import { Suspense } from "react"
 import { MusicPlayerProvider } from "@/lib/contexts/music-player-context"
+import { headers } from "next/headers"
+import Header from "@/components/header"
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -144,6 +145,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const headerList = headers()
+  const pathname = headerList.get("x-pathname") || ""
+  const isAdminPage = pathname?.includes("/admin") || pathname?.includes("simple-admin")
+
   return (
     <html lang="en" suppressHydrationWarning className={`antialiased ${montserrat.variable}`}>
       <head>
@@ -334,9 +339,9 @@ export default function RootLayout({
                   <MusicPlayerProvider>
                     <ToastProvider>
                       <Suspense fallback={null}>
-                        <Header />
+                        {!isAdminPage && <Header />}
                         {children}
-                        <CartSidebar />
+                        {!isAdminPage && <CartSidebar />}
                         <Analytics />
                         <SpeedInsights />
                       </Suspense>

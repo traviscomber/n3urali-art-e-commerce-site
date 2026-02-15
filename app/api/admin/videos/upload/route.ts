@@ -5,6 +5,15 @@ import { v4 as uuidv4 } from "uuid"
 export const maxDuration = 300
 export const dynamic = 'force-dynamic'
 
+// Increase body size limit to 500MB for video uploads
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '500mb',
+    },
+  },
+}
+
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()

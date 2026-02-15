@@ -150,11 +150,41 @@ export default function SimpleAdminPage() {
           </p>
         </div>
 
+        {/* Navigation Tabs */}
+        <div className="mb-8 flex gap-2 overflow-x-auto pb-2">
+          <Button
+            className="bg-cyan-600 hover:bg-cyan-700 text-white whitespace-nowrap"
+            onClick={() => {
+              document.getElementById('upload-video-section')?.scrollIntoView({ behavior: 'smooth' })
+            }}
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Upload Video
+          </Button>
+          <Button
+            variant="outline"
+            className="border-gray-700 text-gray-300 hover:bg-gray-800/50 whitespace-nowrap"
+            onClick={() => {
+              document.getElementById('cleanup-section')?.scrollIntoView({ behavior: 'smooth' })
+            }}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Clean Database
+          </Button>
+          <Button
+            variant="outline"
+            className="border-gray-700 text-gray-300 hover:bg-gray-800/50 whitespace-nowrap ml-auto"
+            asChild
+          >
+            <Link href="/admin/videos">Videos Manager</Link>
+          </Button>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Upload Video Card */}
-            <Card className="bg-gray-900/50 border border-gray-800">
+            <Card id="upload-video-section" className="bg-gray-900/50 border border-gray-800 scroll-mt-8">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-2">
                   <Upload className="h-6 w-6 text-cyan-400" />
@@ -256,7 +286,7 @@ export default function SimpleAdminPage() {
             </Card>
 
             {/* Database Cleanup Card */}
-            <Card className="bg-gray-900/50 border border-gray-800">
+            <Card id="cleanup-section" className="bg-gray-900/50 border border-gray-800 scroll-mt-8">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-2">
                   <Trash2 className="h-6 w-6 text-orange-400" />

@@ -11,7 +11,8 @@ interface HomepageHeroProps {
 
 export function HomepageHero({ featuredImage }: HomepageHeroProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(true)
+  const [videoError, setVideoError] = useState(false)
 
   const features = [
     'Full-dome immersive content',
@@ -29,40 +30,34 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
     video.muted = true
     video.loop = true
     video.playsInline = true
+    video.autoplay = true
 
-    // When metadata loads, try to autoplay
-    const handleLoadedMetadata = () => {
-      console.log('[v0] Video metadata loaded, duration:', video.duration)
-      video.play().catch((err) => {
-        console.log('[v0] Autoplay blocked:', err.message)
-      })
+    const handleError = (e: Event) => {
+      console.log('[v0] Video error:', video.error?.message)
+      setVideoError(true)
     }
 
-    // Track when video is actually playing
     const handlePlay = () => {
-      console.log('[v0] Video playing')
       setIsPlaying(true)
     }
 
     const handlePause = () => {
-      console.log('[v0] Video paused')
       setIsPlaying(false)
     }
 
-    const handleError = () => {
-      console.log('[v0] Video error:', video.error?.message)
-    }
-
-    video.addEventListener('loadedmetadata', handleLoadedMetadata)
+    video.addEventListener('error', handleError)
     video.addEventListener('play', handlePlay)
     video.addEventListener('pause', handlePause)
-    video.addEventListener('error', handleError)
+
+    // Try to play
+    video.play().catch((err) => {
+      console.log('[v0] Autoplay failed:', err.message)
+    })
 
     return () => {
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
+      video.removeEventListener('error', handleError)
       video.removeEventListener('play', handlePlay)
       video.removeEventListener('pause', handlePause)
-      video.removeEventListener('error', handleError)
     }
   }, [])
 
@@ -93,41 +88,62 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
 
           {/* Center Column: Featured Video */}
           <div className="flex justify-center">
-            <div className="relative w-full max-w-sm aspect-square rounded-lg overflow-hidden bg-gray-900">
-              <video
-                ref={videoRef}
-                controls
-                muted
-                loop
-                playsInline
-                className="w-full h-full object-cover bg-black"
-              >
-                <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_y3EtHhRvrMrVloUmW5CqlaLbJnts/GYNIQtHrIQqvBJJr6x0oWq/public/videos/mossy-hero.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+            <div className="relative w-full max-w-sm aspect-square rounded-lg overflow-hidden bg-gradient-to-br from-gray-900 to-black shadow-2xl">
+              {videoError ? (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-900/20 to-gray-900">
+                  <div className="text-center text-gray-400">
+                    <p className="text-sm">Video unavailable</p>
+                  </div>
+                </div>
+              ) : (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  className="w-full h-full object-cover"
+                  onError={() => setVideoError(true)}
+                >
+                  <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/git-blob/prj_y3EtHhRvrMrVloUmW5CqlaLbJnts/GYNIQtHrIQqvBJJr6x0oWq/public/videos/mossy-hero.mp4" type="video/mp4" />
+                </video>
+              )}
 
-              {/* Play button overlay if not playing */}
-              {!isPlaying && (
+              {/* Play/Pause Button */}
+              {!videoError && (
                 <button
                   onClick={() => {
                     if (videoRef.current) {
-                      videoRef.current.play().catch((err) => {
-                        console.log('[v0] Manual play failed:', err.message)
-                      })
+                      if (isPlaying) {
+                        videoRef.current.pause()
+                      } else {
+                        videoRef.current.play()
+                      }
                     }
                   }}
-                  className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/50 transition-colors cursor-pointer group"
-                  aria-label="Play video"
+                  className={`absolute bottom-4 right-4 w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                    isPlaying
+                      ? 'bg-blue-300/80 hover:bg-blue-300'
+                      : 'bg-blue-400/80 hover:bg-blue-400'
+                  }`}
+                  aria-label={isPlaying ? 'Pause video' : 'Play video'}
                 >
-                  <div className="w-16 h-16 bg-blue-300 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                  {isPlaying ? (
                     <svg
-                      className="w-8 h-8 ml-1 text-black"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
+                      className="w-5 h-5 ml-0.5 text-black fill-current"
+                      viewBox="0 0 24 24"
                     >
-                      <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                     </svg>
-                  </div>
+                  ) : (
+                    <svg
+                      className="w-5 h-5 ml-0.5 text-black fill-current"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  )}
                 </button>
               )}
             </div>
@@ -148,4 +164,5 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
       </div>
     </section>
   )
+}
 }

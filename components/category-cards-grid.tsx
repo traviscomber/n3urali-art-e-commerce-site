@@ -25,16 +25,18 @@ export function CategoryCardsGrid({ cards }: CategoryCardsGridProps) {
             <Link
               key={card.id}
               href={card.link}
-              className="group relative h-80 rounded-lg overflow-hidden cursor-pointer transform transition-transform duration-300 hover:scale-105 shadow-lg"
+              className="group relative h-80 rounded-lg overflow-hidden cursor-pointer transform transition-transform duration-300 hover:scale-105 shadow-lg bg-gray-900"
             >
               {/* Background Image */}
-              <Image
-                src={card.imageUrl}
-                alt={card.title}
-                fill
-                className="object-cover group-hover:scale-110 transition-transform duration-300"
-                priority={card.id === 'studio' || card.id === 'realities'}
-              />
+              {card.imageUrl && (
+                <Image
+                  src={card.imageUrl}
+                  alt={card.title}
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-300"
+                  priority={card.id === 'studio' || card.id === 'realities'}
+                />
+              )}
 
               {/* Subtle Dark Overlay */}
               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-300" />

@@ -34,6 +34,11 @@ const THEATRE_CATEGORIES: TheatreCategory[] = [
 export default function TheatrePage() {
   const [selectedCategory, setSelectedCategory] = useState<TheatreCategory>(THEATRE_CATEGORIES[0])
 
+  const handleCategoryClick = (category: TheatreCategory) => {
+    console.log('[v0] Category clicked:', category.title, 'Video URL:', category.videoUrl)
+    setSelectedCategory(category)
+  }
+
   return (
     <main className="min-h-screen w-full bg-black">
       {/* Header Section */}
@@ -53,13 +58,16 @@ export default function TheatrePage() {
       <div className="w-full px-6 py-16 max-w-7xl mx-auto">
         <div className="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden mb-12 group">
           <video
-            key={selectedCategory.id}
+            key={`${selectedCategory.id}-${selectedCategory.videoUrl}`}
             src={selectedCategory.videoUrl}
             autoPlay
             loop
             muted
             playsInline
+            crossOrigin="anonymous"
             className="w-full h-full object-cover"
+            onLoadStart={() => console.log('[v0] Video loading:', selectedCategory.title)}
+            onCanPlay={() => console.log('[v0] Video ready:', selectedCategory.title)}
           />
 
           {/* GO Button */}
@@ -85,7 +93,7 @@ export default function TheatrePage() {
           {THEATRE_CATEGORIES.map((category) => (
             <button
               key={category.id}
-              onClick={() => setSelectedCategory(category)}
+              onClick={() => handleCategoryClick(category)}
               className={`p-6 rounded-lg border-2 transition-all duration-300 text-left ${
                 selectedCategory.id === category.id
                   ? 'border-cyan-500 bg-gray-900/30'

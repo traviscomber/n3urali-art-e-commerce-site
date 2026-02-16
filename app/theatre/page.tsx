@@ -1,7 +1,5 @@
 'use client'
 
-import { ChevronRight } from 'lucide-react'
-
 interface TheatreCategory {
   id: string
   title: string
@@ -9,28 +7,11 @@ interface TheatreCategory {
   videoUrl: string
 }
 
-const THEATRE_CATEGORIES: TheatreCategory[] = [
-  {
-    id: 'immersive-worlds',
-    title: 'Immersive Worlds',
-    description: 'Explore boundless digital realms',
-    videoUrl: 'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/WebBackdrop360-4.mov',
-  },
-  {
-    id: 'cultural-journeys',
-    title: 'Cultural Journeys',
-    description: 'Stories from around the world',
-    videoUrl: 'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/WebBackdrop360-Indo+(1).mov',
-  },
-  {
-    id: 'digital-art',
-    title: 'Digital Art',
-    description: 'Contemporary artistic expressions',
-    videoUrl: 'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/WebBackdrop5.mov',
-  },
-]
-
-const FEATURED_VIDEO = THEATRE_CATEGORIES[0]
+const FEATURED_VIDEO = {
+  title: 'Immersive Worlds',
+  description: 'Explore boundless digital realms',
+  videoUrl: 'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/WebBackdrop360-4.mov',
+}
 
 export default function TheatrePage() {
   return (
@@ -48,7 +29,7 @@ export default function TheatrePage() {
         </div>
       </div>
 
-      {/* Featured Video Section */}
+      {/* Featured Video Section - Main Content */}
       <div className="w-full px-6 py-16 max-w-7xl mx-auto">
         <div className="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden mb-12 group">
           <video
@@ -70,35 +51,13 @@ export default function TheatrePage() {
         </div>
 
         {/* Featured Category Title and Description */}
-        <div className="text-center mb-12">
+        <div className="text-center">
           <h2 className="text-3xl font-light text-gray-300 mb-2">
             {FEATURED_VIDEO.title}
           </h2>
           <p className="text-gray-500">
             {FEATURED_VIDEO.description}
           </p>
-        </div>
-
-        {/* Category Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {THEATRE_CATEGORIES.map((category) => (
-            <a
-              key={category.id}
-              href={`/theatre/${category.id}`}
-              className="p-6 rounded-lg border-2 border-gray-700 hover:border-cyan-500 transition-all duration-300 text-left group/card"
-            >
-              <h3 className="text-lg font-light text-cyan-400 mb-2 group-hover/card:text-cyan-300 transition-colors">
-                {category.title}
-              </h3>
-              <p className="text-gray-400 text-sm mb-4">
-                {category.description}
-              </p>
-              <div className="flex items-center gap-2 text-cyan-400 text-sm font-light group-hover/card:gap-3 transition-all">
-                <span>View</span>
-                <ChevronRight size={16} />
-              </div>
-            </a>
-          ))}
         </div>
       </div>
     </main>

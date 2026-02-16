@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { ChevronRight } from 'lucide-react'
 
 interface TheatreCategory {
@@ -27,28 +27,16 @@ const THEATRE_CATEGORIES: TheatreCategory[] = [
     id: 'digital-art',
     title: 'Digital Art',
     description: 'Contemporary artistic expressions',
-    videoUrl: 'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/cogvideo_1770587069211.mp4',
+    videoUrl: 'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/WebBackdrop5.mov',
   },
 ]
 
 export default function TheatrePage() {
   const [selectedCategory, setSelectedCategory] = useState<TheatreCategory>(THEATRE_CATEGORIES[0])
-  const videoRef = useRef<HTMLVideoElement>(null)
 
   const handleCategoryClick = (category: TheatreCategory) => {
-    console.log('[v0] Category clicked:', category.title, 'Video URL:', category.videoUrl)
     setSelectedCategory(category)
   }
-
-  // Force video reload when category changes
-  useEffect(() => {
-    if (videoRef.current) {
-      console.log('[v0] Updating video source to:', selectedCategory.videoUrl)
-      videoRef.current.src = selectedCategory.videoUrl
-      videoRef.current.load()
-      videoRef.current.play().catch(err => console.log('[v0] Video play error:', err))
-    }
-  }, [selectedCategory])
 
   return (
     <main className="min-h-screen w-full bg-black">
@@ -69,7 +57,7 @@ export default function TheatrePage() {
       <div className="w-full px-6 py-16 max-w-7xl mx-auto">
         <div className="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden mb-12 group">
           <video
-            ref={videoRef}
+            key={selectedCategory.id}
             src={selectedCategory.videoUrl}
             autoPlay
             loop
@@ -77,8 +65,6 @@ export default function TheatrePage() {
             playsInline
             crossOrigin="anonymous"
             className="w-full h-full object-cover"
-            onLoadStart={() => console.log('[v0] Video loading:', selectedCategory.title)}
-            onCanPlay={() => console.log('[v0] Video ready:', selectedCategory.title)}
           />
 
           {/* GO Button */}

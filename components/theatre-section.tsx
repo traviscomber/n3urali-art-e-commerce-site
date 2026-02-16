@@ -1,19 +1,30 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
-import { ChevronRight } from 'lucide-react'
 
-interface TheatreCategory {
-  id: string
-  title: string
-  description: string
-  thumbnail: string
-  videos: Array<{
-    id: string
-    title: string
-    url: string
-  }>
+export function TheatreSection() {
+  return (
+    <section className="w-full bg-black py-16 border-t border-gray-800">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-light text-gray-400 mb-4 tracking-wide">
+            Theatre
+          </h2>
+          <p className="text-gray-500 mb-2">Immerse yourself in curated video experiences</p>
+          <p className="text-gray-500 text-sm">Bigger screen brings better experience</p>
+        </div>
+
+        <Link
+          href="/theatre"
+          className="block w-full md:w-96 mx-auto"
+        >
+          <button className="w-full py-3 px-8 rounded-lg border-2 border-cyan-500 text-cyan-400 hover:bg-cyan-500/10 transition-all duration-300 font-light tracking-wide">
+            Enter Theatre
+          </button>
+        </Link>
+      </div>
+    </section>
+  )
 }
 
 // Sample theatre categories - in production these would come from database

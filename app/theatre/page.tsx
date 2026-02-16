@@ -1,6 +1,5 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
 import { ChevronRight } from 'lucide-react'
 
 interface TheatreCategory {
@@ -31,47 +30,9 @@ const THEATRE_CATEGORIES: TheatreCategory[] = [
   },
 ]
 
+const FEATURED_VIDEO = THEATRE_CATEGORIES[0]
+
 export default function TheatrePage() {
-  const [selectedCategory, setSelectedCategory] = useState<TheatreCategory>(THEATRE_CATEGORIES[0])
-  const videoRef = useRef<HTMLVideoElement>(null)
-
-  const handleCategoryClick = (category: TheatreCategory) => {
-    console.log('[v0] handleCategoryClick triggered:', category.id, category.title)
-    console.log('[v0] New video URL:', category.videoUrl)
-    setSelectedCategory(category)
-  }
-
-  // Update video when category changes
-  useEffect(() => {
-    console.log('[v0] useEffect triggered for category:', selectedCategory.id)
-    
-    if (videoRef.current) {
-      console.log('[v0] Stopping video playback')
-      videoRef.current.pause()
-      videoRef.current.currentTime = 0
-      
-      console.log('[v0] Setting new src to:', selectedCategory.videoUrl)
-      videoRef.current.src = selectedCategory.videoUrl
-      
-      console.log('[v0] Calling load()')
-      videoRef.current.load()
-      
-      // Wait for video to be loadable, then play
-      const playPromise = videoRef.current.play()
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            console.log('[v0] Video playing successfully')
-          })
-          .catch(error => {
-            console.error('[v0] Autoplay failed:', error)
-          })
-      }
-    } else {
-      console.log('[v0] videoRef.current is null')
-    }
-  }, [selectedCategory])
-
   return (
     <main className="min-h-screen w-full bg-black">
       {/* Header Section */}
@@ -91,16 +52,13 @@ export default function TheatrePage() {
       <div className="w-full px-6 py-16 max-w-7xl mx-auto">
         <div className="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden mb-12 group">
           <video
-            ref={videoRef}
+            src={FEATURED_VIDEO.videoUrl}
             autoPlay
             loop
             muted
             playsInline
             crossOrigin="anonymous"
             className="w-full h-full object-cover"
-            onLoadStart={() => console.log('[v0] Video onLoadStart')}
-            onCanPlay={() => console.log('[v0] Video onCanPlay - ready to play')}
-            onError={(e) => console.error('[v0] Video error:', e)}
           />
 
           {/* GO Button */}
@@ -111,39 +69,35 @@ export default function TheatrePage() {
           </div>
         </div>
 
-        {/* Category Title and Description */}
+        {/* Featured Category Title and Description */}
         <div className="text-center mb-12">
           <h2 className="text-3xl font-light text-gray-300 mb-2">
-            {selectedCategory.title}
+            {FEATURED_VIDEO.title}
           </h2>
           <p className="text-gray-500">
-            {selectedCategory.description}
+            {FEATURED_VIDEO.description}
           </p>
         </div>
 
         {/* Category Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {THEATRE_CATEGORIES.map((category) => (
-            <button
+            <a
               key={category.id}
-              onClick={() => handleCategoryClick(category)}
-              className={`p-6 rounded-lg border-2 transition-all duration-300 text-left ${
-                selectedCategory.id === category.id
-                  ? 'border-cyan-500 bg-gray-900/30'
-                  : 'border-gray-700 hover:border-cyan-500/50'
-              }`}
+              href={`/theatre/${category.id}`}
+              className="p-6 rounded-lg border-2 border-gray-700 hover:border-cyan-500 transition-all duration-300 text-left group/card"
             >
-              <h3 className="text-lg font-light text-cyan-400 mb-2">
+              <h3 className="text-lg font-light text-cyan-400 mb-2 group-hover/card:text-cyan-300 transition-colors">
                 {category.title}
               </h3>
               <p className="text-gray-400 text-sm mb-4">
                 {category.description}
               </p>
-              <div className="flex items-center gap-2 text-cyan-400 text-sm font-light">
+              <div className="flex items-center gap-2 text-cyan-400 text-sm font-light group-hover/card:gap-3 transition-all">
                 <span>View</span>
                 <ChevronRight size={16} />
               </div>
-            </button>
+            </a>
           ))}
         </div>
       </div>

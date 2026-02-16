@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { ChevronRight } from 'lucide-react'
 
 interface TheatreCategory {
@@ -33,10 +33,44 @@ const THEATRE_CATEGORIES: TheatreCategory[] = [
 
 export default function TheatrePage() {
   const [selectedCategory, setSelectedCategory] = useState<TheatreCategory>(THEATRE_CATEGORIES[0])
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   const handleCategoryClick = (category: TheatreCategory) => {
+    console.log('[v0] handleCategoryClick triggered:', category.id, category.title)
+    console.log('[v0] New video URL:', category.videoUrl)
     setSelectedCategory(category)
   }
+
+  // Update video when category changes
+  useEffect(() => {
+    console.log('[v0] useEffect triggered for category:', selectedCategory.id)
+    
+    if (videoRef.current) {
+      console.log('[v0] Stopping video playback')
+      videoRef.current.pause()
+      videoRef.current.currentTime = 0
+      
+      console.log('[v0] Setting new src to:', selectedCategory.videoUrl)
+      videoRef.current.src = selectedCategory.videoUrl
+      
+      console.log('[v0] Calling load()')
+      videoRef.current.load()
+      
+      // Wait for video to be loadable, then play
+      const playPromise = videoRef.current.play()
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log('[v0] Video playing successfully')
+          })
+          .catch(error => {
+            console.error('[v0] Autoplay failed:', error)
+          })
+      }
+    } else {
+      console.log('[v0] videoRef.current is null')
+    }
+  }, [selectedCategory])
 
   return (
     <main className="min-h-screen w-full bg-black">
@@ -57,14 +91,16 @@ export default function TheatrePage() {
       <div className="w-full px-6 py-16 max-w-7xl mx-auto">
         <div className="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden mb-12 group">
           <video
-            key={selectedCategory.id}
-            src={selectedCategory.videoUrl}
+            ref={videoRef}
             autoPlay
             loop
             muted
             playsInline
             crossOrigin="anonymous"
             className="w-full h-full object-cover"
+            onLoadStart={() => console.log('[v0] Video onLoadStart')}
+            onCanPlay={() => console.log('[v0] Video onCanPlay - ready to play')}
+            onError={(e) => console.error('[v0] Video error:', e)}
           />
 
           {/* GO Button */}

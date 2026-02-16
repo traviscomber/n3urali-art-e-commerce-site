@@ -21,7 +21,7 @@ const THEATRE_CATEGORIES: TheatreCategory[] = [
     id: 'cultural-journeys',
     title: 'Cultural Journeys',
     description: 'Stories from around the world',
-    videoUrl: 'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/cogvideo_1770587069211.mp4',
+    videoUrl: 'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/WebBackdrop360-Indo+(1).mov',
   },
   {
     id: 'digital-art',

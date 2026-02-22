@@ -12,9 +12,10 @@ export default async function TheatrePage() {
   const supabase = await createClient()
 
   // Fetch only equirectangular images (no videos), must be active
+  // Only select minimal fields to reduce bundle size
   const { data: images } = await supabase
     .from('images')
-    .select('id, title, thumbnail_medium_url, original_url, upscaled_url, image_format, description, active')
+    .select('id, title, original_url, image_format, description')
     .eq('image_format', 'equirectangular')
     .eq('active', true)
     .not('content_category', 'is', null)

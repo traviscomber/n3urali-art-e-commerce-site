@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import { X } from 'lucide-react'
+import { X, ZoomOut, ZoomIn } from 'lucide-react'
 
 interface PanoramaViewerPSVProps {
   imageUrl: string
@@ -261,6 +261,37 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           <div className="pointer-events-auto">
             <h2 className="text-white text-2xl font-light tracking-wide">{title}</h2>
             <p className="text-gray-400 text-sm mt-1">Relax and explore • Scroll to zoom</p>
+          </div>
+
+          {/* Right Side: Zoom Controls */}
+          <div className="absolute right-6 top-1/2 transform -translate-y-1/2 pointer-events-auto flex flex-col gap-3">
+            <button
+              onClick={() => {
+                if (cameraRef.current) {
+                  currentFovRef.current = Math.max(currentFovRef.current - 5, fov)
+                  cameraRef.current.fov = currentFovRef.current
+                  cameraRef.current.updateProjectionMatrix()
+                }
+              }}
+              className="p-3 border border-gray-600 rounded-lg text-gray-400 hover:text-white hover:border-cyan-500 transition-all duration-300 bg-black/30 hover:bg-cyan-500/10"
+              title="Zoom in"
+            >
+              <ZoomIn size={20} />
+            </button>
+
+            <button
+              onClick={() => {
+                if (cameraRef.current) {
+                  currentFovRef.current = Math.min(currentFovRef.current + 5, 170)
+                  cameraRef.current.fov = currentFovRef.current
+                  cameraRef.current.updateProjectionMatrix()
+                }
+              }}
+              className="p-3 border border-gray-600 rounded-lg text-gray-400 hover:text-white hover:border-cyan-500 transition-all duration-300 bg-black/30 hover:bg-cyan-500/10"
+              title="Zoom out"
+            >
+              <ZoomOut size={20} />
+            </button>
           </div>
 
           {/* Bottom: Close Button */}

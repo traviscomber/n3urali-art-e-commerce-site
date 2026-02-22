@@ -61,7 +61,10 @@ function GalleryClientComponent({ initialImages, initialCategories, galleryStats
   const [viewingPanorama, setViewingPanorama] = useState<Image | null>(null)
 
   const { equirectangularImages, fisheyeImages } = useMemo(() => {
-    const equirectangular = images.filter(
+    // Filter only active images with valid thumbnails
+    const activeImages = images.filter((img) => img.active && img.thumbnail_medium_url)
+
+    const equirectangular = activeImages.filter(
       (img) =>
         img.category_name?.toLowerCase().includes("equirectangular") ||
         img.categories?.name?.toLowerCase().includes("equirectangular") ||
@@ -69,7 +72,7 @@ function GalleryClientComponent({ initialImages, initialCategories, galleryStats
         (img.category_name?.toLowerCase().includes("360") && !img.category_name?.toLowerCase().includes("fisheye")),
     )
 
-    const fisheye = images.filter(
+    const fisheye = activeImages.filter(
       (img) =>
         img.category_name?.toLowerCase().includes("fisheye") ||
         img.categories?.name?.toLowerCase().includes("fisheye") ||
@@ -89,9 +92,12 @@ function GalleryClientComponent({ initialImages, initialCategories, galleryStats
   }
 
   const displayedImages = useMemo(() => {
+    // Only show active images with valid content
+    const activeImages = images.filter((img) => img.active && img.thumbnail_medium_url)
+    
     if (selectedFormat === "equirectangular") return equirectangularImages
     if (selectedFormat === "fisheye") return fisheyeImages
-    return images
+    return activeImages
   }, [selectedFormat, images, equirectangularImages, fisheyeImages])
 
   return (

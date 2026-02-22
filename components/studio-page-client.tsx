@@ -106,11 +106,6 @@ export function StudioPageClient() {
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-black/30" />
-        <div className="relative z-10 text-center pointer-events-none">
-          <h2 className="text-5xl md:text-6xl font-light text-white">
-            video player
-          </h2>
-        </div>
       </section>
 
       {/* Team Section */}

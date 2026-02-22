@@ -50,12 +50,12 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
             {/* Left: Content */}
-            <div className="flex flex-col gap-8 pt-8">
+            <div className="flex flex-col gap-8 pt-0">
               <div>
-                <h1 className="text-6xl md:text-7xl font-light text-slate-400 leading-tight mb-4">
+                <h1 className="text-7xl md:text-8xl font-light text-slate-400 leading-tight mb-2">
                   Shows
                 </h1>
-                <p className="text-slate-500 text-lg">Cinematic Dome Stories</p>
+                <p className="text-slate-500 text-base tracking-wide">Cinematic Dome Stories</p>
               </div>
 
               {/* Featured Show Description */}
@@ -110,11 +110,11 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                   />
                 </div>
                 {featuredCollection?.title && (
-                  <div className="mt-4 text-center">
-                    <p className="text-cyan-400 font-light text-lg">
+                  <div className="mt-6 text-center">
+                    <p className="text-cyan-300 font-light text-2xl italic mb-1">
                       {featuredCollection.title}
                     </p>
-                    <p className="text-slate-500 text-xs">1×1 block with {featuredCollection.title}</p>
+                    <p className="text-slate-400 text-xs tracking-wide">1×1 Video block with {featuredCollection.title}</p>
                   </div>
                 )}
               </div>

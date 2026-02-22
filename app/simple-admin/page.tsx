@@ -41,14 +41,19 @@ export default function AdminPage() {
     try {
       setSubmitting(true)
       
-      // Encode URL properly - Backblaze needs %20 for spaces, not +
+      // Extract fileId from B2 URL to reduce storage size
       let finalUrl = url.trim()
+      let fileId = finalUrl
       
-      // Replace + with %20 (common issue when copying URLs)
-      finalUrl = finalUrl.replace(/\+/g, '%20')
+      // Check if it's a B2 API download URL
+      const fileIdMatch = finalUrl.match(/fileId=([^&]+)/)
+      if (fileIdMatch && fileIdMatch[1]) {
+        fileId = fileIdMatch[1]
+        console.log('[v0] Extracted fileId:', fileId)
+      }
       
-      console.log('[v0] Original URL:', url)
-      console.log('[v0] Encoded URL:', finalUrl)
+      // Reconstruct clean B2 URL
+      const cleanUrl = `https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=${fileId}`
       
       const saveRes = await fetch('/api/admin/featured-images', {
         method: 'POST',
@@ -56,11 +61,11 @@ export default function AdminPage() {
         body: JSON.stringify({
           title,
           description,
-          original_url: finalUrl,
-          upscaled_url: finalUrl,
-          thumbnail_medium_url: finalUrl,
-          thumbnail_small_url: finalUrl,
-          file_path: finalUrl,
+          original_url: cleanUrl,
+          upscaled_url: cleanUrl,
+          thumbnail_medium_url: cleanUrl,
+          thumbnail_small_url: cleanUrl,
+          file_path: fileId,
           image_format: 'equirectangular',
           content_category: 'theatre',
           active: true,

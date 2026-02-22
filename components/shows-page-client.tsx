@@ -155,15 +155,15 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       {/* Video Player Section */}
       <section className="px-6 sm:px-8 lg:px-12 py-20 border-b border-slate-800">
         <div className="max-w-7xl mx-auto w-full">
-          <div className="relative w-full aspect-video rounded-md overflow-hidden bg-slate-900">
-            <Image
-              src="https://images.unsplash.com/photo-1566961236-e5cb944e0bf0?w=1400&h=800&fit=crop"
-              alt="Video player"
-              fill
-              className="object-cover"
-            />
+          <div className="relative w-full aspect-video rounded-md overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+            {/* Placeholder background */}
+            <div className="absolute inset-0 opacity-20">
+              <svg viewBox="0 0 1400 800" className="w-full h-full">
+                <rect width="1400" height="800" fill="#1e293b" />
+              </svg>
+            </div>
             {/* Text Overlay - positioned upper left */}
-            <div className="absolute inset-0 flex items-start justify-start pt-12 pl-12 bg-black/20">
+            <div className="absolute inset-0 flex items-start justify-start pt-12 pl-12">
               <p className="text-5xl md:text-6xl font-light text-white drop-shadow-lg">video player</p>
             </div>
           </div>

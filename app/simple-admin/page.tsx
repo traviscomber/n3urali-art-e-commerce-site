@@ -37,7 +37,10 @@ export default function AdminPage() {
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file) return
+    if (!file) {
+      setUploading(false)
+      return
+    }
 
     try {
       setUploading(true)
@@ -59,15 +62,15 @@ export default function AdminPage() {
       })
 
       console.log('[v0] B2 response status:', uploadRes.status)
-      const uploadResText = await uploadRes.text()
-      console.log('[v0] B2 response:', uploadResText)
 
       if (!uploadRes.ok) {
-        throw new Error(`B2 upload failed: ${uploadRes.status} ${uploadResText}`)
+        const errorText = await uploadRes.text()
+        console.error('[v0] B2 error:', errorText)
+        throw new Error(`B2 upload failed: ${uploadRes.status}`)
       }
 
-      const uploadedData = JSON.parse(uploadResText)
-      console.log('[v0] B2 upload successful, data:', uploadedData)
+      const uploadedData = await uploadRes.json()
+      console.log('[v0] B2 upload successful')
 
       // Save to database
       console.log('[v0] Saving to database...')
@@ -81,12 +84,15 @@ export default function AdminPage() {
       })
 
       console.log('[v0] Database response status:', dbRes.status)
-      const dbResText = await dbRes.text()
-      console.log('[v0] Database response:', dbResText)
 
-      if (!dbRes.ok) throw new Error(`Database save failed: ${dbRes.status} ${dbResText}`)
+      if (!dbRes.ok) {
+        const errorText = await dbRes.text()
+        console.error('[v0] Database error:', errorText)
+        throw new Error(`Database save failed: ${dbRes.status}`)
+      }
 
-      console.log('[v0] Upload complete, reloading images...')
+      console.log('[v0] Database save successful')
+
       toast({
         title: 'Success',
         description: 'Image uploaded successfully',
@@ -102,6 +108,7 @@ export default function AdminPage() {
       })
     } finally {
       setUploading(false)
+      console.log('[v0] Upload finished, uploading set to false')
     }
   }
 

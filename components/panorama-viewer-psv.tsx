@@ -8,6 +8,9 @@ interface PanoramaViewerPSVProps {
   title: string
   onClose?: () => void
   relaxMode?: boolean
+  fov?: number // Field of view (default 130 for wide view)
+  sphereScale?: number // Sphere radius (default 5000)
+  rotationSpeed?: number // Auto-rotation speed (default 0.0002)
 }
 
 export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
@@ -15,6 +18,9 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   title,
   onClose,
   relaxMode = true,
+  fov = 130,
+  sphereScale = 5000,
+  rotationSpeed = 0.0002,
 }: PanoramaViewerPSVProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -67,12 +73,12 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
 
         console.log('[v0] Initializing panorama with dimensions:', width, 'x', height)
 
-        // Scene setup with wider FOV (130 degrees for ultra-wide panoramic view)
+        // Scene setup with configurable FOV
         const scene = new THREE.Scene()
-        const camera = new THREE.PerspectiveCamera(130, width / height, 0.1, 100000)
+        const camera = new THREE.PerspectiveCamera(fov, width / height, 0.1, 100000)
         camera.position.set(0, 0, 0)
         camera.lookAt(0, 0, 0)
-        console.log('[v0] Camera created with FOV: 130, position:', camera.position, 'aspect:', width / height)
+        console.log(`[v0] Camera created with FOV: ${fov}, position:`, camera.position, 'aspect:', width / height)
 
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
         renderer.setSize(width, height)
@@ -101,9 +107,8 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         texture.wrapS = THREE.RepeatWrapping
         texture.wrapT = THREE.ClampToEdgeWrapping
 
-        // Create massive sphere geometry for equirectangular panorama with high segmentation
-        // Massive scale ensures no edges are visible, high segment count prevents geometry artifacts
-        const geometry = new THREE.SphereGeometry(5000, 128, 128)
+        // Create configurable sphere geometry for equirectangular panorama
+        const geometry = new THREE.SphereGeometry(sphereScale, 128, 128)
         const material = new THREE.MeshBasicMaterial({
           map: texture,
           side: THREE.BackSide,
@@ -118,7 +123,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         // Render initial frame immediately with correct camera
         renderer.clear()
         renderer.render(scene, camera)
-        console.log('[v0] Initial render completed with FOV 130')
+        console.log(`[v0] Initial render completed with FOV ${fov}`)
 
         // Animation loop with consistent rendering
         const animate = () => {
@@ -126,7 +131,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
 
           // Slow auto-rotation in relax mode (rotate the sphere itself)
           if (relaxMode && sphereRef.current) {
-            rotationYRef.current += 0.0002
+            rotationYRef.current += rotationSpeed
             sphereRef.current.rotation.y = rotationYRef.current
           }
 
@@ -176,7 +181,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         rendererRef.current.dispose()
       }
     }
-  }, [imageUrl, relaxMode])
+  }, [imageUrl, relaxMode, fov, sphereScale, rotationSpeed])
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {

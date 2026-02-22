@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { Trash2 } from 'lucide-react'
-import { parseFilenameMetadata } from '@/lib/parse-filename'
 
 export default function AdminPage() {
   const [images, setImages] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [url, setUrl] = useState('')
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
@@ -28,68 +30,50 @@ export default function AdminPage() {
     }
   }
 
-  const handleFileSelect = (e: any) => {
-    if (!e.target.files?.[0]) return
-
-    const file = e.target.files[0]
-    console.log('[v0] File selected:', file.name)
+  const handleAddImage = async (e: React.FormEvent) => {
+    e.preventDefault()
     
-    // Parse filename to auto-fill title and description
-    const { title: autoTitle, description: autoDescription } = parseFilenameMetadata(file.name)
-    console.log('[v0] Parsed metadata - title:', autoTitle, 'description:', autoDescription)
-    
-    uploadFile(file, autoTitle, autoDescription)
-  }
+    if (!url || !title) {
+      alert('URL and Title are required')
+      return
+    }
 
-  const uploadFile = async (file: File, autoTitle: string, autoDescription: string) => {
     try {
       setSubmitting(true)
-      console.log('[v0] Upload started for:', file.name)
+      console.log('[v0] Adding image with URL:', url)
       
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('folder', 'PICS/Theatre')
-      formData.append('title', autoTitle)
-      formData.append('description', autoDescription)
-      formData.append('imageFormat', 'equirectangular')
-      formData.append('contentCategory', 'theatre')
-
-      console.log('[v0] Uploading to Backblaze...')
-      const uploadRes = await fetch('/api/admin/upload-to-b2', {
-        method: 'POST',
-        body: formData,
-      })
-
-      console.log('[v0] B2 status:', uploadRes.status)
-      console.log('[v0] B2 content-type:', uploadRes.headers.get('content-type'))
-      
-      const responseText = await uploadRes.text()
-      console.log('[v0] B2 raw response (first 500 chars):', responseText.substring(0, 500))
-      
-      let uploadData
-      try {
-        uploadData = JSON.parse(responseText)
-      } catch (parseErr) {
-        console.error('[v0] Failed to parse B2 response as JSON:', parseErr)
-        throw new Error(`B2 returned invalid JSON: ${responseText.substring(0, 200)}`)
-      }
-      
-      console.log('[v0] B2 response:', uploadData)
-
-      if (!uploadRes.ok) throw new Error(uploadData.error || 'B2 upload failed')
-
-      console.log('[v0] Saving to database...')
       const saveRes = await fetch('/api/admin/featured-images', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...uploadData.imageData, active: true }),
+        body: JSON.stringify({
+          title,
+          description,
+          original_url: url,
+          upscaled_url: url,
+          thumbnail_medium_url: url,
+          thumbnail_small_url: url,
+          file_path: url,
+          image_format: 'equirectangular',
+          content_category: 'theatre',
+          active: true,
+        }),
       })
 
       console.log('[v0] Database status:', saveRes.status)
-      if (!saveRes.ok) throw new Error('Database save failed')
+      
+      if (!saveRes.ok) {
+        const errData = await saveRes.json()
+        throw new Error(errData.error || 'Failed to save image')
+      }
 
-      console.log('[v0] Upload complete!')
-      alert('Upload successful!')
+      console.log('[v0] Image saved successfully!')
+      alert('Image added successfully!')
+      
+      // Reset form
+      setUrl('')
+      setTitle('')
+      setDescription('')
+      
       loadImages()
     } catch (err) {
       console.error('[v0] Error:', err)
@@ -115,18 +99,54 @@ export default function AdminPage() {
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold text-white mb-8">Admin Panel</h1>
 
-        {/* Upload */}
+        {/* Add Image from Backblaze URL */}
         <div className="bg-slate-900 p-6 rounded-lg mb-8 border border-slate-700">
-          <h2 className="text-xl text-white mb-4">Upload Image to Backblaze</h2>
-          <p className="text-slate-300 text-sm mb-4">Title and description are auto-filled from filename</p>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileSelect}
-            disabled={submitting}
-            className="block w-full text-white p-2 border border-slate-600 rounded bg-slate-800"
-          />
-          {submitting && <p className="text-blue-400 mt-2">Uploading...</p>}
+          <h2 className="text-xl text-white mb-4">Add Image from Backblaze</h2>
+          <form onSubmit={handleAddImage} className="space-y-4">
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Backblaze URL *</label>
+              <input
+                type="text"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://f005.backblazeb2.com/file/Neuraliart/PICS/Theatre/..."
+                className="w-full p-3 border border-slate-600 rounded bg-slate-800 text-white placeholder-slate-500 font-mono text-sm"
+                required
+              />
+              <p className="text-slate-400 text-xs mt-1">Paste the full Backblaze URL with spaces encoded as + or %20</p>
+            </div>
+            
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Title *</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g., Ocean - Elemental Collection"
+                className="w-full p-3 border border-slate-600 rounded bg-slate-800 text-white placeholder-slate-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Description</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Optional description..."
+                rows={3}
+                className="w-full p-3 border border-slate-600 rounded bg-slate-800 text-white placeholder-slate-500"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-3 rounded font-semibold"
+            >
+              {submitting ? 'Adding...' : 'Add Image'}
+            </button>
+          </form>
         </div>
 
         {/* Images */}
@@ -140,13 +160,17 @@ export default function AdminPage() {
             {images.map((img) => (
               <div key={img.id} className="bg-slate-900 rounded-lg overflow-hidden border border-slate-700">
                 <img
-                  src={img.thumbnail_medium_url || img.thumbnail_url}
+                  src={img.thumbnail_medium_url || img.thumbnail_url || img.original_url}
                   alt={img.title}
                   className="w-full h-48 object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23333" width="200" height="200"/%3E%3Ctext x="50%" y="50%" fill="%23999" font-size="14" text-anchor="middle" dominant-baseline="middle"%3EImage not found%3C/text%3E%3C/svg%3E'
+                  }}
                 />
                 <div className="p-4">
                   <h3 className="text-white font-bold">{img.title}</h3>
                   <p className="text-slate-400 text-sm">{img.description}</p>
+                  <p className="text-slate-500 text-xs mt-2 break-all">{img.original_url}</p>
                   <button
                     onClick={() => deleteImage(img.id)}
                     className="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded flex items-center justify-center gap-2"

@@ -131,15 +131,15 @@ function EnvironmentCollection({
           const size = isCenter ? 320 : 224
           
           return (
-            <button
+            <Link
               key={index}
-              onClick={() => window.location.href = ctaLink}
-              className={`relative rounded-full overflow-hidden transform transition-all duration-300 hover:scale-110 hover:shadow-2xl cursor-pointer flex-shrink-0 ${
+              href={ctaLink}
+              className={`relative rounded-full overflow-hidden transform transition-all duration-300 hover:scale-110 hover:shadow-2xl cursor-pointer flex-shrink-0 block ${
                 isCenter ? 'ring-2 ring-cyan-400/30 hover:ring-cyan-400/60' : ''
               }`}
             >
               <Image
-                src={image.src}
+                src={image.src || '/placeholder.jpg'}
                 alt={image.alt}
                 width={size}
                 height={size}
@@ -148,7 +148,7 @@ function EnvironmentCollection({
               />
               {/* Hover overlay */}
               <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-full" />
-            </button>
+            </Link>
           )
         })}
       </div>

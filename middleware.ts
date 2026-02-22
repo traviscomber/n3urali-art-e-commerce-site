@@ -8,7 +8,6 @@ const DEV_ONLY_PATHS = [
   "/setup-cors",
   "/setup-backblaze-cors",
   "/admin-simple",
-  "/simple-admin",
   "/test-image-access",
   "/test-payment-flow",
   "/fix-cors",

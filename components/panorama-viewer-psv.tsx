@@ -11,6 +11,7 @@ interface PanoramaViewerPSVProps {
   fov?: number // Field of view (default 130 for wide view)
   sphereScale?: number // Sphere radius (default 5000)
   rotationSpeed?: number // Auto-rotation speed (default 0.0002)
+  geometrySegments?: number // Sphere geometry segments (default 128)
 }
 
 export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
@@ -21,6 +22,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   fov = 130,
   sphereScale = 5000,
   rotationSpeed = 0.0002,
+  geometrySegments = 128,
 }: PanoramaViewerPSVProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -108,7 +110,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         texture.wrapT = THREE.ClampToEdgeWrapping
 
         // Create configurable sphere geometry for equirectangular panorama
-        const geometry = new THREE.SphereGeometry(sphereScale, 128, 128)
+        const geometry = new THREE.SphereGeometry(sphereScale, geometrySegments, geometrySegments)
         const material = new THREE.MeshBasicMaterial({
           map: texture,
           side: THREE.BackSide,
@@ -181,7 +183,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         rendererRef.current.dispose()
       }
     }
-  }, [imageUrl, relaxMode, fov, sphereScale, rotationSpeed])
+  }, [imageUrl, relaxMode, fov, sphereScale, rotationSpeed, geometrySegments])
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {

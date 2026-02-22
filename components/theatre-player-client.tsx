@@ -62,6 +62,9 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
           title={currentImage.title || 'Panoramic Experience'}
           onClose={() => setIsViewerOpen(false)}
           relaxMode={true}
+          fov={130}
+          sphereScale={5000}
+          rotationSpeed={0.0002}
         />
       )}
 

@@ -31,7 +31,9 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   const sceneRef = useRef<any>(null)
   const rendererRef = useRef<any>(null)
   const sphereRef = useRef<any>(null)
+  const cameraRef = useRef<any>(null)
   const rotationYRef = useRef(0)
+  const currentFovRef = useRef(fov)
 
   useEffect(() => {
     const loadPanorama = async () => {
@@ -121,6 +123,27 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         sceneRef.current = scene
         rendererRef.current = renderer
         sphereRef.current = sphere
+        cameraRef.current = camera
+
+        // Mouse wheel zoom control (zoom out only)
+        const handleWheel = (e: WheelEvent) => {
+          e.preventDefault()
+          
+          // Zoom out on scroll down
+          if (e.deltaY > 0) {
+            currentFovRef.current = Math.min(currentFovRef.current + 2, 170)
+            camera.fov = currentFovRef.current
+            camera.updateProjectionMatrix()
+          }
+          // Zoom in on scroll up
+          else if (e.deltaY < 0) {
+            currentFovRef.current = Math.max(currentFovRef.current - 2, fov)
+            camera.fov = currentFovRef.current
+            camera.updateProjectionMatrix()
+          }
+        }
+
+        canvas.addEventListener('wheel', handleWheel, { passive: false })
 
         // Render initial frame immediately with correct camera
         renderer.clear()
@@ -157,6 +180,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         // Cleanup
         return () => {
           window.removeEventListener('resize', handleResize)
+          canvas.removeEventListener('wheel', handleWheel)
           if (animationRef.current) {
             cancelAnimationFrame(animationRef.current)
           }
@@ -233,6 +257,23 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
       {/* Title and Close Button Overlay */}
       {!isLoading && !error && (
         <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-6 z-10">
+          {/* Top: Title */}
+          <div className="pointer-events-auto">
+            <h2 className="text-white text-2xl font-light tracking-wide">{title}</h2>
+            <p className="text-gray-400 text-sm mt-1">Relax and explore • Scroll to zoom</p>
+          </div>
+
+          {/* Bottom: Close Button */}
+          <div className="pointer-events-auto">
+            <button
+              onClick={onClose}
+              className="px-6 py-2 border border-gray-600 rounded-lg text-gray-400 hover:text-white hover:border-white transition-all duration-300 font-light"
+            >
+              Close (ESC)
+            </button>
+          </div>
+        </div>
+      )}
           {/* Title */}
           <div className="pointer-events-auto">
             <h2 className="text-white text-2xl font-light tracking-wide">{title}</h2>

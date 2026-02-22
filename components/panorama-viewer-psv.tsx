@@ -305,28 +305,6 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           </div>
         </div>
       )}
-          {/* Title */}
-          <div className="pointer-events-auto">
-            <h2 className="text-white text-2xl font-light tracking-wide">{title}</h2>
-            <p className="text-gray-400 text-sm mt-1">
-              {relaxMode ? 'Relax and explore this panoramic world' : 'Drag to explore • Scroll to zoom • ESC to close'}
-            </p>
-          </div>
-
-          {/* Close Button */}
-          <div className="pointer-events-auto">
-            {onClose && (
-              <button
-                onClick={onClose}
-                className="p-2 border border-gray-600 rounded-lg text-gray-400 hover:text-white hover:border-white transition-all duration-300 flex items-center gap-2"
-              >
-                <X size={18} />
-                <span className="text-sm">Close (ESC)</span>
-              </button>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   )
 })

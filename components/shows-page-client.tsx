@@ -33,11 +33,17 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
   const [currentTeaserIndex, setCurrentTeaserIndex] = useState(0)
   const [selectedTeaserIndex, setSelectedTeaserIndex] = useState<number | null>(null)
 
-  console.log('[v0] ShowsPageClient - Teaser images received:', teaserImages?.length, 'Images:', teaserImages?.map(img => ({ id: img.id, title: img.title })))
-
   const featuredCollection = collections?.[0]
   const featuredImage = teaserImages?.[0]
   const teaserLabels = ['Heritage', 'Education', 'Fun', 'Art']
+
+  // Map teaser labels to custom video URLs
+  const teaserVideoUrls: Record<string, string> = {
+    'Heritage': 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f107090e62b7fa63f_d20260222_m232412_c005_v0501037_t0027_u01771802652244',
+    'Education': '',
+    'Fun': '',
+    'Art': ''
+  }
 
   const handleTeaserNext = () => {
     setCurrentTeaserIndex((prev) => (prev + 1) % teaserImages.length)
@@ -168,7 +174,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
           <div className="max-w-7xl mx-auto w-full">
             <div className="relative w-full aspect-video rounded-md overflow-hidden bg-black">
               <video
-                src={teaserImages[selectedTeaserIndex]?.upscaled_url || teaserImages[selectedTeaserIndex]?.original_url || ''}
+                src={teaserVideoUrls[teaserLabels[selectedTeaserIndex]] || teaserImages[selectedTeaserIndex]?.upscaled_url || teaserImages[selectedTeaserIndex]?.original_url || ''}
                 autoPlay
                 loop
                 muted

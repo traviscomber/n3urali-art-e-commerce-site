@@ -28,11 +28,6 @@ export default async function ShowsPage() {
     .order('created_at', { ascending: false })
     .limit(10)
 
-  console.log('[v0] Shows page - Teaser images count:', images?.length)
-  if (images && images.length > 0) {
-    console.log('[v0] Shows page - First 4 images:', images.slice(0, 4).map(img => ({ id: img.id, title: img.title })))
-  }
-
   return (
     <main className="min-h-screen w-full bg-black">
       <ShowsPageClient collections={collections || []} teaserImages={images || []} />

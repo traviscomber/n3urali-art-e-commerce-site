@@ -33,18 +33,23 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
   const [isViewerOpen, setIsViewerOpen] = useState(false)
   const [fadeOut, setFadeOut] = useState(false)
 
-  // Get all related images (same tags as current image)
+  // Get all related images (same primary subcategory tag)
+  // Primary tag (first tag) represents the subcategory like "Forest", "Ocean", etc.
   const getRelatedImages = (imageIndex: number): Image[] => {
-    if (!images[imageIndex]?.tags || images[imageIndex].tags!.length === 0) {
+    const currentImage = images[imageIndex]
+    
+    if (!currentImage?.tags || currentImage.tags.length === 0) {
       // If no tags, return only this image
-      return [images[imageIndex]]
+      return [currentImage]
     }
 
-    const currentTags = images[imageIndex].tags || []
-    // Find all images that share at least one tag with the current image
+    // Use the first tag as the primary subcategory (e.g., "Forest", "Ocean")
+    const primaryTag = currentImage.tags[0]
+    
+    // Find all images with the same primary tag (same subcategory)
     return images.filter(img => {
       if (!img.tags || img.tags.length === 0) return false
-      return img.tags.some(tag => currentTags.includes(tag))
+      return img.tags[0] === primaryTag
     })
   }
 

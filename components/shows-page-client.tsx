@@ -125,23 +125,25 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
       {/* Teasers Section */}
       {teaserImages.length > 0 && (
-        <section className="px-6 sm:px-8 lg:px-12 py-16 border-b border-slate-800">
+        <section className="px-6 sm:px-8 lg:px-12 py-20 border-b border-slate-800">
           <div className="max-w-7xl mx-auto w-full">
-            <h2 className="text-3xl font-light text-slate-400 mb-12">Teasers:</h2>
+            <h2 className="text-4xl font-light text-slate-400 mb-12">Teasers:</h2>
 
             {/* Teaser Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {teaserImages.slice(0, 4).map((image, index) => (
-                <div key={image.id} className="relative aspect-square rounded-lg overflow-hidden group cursor-pointer">
+                <div key={image.id} className="relative aspect-square rounded-md overflow-hidden group cursor-pointer">
                   <Image
                     src={image.upscaled_url || image.original_url || image.thumbnail_medium_url || '/placeholder.svg'}
                     alt={image.title}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  {/* Label Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end justify-center pb-4">
-                    <p className="text-slate-200 text-sm font-light">{teaserLabels[index] || image.title}</p>
+                  {/* Label Overlay - centered */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-center justify-center">
+                    <p className="text-white text-xl md:text-2xl font-bold uppercase tracking-wider drop-shadow-lg">
+                      {teaserLabels[index] || image.title}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -151,18 +153,18 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       )}
 
       {/* Video Player Section */}
-      <section className="px-6 sm:px-8 lg:px-12 py-16 border-b border-slate-800">
+      <section className="px-6 sm:px-8 lg:px-12 py-20 border-b border-slate-800">
         <div className="max-w-7xl mx-auto w-full">
-          <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-slate-900">
+          <div className="relative w-full aspect-video rounded-md overflow-hidden bg-slate-900">
             <Image
-              src="https://images.unsplash.com/photo-1566961236-e5cb944e0bf0?w=1200&h=675&fit=crop"
+              src="https://images.unsplash.com/photo-1566961236-e5cb944e0bf0?w=1400&h=800&fit=crop"
               alt="Video player"
               fill
               className="object-cover"
             />
-            {/* Centered Text Overlay */}
-            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-              <p className="text-4xl md:text-5xl font-light text-white text-center">video player</p>
+            {/* Text Overlay - positioned upper left */}
+            <div className="absolute inset-0 flex items-start justify-start pt-12 pl-12 bg-black/20">
+              <p className="text-5xl md:text-6xl font-light text-white drop-shadow-lg">video player</p>
             </div>
           </div>
         </div>

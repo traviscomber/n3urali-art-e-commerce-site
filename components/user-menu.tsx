@@ -134,7 +134,7 @@ export function UserMenu() {
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="/admin/upload-video" className="cursor-pointer">
+              <Link href="/simple-admin" className="cursor-pointer">
                 <Shield className="mr-2 h-4 w-4" />
                 <span>Admin Panel</span>
               </Link>

@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { Trash2 } from 'lucide-react'
-import { parseFilenameMetadata } from '@/lib/parse-filename'
 
 export default function AdminPage() {
   const [images, setImages] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [url, setUrl] = useState('')
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     console.log('[v0] Page loaded')
@@ -27,59 +30,51 @@ export default function AdminPage() {
     }
   }
 
-  const handleFileSelect = (e: any) => {
-    console.log('[v0] File selected:', e.target.files?.[0]?.name)
-    if (!e.target.files?.[0]) return
+  const handleAddImage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!url || !title) {
+      alert('URL and Title are required')
+      return
+    }
 
-    const file = e.target.files[0]
-    console.log('[v0] Starting upload for:', file.name)
-    uploadFile(file)
-  }
-
-  const uploadFile = async (file: File) => {
     try {
-      console.log('[v0] Upload started')
+      setSubmitting(true)
+      console.log('[v0] Adding image with URL:', url)
       
-      // Parse filename to extract title and description
-      const { title, description } = parseFilenameMetadata(file.name)
-      console.log('[v0] Parsed metadata - title:', title, 'description:', description)
-      
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('folder', 'PICS/Theatre')
-      formData.append('title', title)
-      formData.append('description', description)
-      formData.append('imageFormat', 'equirectangular')
-      formData.append('contentCategory', 'theatre')
-
-      console.log('[v0] Calling B2 API...')
-      const uploadRes = await fetch('/api/admin/upload-to-b2', {
-        method: 'POST',
-        body: formData,
-      })
-
-      console.log('[v0] B2 status:', uploadRes.status)
-      const uploadData = await uploadRes.json()
-      console.log('[v0] B2 response:', uploadData)
-
-      if (!uploadRes.ok) throw new Error(uploadData.error || 'B2 upload failed')
-
-      console.log('[v0] Saving to database...')
       const saveRes = await fetch('/api/admin/featured-images', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...uploadData.imageData, active: true }),
+        body: JSON.stringify({
+          title,
+          description,
+          original_url: url,
+          upscaled_url: url,
+          thumbnail_medium_url: url,
+          thumbnail_small_url: url,
+          image_format: 'equirectangular',
+          content_category: 'theatre',
+          active: true,
+        }),
       })
 
       console.log('[v0] Database status:', saveRes.status)
-      if (!saveRes.ok) throw new Error('Database save failed')
+      if (!saveRes.ok) throw new Error('Failed to save image')
 
-      console.log('[v0] Upload complete!')
-      alert('Upload successful!')
+      console.log('[v0] Image saved successfully!')
+      alert('Image added successfully!')
+      
+      // Reset form
+      setUrl('')
+      setTitle('')
+      setDescription('')
+      
       loadImages()
     } catch (err) {
       console.error('[v0] Error:', err)
       alert('Error: ' + (err instanceof Error ? err.message : 'Unknown error'))
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -99,15 +94,53 @@ export default function AdminPage() {
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold text-white mb-8">Admin Panel</h1>
 
-        {/* Upload */}
+        {/* Add Image via URL */}
         <div className="bg-slate-900 p-6 rounded-lg mb-8 border border-slate-700">
-          <h2 className="text-xl text-white mb-4">Upload Image</h2>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileSelect}
-            className="block w-full text-white p-2 border border-slate-600 rounded bg-slate-800"
-          />
+          <h2 className="text-xl text-white mb-4">Add Image from Backblaze URL</h2>
+          <form onSubmit={handleAddImage} className="space-y-4">
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Backblaze URL *</label>
+              <input
+                type="url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://f005.backblazeb2.com/file/Neuraliart/PICS/Theatre/..."
+                className="w-full p-3 border border-slate-600 rounded bg-slate-800 text-white placeholder-slate-500"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Title *</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g., Ancient Monuments - Panoramic View"
+                className="w-full p-3 border border-slate-600 rounded bg-slate-800 text-white placeholder-slate-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-white text-sm font-semibold mb-2">Description</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Optional description..."
+                rows={3}
+                className="w-full p-3 border border-slate-600 rounded bg-slate-800 text-white placeholder-slate-500"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-3 rounded font-semibold"
+            >
+              {submitting ? 'Adding...' : 'Add Image'}
+            </button>
+          </form>
         </div>
 
         {/* Images */}

@@ -139,9 +139,9 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
           {/* Side-by-side layout: Teasers on left, Video player on right */}
           <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-12 items-center">
             
-            {/* Left: Full vertical teaser list */}
+            {/* Left: Full vertical teaser list - Square buttons with text overlay */}
             <div className="flex flex-col items-stretch gap-6">
-              {/* Display all 4 teasers vertically */}
+              {/* Display all 4 teasers vertically - Full square cards */}
               {teaserImages.slice(0, 4).map((image, index) => {
                 const label = teaserLabels[index]
                 const isSelected = selectedTeaserIndex === index
@@ -150,27 +150,29 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                   <div
                     key={`teaser-${index}`}
                     onClick={() => setSelectedTeaserIndex(index)}
-                    className="flex flex-col gap-3 cursor-pointer group"
-                  >
-                    <div className={`relative w-full h-24 rounded-md overflow-hidden transition-all duration-300 ${
+                    className={`relative w-full aspect-square rounded-md overflow-hidden cursor-pointer group transition-all duration-300 ${
                       isSelected ? 'ring-2 ring-cyan-400' : 'ring-1 ring-slate-700 group-hover:ring-slate-500'
-                    }`}>
-                      <Image
-                        src={image?.upscaled_url || image?.original_url || image?.thumbnail_medium_url || '/placeholder.svg'}
-                        alt={label}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      {isSelected && (
-                        <div className="absolute inset-0 bg-black/20" />
-                      )}
+                    }`}
+                  >
+                    {/* Background Image - Full bleed */}
+                    <Image
+                      src={image?.upscaled_url || image?.original_url || image?.thumbnail_medium_url || '/placeholder.svg'}
+                      alt={label}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    
+                    {/* Text Label Overlay - At top */}
+                    <div className="absolute inset-0 flex items-start justify-start pt-6 pl-6 pointer-events-none">
+                      <p className="text-3xl font-bold uppercase tracking-wider text-white drop-shadow-lg">
+                        {label}
+                      </p>
                     </div>
-                    {/* Teaser Name */}
-                    <p className={`text-sm font-medium uppercase tracking-wide transition-colors ${
-                      isSelected ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-300'
-                    }`}>
-                      {label}
-                    </p>
+
+                    {/* Selection overlay */}
+                    {isSelected && (
+                      <div className="absolute inset-0 bg-black/20" />
+                    )}
                   </div>
                 )
               })}

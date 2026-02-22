@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { PanoramaViewer } from '@/components/panorama-viewer'
-import { AutoRotatingPanorama } from '@/components/auto-rotating-panorama'
+import { PanoramaViewerPSV } from '@/components/panorama-viewer-psv'
 import { ChevronRight, ChevronLeft } from 'lucide-react'
 
 interface Image {
@@ -58,10 +57,11 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
     <div className="min-h-screen w-full bg-black">
       {/* Full-screen Auto-Rotating Panorama Viewer */}
       {isViewerOpen && (
-        <AutoRotatingPanorama
+        <PanoramaViewerPSV
           imageUrl={imageUrl}
           title={currentImage.title || 'Panoramic Experience'}
           onClose={() => setIsViewerOpen(false)}
+          relaxMode={true}
         />
       )}
 

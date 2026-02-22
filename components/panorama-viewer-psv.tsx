@@ -54,6 +54,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
     const initThreePanorama = () => {
       const THREE = (window as any).THREE
       if (!THREE || !canvasRef.current) {
+        console.log('[v0] Three.js not available or canvas missing')
         setError('3D library not available')
         setIsLoading(false)
         return
@@ -64,17 +65,24 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         const width = window.innerWidth
         const height = window.innerHeight
 
-        // Scene setup
+        console.log('[v0] Initializing panorama with dimensions:', width, 'x', height)
+
+        // Scene setup with wider FOV (90 degrees for panoramic view)
         const scene = new THREE.Scene()
-        const camera = new THREE.PerspectiveCamera(110, width / height, 0.1, 100000)
+        const camera = new THREE.PerspectiveCamera(90, width / height, 0.1, 100000)
         camera.position.z = 0
+        console.log('[v0] Camera created with FOV: 90, aspect:', width / height)
 
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
         renderer.setSize(width, height)
-        renderer.setPixelRatio(window.devicePixelRatio)
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        renderer.setClearColor(0x000000, 1)
+        console.log('[v0] Renderer initialized')
 
         // Load panorama image with CORS
         const textureLoader = new THREE.TextureLoader()
+        console.log('[v0] Loading texture from:', imageUrl)
+        
         const texture = textureLoader.load(
           imageUrl,
           () => {
@@ -105,6 +113,10 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         sceneRef.current = scene
         rendererRef.current = renderer
         sphereRef.current = sphere
+
+        // Render initial frame immediately
+        renderer.render(scene, camera)
+        console.log('[v0] Initial render completed')
 
         // Animation loop
         const animate = () => {

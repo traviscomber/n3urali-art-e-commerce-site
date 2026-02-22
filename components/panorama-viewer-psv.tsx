@@ -66,7 +66,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
 
         // Scene setup
         const scene = new THREE.Scene()
-        const camera = new THREE.PerspectiveCamera(170, width / height, 0.1, 10000)
+        const camera = new THREE.PerspectiveCamera(110, width / height, 0.1, 100000)
         camera.position.z = 0
 
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
@@ -89,9 +89,12 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           }
         )
         texture.encoding = THREE.sRGBColorSpace
+        texture.wrapS = THREE.RepeatWrapping
+        texture.wrapT = THREE.ClampToEdgeWrapping
 
-        // Create sphere geometry for equirectangular panorama
-        const geometry = new THREE.SphereGeometry(500, 64, 64)
+        // Create massive sphere geometry for equirectangular panorama with high segmentation
+        // Massive scale ensures no edges are visible, high segment count prevents geometry artifacts
+        const geometry = new THREE.SphereGeometry(5000, 128, 128)
         const material = new THREE.MeshBasicMaterial({
           map: texture,
           side: THREE.BackSide,

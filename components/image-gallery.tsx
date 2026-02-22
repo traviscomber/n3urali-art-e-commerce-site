@@ -40,7 +40,8 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
   const transformedImages = useMemo(() => {
     return images.map((image) => ({
       ...image,
-      preview_url: ImageUrlHandler.convertToDisplayUrl(image.preview_url, { useProxy: true }),
+      // Use direct Backblaze URLs, don't proxy them
+      preview_url: ImageUrlHandler.convertToDisplayUrl(image.preview_url, { useProxy: false }),
     }))
   }, [images])
 

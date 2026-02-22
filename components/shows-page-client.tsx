@@ -136,11 +136,11 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
         <div className="max-w-7xl mx-auto w-full">
           <h2 className="text-4xl font-light text-slate-400 mb-12">Teasers:</h2>
 
-          {/* Side-by-side layout: Teasers on left (full height), Video player on right */}
-          <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-12 min-h-96">
+          {/* Side-by-side layout: Teasers on left, Video player on right */}
+          <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8 items-start">
             
             {/* Left: Full vertical teaser list */}
-            <div className="flex flex-col items-stretch gap-8">
+            <div className="flex flex-col items-stretch gap-5">
               {/* Display all 4 teasers vertically */}
               {teaserImages.slice(0, 4).map((image, index) => {
                 const label = teaserLabels[index]
@@ -150,9 +150,9 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                   <div
                     key={`teaser-${index}`}
                     onClick={() => setSelectedTeaserIndex(index)}
-                    className="flex flex-col gap-3 cursor-pointer group"
+                    className="flex flex-col gap-2 cursor-pointer group"
                   >
-                    <div className={`relative w-full h-32 rounded-md overflow-hidden transition-all duration-300 ${
+                    <div className={`relative w-full aspect-video rounded-md overflow-hidden transition-all duration-300 ${
                       isSelected ? 'ring-2 ring-cyan-400' : 'ring-1 ring-slate-700 group-hover:ring-slate-500'
                     }`}>
                       <Image
@@ -166,7 +166,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                       )}
                     </div>
                     {/* Teaser Name */}
-                    <p className={`text-sm font-medium uppercase tracking-wide transition-colors ${
+                    <p className={`text-xs font-medium uppercase tracking-wide transition-colors ${
                       isSelected ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-300'
                     }`}>
                       {label}
@@ -176,8 +176,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
               })}
             </div>
 
-            {/* Right: Video Player (Square) */}
-            <div className="relative w-full h-96 rounded-md overflow-hidden bg-black flex-shrink-0">
+            {/* Right: Video Player (Perfect Square) */}
+            <div className="relative w-full aspect-square rounded-md overflow-hidden bg-black">
               <video
                 key={selectedTeaserIndex}
                 src={selectedTeaserIndex !== null ? (teaserVideoUrls[teaserLabels[selectedTeaserIndex]] || teaserImages[selectedTeaserIndex]?.upscaled_url || teaserImages[selectedTeaserIndex]?.original_url || '') : 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f1103aff7f35b2839_d20260222_m230525_c005_v0501012_t0023_u01771801525343'}

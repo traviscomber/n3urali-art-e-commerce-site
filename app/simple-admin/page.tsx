@@ -41,6 +41,7 @@ export default function AdminPage() {
 
     try {
       setUploading(true)
+      console.log('[v0] Upload started for file:', file.name)
 
       // Upload to B2
       const formData = new FormData()
@@ -51,15 +52,25 @@ export default function AdminPage() {
       formData.append('imageFormat', 'equirectangular')
       formData.append('contentCategory', 'theatre')
 
+      console.log('[v0] Sending to B2 upload API...')
       const uploadRes = await fetch('/api/admin/upload-to-b2', {
         method: 'POST',
         body: formData,
       })
 
-      if (!uploadRes.ok) throw new Error('Upload to B2 failed')
-      const uploadedData = await uploadRes.json()
+      console.log('[v0] B2 response status:', uploadRes.status)
+      const uploadResText = await uploadRes.text()
+      console.log('[v0] B2 response:', uploadResText)
+
+      if (!uploadRes.ok) {
+        throw new Error(`B2 upload failed: ${uploadRes.status} ${uploadResText}`)
+      }
+
+      const uploadedData = JSON.parse(uploadResText)
+      console.log('[v0] B2 upload successful, data:', uploadedData)
 
       // Save to database
+      console.log('[v0] Saving to database...')
       const dbRes = await fetch('/api/admin/featured-images', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -69,8 +80,13 @@ export default function AdminPage() {
         }),
       })
 
-      if (!dbRes.ok) throw new Error('Failed to save to database')
+      console.log('[v0] Database response status:', dbRes.status)
+      const dbResText = await dbRes.text()
+      console.log('[v0] Database response:', dbResText)
 
+      if (!dbRes.ok) throw new Error(`Database save failed: ${dbRes.status} ${dbResText}`)
+
+      console.log('[v0] Upload complete, reloading images...')
       toast({
         title: 'Success',
         description: 'Image uploaded successfully',
@@ -78,6 +94,7 @@ export default function AdminPage() {
 
       await loadImages()
     } catch (error) {
+      console.error('[v0] Upload error:', error)
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Upload failed',

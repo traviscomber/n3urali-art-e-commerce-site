@@ -38,11 +38,11 @@ export function StudioPageClient() {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="min-h-screen flex items-center px-6 sm:px-8 lg:px-12 py-0 pt-20">
-        <div className="max-w-7xl mx-auto w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left: Title and Content */}
-            <div className="flex flex-col gap-12">
+      <section className="flex items-stretch px-0 py-0">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-2">
+          {/* Left: Title and Content */}
+          <div className="flex flex-col justify-center px-6 sm:px-8 lg:px-12 py-16 lg:py-0 h-screen lg:h-auto">
+            <div className="flex flex-col gap-8">
               <h1 className="text-6xl md:text-7xl font-light text-slate-400 leading-tight">
                 Studio
               </h1>
@@ -80,19 +80,17 @@ export function StudioPageClient() {
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Right: Studio Image */}
-            <div className="flex justify-end items-start lg:pt-0">
-              <div className="relative w-full max-w-xs aspect-square rounded-lg overflow-hidden border border-slate-700/50 bg-slate-900">
-                <Image
-                  src="/images/studio-ph1.png"
-                  alt="Studio immersive projection setup"
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
-            </div>
+          {/* Right: Studio Image - Full Height */}
+          <div className="relative h-screen w-full overflow-hidden">
+            <Image
+              src="/images/studio-ph1.png"
+              alt="Studio immersive projection setup"
+              fill
+              className="object-cover"
+              priority
+            />
           </div>
         </div>
       </section>

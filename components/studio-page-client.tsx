@@ -41,7 +41,7 @@ export function StudioPageClient() {
       <section className="flex items-stretch px-0 py-0 relative h-[70vh]">
         <div className="w-full flex relative">
           {/* Left: Title and Content */}
-          <div className="w-1/4 flex flex-col justify-start pt-16 px-6 sm:px-8 lg:px-12 lg:pt-20 h-full">
+          <div className="w-1/3 flex flex-col justify-start pt-16 px-6 sm:px-8 lg:px-12 lg:pt-20 h-full">
             <div className="flex flex-col gap-8 max-w-md">
               <h1 className="text-6xl md:text-7xl font-light text-slate-400 leading-tight">
                 Studio
@@ -83,7 +83,7 @@ export function StudioPageClient() {
           </div>
 
           {/* Right: Studio Image */}
-          <div className="relative h-full w-3/4 overflow-hidden">
+          <div className="relative h-full w-2/3 overflow-hidden">
             <Image
               src="/images/studio-ph1.png"
               alt="Studio immersive projection setup"

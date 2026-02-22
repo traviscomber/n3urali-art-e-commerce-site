@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PanoramaViewerPSV } from '@/components/panorama-viewer-psv'
 import { ChevronRight, ChevronLeft } from 'lucide-react'
 
@@ -30,6 +30,22 @@ interface TheatrePlayerClientProps {
 export function TheatrePlayerClient({ images, collections }: TheatrePlayerClientProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [isViewerOpen, setIsViewerOpen] = useState(false)
+  const [fadeOut, setFadeOut] = useState(false)
+
+  // Auto-rotate images every 30 seconds with fade effect
+  useEffect(() => {
+    if (isViewerOpen) return // Don't auto-rotate when viewer is open
+
+    const interval = setInterval(() => {
+      setFadeOut(true)
+      setTimeout(() => {
+        setSelectedImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+        setFadeOut(false)
+      }, 500) // Fade duration
+    }, 30000) // 30 seconds
+
+    return () => clearInterval(interval)
+  }, [isViewerOpen, images.length])
 
   if (!images || images.length === 0) {
     return (
@@ -89,7 +105,9 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
             {/* Panorama Teaser */}
             <div className="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden mb-12 border border-gray-700 group">
               <div
-                className="w-full h-full bg-cover bg-center cursor-pointer transition-transform duration-300 group-hover:scale-105"
+                className={`w-full h-full bg-cover bg-center cursor-pointer transition-all duration-500 group-hover:scale-105 ${
+                  fadeOut ? 'opacity-0' : 'opacity-100'
+                }`}
                 style={{
                   backgroundImage: `url('${currentImage.thumbnail_medium_url || imageUrl}')`,
                   backgroundPosition: 'center',

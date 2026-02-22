@@ -1,16 +1,23 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 
-export async function GET() {
+export async function GET(request: Request) {
   const supabase = await createClient()
+  const { searchParams } = new URL(request.url)
+  const showAll = searchParams.get("all") === "true"
 
-  const { data: images, error } = await supabase
+  const query = supabase
     .from("images")
     .select(
-      "id, title, description, file_path, original_url, upscaled_url, thumbnail_medium_url, featured_collection, price, image_format",
+      "id, title, description, file_path, original_url, upscaled_url, thumbnail_medium_url, featured_collection, price, image_format, active, content_category",
     )
-    .eq("active", true)
-    .order("created_at", { ascending: false })
+
+  // If showAll is not set, filter for active images
+  if (!showAll) {
+    query.eq("active", true)
+  }
+
+  const { data: images, error } = await query.order("created_at", { ascending: false })
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

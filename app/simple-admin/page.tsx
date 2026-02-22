@@ -51,7 +51,7 @@ export default function SimpleAdminPage() {
   const fetchImages = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch("/api/admin/featured-images")
+      const response = await fetch("/api/admin/featured-images?all=true")
       const data = await response.json()
       setImages(data)
     } catch (error) {
@@ -105,20 +105,20 @@ export default function SimpleAdminPage() {
   const standardImages = filteredImages.filter(img => img.image_format !== "equirectangular")
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Header */}
-      <div className="bg-white shadow-md border-b border-slate-200">
+      <div className="bg-slate-950 shadow-lg border-b border-slate-700">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold text-slate-900">Admin Panel</h1>
-              <p className="text-slate-600 mt-1">Manage your content and images</p>
+              <h1 className="text-4xl font-bold text-white">Admin Panel</h1>
+              <p className="text-slate-400 mt-1">Manage your content and images</p>
             </div>
             <div className="flex items-center gap-3">
               <Button
                 variant="outline"
                 onClick={() => router.push("/simple-admin/contracts")}
-                className="text-slate-700 border-slate-300"
+                className="text-slate-200 border-slate-600 hover:bg-slate-800"
               >
                 <FileText className="h-4 w-4 mr-2" />
                 Contracts
@@ -129,7 +129,7 @@ export default function SimpleAdminPage() {
                   localStorage.removeItem("admin-session")
                   router.push("/")
                 }}
-                className="text-slate-600 hover:text-slate-900"
+                className="text-slate-300 hover:text-white hover:bg-slate-800"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
@@ -142,24 +142,24 @@ export default function SimpleAdminPage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white border-b border-slate-200 w-full h-auto p-0 rounded-none">
+          <TabsList className="bg-slate-800 border-b border-slate-700 w-full h-auto p-0 rounded-none gap-0">
             <TabsTrigger 
               value="images"
-              className="rounded-none border-b-2 border-b-transparent data-[state=active]:border-b-slate-900"
+              className="rounded-none border-b-2 border-b-transparent text-slate-300 hover:text-white data-[state=active]:border-b-cyan-500 data-[state=active]:text-white data-[state=active]:bg-slate-700/50"
             >
               <Images className="h-4 w-4 mr-2" />
               Images Management
             </TabsTrigger>
             <TabsTrigger 
               value="theatre"
-              className="rounded-none border-b-2 border-b-transparent data-[state=active]:border-b-slate-900"
+              className="rounded-none border-b-2 border-b-transparent text-slate-300 hover:text-white data-[state=active]:border-b-cyan-500 data-[state=active]:text-white data-[state=active]:bg-slate-700/50"
             >
               <Eye className="h-4 w-4 mr-2" />
               Theatre Panoramas
             </TabsTrigger>
             <TabsTrigger 
               value="settings"
-              className="rounded-none border-b-2 border-b-transparent data-[state=active]:border-b-slate-900"
+              className="rounded-none border-b-2 border-b-transparent text-slate-300 hover:text-white data-[state=active]:border-b-cyan-500 data-[state=active]:text-white data-[state=active]:bg-slate-700/50"
             >
               <Settings className="h-4 w-4 mr-2" />
               Settings
@@ -168,46 +168,46 @@ export default function SimpleAdminPage() {
 
           {/* Images Tab */}
           <TabsContent value="images" className="space-y-6">
-            <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
+            <div className="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-xl">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-900">Image Gallery</h2>
-                  <p className="text-slate-600 text-sm mt-1">
+                  <h2 className="text-2xl font-bold text-white">Image Gallery</h2>
+                  <p className="text-slate-400 text-sm mt-1">
                     {filteredImages.length} image{filteredImages.length !== 1 ? "s" : ""} available
                   </p>
                 </div>
                 <div className="relative w-72">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
                   <Input
                     placeholder="Search images..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-slate-50 border-slate-300"
+                    className="pl-10 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500"
                   />
                 </div>
               </div>
 
               {isLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 text-slate-400 animate-spin" />
+                  <Loader2 className="h-8 w-8 text-cyan-400 animate-spin" />
                 </div>
               ) : filteredImages.length === 0 ? (
                 <div className="text-center py-12">
-                  <Images className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                  <p className="text-slate-600 font-medium">No images found</p>
+                  <Images className="h-12 w-12 text-slate-600 mx-auto mb-4" />
+                  <p className="text-slate-400 font-medium">No images found</p>
                 </div>
               ) : (
                 <div className="space-y-6">
                   {/* Standard Images */}
                   {standardImages.length > 0 && (
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                        <Badge className="bg-blue-100 text-blue-800">Standard Images</Badge>
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <Badge className="bg-blue-600 text-white">Standard Images</Badge>
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {standardImages.map((image) => (
-                          <Card key={image.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                            <div className="relative h-48 bg-slate-100 overflow-hidden">
+                          <Card key={image.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-slate-700 border-slate-600">
+                            <div className="relative h-48 bg-slate-600 overflow-hidden">
                               {image.thumbnail_medium_url && (
                                 <Image
                                   src={image.thumbnail_medium_url}
@@ -218,20 +218,25 @@ export default function SimpleAdminPage() {
                               )}
                               <div className="absolute top-2 right-2 flex gap-2">
                                 {!image.active && (
-                                  <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                                  <Badge variant="outline" className="bg-red-900 text-red-300 border-red-700">
                                     Inactive
                                   </Badge>
                                 )}
+                                {image.active && (
+                                  <Badge className="bg-green-600 text-white">
+                                    Active
+                                  </Badge>
+                                )}
                                 {image.content_category && (
-                                  <Badge className="bg-slate-700 text-white capitalize text-xs">
+                                  <Badge className="bg-cyan-600 text-white capitalize text-xs">
                                     {image.content_category}
                                   </Badge>
                                 )}
                               </div>
                             </div>
-                            <CardContent className="p-4">
-                              <h4 className="font-semibold text-slate-900 truncate">{image.title}</h4>
-                              <p className="text-xs text-slate-600 line-clamp-2 mt-1">
+                            <CardContent className="p-4 bg-slate-700">
+                              <h4 className="font-semibold text-white truncate">{image.title}</h4>
+                              <p className="text-xs text-slate-300 line-clamp-2 mt-1">
                                 {image.description || "No description"}
                               </p>
                               <div className="mt-4 flex gap-2">
@@ -245,7 +250,7 @@ export default function SimpleAdminPage() {
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      className="w-full text-xs"
+                                      className="w-full text-xs text-slate-300 border-slate-500 hover:bg-slate-600"
                                     >
                                       <Download className="h-3 w-3 mr-1" />
                                       Download
@@ -277,13 +282,13 @@ export default function SimpleAdminPage() {
                   {/* Equirectangular Images */}
                   {equirectangularImages.length > 0 && (
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                        <Badge className="bg-purple-100 text-purple-800">360° Panoramas</Badge>
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <Badge className="bg-purple-600 text-white">360° Panoramas</Badge>
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {equirectangularImages.map((image) => (
-                          <Card key={image.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                            <div className="relative h-48 bg-slate-100 overflow-hidden">
+                          <Card key={image.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-slate-700 border-slate-600">
+                            <div className="relative h-48 bg-slate-600 overflow-hidden">
                               {image.thumbnail_medium_url && (
                                 <Image
                                   src={image.thumbnail_medium_url}
@@ -294,16 +299,26 @@ export default function SimpleAdminPage() {
                               )}
                               <div className="absolute top-2 right-2 flex gap-2">
                                 <Badge className="bg-purple-600 text-white text-xs">360°</Badge>
+                                {!image.active && (
+                                  <Badge variant="outline" className="bg-red-900 text-red-300 border-red-700">
+                                    Inactive
+                                  </Badge>
+                                )}
+                                {image.active && (
+                                  <Badge className="bg-green-600 text-white">
+                                    Active
+                                  </Badge>
+                                )}
                                 {image.content_category && (
-                                  <Badge className="bg-slate-700 text-white capitalize text-xs">
+                                  <Badge className="bg-cyan-600 text-white capitalize text-xs">
                                     {image.content_category}
                                   </Badge>
                                 )}
                               </div>
                             </div>
-                            <CardContent className="p-4">
-                              <h4 className="font-semibold text-slate-900 truncate">{image.title}</h4>
-                              <p className="text-xs text-slate-600 line-clamp-2 mt-1">
+                            <CardContent className="p-4 bg-slate-700">
+                              <h4 className="font-semibold text-white truncate">{image.title}</h4>
+                              <p className="text-xs text-slate-300 line-clamp-2 mt-1">
                                 {image.description || "No description"}
                               </p>
                               <div className="mt-4 flex gap-2">
@@ -317,7 +332,7 @@ export default function SimpleAdminPage() {
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      className="w-full text-xs"
+                                      className="w-full text-xs text-slate-300 border-slate-500 hover:bg-slate-600"
                                     >
                                       <Eye className="h-3 w-3 mr-1" />
                                       View
@@ -352,40 +367,40 @@ export default function SimpleAdminPage() {
 
           {/* Theatre Tab */}
           <TabsContent value="theatre" className="space-y-6">
-            <Card className="bg-white border-slate-200">
+            <Card className="bg-slate-800 border-slate-700">
               <CardHeader>
-                <CardTitle>Theatre Panoramas (360° Images)</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-white">Theatre Panoramas (360° Images)</CardTitle>
+                <CardDescription className="text-slate-400">
                   View and manage all equirectangular panoramic images used in Theatre mode
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {equirectangularImages.length === 0 ? (
                   <div className="text-center py-12">
-                    <Eye className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                    <p className="text-slate-600 font-medium">No panoramic images found</p>
+                    <Eye className="h-12 w-12 text-slate-600 mx-auto mb-4" />
+                    <p className="text-slate-400 font-medium">No panoramic images found</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {equirectangularImages.map((image) => (
-                      <Card key={image.id} className="overflow-hidden">
-                        <div className="relative h-40 bg-slate-100">
+                      <Card key={image.id} className="overflow-hidden bg-slate-700 border-slate-600">
+                        <div className="relative h-40 bg-slate-600">
                           {image.thumbnail_medium_url && (
                             <Image
                               src={image.thumbnail_medium_url}
                               alt={image.title}
                               fill
-                                                            className="object-cover"
+                              className="object-cover"
                             />
                           )}
                         </div>
-                        <CardContent className="p-4">
-                          <h4 className="font-semibold text-slate-900">{image.title}</h4>
-                          <p className="text-sm text-slate-600 mt-1">{image.description}</p>
+                        <CardContent className="p-4 bg-slate-700">
+                          <h4 className="font-semibold text-white">{image.title}</h4>
+                          <p className="text-sm text-slate-300 mt-1">{image.description}</p>
                           {image.original_url && (
-                            <div className="mt-3 p-2 bg-slate-50 rounded border border-slate-200">
-                              <p className="text-xs text-slate-600 font-medium mb-1">Backblaze URL:</p>
-                              <code className="text-xs text-slate-700 break-all">
+                            <div className="mt-3 p-2 bg-slate-800 rounded border border-slate-600">
+                              <p className="text-xs text-slate-400 font-medium mb-1">Backblaze URL:</p>
+                              <code className="text-xs text-cyan-400 break-all">
                                 {image.original_url}
                               </code>
                             </div>
@@ -401,38 +416,38 @@ export default function SimpleAdminPage() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <Card className="bg-white border-slate-200">
+            <Card className="bg-slate-800 border-slate-700">
               <CardHeader>
-                <CardTitle>Admin Settings</CardTitle>
-                <CardDescription>Manage admin preferences and configurations</CardDescription>
+                <CardTitle className="text-white">Admin Settings</CardTitle>
+                <CardDescription className="text-slate-400">Manage admin preferences and configurations</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <h4 className="font-semibold text-blue-900 mb-2">Video Management</h4>
-                  <p className="text-sm text-blue-800">
+                <div className="p-4 bg-cyan-900/30 border border-cyan-700/50 rounded-lg">
+                  <h4 className="font-semibold text-cyan-300 mb-2">Video Management</h4>
+                  <p className="text-sm text-cyan-200">
                     Videos are now managed directly via Backblaze URLs in the database. 
-                    Update video URLs in the images table with the <code className="bg-white px-2 py-1 rounded">original_url</code> field.
+                    Update video URLs in the images table with the <code className="bg-slate-900 px-2 py-1 rounded text-cyan-400">original_url</code> field.
                   </p>
                 </div>
 
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                  <h4 className="font-semibold text-slate-900 mb-2">Image Statistics</h4>
+                <div className="p-4 bg-slate-700 border border-slate-600 rounded-lg">
+                  <h4 className="font-semibold text-white mb-2">Image Statistics</h4>
                   <div className="grid grid-cols-2 gap-4 mt-3">
                     <div>
-                      <p className="text-sm text-slate-600">Total Images</p>
-                      <p className="text-2xl font-bold text-slate-900">{images.length}</p>
+                      <p className="text-sm text-slate-300">Total Images</p>
+                      <p className="text-2xl font-bold text-white">{images.length}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-slate-600">360° Panoramas</p>
-                      <p className="text-2xl font-bold text-purple-600">{equirectangularImages.length}</p>
+                      <p className="text-sm text-slate-300">360° Panoramas</p>
+                      <p className="text-2xl font-bold text-purple-400">{equirectangularImages.length}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-slate-600">Standard Images</p>
-                      <p className="text-2xl font-bold text-blue-600">{standardImages.length}</p>
+                      <p className="text-sm text-slate-300">Standard Images</p>
+                      <p className="text-2xl font-bold text-blue-400">{standardImages.length}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-slate-600">Active Images</p>
-                      <p className="text-2xl font-bold text-green-600">
+                      <p className="text-sm text-slate-300">Active Images</p>
+                      <p className="text-2xl font-bold text-green-400">
                         {images.filter(img => img.active).length}
                       </p>
                     </div>

@@ -352,13 +352,21 @@ export async function uploadToBackblaze(
 
     const uploadedFile = await uploadResponse.json()
 
+    console.log("[v0] uploadedFile response:", uploadedFile)
     console.log("[v0] uploadedFile.fileName:", uploadedFile.fileName)
+    console.log("[v0] filePath sent to B2:", filePath)
     console.log("[v0] bucketName:", bucketName)
+
+    // B2 returns just the filename, but we sent the full path (PICS/Theatre/...)
+    // So uploadedFile.fileName should already include the path from the X-Bz-File-Name header
+    // But if it doesn't, we construct it
+    const fullFileName = uploadedFile.fileName.includes('/') ? uploadedFile.fileName : filePath
 
     // Use the standard B2 public URL format that matches your other images
     // Format: https://f005.backblazeb2.com/file/Neuraliart/PICS/Theatre/[filename]
-    const fileUrl = `https://f005.backblazeb2.com/file/${bucketName}/${uploadedFile.fileName}`
+    const fileUrl = `https://f005.backblazeb2.com/file/${bucketName}/${fullFileName}`
 
+    console.log("[v0] Constructed URL:", fileUrl)
     console.log("[v0] File uploaded successfully to:", fileUrl)
 
     return {

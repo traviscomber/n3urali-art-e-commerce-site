@@ -59,9 +59,20 @@ export default function SimpleAdminPage() {
     try {
       setIsLoading(true)
       const response = await fetch("/api/admin/featured-images?all=true")
+      
+      if (!response.ok) {
+        console.log("[v0] Fetch response not ok:", response.status)
+        throw new Error(`Failed to fetch images: ${response.status}`)
+      }
+      
       const data = await response.json()
-      setImages(data)
+      console.log("[v0] Fetched images:", data)
+      
+      // Handle both array and object responses
+      const imageList = Array.isArray(data) ? data : (data.data || data.images || [])
+      setImages(imageList)
     } catch (error) {
+      console.error("[v0] Fetch images error:", error)
       toast({
         title: "Error",
         description: "Failed to load images",
@@ -106,6 +117,8 @@ export default function SimpleAdminPage() {
   const handleUpload = async (file: File, metadata: any) => {
     try {
       setUploadLoading(true)
+      console.log("[v0] Starting upload with metadata:", metadata)
+      
       const formData = new FormData()
       formData.append("file", file)
       formData.append("folder", "PICS/Theatre")
@@ -114,15 +127,23 @@ export default function SimpleAdminPage() {
       formData.append("imageFormat", metadata.imageFormat)
       formData.append("contentCategory", metadata.contentCategory)
 
+      console.log("[v0] Uploading to B2...")
       const uploadRes = await fetch("/api/admin/upload-to-b2", {
         method: "POST",
         body: formData,
       })
 
-      if (!uploadRes.ok) throw new Error("Upload failed")
+      if (!uploadRes.ok) {
+        const errorData = await uploadRes.json()
+        console.error("[v0] B2 upload failed:", errorData)
+        throw new Error(errorData.error || "Upload failed")
+      }
+      
       const uploadResult = await uploadRes.json()
+      console.log("[v0] B2 upload success:", uploadResult)
 
       // Save to database
+      console.log("[v0] Saving to database...")
       const createRes = await fetch("/api/admin/featured-images", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -132,15 +153,23 @@ export default function SimpleAdminPage() {
         }),
       })
 
-      if (!createRes.ok) throw new Error("Failed to save to database")
+      if (!createRes.ok) {
+        const errorData = await createRes.json()
+        console.error("[v0] Database save failed:", errorData)
+        throw new Error(errorData.error || "Failed to save to database")
+      }
+      
+      console.log("[v0] Database save success")
 
       toast({
         title: "Success",
         description: "Image uploaded successfully",
       })
 
-      fetchImages()
+      console.log("[v0] Fetching updated images...")
+      await fetchImages()
     } catch (error) {
+      console.error("[v0] Upload error:", error)
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Upload failed",

@@ -96,16 +96,17 @@ export function StudioPageClient() {
       </section>
 
       {/* Video Player Section */}
-      <section className="w-full h-screen flex items-center justify-center bg-gradient-to-b from-black to-slate-900 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-30">
-          <Image
-            src="/placeholder.svg?height=900&width=1600"
-            alt="Video background"
-            fill
-            className="object-cover"
-          />
-        </div>
-        <div className="relative z-10 text-center">
+      <section className="w-full h-screen flex items-center justify-center bg-black relative overflow-hidden">
+        <video
+          src="https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f1103aff7f35b2839_d20260222_m230525_c005_v0501012_t0023_u01771801525343"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/30" />
+        <div className="relative z-10 text-center pointer-events-none">
           <h2 className="text-5xl md:text-6xl font-light text-white">
             video player
           </h2>

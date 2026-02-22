@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { uploadToBackblaze } from "@/app/actions/backblaze-actions"
+import { writeFile } from "fs/promises"
+import { join } from "path"
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     console.log("[v0] Uploading to Backblaze with path:", filePath)
 
-    // Upload to Backblaze
+    // Upload to Backblaze (for backup/archival)
     const b2Result = await uploadToBackblaze(Buffer.from(buffer), filePath)
 
     console.log("[v0] B2 result:", b2Result)
@@ -36,8 +38,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: b2Result.error }, { status: 500 })
     }
 
-    // Use direct Backblaze URL - no proxy needed
-    const b2Url = b2Result.url
+    // Save locally to /public/images for direct access (same as working images)
+    // This ensures the image works immediately without relying on B2 public URLs
+    try {
+      const publicDir = join(process.cwd(), "public", "images")
+      const localPath = join(publicDir, fileName)
+      await writeFile(localPath, Buffer.from(buffer))
+      console.log("[v0] File saved locally to:", localPath)
+    } catch (localError) {
+      console.error("[v0] Error saving file locally:", localError)
+      // Don't fail the upload if local save fails - B2 upload was successful
+    }
+
+    // Use LOCAL URL (same pattern as working images)
+    // This works reliably without depending on B2 public access
+    const localUrl = `/images/${fileName}`
 
     // Return the image data for database insertion
     const responseData = {
@@ -45,17 +60,17 @@ export async function POST(request: NextRequest) {
       imageData: {
         title,
         description,
-        original_url: b2Url,
-        upscaled_url: b2Url,
-        thumbnail_medium_url: b2Url,
-        thumbnail_small_url: b2Url,
+        original_url: localUrl,
+        upscaled_url: localUrl,
+        thumbnail_medium_url: localUrl,
+        thumbnail_small_url: localUrl,
         file_path: filePath,
         image_format: imageFormat,
         content_category: contentCategory,
       },
     }
     
-    console.log("[v0] Returning response with B2 URL:", b2Url)
+    console.log("[v0] Returning response with local URL:", localUrl)
     return NextResponse.json(responseData)
   } catch (error) {
     console.error("[v0] B2 upload error:", error)

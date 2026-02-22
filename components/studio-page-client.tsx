@@ -40,8 +40,19 @@ export function StudioPageClient() {
       {/* Hero Section */}
       <section className="flex items-stretch px-0 py-0">
         <div className="w-full grid grid-cols-1 lg:grid-cols-2">
-          {/* Left: Title and Content */}
-          <div className="flex flex-col justify-start pt-16 px-6 sm:px-8 lg:px-12 lg:pt-20 h-screen lg:h-auto">
+          {/* Left: Studio Image - 30% Smaller */}
+          <div className="relative h-[70vh] w-full overflow-hidden order-2 lg:order-1">
+            <Image
+              src="/images/studio-ph1.png"
+              alt="Studio immersive projection setup"
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+
+          {/* Right: Title and Content */}
+          <div className="flex flex-col justify-start pt-16 px-6 sm:px-8 lg:px-12 lg:pt-20 h-screen lg:h-auto order-1 lg:order-2">
             <div className="flex flex-col gap-8">
               <h1 className="text-6xl md:text-7xl font-light text-slate-400 leading-tight">
                 Studio
@@ -80,17 +91,6 @@ export function StudioPageClient() {
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Right: Studio Image - 30% Smaller */}
-          <div className="relative h-[70vh] w-full overflow-hidden">
-            <Image
-              src="/images/studio-ph1.png"
-              alt="Studio immersive projection setup"
-              fill
-              className="object-cover"
-              priority
-            />
           </div>
         </div>
       </section>

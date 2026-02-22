@@ -167,55 +167,101 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
         </section>
       )}
 
-      {/* Video Player Section */}
-      {selectedTeaserIndex !== null ? (
-        /* Teaser Video Modal */
-        <section className="px-6 sm:px-8 lg:px-12 py-20 border-b border-slate-800">
-          <div className="max-w-7xl mx-auto w-full">
-            <div className="relative w-full aspect-video rounded-md overflow-hidden bg-black">
-              <video
-                key={selectedTeaserIndex}
-                src={teaserVideoUrls[teaserLabels[selectedTeaserIndex]] || teaserImages[selectedTeaserIndex]?.upscaled_url || teaserImages[selectedTeaserIndex]?.original_url || ''}
-                autoPlay
-                loop
-                muted
-                playsInline
-                controls
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="mt-6 flex gap-4 items-center">
-              <h3 className="text-xl text-slate-300">{teaserLabels[selectedTeaserIndex]}</h3>
+      {/* Video Player Section with Side Teaser Carousel */}
+      <section className="px-6 sm:px-8 lg:px-12 py-20 border-b border-slate-800">
+        <div className="max-w-7xl mx-auto w-full">
+          <h2 className="text-4xl font-light text-slate-400 mb-12">Teasers:</h2>
+
+          {/* Side-by-side layout: Teasers on left, Video player on right */}
+          <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-12 items-start">
+            
+            {/* Left: Teaser Carousel */}
+            <div className="flex flex-col items-center gap-4">
+              {/* Up Arrow */}
               <button
-                onClick={() => setSelectedTeaserIndex(null)}
-                className="ml-auto px-6 py-2 text-slate-400 hover:text-cyan-400 border border-slate-600 hover:border-cyan-400 rounded-sm transition-colors text-sm"
+                onClick={handleTeaserPrev}
+                className="text-slate-400 hover:text-cyan-400 transition-colors p-2"
               >
-                Close
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                </svg>
+              </button>
+
+              {/* Teaser Cards Carousel */}
+              <div className="relative w-full max-w-xs h-80 overflow-hidden">
+                <div className="flex flex-col gap-4">
+                  {/* Display current and adjacent teasers */}
+                  {[...Array(3)].map((_, i) => {
+                    const idx = (currentTeaserIndex + i - 1 + teaserImages.length) % teaserImages.length
+                    const image = teaserImages[idx]
+                    const label = teaserLabels[idx]
+                    const isCenter = i === 1
+                    
+                    return (
+                      <div
+                        key={idx}
+                        onClick={() => {
+                          if (isCenter) {
+                            setSelectedTeaserIndex(idx)
+                          }
+                        }}
+                        className={`relative aspect-square rounded-md overflow-hidden cursor-pointer transition-all duration-300 ${
+                          isCenter
+                            ? 'w-full opacity-100 scale-100 ring-2 ring-cyan-400'
+                            : 'w-2/3 opacity-50 scale-75'
+                        }`}
+                      >
+                        <Image
+                          src={image?.upscaled_url || image?.original_url || image?.thumbnail_medium_url || '/placeholder.svg'}
+                          alt={label}
+                          fill
+                          className="object-cover"
+                        />
+                        {isCenter && (
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-center justify-center">
+                            <p className="text-white text-lg font-bold uppercase tracking-wider drop-shadow-lg">
+                              {label}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Down Arrow */}
+              <button
+                onClick={handleTeaserNext}
+                className="text-slate-400 hover:text-cyan-400 transition-colors p-2"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
               </button>
             </div>
-          </div>
-        </section>
-      ) : (
-        /* Default Video Player */
-        <section className="px-6 sm:px-8 lg:px-12 py-20 border-b border-slate-800">
-          <div className="max-w-7xl mx-auto w-full">
-            <div className="relative w-full aspect-video rounded-md overflow-hidden bg-black">
+
+            {/* Right: Video Player (Square) */}
+            <div className="relative w-full max-w-2xl aspect-square rounded-md overflow-hidden bg-black">
               <video
-                src="https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f1103aff7f35b2839_d20260222_m230525_c005_v0501012_t0023_u01771801525343"
+                key={selectedTeaserIndex}
+                src={selectedTeaserIndex !== null ? (teaserVideoUrls[teaserLabels[selectedTeaserIndex]] || teaserImages[selectedTeaserIndex]?.upscaled_url || teaserImages[selectedTeaserIndex]?.original_url || '') : 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f1103aff7f35b2839_d20260222_m230525_c005_v0501012_t0023_u01771801525343'}
                 autoPlay
                 loop
                 muted
                 playsInline
                 className="w-full h-full object-cover"
               />
-              {/* Text Overlay - positioned upper left */}
-              <div className="absolute top-0 left-0 pt-12 pl-12 pointer-events-none">
-                <p className="text-5xl md:text-6xl font-light text-white drop-shadow-lg">video player</p>
-              </div>
+              {/* Text Overlay - only show for default state */}
+              {selectedTeaserIndex === null && (
+                <div className="absolute top-0 left-0 pt-12 pl-12 pointer-events-none">
+                  <p className="text-4xl md:text-5xl font-light text-white drop-shadow-lg">video player</p>
+                </div>
+              )}
             </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* Deliverables Section */}
       <section className="px-6 sm:px-8 lg:px-12 py-20">

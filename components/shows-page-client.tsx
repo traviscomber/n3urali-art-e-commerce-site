@@ -59,42 +59,40 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
               </div>
 
               {/* Featured Show Description */}
-              {featuredCollection && (
-                <div className="space-y-6">
-                  <div>
-                    <p className="text-slate-300 text-sm leading-relaxed mb-4">
-                      {featuredCollection.synopsis || featuredCollection.description || 'Experience immersive cinematic stories'}
-                    </p>
-                    <p className="text-slate-400 text-xs leading-relaxed">
-                      From mythical realms to sacred atmospheres, cinematic side of N3uralia360.
-                    </p>
-                  </div>
-
-                  {/* Perfect For */}
-                  <div className="space-y-3">
-                    <p className="text-slate-400 text-xs font-medium uppercase tracking-wide">Perfect for:</p>
-                    <ul className="space-y-2">
-                      <li className="flex gap-3 items-start text-slate-300 text-sm">
-                        <span className="text-cyan-400 flex-shrink-0 mt-0.5">•</span>
-                        <span>Family dome nights</span>
-                      </li>
-                      <li className="flex gap-3 items-start text-slate-300 text-sm">
-                        <span className="text-cyan-400 flex-shrink-0 mt-0.5">•</span>
-                        <span>Cultural programming</span>
-                      </li>
-                      <li className="flex gap-3 items-start text-slate-300 text-sm">
-                        <span className="text-cyan-400 flex-shrink-0 mt-0.5">•</span>
-                        <span>Branded immersive events</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  {/* Production Details */}
-                  <p className="text-slate-400 text-xs leading-relaxed pt-4 border-t border-slate-700">
-                    Real 4K, ready to be distributed and custom storytelling creation.
+              <div className="space-y-6">
+                <div>
+                  <p className="text-slate-300 text-sm leading-relaxed mb-4">
+                    {featuredCollection?.synopsis || 'Meet Mossy — Guide of the Multiverse'}
+                  </p>
+                  <p className="text-slate-400 text-xs leading-relaxed">
+                    {featuredCollection?.description || 'From mythical realms to sacred atmospheres, cinematic side of N3uralia360.'}
                   </p>
                 </div>
-              )}
+
+                {/* Perfect For */}
+                <div className="space-y-3">
+                  <p className="text-slate-400 text-xs font-medium uppercase tracking-wide">Perfect for:</p>
+                  <ul className="space-y-2">
+                    <li className="flex gap-3 items-start text-slate-300 text-sm">
+                      <span className="text-cyan-400 flex-shrink-0 mt-0.5">•</span>
+                      <span>Family dome nights</span>
+                    </li>
+                    <li className="flex gap-3 items-start text-slate-300 text-sm">
+                      <span className="text-cyan-400 flex-shrink-0 mt-0.5">•</span>
+                      <span>Cultural programming</span>
+                    </li>
+                    <li className="flex gap-3 items-start text-slate-300 text-sm">
+                      <span className="text-cyan-400 flex-shrink-0 mt-0.5">•</span>
+                      <span>Branded immersive events</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Production Details */}
+                <p className="text-slate-400 text-xs leading-relaxed pt-4 border-t border-slate-700">
+                  Real 4K, ready to be distributed and custom storytelling creation.
+                </p>
+              </div>
             </div>
 
             {/* Right: Featured Image */}

@@ -24,7 +24,7 @@ import {
   X
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { FileUpload } from "@/components/admin/file-upload"
+
 
 interface ImageType {
   id: string
@@ -288,8 +288,71 @@ export default function SimpleAdminPage() {
 
           {/* Images Tab */}
           <TabsContent value="images" className="space-y-6">
-            {/* Upload Section */}
-            <FileUpload onUpload={handleUpload} isLoading={uploadLoading} />
+            {/* Simple Upload Form */}
+            <div className="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-xl">
+              <h2 className="text-xl font-bold text-white mb-4">Upload New Image</h2>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault()
+                  console.log("[v0] Form submitted")
+                  
+                  const formData = new FormData(e.currentTarget)
+                  const file = formData.get("file") as File
+                  const title = (formData.get("title") as string) || file.name
+                  const description = (formData.get("description") as string) || ""
+
+                  if (!file) {
+                    alert("Please select a file")
+                    return
+                  }
+
+                  console.log("[v0] Uploading file:", file.name)
+                  await handleUpload(file, {
+                    title,
+                    description,
+                    imageFormat: "equirectangular",
+                    contentCategory: "theatre",
+                  })
+                }}
+                className="space-y-4"
+              >
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">Select Image</label>
+                  <input
+                    type="file"
+                    name="file"
+                    accept="image/*"
+                    required
+                    className="w-full p-2 border border-slate-600 rounded bg-slate-700 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">Title</label>
+                  <input
+                    type="text"
+                    name="title"
+                    placeholder="Enter image title"
+                    className="w-full p-2 border border-slate-600 rounded bg-slate-700 text-white placeholder:text-slate-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">Description</label>
+                  <textarea
+                    name="description"
+                    placeholder="Enter image description"
+                    className="w-full p-2 border border-slate-600 rounded bg-slate-700 text-white placeholder:text-slate-500"
+                    rows={3}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={uploadLoading}
+                  className="w-full bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-700 text-white font-medium py-2 rounded transition-colors"
+                >
+                  {uploadLoading ? "Uploading..." : "Upload Image"}
+                </button>
+              </form>
+            </div>
 
             <div className="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-xl">
               <div className="flex items-center justify-between mb-6">

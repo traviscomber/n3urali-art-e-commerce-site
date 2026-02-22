@@ -91,29 +91,37 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
 
   const currentImage = images[selectedImageIndex]
   const imageUrl = currentImage.upscaled_url || currentImage.original_url || currentImage.thumbnail_medium_url || ''
-  const relatedImages = getRelatedImages(selectedImageIndex)
-  const currentRelatedIndex = relatedImages.findIndex(img => img.id === currentImage.id) + 1
+  
+  // Compute these safely - they're derived from state and will be consistent on client
+  let relatedImages: Image[] = []
+  let currentRelatedIndex = 0
+  
+  if (typeof window !== 'undefined' || !isViewerOpen) {
+    // Safe to compute after hydration completes
+    relatedImages = getRelatedImages(selectedImageIndex)
+    currentRelatedIndex = relatedImages.findIndex(img => img.id === currentImage.id) + 1
+  }
 
   const handlePrevious = () => {
-    const relatedImages = getRelatedImages(selectedImageIndex)
+    const currentRelated = getRelatedImages(selectedImageIndex)
     
-    if (relatedImages.length <= 1) return // No navigation if only 1 related image
+    if (currentRelated.length <= 1) return // No navigation if only 1 related image
     
-    const currentIdx = relatedImages.findIndex(img => img.id === images[selectedImageIndex].id)
-    const prevIdx = (currentIdx - 1 + relatedImages.length) % relatedImages.length
-    const prevImage = relatedImages[prevIdx]
+    const currentIdx = currentRelated.findIndex(img => img.id === images[selectedImageIndex].id)
+    const prevIdx = (currentIdx - 1 + currentRelated.length) % currentRelated.length
+    const prevImage = currentRelated[prevIdx]
     const prevImageIndex = images.findIndex(img => img.id === prevImage.id)
     setSelectedImageIndex(prevImageIndex)
   }
 
   const handleNext = () => {
-    const relatedImages = getRelatedImages(selectedImageIndex)
+    const currentRelated = getRelatedImages(selectedImageIndex)
     
-    if (relatedImages.length <= 1) return // No navigation if only 1 related image
+    if (currentRelated.length <= 1) return // No navigation if only 1 related image
     
-    const currentIdx = relatedImages.findIndex(img => img.id === images[selectedImageIndex].id)
-    const nextIdx = (currentIdx + 1) % relatedImages.length
-    const nextImage = relatedImages[nextIdx]
+    const currentIdx = currentRelated.findIndex(img => img.id === images[selectedImageIndex].id)
+    const nextIdx = (currentIdx + 1) % currentRelated.length
+    const nextImage = currentRelated[nextIdx]
     const nextImageIndex = images.findIndex(img => img.id === nextImage.id)
     setSelectedImageIndex(nextImageIndex)
   }

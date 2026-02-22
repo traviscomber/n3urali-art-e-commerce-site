@@ -7,6 +7,7 @@ INSERT INTO images (
   description,
   image_format,
   content_category,
+  file_path,
   original_url,
   upscaled_url,
   thumbnail_medium_url,
@@ -23,6 +24,7 @@ INSERT INTO images (
     'Explore boundless digital realms in 360 degrees',
     'equirectangular',
     'theatre',
+    'backblaze/WebBackdrop360-4.mov',
     'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/WebBackdrop360-4.mov',
     'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/WebBackdrop360-4.mov',
     'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/WebBackdrop360-4.mov',
@@ -39,6 +41,7 @@ INSERT INTO images (
     'Stories from around the world in immersive 360 panorama',
     'equirectangular',
     'theatre',
+    'backblaze/WebBackdrop360-Indo-1.mov',
     'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/WebBackdrop360-Indo+(1).mov',
     'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/WebBackdrop360-Indo+(1).mov',
     'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/WebBackdrop360-Indo+(1).mov',
@@ -55,6 +58,7 @@ INSERT INTO images (
     'Contemporary artistic expressions in 360 immersive format',
     'equirectangular',
     'theatre',
+    'backblaze/WebBackdrop5.mov',
     'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/WebBackdrop5.mov',
     'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/WebBackdrop5.mov',
     'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/WebBackdrop5.mov',
@@ -65,3 +69,4 @@ INSERT INTO images (
     now(),
     false
   );
+

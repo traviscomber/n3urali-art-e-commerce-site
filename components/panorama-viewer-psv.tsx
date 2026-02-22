@@ -67,11 +67,11 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
 
         console.log('[v0] Initializing panorama with dimensions:', width, 'x', height)
 
-        // Scene setup with wider FOV (90 degrees for panoramic view)
+        // Scene setup with wider FOV (130 degrees for ultra-wide panoramic view)
         const scene = new THREE.Scene()
-        const camera = new THREE.PerspectiveCamera(90, width / height, 0.1, 100000)
+        const camera = new THREE.PerspectiveCamera(130, width / height, 0.1, 100000)
         camera.position.z = 0
-        console.log('[v0] Camera created with FOV: 90, aspect:', width / height)
+        console.log('[v0] Camera created with FOV: 130, aspect:', width / height)
 
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
         renderer.setSize(width, height)

@@ -131,118 +131,52 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
         </div>
       </section>
 
-      {/* Teasers Section */}
-      {teaserImages.length > 0 && (
-        <section className="px-6 sm:px-8 lg:px-12 py-20 border-b border-slate-800">
-          <div className="max-w-7xl mx-auto w-full">
-            <h2 className="text-4xl font-light text-slate-400 mb-12">Teasers:</h2>
-
-            {/* Teaser Frame */}
-            <div className="border border-slate-700 rounded-lg p-8 bg-black/30">
-              {/* Teaser Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {teaserImages.slice(0, 4).map((image, index) => (
-                  <div 
-                    key={image.id} 
-                    onClick={() => setSelectedTeaserIndex(index)}
-                    className="relative aspect-square rounded-md overflow-hidden group cursor-pointer"
-                  >
-                    <Image
-                      src={image.upscaled_url || image.original_url || image.thumbnail_medium_url || '/placeholder.svg'}
-                      alt={image.title}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    {/* Label Overlay - centered */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-center justify-center">
-                      <p className="text-white text-xl md:text-2xl font-bold uppercase tracking-wider drop-shadow-lg">
-                        {teaserLabels[index] || image.title}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* Video Player Section with Side Teaser Carousel */}
       <section className="px-6 sm:px-8 lg:px-12 py-20 border-b border-slate-800">
         <div className="max-w-7xl mx-auto w-full">
           <h2 className="text-4xl font-light text-slate-400 mb-12">Teasers:</h2>
 
-          {/* Side-by-side layout: Teasers on left, Video player on right */}
-          <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-12 items-start">
+          {/* Side-by-side layout: Teasers on left (full height), Video player on right */}
+          <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-12 min-h-96">
             
-            {/* Left: Teaser Carousel */}
-            <div className="flex flex-col items-center gap-4">
-              {/* Up Arrow */}
-              <button
-                onClick={handleTeaserPrev}
-                className="text-slate-400 hover:text-cyan-400 transition-colors p-2"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                </svg>
-              </button>
-
-              {/* Teaser Cards Carousel - Only show first 4 teasers */}
-              <div className="relative w-full max-w-xs">
-                <div className="flex flex-col gap-4 justify-center items-center">
-                  {/* Display current and adjacent teasers - limit to 4 teasers only */}
-                  {[...Array(3)].map((_, i) => {
-                    const totalTeasers = Math.min(teaserImages.length, 4)
-                    const idx = (currentTeaserIndex + i - 1 + totalTeasers) % totalTeasers
-                    const image = teaserImages[idx]
-                    const label = teaserLabels[idx]
-                    const isCenter = i === 1
-                    
-                    return (
-                      <div
-                        key={`teaser-${idx}`}
-                        onClick={() => {
-                          if (isCenter) {
-                            setSelectedTeaserIndex(idx)
-                          }
-                        }}
-                        className={`relative rounded-md overflow-hidden cursor-pointer transition-all duration-300 ${
-                          isCenter
-                            ? 'w-40 h-40 opacity-100 scale-100 ring-2 ring-cyan-400'
-                            : 'w-28 h-28 opacity-50 scale-75'
-                        }`}
-                      >
-                        <Image
-                          src={image?.upscaled_url || image?.original_url || image?.thumbnail_medium_url || '/placeholder.svg'}
-                          alt={label}
-                          fill
-                          className="object-cover"
-                        />
-                        {isCenter && (
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-center justify-center">
-                            <p className="text-white text-sm font-bold uppercase tracking-wider drop-shadow-lg">
-                              {label}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Down Arrow */}
-              <button
-                onClick={handleTeaserNext}
-                className="text-slate-400 hover:text-cyan-400 transition-colors p-2"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
-              </button>
+            {/* Left: Full vertical teaser list */}
+            <div className="flex flex-col items-stretch gap-8">
+              {/* Display all 4 teasers vertically */}
+              {teaserImages.slice(0, 4).map((image, index) => {
+                const label = teaserLabels[index]
+                const isSelected = selectedTeaserIndex === index
+                
+                return (
+                  <div
+                    key={`teaser-${index}`}
+                    onClick={() => setSelectedTeaserIndex(index)}
+                    className="flex flex-col gap-3 cursor-pointer group"
+                  >
+                    <div className={`relative w-full h-32 rounded-md overflow-hidden transition-all duration-300 ${
+                      isSelected ? 'ring-2 ring-cyan-400' : 'ring-1 ring-slate-700 group-hover:ring-slate-500'
+                    }`}>
+                      <Image
+                        src={image?.upscaled_url || image?.original_url || image?.thumbnail_medium_url || '/placeholder.svg'}
+                        alt={label}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      {isSelected && (
+                        <div className="absolute inset-0 bg-black/20" />
+                      )}
+                    </div>
+                    {/* Teaser Name */}
+                    <p className={`text-sm font-medium uppercase tracking-wide transition-colors ${
+                      isSelected ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-300'
+                    }`}>
+                      {label}
+                    </p>
+                  </div>
+                )
+              })}
             </div>
 
-            {/* Right: Video Player (Square with proper aspect ratio) */}
+            {/* Right: Video Player (Square) */}
             <div className="relative w-full h-96 rounded-md overflow-hidden bg-black flex-shrink-0">
               <video
                 key={selectedTeaserIndex}

@@ -128,24 +128,27 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
           <div className="max-w-7xl mx-auto w-full">
             <h2 className="text-4xl font-light text-slate-400 mb-12">Teasers:</h2>
 
-            {/* Teaser Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {teaserImages.slice(0, 4).map((image, index) => (
-                <div key={image.id} className="relative aspect-square rounded-md overflow-hidden group cursor-pointer">
-                  <Image
-                    src={image.upscaled_url || image.original_url || image.thumbnail_medium_url || '/placeholder.svg'}
-                    alt={image.title}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  {/* Label Overlay - centered */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-center justify-center">
-                    <p className="text-white text-xl md:text-2xl font-bold uppercase tracking-wider drop-shadow-lg">
-                      {teaserLabels[index] || image.title}
-                    </p>
+            {/* Teaser Frame */}
+            <div className="border border-slate-700 rounded-lg p-8 bg-black/30">
+              {/* Teaser Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {teaserImages.slice(0, 4).map((image, index) => (
+                  <div key={image.id} className="relative aspect-square rounded-md overflow-hidden group cursor-pointer">
+                    <Image
+                      src={image.upscaled_url || image.original_url || image.thumbnail_medium_url || '/placeholder.svg'}
+                      alt={image.title}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    {/* Label Overlay - centered */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-center justify-center">
+                      <p className="text-white text-xl md:text-2xl font-bold uppercase tracking-wider drop-shadow-lg">
+                        {teaserLabels[index] || image.title}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </section>

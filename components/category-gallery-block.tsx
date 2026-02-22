@@ -80,7 +80,7 @@ export function CategoryGalleryBlock({
           <div className="flex justify-center pt-8">
             <Link
               href={`/gallery?category=${category}`}
-              className="px-8 py-3 border border-gray-600 text-foreground font-semibold rounded-lg hover:bg-gray-900 transition-colors"
+              className="inline-block px-8 py-3 border border-gray-600 text-foreground font-semibold rounded-lg hover:bg-gray-900 transition-colors"
             >
               View All Works
             </Link>

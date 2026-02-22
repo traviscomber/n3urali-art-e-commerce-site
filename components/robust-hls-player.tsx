@@ -10,7 +10,7 @@
 ---
 
 ## 0) Install deps
-```bash
+\`\`\`bash
 npm i @mux/mux-node hls.js
 1) Env Vars (Vercel + .env.local)
 Add these in Vercel Project → Settings → Environment Variables, and locally in .env.local:

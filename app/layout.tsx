@@ -12,7 +12,6 @@ import { CartSidebar } from "@/components/cart-sidebar"
 import { ToastProvider } from "@/components/toast-notifications"
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
-import { Suspense } from "react"
 import { MusicPlayerProvider } from "@/lib/contexts/music-player-context"
 
 const montserrat = Montserrat({
@@ -333,13 +332,11 @@ export default function RootLayout({
                 <LanguageProvider>
                   <MusicPlayerProvider>
                     <ToastProvider>
-                      <Suspense fallback={null}>
-                        <Header />
-                        {children}
-                        <CartSidebar />
-                        <Analytics />
-                        <SpeedInsights />
-                      </Suspense>
+                      <Header />
+                      {children}
+                      <CartSidebar />
+                      <Analytics />
+                      <SpeedInsights />
                     </ToastProvider>
                   </MusicPlayerProvider>
                 </LanguageProvider>

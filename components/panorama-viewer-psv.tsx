@@ -8,7 +8,7 @@ interface PanoramaViewerPSVProps {
   title: string
   onClose?: () => void
   relaxMode?: boolean
-  fov?: number // Field of view (default 130 for wide view)
+  fov?: number // Field of view (default 75 for comfortable viewing)
   sphereScale?: number // Sphere radius (default 5000)
   rotationSpeed?: number // Auto-rotation speed (default 0.0002)
   geometrySegments?: number // Sphere geometry segments (default 128)
@@ -19,7 +19,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   title,
   onClose,
   relaxMode = true,
-  fov = 130,
+  fov = 75,
   sphereScale = 5000,
   rotationSpeed = 0.0002,
   geometrySegments = 128,

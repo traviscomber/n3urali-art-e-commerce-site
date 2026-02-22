@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Trash2 } from 'lucide-react'
+import { parseFilenameMetadata } from '@/lib/parse-filename'
 
 export default function AdminPage() {
   const [images, setImages] = useState<any[]>([])
@@ -38,11 +39,16 @@ export default function AdminPage() {
   const uploadFile = async (file: File) => {
     try {
       console.log('[v0] Upload started')
+      
+      // Parse filename to extract title and description
+      const { title, description } = parseFilenameMetadata(file.name)
+      console.log('[v0] Parsed metadata - title:', title, 'description:', description)
+      
       const formData = new FormData()
       formData.append('file', file)
       formData.append('folder', 'PICS/Theatre')
-      formData.append('title', file.name)
-      formData.append('description', 'Uploaded image')
+      formData.append('title', title)
+      formData.append('description', description)
       formData.append('imageFormat', 'equirectangular')
       formData.append('contentCategory', 'theatre')
 

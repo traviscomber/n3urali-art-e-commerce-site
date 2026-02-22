@@ -126,7 +126,7 @@ function EnvironmentCollection({
 
       {/* Image Grid - 3 Circular Images with Center Highlighted */}
       <div className="flex items-center justify-center gap-6 md:gap-8 flex-wrap">
-        {images.map((image, index) => {
+        {images.filter(image => image.src && image.src.trim() !== '').map((image, index) => {
           const isCenter = index === 1
           const size = isCenter ? 320 : 224
           
@@ -139,7 +139,7 @@ function EnvironmentCollection({
               }`}
             >
               <Image
-                src={image.src || '/placeholder.jpg'}
+                src={image.src}
                 alt={image.alt}
                 width={size}
                 height={size}

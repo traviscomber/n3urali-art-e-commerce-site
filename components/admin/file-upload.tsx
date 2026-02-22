@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { Upload, X } from 'lucide-react'
+import { parseFilenameMetadata } from '@/lib/parse-filename'
 
 interface FileUploadProps {
   onUpload: (file: File, metadata: any) => Promise<void>
@@ -35,13 +36,31 @@ export function FileUpload({ onUpload, isLoading }: FileUploadProps) {
     setDragActive(false)
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setSelectedFile(e.dataTransfer.files[0])
+      const file = e.dataTransfer.files[0]
+      setSelectedFile(file)
+      
+      // Auto-parse filename to populate metadata
+      const { title, description } = parseFilenameMetadata(file.name)
+      setMetadata(prev => ({
+        ...prev,
+        title: title || prev.title,
+        description: description || prev.description,
+      }))
     }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0])
+      const file = e.target.files[0]
+      setSelectedFile(file)
+      
+      // Auto-parse filename to populate metadata
+      const { title, description } = parseFilenameMetadata(file.name)
+      setMetadata(prev => ({
+        ...prev,
+        title: title || prev.title,
+        description: description || prev.description,
+      }))
     }
   }
 

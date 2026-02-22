@@ -36,9 +36,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: b2Result.error }, { status: 500 })
     }
 
-    // Use proxy URL for CORS compatibility: /api/b2-proxy?url=[encoded-b2-url]
-    // This allows the browser to fetch through our server which handles CORS headers
-    const proxiedUrl = `/api/b2-proxy?url=${encodeURIComponent(b2Result.url)}`
+    // Use direct Backblaze URL - no proxy needed
+    const b2Url = b2Result.url
 
     // Return the image data for database insertion
     const responseData = {
@@ -46,17 +45,17 @@ export async function POST(request: NextRequest) {
       imageData: {
         title,
         description,
-        original_url: proxiedUrl,
-        upscaled_url: proxiedUrl,
-        thumbnail_medium_url: proxiedUrl,
-        thumbnail_small_url: proxiedUrl,
+        original_url: b2Url,
+        upscaled_url: b2Url,
+        thumbnail_medium_url: b2Url,
+        thumbnail_small_url: b2Url,
         file_path: filePath,
         image_format: imageFormat,
         content_category: contentCategory,
       },
     }
     
-    console.log("[v0] Returning response with proxied URL:", proxiedUrl)
+    console.log("[v0] Returning response with B2 URL:", b2Url)
     return NextResponse.json(responseData)
   } catch (error) {
     console.error("[v0] B2 upload error:", error)

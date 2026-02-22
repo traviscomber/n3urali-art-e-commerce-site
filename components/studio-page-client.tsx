@@ -85,12 +85,11 @@ export function StudioPageClient() {
             <div className="flex justify-end items-start lg:pt-0">
               <div className="relative w-full max-w-xs aspect-square rounded-lg overflow-hidden border border-slate-700/50 bg-slate-900">
                 <Image
-                  src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&h=500&fit=crop"
+                  src="/images/studio-ph1.png"
                   alt="Studio immersive projection setup"
                   fill
                   className="object-cover"
                   priority
-                  unoptimized
                 />
               </div>
             </div>

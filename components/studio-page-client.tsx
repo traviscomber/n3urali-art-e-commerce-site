@@ -38,10 +38,10 @@ export function StudioPageClient() {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="flex items-stretch px-0 py-0 relative">
-        <div className="w-full flex">
+      <section className="flex items-stretch px-0 py-0 relative h-[70vh]">
+        <div className="w-full flex relative">
           {/* Left: Studio Image - 30% Smaller */}
-          <div className="relative h-[70vh] w-1/2 overflow-hidden">
+          <div className="relative h-full w-2/3 overflow-hidden">
             <Image
               src="/images/studio-ph1.png"
               alt="Studio immersive projection setup"
@@ -51,9 +51,9 @@ export function StudioPageClient() {
             />
           </div>
 
-          {/* Right: Title and Content - Positioned right */}
-          <div className="w-1/2 flex flex-col justify-start pt-16 px-6 sm:px-8 lg:px-12 lg:pt-20">
-            <div className="flex flex-col gap-8 ml-auto mr-0 max-w-sm">
+          {/* Left-Center: Title and Content - Overlapping image */}
+          <div className="absolute left-0 flex flex-col justify-start pt-16 px-6 sm:px-8 lg:px-12 lg:pt-20 h-full w-1/2">
+            <div className="flex flex-col gap-8 max-w-md">
               <h1 className="text-6xl md:text-7xl font-light text-slate-400 leading-tight">
                 Studio
               </h1>

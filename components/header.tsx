@@ -202,13 +202,6 @@ export function Header({ videoContext }: HeaderProps) {
               Tools
               <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
             </Link>
-            <Link
-              href="/gallery"
-              className="relative text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-4 py-2"
-            >
-              Gallery
-              <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
-            </Link>
             {isAuthenticated && (
               <Link
                 href="/account/orders"
@@ -370,13 +363,6 @@ export function Header({ videoContext }: HeaderProps) {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Tools
-              </Link>
-              <Link
-                href="/gallery"
-                className="text-base font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-3"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Gallery
               </Link>
               {isAuthenticated && (
                 <Link

@@ -32,7 +32,8 @@ interface ShowsPageClientProps {
 export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientProps) {
   const [currentTeaserIndex, setCurrentTeaserIndex] = useState(0)
 
-  const featuredCollection = collections[0]
+  const featuredCollection = collections?.[0]
+  const featuredImage = teaserImages?.[0]
   const teaserLabels = ['Heritage', 'Education', 'Fun', 'Art']
 
   const handleTeaserNext = () => {
@@ -100,8 +101,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
               <div className="relative w-full max-w-sm">
                 <div className="relative aspect-square rounded-lg overflow-hidden border border-slate-700/50">
                   <Image
-                    src={featuredCollection?.featured_image_url || '/placeholder.svg?height=400&width=400'}
-                    alt={featuredCollection?.title || 'Featured show'}
+                    src={featuredImage?.upscaled_url || featuredImage?.original_url || featuredImage?.thumbnail_medium_url || '/placeholder.svg?height=400&width=400'}
+                    alt={featuredImage?.title || featuredCollection?.title || 'Featured show'}
                     fill
                     className="object-cover"
                     priority

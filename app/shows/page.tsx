@@ -12,16 +12,16 @@ export const revalidate = 3600
 export default async function ShowsPage() {
   const supabase = await createClient()
 
-  // Fetch collections (shows) with their featured images
-  const { data: collections } = await supabase
+  // Fetch collections (shows) - fetch all to ensure we get data
+  const { data: collections, error: collectionsError } = await supabase
     .from('collections')
-    .select('id, title, work_title, description, synopsis, featured_image_url, format_types, code')
+    .select('id, title, work_title, description, synopsis, code')
     .eq('is_active', true)
     .order('created_at', { ascending: false })
     .limit(10)
 
-  // Fetch teaser images tagged with specific collections
-  const { data: images } = await supabase
+  // Fetch teaser images for shows - get first 4
+  const { data: images, error: imagesError } = await supabase
     .from('images')
     .select('id, title, thumbnail_medium_url, original_url, upscaled_url, tags')
     .eq('content_category', 'shows')

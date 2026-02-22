@@ -176,8 +176,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
               })}
             </div>
 
-            {/* Right: Video Player (Perfect Square) */}
-            <div className="relative w-full aspect-square rounded-md overflow-hidden bg-black">
+            {/* Right: Video Player (Square - Constrained Size) */}
+            <div className="relative max-w-sm aspect-square rounded-md overflow-hidden bg-black">
               <video
                 key={selectedTeaserIndex}
                 src={selectedTeaserIndex !== null ? (teaserVideoUrls[teaserLabels[selectedTeaserIndex]] || teaserImages[selectedTeaserIndex]?.upscaled_url || teaserImages[selectedTeaserIndex]?.original_url || '') : 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f1103aff7f35b2839_d20260222_m230525_c005_v0501012_t0023_u01771801525343'}

@@ -61,7 +61,19 @@ export default function AdminPage() {
       })
 
       console.log('[v0] B2 status:', uploadRes.status)
-      const uploadData = await uploadRes.json()
+      console.log('[v0] B2 content-type:', uploadRes.headers.get('content-type'))
+      
+      const responseText = await uploadRes.text()
+      console.log('[v0] B2 raw response (first 500 chars):', responseText.substring(0, 500))
+      
+      let uploadData
+      try {
+        uploadData = JSON.parse(responseText)
+      } catch (parseErr) {
+        console.error('[v0] Failed to parse B2 response as JSON:', parseErr)
+        throw new Error(`B2 returned invalid JSON: ${responseText.substring(0, 200)}`)
+      }
+      
       console.log('[v0] B2 response:', uploadData)
 
       if (!uploadRes.ok) throw new Error(uploadData.error || 'B2 upload failed')

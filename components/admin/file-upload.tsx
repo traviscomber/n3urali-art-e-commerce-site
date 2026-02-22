@@ -70,14 +70,23 @@ export function FileUpload({ onUpload, isLoading }: FileUploadProps) {
     console.log("[v0] selectedFile:", selectedFile?.name)
     console.log("[v0] metadata:", metadata)
     
-    if (!selectedFile || !metadata.title) {
-      console.log("[v0] Missing file or title, aborting")
-      alert('Please select a file and enter a title')
+    if (!selectedFile) {
+      console.log("[v0] No file selected")
+      alert('Please select a file')
       return
     }
 
-    console.log("[v0] Calling onUpload callback")
-    await onUpload(selectedFile, metadata)
+    // Use filename as fallback if title is empty
+    const finalTitle = metadata.title || selectedFile.name.replace(/\.[^/.]+$/, "")
+    
+    if (!finalTitle) {
+      console.log("[v0] No title available")
+      alert('Please enter a title or ensure filename has content')
+      return
+    }
+
+    console.log("[v0] Calling onUpload with title:", finalTitle)
+    await onUpload(selectedFile, { ...metadata, title: finalTitle })
     console.log("[v0] Upload callback completed")
     
     setSelectedFile(null)
@@ -195,9 +204,6 @@ export function FileUpload({ onUpload, isLoading }: FileUploadProps) {
         {/* Submit Button */}
         <button
           type="submit"
-          onClick={(e) => {
-            console.log("[v0] Submit button clicked")
-          }}
           disabled={!selectedFile || isLoading}
           className="w-full bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-medium py-2 rounded transition-colors"
         >

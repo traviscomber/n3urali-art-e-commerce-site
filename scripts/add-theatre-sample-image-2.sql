@@ -8,7 +8,7 @@ INSERT INTO images (
   thumbnail_small_url,
   file_path,
   image_format,
-  category,
+  content_category,
   active,
   created_at,
   updated_at

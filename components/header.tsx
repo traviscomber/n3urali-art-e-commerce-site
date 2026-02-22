@@ -168,10 +168,10 @@ export function Header({ videoContext }: HeaderProps) {
 
           <nav className="hidden md:flex items-center space-x-1">
             <Link
-              href="/realities"
+              href="/shows"
               className="relative text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-4 py-2"
             >
-              R3alities
+              Shows
               <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
             </Link>
             <Link
@@ -330,11 +330,11 @@ export function Header({ videoContext }: HeaderProps) {
           <div className="md:hidden border-t border-slate-700 py-6 bg-slate-900/80 backdrop-blur-xl rounded-b-lg">
             <nav className="flex flex-col space-y-2">
               <Link
-                href="/realities"
+                href="/shows"
                 className="text-base font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-3"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                R3alities
+                Shows
               </Link>
               <Link
                 href="/environments"

@@ -16,12 +16,14 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   onClose,
   relaxMode = true,
 }: PanoramaViewerPSVProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const animationRef = useRef<number>()
-  const rotationRef = useRef({ yaw: 0, pitch: 0, fov: 85 })
+  const sceneRef = useRef<any>(null)
+  const rendererRef = useRef<any>(null)
+  const sphereRef = useRef<any>(null)
+  const rotationYRef = useRef(0)
 
   useEffect(() => {
     const loadPanorama = async () => {
@@ -64,18 +66,19 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
 
         // Scene setup
         const scene = new THREE.Scene()
-        const camera = new THREE.PerspectiveCamera(rotationRef.current.fov, width / height, 0.1, 10000)
-        camera.position.set(0, 0, 0)
+        const camera = new THREE.PerspectiveCamera(85, width / height, 0.1, 10000)
+        camera.position.z = 0
 
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
         renderer.setSize(width, height)
         renderer.setPixelRatio(window.devicePixelRatio)
 
-        // Load panorama image
+        // Load panorama image with CORS
         const textureLoader = new THREE.TextureLoader()
         const texture = textureLoader.load(
           imageUrl,
           () => {
+            console.log('[v0] Texture loaded successfully')
             setIsLoading(false)
           },
           undefined,
@@ -85,6 +88,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
             setIsLoading(false)
           }
         )
+        texture.encoding = THREE.sRGBColorSpace
 
         // Create sphere geometry for equirectangular panorama
         const geometry = new THREE.SphereGeometry(500, 64, 64)
@@ -95,25 +99,19 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         const sphere = new THREE.Mesh(geometry, material)
         scene.add(sphere)
 
+        sceneRef.current = scene
+        rendererRef.current = renderer
+        sphereRef.current = sphere
+
         // Animation loop
         const animate = () => {
           animationRef.current = requestAnimationFrame(animate)
 
-          // Slow auto-rotation in relax mode
-          if (relaxMode) {
-            rotationRef.current.yaw += 0.0002
+          // Slow auto-rotation in relax mode (rotate the sphere itself)
+          if (relaxMode && sphereRef.current) {
+            rotationYRef.current += 0.0002
+            sphereRef.current.rotation.y = rotationYRef.current
           }
-
-          // Update camera
-          const { yaw, pitch, fov } = rotationRef.current
-          camera.fov = fov
-          camera.updateProjectionMatrix()
-
-          const radius = 1
-          camera.position.x = radius * Math.sin(yaw) * Math.cos(pitch)
-          camera.position.y = radius * Math.sin(pitch)
-          camera.position.z = radius * Math.cos(yaw) * Math.cos(pitch)
-          camera.lookAt(0, 0, 0)
 
           renderer.render(scene, camera)
         }
@@ -151,9 +149,13 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
 
     loadPanorama()
 
+    // Cleanup function
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current)
+      }
+      if (rendererRef.current) {
+        rendererRef.current.dispose()
       }
     }
   }, [imageUrl, relaxMode])

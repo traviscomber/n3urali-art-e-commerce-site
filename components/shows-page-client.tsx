@@ -157,15 +157,17 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       {/* Video Player Section */}
       <section className="px-6 sm:px-8 lg:px-12 py-20 border-b border-slate-800">
         <div className="max-w-7xl mx-auto w-full">
-          <div className="relative w-full aspect-video rounded-md overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
-            {/* Placeholder background */}
-            <div className="absolute inset-0 opacity-20">
-              <svg viewBox="0 0 1400 800" className="w-full h-full">
-                <rect width="1400" height="800" fill="#1e293b" />
-              </svg>
-            </div>
+          <div className="relative w-full aspect-video rounded-md overflow-hidden bg-black">
+            <video
+              src="https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f1103aff7f35b2839_d20260222_m230525_c005_v0501012_t0023_u01771801525343"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+            />
             {/* Text Overlay - positioned upper left */}
-            <div className="absolute inset-0 flex items-start justify-start pt-12 pl-12">
+            <div className="absolute top-0 left-0 pt-12 pl-12 pointer-events-none">
               <p className="text-5xl md:text-6xl font-light text-white drop-shadow-lg">video player</p>
             </div>
           </div>

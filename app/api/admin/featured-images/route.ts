@@ -30,8 +30,12 @@ export async function POST(request: Request) {
   const supabase = await createClient()
   const body = await request.json()
 
+  console.log("[v0] Featured-images POST received:", body)
+
   // Handle creating new image from upload
   if (body.title && body.original_url) {
+    console.log("[v0] Creating new image:", body.title)
+    
     const { data, error } = await supabase
       .from("images")
       .insert({
@@ -48,12 +52,18 @@ export async function POST(request: Request) {
       })
       .select()
 
+    console.log("[v0] Insert result:", { error: error?.message, data })
+
     if (error) {
+      console.error("[v0] Database insert error:", error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    console.log("[v0] Image created successfully")
     return NextResponse.json({ success: true, data: data?.[0] }, { status: 201 })
   }
+
+  console.log("[v0] Featured collection update or missing required fields")
 
   // Handle featured collection updates (existing logic)
   const { imageIds } = body

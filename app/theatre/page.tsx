@@ -20,6 +20,11 @@ export default async function TheatrePage() {
     .eq('active', true)
     .order('created_at', { ascending: false })
 
+  console.log('[v0] Theatre page - images fetched:', {
+    count: images?.length,
+    items: images?.map(img => ({ id: img.id, title: img.title, format: img.image_format }))
+  })
+
   // Fetch collections with their images
   const { data: collections } = await supabase
     .from('collections')

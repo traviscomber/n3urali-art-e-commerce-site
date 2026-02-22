@@ -38,7 +38,7 @@ export function StudioPageClient() {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="min-h-screen flex items-center px-6 sm:px-8 lg:px-12 py-20">
+      <section className="min-h-screen flex items-center px-6 sm:px-8 lg:px-12 py-0 pt-20">
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left: Title and Content */}

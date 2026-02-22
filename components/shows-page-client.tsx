@@ -33,6 +33,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
   const [currentTeaserIndex, setCurrentTeaserIndex] = useState(0)
   const [selectedTeaserIndex, setSelectedTeaserIndex] = useState<number | null>(null)
 
+  console.log('[v0] ShowsPageClient - Teaser images received:', teaserImages?.length, 'Images:', teaserImages?.map(img => ({ id: img.id, title: img.title })))
+
   const featuredCollection = collections?.[0]
   const featuredImage = teaserImages?.[0]
   const teaserLabels = ['Heritage', 'Education', 'Fun', 'Art']

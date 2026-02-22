@@ -20,13 +20,18 @@ export default async function ShowsPage() {
     .order('created_at', { ascending: false })
     .limit(10)
 
-  // Fetch teaser images - get first 4 active images (regardless of category)
+  // Fetch teaser images - get more than 4 to ensure we have enough
   const { data: images } = await supabase
     .from('images')
     .select('id, title, thumbnail_medium_url, original_url, upscaled_url, tags, content_category')
     .eq('active', true)
     .order('created_at', { ascending: false })
-    .limit(4)
+    .limit(10)
+
+  console.log('[v0] Shows page - Teaser images count:', images?.length)
+  if (images && images.length > 0) {
+    console.log('[v0] Shows page - First 4 images:', images.slice(0, 4).map(img => ({ id: img.id, title: img.title })))
+  }
 
   return (
     <main className="min-h-screen w-full bg-black">

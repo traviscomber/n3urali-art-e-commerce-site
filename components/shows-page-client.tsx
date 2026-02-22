@@ -187,28 +187,29 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                 </svg>
               </button>
 
-              {/* Teaser Cards Carousel */}
-              <div className="relative w-full max-w-xs h-80 overflow-hidden">
-                <div className="flex flex-col gap-4">
-                  {/* Display current and adjacent teasers */}
+              {/* Teaser Cards Carousel - Only show first 4 teasers */}
+              <div className="relative w-full max-w-xs">
+                <div className="flex flex-col gap-4 justify-center items-center">
+                  {/* Display current and adjacent teasers - limit to 4 teasers only */}
                   {[...Array(3)].map((_, i) => {
-                    const idx = (currentTeaserIndex + i - 1 + teaserImages.length) % teaserImages.length
+                    const totalTeasers = Math.min(teaserImages.length, 4)
+                    const idx = (currentTeaserIndex + i - 1 + totalTeasers) % totalTeasers
                     const image = teaserImages[idx]
                     const label = teaserLabels[idx]
                     const isCenter = i === 1
                     
                     return (
                       <div
-                        key={idx}
+                        key={`teaser-${idx}`}
                         onClick={() => {
                           if (isCenter) {
                             setSelectedTeaserIndex(idx)
                           }
                         }}
-                        className={`relative aspect-square rounded-md overflow-hidden cursor-pointer transition-all duration-300 ${
+                        className={`relative rounded-md overflow-hidden cursor-pointer transition-all duration-300 ${
                           isCenter
-                            ? 'w-full opacity-100 scale-100 ring-2 ring-cyan-400'
-                            : 'w-2/3 opacity-50 scale-75'
+                            ? 'w-40 h-40 opacity-100 scale-100 ring-2 ring-cyan-400'
+                            : 'w-28 h-28 opacity-50 scale-75'
                         }`}
                       >
                         <Image
@@ -219,7 +220,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                         />
                         {isCenter && (
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-center justify-center">
-                            <p className="text-white text-lg font-bold uppercase tracking-wider drop-shadow-lg">
+                            <p className="text-white text-sm font-bold uppercase tracking-wider drop-shadow-lg">
                               {label}
                             </p>
                           </div>
@@ -241,8 +242,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
               </button>
             </div>
 
-            {/* Right: Video Player (Square) */}
-            <div className="relative w-full max-w-2xl aspect-square rounded-md overflow-hidden bg-black">
+            {/* Right: Video Player (Square with proper aspect ratio) */}
+            <div className="relative w-full h-96 rounded-md overflow-hidden bg-black flex-shrink-0">
               <video
                 key={selectedTeaserIndex}
                 src={selectedTeaserIndex !== null ? (teaserVideoUrls[teaserLabels[selectedTeaserIndex]] || teaserImages[selectedTeaserIndex]?.upscaled_url || teaserImages[selectedTeaserIndex]?.original_url || '') : 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f1103aff7f35b2839_d20260222_m230525_c005_v0501012_t0023_u01771801525343'}
@@ -254,8 +255,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
               />
               {/* Text Overlay - only show for default state */}
               {selectedTeaserIndex === null && (
-                <div className="absolute top-0 left-0 pt-12 pl-12 pointer-events-none">
-                  <p className="text-4xl md:text-5xl font-light text-white drop-shadow-lg">video player</p>
+                <div className="absolute top-0 left-0 pt-8 pl-8 pointer-events-none">
+                  <p className="text-4xl font-light text-white drop-shadow-lg">video player</p>
                 </div>
               )}
             </div>

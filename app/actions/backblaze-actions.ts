@@ -350,7 +350,9 @@ export async function uploadToBackblaze(
 
     const uploadedFile = await uploadResponse.json()
 
-    const fileUrl = `${downloadUrl}/file/${bucketName}/${uploadedFile.fileName}`
+    // Use the standard B2 public URL format that matches your other images
+    // Format: https://f005.backblazeb2.com/file/[bucketName]/[filePath]
+    const fileUrl = `https://f005.backblazeb2.com/file/${bucketName}/${uploadedFile.fileName}`
 
     console.log("[v0] File uploaded successfully to:", fileUrl)
 

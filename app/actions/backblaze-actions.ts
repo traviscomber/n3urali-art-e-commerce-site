@@ -272,8 +272,10 @@ export async function uploadToBackblaze(
     const bucketName = process.env.BACKBLAZE_BUCKET_NAME
     const bucketId = process.env.BACKBLAZE_BUCKET_ID
 
+    console.log("[v0] bucketName from env:", bucketName, "bucketId:", bucketId)
+
     if (!apiKey || !applicationKey || !bucketName || !bucketId) {
-      console.error("[v0] Missing Backblaze credentials")
+      console.error("[v0] Missing Backblaze credentials - bucketName:", bucketName)
       return {
         success: false,
         error: "Backblaze credentials not configured",

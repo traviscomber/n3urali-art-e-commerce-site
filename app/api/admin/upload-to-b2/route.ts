@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
 import { uploadToBackblaze } from "@/app/actions/backblaze-actions"
-import { writeFile } from "fs/promises"
-import { join } from "path"
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,17 +36,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: b2Result.error }, { status: 500 })
     }
 
-    // Also save locally to /public/images for direct access (same as working images)
-    try {
-      const localPath = join(process.cwd(), "public", "images", fileName)
-      await writeFile(localPath, Buffer.from(buffer))
-      console.log("[v0] File saved locally to:", localPath)
-    } catch (localError) {
-      console.warn("[v0] Warning: Could not save file locally, using B2 only:", localError)
-    }
-
-    // Use LOCAL URL (same pattern as working images) instead of Backblaze URL
-    const localUrl = `/images/${fileName}`
+    // Use proxy URL for CORS compatibility: /api/b2-proxy?url=[encoded-b2-url]
+    // This allows the browser to fetch through our server which handles CORS headers
+    const proxiedUrl = `/api/b2-proxy?url=${encodeURIComponent(b2Result.url)}`
 
     // Return the image data for database insertion
     const responseData = {
@@ -56,17 +46,17 @@ export async function POST(request: NextRequest) {
       imageData: {
         title,
         description,
-        original_url: localUrl,
-        upscaled_url: localUrl,
-        thumbnail_medium_url: localUrl,
-        thumbnail_small_url: localUrl,
+        original_url: proxiedUrl,
+        upscaled_url: proxiedUrl,
+        thumbnail_medium_url: proxiedUrl,
+        thumbnail_small_url: proxiedUrl,
         file_path: filePath,
         image_format: imageFormat,
         content_category: contentCategory,
       },
     }
     
-    console.log("[v0] Returning response with local URL:", responseData)
+    console.log("[v0] Returning response with proxied URL:", proxiedUrl)
     return NextResponse.json(responseData)
   } catch (error) {
     console.error("[v0] B2 upload error:", error)

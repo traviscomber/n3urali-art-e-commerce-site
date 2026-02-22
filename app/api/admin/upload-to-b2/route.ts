@@ -43,11 +43,12 @@ export async function POST(request: NextRequest) {
         title,
         description,
         original_url: b2Result.url,
+        upscaled_url: b2Result.url,
+        thumbnail_medium_url: b2Result.url,
+        thumbnail_small_url: b2Result.url,
         file_path: filePath,
         image_format: imageFormat,
         content_category: contentCategory,
-        thumbnail_medium_url: b2Result.url,
-        thumbnail_small_url: b2Result.url,
       },
     }
     

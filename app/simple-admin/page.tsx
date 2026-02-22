@@ -19,9 +19,12 @@ import {
   Edit,
   Eye,
   Play,
-  Loader2
+  Loader2,
+  Save,
+  X
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { FileUpload } from "@/components/admin/file-upload"
 
 interface ImageType {
   id: string
@@ -44,6 +47,9 @@ export default function SimpleAdminPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
+  const [uploadLoading, setUploadLoading] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editData, setEditData] = useState<any>({})
 
   useEffect(() => {
     fetchImages()
@@ -94,6 +100,79 @@ export default function SimpleAdminPage() {
       })
     } finally {
       setIsDeleting(null)
+    }
+  }
+
+  const handleUpload = async (file: File, metadata: any) => {
+    try {
+      setUploadLoading(true)
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("folder", "PICS/Theatre")
+      formData.append("title", metadata.title)
+      formData.append("description", metadata.description)
+      formData.append("imageFormat", metadata.imageFormat)
+      formData.append("contentCategory", metadata.contentCategory)
+
+      const uploadRes = await fetch("/api/admin/upload-to-b2", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!uploadRes.ok) throw new Error("Upload failed")
+      const uploadResult = await uploadRes.json()
+
+      // Save to database
+      const createRes = await fetch("/api/admin/featured-images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...uploadResult.imageData,
+          active: true,
+        }),
+      })
+
+      if (!createRes.ok) throw new Error("Failed to save to database")
+
+      toast({
+        title: "Success",
+        description: "Image uploaded successfully",
+      })
+
+      fetchImages()
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Upload failed",
+        variant: "destructive",
+      })
+    } finally {
+      setUploadLoading(false)
+    }
+  }
+
+  const handleUpdateImage = async (imageId: string) => {
+    try {
+      const response = await fetch(`/api/admin/images/${imageId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editData),
+      })
+
+      if (response.ok) {
+        setImages(images.map(img => img.id === imageId ? { ...img, ...editData } : img))
+        setEditingId(null)
+        toast({
+          title: "Success",
+          description: "Image updated successfully",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update image",
+        variant: "destructive",
+      })
     }
   }
 
@@ -169,6 +248,9 @@ export default function SimpleAdminPage() {
 
           {/* Images Tab */}
           <TabsContent value="images" className="space-y-6">
+            {/* Upload Section */}
+            <FileUpload onUpload={handleUpload} isLoading={uploadLoading} />
+
             <div className="bg-slate-800 p-6 rounded-lg border border-slate-700 shadow-xl">
               <div className="flex items-center justify-between mb-6">
                 <div>

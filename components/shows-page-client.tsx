@@ -31,6 +31,7 @@ interface ShowsPageClientProps {
 
 export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientProps) {
   const [currentTeaserIndex, setCurrentTeaserIndex] = useState(0)
+  const [selectedTeaserIndex, setSelectedTeaserIndex] = useState<number | null>(null)
 
   const featuredCollection = collections?.[0]
   const featuredImage = teaserImages?.[0]
@@ -133,7 +134,11 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
               {/* Teaser Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {teaserImages.slice(0, 4).map((image, index) => (
-                  <div key={image.id} className="relative aspect-square rounded-md overflow-hidden group cursor-pointer">
+                  <div 
+                    key={image.id} 
+                    onClick={() => setSelectedTeaserIndex(index)}
+                    className="relative aspect-square rounded-md overflow-hidden group cursor-pointer"
+                  >
                     <Image
                       src={image.upscaled_url || image.original_url || image.thumbnail_medium_url || '/placeholder.svg'}
                       alt={image.title}
@@ -155,24 +160,53 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       )}
 
       {/* Video Player Section */}
-      <section className="px-6 sm:px-8 lg:px-12 py-20 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto w-full">
-          <div className="relative w-full aspect-video rounded-md overflow-hidden bg-black">
-            <video
-              src="https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f1103aff7f35b2839_d20260222_m230525_c005_v0501012_t0023_u01771801525343"
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-            />
-            {/* Text Overlay - positioned upper left */}
-            <div className="absolute top-0 left-0 pt-12 pl-12 pointer-events-none">
-              <p className="text-5xl md:text-6xl font-light text-white drop-shadow-lg">video player</p>
+      {selectedTeaserIndex !== null ? (
+        /* Teaser Video Modal */
+        <section className="px-6 sm:px-8 lg:px-12 py-20 border-b border-slate-800">
+          <div className="max-w-7xl mx-auto w-full">
+            <div className="relative w-full aspect-video rounded-md overflow-hidden bg-black">
+              <video
+                src={teaserImages[selectedTeaserIndex]?.upscaled_url || teaserImages[selectedTeaserIndex]?.original_url || ''}
+                autoPlay
+                loop
+                muted
+                playsInline
+                controls
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="mt-6 flex gap-4 items-center">
+              <h3 className="text-xl text-slate-300">{teaserLabels[selectedTeaserIndex]}</h3>
+              <button
+                onClick={() => setSelectedTeaserIndex(null)}
+                className="ml-auto px-6 py-2 text-slate-400 hover:text-cyan-400 border border-slate-600 hover:border-cyan-400 rounded-sm transition-colors text-sm"
+              >
+                Close
+              </button>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : (
+        /* Default Video Player */
+        <section className="px-6 sm:px-8 lg:px-12 py-20 border-b border-slate-800">
+          <div className="max-w-7xl mx-auto w-full">
+            <div className="relative w-full aspect-video rounded-md overflow-hidden bg-black">
+              <video
+                src="https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f1103aff7f35b2839_d20260222_m230525_c005_v0501012_t0023_u01771801525343"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+              />
+              {/* Text Overlay - positioned upper left */}
+              <div className="absolute top-0 left-0 pt-12 pl-12 pointer-events-none">
+                <p className="text-5xl md:text-6xl font-light text-white drop-shadow-lg">video player</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Deliverables Section */}
       <section className="px-6 sm:px-8 lg:px-12 py-20">

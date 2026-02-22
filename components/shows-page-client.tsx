@@ -131,11 +131,6 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
         </div>
       </section>
 
-      {/* Video Player Section with Side Teaser Carousel */}
-      <section className="px-6 sm:px-8 lg:px-12 py-20 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto w-full">
-          <h2 className="text-4xl font-light text-slate-400 mb-12">Teasers:</h2>
-
       {/* Deliverables Section */}
       <section className="px-6 sm:px-8 lg:px-12 py-20">
         <div className="max-w-7xl mx-auto w-full">

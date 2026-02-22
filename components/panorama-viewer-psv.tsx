@@ -70,15 +70,16 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         // Scene setup with wider FOV (130 degrees for ultra-wide panoramic view)
         const scene = new THREE.Scene()
         const camera = new THREE.PerspectiveCamera(130, width / height, 0.1, 100000)
-        camera.position.z = 0
-        console.log('[v0] Camera created with FOV: 130, aspect:', width / height)
+        camera.position.set(0, 0, 0)
+        camera.lookAt(0, 0, 0)
+        console.log('[v0] Camera created with FOV: 130, position:', camera.position, 'aspect:', width / height)
 
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
         renderer.setSize(width, height)
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
         renderer.setClearColor(0x000000, 1)
-        console.log('[v0] Renderer initialized')
-
+        renderer.autoClear = false
+        console.log('[v0] Renderer initialized, size:', width, 'x', height)
         // Load panorama image with CORS
         const textureLoader = new THREE.TextureLoader()
         console.log('[v0] Loading texture from:', imageUrl)
@@ -114,11 +115,12 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         rendererRef.current = renderer
         sphereRef.current = sphere
 
-        // Render initial frame immediately
+        // Render initial frame immediately with correct camera
+        renderer.clear()
         renderer.render(scene, camera)
-        console.log('[v0] Initial render completed')
+        console.log('[v0] Initial render completed with FOV 130')
 
-        // Animation loop
+        // Animation loop with consistent rendering
         const animate = () => {
           animationRef.current = requestAnimationFrame(animate)
 
@@ -128,6 +130,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
             sphereRef.current.rotation.y = rotationYRef.current
           }
 
+          renderer.clear()
           renderer.render(scene, camera)
         }
 

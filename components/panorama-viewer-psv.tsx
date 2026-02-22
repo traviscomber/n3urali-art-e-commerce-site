@@ -17,29 +17,29 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   relaxMode = true,
 }: PanoramaViewerPSVProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const viewerRef = useRef<any>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const animationRef = useRef<number>()
+  const rotationRef = useRef({ yaw: 0, pitch: 0, fov: 85 })
 
   useEffect(() => {
-    // Dynamically load Photo Sphere Viewer library
-    const loadLibrary = async () => {
+    const loadPanorama = async () => {
       try {
-        // Load CSS
-        const link = document.createElement('link')
-        link.rel = 'stylesheet'
-        link.href = 'https://cdn.jsdelivr.net/npm/photo-sphere-viewer@5.10.0/index.min.css'
-        document.head.appendChild(link)
+        if (!canvasRef.current) {
+          setError('Canvas not initialized')
+          return
+        }
 
-        // Load JS
+        // Load Three.js from CDN
         const script = document.createElement('script')
-        script.src = 'https://cdn.jsdelivr.net/npm/photo-sphere-viewer@5.10.0/index.umd.min.js'
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'
         script.async = true
         script.onload = () => {
-          initializePanorama()
+          initThreePanorama()
         }
         script.onerror = () => {
-          setError('Failed to load panorama library')
+          setError('Failed to load 3D library')
           setIsLoading(false)
         }
         document.body.appendChild(script)
@@ -49,43 +49,111 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
       }
     }
 
-    const initializePanorama = () => {
-      if (!containerRef.current || !window.PhotoSphereViewer) {
-        setError('Panorama viewer not available')
+    const initThreePanorama = () => {
+      const THREE = (window as any).THREE
+      if (!THREE || !canvasRef.current) {
+        setError('3D library not available')
         setIsLoading(false)
         return
       }
 
       try {
-        const PSV = window.PhotoSphereViewer.Viewer
+        const canvas = canvasRef.current
+        const width = window.innerWidth
+        const height = window.innerHeight
 
-        viewerRef.current = new PSV({
-          container: containerRef.current,
-          panorama: imageUrl,
-          navbar: relaxMode ? false : 'bottom',
-          defaultZoomLvl: 50, // Start zoomed out for full view
-          minZoomLvl: 30,
-          maxZoomLvl: 100,
-          autorotate: relaxMode ? { speed: '2rpm', idleTime: 0 } : false,
-          keyboard: !relaxMode,
-          mousewheel: !relaxMode,
-          touchmove: !relaxMode,
-          withCredentials: false,
+        // Scene setup
+        const scene = new THREE.Scene()
+        const camera = new THREE.PerspectiveCamera(rotationRef.current.fov, width / height, 0.1, 10000)
+        camera.position.set(0, 0, 0)
+
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
+        renderer.setSize(width, height)
+        renderer.setPixelRatio(window.devicePixelRatio)
+
+        // Load panorama image
+        const textureLoader = new THREE.TextureLoader()
+        const texture = textureLoader.load(
+          imageUrl,
+          () => {
+            setIsLoading(false)
+          },
+          undefined,
+          (error) => {
+            console.error('[v0] Texture load error:', error)
+            setError('Failed to load panorama image')
+            setIsLoading(false)
+          }
+        )
+
+        // Create sphere geometry for equirectangular panorama
+        const geometry = new THREE.SphereGeometry(500, 64, 64)
+        const material = new THREE.MeshBasicMaterial({
+          map: texture,
+          side: THREE.BackSide,
         })
+        const sphere = new THREE.Mesh(geometry, material)
+        scene.add(sphere)
 
-        setIsLoading(false)
+        // Animation loop
+        const animate = () => {
+          animationRef.current = requestAnimationFrame(animate)
+
+          // Slow auto-rotation in relax mode
+          if (relaxMode) {
+            rotationRef.current.yaw += 0.0002
+          }
+
+          // Update camera
+          const { yaw, pitch, fov } = rotationRef.current
+          camera.fov = fov
+          camera.updateProjectionMatrix()
+
+          const radius = 1
+          camera.position.x = radius * Math.sin(yaw) * Math.cos(pitch)
+          camera.position.y = radius * Math.sin(pitch)
+          camera.position.z = radius * Math.cos(yaw) * Math.cos(pitch)
+          camera.lookAt(0, 0, 0)
+
+          renderer.render(scene, camera)
+        }
+
+        animate()
+
+        // Handle window resize
+        const handleResize = () => {
+          const newWidth = window.innerWidth
+          const newHeight = window.innerHeight
+          camera.aspect = newWidth / newHeight
+          camera.updateProjectionMatrix()
+          renderer.setSize(newWidth, newHeight)
+        }
+
+        window.addEventListener('resize', handleResize)
+
+        // Cleanup
+        return () => {
+          window.removeEventListener('resize', handleResize)
+          if (animationRef.current) {
+            cancelAnimationFrame(animationRef.current)
+          }
+          renderer.dispose()
+          geometry.dispose()
+          material.dispose()
+          texture.dispose()
+        }
       } catch (err) {
-        console.error('[v0] Failed to initialize panorama:', err)
+        console.error('[v0] Panorama initialization error:', err)
         setError('Failed to initialize panorama viewer')
         setIsLoading(false)
       }
     }
 
-    loadLibrary()
+    loadPanorama()
 
     return () => {
-      if (viewerRef.current) {
-        viewerRef.current.destroy()
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
       }
     }
   }, [imageUrl, relaxMode])
@@ -103,11 +171,11 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
 
   return (
     <div className="w-full h-screen bg-black relative overflow-hidden">
-      {/* Container for PSV */}
-      <div
-        ref={containerRef}
-        className="w-full h-full"
-        style={{ background: '#000' }}
+      {/* Canvas for panorama */}
+      <canvas
+        ref={canvasRef}
+        className="w-full h-full block"
+        style={{ display: 'block' }}
       />
 
       {/* Loading State */}
@@ -167,6 +235,6 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
 // Extend Window interface for TypeScript
 declare global {
   interface Window {
-    PhotoSphereViewer: any
+    THREE: any
   }
 }

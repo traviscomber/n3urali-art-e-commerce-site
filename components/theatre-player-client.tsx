@@ -92,15 +92,9 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
   const currentImage = images[selectedImageIndex]
   const imageUrl = currentImage.upscaled_url || currentImage.original_url || currentImage.thumbnail_medium_url || ''
   
-  // Compute these safely - they're derived from state and will be consistent on client
-  let relatedImages: Image[] = []
-  let currentRelatedIndex = 0
-  
-  if (typeof window !== 'undefined' || !isViewerOpen) {
-    // Safe to compute after hydration completes
-    relatedImages = getRelatedImages(selectedImageIndex)
-    currentRelatedIndex = relatedImages.findIndex(img => img.id === currentImage.id) + 1
-  }
+  // Compute related images and index - safe to compute on both server and client
+  const relatedImages = getRelatedImages(selectedImageIndex)
+  const currentRelatedIndex = relatedImages.findIndex(img => img.id === currentImage.id) + 1
 
   const handlePrevious = () => {
     const currentRelated = getRelatedImages(selectedImageIndex)

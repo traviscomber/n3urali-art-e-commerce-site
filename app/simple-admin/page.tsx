@@ -1,220 +1,136 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import Image from 'next/image'
-import { Trash2, Upload } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
+import { Trash2 } from 'lucide-react'
 
 export default function AdminPage() {
   const [images, setImages] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [uploading, setUploading] = useState(false)
-  const { toast } = useToast()
 
   useEffect(() => {
+    console.log('[v0] Page loaded')
     loadImages()
   }, [])
 
   const loadImages = async () => {
     try {
-      setLoading(true)
+      console.log('[v0] Loading images...')
       const res = await fetch('/api/admin/featured-images?all=true')
-      if (!res.ok) throw new Error('Failed to load images')
       const data = await res.json()
-      setImages(data || [])
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to load images',
-        variant: 'destructive',
-      })
+      console.log('[v0] Images loaded:', data)
+      setImages(Array.isArray(data) ? data : data.data || [])
+    } catch (err) {
+      console.error('[v0] Load error:', err)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) {
-      setUploading(false)
-      return
-    }
+  const handleFileSelect = (e: any) => {
+    console.log('[v0] File selected:', e.target.files?.[0]?.name)
+    if (!e.target.files?.[0]) return
 
+    const file = e.target.files[0]
+    console.log('[v0] Starting upload for:', file.name)
+    uploadFile(file)
+  }
+
+  const uploadFile = async (file: File) => {
     try {
-      setUploading(true)
-      console.log('[v0] Upload started for file:', file.name)
-
-      // Upload to B2
+      console.log('[v0] Upload started')
       const formData = new FormData()
       formData.append('file', file)
       formData.append('folder', 'PICS/Theatre')
-      formData.append('title', file.name.replace(/\.[^/.]+$/, ''))
-      formData.append('description', 'Panoramic image')
+      formData.append('title', file.name)
+      formData.append('description', 'Uploaded image')
       formData.append('imageFormat', 'equirectangular')
       formData.append('contentCategory', 'theatre')
 
-      console.log('[v0] Sending to B2 upload API...')
+      console.log('[v0] Calling B2 API...')
       const uploadRes = await fetch('/api/admin/upload-to-b2', {
         method: 'POST',
         body: formData,
       })
 
-      console.log('[v0] B2 response status:', uploadRes.status)
+      console.log('[v0] B2 status:', uploadRes.status)
+      const uploadData = await uploadRes.json()
+      console.log('[v0] B2 response:', uploadData)
 
-      if (!uploadRes.ok) {
-        const errorText = await uploadRes.text()
-        console.error('[v0] B2 error:', errorText)
-        throw new Error(`B2 upload failed: ${uploadRes.status}`)
-      }
+      if (!uploadRes.ok) throw new Error(uploadData.error || 'B2 upload failed')
 
-      const uploadedData = await uploadRes.json()
-      console.log('[v0] B2 upload successful')
-
-      // Save to database
       console.log('[v0] Saving to database...')
-      const dbRes = await fetch('/api/admin/featured-images', {
+      const saveRes = await fetch('/api/admin/featured-images', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...uploadedData.imageData,
-          active: true,
-        }),
+        body: JSON.stringify({ ...uploadData.imageData, active: true }),
       })
 
-      console.log('[v0] Database response status:', dbRes.status)
+      console.log('[v0] Database status:', saveRes.status)
+      if (!saveRes.ok) throw new Error('Database save failed')
 
-      if (!dbRes.ok) {
-        const errorText = await dbRes.text()
-        console.error('[v0] Database error:', errorText)
-        throw new Error(`Database save failed: ${dbRes.status}`)
-      }
-
-      console.log('[v0] Database save successful')
-
-      toast({
-        title: 'Success',
-        description: 'Image uploaded successfully',
-      })
-
-      await loadImages()
-    } catch (error) {
-      console.error('[v0] Upload error:', error)
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Upload failed',
-        variant: 'destructive',
-      })
-    } finally {
-      setUploading(false)
-      console.log('[v0] Upload finished, uploading set to false')
+      console.log('[v0] Upload complete!')
+      alert('Upload successful!')
+      loadImages()
+    } catch (err) {
+      console.error('[v0] Error:', err)
+      alert('Error: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }
 
-  const handleDelete = async (imageId: string) => {
-    if (!confirm('Delete this image?')) return
-
+  const deleteImage = async (id: string) => {
     try {
-      const res = await fetch(`/api/admin/images/${imageId}`, {
-        method: 'DELETE',
-      })
-
+      const res = await fetch(`/api/admin/images/${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Delete failed')
-
-      toast({
-        title: 'Success',
-        description: 'Image deleted',
-      })
-
-      await loadImages()
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to delete image',
-        variant: 'destructive',
-      })
+      alert('Deleted!')
+      loadImages()
+    } catch (err) {
+      alert('Error: ' + (err instanceof Error ? err.message : 'Delete failed'))
     }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-white">Loading...</p>
-      </div>
-    )
   }
 
   return (
     <div className="min-h-screen bg-black p-8">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-white">Admin Panel</h1>
+        <h1 className="text-4xl font-bold text-white mb-8">Admin Panel</h1>
+
+        {/* Upload */}
+        <div className="bg-slate-900 p-6 rounded-lg mb-8 border border-slate-700">
+          <h2 className="text-xl text-white mb-4">Upload Image</h2>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileSelect}
+            className="block w-full text-white p-2 border border-slate-600 rounded bg-slate-800"
+          />
         </div>
 
-        {/* Upload Section */}
-        <Card className="mb-8 bg-slate-800 border-slate-700">
-          <CardHeader>
-            <CardTitle className="text-white">Upload Image</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <label className="flex items-center justify-center w-full p-6 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer hover:border-cyan-500 transition-colors">
-              <div className="flex flex-col items-center">
-                <Upload className="w-8 h-8 text-slate-400 mb-2" />
-                <span className="text-slate-300">Click to upload image</span>
-              </div>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleUpload}
-                disabled={uploading}
-                className="hidden"
-              />
-            </label>
-            {uploading && <p className="text-cyan-400 mt-4">Uploading...</p>}
-          </CardContent>
-        </Card>
-
-        {/* Images Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {images.map((image) => (
-            <Card key={image.id} className="bg-slate-800 border-slate-700 overflow-hidden">
-              <div className="relative w-full h-48 bg-slate-700">
-                {image.thumbnail_medium_url || image.original_url ? (
-                  <Image
-                    src={image.thumbnail_medium_url || image.original_url}
-                    alt={image.title}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-500">
-                    No image
-                  </div>
-                )}
-              </div>
-              <CardContent className="pt-4">
-                <h3 className="text-white font-semibold mb-2">{image.title}</h3>
-                <p className="text-slate-400 text-sm mb-4">{image.description}</p>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => handleDelete(image.id)}
-                    variant="destructive"
-                    size="sm"
-                    className="flex-1"
+        {/* Images */}
+        <h2 className="text-2xl text-white mb-4">Images ({images.length})</h2>
+        {loading ? (
+          <p className="text-white">Loading...</p>
+        ) : images.length === 0 ? (
+          <p className="text-white">No images</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {images.map((img) => (
+              <div key={img.id} className="bg-slate-900 rounded-lg overflow-hidden border border-slate-700">
+                <img
+                  src={img.thumbnail_medium_url || img.thumbnail_url}
+                  alt={img.title}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-4">
+                  <h3 className="text-white font-bold">{img.title}</h3>
+                  <p className="text-slate-400 text-sm">{img.description}</p>
+                  <button
+                    onClick={() => deleteImage(img.id)}
+                    className="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded flex items-center justify-center gap-2"
                   >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete
-                  </Button>
+                    <Trash2 size={16} /> Delete
+                  </button>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {images.length === 0 && (
-          <div className="text-center text-slate-400 mt-12">
-            <p>No images yet. Upload your first image above.</p>
+              </div>
+            ))}
           </div>
         )}
       </div>

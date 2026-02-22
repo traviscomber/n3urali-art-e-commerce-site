@@ -38,10 +38,10 @@ export function StudioPageClient() {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="flex items-stretch px-0 py-0">
-        <div className="w-full grid grid-cols-1 lg:grid-cols-2">
+      <section className="flex items-stretch px-0 py-0 relative">
+        <div className="w-full flex">
           {/* Left: Studio Image - 30% Smaller */}
-          <div className="relative h-[70vh] w-full overflow-hidden order-2 lg:order-1">
+          <div className="relative h-[70vh] w-1/2 overflow-hidden">
             <Image
               src="/images/studio-ph1.png"
               alt="Studio immersive projection setup"
@@ -51,15 +51,15 @@ export function StudioPageClient() {
             />
           </div>
 
-          {/* Right: Title and Content */}
-          <div className="flex flex-col justify-start pt-16 px-6 sm:px-8 lg:px-12 lg:pt-20 h-screen lg:h-auto order-1 lg:order-2">
-            <div className="flex flex-col gap-8">
+          {/* Right: Title and Content - Positioned right */}
+          <div className="w-1/2 flex flex-col justify-start pt-16 px-6 sm:px-8 lg:px-12 lg:pt-20">
+            <div className="flex flex-col gap-8 ml-auto mr-0 max-w-sm">
               <h1 className="text-6xl md:text-7xl font-light text-slate-400 leading-tight">
                 Studio
               </h1>
               
               <div className="space-y-6">
-                <p className="text-slate-400 text-sm leading-relaxed max-w-md">
+                <p className="text-slate-400 text-sm leading-relaxed">
                   N3uralia360 is a content creation studio combining advanced proprietary <a href="#" className="text-cyan-400 hover:text-cyan-300 underline">AI tools</a> with human art direction and real production.
                 </p>
 

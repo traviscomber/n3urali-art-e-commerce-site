@@ -335,7 +335,7 @@ export async function uploadToBackblaze(
         Authorization: uploadUrlData.authorizationToken,
         "X-Bz-File-Name": encodeURIComponent(filePath),
         "Content-Type": "application/octet-stream",
-        "X-Bz-Content-Sha1": "unverified",
+        "X-Bz-Content-Sha1": "do_not_verify",
       },
       body: buffer,
     })

@@ -47,6 +47,20 @@ const nextConfig = {
     pagesBufferLength: 2,
   },
   staticPageGenerationTimeout: 120,
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.cache = {
+        type: 'filesystem',
+        cacheDirectory: '.next/cache',
+        buildDependencies: {
+          config: [__filename],
+        },
+        maxMemoryGenerations: 1,
+        hashAlgorithm: 'sha256',
+      }
+    }
+    return config
+  },
 }
 
 export default nextConfig

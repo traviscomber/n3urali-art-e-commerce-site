@@ -238,6 +238,7 @@ export async function getImages() {
         image_format
       `)
       .eq("active", true)
+      .not("thumbnail_medium_url", "is", null)
       .order("created_at", { ascending: false })
 
     if (error) throw error

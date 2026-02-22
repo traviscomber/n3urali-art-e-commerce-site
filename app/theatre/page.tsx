@@ -12,18 +12,13 @@ export default async function TheatrePage() {
   const supabase = await createClient()
 
   // Fetch only equirectangular images (no videos), must be active
-  // Only select minimal fields to reduce bundle size
+  // Include tags field to group related images together
   const { data: images } = await supabase
     .from('images')
-    .select('id, title, original_url, image_format, description')
+    .select('id, title, original_url, image_format, description, tags, thumbnail_medium_url, upscaled_url')
     .eq('image_format', 'equirectangular')
     .eq('active', true)
     .order('created_at', { ascending: false })
-
-  console.log('[v0] Theatre page - images fetched:', {
-    count: images?.length,
-    items: images?.map(img => ({ id: img.id, title: img.title, format: img.image_format }))
-  })
 
   // Fetch collections with their images
   const { data: collections } = await supabase

@@ -12,6 +12,7 @@ interface Image {
   upscaled_url?: string
   image_format?: string
   description?: string
+  tags?: string[]
 }
 
 interface Collection {
@@ -32,20 +33,45 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
   const [isViewerOpen, setIsViewerOpen] = useState(false)
   const [fadeOut, setFadeOut] = useState(false)
 
-  // Auto-rotate images every 30 seconds with fade effect
+  // Get all related images (same tags as current image)
+  const getRelatedImages = (imageIndex: number): Image[] => {
+    if (!images[imageIndex]?.tags || images[imageIndex].tags!.length === 0) {
+      // If no tags, return only this image
+      return [images[imageIndex]]
+    }
+
+    const currentTags = images[imageIndex].tags || []
+    // Find all images that share at least one tag with the current image
+    return images.filter(img => {
+      if (!img.tags || img.tags.length === 0) return false
+      return img.tags.some(tag => currentTags.includes(tag))
+    })
+  }
+
+  // Auto-rotate related images every 30 seconds when in fullscreen viewer
   useEffect(() => {
-    if (isViewerOpen) return // Don't auto-rotate when viewer is open
+    if (!isViewerOpen) return // Only auto-rotate when viewer IS open
+
+    const relatedImages = getRelatedImages(selectedImageIndex)
+
+    // If only 1 related image, no need to rotate
+    if (relatedImages.length <= 1) return
 
     const interval = setInterval(() => {
       setFadeOut(true)
       setTimeout(() => {
-        setSelectedImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+        // Find current image in related images and rotate to next
+        const currentIdx = relatedImages.findIndex(img => img.id === images[selectedImageIndex].id)
+        const nextIdx = (currentIdx + 1) % relatedImages.length
+        const nextImage = relatedImages[nextIdx]
+        const nextImageIndex = images.findIndex(img => img.id === nextImage.id)
+        setSelectedImageIndex(nextImageIndex)
         setFadeOut(false)
       }, 500) // Fade duration
     }, 30000) // 30 seconds
 
     return () => clearInterval(interval)
-  }, [isViewerOpen, images.length])
+  }, [isViewerOpen, selectedImageIndex, images])
 
   if (!images || images.length === 0) {
     return (
@@ -60,13 +86,31 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
 
   const currentImage = images[selectedImageIndex]
   const imageUrl = currentImage.upscaled_url || currentImage.original_url || currentImage.thumbnail_medium_url || ''
+  const relatedImages = getRelatedImages(selectedImageIndex)
+  const currentRelatedIndex = relatedImages.findIndex(img => img.id === currentImage.id) + 1
 
   const handlePrevious = () => {
-    setSelectedImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+    const relatedImages = getRelatedImages(selectedImageIndex)
+    
+    if (relatedImages.length <= 1) return // No navigation if only 1 related image
+    
+    const currentIdx = relatedImages.findIndex(img => img.id === images[selectedImageIndex].id)
+    const prevIdx = (currentIdx - 1 + relatedImages.length) % relatedImages.length
+    const prevImage = relatedImages[prevIdx]
+    const prevImageIndex = images.findIndex(img => img.id === prevImage.id)
+    setSelectedImageIndex(prevImageIndex)
   }
 
   const handleNext = () => {
-    setSelectedImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+    const relatedImages = getRelatedImages(selectedImageIndex)
+    
+    if (relatedImages.length <= 1) return // No navigation if only 1 related image
+    
+    const currentIdx = relatedImages.findIndex(img => img.id === images[selectedImageIndex].id)
+    const nextIdx = (currentIdx + 1) % relatedImages.length
+    const nextImage = relatedImages[nextIdx]
+    const nextImageIndex = images.findIndex(img => img.id === nextImage.id)
+    setSelectedImageIndex(nextImageIndex)
   }
 
   return (
@@ -140,7 +184,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
                 {currentImage.description || 'Explore this immersive panoramic experience'}
               </p>
               <p className="text-gray-600 text-sm mt-2">
-                {selectedImageIndex + 1} of {images.length}
+                {currentRelatedIndex} of {relatedImages.length}
               </p>
             </div>
 
@@ -148,19 +192,23 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
             <div className="flex items-center justify-center gap-8 mb-12">
               <button
                 onClick={handlePrevious}
-                className="p-3 rounded-full border border-gray-700 hover:border-cyan-500 hover:bg-cyan-500/10 transition-all"
+                disabled={relatedImages.length <= 1}
+                className="p-3 rounded-full border border-gray-700 hover:border-cyan-500 hover:bg-cyan-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Previous panorama"
               >
                 <ChevronLeft className="w-6 h-6 text-gray-400 hover:text-cyan-400" />
               </button>
 
               <div className="flex gap-2">
-                {images.map((_, index) => (
+                {relatedImages.map((img, index) => (
                   <button
-                    key={index}
-                    onClick={() => setSelectedImageIndex(index)}
+                    key={img.id}
+                    onClick={() => {
+                      const imageIndex = images.findIndex(i => i.id === img.id)
+                      setSelectedImageIndex(imageIndex)
+                    }}
                     className={`w-2 h-2 rounded-full transition-all ${
-                      index === selectedImageIndex
+                      img.id === currentImage.id
                         ? 'bg-cyan-500 w-8'
                         : 'bg-gray-600 hover:bg-gray-500'
                     }`}
@@ -171,7 +219,8 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
 
               <button
                 onClick={handleNext}
-                className="p-3 rounded-full border border-gray-700 hover:border-cyan-500 hover:bg-cyan-500/10 transition-all"
+                disabled={relatedImages.length <= 1}
+                className="p-3 rounded-full border border-gray-700 hover:border-cyan-500 hover:bg-cyan-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Next panorama"
               >
                 <ChevronRight className="w-6 h-6 text-gray-400 hover:text-cyan-400" />

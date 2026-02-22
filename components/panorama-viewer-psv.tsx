@@ -66,7 +66,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
 
         // Scene setup
         const scene = new THREE.Scene()
-        const camera = new THREE.PerspectiveCamera(85, width / height, 0.1, 10000)
+        const camera = new THREE.PerspectiveCamera(120, width / height, 0.1, 10000)
         camera.position.z = 0
 
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })

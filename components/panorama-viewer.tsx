@@ -263,11 +263,13 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({
     const img = new Image()
     img.crossOrigin = "anonymous"
     img.onload = () => {
-      console.log("[v0] Panorama image loaded successfully")
+      console.log("[v0] Panorama image loaded successfully from:", imageUrl)
       setImageLoaded(true)
     }
-    img.onerror = () => {
-      console.error("[v0] Failed to load panorama image")
+    img.onerror = (e) => {
+      console.error("[v0] Failed to load panorama image from URL:", imageUrl)
+      console.error("[v0] Image error event:", e)
+      console.error("[v0] Error type:", img.error)
     }
     img.src = imageUrl
     imageRef.current = img

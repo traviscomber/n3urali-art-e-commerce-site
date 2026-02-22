@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { Trash2 } from 'lucide-react'
+import { parseFilenameMetadata } from '@/lib/parse-filename'
 
 export default function AdminPage() {
   const [images, setImages] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [url, setUrl] = useState('')
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
@@ -30,45 +28,56 @@ export default function AdminPage() {
     }
   }
 
-  const handleAddImage = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!url || !title) {
-      alert('URL and Title are required')
-      return
-    }
+  const handleFileSelect = (e: any) => {
+    if (!e.target.files?.[0]) return
 
+    const file = e.target.files[0]
+    console.log('[v0] File selected:', file.name)
+    
+    // Parse filename to auto-fill title and description
+    const { title: autoTitle, description: autoDescription } = parseFilenameMetadata(file.name)
+    console.log('[v0] Parsed metadata - title:', autoTitle, 'description:', autoDescription)
+    
+    uploadFile(file, autoTitle, autoDescription)
+  }
+
+  const uploadFile = async (file: File, autoTitle: string, autoDescription: string) => {
     try {
       setSubmitting(true)
-      console.log('[v0] Adding image with URL:', url)
+      console.log('[v0] Upload started for:', file.name)
       
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('folder', 'PICS/Theatre')
+      formData.append('title', autoTitle)
+      formData.append('description', autoDescription)
+      formData.append('imageFormat', 'equirectangular')
+      formData.append('contentCategory', 'theatre')
+
+      console.log('[v0] Uploading to Backblaze...')
+      const uploadRes = await fetch('/api/admin/upload-to-b2', {
+        method: 'POST',
+        body: formData,
+      })
+
+      console.log('[v0] B2 status:', uploadRes.status)
+      const uploadData = await uploadRes.json()
+      console.log('[v0] B2 response:', uploadData)
+
+      if (!uploadRes.ok) throw new Error(uploadData.error || 'B2 upload failed')
+
+      console.log('[v0] Saving to database...')
       const saveRes = await fetch('/api/admin/featured-images', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title,
-          description,
-          original_url: url,
-          upscaled_url: url,
-          thumbnail_medium_url: url,
-          thumbnail_small_url: url,
-          image_format: 'equirectangular',
-          content_category: 'theatre',
-          active: true,
-        }),
+        body: JSON.stringify({ ...uploadData.imageData, active: true }),
       })
 
       console.log('[v0] Database status:', saveRes.status)
-      if (!saveRes.ok) throw new Error('Failed to save image')
+      if (!saveRes.ok) throw new Error('Database save failed')
 
-      console.log('[v0] Image saved successfully!')
-      alert('Image added successfully!')
-      
-      // Reset form
-      setUrl('')
-      setTitle('')
-      setDescription('')
-      
+      console.log('[v0] Upload complete!')
+      alert('Upload successful!')
       loadImages()
     } catch (err) {
       console.error('[v0] Error:', err)
@@ -94,53 +103,18 @@ export default function AdminPage() {
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold text-white mb-8">Admin Panel</h1>
 
-        {/* Add Image via URL */}
+        {/* Upload */}
         <div className="bg-slate-900 p-6 rounded-lg mb-8 border border-slate-700">
-          <h2 className="text-xl text-white mb-4">Add Image from Backblaze URL</h2>
-          <form onSubmit={handleAddImage} className="space-y-4">
-            <div>
-              <label className="block text-white text-sm font-semibold mb-2">Backblaze URL *</label>
-              <input
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://f005.backblazeb2.com/file/Neuraliart/PICS/Theatre/..."
-                className="w-full p-3 border border-slate-600 rounded bg-slate-800 text-white placeholder-slate-500"
-                required
-              />
-            </div>
-            
-            <div>
-              <label className="block text-white text-sm font-semibold mb-2">Title *</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g., Ancient Monuments - Panoramic View"
-                className="w-full p-3 border border-slate-600 rounded bg-slate-800 text-white placeholder-slate-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-white text-sm font-semibold mb-2">Description</label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Optional description..."
-                rows={3}
-                className="w-full p-3 border border-slate-600 rounded bg-slate-800 text-white placeholder-slate-500"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-3 rounded font-semibold"
-            >
-              {submitting ? 'Adding...' : 'Add Image'}
-            </button>
-          </form>
+          <h2 className="text-xl text-white mb-4">Upload Image to Backblaze</h2>
+          <p className="text-slate-300 text-sm mb-4">Title and description are auto-filled from filename</p>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileSelect}
+            disabled={submitting}
+            className="block w-full text-white p-2 border border-slate-600 rounded bg-slate-800"
+          />
+          {submitting && <p className="text-blue-400 mt-2">Uploading...</p>}
         </div>
 
         {/* Images */}

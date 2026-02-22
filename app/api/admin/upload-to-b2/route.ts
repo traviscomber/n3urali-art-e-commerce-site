@@ -3,6 +3,8 @@ import { uploadToBackblaze } from "@/app/actions/backblaze-actions"
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("[v0] B2 upload API called")
+    
     const formData = await request.formData()
     const file = formData.get("file") as File
     const folder = formData.get("folder") as string
@@ -11,7 +13,10 @@ export async function POST(request: NextRequest) {
     const imageFormat = formData.get("imageFormat") as string
     const contentCategory = formData.get("contentCategory") as string
 
+    console.log("[v0] Form data received:", { file: file?.name, folder, title })
+
     if (!file) {
+      console.error("[v0] No file provided")
       return NextResponse.json({ error: "No file provided" }, { status: 400 })
     }
 
@@ -19,15 +24,20 @@ export async function POST(request: NextRequest) {
     const fileName = `${Date.now()}-${file.name}`
     const filePath = folder ? `${folder}/${fileName}` : fileName
 
+    console.log("[v0] Uploading to Backblaze with path:", filePath)
+
     // Upload to Backblaze
     const b2Result = await uploadToBackblaze(Buffer.from(buffer), filePath)
 
+    console.log("[v0] B2 result:", b2Result)
+
     if (!b2Result.success) {
+      console.error("[v0] B2 upload failed:", b2Result.error)
       return NextResponse.json({ error: b2Result.error }, { status: 500 })
     }
 
     // Return the image data for database insertion
-    return NextResponse.json({
+    const responseData = {
       success: true,
       imageData: {
         title,
@@ -39,7 +49,10 @@ export async function POST(request: NextRequest) {
         thumbnail_medium_url: b2Result.url,
         thumbnail_small_url: b2Result.url,
       },
-    })
+    }
+    
+    console.log("[v0] Returning response:", responseData)
+    return NextResponse.json(responseData)
   } catch (error) {
     console.error("[v0] B2 upload error:", error)
     return NextResponse.json(

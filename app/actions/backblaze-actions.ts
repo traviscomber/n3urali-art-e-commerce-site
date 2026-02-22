@@ -280,6 +280,8 @@ export async function uploadToBackblaze(
       }
     }
 
+    console.log("[v0] Credentials present, authenticating with B2...")
+
     // Get authorization
     const credentials = Buffer.from(`${apiKey}:${applicationKey}`).toString("base64")
     const authResponse = await fetch("https://api.backblazeb2.com/b2api/v2/b2_authorize_account", {
@@ -289,14 +291,18 @@ export async function uploadToBackblaze(
       },
     })
 
+    console.log("[v0] Auth response status:", authResponse.status)
+
     if (!authResponse.ok) {
-      throw new Error("Authentication failed")
+      const authError = await authResponse.text()
+      console.error("[v0] Auth failed:", authError)
+      throw new Error(`B2 authentication failed: ${authResponse.status}`)
     }
 
     const authData = await authResponse.json()
     const { authorizationToken, apiUrl, downloadUrl } = authData
 
-    console.log("[v0] Got B2 authorization, getting upload URL...")
+    console.log("[v0] Authentication successful, getting upload URL...")
 
     // Get upload URL
     const uploadUrlResponse = await fetch(`${apiUrl}/b2api/v2/b2_get_upload_url`, {
@@ -310,13 +316,17 @@ export async function uploadToBackblaze(
       }),
     })
 
+    console.log("[v0] Upload URL response status:", uploadUrlResponse.status)
+
     if (!uploadUrlResponse.ok) {
-      throw new Error("Failed to get upload URL")
+      const urlError = await uploadUrlResponse.text()
+      console.error("[v0] Get upload URL failed:", urlError)
+      throw new Error(`Failed to get upload URL: ${uploadUrlResponse.status}`)
     }
 
     const uploadUrlData = await uploadUrlResponse.json()
 
-    console.log("[v0] Got upload URL, uploading file...")
+    console.log("[v0] Got upload URL, uploading file with name:", filePath, "buffer size:", buffer.length)
 
     // Upload file
     const uploadResponse = await fetch(uploadUrlData.uploadUrl, {
@@ -330,27 +340,30 @@ export async function uploadToBackblaze(
       body: buffer,
     })
 
+    console.log("[v0] File upload response status:", uploadResponse.status)
+
     if (!uploadResponse.ok) {
       const errorText = await uploadResponse.text()
-      console.error("[v0] Upload failed:", errorText)
-      throw new Error(`Upload failed: ${uploadResponse.statusText}`)
+      console.error("[v0] File upload failed:", uploadResponse.status, errorText)
+      throw new Error(`File upload failed: ${uploadResponse.status} - ${errorText}`)
     }
 
     const uploadedFile = await uploadResponse.json()
 
     const fileUrl = `${downloadUrl}/file/${bucketName}/${uploadedFile.fileName}`
 
-    console.log("[v0] File uploaded successfully:", fileUrl)
+    console.log("[v0] File uploaded successfully to:", fileUrl)
 
     return {
       success: true,
       url: fileUrl,
     }
   } catch (error) {
-    console.error("[v0] Error uploading to Backblaze:", error)
+    const errorMsg = error instanceof Error ? error.message : "Unknown error"
+    console.error("[v0] Error uploading to Backblaze:", errorMsg)
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: errorMsg,
     }
   }
 }

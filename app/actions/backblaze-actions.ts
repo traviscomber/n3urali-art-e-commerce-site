@@ -259,3 +259,98 @@ export async function deleteBackblazeImage(fileId: string, fileName: string) {
 }
 
 // Removed toggleB2Favorite function to avoid errors when table doesn't exist
+
+export async function uploadToBackblaze(
+  buffer: Buffer,
+  filePath: string
+): Promise<{ success: boolean; url?: string; error?: string }> {
+  try {
+    console.log("[v0] uploadToBackblaze called with path:", filePath)
+
+    const apiKey = process.env.BACKBLAZE_API_KEY
+    const applicationKey = process.env.BACKBLAZE_APPLICATION_KEY
+    const bucketName = process.env.BACKBLAZE_BUCKET_NAME
+    const bucketId = process.env.BACKBLAZE_BUCKET_ID
+
+    if (!apiKey || !applicationKey || !bucketName || !bucketId) {
+      console.error("[v0] Missing Backblaze credentials")
+      return {
+        success: false,
+        error: "Backblaze credentials not configured",
+      }
+    }
+
+    // Get authorization
+    const credentials = Buffer.from(`${apiKey}:${applicationKey}`).toString("base64")
+    const authResponse = await fetch("https://api.backblazeb2.com/b2api/v2/b2_authorize_account", {
+      method: "GET",
+      headers: {
+        Authorization: `Basic ${credentials}`,
+      },
+    })
+
+    if (!authResponse.ok) {
+      throw new Error("Authentication failed")
+    }
+
+    const authData = await authResponse.json()
+    const { authorizationToken, apiUrl, downloadUrl } = authData
+
+    console.log("[v0] Got B2 authorization, getting upload URL...")
+
+    // Get upload URL
+    const uploadUrlResponse = await fetch(`${apiUrl}/b2api/v2/b2_get_upload_url`, {
+      method: "POST",
+      headers: {
+        Authorization: authorizationToken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        bucketId: bucketId,
+      }),
+    })
+
+    if (!uploadUrlResponse.ok) {
+      throw new Error("Failed to get upload URL")
+    }
+
+    const uploadUrlData = await uploadUrlResponse.json()
+
+    console.log("[v0] Got upload URL, uploading file...")
+
+    // Upload file
+    const uploadResponse = await fetch(uploadUrlData.uploadUrl, {
+      method: "POST",
+      headers: {
+        Authorization: uploadUrlData.authorizationToken,
+        "X-Bz-File-Name": encodeURIComponent(filePath),
+        "Content-Type": "application/octet-stream",
+        "X-Bz-Content-Sha1": "unverified",
+      },
+      body: buffer,
+    })
+
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text()
+      console.error("[v0] Upload failed:", errorText)
+      throw new Error(`Upload failed: ${uploadResponse.statusText}`)
+    }
+
+    const uploadedFile = await uploadResponse.json()
+
+    const fileUrl = `${downloadUrl}/file/${bucketName}/${uploadedFile.fileName}`
+
+    console.log("[v0] File uploaded successfully:", fileUrl)
+
+    return {
+      success: true,
+      url: fileUrl,
+    }
+  } catch (error) {
+    console.error("[v0] Error uploading to Backblaze:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}

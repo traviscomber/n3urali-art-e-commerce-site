@@ -18,6 +18,7 @@ import {
   Trash2,
   Edit,
   Eye,
+  Play,
   Loader2
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
@@ -207,15 +208,25 @@ export default function SimpleAdminPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {standardImages.map((image) => (
                           <Card key={image.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-slate-700 border-slate-600">
-                            <div className="relative h-48 bg-slate-600 overflow-hidden">
-                              {image.thumbnail_medium_url && (
+                            <div className="relative h-48 bg-gradient-to-br from-slate-600 to-slate-800 overflow-hidden flex items-center justify-center">
+                              {image.thumbnail_medium_url ? (
                                 <Image
                                   src={image.thumbnail_medium_url}
                                   alt={image.title}
                                   fill
                                   className="object-cover"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none'
+                                  }}
                                 />
-                              )}
+                              ) : null}
+                              {/* Fallback for videos or missing images */}
+                              {!image.thumbnail_medium_url || image.original_url?.endsWith('.mov') ? (
+                                <div className="text-center">
+                                  <Eye className="h-12 w-12 text-slate-400 mx-auto mb-2" />
+                                  <p className="text-slate-400 text-sm">Video Content</p>
+                                </div>
+                              ) : null}
                               <div className="absolute top-2 right-2 flex gap-2">
                                 {!image.active && (
                                   <Badge variant="outline" className="bg-red-900 text-red-300 border-red-700">
@@ -288,15 +299,25 @@ export default function SimpleAdminPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {equirectangularImages.map((image) => (
                           <Card key={image.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-slate-700 border-slate-600">
-                            <div className="relative h-48 bg-slate-600 overflow-hidden">
-                              {image.thumbnail_medium_url && (
+                            <div className="relative h-48 bg-gradient-to-br from-slate-600 to-slate-800 overflow-hidden flex items-center justify-center">
+                              {image.thumbnail_medium_url ? (
                                 <Image
                                   src={image.thumbnail_medium_url}
                                   alt={image.title}
                                   fill
                                   className="object-cover"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none'
+                                  }}
                                 />
-                              )}
+                              ) : null}
+                              {/* Fallback for videos or missing images */}
+                              {!image.thumbnail_medium_url || image.original_url?.endsWith('.mov') ? (
+                                <div className="text-center">
+                                  <Play className="h-12 w-12 text-cyan-400 mx-auto mb-2" />
+                                  <p className="text-cyan-400 text-sm">360° Video</p>
+                                </div>
+                              ) : null}
                               <div className="absolute top-2 right-2 flex gap-2">
                                 <Badge className="bg-purple-600 text-white text-xs">360°</Badge>
                                 {!image.active && (

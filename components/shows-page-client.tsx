@@ -174,6 +174,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
           <div className="max-w-7xl mx-auto w-full">
             <div className="relative w-full aspect-video rounded-md overflow-hidden bg-black">
               <video
+                key={selectedTeaserIndex}
                 src={teaserVideoUrls[teaserLabels[selectedTeaserIndex]] || teaserImages[selectedTeaserIndex]?.upscaled_url || teaserImages[selectedTeaserIndex]?.original_url || ''}
                 autoPlay
                 loop

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { uploadToBackblaze } from "@/app/actions/backblaze-actions"
+import { writeFile } from "fs/promises"
+import { join } from "path"
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,23 +38,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: b2Result.error }, { status: 500 })
     }
 
+    // Also save locally to /public/images for direct access (same as working images)
+    try {
+      const localPath = join(process.cwd(), "public", "images", fileName)
+      await writeFile(localPath, Buffer.from(buffer))
+      console.log("[v0] File saved locally to:", localPath)
+    } catch (localError) {
+      console.warn("[v0] Warning: Could not save file locally, using B2 only:", localError)
+    }
+
+    // Use LOCAL URL (same pattern as working images) instead of Backblaze URL
+    const localUrl = `/images/${fileName}`
+
     // Return the image data for database insertion
     const responseData = {
       success: true,
       imageData: {
         title,
         description,
-        original_url: b2Result.url,
-        upscaled_url: b2Result.url,
-        thumbnail_medium_url: b2Result.url,
-        thumbnail_small_url: b2Result.url,
+        original_url: localUrl,
+        upscaled_url: localUrl,
+        thumbnail_medium_url: localUrl,
+        thumbnail_small_url: localUrl,
         file_path: filePath,
         image_format: imageFormat,
         content_category: contentCategory,
       },
     }
     
-    console.log("[v0] Returning response:", responseData)
+    console.log("[v0] Returning response with local URL:", responseData)
     return NextResponse.json(responseData)
   } catch (error) {
     console.error("[v0] B2 upload error:", error)

@@ -11,11 +11,13 @@ export const revalidate = 3600
 export default async function TheatrePage() {
   const supabase = await createClient()
 
-  // Fetch all equirectangular images
+  // Fetch only equirectangular images (no videos), must be active
   const { data: images } = await supabase
     .from('images')
     .select('id, title, thumbnail_medium_url, original_url, upscaled_url, image_format, description, active')
     .eq('image_format', 'equirectangular')
+    .eq('active', true)
+    .not('content_category', 'is', null)
     .order('created_at', { ascending: false })
 
   // Fetch collections with their images

@@ -51,37 +51,44 @@ export default function SimpleAdminPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editData, setEditData] = useState<any>({})
 
-  useEffect(() => {
-    fetchImages()
-  }, [])
-
+  // Define fetchImages BEFORE useEffect
   const fetchImages = async () => {
     try {
       setIsLoading(true)
+      console.log("[v0] Fetching images from API...")
       const response = await fetch("/api/admin/featured-images?all=true")
       
+      console.log("[v0] API response status:", response.status)
+      
       if (!response.ok) {
-        console.log("[v0] Fetch response not ok:", response.status)
+        console.error("[v0] Fetch response not ok:", response.status)
         throw new Error(`Failed to fetch images: ${response.status}`)
       }
       
       const data = await response.json()
-      console.log("[v0] Fetched images:", data)
+      console.log("[v0] Fetched images data:", data)
       
       // Handle both array and object responses
       const imageList = Array.isArray(data) ? data : (data.data || data.images || [])
+      console.log("[v0] Setting images:", imageList)
       setImages(imageList)
     } catch (error) {
       console.error("[v0] Fetch images error:", error)
       toast({
         title: "Error",
-        description: "Failed to load images",
+        description: error instanceof Error ? error.message : "Failed to load images",
         variant: "destructive",
       })
     } finally {
       setIsLoading(false)
     }
   }
+
+  // NOW use fetchImages in useEffect
+  useEffect(() => {
+    console.log("[v0] Component mounted, calling fetchImages")
+    fetchImages()
+  }, [])
 
   const deleteImage = async (imageId: string) => {
     try {

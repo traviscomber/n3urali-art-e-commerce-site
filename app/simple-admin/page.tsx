@@ -117,7 +117,7 @@ export default function SimpleAdminPage() {
   const handleUpload = async (file: File, metadata: any) => {
     try {
       setUploadLoading(true)
-      console.log("[v0] Starting upload with metadata:", metadata)
+      console.log("[v0] handleUpload START - file:", file.name, "metadata:", metadata)
       
       const formData = new FormData()
       formData.append("file", file)
@@ -127,23 +127,30 @@ export default function SimpleAdminPage() {
       formData.append("imageFormat", metadata.imageFormat)
       formData.append("contentCategory", metadata.contentCategory)
 
-      console.log("[v0] Uploading to B2...")
+      console.log("[v0] FormData prepared, calling B2 upload...")
+      
       const uploadRes = await fetch("/api/admin/upload-to-b2", {
         method: "POST",
         body: formData,
       })
+      
+      console.log("[v0] B2 response received:", uploadRes.status, uploadRes.statusText)
 
       if (!uploadRes.ok) {
-        const errorData = await uploadRes.json()
-        console.error("[v0] B2 upload failed:", errorData)
-        throw new Error(errorData.error || "Upload failed")
+        const errorText = await uploadRes.text()
+        console.error("[v0] B2 upload failed with status", uploadRes.status, ":", errorText)
+        throw new Error(`Upload failed: ${uploadRes.status} ${errorText}`)
       }
       
       const uploadResult = await uploadRes.json()
-      console.log("[v0] B2 upload success:", uploadResult)
+      console.log("[v0] B2 upload result parsed:", uploadResult)
+
+      if (!uploadResult.imageData) {
+        throw new Error("No imageData in response")
+      }
 
       // Save to database
-      console.log("[v0] Saving to database...")
+      console.log("[v0] Saving to database with data:", uploadResult.imageData)
       const createRes = await fetch("/api/admin/featured-images", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -153,10 +160,12 @@ export default function SimpleAdminPage() {
         }),
       })
 
+      console.log("[v0] Database response received:", createRes.status)
+
       if (!createRes.ok) {
-        const errorData = await createRes.json()
-        console.error("[v0] Database save failed:", errorData)
-        throw new Error(errorData.error || "Failed to save to database")
+        const errorText = await createRes.text()
+        console.error("[v0] Database save failed:", errorText)
+        throw new Error(`Database save failed: ${createRes.status} ${errorText}`)
       }
       
       console.log("[v0] Database save success")
@@ -168,6 +177,7 @@ export default function SimpleAdminPage() {
 
       console.log("[v0] Fetching updated images...")
       await fetchImages()
+      console.log("[v0] handleUpload COMPLETE")
     } catch (error) {
       console.error("[v0] Upload error:", error)
       toast({
@@ -177,6 +187,7 @@ export default function SimpleAdminPage() {
       })
     } finally {
       setUploadLoading(false)
+      console.log("[v0] setUploadLoading set to false")
     }
   }
 

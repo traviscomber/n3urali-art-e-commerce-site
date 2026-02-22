@@ -42,49 +42,50 @@ export function StudioPageClient() {
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left: Title and Content */}
-            <div className="flex flex-col gap-8">
-              <div>
-                <h1 className="text-6xl md:text-7xl font-light text-slate-300 mb-4">
-                  Studio
-                </h1>
-                <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-md">
-                  N3uralia360 is a content creation studio combining advanced proprietary AI tools with human art direction and real production.
+            <div className="flex flex-col gap-12">
+              <h1 className="text-6xl md:text-7xl font-light text-slate-400 leading-tight">
+                Studio
+              </h1>
+              
+              <div className="space-y-6">
+                <p className="text-slate-400 text-sm leading-relaxed max-w-md">
+                  N3uralia360 is a content creation studio combining advanced proprietary <a href="#" className="text-cyan-400 hover:text-cyan-300 underline">AI tools</a> with human art direction and real production.
                 </p>
-              </div>
 
-              {/* We create section */}
-              <div className="space-y-4">
-                <p className="text-slate-400 text-sm font-medium">We create:</p>
-                <ul className="space-y-3">
-                  <li className="flex gap-3 items-start text-slate-300 text-sm">
-                    <span className="text-cyan-400 mt-1">•</span>
-                    <span>Full-dome cinematic stories</span>
-                  </li>
-                  <li className="flex gap-3 items-start text-slate-300 text-sm">
-                    <span className="text-cyan-400 mt-1">•</span>
-                    <span>Seamless dome environments & loops</span>
-                  </li>
-                  <li className="flex gap-3 items-start text-slate-300 text-sm">
-                    <span className="text-cyan-400 mt-1">•</span>
-                    <span>VR-ready immersive worlds</span>
-                  </li>
-                  <li className="flex gap-3 items-start text-slate-300 text-sm">
-                    <span className="text-cyan-400 mt-1">•</span>
-                    <span>Educational cultural stories</span>
-                  </li>
-                  <li className="flex gap-3 items-start text-slate-300 text-sm">
-                    <span className="text-cyan-400 mt-1">•</span>
-                    <span>Custom immersive productions</span>
-                  </li>
-                </ul>
+                {/* We create section */}
+                <div className="space-y-4 pt-4">
+                  <p className="text-slate-400 text-xs font-medium uppercase tracking-wide">We create:</p>
+                  <ul className="space-y-2">
+                    <li className="flex gap-3 items-start text-slate-300 text-sm">
+                      <span className="text-cyan-400 flex-shrink-0">•</span>
+                      <span>Full-dome cinematic stories</span>
+                    </li>
+                    <li className="flex gap-3 items-start text-slate-300 text-sm">
+                      <span className="text-cyan-400 flex-shrink-0">•</span>
+                      <span>Seamless dome environments & loops</span>
+                    </li>
+                    <li className="flex gap-3 items-start text-slate-300 text-sm">
+                      <span className="text-cyan-400 flex-shrink-0">•</span>
+                      <span>VR-ready immersive worlds</span>
+                    </li>
+                    <li className="flex gap-3 items-start text-slate-300 text-sm">
+                      <span className="text-cyan-400 flex-shrink-0">•</span>
+                      <span>Educational & cultural series</span>
+                    </li>
+                    <li className="flex gap-3 items-start text-slate-300 text-sm">
+                      <span className="text-cyan-400 flex-shrink-0">•</span>
+                      <span>Custom immersive productions</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
 
             {/* Right: Studio Image */}
-            <div className="flex justify-center items-center">
-              <div className="relative w-full max-w-md aspect-video rounded-lg overflow-hidden">
+            <div className="flex justify-end items-start lg:pt-0">
+              <div className="relative w-full max-w-xs aspect-square rounded-lg overflow-hidden border border-slate-700/50">
                 <Image
-                  src="/placeholder.svg?height=400&width=600"
+                  src="/placeholder.svg?height=500&width=500"
                   alt="Studio setup"
                   fill
                   className="object-cover"

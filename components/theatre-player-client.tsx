@@ -31,7 +31,11 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [isViewerOpen, setIsViewerOpen] = useState(false)
 
+  console.log('[v0] TheatrePlayerClient - Images received:', images.length)
+  console.log('[v0] TheatrePlayerClient - Collections received:', collections.length)
+
   if (!images || images.length === 0) {
+    console.log('[v0] TheatrePlayerClient - No images, showing fallback')
     return (
       <div className="min-h-screen w-full bg-black flex items-center justify-center">
         <div className="text-center">
@@ -44,6 +48,8 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
 
   const currentImage = images[selectedImageIndex]
   const imageUrl = currentImage.upscaled_url || currentImage.original_url || currentImage.thumbnail_medium_url || ''
+  
+  console.log('[v0] Current image:', currentImage.title, 'URL:', imageUrl)
 
   const handlePrevious = () => {
     setSelectedImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))

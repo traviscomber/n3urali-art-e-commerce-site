@@ -46,13 +46,13 @@ export const ClientWrapper = memo(
     // Core product sections
     const productSections = [
       {
-        id: "realities",
-        title: "R3alities",
+        id: "shows",
+        title: "Shows",
         subtitle: "Cinematic Dome Stories",
         description: "Seamless immersive loops designed for full-dome cinema, festivals, and branded experiences.",
         icon: Play,
         color: "from-cyan-500/20 to-blue-500/20",
-        href: "/realities",
+        href: "/shows",
       },
       {
         id: "environments",
@@ -125,7 +125,7 @@ export const ClientWrapper = memo(
 
                 {/* CTA Buttons */}
                 <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-                  <Link href="/realities">
+                  <Link href="/shows">
                     <Button size="lg" className="bg-cyan-600 hover:bg-cyan-700 text-white">
                       Explore Worlds
                       <ArrowRight className="w-4 h-4 ml-2" />

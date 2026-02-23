@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { createClient } from "@/lib/supabase/server"
 import { HomepageHero } from "@/components/homepage-hero"
 import { CategoryCardsGrid } from "@/components/category-cards-grid"
-import { RealitiesSection } from "@/components/realities-section"
+import { ShowsSection } from "@/components/shows-section"
 import { EnvironmentsSection } from "@/components/environments-section"
 import { TheatreSection } from "@/components/theatre-section"
 
@@ -36,14 +36,14 @@ export default async function HomePage() {
   // Fetch first image from each category for the category cards
   const categories = [
     { key: 'studio', title: 'STUDIO', label: 'Production', link: '/studio', accent: 'gold' as const },
-    { key: 'realities', title: 'REALITIES', label: 'Stories', link: '/realities', accent: 'purple' as const },
+    { key: 'shows', title: 'SHOWS', label: 'Stories', link: '/shows', accent: 'purple' as const },
     { key: 'environments', title: 'FULL DOME', label: 'Environments', link: '/environments', accent: 'green' as const },
     { key: 'theatre', title: 'THEATRE', label: 'Online', link: '/theatre', accent: 'orange' as const },
   ]
 
   // Fallback images for each category - using button design images
   const fallbackImages: Record<string, string | null> = {
-    realities: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/R3alities%20-SfYHWLGoctbhyfsR3b6Y6eGISXCeyG.png',
+    shows: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/R3alities%20-SfYHWLGoctbhyfsR3b6Y6eGISXCeyG.png',
     studio: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Studio-MYfrERBxbjcFc5gyFXzjZftIbU5kOt.png',
     environments: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Enve%CC%81s-EyBbx4EwgsTeVeUjU70EbUa9ZnVUDs.png',
     theatre: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatre-MypQBeV3eTXC7HBzjUM9NmWTs2cRkO.png',
@@ -95,8 +95,8 @@ export default async function HomePage() {
       {/* Category Cards Grid */}
       <CategoryCardsGrid cards={categoryCards.filter(card => card.imageUrl)} />
 
-      {/* Realities Section */}
-      <RealitiesSection />
+      {/* Shows Section */}
+      <ShowsSection />
 
       {/* Environments Section */}
       <EnvironmentsSection />

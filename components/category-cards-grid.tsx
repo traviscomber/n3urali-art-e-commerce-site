@@ -34,7 +34,7 @@ export function CategoryCardsGrid({ cards }: CategoryCardsGridProps) {
                   alt={card.title}
                   fill
                   className="object-cover group-hover:scale-110 transition-transform duration-300"
-                  priority={card.id === 'studio' || card.id === 'realities'}
+                  priority={card.id === 'studio' || card.id === 'shows'}
                 />
               )}
 

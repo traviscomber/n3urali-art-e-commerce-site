@@ -1,211 +1,274 @@
-'use client'
+"use client"
 
-import Image from 'next/image'
-import { useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useState, useMemo } from "react"
+import Link from "next/link"
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { ArrowRight, Filter, Search, Play } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Footer } from "@/components/footer"
 
-interface Collection {
+interface ContentItem {
   id: string
   title: string
-  work_title?: string
-  description?: string
-  synopsis?: string
-  featured_image_url?: string
-  format_types?: string[]
-  code?: string
-}
-
-interface TeaserImage {
-  id: string
-  title: string
+  file_path: string
+  original_url: string | null
+  upscaled_url: string | null
+  price: number
+  image_format: string
   thumbnail_medium_url?: string
-  original_url?: string
-  upscaled_url?: string
-  tags?: string[]
+  description?: string
 }
 
-interface ShowsPageClientProps {
-  collections: Collection[]
-  teaserImages: TeaserImage[]
+interface ShowsClientProps {
+  initialContent: ContentItem[]
 }
 
-export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientProps) {
-  const [currentTeaserIndex, setCurrentTeaserIndex] = useState(0)
-  const [selectedTeaserIndex, setSelectedTeaserIndex] = useState<number | null>(null)
+export function ShowsClient({ initialContent }: ShowsClientProps) {
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedFormat, setSelectedFormat] = useState<string | null>(null)
 
-  const featuredCollection = collections?.[0]
-  const featuredImage = teaserImages?.[0]
-  const teaserLabels = ['Heritage', 'Education', 'Fun']
+  // Format categories
+  const formats = useMemo(() => {
+    const unique = new Set(initialContent.map((item) => item.image_format))
+    return Array.from(unique).sort()
+  }, [initialContent])
 
-  // Map teaser labels to button image URLs (the square button designs)
-  const teaserButtonImages: Record<string, string> = {
-    'Heritage': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/HeritageButtonShowPage%20%281%29-UTOiJnPQYrWs6eoV58npFHyJGXFzrR.png',
-    'Education': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EducationButtonShowPage-7Cbh8lnKGVveRFY7gN0mLW8JagRgPS.png',
-    'Fun': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/FunButtonShowPage-JhOWIO4GjW22okIs8IPV2s8JofS8SI.png'
-  }
-
-  // Map teaser labels to custom video URLs
-  const teaserVideoUrls: Record<string, string> = {
-    'Heritage': 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f107090e62b7fa63f_d20260222_m232412_c005_v0501037_t0027_u01771802652244',
-    'Education': 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f10685a25d2bfc41a_d20260223_m001040_c005_v0501031_t0025_u01771805440205',
-    'Fun': 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f1181cca5d91b6fda_d20260223_m001409_c005_v0501033_t0019_u01771805649055'
-  }
-
-  const handleTeaserNext = () => {
-    setCurrentTeaserIndex((prev) => (prev + 1) % teaserImages.length)
-  }
-
-  const handleTeaserPrev = () => {
-    setCurrentTeaserIndex((prev) => (prev - 1 + teaserImages.length) % teaserImages.length)
-  }
+  // Filter content
+  const filteredContent = useMemo(() => {
+    return initialContent.filter((item) => {
+      const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesFormat = !selectedFormat || item.image_format === selectedFormat
+      return matchesSearch && matchesFormat
+    })
+  }, [initialContent, searchQuery, selectedFormat])
 
   return (
-    <div className="w-full">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="min-h-screen flex items-center px-6 sm:px-8 lg:px-12 py-20 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-            {/* Left: Content */}
-            <div className="flex flex-col gap-8 pt-0">
-              <div>
-                <h1 className="text-7xl md:text-8xl font-light text-slate-400 leading-tight mb-2">
-                  Shows
-                </h1>
-                <p className="text-slate-500 text-base tracking-wide">Cinematic Dome Stories</p>
-              </div>
+      <section className="relative py-20 px-4 bg-gradient-to-b from-slate-900/50 via-slate-900/30 to-background">
+        <div className="absolute inset-0 z-0 opacity-40">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
+        </div>
 
-              {/* Featured Show Description */}
-              <div className="space-y-6">
-                <div>
-                  <p className="text-slate-300 text-sm leading-relaxed mb-4">
-                    {featuredCollection?.synopsis || 'Meet Mossy — Guide of the Multiverse'}
-                  </p>
-                  <p className="text-slate-400 text-xs leading-relaxed">
-                    {featuredCollection?.description || 'From mythical realms to sacred atmospheres, cinematic side of N3uralia360.'}
-                  </p>
-                </div>
-
-                {/* Perfect For */}
-                <div className="space-y-3">
-                  <p className="text-slate-400 text-xs font-medium uppercase tracking-wide">Perfect for:</p>
-                  <ul className="space-y-2">
-                    <li className="flex gap-3 items-start text-slate-300 text-sm">
-                      <span className="text-cyan-400 flex-shrink-0 mt-0.5">•</span>
-                      <span>Family dome nights</span>
-                    </li>
-                    <li className="flex gap-3 items-start text-slate-300 text-sm">
-                      <span className="text-cyan-400 flex-shrink-0 mt-0.5">•</span>
-                      <span>Cultural programming</span>
-                    </li>
-                    <li className="flex gap-3 items-start text-slate-300 text-sm">
-                      <span className="text-cyan-400 flex-shrink-0 mt-0.5">•</span>
-                      <span>Branded immersive events</span>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Production Details */}
-                <p className="text-slate-400 text-xs leading-relaxed pt-4 border-t border-slate-700">
-                  Real 4K, ready to be distributed and custom storytelling creation.
-                </p>
-              </div>
+        <div className="relative z-10 container mx-auto max-w-6xl">
+          <div className="text-center space-y-6 mb-16">
+            <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/30 rounded-full px-4 py-2">
+              <Play className="w-4 h-4 text-cyan-400" />
+              <span className="text-sm font-semibold text-cyan-300">Cinematic Experiences</span>
             </div>
 
-            {/* Right: Featured Image */}
-            <div className="flex justify-end items-start">
-              <div className="relative w-full max-w-sm">
-                <div className="relative aspect-square rounded-lg overflow-hidden border border-slate-700/50">
-                  <Image
-                    src={featuredImage?.upscaled_url || featuredImage?.original_url || featuredImage?.thumbnail_medium_url || '/placeholder.svg?height=400&width=400'}
-                    alt={featuredImage?.title || featuredCollection?.title || 'Featured show'}
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                </div>
-                {featuredCollection?.title && (
-                  <div className="mt-6 text-center">
-                    <p className="text-cyan-300 font-light text-2xl italic mb-1">
-                      {featuredCollection.title}
-                    </p>
-                  </div>
-                )}
-              </div>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
+              Cinematic Dome Stories
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">
+                With Timing
+              </span>
+            </h1>
+
+            <p className="text-lg text-slate-300 max-w-3xl mx-auto">
+              Not loops. Not static backdrops. Real stories that unfold.
+            </p>
+
+            <p className="text-base text-slate-400 max-w-3xl mx-auto leading-relaxed">
+              Realities are AI-animated immersive experiences with progression, rhythm, and visual timing. Designed as mini-shows that hold audience attention from beginning to end.
+            </p>
+
+            <div className="mt-8 bg-slate-800/50 border border-slate-700 rounded-xl p-6 max-w-3xl mx-auto">
+              <h3 className="text-lg font-bold text-white mb-4">Perfect for:</h3>
+              <ul className="grid md:grid-cols-2 gap-3 text-slate-300">
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full" />
+                  School dome programming
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
+                  Festival headline segments
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full" />
+                  Branded immersive presentations
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
+                  Themed event openings
+                </li>
+              </ul>
+            </div>
+
+            <div className="mt-8 bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 border border-cyan-500/20 rounded-xl p-6 max-w-3xl mx-auto">
+              <p className="text-slate-300 font-semibold mb-2">Each Reality includes:</p>
+              <p className="text-slate-400 text-sm">
+                Full-dome fisheye version • Optional VR equirectangular edition • Structured runtime with narrative flow • Clean projection-ready delivery
+              </p>
+            </div>
+
+            <div className="flex items-center justify-center gap-4 pt-4">
+              <Link href="/studio">
+                <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                  Commission Custom Work
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Key features */}
+          <div className="grid md:grid-cols-4 gap-4 bg-slate-800/40 rounded-xl border border-slate-700 p-8">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-cyan-400 mb-1">{initialContent.length}</p>
+              <p className="text-sm text-slate-400">Immersive Stories</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-cyan-400 mb-1">{formats.length}</p>
+              <p className="text-sm text-slate-400">Format Types</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-cyan-400 mb-1">4K+</p>
+              <p className="text-sm text-slate-400">Resolution</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-cyan-400 mb-1">VR Ready</p>
+              <p className="text-sm text-slate-400">All Formats</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Video Player Section with Side Teaser Carousel */}
-      <section className="px-6 sm:px-8 lg:px-12 py-20 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto w-full">
-          <h2 className="text-4xl font-light text-slate-400 mb-12">Teasers:</h2>
-
-          {/* Side-by-side layout: Teasers on left, Video player on right */}
-          <div className="grid grid-cols-1 lg:grid-cols-[140px_1fr] gap-12 items-start">
-            
-            {/* Left: Compact vertical teaser list - Smaller thumbnail buttons */}
-            <div className="flex flex-col items-stretch gap-3">
-              {/* Display 3 teasers vertically - Compact squares */}
-              {teaserLabels.map((label, index) => {
-                const isSelected = selectedTeaserIndex === index
-                const buttonImageUrl = teaserButtonImages[label]
-                
-                return (
-                  <div
-                    key={`teaser-${index}`}
-                    onClick={() => setSelectedTeaserIndex(index)}
-                    className={`relative w-full h-32 rounded-sm overflow-hidden cursor-pointer group transition-all duration-300 ${
-                      isSelected ? 'ring-2 ring-cyan-400' : 'ring-1 ring-slate-700 group-hover:ring-slate-500'
-                    }`}
-                  >
-                    {/* Background Image - Full bleed, no text overlay */}
-                    <Image
-                      src={buttonImageUrl}
-                      alt={label}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-
-                    {/* Selection overlay */}
-                    {isSelected && (
-                      <div className="absolute inset-0 bg-black/20" />
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Right: Video Player (Square - Better balanced size) */}
-            <div className="relative w-full max-w-lg aspect-square rounded-md overflow-hidden bg-black">
-              <video
-                key={selectedTeaserIndex}
-                src={selectedTeaserIndex !== null ? (teaserVideoUrls[teaserLabels[selectedTeaserIndex]] || teaserImages[selectedTeaserIndex]?.upscaled_url || teaserImages[selectedTeaserIndex]?.original_url || '') : 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f107090e62b7fa63f_d20260222_m232412_c005_v0501037_t0027_u01771802652244'}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full h-full object-cover"
+      {/* Search and Filter Section */}
+      <section className="sticky top-0 z-40 py-6 px-4 bg-background/95 backdrop-blur border-b border-slate-700">
+        <div className="container mx-auto max-w-6xl">
+          <div className="flex flex-col md:flex-row gap-4 items-center">
+            {/* Search */}
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" />
+              <Input
+                placeholder="Search R3alities..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-slate-800 border-slate-700 text-white placeholder-slate-400"
               />
             </div>
+
+            {/* Format Filter */}
+            {formats.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
+                <Filter className="w-5 h-5 text-slate-400" />
+                <select
+                  value={selectedFormat || ""}
+                  onChange={(e) => setSelectedFormat(e.target.value || null)}
+                  className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 text-sm cursor-pointer hover:border-slate-600"
+                >
+                  <option value="">All Formats</option>
+                  {formats.map((format) => (
+                    <option key={format} value={format}>
+                      {format}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Results count */}
+            <div className="text-sm text-slate-400">
+              {filteredContent.length} of {initialContent.length} stories
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Deliverables Section */}
-      <section className="px-6 sm:px-8 lg:px-12 py-20">
-        <div className="max-w-7xl mx-auto w-full">
-          <h2 className="text-5xl font-light text-slate-400 mb-6">Deliverables</h2>
+      {/* Content Grid */}
+      <section className="py-16 px-4">
+        <div className="container mx-auto max-w-6xl">
+          {filteredContent.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredContent.map((item) => (
+                <Link key={item.id} href={`/photo/${item.id}`}>
+                  <Card className="group relative h-96 overflow-hidden bg-slate-800/40 border-slate-700 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20 cursor-pointer">
+                    {/* Image */}
+                    <Image
+                      src={item.upscaled_url || item.original_url || item.file_path || "/placeholder.svg"}
+                      alt={item.title}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
 
-          <p className="text-slate-400 text-sm leading-relaxed mb-12 max-w-md">
-            Simple show licensing or custom created show. Real 4K quality.
-          </p>
+                    {/* Overlay gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
-          <button className="px-8 py-3 border border-slate-500 text-slate-300 hover:border-cyan-400 hover:text-cyan-400 transition-colors rounded-sm text-sm font-light uppercase tracking-wider">
-            Ask Question
-          </button>
+                    {/* Format badge */}
+                    <div className="absolute top-3 right-3 px-3 py-1 bg-cyan-500/20 border border-cyan-500/50 rounded-lg text-xs font-semibold text-cyan-300 backdrop-blur-sm">
+                      {item.image_format}
+                    </div>
+
+                    {/* Content */}
+                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white space-y-3">
+                      <div>
+                        <h3 className="text-lg font-bold line-clamp-2">{item.title}</h3>
+                        {item.description && (
+                          <p className="text-sm text-slate-300 line-clamp-1 mt-1">{item.description}</p>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-slate-400">VR Ready</span>
+                        <div className="flex items-center gap-1 text-cyan-400 group-hover:translate-x-1 transition-transform">
+                          <span className="text-sm">View</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16 space-y-4">
+              <p className="text-lg text-slate-400">No stories found matching your search.</p>
+              <Button
+                onClick={() => {
+                  setSearchQuery("")
+                  setSelectedFormat(null)
+                }}
+                variant="outline"
+                className="border-slate-600 text-slate-200 hover:bg-slate-800/50"
+              >
+                Clear Filters
+              </Button>
+            </div>
+          )}
         </div>
       </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-4 bg-gradient-to-b from-slate-900/50 to-background">
+        <div className="container mx-auto max-w-4xl">
+          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-slate-700 p-12 text-center space-y-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-white">Looking for Something Custom?</h2>
+            <p className="text-slate-300 text-lg">
+              Our studio team creates bespoke immersive experiences tailored to your venue, brand, or cultural narrative.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+              <Link href="/studio">
+                <Button size="lg" className="bg-cyan-600 hover:bg-cyan-700 text-white">
+                  Explore Studio Services
+                </Button>
+              </Link>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-slate-600 text-slate-200 hover:bg-slate-800/50"
+              >
+                Request Quote
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   )
 }

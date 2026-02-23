@@ -38,9 +38,17 @@ export function StudioPageClient() {
   return (
     <div className="w-full">
       <style jsx>{`
-        /* Hide the 2 images gallery section below Studio hero */
-        .hidden-gallery {
-          display: none;
+        /* Hide any 2-column image gallery between sections */
+        section + section .grid-cols-2,
+        section + section + section .grid-cols-2,
+        [class*="gallery"] img:nth-child(1),
+        [class*="gallery"] img:nth-child(2) {
+          display: none !important;
+        }
+        
+        /* Hide container that shows the 2 thumbnail images */
+        .px-6.sm\:px-8.lg\:px-12.py-20 > .max-w-7xl > .grid-cols-2 {
+          display: none !important;
         }
       `}</style>
       {/* Hero Section */}

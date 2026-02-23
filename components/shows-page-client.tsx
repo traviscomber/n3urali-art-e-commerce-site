@@ -37,6 +37,14 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
   const featuredImage = teaserImages?.[0]
   const teaserLabels = ['Heritage', 'Education', 'Fun', 'Art']
 
+  // Map teaser labels to button image URLs (the square button designs)
+  const teaserButtonImages: Record<string, string> = {
+    'Heritage': 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f10748d3c9f622684_d20260222_m201001_c005_v0501033_t0045_u01771791001362',
+    'Education': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EducationButtonShowPage-7Cbh8lnKGVveRFY7gN0mLW8JagRgPS.png',
+    'Fun': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/FunButtonShowPage-JhOWIO4GjW22okIs8IPV2s8JofS8SI.png',
+    'Art': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/HeritageButtonShowPage%20%281%29-jRobSVOC5G6BBeiFaBMOdZGa5OwMEy.png'
+  }
+
   // Map teaser labels to custom video URLs
   const teaserVideoUrls: Record<string, string> = {
     'Heritage': 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f107090e62b7fa63f_d20260222_m232412_c005_v0501037_t0027_u01771802652244',
@@ -142,9 +150,9 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
             {/* Left: Full vertical teaser list - Square buttons with text overlay */}
             <div className="flex flex-col items-stretch gap-6">
               {/* Display all 4 teasers vertically - Full square cards */}
-              {teaserImages.slice(0, 4).map((image, index) => {
-                const label = teaserLabels[index]
+              {teaserLabels.map((label, index) => {
                 const isSelected = selectedTeaserIndex === index
+                const buttonImageUrl = teaserButtonImages[label]
                 
                 return (
                   <div
@@ -156,7 +164,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                   >
                     {/* Background Image - Full bleed */}
                     <Image
-                      src={image?.upscaled_url || image?.original_url || image?.thumbnail_medium_url || '/placeholder.svg'}
+                      src={buttonImageUrl}
                       alt={label}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"

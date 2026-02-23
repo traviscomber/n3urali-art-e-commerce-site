@@ -143,11 +143,11 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
           <h2 className="text-4xl font-light text-slate-400 mb-12">Teasers:</h2>
 
           {/* Side-by-side layout: Teasers on left, Video player on right */}
-          <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-10 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-[140px_1fr] gap-12 items-start">
             
-            {/* Left: Full vertical teaser list - Square buttons */}
-            <div className="flex flex-col items-stretch gap-5">
-              {/* Display 3 teasers vertically - Full square cards */}
+            {/* Left: Compact vertical teaser list - Smaller thumbnail buttons */}
+            <div className="flex flex-col items-stretch gap-3">
+              {/* Display 3 teasers vertically - Compact squares */}
               {teaserLabels.map((label, index) => {
                 const isSelected = selectedTeaserIndex === index
                 const buttonImageUrl = teaserButtonImages[label]
@@ -156,7 +156,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                   <div
                     key={`teaser-${index}`}
                     onClick={() => setSelectedTeaserIndex(index)}
-                    className={`relative w-full aspect-square rounded-md overflow-hidden cursor-pointer group transition-all duration-300 ${
+                    className={`relative w-full h-32 rounded-sm overflow-hidden cursor-pointer group transition-all duration-300 ${
                       isSelected ? 'ring-2 ring-cyan-400' : 'ring-1 ring-slate-700 group-hover:ring-slate-500'
                     }`}
                   >

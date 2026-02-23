@@ -68,7 +68,7 @@ export function ShowsSection() {
           <div className="flex justify-center">
             <div className="relative w-full max-w-md aspect-square rounded-full overflow-hidden shadow-2xl">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/R3alities%20-SfYHWLGoctbhyfsR3b6Y6eGISXCeyG.png"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/MossyCircle2%20%281%29-H1oNbCAWPjvohtpmqn91ZlDKOo68Ky.png"
                 alt="Shows - Cinematic dome stories with whimsical creatures"
                 fill
                 className="w-full h-full object-cover"

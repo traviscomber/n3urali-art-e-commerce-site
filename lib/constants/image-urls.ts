@@ -8,6 +8,10 @@ export const LANDING_PAGE_IMAGES = {
   theatre: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatre-MypQBeV3eTXC7HBzjUM9NmWTs2cRkO.png',
 } as const
 
+export const SECTION_BACKGROUND_IMAGES = {
+  environments: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsBack.png-0q3topnrVPiOkCWvl8eEQKVmMbu237.jpeg',
+} as const
+
 export const TEASER_BUTTON_IMAGES = {
   Heritage: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/HeritageButtonShowPage%20%281%29-UTOiJnPQYrWs6eoV58npFHyJGXFzrR.png',
   Education: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EducationButtonShowPage-7Cbh8lnKGVveRFY7gN0mLW8JagRgPS.png',

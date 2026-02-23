@@ -103,54 +103,6 @@ export function EnvironmentsSection() {
   )
 }
 
-        {/* Environment Collections Container */}
-        <div className="space-y-20">
-          {/* Collection 1: Heritage Environments */}
-          <EnvironmentCollection
-            title="Heritage Environments"
-            subtitle="Travel like never before!"
-            images={[
-              { src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EH1-Dqv4I3pSMeCK9NxLTaFxtb1VANTGwj.png', alt: 'Modern City Dome' },
-              { src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EH2-4IhImlQqz5kKqrpXG4E82X3st6cOxq.png', alt: 'Heritage Temple' },
-              { src: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EH3-wOIyeBtXJHkwkfy0iotkQWUkSQ5Ibg.png', alt: 'Urban Architecture' },
-            ]}
-            ctaText="Choose environment"
-            ctaLink="/environments/heritage"
-          />
-
-          {/* Collection 2: Mythical Universe */}
-          <EnvironmentCollection
-            title="Mythical Universe"
-            subtitle="Find yourself inside the legends"
-            images={[
-              { src: '/images/MH1.png', alt: 'Mythical Dragons' },
-              { src: '/images/MH2.png', alt: 'Mythical Beast' },
-              { src: '/images/MH3.png', alt: 'Forest Dweller' },
-            ]}
-            ctaText="Get Those Loops!"
-            ctaLink="/environments/mythical"
-            highlightIndex={2}
-          />
-
-          {/* Collection 3: Art Spaces */}
-          <EnvironmentCollection
-            title="Art Spaces"
-            subtitle="Dreams you can choose"
-            images={[
-              { src: '/images/AH1.png', alt: 'Art 1' },
-              { src: '/images/AH2.png', alt: 'Art 2' },
-              { src: '/images/AH3.png', alt: 'Art 3' },
-            ]}
-            ctaText="Choose environment"
-            ctaLink="/environments/art"
-            highlightIndex={0}
-          />
-        </div>
-      </div>
-    </section>
-  )
-}
-
 interface EnvironmentCollectionProps {
   title: string
   subtitle: string

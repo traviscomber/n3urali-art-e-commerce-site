@@ -101,6 +101,15 @@ export function StudioPageClient() {
         </div>
       </section>
 
+      {/* Gallery Thumbnails Section - HIDDEN */}
+      <section className="hidden px-6 sm:px-8 lg:px-12 py-20 border-b border-slate-800">
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="grid grid-cols-2 gap-8">
+            {/* Thumbnail images hidden */}
+          </div>
+        </div>
+      </section>
+
       {/* Video Player Section */}
       <section className="w-full h-screen flex items-center justify-center bg-black relative overflow-hidden">
         <video

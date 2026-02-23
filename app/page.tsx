@@ -51,6 +51,18 @@ export default async function HomePage() {
 
   const categoryCards = await Promise.all(
     categories.map(async (cat) => {
+      // For theatre, always use the fallback button design image
+      if (cat.key === 'theatre') {
+        return {
+          id: cat.key,
+          title: cat.title,
+          label: cat.label,
+          link: cat.link,
+          imageUrl: fallbackImages[cat.key],
+          accentColor: cat.accent,
+        }
+      }
+
       const { data } = await supabase
         .from("images")
         .select("id, title, original_url, upscaled_url, thumbnail_large_url")

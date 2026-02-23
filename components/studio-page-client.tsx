@@ -37,6 +37,12 @@ export function StudioPageClient() {
 
   return (
     <div className="w-full">
+      <style jsx>{`
+        /* Hide the 2 images gallery section below Studio hero */
+        .hidden-gallery {
+          display: none;
+        }
+      `}</style>
       {/* Hero Section */}
       <section className="flex items-stretch px-0 py-0 relative h-[70vh]">
         <div className="w-full flex relative">
@@ -143,8 +149,8 @@ export function StudioPageClient() {
         </div>
       </section>
 
-      {/* Life/Production Section */}
-      <section className="min-h-screen flex items-center px-6 sm:px-8 lg:px-12 py-20">
+      {/* Life/Production Section - HIDDEN */}
+      <section className="hidden min-h-screen flex items-center px-6 sm:px-8 lg:px-12 py-20">
         <div className="max-w-7xl mx-auto w-full">
           <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
             {/* Left: Title */}

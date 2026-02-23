@@ -46,7 +46,7 @@ export default async function HomePage() {
     realities: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/R3alities%20-SfYHWLGoctbhyfsR3b6Y6eGISXCeyG.png',
     studio: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Studio-MYfrERBxbjcFc5gyFXzjZftIbU5kOt.png',
     environments: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Enve%CC%81s-EyBbx4EwgsTeVeUjU70EbUa9ZnVUDs.png',
-    theatre: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatre-zLIpqwuRxJ489kAoyVX092lP4aCCok.png',
+    theatre: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatre-MypQBeV3eTXC7HBzjUM9NmWTs2cRkO.png',
   }
 
   const categoryCards = await Promise.all(

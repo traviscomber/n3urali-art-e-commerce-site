@@ -35,22 +35,20 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
   const featuredCollection = collections?.[0]
   const featuredImage = teaserImages?.[0]
-  const teaserLabels = ['Heritage', 'Education', 'Fun', 'Art']
+  const teaserLabels = ['Heritage', 'Education', 'Fun']
 
   // Map teaser labels to button image URLs (the square button designs)
   const teaserButtonImages: Record<string, string> = {
     'Heritage': 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f10748d3c9f622684_d20260222_m201001_c005_v0501033_t0045_u01771791001362',
     'Education': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EducationButtonShowPage-7Cbh8lnKGVveRFY7gN0mLW8JagRgPS.png',
-    'Fun': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/FunButtonShowPage-JhOWIO4GjW22okIs8IPV2s8JofS8SI.png',
-    'Art': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/HeritageButtonShowPage%20%281%29-jRobSVOC5G6BBeiFaBMOdZGa5OwMEy.png'
+    'Fun': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/FunButtonShowPage-JhOWIO4GjW22okIs8IPV2s8JofS8SI.png'
   }
 
   // Map teaser labels to custom video URLs
   const teaserVideoUrls: Record<string, string> = {
     'Heritage': 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f107090e62b7fa63f_d20260222_m232412_c005_v0501037_t0027_u01771802652244',
     'Education': '',
-    'Fun': '',
-    'Art': ''
+    'Fun': ''
   }
 
   const handleTeaserNext = () => {
@@ -145,11 +143,11 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
           <h2 className="text-4xl font-light text-slate-400 mb-12">Teasers:</h2>
 
           {/* Side-by-side layout: Teasers on left, Video player on right */}
-          <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-10 items-center">
             
-            {/* Left: Full vertical teaser list - Square buttons with text overlay */}
-            <div className="flex flex-col items-stretch gap-6">
-              {/* Display all 4 teasers vertically - Full square cards */}
+            {/* Left: Full vertical teaser list - Square buttons */}
+            <div className="flex flex-col items-stretch gap-5">
+              {/* Display 3 teasers vertically - Full square cards */}
               {teaserLabels.map((label, index) => {
                 const isSelected = selectedTeaserIndex === index
                 const buttonImageUrl = teaserButtonImages[label]
@@ -162,20 +160,13 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                       isSelected ? 'ring-2 ring-cyan-400' : 'ring-1 ring-slate-700 group-hover:ring-slate-500'
                     }`}
                   >
-                    {/* Background Image - Full bleed */}
+                    {/* Background Image - Full bleed, no text overlay */}
                     <Image
                       src={buttonImageUrl}
                       alt={label}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                    
-                    {/* Text Label Overlay - At top */}
-                    <div className="absolute inset-0 flex items-start justify-start pt-6 pl-6 pointer-events-none">
-                      <p className="text-3xl font-bold uppercase tracking-wider text-white drop-shadow-lg">
-                        {label}
-                      </p>
-                    </div>
 
                     {/* Selection overlay */}
                     {isSelected && (
@@ -186,8 +177,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
               })}
             </div>
 
-            {/* Right: Video Player (Square - Balanced Size) */}
-            <div className="relative max-w-md aspect-square rounded-md overflow-hidden bg-black">
+            {/* Right: Video Player (Square - Better balanced size) */}
+            <div className="relative w-full max-w-lg aspect-square rounded-md overflow-hidden bg-black">
               <video
                 key={selectedTeaserIndex}
                 src={selectedTeaserIndex !== null ? (teaserVideoUrls[teaserLabels[selectedTeaserIndex]] || teaserImages[selectedTeaserIndex]?.upscaled_url || teaserImages[selectedTeaserIndex]?.original_url || '') : 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f107090e62b7fa63f_d20260222_m232412_c005_v0501037_t0027_u01771802652244'}

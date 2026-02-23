@@ -128,7 +128,6 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                     <p className="text-cyan-300 font-light text-2xl italic mb-1">
                       {featuredCollection.title}
                     </p>
-                    <p className="text-slate-400 text-xs tracking-wide">1×1 Video block with {featuredCollection.title}</p>
                   </div>
                 )}
               </div>

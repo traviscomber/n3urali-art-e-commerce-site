@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { createClient } from "@/lib/supabase/server"
+import { LANDING_PAGE_IMAGES } from "@/lib/constants/image-urls"
 import { HomepageHero } from "@/components/homepage-hero"
 import { CategoryCardsGrid } from "@/components/category-cards-grid"
 import { ShowsSection } from "@/components/shows-section"
@@ -42,12 +43,7 @@ export default async function HomePage() {
   ]
 
   // Fallback images for each category - using button design images
-  const fallbackImages: Record<string, string | null> = {
-    shows: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/MossyCircle2%20%281%29-H1oNbCAWPjvohtpmqn91ZlDKOo68Ky.png',
-    studio: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Studio-MYfrERBxbjcFc5gyFXzjZftIbU5kOt.png',
-    environments: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Enve%CC%81s-EyBbx4EwgsTeVeUjU70EbUa9ZnVUDs.png',
-    theatre: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatre-MypQBeV3eTXC7HBzjUM9NmWTs2cRkO.png',
-  }
+  const fallbackImages: Record<string, string | null> = LANDING_PAGE_IMAGES
 
   const categoryCards = await Promise.all(
     categories.map(async (cat) => {

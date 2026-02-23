@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { LANDING_PAGE_IMAGES } from '@/lib/constants/image-urls'
 
 export function ShowsSection() {
   const useCases = [
@@ -68,7 +69,7 @@ export function ShowsSection() {
           <div className="flex justify-center">
             <div className="relative w-full max-w-md aspect-square rounded-full overflow-hidden shadow-2xl">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/MossyCircle2%20%281%29-H1oNbCAWPjvohtpmqn91ZlDKOo68Ky.png"
+                src={LANDING_PAGE_IMAGES.shows}
                 alt="Shows - Cinematic dome stories with whimsical creatures"
                 fill
                 className="w-full h-full object-cover"

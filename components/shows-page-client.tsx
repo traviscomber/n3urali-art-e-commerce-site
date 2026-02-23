@@ -39,7 +39,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
   // Map teaser labels to button image URLs (the square button designs)
   const teaserButtonImages: Record<string, string> = {
-    'Heritage': 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f10748d3c9f622684_d20260222_m201001_c005_v0501033_t0045_u01771791001362',
+    'Heritage': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/HeritageButtonShowPage%20%281%29-UTOiJnPQYrWs6eoV58npFHyJGXFzrR.png',
     'Education': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EducationButtonShowPage-7Cbh8lnKGVveRFY7gN0mLW8JagRgPS.png',
     'Fun': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/FunButtonShowPage-JhOWIO4GjW22okIs8IPV2s8JofS8SI.png'
   }

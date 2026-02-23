@@ -41,12 +41,12 @@ export default async function HomePage() {
     { key: 'theatre', title: 'THEATRE', label: 'Online', link: '/theatre', accent: 'orange' as const },
   ]
 
-  // Fallback images for each category - using existing images or skip if none available
+  // Fallback images for each category - using button design images
   const fallbackImages: Record<string, string | null> = {
-    realities: '/images/R3alities.png',
-    studio: null,
-    environments: null,
-    theatre: null,
+    realities: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/R3alities%20-SfYHWLGoctbhyfsR3b6Y6eGISXCeyG.png',
+    studio: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Studio-MYfrERBxbjcFc5gyFXzjZftIbU5kOt.png',
+    environments: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Enve%CC%81s-EyBbx4EwgsTeVeUjU70EbUa9ZnVUDs.png',
+    theatre: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatre-zLIpqwuRxJ489kAoyVX092lP4aCCok.png',
   }
 
   const categoryCards = await Promise.all(

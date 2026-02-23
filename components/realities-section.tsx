@@ -68,7 +68,7 @@ export function RealitiesSection() {
           <div className="flex justify-center">
             <div className="relative w-full max-w-md aspect-square rounded-full overflow-hidden shadow-2xl">
               <Image
-                src="/images/R3alities.png"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/R3alities%20-SfYHWLGoctbhyfsR3b6Y6eGISXCeyG.png"
                 alt="R3alities - Cinematic dome stories with whimsical creatures"
                 fill
                 className="w-full h-full object-cover"

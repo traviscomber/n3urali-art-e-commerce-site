@@ -207,7 +207,7 @@ export function StudioPageClient() {
 
           {/* Right: Gallery Carousel - 70% width */}
           <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-12">
-            <div className="relative w-full max-w-2xl">
+            <div className="relative w-full max-w-2xl flex flex-col gap-6">
               <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-900 border border-slate-700">
                 <Image
                   src={galleryItems[galleryIndex].image}
@@ -215,12 +215,12 @@ export function StudioPageClient() {
                   fill
                   className="object-cover"
                 />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                  <p className="text-4xl md:text-5xl font-light text-white text-center">
-                    {galleryItems[galleryIndex].title}
-                  </p>
-                </div>
               </div>
+              
+              {/* Title below image */}
+              <p className="text-4xl md:text-5xl font-light text-white text-center">
+                {galleryItems[galleryIndex].title}
+              </p>
 
               {/* Navigation Arrows */}
               <button

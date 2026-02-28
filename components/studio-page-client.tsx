@@ -22,6 +22,14 @@ export function StudioPageClient() {
 
   const galleryItems = [
     {
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png',
+      title: 'Dragon Immersion',
+    },
+    {
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_0000000084b4720eab101516c1d517ef-isrhjXPFYMJ2NRAjYnKXaqq7UFm5QK.png',
+      title: 'Cosmic Dreams',
+    },
+    {
       image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/StudioWorkspace-keyboard.png',
       title: 'photo gallery',
     },

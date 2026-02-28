@@ -173,7 +173,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
           {/* Right: Video Teasers with Arrow Navigation - 70% width */}
           <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-12">
             {/* Left: Current Teaser with Up/Down Arrows */}
-            <div className="relative flex flex-col items-center gap-6">
+            <div className="relative flex flex-col items-center gap-4">
               {/* Up Arrow */}
               <button
                 onClick={handlePrevTeaser}
@@ -183,20 +183,38 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                 <ChevronLeft size={32} className="rotate-90" />
               </button>
 
-              {/* Current Teaser Video */}
-              <button
-                onClick={() => handleTeaserClick(teaserIndex)}
-                className={`relative w-40 h-40 rounded-lg overflow-hidden border transition-all border-cyan-400 shadow-lg shadow-cyan-400/30`}
-              >
-                <video
-                  src={teasers[teaserIndex]?.video}
-                  className="w-full h-full object-cover"
-                  preload="metadata"
-                />
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                  <p className="text-white text-xs font-medium text-center px-2">{teasers[teaserIndex]?.title}</p>
-                </div>
-              </button>
+              {/* Teaser Videos - Current and Next */}
+              <div className="flex flex-col gap-3">
+                {/* Current Teaser Video */}
+                <button
+                  onClick={() => handleTeaserClick(teaserIndex)}
+                  className={`relative w-40 h-40 rounded-lg overflow-hidden border transition-all border-cyan-400 shadow-lg shadow-cyan-400/30`}
+                >
+                  <video
+                    src={teasers[teaserIndex]?.video}
+                    className="w-full h-full object-cover"
+                    preload="metadata"
+                  />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                    <p className="text-white text-xs font-medium text-center px-2">{teasers[teaserIndex]?.title}</p>
+                  </div>
+                </button>
+
+                {/* Next Teaser Video */}
+                <button
+                  onClick={() => handleTeaserClick((teaserIndex + 1) % teasers.length)}
+                  className={`relative w-40 h-40 rounded-lg overflow-hidden border transition-all border-slate-700 hover:border-cyan-400`}
+                >
+                  <video
+                    src={teasers[(teaserIndex + 1) % teasers.length]?.video}
+                    className="w-full h-full object-cover"
+                    preload="metadata"
+                  />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                    <p className="text-white text-xs font-medium text-center px-2">{teasers[(teaserIndex + 1) % teasers.length]?.title}</p>
+                  </div>
+                </button>
+              </div>
 
               {/* Down Arrow */}
               <button

@@ -36,6 +36,14 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       video: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/upscaled_4k_1769186425665-tIDvx4aisEE2OnZKa01br1AsjGa0U9.mp4',
       title: 'Teaser Video 1',
     },
+    {
+      video: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/upscaled_4k_1769188268692-hzRqYyG3px6XWnyqOeymrygNVHapDN.mp4',
+      title: 'Teaser Video 2',
+    },
+    {
+      video: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/upscaled_4k_1769187422672-86GC3cBIId4ahyMtCrRkhq9BS8zVM5.mp4',
+      title: 'Teaser Video 3',
+    },
   ]
 
   const handlePrevTeaser = () => {

@@ -1,12 +1,10 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
-import { CategoryHeroBlock } from '@/components/category-hero-block'
-import { CategoryGalleryBlock } from '@/components/category-gallery-block'
-import { RelatedCategoriesBlock } from '@/components/related-categories-block'
+import { EnvironmentsPageClient } from '@/components/environments-page-client'
 
 export const metadata: Metadata = {
   title: 'Environments - N3uralia360',
-  description: '360-degree immersive environments designed for projection mapping, dome installations, and VR experiences.',
+  description: 'Full-dome immersive environments designed for planetariums, rental domes, and experiential spaces worldwide.',
 }
 
 export const revalidate = 3600
@@ -14,45 +12,25 @@ export const revalidate = 3600
 export default async function EnvironmentsPage() {
   const supabase = await createClient()
 
+  // Fetch collections (environments)
+  const { data: collections } = await supabase
+    .from('collections')
+    .select('id, title, work_title, description, synopsis, code')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+    .limit(10)
+
+  // Fetch environment images
   const { data: images } = await supabase
     .from('images')
-    .select('id, title, thumbnail_medium_url, original_url, upscaled_url')
-    .eq('content_category', 'environments')
+    .select('id, title, thumbnail_medium_url, original_url, upscaled_url, tags, content_category')
     .eq('active', true)
     .order('created_at', { ascending: false })
-
-  const featuredImage = images?.[0]
-
-  const environmentsFeatures = [
-    'Dome-optimized 360° content',
-    'VR-ready equirectangular formats',
-    'Projection mapping compatible',
-    'Seamless loop environments',
-    'Museum & venue installation',
-  ]
+    .limit(10)
 
   return (
-    <main className="min-h-screen w-full bg-background">
-      <CategoryHeroBlock
-        category="environments"
-        title="Environments"
-        subtitle="Living Immersive Spaces"
-        description="Continuous atmospheric loops optimized for dome perception. Flexible immersive environments ready for integration into any venue or experience. Projection-ready, instantly deployable."
-        features={environmentsFeatures}
-        featuredImage={
-          featuredImage ? {
-            url: featuredImage.upscaled_url || featuredImage.original_url || '',
-            alt: featuredImage.title || 'Environments featured work'
-          } : undefined
-        }
-      />
-
-      <CategoryGalleryBlock
-        images={images || []}
-        category="environments"
-      />
-
-      <RelatedCategoriesBlock currentCategory="environments" />
+    <main className="min-h-screen w-full bg-black">
+      <EnvironmentsPageClient collections={collections || []} environmentImages={images || []} />
     </main>
   )
 }

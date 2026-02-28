@@ -272,3 +272,6 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           </div>
         </div>
       </section>
+    </div>
+  )
+}

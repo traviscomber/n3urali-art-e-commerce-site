@@ -27,20 +27,8 @@ export function ShowsPageClient() {
 
   const teasers = [
     {
-      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png',
-      title: 'Episode 1',
-    },
-    {
-      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_0000000084b4720eab101516c1d517ef-isrhjXPFYMJ2NRAjYnKXaqq7UFm5QK.png',
-      title: 'Episode 2',
-    },
-    {
-      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T3-tKVM0mRce88hLOkXMFL3RMTfa90904.png',
-      title: 'Episode 3',
-    },
-    {
       video: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/upscaled_4k_1769186425665-tIDvx4aisEE2OnZKa01br1AsjGa0U9.mp4',
-      title: 'Teaser Video',
+      title: 'Teaser Video 1',
     },
   ]
 
@@ -142,42 +130,41 @@ export function ShowsPageClient() {
             </div>
           </div>
 
-          {/* Right: Teasers and Video Preview - 70% width */}
+          {/* Right: Scrollable Video Teasers and Preview - 70% width */}
           <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-12 gap-8">
-            {/* Left Teasers Column */}
-            <div className="flex flex-col gap-4">
-              {teasers.map((teaser, idx) => (
-                <div
-                  key={idx}
-                  className={`relative w-24 h-32 rounded-lg overflow-hidden border transition-all cursor-pointer ${
-                    idx === teaserIndex ? 'border-cyan-400 shadow-lg shadow-cyan-400/30' : 'border-slate-700 hover:border-cyan-400'
-                  }`}
-                  onClick={() => setTeaserIndex(idx)}
-                >
-                  <Image
-                    src={teaser.image}
-                    alt={teaser.title}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              ))}
+            {/* Left Scrollable Teasers Column */}
+            <div className="flex flex-col h-full justify-center">
+              <div className="flex flex-col gap-4 overflow-y-auto pr-4 max-h-96">
+                {teasers.map((teaser, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setTeaserIndex(idx)}
+                    className={`relative w-28 h-40 rounded-lg overflow-hidden border transition-all flex-shrink-0 ${
+                      idx === teaserIndex ? 'border-cyan-400 shadow-lg shadow-cyan-400/30' : 'border-slate-700 hover:border-cyan-400'
+                    }`}
+                  >
+                    <video
+                      src={teaser.video}
+                      className="w-full h-full object-cover"
+                      preload="metadata"
+                    />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                      <p className="text-white text-xs font-medium text-center px-2">{teaser.title}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Right Video Preview */}
+            {/* Right Main Video Preview */}
             <div className="relative flex-1 flex flex-col items-center">
               <div className="relative w-full max-w-xl aspect-video rounded-lg overflow-hidden bg-slate-900 border border-slate-700">
-                <Image
-                  src={currentShow.videoImage}
-                  alt="Video preview"
-                  fill
-                  className="object-cover"
+                <video
+                  src={teasers[teaserIndex]?.video}
+                  className="w-full h-full object-cover"
+                  controls
+                  preload="metadata"
                 />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                  <p className="text-4xl md:text-5xl font-light text-white text-center">
-                    video player
-                  </p>
-                </div>
               </div>
 
               {/* Navigation Arrows */}

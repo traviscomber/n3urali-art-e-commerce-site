@@ -82,23 +82,12 @@ export function StudioPageClient() {
             </div>
           </div>
 
-          {/* Right: Studio Images - Hidden on mobile, visible on lg */}
+          {/* Right: Studio Image - Hidden on mobile, visible on lg */}
           <div className="hidden lg:block lg:w-1/2 absolute right-0 top-0 h-full w-1/2">
-            {/* Dome Projector Image */}
-            <div className="relative h-1/2 w-full border-b border-slate-700">
+            <div className="relative w-full h-full">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/StudioDomeTheater.png"
-                alt="Dome theater with immersive content"
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-            {/* Projection Setup Image */}
-            <div className="relative h-1/2 w-full">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/StudioProjectionSetup.png"
-                alt="Studio projection setup"
+                src="/images/studio-hero.jpg"
+                alt="N3uralia360 studio dome projection setup with immersive content"
                 fill
                 className="object-cover"
                 priority

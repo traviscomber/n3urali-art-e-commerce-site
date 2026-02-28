@@ -150,7 +150,7 @@ export function StudioPageClient() {
               <div className="flex flex-col gap-4 items-center text-center">
                 <div className="relative w-48 h-48 rounded-full overflow-hidden border border-slate-700">
                   <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TravisProfile-cosmic-swirl.png"
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T3-tKVM0mRce88hLOkXMFL3RMTfa90904.png"
                     alt="Juan Vial - AI Development"
                     fill
                     className="object-cover"
@@ -168,7 +168,7 @@ export function StudioPageClient() {
               <div className="flex flex-col gap-4 items-center text-center">
                 <div className="relative w-48 h-48 rounded-full overflow-hidden border border-slate-700">
                   <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IrinaProfile-moon-elephant.png"
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/I-wc9y6bsZ9YaB24VxUIKbDCbvpJnlJe.png"
                     alt="Irina Lebedeva - Visual Identity"
                     fill
                     className="object-cover"

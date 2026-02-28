@@ -56,8 +56,8 @@ export function StudioPageClient() {
       {/* Hero Section - Studio Title + Content + Image */}
       <section className="w-full h-screen border-b border-slate-700">
         <div className="w-full h-full flex items-stretch overflow-hidden relative">
-          {/* Left: Title and Content - 30% width with continuous border */}
-          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 border-r border-slate-700">
+          {/* Left: Title and Content - 30% width with disconnected dividing line */}
+          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 section-divider">
             <div className="flex flex-col gap-6 max-w-md">
               <h1 className="text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 Studio
@@ -116,8 +116,8 @@ export function StudioPageClient() {
       {/* Team Section */}
       <section className="w-full h-screen border-b border-slate-700">
         <div className="w-full h-full flex items-stretch overflow-hidden relative">
-          {/* Left: Title and Content - 30% width with continuous border */}
-          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 border-r border-slate-700">
+          {/* Left: Title and Content - 30% width with disconnected dividing line */}
+          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 section-divider">
             <div className="flex flex-col gap-8 max-w-md">
               <h2 className="text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 Team
@@ -185,8 +185,8 @@ export function StudioPageClient() {
       {/* Life/Production Section */}
       <section className="w-full h-screen border-b border-slate-700">
         <div className="w-full h-full flex items-stretch overflow-hidden relative">
-          {/* Left: Title - 30% width with continuous border */}
-          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 border-r border-slate-700">
+          {/* Left: Title - 30% width with disconnected dividing line */}
+          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 section-divider">
             <div className="flex flex-col gap-6 max-w-md">
               <h2 className="text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 Life Gallery

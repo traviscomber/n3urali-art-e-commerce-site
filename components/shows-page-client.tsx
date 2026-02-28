@@ -38,6 +38,10 @@ export function ShowsPageClient() {
       image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T3-tKVM0mRce88hLOkXMFL3RMTfa90904.png',
       title: 'Episode 3',
     },
+    {
+      video: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/upscaled_4k_1769186425665-tIDvx4aisEE2OnZKa01br1AsjGa0U9.mp4',
+      title: 'Teaser Video',
+    },
   ]
 
   const handlePrevTeaser = () => {

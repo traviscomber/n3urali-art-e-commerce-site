@@ -1,274 +1,314 @@
-"use client"
+'use client'
 
-import { useState, useMemo } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { ArrowRight, Filter, Search, Play } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Footer } from "@/components/footer"
+import { useState } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import Image from 'next/image'
 
-interface ContentItem {
-  id: string
-  title: string
-  file_path: string
-  original_url: string | null
-  upscaled_url: string | null
-  price: number
-  image_format: string
-  thumbnail_medium_url?: string
-  description?: string
-}
+export function ShowsPageClient() {
+  const [teaserIndex, setTeaserIndex] = useState(0)
 
-interface ShowsClientProps {
-  initialContent: ContentItem[]
-}
+  // Sample shows data
+  const shows = [
+    {
+      id: 1,
+      name: 'Meet Mosey — Guide of the Nile, Multiverse',
+      subtitle: 'Cinematic Dome Stories',
+      description: 'From mythical realms to sacred atmospheres, immerse in tales of wonder.',
+      perfectFor: [
+        'Family dome nights',
+        'Cultural programming',
+        'Art and experience-focused events',
+        'Themed event openings',
+      ],
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png',
+      videoImage: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_0000000084b4720eab101516c1d517ef-isrhjXPFYMJ2NRAjYnKXaqq7UFm5QK.png',
+    },
+  ]
 
-export function ShowsClient({ initialContent }: ShowsClientProps) {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedFormat, setSelectedFormat] = useState<string | null>(null)
+  const teasers = [
+    {
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png',
+      title: 'Episode 1',
+    },
+    {
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_0000000084b4720eab101516c1d517ef-isrhjXPFYMJ2NRAjYnKXaqq7UFm5QK.png',
+      title: 'Episode 2',
+    },
+    {
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T3-tKVM0mRce88hLOkXMFL3RMTfa90904.png',
+      title: 'Episode 3',
+    },
+  ]
 
-  // Format categories
-  const formats = useMemo(() => {
-    const unique = new Set(initialContent.map((item) => item.image_format))
-    return Array.from(unique).sort()
-  }, [initialContent])
+  const handlePrevTeaser = () => {
+    setTeaserIndex((prev) => (prev - 1 + teasers.length) % teasers.length)
+  }
 
-  // Filter content
-  const filteredContent = useMemo(() => {
-    return initialContent.filter((item) => {
-      const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesFormat = !selectedFormat || item.image_format === selectedFormat
-      return matchesSearch && matchesFormat
-    })
-  }, [initialContent, searchQuery, selectedFormat])
+  const handleNextTeaser = () => {
+    setTeaserIndex((prev) => (prev + 1) % teasers.length)
+  }
+
+  const currentShow = shows[0]
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="w-full bg-black">
       {/* Hero Section */}
-      <section className="relative py-20 px-4 bg-gradient-to-b from-slate-900/50 via-slate-900/30 to-background">
-        <div className="absolute inset-0 z-0 opacity-40">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
-        </div>
-
-        <div className="relative z-10 container mx-auto max-w-6xl">
-          <div className="text-center space-y-6 mb-16">
-            <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/30 rounded-full px-4 py-2">
-              <Play className="w-4 h-4 text-cyan-400" />
-              <span className="text-sm font-semibold text-cyan-300">Cinematic Experiences</span>
-            </div>
-
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
-              Cinematic Dome Stories
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">
-                With Timing
-              </span>
-            </h1>
-
-            <p className="text-lg text-slate-300 max-w-3xl mx-auto">
-              Not loops. Not static backdrops. Real stories that unfold.
-            </p>
-
-            <p className="text-base text-slate-400 max-w-3xl mx-auto leading-relaxed">
-              Realities are AI-animated immersive experiences with progression, rhythm, and visual timing. Designed as mini-shows that hold audience attention from beginning to end.
-            </p>
-
-            <div className="mt-8 bg-slate-800/50 border border-slate-700 rounded-xl p-6 max-w-3xl mx-auto">
-              <h3 className="text-lg font-bold text-white mb-4">Perfect for:</h3>
-              <ul className="grid md:grid-cols-2 gap-3 text-slate-300">
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full" />
-                  School dome programming
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
-                  Festival headline segments
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full" />
-                  Branded immersive presentations
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
-                  Themed event openings
-                </li>
-              </ul>
-            </div>
-
-            <div className="mt-8 bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 border border-cyan-500/20 rounded-xl p-6 max-w-3xl mx-auto">
-              <p className="text-slate-300 font-semibold mb-2">Each Reality includes:</p>
-              <p className="text-slate-400 text-sm">
-                Full-dome fisheye version • Optional VR equirectangular edition • Structured runtime with narrative flow • Clean projection-ready delivery
-              </p>
-            </div>
-
-            <div className="flex items-center justify-center gap-4 pt-4">
-              <Link href="/studio">
-                <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                  Commission Custom Work
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          {/* Key features */}
-          <div className="grid md:grid-cols-4 gap-4 bg-slate-800/40 rounded-xl border border-slate-700 p-8">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-cyan-400 mb-1">{initialContent.length}</p>
-              <p className="text-sm text-slate-400">Immersive Stories</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-cyan-400 mb-1">{formats.length}</p>
-              <p className="text-sm text-slate-400">Format Types</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-cyan-400 mb-1">4K+</p>
-              <p className="text-sm text-slate-400">Resolution</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-cyan-400 mb-1">VR Ready</p>
-              <p className="text-sm text-slate-400">All Formats</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Search and Filter Section */}
-      <section className="sticky top-0 z-40 py-6 px-4 bg-background/95 backdrop-blur border-b border-slate-700">
-        <div className="container mx-auto max-w-6xl">
-          <div className="flex flex-col md:flex-row gap-4 items-center">
-            {/* Search */}
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none" />
-              <Input
-                placeholder="Search R3alities..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-slate-800 border-slate-700 text-white placeholder-slate-400"
-              />
-            </div>
-
-            {/* Format Filter */}
-            {formats.length > 0 && (
-              <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
-                <Filter className="w-5 h-5 text-slate-400" />
-                <select
-                  value={selectedFormat || ""}
-                  onChange={(e) => setSelectedFormat(e.target.value || null)}
-                  className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 text-sm cursor-pointer hover:border-slate-600"
-                >
-                  <option value="">All Formats</option>
-                  {formats.map((format) => (
-                    <option key={format} value={format}>
-                      {format}
-                    </option>
-                  ))}
-                </select>
+      <section className="w-full h-screen border-b border-slate-700">
+        <div className="w-full h-full flex items-stretch overflow-hidden relative">
+          {/* Left: Title and Content - 30% width with disconnected dividing line */}
+          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 section-divider">
+            <div className="flex flex-col gap-6 max-w-md">
+              <div>
+                <h1 className="text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
+                  Shows
+                </h1>
+                <p className="text-slate-500 text-base font-light mt-2">
+                  Cinematic Dome Stories
+                </p>
               </div>
-            )}
 
-            {/* Results count */}
-            <div className="text-sm text-slate-400">
-              {filteredContent.length} of {initialContent.length} stories
+              <div className="space-y-4">
+                <p className="text-slate-400 text-base leading-relaxed">
+                  {currentShow.description}
+                </p>
+
+                <div className="space-y-3 pt-2">
+                  <p className="text-slate-400 text-xs font-medium uppercase tracking-widest opacity-60">Perfect for:</p>
+                  <ul className="space-y-1.5">
+                    {currentShow.perfectFor.map((item, idx) => (
+                      <li key={idx} className="flex gap-3 items-start text-slate-300 text-sm">
+                        <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Main Show Image - 70% with flex grow to fill remaining space */}
+          <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-8">
+            <div className="relative w-4/5 h-4/5 rounded-lg overflow-hidden">
+              <Image
+                src={currentShow.image}
+                alt={currentShow.name}
+                fill
+                className="object-cover"
+                priority
+              />
+              <div className="absolute inset-0 flex items-end justify-center pb-8">
+                <p className="text-3xl md:text-4xl font-light text-white">
+                  still image
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Content Grid */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto max-w-6xl">
-          {filteredContent.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredContent.map((item) => (
-                <Link key={item.id} href={`/photo/${item.id}`}>
-                  <Card className="group relative h-96 overflow-hidden bg-slate-800/40 border-slate-700 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20 cursor-pointer">
-                    {/* Image */}
-                    <Image
-                      src={item.upscaled_url || item.original_url || item.file_path || "/placeholder.svg"}
-                      alt={item.title}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-500"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
+      {/* Teasers Section */}
+      <section className="w-full h-screen border-b border-slate-700">
+        <div className="w-full h-full flex items-stretch overflow-hidden relative">
+          {/* Left: Teaser Info and Buttons - 30% width */}
+          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 section-divider">
+            <div className="flex flex-col gap-6 max-w-md">
+              <h2 className="text-6xl lg:text-7xl font-light text-slate-300 leading-tight">
+                Teasers:
+              </h2>
 
-                    {/* Overlay gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+              <p className="text-slate-400 text-base leading-relaxed">
+                Full-length shows and dome editions are available. If you are interested in a specific episode or would like to commission a custom production, please contact our team.
+              </p>
 
-                    {/* Format badge */}
-                    <div className="absolute top-3 right-3 px-3 py-1 bg-cyan-500/20 border border-cyan-500/50 rounded-lg text-xs font-semibold text-cyan-300 backdrop-blur-sm">
-                      {item.image_format}
-                    </div>
+              <p className="text-slate-400 text-sm">
+                We develop immersive content from concept to final delivery.
+              </p>
 
-                    {/* Content */}
-                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white space-y-3">
-                      <div>
-                        <h3 className="text-lg font-bold line-clamp-2">{item.title}</h3>
-                        {item.description && (
-                          <p className="text-sm text-slate-300 line-clamp-1 mt-1">{item.description}</p>
-                        )}
-                      </div>
+              <div className="space-y-2 text-slate-500 text-xs leading-relaxed">
+                <p>Original and consistent character design</p>
+                <p>Cohesive narrative and visual building</p>
+                <p>Dynamic scene editing with special effects</p>
+              </div>
 
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-slate-400">VR Ready</span>
-                        <div className="flex items-center gap-1 text-cyan-400 group-hover:translate-x-1 transition-transform">
-                          <span className="text-sm">View</span>
-                          <ArrowRight className="w-4 h-4" />
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
+              {/* Action Buttons */}
+              <div className="flex gap-4 pt-4">
+                <button className="px-6 py-2 border border-cyan-400 text-cyan-400 text-sm font-medium hover:bg-cyan-400/10 transition-colors">
+                  Send Email
+                </button>
+                <button className="px-6 py-2 border border-cyan-400 text-cyan-400 text-sm font-medium hover:bg-cyan-400/10 transition-colors">
+                  WhatsApp
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Teasers and Video Preview - 70% width */}
+          <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-12 gap-8">
+            {/* Left Teasers Column */}
+            <div className="flex flex-col gap-4">
+              {teasers.map((teaser, idx) => (
+                <div
+                  key={idx}
+                  className={`relative w-24 h-32 rounded-lg overflow-hidden border transition-all cursor-pointer ${
+                    idx === teaserIndex ? 'border-cyan-400 shadow-lg shadow-cyan-400/30' : 'border-slate-700 hover:border-cyan-400'
+                  }`}
+                  onClick={() => setTeaserIndex(idx)}
+                >
+                  <Image
+                    src={teaser.image}
+                    alt={teaser.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
               ))}
             </div>
-          ) : (
-            <div className="text-center py-16 space-y-4">
-              <p className="text-lg text-slate-400">No stories found matching your search.</p>
-              <Button
-                onClick={() => {
-                  setSearchQuery("")
-                  setSelectedFormat(null)
-                }}
-                variant="outline"
-                className="border-slate-600 text-slate-200 hover:bg-slate-800/50"
-              >
-                Clear Filters
-              </Button>
-            </div>
-          )}
-        </div>
-      </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-4 bg-gradient-to-b from-slate-900/50 to-background">
-        <div className="container mx-auto max-w-4xl">
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-slate-700 p-12 text-center space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold text-white">Looking for Something Custom?</h2>
-            <p className="text-slate-300 text-lg">
-              Our studio team creates bespoke immersive experiences tailored to your venue, brand, or cultural narrative.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-              <Link href="/studio">
-                <Button size="lg" className="bg-cyan-600 hover:bg-cyan-700 text-white">
-                  Explore Studio Services
-                </Button>
-              </Link>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-slate-600 text-slate-200 hover:bg-slate-800/50"
-              >
-                Request Quote
-              </Button>
+            {/* Right Video Preview */}
+            <div className="relative flex-1 flex flex-col items-center">
+              <div className="relative w-full max-w-xl aspect-video rounded-lg overflow-hidden bg-slate-900 border border-slate-700">
+                <Image
+                  src={currentShow.videoImage}
+                  alt="Video preview"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                  <p className="text-4xl md:text-5xl font-light text-white text-center">
+                    video player
+                  </p>
+                </div>
+              </div>
+
+              {/* Navigation Arrows */}
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-24">
+                <button
+                  onClick={handlePrevTeaser}
+                  className="text-slate-400 hover:text-cyan-400 transition-colors p-2"
+                  aria-label="Previous teaser"
+                >
+                  <ChevronLeft size={40} />
+                </button>
+              </div>
+              <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-24">
+                <button
+                  onClick={handleNextTeaser}
+                  className="text-slate-400 hover:text-cyan-400 transition-colors p-2"
+                  aria-label="Next teaser"
+                >
+                  <ChevronRight size={40} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <Footer />
+      {/* Deliverables Section */}
+      <section className="w-full h-screen border-b border-slate-700">
+        <div className="w-full h-full flex items-stretch overflow-hidden relative">
+          {/* Left: Deliverables Info - 30% width */}
+          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 section-divider">
+            <div className="flex flex-col gap-6 max-w-md">
+              <h2 className="text-6xl lg:text-7xl font-light text-slate-300 leading-tight">
+                Deliverables
+              </h2>
+
+              <p className="text-slate-400 text-base leading-relaxed">
+                All content is delivered in professional 4K resolution and optimized for full dome, Fulldome and 360-degree environments.
+              </p>
+
+              <div className="space-y-3">
+                <p className="text-slate-500 text-sm font-medium">Our productions include:</p>
+                <ul className="space-y-2 text-slate-400 text-sm">
+                  <li className="flex gap-3 items-start">
+                    <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
+                    <span>Dome-ready masters</span>
+                  </li>
+                  <li className="flex gap-3 items-start">
+                    <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
+                    <span>Character creation (natural)</span>
+                  </li>
+                  <li className="flex gap-3 items-start">
+                    <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
+                    <span>Full dome environment and special effects</span>
+                  </li>
+                  <li className="flex gap-3 items-start">
+                    <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
+                    <span>Structured storytelling and educational frameworks</span>
+                  </li>
+                </ul>
+              </div>
+
+              <p className="text-slate-400 text-sm">
+                <span className="text-cyan-400 font-semibold">Blackblaze</span> develops scalable immersive content for planetariums, rental domes, and exhibitions everywhere.
+              </p>
+            </div>
+          </div>
+
+          {/* Right: Contact Form - 70% width */}
+          <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-12">
+            <div className="max-w-md w-full">
+              <h3 className="text-3xl font-light text-slate-300 mb-8">
+                Submit Your Inquiry
+              </h3>
+
+              <form className="space-y-6">
+                <div>
+                  <label className="text-slate-400 text-sm mb-2 block">Your email</label>
+                  <input
+                    type="email"
+                    placeholder="your@email.com"
+                    className="w-full bg-transparent border border-slate-600 text-slate-300 px-4 py-2 text-sm focus:outline-none focus:border-cyan-400 transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-slate-400 text-sm mb-3 block">Choose one:</label>
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 rounded border-slate-600 text-cyan-400 focus:ring-0"
+                      />
+                      <span className="text-slate-400 text-sm">I would like to see a demo in my dome</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 rounded border-slate-600 text-cyan-400 focus:ring-0"
+                      />
+                      <span className="text-slate-400 text-sm">I am interested in watching a full episode</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 rounded border-slate-600 text-cyan-400 focus:ring-0"
+                      />
+                      <span className="text-slate-400 text-sm">I want to commission a custom show</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 rounded border-slate-600 text-cyan-400 focus:ring-0"
+                      />
+                      <span className="text-slate-400 text-sm">Other</span>
+                    </label>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full px-6 py-3 border border-cyan-400 text-cyan-400 text-sm font-medium hover:bg-cyan-400/10 transition-colors"
+                >
+                  Submit
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }

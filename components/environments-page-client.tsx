@@ -29,12 +29,20 @@ interface EnvironmentsPageClientProps {
 }
 
 export function EnvironmentsPageClient({ collections, environmentImages }: EnvironmentsPageClientProps) {
-  const [categoryIndex, setCategoryIndex] = useState(0)
+  const [heritageCategoryIndex, setHeritageCategoryIndex] = useState(0)
+  const [artCategoryIndex, setArtCategoryIndex] = useState(0)
 
-  const categories = [
+  const heritageCategories = [
     { name: 'North America', id: 'north-america' },
     { name: 'South America', id: 'south-america' },
     { name: 'Asia', id: 'asia' },
+    { name: 'More', id: 'more' },
+  ]
+
+  const artCategories = [
+    { name: 'Color Splash', id: 'color-splash' },
+    { name: 'Dreamland', id: 'dreamland' },
+    { name: 'Escher inspired', id: 'escher' },
     { name: 'More', id: 'more' },
   ]
 
@@ -45,8 +53,12 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
     'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T31-icn8zhQpqszgBmYVNR57HNzAmikXcO.png',
   ]
 
-  const handleNextCategory = () => {
-    setCategoryIndex((prev) => (prev + 1) % categories.length)
+  const handleNextHeritageCategory = () => {
+    setHeritageCategoryIndex((prev) => (prev + 1) % heritageCategories.length)
+  }
+
+  const handleNextArtCategory = () => {
+    setArtCategoryIndex((prev) => (prev + 1) % artCategories.length)
   }
 
   return (
@@ -124,15 +136,15 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             <div className="relative w-full flex items-center gap-6">
               {/* Category Buttons */}
               <div className="flex gap-6 flex-wrap">
-                {categories.map((category, idx) => (
+                {heritageCategories.map((category, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setCategoryIndex(idx)}
+                    onClick={() => setHeritageCategoryIndex(idx)}
                     className="flex flex-col items-center gap-3 group"
                   >
                     {/* Category Image or Placeholder */}
                     <div className={`relative w-24 h-24 rounded-full overflow-hidden border-2 transition-all ${
-                      idx === categoryIndex ? 'border-cyan-400' : 'border-slate-700'
+                      idx === heritageCategoryIndex ? 'border-cyan-400' : 'border-slate-700'
                     }`}>
                       {idx < 3 ? (
                         <Image
@@ -154,7 +166,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
 
               {/* Scroll More Arrow - Positioned on the right */}
               <button
-                onClick={handleNextCategory}
+                onClick={handleNextHeritageCategory}
                 className="ml-auto text-slate-400 hover:text-cyan-400 transition-colors p-2"
                 aria-label="View more categories"
               >
@@ -164,6 +176,99 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           </div>
         </div>
       </section>
-    </div>
-  )
-}
+
+      {/* Art Environments Section */}
+      <section className="w-full min-h-screen border-b border-slate-700">
+        <div className="w-full h-full flex items-stretch overflow-hidden relative">
+          {/* Left: Art Environments Info - 30% width */}
+          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 section-divider">
+            <div className="flex flex-col gap-6 max-w-md">
+              <h2 className="text-5xl lg:text-6xl font-light text-slate-300 leading-tight">
+                Art Environments
+              </h2>
+
+              <p className="text-slate-400 text-base font-light">
+                Dreams you can choose
+              </p>
+
+              <p className="text-slate-400 text-base leading-relaxed">
+                Performance-Ready Visual Architecture. Art Spaces are bold, cinematic dome worlds created for live performance and immersive stages.
+              </p>
+
+              <p className="text-slate-400 text-base leading-relaxed">
+                Designed for:
+              </p>
+
+              <ul className="space-y-2">
+                <li className="flex gap-3 items-start text-slate-400 text-sm">
+                  <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
+                  <span>Event domes</span>
+                </li>
+                <li className="flex gap-3 items-start text-slate-400 text-sm">
+                  <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
+                  <span>Experiential activations</span>
+                </li>
+                <li className="flex gap-3 items-start text-slate-400 text-sm">
+                  <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
+                  <span>Immersive installations</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Right: Featured Image and Category Buttons - 70% width */}
+          <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-12 flex-col gap-8">
+            {/* Main Featured Image */}
+            <div className="relative w-full h-96 rounded-lg overflow-hidden">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_0000000084b4720eab101516c1d517ef-isrhjXPFYMJ2NRAjYnKXaqq7UFm5QK.png"
+                alt="Art Environments"
+                fill
+                className="object-cover"
+              />
+            </div>
+
+            {/* Category Buttons with Scroll Arrow */}
+            <div className="relative w-full flex items-center gap-6">
+              {/* Category Buttons */}
+              <div className="flex gap-6 flex-wrap">
+                {artCategories.map((category, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setArtCategoryIndex(idx)}
+                    className="flex flex-col items-center gap-3 group"
+                  >
+                    {/* Category Image or Placeholder */}
+                    <div className={`relative w-24 h-24 rounded-full overflow-hidden border-2 transition-all ${
+                      idx === artCategoryIndex ? 'border-cyan-400' : 'border-slate-700'
+                    }`}>
+                      {idx < 3 ? (
+                        <Image
+                          src={categoryImages[idx]}
+                          alt={category.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-slate-800 flex items-center justify-center">
+                          <ChevronRight size={32} className="text-slate-600" />
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-slate-300 text-sm font-light">{category.name}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Scroll More Arrow - Positioned on the right */}
+              <button
+                onClick={handleNextArtCategory}
+                className="ml-auto text-slate-400 hover:text-cyan-400 transition-colors p-2"
+                aria-label="View more categories"
+              >
+                <ChevronRight size={32} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>

@@ -82,15 +82,17 @@ export function StudioPageClient() {
             </div>
           </div>
 
-          {/* Right: Studio Image - 56% width (70% reduced by 20%) */}
-          <div className="hidden lg:flex lg:w-[56%] relative overflow-hidden">
-            <Image
-              src="/images/studio-hero.jpg"
-              alt="N3uralia360 studio dome projection setup with immersive content"
-              fill
-              className="object-cover object-left"
-              priority
-            />
+          {/* Right: Studio Image - Preserves aspect ratio */}
+          <div className="hidden lg:flex lg:w-[45%] relative overflow-hidden flex items-center justify-center">
+            <div className="relative w-4/5 h-4/5">
+              <Image
+                src="/images/studio-hero.jpg"
+                alt="N3uralia360 studio dome projection setup with immersive content"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
           </div>
         </div>
       </section>

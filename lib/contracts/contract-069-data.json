@@ -1,0 +1,238 @@
+{
+  "title": "SLO DIGITAL ASSET LICENSE AGREEMENT",
+  "contractNumber": "069",
+  "effectiveDate": "January 10, 2025",
+  "parties": {
+    "provider": {
+      "name": "Neuralia (N3urali.art)",
+      "type": "Online Blockchain Digital Asset Company",
+      "operations": "Operating via decentralized infrastructure"
+    },
+    "client": {
+      "name": "Labyrinth",
+      "location": "Bali, Indonesia"
+    }
+  },
+  "articles": [
+    {
+      "number": "1",
+      "title": "SCOPE OF WORK",
+      "sections": [
+        {
+          "number": "1.1",
+          "title": "Deliverables",
+          "content": "Provider shall deliver to Client twenty (20) digital images in 4K resolution format."
+        },
+        {
+          "number": "1.2",
+          "title": "Nature of Images",
+          "content": "The images provided under this Agreement are selected from Provider's existing database of digital creations and inventory. These images are NOT specially created or commissioned for Client under this contract. Client is licensing pre-existing works from Provider's catalog."
+        },
+        {
+          "number": "1.3",
+          "title": "Quality Standards",
+          "content": "All images shall be delivered in high-quality 4K resolution (3840 x 2160 pixels minimum) in industry-standard formats (PNG, JPG, or equivalent)."
+        },
+        {
+          "number": "1.4",
+          "title": "Delivery Method",
+          "content": "Images shall be delivered via secure download link provided in real-time upon confirmation of payment."
+        }
+      ]
+    },
+    {
+      "number": "2",
+      "title": "LICENSE GRANT AND RESTRICTIONS",
+      "sections": [
+        {
+          "number": "2.1",
+          "title": "License Type",
+          "content": "Provider grants Client a non-exclusive, perpetual license to use the delivered images subject to the restrictions set forth herein."
+        },
+        {
+          "number": "2.2",
+          "title": "Permitted Uses",
+          "content": "Client may use the images as part of their creative process and creation workflow; Client may incorporate the images into derivative works and creative projects; Client may modify, edit, and transform the images for use in their projects.",
+          "isList": true
+        },
+        {
+          "number": "2.3",
+          "title": "Prohibited Uses",
+          "content": "Client shall NOT redistribute, resell, or transfer the original images to any third party; Client shall NOT sell the images as separate, standalone files; Client shall NOT sublicense the images to other parties; Client shall NOT use the images in any manner that violates applicable laws or regulations.",
+          "isList": true
+        },
+        {
+          "number": "2.4",
+          "title": "Completion of Work",
+          "content": "Provider's obligations under this Agreement shall be deemed complete upon Client's receipt of the download link and successful download of all twenty (20) images."
+        }
+      ]
+    },
+    {
+      "number": "3",
+      "title": "PAYMENT TERMS",
+      "sections": [
+        {
+          "number": "3.1",
+          "title": "Total Contract Value",
+          "content": "Twenty-Three Million Five Hundred Fifty Thousand Indonesian Rupiah (IDR Rp 23,550,000)"
+        },
+        {
+          "number": "3.2",
+          "title": "Payment Structure",
+          "content": "Gross Amount: IDR Rp 23,550,000; Commission (Labyrinth): 15% (IDR Rp 3,532,500); Net Amount to Provider: IDR Rp 20,017,500",
+          "isList": true
+        },
+        {
+          "number": "3.3",
+          "title": "Payment Method",
+          "content": "Payment shall be made via bank transfer to the specified account.",
+          "bankDetails": {
+            "beneficiaryName": "Juan Francisco Vial Comber",
+            "bankName": "Bank Mandiri",
+            "accountNumber": "1750002001195",
+            "country": "Indonesia"
+          }
+        },
+        {
+          "number": "3.4",
+          "title": "Payment Requirement",
+          "content": "One hundred percent (100%) of the total contract value must be received and confirmed in the bank account before the download link will be provided to Client."
+        },
+        {
+          "number": "3.5",
+          "title": "Real-Time Processing",
+          "content": "Upon confirmation of payment in the bank account, Provider shall immediately provide Client with the secure download link. Delivery is processed in real-time."
+        },
+        {
+          "number": "3.6",
+          "title": "Payment Verification",
+          "content": "Client is solely responsible for ensuring payment is sent to the correct bank account with proper reference information. Provider is not responsible for funds sent to incorrect accounts or with missing reference details."
+        }
+      ]
+    },
+    {
+      "number": "4",
+      "title": "INTELLECTUAL PROPERTY",
+      "sections": [
+        {
+          "number": "4.1",
+          "title": "Ownership",
+          "content": "Provider retains all ownership rights, title, and interest in and to the original images. This Agreement grants only a license to use, not a transfer of ownership."
+        },
+        {
+          "number": "4.2",
+          "title": "Derivative Works",
+          "content": "Client shall own all rights to derivative works created by incorporating or transforming the licensed images, subject to Provider's retained rights in the original images."
+        }
+      ]
+    },
+    {
+      "number": "5",
+      "title": "WARRANTIES AND DISCLAIMERS",
+      "sections": [
+        {
+          "number": "5.1",
+          "title": "Provider Warranties",
+          "content": "Provider warrants that it has the right to license the images and that the images do not infringe upon any third-party intellectual property rights."
+        },
+        {
+          "number": "5.2",
+          "title": "Disclaimer",
+          "content": "THE IMAGES ARE PROVIDED \"AS IS\" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE."
+        }
+      ]
+    },
+    {
+      "number": "6",
+      "title": "LIMITATION OF LIABILITY",
+      "sections": [
+        {
+          "number": "6.1",
+          "title": "Maximum Liability",
+          "content": "Provider's total liability under this Agreement shall not exceed the total amount paid by Client under this Agreement (IDR Rp 23,550,000)."
+        },
+        {
+          "number": "6.2",
+          "title": "Consequential Damages",
+          "content": "In no event shall either party be liable for any indirect, incidental, special, or consequential damages."
+        }
+      ]
+    },
+    {
+      "number": "7",
+      "title": "TERM AND TERMINATION",
+      "sections": [
+        {
+          "number": "7.1",
+          "title": "Term",
+          "content": "This Agreement shall commence on the Effective Date and continue until all obligations are fulfilled."
+        },
+        {
+          "number": "7.2",
+          "title": "Survival",
+          "content": "The license grant, payment obligations, intellectual property provisions, and limitation of liability shall survive any termination of this Agreement."
+        },
+        {
+          "number": "7.3",
+          "title": "Final Delivery Deadline",
+          "content": "The absolute final deadline for delivery of all images under this Agreement is October 10, 2025. No additional conditions, penalties, or fees shall apply for delivery on or before this date."
+        }
+      ]
+    },
+    {
+      "number": "8",
+      "title": "GOVERNING LAW AND DISPUTE RESOLUTION",
+      "sections": [
+        {
+          "number": "8.1",
+          "title": "Governing Law",
+          "content": "This Agreement shall be governed by and construed in accordance with the laws of Indonesia."
+        },
+        {
+          "number": "8.2",
+          "title": "Jurisdiction",
+          "content": "The parties agree to resolve disputes through good faith negotiation and, if necessary, through the courts of Indonesia."
+        }
+      ]
+    },
+    {
+      "number": "9",
+      "title": "GENERAL PROVISIONS",
+      "sections": [
+        {
+          "number": "9.1",
+          "title": "Entire Agreement",
+          "content": "This Agreement constitutes the entire agreement between the parties and supersedes all prior negotiations, representations, or agreements."
+        },
+        {
+          "number": "9.2",
+          "title": "Amendments",
+          "content": "This Agreement may only be amended in writing signed by both parties."
+        },
+        {
+          "number": "9.3",
+          "title": "Severability",
+          "content": "If any provision is found invalid or unenforceable, the remaining provisions shall continue in full force and effect."
+        },
+        {
+          "number": "9.4",
+          "title": "Force Majeure",
+          "content": "Neither party shall be liable for failure to perform due to circumstances beyond their reasonable control, including but not limited to blockchain network failures or disruptions."
+        }
+      ]
+    }
+  ],
+  "signatures": {
+    "provider": {
+      "organization": "Neuralia (N3urali.art)",
+      "signedBy": "Irina Lebedeva",
+      "title": "Director of n3uralia360 - n3uraliart"
+    },
+    "client": {
+      "organization": "PT Labyrinth Collective Bali",
+      "location": "Bali, Indonesia",
+      "signedBy": "Rafael Jimenez Arroyo"
+    }
+  }
+}

@@ -4,9 +4,32 @@ import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Image from 'next/image'
 
-export function ShowsPageClient() {
+interface Collection {
+  id: string
+  title: string
+  work_title?: string
+  description?: string
+  synopsis?: string
+  code?: string
+}
+
+interface TeaserImage {
+  id: string
+  title: string
+  thumbnail_medium_url?: string
+  original_url?: string
+  upscaled_url?: string
+  tags?: string[]
+  content_category?: string
+}
+
+interface ShowsPageClientProps {
+  collections: Collection[]
+  teaserImages: TeaserImage[]
+}
+
+export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientProps) {
   const [teaserIndex, setTeaserIndex] = useState(0)
-  const videoRef = useState<HTMLVideoElement | null>(null)[1]
 
   const teasers = [
     {
@@ -34,6 +57,16 @@ export function ShowsPageClient() {
     }, 0)
   }
 
+  // Sample shows data (fallback if no collections)
+  const shows = collections.length > 0 ? collections : [
+    {
+      id: '1',
+      title: 'Meet Mosey — Guide of the Nile, Multiverse',
+      description: 'From mythical realms to sacred atmospheres, immerse in tales of wonder.',
+      code: 'mosey',
+    },
+  ]
+
   const currentShow = shows[0]
 
   return (
@@ -55,13 +88,18 @@ export function ShowsPageClient() {
 
               <div className="space-y-4">
                 <p className="text-slate-400 text-base leading-relaxed">
-                  {currentShow.description}
+                  {currentShow.description || currentShow.synopsis || 'From mythical realms to sacred atmospheres, immerse in tales of wonder.'}
                 </p>
 
                 <div className="space-y-3 pt-2">
                   <p className="text-slate-400 text-xs font-medium uppercase tracking-widest opacity-60">Perfect for:</p>
                   <ul className="space-y-1.5">
-                    {currentShow.perfectFor.map((item, idx) => (
+                    {[
+                      'Family dome nights',
+                      'Cultural programming',
+                      'Art and experience-focused events',
+                      'Themed event openings',
+                    ].map((item, idx) => (
                       <li key={idx} className="flex gap-3 items-start text-slate-300 text-sm">
                         <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                         <span>{item}</span>
@@ -77,8 +115,8 @@ export function ShowsPageClient() {
           <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-8">
             <div className="relative w-4/5 h-4/5 rounded-lg overflow-hidden">
               <Image
-                src={currentShow.image}
-                alt={currentShow.name}
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
+                alt={currentShow.title || 'Show preview'}
                 fill
                 className="object-cover"
                 priority

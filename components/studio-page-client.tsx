@@ -29,10 +29,6 @@ export function StudioPageClient() {
       image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_0000000084b4720eab101516c1d517ef-isrhjXPFYMJ2NRAjYnKXaqq7UFm5QK.png',
       title: 'Cosmic Dreams',
     },
-    {
-      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/StudioWorkspace-keyboard.png',
-      title: 'photo gallery',
-    },
   ]
 
   const handlePrevGallery = () => {

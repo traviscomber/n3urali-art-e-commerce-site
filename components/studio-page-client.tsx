@@ -150,7 +150,7 @@ export function StudioPageClient() {
               <div className="flex flex-col gap-4 items-center text-center">
                 <div className="relative w-48 h-48 rounded-full overflow-hidden border border-slate-700">
                   <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T3-tKVM0mRce88hLOkXMFL3RMTfa90904.png"
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T31-icn8zhQpqszgBmYVNR57HNzAmikXcO.png"
                     alt="Juan Vial - AI Development"
                     fill
                     className="object-cover"

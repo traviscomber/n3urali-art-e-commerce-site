@@ -40,9 +40,9 @@ export function StudioPageClient() {
       {/* Hero Section - Studio Title + Content + Image */}
       <section className="w-full h-screen border-b border-slate-700">
         <div className="w-full h-full flex items-stretch overflow-hidden">
-          {/* Left: Title and Content */}
-          <div className="w-full lg:flex-1 flex flex-col justify-center py-12 px-8 lg:px-16">
-            <div className="flex flex-col gap-6 max-w-lg">
+          {/* Left: Title and Content - 30% width */}
+          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0">
+            <div className="flex flex-col gap-6 max-w-md">
               <h1 className="text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 Studio
               </h1>
@@ -82,7 +82,7 @@ export function StudioPageClient() {
             </div>
           </div>
 
-          {/* Right: Studio Image - Flex layout, hidden on mobile */}
+          {/* Right: Studio Image - 70% width, takes remaining space */}
           <div className="hidden lg:flex lg:flex-1 relative overflow-hidden">
             <Image
               src="/images/studio-hero.jpg"

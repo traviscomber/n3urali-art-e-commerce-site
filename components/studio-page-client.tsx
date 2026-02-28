@@ -55,9 +55,14 @@ export function StudioPageClient() {
 
       {/* Hero Section - Studio Title + Content + Image */}
       <section className="w-full h-screen border-b border-slate-700">
-        <div className="w-full h-full flex items-stretch overflow-hidden">
-          {/* Left: Title and Content - 30% width with right border */}
-          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 border-r border-slate-600">
+        <div className="w-full h-full flex items-stretch overflow-hidden relative">
+          {/* Left: Title and Content - 30% width with gapped border */}
+          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0" style={{
+            backgroundImage: 'linear-gradient(to bottom, transparent 0%, transparent 20%, rgb(71, 85, 99) 20%, rgb(71, 85, 99) calc(50% - 30px), transparent calc(50% - 30px), transparent calc(50% + 30px), rgb(71, 85, 99) calc(50% + 30px), rgb(71, 85, 99) 80%, transparent 80%, transparent 100%)',
+            backgroundPosition: 'right',
+            backgroundSize: '1px 100%',
+            backgroundRepeat: 'no-repeat'
+          }}>
             <div className="flex flex-col gap-6 max-w-md">
               <h1 className="text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 Studio
@@ -115,9 +120,14 @@ export function StudioPageClient() {
 
       {/* Team Section */}
       <section className="w-full h-screen border-b border-slate-700">
-        <div className="w-full h-full flex items-stretch overflow-hidden">
-          {/* Left: Title and Content - 30% width with right border */}
-          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 border-r border-slate-600">
+        <div className="w-full h-full flex items-stretch overflow-hidden relative">
+          {/* Left: Title and Content - 30% width with gapped border */}
+          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0" style={{
+            backgroundImage: 'linear-gradient(to bottom, transparent 0%, transparent 20%, rgb(71, 85, 99) 20%, rgb(71, 85, 99) calc(50% - 30px), transparent calc(50% - 30px), transparent calc(50% + 30px), rgb(71, 85, 99) calc(50% + 30px), rgb(71, 85, 99) 80%, transparent 80%, transparent 100%)',
+            backgroundPosition: 'right',
+            backgroundSize: '1px 100%',
+            backgroundRepeat: 'no-repeat'
+          }}>
             <div className="flex flex-col gap-8 max-w-md">
               <h2 className="text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 Team
@@ -183,19 +193,28 @@ export function StudioPageClient() {
       </section>
 
       {/* Life/Production Section */}
-      <section className="min-h-screen flex items-center px-8 lg:px-12 py-16 border-b border-slate-700">
-        <div className="w-full">
-          <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-center max-w-6xl">
-            {/* Left: Title */}
-            <div className="flex flex-col gap-6 lg:w-1/3">
-              <h2 className="text-5xl md:text-6xl font-light text-slate-400">
-                Life
+      <section className="w-full h-screen border-b border-slate-700">
+        <div className="w-full h-full flex items-stretch overflow-hidden relative">
+          {/* Left: Title - 30% width with gapped border */}
+          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0" style={{
+            backgroundImage: 'linear-gradient(to bottom, transparent 0%, transparent 20%, rgb(71, 85, 99) 20%, rgb(71, 85, 99) calc(50% - 30px), transparent calc(50% - 30px), transparent calc(50% + 30px), rgb(71, 85, 99) calc(50% + 30px), rgb(71, 85, 99) 80%, transparent 80%, transparent 100%)',
+            backgroundPosition: 'right',
+            backgroundSize: '1px 100%',
+            backgroundRepeat: 'no-repeat'
+          }}>
+            <div className="flex flex-col gap-6 max-w-md">
+              <h2 className="text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
+                Life Gallery
               </h2>
-              <p className="text-slate-400 text-sm">Production process</p>
+              <p className="text-slate-400 text-base">
+                Behind the scenes and our content living among physical reality.
+              </p>
             </div>
+          </div>
 
-            {/* Right: Gallery Carousel */}
-            <div className="relative lg:w-2/3 w-full">
+          {/* Right: Gallery Carousel - 70% width */}
+          <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-12">
+            <div className="relative w-full max-w-2xl">
               <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-900 border border-slate-700">
                 <Image
                   src={galleryItems[galleryIndex].image}
@@ -213,14 +232,14 @@ export function StudioPageClient() {
               {/* Navigation Arrows */}
               <button
                 onClick={handlePrevGallery}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 text-slate-400 hover:text-cyan-400 transition-colors"
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-20 text-slate-400 hover:text-cyan-400 transition-colors"
                 aria-label="Previous gallery item"
               >
                 <ChevronLeft size={40} />
               </button>
               <button
                 onClick={handleNextGallery}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 text-slate-400 hover:text-cyan-400 transition-colors"
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-20 text-slate-400 hover:text-cyan-400 transition-colors"
                 aria-label="Next gallery item"
               >
                 <ChevronRight size={40} />

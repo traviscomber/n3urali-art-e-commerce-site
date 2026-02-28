@@ -38,42 +38,42 @@ export function StudioPageClient() {
   return (
     <div className="w-full bg-black">
       {/* Hero Section - Studio Title + Content + Image */}
-      <section className="w-full relative min-h-[80vh] border-b border-slate-700">
+      <section className="w-full relative h-screen border-b border-slate-700">
         <div className="w-full h-full flex relative">
           {/* Left: Title and Content */}
-          <div className="w-full lg:w-1/2 flex flex-col justify-center pt-20 pb-20 px-8 lg:px-12">
-            <div className="flex flex-col gap-8 max-w-xl">
-              <h1 className="text-6xl md:text-7xl font-light text-slate-400 leading-tight">
+          <div className="w-full lg:w-1/2 flex flex-col justify-center py-12 px-8 lg:px-16">
+            <div className="flex flex-col gap-6 max-w-lg">
+              <h1 className="text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 Studio
               </h1>
               
-              <div className="space-y-6">
-                <p className="text-slate-400 text-sm leading-relaxed">
+              <div className="space-y-5">
+                <p className="text-slate-400 text-base leading-relaxed">
                   N3uralia360 is a content creation studio combining advanced proprietary <a href="#" className="text-cyan-400 hover:text-cyan-300 underline">AI tools</a> with human art direction and real production.
                 </p>
 
                 {/* We create section */}
-                <div className="space-y-4 pt-4">
-                  <p className="text-slate-400 text-xs font-medium uppercase tracking-wide opacity-70">We create:</p>
-                  <ul className="space-y-2">
+                <div className="space-y-3 pt-2">
+                  <p className="text-slate-400 text-xs font-medium uppercase tracking-widest opacity-60">We create:</p>
+                  <ul className="space-y-1.5">
                     <li className="flex gap-3 items-start text-slate-300 text-sm">
-                      <span className="text-cyan-400 flex-shrink-0 mt-0.5">•</span>
+                      <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                       <span>Full-dome cinematic stories</span>
                     </li>
                     <li className="flex gap-3 items-start text-slate-300 text-sm">
-                      <span className="text-cyan-400 flex-shrink-0 mt-0.5">•</span>
+                      <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                       <span>Seamless dome environments & loops</span>
                     </li>
                     <li className="flex gap-3 items-start text-slate-300 text-sm">
-                      <span className="text-cyan-400 flex-shrink-0 mt-0.5">•</span>
+                      <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                       <span>VR-ready immersive worlds</span>
                     </li>
                     <li className="flex gap-3 items-start text-slate-300 text-sm">
-                      <span className="text-cyan-400 flex-shrink-0 mt-0.5">•</span>
+                      <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                       <span>Educational & cultural series</span>
                     </li>
                     <li className="flex gap-3 items-start text-slate-300 text-sm">
-                      <span className="text-cyan-400 flex-shrink-0 mt-0.5">•</span>
+                      <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                       <span>Custom immersive productions</span>
                     </li>
                   </ul>
@@ -82,7 +82,7 @@ export function StudioPageClient() {
             </div>
           </div>
 
-          {/* Right: Studio Image - Hidden on mobile, visible on lg */}
+          {/* Right: Studio Image - Full height on desktop */}
           <div className="hidden lg:block lg:w-1/2 absolute right-0 top-0 h-full w-1/2">
             <div className="relative w-full h-full">
               <Image
@@ -114,7 +114,7 @@ export function StudioPageClient() {
       </section>
 
       {/* Team Section */}
-      <section className="min-h-screen flex items-center px-8 lg:px-12 py-20 border-b border-slate-700">
+      <section className="min-h-screen flex items-center px-8 lg:px-12 py-16 border-b border-slate-700">
         <div className="w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 max-w-6xl">
             {/* Left: Team Title */}
@@ -149,7 +149,7 @@ export function StudioPageClient() {
       </section>
 
       {/* Life/Production Section */}
-      <section className="min-h-screen flex items-center px-8 lg:px-12 py-20 border-b border-slate-700">
+      <section className="min-h-screen flex items-center px-8 lg:px-12 py-16 border-b border-slate-700">
         <div className="w-full">
           <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-center max-w-6xl">
             {/* Left: Title */}

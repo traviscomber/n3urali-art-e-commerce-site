@@ -242,7 +242,7 @@ export function ShowsPageClient() {
               </div>
 
               <p className="text-slate-400 text-sm">
-                <span className="text-cyan-400 font-semibold">Blackblaze</span> develops scalable immersive content for planetariums, rental domes, and exhibitions everywhere.
+                <span className="text-cyan-400 font-semibold">N3uralia360</span> develops scalable immersive content for planetariums, rental domes, and exhibitions everywhere.
               </p>
             </div>
           </div>

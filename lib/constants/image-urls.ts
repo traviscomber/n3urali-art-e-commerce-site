@@ -2,7 +2,7 @@
 // Extracted to separate file to improve webpack caching performance
 
 export const LANDING_PAGE_IMAGES = {
-  shows: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/shows-WxJsoCUNBvaIHIvfrgnut4SXbJpSct.png',
+  shows: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ShowhButton-uwGAcpqJDs6WQJitmkENtnBzIkNeGJ.png',
   studio: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Studio-MYfrERBxbjcFc5gyFXzjZftIbU5kOt.png',
   environments: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Enve%CC%81s-EyBbx4EwgsTeVeUjU70EbUa9ZnVUDs.png',
   theatre: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatre-MypQBeV3eTXC7HBzjUM9NmWTs2cRkO.png',

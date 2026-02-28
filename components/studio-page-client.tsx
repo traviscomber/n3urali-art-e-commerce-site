@@ -56,8 +56,8 @@ export function StudioPageClient() {
       {/* Hero Section - Studio Title + Content + Image */}
       <section className="w-full h-screen border-b border-slate-700">
         <div className="w-full h-full flex items-stretch overflow-hidden">
-          {/* Left: Title and Content - 30% width */}
-          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0">
+          {/* Left: Title and Content - 30% width with right border */}
+          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 border-r border-slate-600">
             <div className="flex flex-col gap-6 max-w-md">
               <h1 className="text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 Studio
@@ -98,8 +98,8 @@ export function StudioPageClient() {
             </div>
           </div>
 
-          {/* Right: Studio Image - Preserves aspect ratio */}
-          <div className="hidden lg:flex lg:w-[45%] relative overflow-hidden flex items-center justify-center">
+          {/* Right: Studio Image - 70% with flex grow to fill remaining space */}
+          <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-8">
             <div className="relative w-4/5 h-4/5">
               <Image
                 src="/images/studio-hero.jpg"

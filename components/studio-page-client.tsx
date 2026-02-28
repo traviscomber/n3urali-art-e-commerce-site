@@ -11,18 +11,18 @@ export function StudioPageClient() {
     {
       name: 'Travis',
       role: 'AI-developing',
-      image: '/placeholder.svg?height=300&width=300',
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TravisProfile-cosmic-swirl.png',
     },
     {
       name: 'Irina',
       role: 'Art-curation',
-      image: '/placeholder.svg?height=300&width=300',
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IrinaProfile-moon-elephant.png',
     },
   ]
 
   const galleryItems = [
     {
-      image: '/placeholder.svg?height=500&width=600',
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/StudioWorkspace-keyboard.png',
       title: 'photo gallery',
     },
   ]
@@ -166,8 +166,8 @@ export function StudioPageClient() {
         </div>
       </section>
 
-      {/* Life/Production Section - HIDDEN */}
-      <section className="hidden min-h-screen flex items-center px-6 sm:px-8 lg:px-12 py-20">
+      {/* Life/Production Section */}
+      <section className="min-h-screen flex items-center px-6 sm:px-8 lg:px-12 py-20 border-t border-slate-700">
         <div className="max-w-7xl mx-auto w-full">
           <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-center">
             {/* Left: Title */}

@@ -6,24 +6,7 @@ import Image from 'next/image'
 
 export function ShowsPageClient() {
   const [teaserIndex, setTeaserIndex] = useState(0)
-
-  // Sample shows data
-  const shows = [
-    {
-      id: 1,
-      name: 'Meet Mosey — Guide of the Nile, Multiverse',
-      subtitle: 'Cinematic Dome Stories',
-      description: 'From mythical realms to sacred atmospheres, immerse in tales of wonder.',
-      perfectFor: [
-        'Family dome nights',
-        'Cultural programming',
-        'Art and experience-focused events',
-        'Themed event openings',
-      ],
-      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png',
-      videoImage: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_0000000084b4720eab101516c1d517ef-isrhjXPFYMJ2NRAjYnKXaqq7UFm5QK.png',
-    },
-  ]
+  const videoRef = useState<HTMLVideoElement | null>(null)[1]
 
   const teasers = [
     {
@@ -38,6 +21,17 @@ export function ShowsPageClient() {
 
   const handleNextTeaser = () => {
     setTeaserIndex((prev) => (prev + 1) % teasers.length)
+  }
+
+  const handleTeaserClick = (idx: number) => {
+    setTeaserIndex(idx)
+    // Auto-play video when clicked
+    setTimeout(() => {
+      const videoElement = document.querySelector('video[data-main-player]') as HTMLVideoElement
+      if (videoElement) {
+        videoElement.play()
+      }
+    }, 0)
   }
 
   const currentShow = shows[0]
@@ -138,8 +132,8 @@ export function ShowsPageClient() {
                 {teasers.map((teaser, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setTeaserIndex(idx)}
-                    className={`relative w-28 h-40 rounded-lg overflow-hidden border transition-all flex-shrink-0 ${
+                    onClick={() => handleTeaserClick(idx)}
+                    className={`relative w-32 h-32 rounded-lg overflow-hidden border transition-all flex-shrink-0 ${
                       idx === teaserIndex ? 'border-cyan-400 shadow-lg shadow-cyan-400/30' : 'border-slate-700 hover:border-cyan-400'
                     }`}
                   >
@@ -158,11 +152,20 @@ export function ShowsPageClient() {
 
             {/* Right Main Video Preview */}
             <div className="relative flex-1 flex flex-col items-center">
+              <style>{`
+                video::-webkit-media-controls-fullscreen-button {
+                  display: none;
+                }
+                video::-moz-media-controls-fullscreen-button {
+                  display: none;
+                }
+              `}</style>
               <div className="relative w-full max-w-xl aspect-video rounded-lg overflow-hidden bg-slate-900 border border-slate-700">
                 <video
+                  data-main-player
                   src={teasers[teaserIndex]?.video}
                   className="w-full h-full object-cover"
-                  controls
+                  controlsList="nodownload nofullscreen"
                   preload="metadata"
                 />
               </div>

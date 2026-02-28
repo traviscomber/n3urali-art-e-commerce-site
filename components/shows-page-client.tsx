@@ -97,11 +97,6 @@ export function ShowsPageClient() {
                 className="object-cover"
                 priority
               />
-              <div className="absolute inset-0 flex items-end justify-center pb-8">
-                <p className="text-3xl md:text-4xl font-light text-white">
-                  still image
-                </p>
-              </div>
             </div>
           </div>
         </div>

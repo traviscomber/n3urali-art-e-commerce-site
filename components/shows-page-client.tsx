@@ -203,6 +203,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                   data-main-player
                   src={teasers[teaserIndex]?.video}
                   className="w-full h-full object-cover"
+                  controls
                   controlsList="nodownload nofullscreen"
                   preload="metadata"
                 />

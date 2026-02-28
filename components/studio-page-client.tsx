@@ -39,9 +39,9 @@ export function StudioPageClient() {
     <div className="w-full bg-black">
       {/* Hero Section - Studio Title + Content + Image */}
       <section className="w-full relative h-screen border-b border-slate-700">
-        <div className="w-full h-full flex relative">
+        <div className="w-full h-full flex relative overflow-hidden">
           {/* Left: Title and Content */}
-          <div className="w-full lg:w-1/2 flex flex-col justify-center py-12 px-8 lg:px-16">
+          <div className="w-full lg:w-2/5 flex flex-col justify-center py-12 px-8 lg:px-16 relative z-10">
             <div className="flex flex-col gap-6 max-w-lg">
               <h1 className="text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 Studio
@@ -82,8 +82,8 @@ export function StudioPageClient() {
             </div>
           </div>
 
-          {/* Right: Studio Image - Full height on desktop */}
-          <div className="hidden lg:block lg:w-1/2 absolute right-0 top-0 h-full w-1/2">
+          {/* Right: Studio Image - Expanded to fill remaining space */}
+          <div className="hidden lg:block absolute right-0 top-0 h-full w-3/5">
             <div className="relative w-full h-full">
               <Image
                 src="/images/studio-hero.jpg"

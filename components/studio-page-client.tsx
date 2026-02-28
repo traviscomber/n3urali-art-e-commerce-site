@@ -1,24 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Image from 'next/image'
 
 export function StudioPageClient() {
   const [galleryIndex, setGalleryIndex] = useState(0)
-
-  const teamMembers = [
-    {
-      name: 'Travis',
-      role: 'AI-developing',
-      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TravisProfile-cosmic-swirl.png',
-    },
-    {
-      name: 'Irina',
-      role: 'Art-curation',
-      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IrinaProfile-moon-elephant.png',
-    },
-  ]
 
   const galleryItems = [
     {
@@ -30,6 +17,15 @@ export function StudioPageClient() {
       title: 'Cosmic Dreams',
     },
   ]
+
+  // Auto-advance gallery every 10 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setGalleryIndex((prev) => (prev + 1) % galleryItems.length)
+    }, 10000)
+
+    return () => clearInterval(interval)
+  }, [galleryItems.length])
 
   const handlePrevGallery = () => {
     setGalleryIndex((prev) => (prev - 1 + galleryItems.length) % galleryItems.length)

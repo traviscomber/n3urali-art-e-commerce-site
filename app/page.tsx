@@ -4,6 +4,7 @@ import { LANDING_PAGE_IMAGES } from "@/lib/constants/image-urls"
 import { HomepageHero } from "@/components/homepage-hero"
 import { CategoryCardsGrid } from "@/components/category-cards-grid"
 import { ShowsSection } from "@/components/shows-section"
+import { StudioSection } from "@/components/studio-section"
 import { EnvironmentsSection } from "@/components/environments-section"
 import { TheatreSection } from "@/components/theatre-section"
 
@@ -90,6 +91,9 @@ export default async function HomePage() {
 
       {/* Category Cards Grid */}
       <CategoryCardsGrid cards={categoryCards.filter(card => card.imageUrl)} />
+
+      {/* Studio Section */}
+      <StudioSection />
 
       {/* Shows Section */}
       <ShowsSection />

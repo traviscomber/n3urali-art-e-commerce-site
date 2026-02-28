@@ -114,35 +114,69 @@ export function StudioPageClient() {
       </section>
 
       {/* Team Section */}
-      <section className="min-h-screen flex items-center px-8 lg:px-12 py-16 border-b border-slate-700">
-        <div className="w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 max-w-6xl">
-            {/* Left: Team Title */}
-            <div className="flex flex-col justify-center gap-6 border-r border-slate-700 pr-12">
-              <h2 className="text-5xl md:text-6xl font-light text-slate-400">
+      <section className="w-full h-screen border-b border-slate-700">
+        <div className="w-full h-full flex items-stretch overflow-hidden">
+          {/* Left: Title and Content - 30% width with right border */}
+          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 border-r border-slate-600">
+            <div className="flex flex-col gap-8 max-w-md">
+              <h2 className="text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 Team
               </h2>
-              <p className="text-slate-400 text-sm">Introducing our crew</p>
-            </div>
+              
+              <p className="text-slate-400 text-base leading-relaxed">
+                N3uralia360 is an AI + human studio. We build immersive content through code, curation, and cinematic motion design.
+              </p>
 
-            {/* Right: Team Members */}
-            <div className="flex flex-col gap-12 justify-center">
-              {teamMembers.map((member, index) => (
-                <div key={member.name} className="flex gap-8 items-center">
-                  <div className="flex flex-col gap-1 flex-1">
-                    <p className="text-slate-400 text-sm">{member.name}</p>
-                    <p className="text-slate-500 text-xs">{member.role}</p>
-                  </div>
-                  <div className="relative w-32 h-32 rounded-full overflow-hidden flex-shrink-0 border border-slate-700">
-                    <Image
-                      src={member.image}
-                      alt={member.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
+              {/* Action Buttons */}
+              <div className="flex gap-4 pt-4">
+                <button className="px-6 py-2 border border-cyan-400 text-cyan-400 text-sm font-medium hover:bg-cyan-400/10 transition-colors">
+                  Our Tools
+                </button>
+                <button className="px-6 py-2 border border-cyan-400 text-cyan-400 text-sm font-medium hover:bg-cyan-400/10 transition-colors">
+                  WhatsApp
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Team Members - 70% width */}
+          <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-12">
+            <div className="flex gap-12 justify-center items-end w-full">
+              {/* Team Member 1 */}
+              <div className="flex flex-col gap-4 items-center text-center">
+                <div className="relative w-48 h-48 rounded-full overflow-hidden border border-slate-700">
+                  <Image
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TravisProfile-cosmic-swirl.png"
+                    alt="Juan Vial - AI Development"
+                    fill
+                    className="object-cover"
+                  />
                 </div>
-              ))}
+                <div className="flex flex-col gap-3">
+                  <p className="text-slate-400 text-lg font-light">Juan Vial</p>
+                  <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
+                    Leads AI development, generative systems, and immersive production architecture.
+                  </p>
+                </div>
+              </div>
+
+              {/* Team Member 2 */}
+              <div className="flex flex-col gap-4 items-center text-center">
+                <div className="relative w-48 h-48 rounded-full overflow-hidden border border-slate-700">
+                  <Image
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IrinaProfile-moon-elephant.png"
+                    alt="Irina Lebedeva - Visual Identity"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="flex flex-col gap-3">
+                  <p className="text-slate-400 text-lg font-light">Irina Lebedeva</p>
+                  <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
+                    Shapes visual identity, and curates each world into a cohesive immersive experience.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

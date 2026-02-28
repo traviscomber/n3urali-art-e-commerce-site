@@ -692,6 +692,7 @@
 /* Disconnected vertical dividing lines - contained within each section */
 .section-divider {
   position: relative;
+  overflow: hidden;
 }
 
 .section-divider::after {
@@ -702,4 +703,5 @@
   bottom: 0;
   width: 1px;
   background-color: rgb(71, 85, 99);
+  pointer-events: none;
 }

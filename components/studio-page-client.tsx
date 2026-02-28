@@ -38,10 +38,10 @@ export function StudioPageClient() {
   return (
     <div className="w-full bg-black">
       {/* Hero Section - Studio Title + Content + Image */}
-      <section className="flex items-stretch px-0 py-0 relative min-h-[80vh] border-b border-slate-700">
-        <div className="w-full flex relative">
+      <section className="w-full relative min-h-[80vh] border-b border-slate-700">
+        <div className="w-full h-full flex relative">
           {/* Left: Title and Content */}
-          <div className="lg:w-1/2 flex flex-col justify-center pt-20 pb-20 px-8 lg:px-12">
+          <div className="w-full lg:w-1/2 flex flex-col justify-center pt-20 pb-20 px-8 lg:px-12">
             <div className="flex flex-col gap-8 max-w-xl">
               <h1 className="text-6xl md:text-7xl font-light text-slate-400 leading-tight">
                 Studio
@@ -82,8 +82,8 @@ export function StudioPageClient() {
             </div>
           </div>
 
-          {/* Right: Studio Images */}
-          <div className="lg:w-1/2 relative h-full">
+          {/* Right: Studio Images - Hidden on mobile, visible on lg */}
+          <div className="hidden lg:block lg:w-1/2 absolute right-0 top-0 h-full w-1/2">
             {/* Dome Projector Image */}
             <div className="relative h-1/2 w-full border-b border-slate-700">
               <Image
@@ -91,6 +91,7 @@ export function StudioPageClient() {
                 alt="Dome theater with immersive content"
                 fill
                 className="object-cover"
+                priority
               />
             </div>
             {/* Projection Setup Image */}
@@ -100,9 +101,26 @@ export function StudioPageClient() {
                 alt="Studio projection setup"
                 fill
                 className="object-cover"
+                priority
               />
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Video Player Section - Full Width (Position #2) */}
+      <section className="w-full h-screen flex items-center justify-center bg-black relative overflow-hidden border-b border-slate-700">
+        <video
+          src="https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f1103aff7f35b2839_d20260222_m230525_c005_v0501012_t0023_u01771801525343"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/20" />
+        <div className="relative z-10 text-5xl md:text-7xl font-light text-white text-center">
+          Video player
         </div>
       </section>
 

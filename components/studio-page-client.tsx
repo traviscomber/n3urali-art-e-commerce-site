@@ -148,22 +148,6 @@ export function StudioPageClient() {
         </div>
       </section>
 
-      {/* Video Player Section - Full Width (Position #3) */}
-      <section className="w-full h-screen flex items-center justify-center bg-black relative overflow-hidden border-b border-slate-700">
-        <video
-          src="https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f1103aff7f35b2839_d20260222_m230525_c005_v0501012_t0023_u01771801525343"
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black/20" />
-        <div className="relative z-10 text-5xl md:text-7xl font-light text-white text-center">
-          Video player
-        </div>
-      </section>
-
       {/* Life/Production Section */}
       <section className="min-h-screen flex items-center px-8 lg:px-12 py-20 border-b border-slate-700">
         <div className="w-full">

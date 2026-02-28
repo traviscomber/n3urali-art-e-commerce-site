@@ -82,14 +82,14 @@ export function StudioPageClient() {
             </div>
           </div>
 
-          {/* Right: Studio Image - Expanded to fill remaining space */}
-          <div className="hidden lg:block absolute right-0 top-0 h-full w-1/2">
+          {/* Right: Studio Image - Positioned right after text */}
+          <div className="hidden lg:block absolute left-1/2 top-0 h-full w-1/2">
             <div className="relative w-full h-full">
               <Image
                 src="/images/studio-hero.jpg"
                 alt="N3uralia360 studio dome projection setup with immersive content"
                 fill
-                className="object-cover object-center"
+                className="object-cover object-left"
                 priority
               />
             </div>

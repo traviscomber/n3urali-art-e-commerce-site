@@ -38,10 +38,10 @@ export function StudioPageClient() {
   return (
     <div className="w-full bg-black">
       {/* Hero Section - Studio Title + Content + Image */}
-      <section className="w-full relative h-screen border-b border-slate-700">
-        <div className="w-full h-full flex relative overflow-hidden">
+      <section className="w-full h-screen border-b border-slate-700">
+        <div className="w-full h-full flex items-stretch overflow-hidden">
           {/* Left: Title and Content */}
-          <div className="w-full lg:w-1/2 flex flex-col justify-center py-12 px-8 lg:px-16 relative z-10">
+          <div className="w-full lg:flex-1 flex flex-col justify-center py-12 px-8 lg:px-16">
             <div className="flex flex-col gap-6 max-w-lg">
               <h1 className="text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 Studio
@@ -82,17 +82,15 @@ export function StudioPageClient() {
             </div>
           </div>
 
-          {/* Right: Studio Image - Positioned right after text */}
-          <div className="hidden lg:block absolute left-1/2 top-0 h-full w-1/2">
-            <div className="relative w-full h-full">
-              <Image
-                src="/images/studio-hero.jpg"
-                alt="N3uralia360 studio dome projection setup with immersive content"
-                fill
-                className="object-cover object-left"
-                priority
-              />
-            </div>
+          {/* Right: Studio Image - Flex layout, hidden on mobile */}
+          <div className="hidden lg:flex lg:flex-1 relative overflow-hidden">
+            <Image
+              src="/images/studio-hero.jpg"
+              alt="N3uralia360 studio dome projection setup with immersive content"
+              fill
+              className="object-cover object-left"
+              priority
+            />
           </div>
         </div>
       </section>

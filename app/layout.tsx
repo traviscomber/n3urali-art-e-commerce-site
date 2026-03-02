@@ -335,13 +335,11 @@ export default function RootLayout({
                 <LanguageProvider>
                   <MusicPlayerProvider>
                     <ToastProvider>
-                      <Suspense fallback={null}>
-                        <Header />
-                        {children}
-                        <CartSidebar />
-                        <Analytics />
-                        <SpeedInsights />
-                      </Suspense>
+                      <Header />
+                      {children}
+                      <CartSidebar />
+                      <Analytics />
+                      <SpeedInsights />
                     </ToastProvider>
                   </MusicPlayerProvider>
                 </LanguageProvider>

@@ -1,5 +1,3 @@
-'use client'
-
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
@@ -120,31 +118,35 @@ function EnvironmentCollection({
 
       {/* Image Grid - 3 Circular Images with Center Highlighted */}
       <div className="flex items-center justify-center gap-6 md:gap-8 flex-wrap">
-        {images.map((image, index) => {
-          const isHighlighted = index === highlightIndex
-          const size = isHighlighted ? 320 : 224
-          
-          return (
-            <button
-              key={index}
-              onClick={() => window.location.href = ctaLink}
-              className={`relative rounded-full overflow-hidden transform transition-all duration-300 hover:scale-110 hover:shadow-2xl cursor-pointer flex-shrink-0 ${
-                isHighlighted ? 'ring-2 ring-cyan-400/30 hover:ring-cyan-400/60' : ''
-              }`}
-            >
-              <Image
-                src={image.src}
-                alt={image.alt}
-                width={size}
-                height={size}
-                className="object-cover rounded-full"
-                priority={isHighlighted}
-              />
-              {/* Hover overlay */}
-              <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-full" />
-            </button>
-          )
-        })}
+{images
+  .map((image, originalIndex) => ({ image, originalIndex }))
+  .filter(({ image }) => image.src && image.src.trim() !== "")
+  .map(({ image, originalIndex }) => {
+    // Find if this should be the center image (originally at index 1)
+    const isCenter = originalIndex === 1
+    const size = isCenter ? 320 : 224
+
+    return (
+      <Link
+        key={originalIndex}
+        href={ctaLink}
+        className={`relative rounded-full overflow-hidden transform transition-all duration-300 hover:scale-110 hover:shadow-2xl cursor-pointer flex-shrink-0 block ${
+          isCenter ? "ring-2 ring-cyan-400/30 hover:ring-cyan-400/60" : ""
+        }`}
+      >
+        <Image
+          src={image.src}
+          alt={image.alt}
+          width={size}
+          height={size}
+          className="object-cover rounded-full"
+          priority={isCenter}
+        />
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-full" />
+      </Link>
+    )
+  })}
       </div>
     </div>
   )

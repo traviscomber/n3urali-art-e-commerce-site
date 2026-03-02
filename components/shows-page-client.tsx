@@ -228,15 +228,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
             {/* Right: Main Video Preview */}
             <div className="relative flex-1 flex flex-col items-center ml-12">
-              <style>{`
-                video::-webkit-media-controls-fullscreen-button {
-                  display: none;
-                }
-                video::-moz-media-controls-fullscreen-button {
-                  display: none;
-                }
-              `}</style>
-              <div className="relative w-full max-w-xl aspect-video rounded-lg overflow-hidden bg-slate-900 border border-slate-700">
+              <div className="relative w-full max-w-xl aspect-video rounded-lg overflow-hidden bg-slate-900 border border-slate-700 video-player-container">
                 <video
                   data-main-player
                   src={teasers[teaserIndex]?.video}

@@ -705,3 +705,12 @@
   background-color: rgb(71, 85, 99);
   pointer-events: none;
 }
+
+/* Video player controls - hide fullscreen button across all browsers */
+.video-player-container video::-webkit-media-controls-fullscreen-button {
+  display: none;
+}
+
+.video-player-container video::-moz-media-controls-fullscreen-button {
+  display: none;
+}

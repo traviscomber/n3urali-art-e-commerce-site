@@ -227,7 +227,6 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 <p className="text-white text-base font-light">Dreamy Sponges</p>
               </div>
             </div>
-            </div>
 
             {/* Load More - spans the third column */}
             <div className="flex items-center justify-center">

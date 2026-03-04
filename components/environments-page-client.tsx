@@ -172,10 +172,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png"
                 alt="Chilled trees forest walking"
                 fill
-                className="object-cover"
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
-                <p className="text-slate-100 text-sm font-light">Chilled trees forest walking</p>
+              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
+                <p className="text-white text-base font-light">Chilled trees forest walking</p>
               </div>
             </div>
 
@@ -184,10 +184,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png"
                 alt="Tropical paradise bay"
                 fill
-                className="object-cover"
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
-                <p className="text-slate-100 text-sm font-light">Tropical paradise bay</p>
+              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
+                <p className="text-white text-base font-light">Tropical paradise bay</p>
               </div>
             </div>
 
@@ -196,10 +196,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat3-LTyR3NMoIATIkcqUzoPaCNqwJ0JscN.png"
                 alt="Mycelia in strange"
                 fill
-                className="object-cover"
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
-                <p className="text-slate-100 text-sm font-light">Mycelia in strange</p>
+              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
+                <p className="text-white text-base font-light">Mycelia in strange</p>
               </div>
             </div>
 
@@ -209,23 +209,24 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png"
                 alt="Lava power"
                 fill
-                className="object-cover"
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
-                <p className="text-slate-100 text-sm font-light">Lava power</p>
+              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
+                <p className="text-white text-base font-light">Lava power</p>
               </div>
             </div>
 
             <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat5-kNXWZO6NmPKqOnEXPxAFy9TRHKUpyK.png"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat5-4G2FHlE9CWaQ4TUFvXf7JHyJz8n3Hu.png"
                 alt="Dreamy Sponges"
                 fill
-                className="object-cover"
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
-                <p className="text-slate-100 text-sm font-light">Dreamy Sponges</p>
+              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
+                <p className="text-white text-base font-light">Dreamy Sponges</p>
               </div>
+            </div>
             </div>
 
             {/* Load More - spans the third column */}
@@ -281,10 +282,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult1-dhVGWchKNmJw81kGmXDaXIJ5cd2xFk.png"
                 alt="Purple sunset halo"
                 fill
-                className="object-cover"
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
-                <p className="text-slate-100 text-sm font-light">Purple sunset halo</p>
+              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
+                <p className="text-white text-base font-light">Purple sunset halo</p>
               </div>
             </div>
 
@@ -293,10 +294,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult2-g8bXETDkCu4snNrPouTKozSZSfGxMl.png"
                 alt="Canoe adventure"
                 fill
-                className="object-cover"
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
-                <p className="text-slate-100 text-sm font-light">Canoe adventure</p>
+              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
+                <p className="text-white text-base font-light">Canoe adventure</p>
               </div>
             </div>
 
@@ -305,10 +306,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult3-rkJrAmWhsEN0xY7OOeNbBueEgYyjBY.png"
                 alt="Sunset over ancient temple"
                 fill
-                className="object-cover"
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
-                <p className="text-slate-100 text-sm font-light">Sunset over ancient temple</p>
+              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
+                <p className="text-white text-base font-light">Sunset over ancient temple</p>
               </div>
             </div>
 
@@ -318,10 +319,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult4-fOr7dFUw2LF1ihBOtwpZSNb9txsVJq.png"
                 alt="Walking walls of Valparaiso"
                 fill
-                className="object-cover"
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
-                <p className="text-slate-100 text-sm font-light">Walking walls of Valparaiso</p>
+              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
+                <p className="text-white text-base font-light">Walking walls of Valparaiso</p>
               </div>
             </div>
 
@@ -330,10 +331,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult5-YMhIkyjNnvCMyh91uvItbrfSuoxm5n.png"
                 alt="Celestial gates"
                 fill
-                className="object-cover"
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
-                <p className="text-slate-100 text-sm font-light">Celestial gates</p>
+              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
+                <p className="text-white text-base font-light">Celestial gates</p>
               </div>
             </div>
 
@@ -393,10 +394,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                   src={url}
                   alt={mythicLabels[idx]}
                   fill
-                  className="object-cover"
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
-                  <p className="text-slate-100 text-sm font-light">{mythicLabels[idx]}</p>
+                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
+                  <p className="text-white text-base font-light">{mythicLabels[idx]}</p>
                 </div>
               </div>
             ))}
@@ -458,10 +459,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                   src={url}
                   alt={artLabels[idx]}
                   fill
-                  className="object-cover"
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
-                  <p className="text-slate-100 text-sm font-light">{artLabels[idx]}</p>
+                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
+                  <p className="text-white text-base font-light">{artLabels[idx]}</p>
                 </div>
               </div>
             ))}

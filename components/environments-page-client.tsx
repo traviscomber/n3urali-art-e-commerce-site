@@ -198,6 +198,118 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         </div>
       </section>
 
+      {/* Nature Section */}
+      <section className="w-full border-b border-slate-700">
+        {/* Full-width Banner with Overlay Text */}
+        <div className="relative w-full h-80 overflow-hidden">
+          <Image
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
+            alt="Nature"
+            fill
+            className="object-cover"
+          />
+          {/* Overlay Text */}
+          <div className="absolute inset-0 flex flex-col justify-center px-12 bg-black/40">
+            <div className="flex flex-col gap-4 max-w-2xl">
+              <h2 className="text-6xl font-light text-slate-100 leading-tight">
+                Nature
+              </h2>
+              <p className="text-slate-200 text-base leading-relaxed max-w-md">
+                Explore real world with dreamlike immersive dome interpretations. Travel between UNESCO Sites in seconds or discover diversity of real life reimagined with <span className="text-red-400">immersive</span> creativity.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Region Navigation Tabs */}
+        <div className="relative w-full flex items-center gap-8 px-12 py-8 border-b border-slate-700">
+          <button className="text-slate-400 hover:text-cyan-400 transition-colors">
+            <ChevronLeft size={24} />
+          </button>
+          <button className="text-slate-300 hover:text-cyan-400 transition-colors font-light">Oceans</button>
+          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Volcanoes</button>
+          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Underwater Life</button>
+          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Ice and Snow</button>
+          <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto">
+            <ChevronRight size={24} />
+          </button>
+        </div>
+
+        {/* Showcase Grid - 3 columns */}
+        <div className="w-full px-12 py-12">
+          <div className="grid grid-cols-3 gap-6">
+            {/* Row 1 */}
+            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
+                alt="Chilled trees forest walking"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
+                <p className="text-slate-100 text-sm font-light">Chilled trees forest walking</p>
+              </div>
+            </div>
+
+            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult2-g8bXETDkCu4snNrPouTKozSZSfGxMl.png"
+                alt="Tropical paradise bay"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
+                <p className="text-slate-100 text-sm font-light">Tropical paradise bay</p>
+              </div>
+            </div>
+
+            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult3-rkJrAmWhsEN0xY7OOeNbBueEgYyjBY.png"
+                alt="Mycelia in strange"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
+                <p className="text-slate-100 text-sm font-light">Mycelia in strange</p>
+              </div>
+            </div>
+
+            {/* Row 2 */}
+            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult4-fOr7dFUw2LF1ihBOtwpZSNb9txsVJq.png"
+                alt="Lava power"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
+                <p className="text-slate-100 text-sm font-light">Lava power</p>
+              </div>
+            </div>
+
+            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult5-YMhIkyjNnvCMyh91uvItbrfSuoxm5n.png"
+                alt="Dreamy Sponges"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
+                <p className="text-slate-100 text-sm font-light">Dreamy Sponges</p>
+              </div>
+            </div>
+
+            {/* Load More - spans the third column */}
+            <div className="flex items-center justify-center">
+              <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
+                Load More
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Art Environments Section */}
       <section className="w-full min-h-screen border-b border-slate-700">
         <div className="w-full h-full flex items-stretch overflow-hidden relative">

@@ -90,114 +90,109 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
       </section>
 
       {/* Heritage Environments Featured Section - Culture */}
-      <section className="w-full min-h-screen border-b border-slate-700">
-        <div className="w-full h-full flex items-stretch overflow-hidden relative">
-          {/* Left: Culture Info - 30% width */}
-          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 section-divider">
-            <div className="flex flex-col gap-6 max-w-md">
-              <h2 className="text-5xl lg:text-6xl font-light text-slate-300 leading-tight">
+      <section className="w-full border-b border-slate-700">
+        {/* Full-width Banner with Overlay Text */}
+        <div className="relative w-full h-80 overflow-hidden">
+          <Image
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
+            alt="Culture"
+            fill
+            className="object-cover"
+          />
+          {/* Overlay Text */}
+          <div className="absolute inset-0 flex flex-col justify-center px-12 bg-black/40">
+            <div className="flex flex-col gap-4 max-w-2xl">
+              <h2 className="text-6xl font-light text-slate-100 leading-tight">
                 Culture
               </h2>
-
-              <p className="text-slate-400 text-base leading-relaxed">
+              <p className="text-slate-200 text-base leading-relaxed max-w-md">
                 Heritage Environments are immersive journeys inspired by real cultures, architecture, symbolism, and landscapes.
               </p>
             </div>
           </div>
+        </div>
 
-          {/* Right: Featured Image, Navigation Tabs and Showcase Grid - 70% width */}
-          <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-start justify-start px-12 flex-col">
-            {/* Main Featured Image */}
-            <div className="relative w-full h-64 rounded-lg overflow-hidden mb-8">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
-                alt="Culture"
-                fill
-                className="object-cover"
-              />
+        {/* Region Navigation Tabs */}
+        <div className="relative w-full flex items-center gap-8 px-12 py-8 border-b border-slate-700">
+          <button className="text-slate-400 hover:text-cyan-400 transition-colors">
+            <ChevronLeft size={24} />
+          </button>
+          <button className="text-slate-300 hover:text-cyan-400 transition-colors font-light">North America</button>
+          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Polynesia</button>
+          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Southeast Asia</button>
+          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Antarctica</button>
+        </div>
+
+        {/* Showcase Grid - 3 columns */}
+        <div className="w-full px-12 py-12">
+          <div className="grid grid-cols-3 gap-6">
+            {/* Row 1 */}
+            <div className="flex flex-col gap-2">
+              <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
+                  alt="Purple sunset halo"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <p className="text-slate-300 text-sm font-light">Purple sunset halo</p>
             </div>
 
-            {/* Region Navigation Tabs */}
-            <div className="relative w-full flex items-center gap-8 mb-12 border-b border-slate-700 pb-4">
-              <button className="text-slate-400 hover:text-cyan-400 transition-colors">
-                <ChevronLeft size={24} />
+            <div className="flex flex-col gap-2">
+              <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_0000000084b4720eab101516c1d517ef-isrhjXPFYMJ2NRAjYnKXaqq7UFm5QK.png"
+                  alt="Canoe adventure"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <p className="text-slate-300 text-sm font-light">Canoe adventure</p>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T3-tKVM0mRce88hLOkXMFL3RMTfa90904.png"
+                  alt="Sunset over ancient temple"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <p className="text-slate-300 text-sm font-light">Sunset over ancient temple</p>
+            </div>
+
+            {/* Row 2 */}
+            <div className="flex flex-col gap-2">
+              <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T31-icn8zhQpqszgBmYVNR57HNzAmikXcO.png"
+                  alt="Walking walls of Valparaiso"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <p className="text-slate-300 text-sm font-light">Walking walls of Valparaiso</p>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
+                  alt="Celestial gates"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <p className="text-slate-300 text-sm font-light">Celestial gates</p>
+            </div>
+
+            {/* Load More - spans the third column */}
+            <div className="flex items-center justify-center">
+              <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
+                Load More
               </button>
-              <button className="text-slate-300 hover:text-cyan-400 transition-colors font-light">North America</button>
-              <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Polynesia</button>
-              <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Southeast Asia</button>
-              <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Antarctica</button>
-            </div>
-
-            {/* Showcase Grid - 3 columns */}
-            <div className="w-full grid grid-cols-3 gap-6">
-              {/* Row 1 */}
-              <div className="flex flex-col gap-2">
-                <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
-                  <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
-                    alt="Purple sunset halo"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <p className="text-slate-300 text-sm font-light">Purple sunset halo</p>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
-                  <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_0000000084b4720eab101516c1d517ef-isrhjXPFYMJ2NRAjYnKXaqq7UFm5QK.png"
-                    alt="Canoe adventure"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <p className="text-slate-300 text-sm font-light">Canoe adventure</p>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
-                  <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T3-tKVM0mRce88hLOkXMFL3RMTfa90904.png"
-                    alt="Sunset over ancient temple"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <p className="text-slate-300 text-sm font-light">Sunset over ancient temple</p>
-              </div>
-
-              {/* Row 2 */}
-              <div className="flex flex-col gap-2">
-                <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
-                  <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T31-icn8zhQpqszgBmYVNR57HNzAmikXcO.png"
-                    alt="Walking walls of Valparaiso"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <p className="text-slate-300 text-sm font-light">Walking walls of Valparaiso</p>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
-                  <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
-                    alt="Celestial gates"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <p className="text-slate-300 text-sm font-light">Celestial gates</p>
-              </div>
-
-              {/* Load More - spans the third column */}
-              <div className="flex items-center justify-center">
-                <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
-                  Load More
-                </button>
-              </div>
             </div>
           </div>
         </div>

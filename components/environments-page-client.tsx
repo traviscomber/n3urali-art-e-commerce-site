@@ -47,7 +47,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
     { name: 'Abstract', id: 'abstract' },
   ]
 
-  const artBannerUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArtBackg-9ZJq4XrKmJPQnH2LvPqw5qD7qY8vJ1.png'
+  const artBannerUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArtBackg-MIwtTMvWE0TRmQidtELMbTop8VeRAE.png'
   
   const artImages = [
     'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArt1-LkM9nPqRwXyZaBcDeFgHiJkLmNoPqR.png',

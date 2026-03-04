@@ -349,10 +349,6 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
     </div>
   )
 }
-
-  return (
-    <div className="w-full bg-black">
-      {/* Intro Section */}
       <section className="w-full py-16 px-8 lg:px-12 border-b border-slate-700">
         <div className="max-w-2xl">
           <h1 className="text-6xl lg:text-7xl font-light text-slate-400 leading-tight mb-4">

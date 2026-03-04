@@ -132,7 +132,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             {/* Row 1 */}
             <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png"
                 alt="Chilled trees forest walking"
                 fill
                 className="object-cover"
@@ -144,7 +144,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
 
             <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult2-g8bXETDkCu4snNrPouTKozSZSfGxMl.png"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png"
                 alt="Tropical paradise bay"
                 fill
                 className="object-cover"
@@ -156,7 +156,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
 
             <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult3-rkJrAmWhsEN0xY7OOeNbBueEgYyjBY.png"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat3-LTyR3NMoIATIkcqUzoPaCNqwJ0JscN.png"
                 alt="Mycelia in strange"
                 fill
                 className="object-cover"
@@ -169,7 +169,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             {/* Row 2 */}
             <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult4-fOr7dFUw2LF1ihBOtwpZSNb9txsVJq.png"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png"
                 alt="Lava power"
                 fill
                 className="object-cover"
@@ -181,7 +181,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
 
             <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult5-YMhIkyjNnvCMyh91uvItbrfSuoxm5n.png"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat5-kNXWZO6NmPKqOnEXPxAFy9TRHKUpyK.png"
                 alt="Dreamy Sponges"
                 fill
                 className="object-cover"

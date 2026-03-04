@@ -47,8 +47,8 @@ export default async function HomePage() {
 
   const categoryCards = await Promise.all(
     categories.map(async (cat) => {
-      // For theatre, always use the fallback button design image
-      if (cat.key === 'theatre') {
+      // For theatre and shows, always use the fallback button design image
+      if (cat.key === 'theatre' || cat.key === 'shows') {
         return {
           id: cat.key,
           title: cat.title,

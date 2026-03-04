@@ -47,7 +47,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
     { name: 'Abstract', id: 'abstract' },
   ]
 
-  const mythicBannerUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythicBackg-placeholder.png'
+  const mythicBannerUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythBackg%20%282%29-UZZUeitXszDkixpZBAL3mYzMq9rEq1.png'
 
   const mythicImages = [
     'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythic1-placeholder.png',

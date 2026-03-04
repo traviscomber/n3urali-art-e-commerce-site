@@ -127,7 +127,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         <div className="w-full px-12 py-12">
           <div className="grid grid-cols-3 gap-6">
             {/* Row 1 */}
-            <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800 group">
+            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
                 alt="Purple sunset halo"
@@ -139,7 +139,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800 group">
+            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_0000000084b4720eab101516c1d517ef-isrhjXPFYMJ2NRAjYnKXaqq7UFm5QK.png"
                 alt="Canoe adventure"
@@ -151,7 +151,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800 group">
+            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T3-tKVM0mRce88hLOkXMFL3RMTfa90904.png"
                 alt="Sunset over ancient temple"
@@ -164,7 +164,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             </div>
 
             {/* Row 2 */}
-            <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800 group">
+            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T31-icn8zhQpqszgBmYVNR57HNzAmikXcO.png"
                 alt="Walking walls of Valparaiso"
@@ -176,7 +176,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800 group">
+            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
                 alt="Celestial gates"

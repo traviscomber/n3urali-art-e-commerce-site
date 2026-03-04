@@ -94,7 +94,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         {/* Full-width Banner with Overlay Text */}
         <div className="relative w-full h-80 overflow-hidden">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatBackg%20%281%29-TLXUR5xYkTXrK8r7ahb8ZseNFWVg53.png"
             alt="Nature"
             fill
             className="object-cover"

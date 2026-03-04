@@ -127,65 +127,65 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         <div className="w-full px-12 py-12">
           <div className="grid grid-cols-3 gap-6">
             {/* Row 1 */}
-            <div className="flex flex-col gap-2">
-              <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
-                <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
-                  alt="Purple sunset halo"
-                  fill
-                  className="object-cover"
-                />
+            <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800 group">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
+                alt="Purple sunset halo"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
+                <p className="text-slate-100 text-sm font-light">Purple sunset halo</p>
               </div>
-              <p className="text-slate-300 text-sm font-light">Purple sunset halo</p>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
-                <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_0000000084b4720eab101516c1d517ef-isrhjXPFYMJ2NRAjYnKXaqq7UFm5QK.png"
-                  alt="Canoe adventure"
-                  fill
-                  className="object-cover"
-                />
+            <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800 group">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_0000000084b4720eab101516c1d517ef-isrhjXPFYMJ2NRAjYnKXaqq7UFm5QK.png"
+                alt="Canoe adventure"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
+                <p className="text-slate-100 text-sm font-light">Canoe adventure</p>
               </div>
-              <p className="text-slate-300 text-sm font-light">Canoe adventure</p>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
-                <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T3-tKVM0mRce88hLOkXMFL3RMTfa90904.png"
-                  alt="Sunset over ancient temple"
-                  fill
-                  className="object-cover"
-                />
+            <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800 group">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T3-tKVM0mRce88hLOkXMFL3RMTfa90904.png"
+                alt="Sunset over ancient temple"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
+                <p className="text-slate-100 text-sm font-light">Sunset over ancient temple</p>
               </div>
-              <p className="text-slate-300 text-sm font-light">Sunset over ancient temple</p>
             </div>
 
             {/* Row 2 */}
-            <div className="flex flex-col gap-2">
-              <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
-                <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T31-icn8zhQpqszgBmYVNR57HNzAmikXcO.png"
-                  alt="Walking walls of Valparaiso"
-                  fill
-                  className="object-cover"
-                />
+            <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800 group">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T31-icn8zhQpqszgBmYVNR57HNzAmikXcO.png"
+                alt="Walking walls of Valparaiso"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
+                <p className="text-slate-100 text-sm font-light">Walking walls of Valparaiso</p>
               </div>
-              <p className="text-slate-300 text-sm font-light">Walking walls of Valparaiso</p>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
-                <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
-                  alt="Celestial gates"
-                  fill
-                  className="object-cover"
-                />
+            <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800 group">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
+                alt="Celestial gates"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
+                <p className="text-slate-100 text-sm font-light">Celestial gates</p>
               </div>
-              <p className="text-slate-300 text-sm font-light">Celestial gates</p>
             </div>
 
             {/* Load More - spans the third column */}

@@ -349,7 +349,6 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
     </div>
   )
 }
-          <p className="text-slate-500 text-base font-light mb-6">
             Seamless dome loops designed to charm.
           </p>
           <ul className="space-y-3">

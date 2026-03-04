@@ -28,13 +28,11 @@ interface FeaturedImage {
 
 interface ClientWrapperProps {
   imageOfTheDay: FeaturedImage | null
-  collectionImages: FeaturedImage[]
   auctionImages: FeaturedImage[]
-  dailyImages: FeaturedImage[]
 }
 
 export const ClientWrapper = memo(
-  function ClientWrapper({ imageOfTheDay, auctionImages, collectionImages, dailyImages }: ClientWrapperProps) {
+  function ClientWrapper({ imageOfTheDay, auctionImages }: ClientWrapperProps) {
     const { t } = useLanguage()
     const isMounted = useRef(true)
 
@@ -48,13 +46,13 @@ export const ClientWrapper = memo(
     // Core product sections
     const productSections = [
       {
-        id: "realities",
-        title: "R3alities",
+        id: "shows",
+        title: "Shows",
         subtitle: "Cinematic Dome Stories",
         description: "Seamless immersive loops designed for full-dome cinema, festivals, and branded experiences.",
         icon: Play,
         color: "from-cyan-500/20 to-blue-500/20",
-        href: "/realities",
+        href: "/shows",
       },
       {
         id: "environments",
@@ -127,7 +125,7 @@ export const ClientWrapper = memo(
 
                 {/* CTA Buttons */}
                 <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-                  <Link href="/realities">
+                  <Link href="/shows">
                     <Button size="lg" className="bg-cyan-600 hover:bg-cyan-700 text-white">
                       Explore Worlds
                       <ArrowRight className="w-4 h-4 ml-2" />
@@ -266,51 +264,7 @@ export const ClientWrapper = memo(
             </div>
           </section>
 
-          {/* Featured Content Showcase */}
-          {collectionImages && collectionImages.length > 0 && (
-            <section className="py-24 px-4 bg-background">
-              <div className="container mx-auto max-w-6xl">
-                <div className="mb-12">
-                  <h2 className="text-4xl md:text-5xl font-bold text-white mb-3">Featured Collections</h2>
-                  <p className="text-slate-400 text-lg">Discover our curated immersive experiences</p>
-                </div>
-
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {collectionImages.slice(0, 6).map((image) => (
-                    <Link key={image.id} href={`/photo/${image.id}`}>
-                      <div className="group relative h-64 rounded-xl overflow-hidden border border-slate-700 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20">
-                        <Image
-                          src={image.upscaled_url || image.original_url || image.file_path || "/placeholder.svg"}
-                          alt={image.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-
-                        <div className="absolute bottom-0 left-0 right-0 p-4">
-                          <h3 className="text-white font-bold text-lg mb-1">{image.title}</h3>
-                          <p className="text-cyan-300 text-sm">{image.image_format}</p>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-
-                <div className="text-center mt-12">
-                  <Link href="/gallery">
-                    <Button
-                      size="lg"
-                      className="bg-slate-700 hover:bg-slate-600 text-white border-0"
-                    >
-                      View All Collections
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </section>
-          )}
+          {/* Featured Content Showcase - Removed: Collection images no longer used */}
 
           {/* CTA Section - Request Special Offer */}
           <section className="py-24 px-4 bg-gradient-to-b from-slate-900/50 via-slate-900/30 to-background">

@@ -688,3 +688,29 @@
 .animate-kenBurnsAuction {
   animation: kenBurnsAuction 60s ease-in-out forwards;
 }
+
+/* Disconnected vertical dividing lines - contained within each section */
+.section-divider {
+  position: relative;
+  overflow: hidden;
+}
+
+.section-divider::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: rgb(71, 85, 99);
+  pointer-events: none;
+}
+
+/* Video player controls - hide fullscreen button across all browsers */
+.video-player-container video::-webkit-media-controls-fullscreen-button {
+  display: none;
+}
+
+.video-player-container video::-moz-media-controls-fullscreen-button {
+  display: none;
+}

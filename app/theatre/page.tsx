@@ -1,12 +1,9 @@
-import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
-import { CategoryHeroBlock } from '@/components/category-hero-block'
-import { CategoryGalleryBlock } from '@/components/category-gallery-block'
-import { RelatedCategoriesBlock } from '@/components/related-categories-block'
+import { TheatrePlayerClient } from '@/components/theatre-player-client'
 
-export const metadata: Metadata = {
+export const metadata = {
   title: 'Theatre - N3uralia360',
-  description: 'Performance-focused immersive experiences designed for live venues, cultural institutions, and theatrical spaces.',
+  description: 'Immersive equirectangular 360° experiences.',
 }
 
 export const revalidate = 3600
@@ -14,45 +11,28 @@ export const revalidate = 3600
 export default async function TheatrePage() {
   const supabase = await createClient()
 
+  // Fetch only equirectangular images (no videos), must be active
+  // Include tags field to group related images together
   const { data: images } = await supabase
     .from('images')
-    .select('id, title, thumbnail_medium_url, original_url, upscaled_url')
-    .eq('content_category', 'theatre')
+    .select('id, title, original_url, image_format, description, tags, thumbnail_medium_url, upscaled_url')
+    .eq('image_format', 'equirectangular')
     .eq('active', true)
     .order('created_at', { ascending: false })
 
-  const featuredImage = images?.[0]
-
-  const theatreFeatures = [
-    'Live performance integration',
-    'Theatre venue optimization',
-    'Performance loop sequences',
-    'Cultural event experiences',
-    'Custom venue solutions',
-  ]
+  // Fetch collections with their images
+  const { data: collections } = await supabase
+    .from('collections')
+    .select('*')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
 
   return (
-    <main className="min-h-screen w-full bg-background">
-      <CategoryHeroBlock
-        category="theatre"
-        title="Theatre"
-        subtitle="Performance-Ready Experiences"
-        description="Performance-focused immersive experiences designed for live venues, cultural institutions, and theatrical spaces. Built for seamless integration with live events and performances."
-        features={theatreFeatures}
-        featuredImage={
-          featuredImage ? {
-            url: featuredImage.upscaled_url || featuredImage.original_url || '',
-            alt: featuredImage.title || 'Theatre featured work'
-          } : undefined
-        }
+    <main className="min-h-screen w-full bg-black">
+      <TheatrePlayerClient 
+        images={images || []} 
+        collections={collections || []}
       />
-
-      <CategoryGalleryBlock
-        images={images || []}
-        category="theatre"
-      />
-
-      <RelatedCategoriesBlock currentCategory="theatre" />
     </main>
   )
 }

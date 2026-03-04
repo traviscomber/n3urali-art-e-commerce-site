@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import type React from "react"
 import type { Metadata } from "next"
 import { Montserrat } from "next/font/google"
@@ -13,6 +14,8 @@ import { ToastProvider } from "@/components/toast-notifications"
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { MusicPlayerProvider } from "@/lib/contexts/music-player-context"
+
+// Force redeploy trigger
 
 const montserrat = Montserrat({
   subsets: ["latin"],

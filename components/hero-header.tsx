@@ -7,9 +7,9 @@ export function HeroHeader() {
   const { t } = useLanguage()
 
   const sections = [
-    { label: 'Studio', href: '/studio', icon: '◆' },
+    { label: 'Shows', href: '/shows', icon: '◆' },
     { label: 'Environments', href: '/environments', icon: '▬' },
-    { label: 'Realities', href: '/realities', icon: '●' },
+    { label: 'Studio', href: '/studio', icon: '●' },
     { label: 'Theatre', href: '/theatre', icon: '▲' },
   ]
 

@@ -61,19 +61,28 @@ function GalleryClientComponent({ initialImages, initialCategories, galleryStats
   const [viewingPanorama, setViewingPanorama] = useState<Image | null>(null)
 
   const { equirectangularImages, fisheyeImages } = useMemo(() => {
-    const equirectangular = images.filter(
+    // Filter only active images with valid thumbnails and valid image format
+    const activeImages = images.filter(
       (img) =>
+        img.active &&
+        img.thumbnail_medium_url &&
+        (img.image_format?.toLowerCase() === "equirectangular" ||
+          img.image_format?.toLowerCase() === "fisheye"),
+    )
+
+    const equirectangular = activeImages.filter(
+      (img) =>
+        img.image_format?.toLowerCase().includes("equirectangular") ||
         img.category_name?.toLowerCase().includes("equirectangular") ||
         img.categories?.name?.toLowerCase().includes("equirectangular") ||
-        img.image_format?.toLowerCase().includes("equirectangular") ||
         (img.category_name?.toLowerCase().includes("360") && !img.category_name?.toLowerCase().includes("fisheye")),
     )
 
-    const fisheye = images.filter(
+    const fisheye = activeImages.filter(
       (img) =>
+        img.image_format?.toLowerCase().includes("fisheye") ||
         img.category_name?.toLowerCase().includes("fisheye") ||
         img.categories?.name?.toLowerCase().includes("fisheye") ||
-        img.image_format?.toLowerCase().includes("fisheye") ||
         img.category_name?.toLowerCase().includes("180"),
     )
 
@@ -89,9 +98,18 @@ function GalleryClientComponent({ initialImages, initialCategories, galleryStats
   }
 
   const displayedImages = useMemo(() => {
+    // Only show active images with valid format (equirectangular or fisheye)
+    const validImages = images.filter(
+      (img) =>
+        img.active &&
+        img.thumbnail_medium_url &&
+        (img.image_format?.toLowerCase() === "equirectangular" ||
+          img.image_format?.toLowerCase() === "fisheye"),
+    )
+
     if (selectedFormat === "equirectangular") return equirectangularImages
     if (selectedFormat === "fisheye") return fisheyeImages
-    return images
+    return validImages
   }, [selectedFormat, images, equirectangularImages, fisheyeImages])
 
   return (

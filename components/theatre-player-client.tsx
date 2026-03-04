@@ -1,0 +1,241 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { PanoramaViewerPSV } from '@/components/panorama-viewer-psv'
+import { ChevronRight, ChevronLeft } from 'lucide-react'
+
+interface Image {
+  id: string
+  title: string
+  thumbnail_medium_url?: string
+  original_url?: string
+  upscaled_url?: string
+  image_format?: string
+  description?: string
+  tags?: string[]
+}
+
+interface Collection {
+  id: string
+  title?: string
+  code?: string
+  description?: string
+  synopsis?: string
+}
+
+interface TheatrePlayerClientProps {
+  images: Image[]
+  collections: Collection[]
+}
+
+export function TheatrePlayerClient({ images, collections }: TheatrePlayerClientProps) {
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const [isViewerOpen, setIsViewerOpen] = useState(false)
+  const [fadeOut, setFadeOut] = useState(false)
+
+  // Get all related images (same primary subcategory tag)
+  // Primary tag (first tag) represents the subcategory like "Forest", "Ocean", etc.
+  const getRelatedImages = (imageIndex: number): Image[] => {
+    const currentImage = images[imageIndex]
+    
+    if (!currentImage?.tags || currentImage.tags.length === 0) {
+      // If no tags, return only this image
+      return [currentImage]
+    }
+
+    // Use the first tag as the primary subcategory (e.g., "Forest", "Ocean")
+    const primaryTag = currentImage.tags[0]
+    
+    // Find all images with the same primary tag (same subcategory)
+    return images.filter(img => {
+      if (!img.tags || img.tags.length === 0) return false
+      return img.tags[0] === primaryTag
+    })
+  }
+
+  // Auto-rotate related images every 30 seconds when in fullscreen viewer
+  useEffect(() => {
+    if (!isViewerOpen) return // Only auto-rotate when viewer IS open
+
+    const relatedImages = getRelatedImages(selectedImageIndex)
+
+    // If only 1 related image, no need to rotate
+    if (relatedImages.length <= 1) return
+
+    const interval = setInterval(() => {
+      setFadeOut(true)
+      setTimeout(() => {
+        // Find current image in related images and rotate to next
+        const currentIdx = relatedImages.findIndex(img => img.id === images[selectedImageIndex].id)
+        const nextIdx = (currentIdx + 1) % relatedImages.length
+        const nextImage = relatedImages[nextIdx]
+        const nextImageIndex = images.findIndex(img => img.id === nextImage.id)
+        setSelectedImageIndex(nextImageIndex)
+        setFadeOut(false)
+      }, 500) // Fade duration
+    }, 30000) // 30 seconds
+
+    return () => clearInterval(interval)
+  }, [isViewerOpen, selectedImageIndex, images])
+
+  if (!images || images.length === 0) {
+    return (
+      <div className="min-h-screen w-full bg-black flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-3xl font-light text-gray-400 mb-4">No Equirectangular Images Available</h2>
+          <p className="text-gray-500">Check back soon for immersive 360° experiences.</p>
+        </div>
+      </div>
+    )
+  }
+
+  const currentImage = images[selectedImageIndex]
+  const imageUrl = currentImage.upscaled_url || currentImage.original_url || currentImage.thumbnail_medium_url || ''
+  
+  // Compute related images and index - safe to compute on both server and client
+  const relatedImages = getRelatedImages(selectedImageIndex)
+  const currentRelatedIndex = relatedImages.findIndex(img => img.id === currentImage.id) + 1
+
+  const handlePrevious = () => {
+    const currentRelated = getRelatedImages(selectedImageIndex)
+    
+    if (currentRelated.length <= 1) return // No navigation if only 1 related image
+    
+    const currentIdx = currentRelated.findIndex(img => img.id === images[selectedImageIndex].id)
+    const prevIdx = (currentIdx - 1 + currentRelated.length) % currentRelated.length
+    const prevImage = currentRelated[prevIdx]
+    const prevImageIndex = images.findIndex(img => img.id === prevImage.id)
+    setSelectedImageIndex(prevImageIndex)
+  }
+
+  const handleNext = () => {
+    const currentRelated = getRelatedImages(selectedImageIndex)
+    
+    if (currentRelated.length <= 1) return // No navigation if only 1 related image
+    
+    const currentIdx = currentRelated.findIndex(img => img.id === images[selectedImageIndex].id)
+    const nextIdx = (currentIdx + 1) % currentRelated.length
+    const nextImage = currentRelated[nextIdx]
+    const nextImageIndex = images.findIndex(img => img.id === nextImage.id)
+    setSelectedImageIndex(nextImageIndex)
+  }
+
+  return (
+    <div className="min-h-screen w-full bg-black">
+      {/* Full-screen Auto-Rotating Panorama Viewer */}
+      {isViewerOpen && (
+        <PanoramaViewerPSV
+          imageUrl={imageUrl}
+          title={currentImage.title || 'Panoramic Experience'}
+          onClose={() => setIsViewerOpen(false)}
+          relaxMode={true}
+          fov={130}
+          sphereScale={5000}
+          rotationSpeed={0.0002}
+        />
+      )}
+
+      {/* Landing Page - Only shown when viewer is not open */}
+      {!isViewerOpen && (
+        <>
+          {/* Header Section */}
+          <div className="pt-20 pb-12 text-center border-b border-gray-800">
+            <h1 className="text-5xl md:text-6xl font-light text-gray-400 mb-6 tracking-wide">
+              Theatre
+            </h1>
+            <div className="space-y-2 text-gray-500 text-sm md:text-base">
+              <p>Immerse yourself. No special requirements</p>
+              <p>Bigger screen brings better experience</p>
+              <p className="mt-4">A Living Immersive Catalog</p>
+              <p>New worlds are released regularly</p>
+            </div>
+          </div>
+
+          {/* Featured Panorama Section */}
+          <div className="w-full px-6 py-16 max-w-7xl mx-auto">
+            {/* Panorama Teaser */}
+            <div className="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden mb-12 border border-gray-700 group">
+              <div
+                className={`w-full h-full bg-cover bg-center cursor-pointer transition-all duration-500 group-hover:scale-105 ${
+                  fadeOut ? 'opacity-0' : 'opacity-100'
+                }`}
+                style={{
+                  backgroundImage: `url('${currentImage.thumbnail_medium_url || imageUrl}')`,
+                  backgroundPosition: 'center',
+                }}
+              />
+
+              {/* GO Button - Opens full auto-rotating panorama */}
+              <button
+                onClick={() => setIsViewerOpen(true)}
+                className="absolute inset-0 m-auto w-24 h-24 rounded-full border-2 border-gray-600 hover:border-cyan-500 transition-all duration-300 flex items-center justify-center z-10 hover:scale-110 hover:bg-black/20"
+              >
+                <span className="text-cyan-400 text-lg font-light tracking-wider group-hover:text-cyan-300 transition-colors">GO</span>
+              </button>
+
+              {/* Info overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
+                <div className="p-6">
+                  <h3 className="text-xl font-light text-white">{currentImage.title}</h3>
+                  <p className="text-sm text-gray-300 mt-2">Click GO to explore in 360°</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Image Info */}
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-light text-gray-300 mb-2">
+                {currentImage.title}
+              </h2>
+              <p className="text-gray-500">
+                {currentImage.description || 'Explore this immersive panoramic experience'}
+              </p>
+              <p className="text-gray-600 text-sm mt-2">
+                {currentRelatedIndex} of {relatedImages.length}
+              </p>
+            </div>
+
+            {/* Navigation Controls */}
+            <div className="flex items-center justify-center gap-8 mb-12">
+              <button
+                onClick={handlePrevious}
+                disabled={relatedImages.length <= 1}
+                className="p-3 rounded-full border border-gray-700 hover:border-cyan-500 hover:bg-cyan-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Previous panorama"
+              >
+                <ChevronLeft className="w-6 h-6 text-gray-400 hover:text-cyan-400" />
+              </button>
+
+              <div className="flex gap-2">
+                {relatedImages.map((img, index) => (
+                  <button
+                    key={img.id}
+                    onClick={() => {
+                      const imageIndex = images.findIndex(i => i.id === img.id)
+                      setSelectedImageIndex(imageIndex)
+                    }}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      img.id === currentImage.id
+                        ? 'bg-cyan-500 w-8'
+                        : 'bg-gray-600 hover:bg-gray-500'
+                    }`}
+                    aria-label={`Go to panorama ${index + 1}`}
+                  />
+                ))}
+              </div>
+
+              <button
+                onClick={handleNext}
+                disabled={relatedImages.length <= 1}
+                className="p-3 rounded-full border border-gray-700 hover:border-cyan-500 hover:bg-cyan-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Next panorama"
+              >
+                <ChevronRight className="w-6 h-6 text-gray-400 hover:text-cyan-400" />
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}

@@ -21,7 +21,10 @@ export default async function AdminLayout({
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
 
-  if (profile?.role !== "admin") {
+  // Allow if user is admin or if email is travis@nuanu.com
+  const isAdmin = profile?.role === "admin" || user.email === "travis@nuanu.com"
+  
+  if (!isAdmin) {
     redirect("/")
   }
 
@@ -31,12 +34,15 @@ export default async function AdminLayout({
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">Admin Panel</h1>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 flex-wrap justify-end">
               <Button variant="ghost" asChild>
                 <Link href="/admin">Dashboard</Link>
               </Button>
               <Button variant="ghost" asChild>
-                <Link href="/admin/videos">Videos</Link>
+                <Link href="/admin/simple-admin">Upload Videos</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link href="/admin/videos">Videos Manager</Link>
               </Button>
               <Button variant="ghost" asChild>
                 <Link href="/admin/featured-images">Featured Images</Link>

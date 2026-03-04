@@ -3,25 +3,14 @@
 import Image from 'next/image'
 
 interface HomepageHeroProps {
-  featuredImage?: {
-    url: string
-    alt: string
-  }
+  videoUrl?: string
 }
 
-export function HomepageHero({ featuredImage }: HomepageHeroProps) {
-  const features = [
-    'Full-dome immersive content',
-    'Dome & VR environments',
-    'Seamless performance loops',
-    'Educational and cultural series',
-    'Custom immersive productions',
-  ]
-
+export function HomepageHero({ videoUrl }: HomepageHeroProps) {
   return (
     <section className="w-full bg-black py-24 px-4 sm:px-6 lg:px-8 border-b border-gray-600/60">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left Column: Title, Subtitle, Description */}
           <div className="flex flex-col gap-6">
             <div>
@@ -34,38 +23,39 @@ export function HomepageHero({ featuredImage }: HomepageHeroProps) {
             </div>
 
             <div className="space-y-4">
-              <p className="text-sm md:text-base text-gray-400 leading-relaxed max-w-sm font-light">
+              <p className="text-sm md:text-base text-gray-400 leading-relaxed font-light">
                 Cinematic dome stories, seamless immersive loops, and VR-ready environments — crafted for dome operators, immersive events, and live performance.
               </p>
-              <p className="text-sm md:text-base text-gray-400 leading-relaxed max-w-sm font-light">
+              <p className="text-sm md:text-base text-gray-400 leading-relaxed font-light">
                 Projection-ready. Dome-correct. Instantly deployable.
               </p>
             </div>
           </div>
 
-          {/* Center Column: Featured Image */}
+          {/* Right Column: Video */}
           <div className="flex justify-center">
-            <div className="relative w-full max-w-sm aspect-square rounded-lg overflow-hidden bg-gradient-to-br from-gray-900 to-black shadow-2xl">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000f2d4720eae5b83444e157277-apnWSNe9S9zAGRXCiRyHS4dK9QdLb0.png"
-                alt="Studio - Immersive forest environment"
-                fill
-                className="w-full h-full object-cover"
-                priority
-              />
+            <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-black shadow-2xl border border-gray-700/50">
+              {videoUrl ? (
+                <video
+                  src={videoUrl}
+                  muted
+                  loop
+                  playsInline
+                  autoPlay
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
+                  <div className="text-center">
+                    <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-gray-400 text-sm">Video not available</p>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-
-          {/* Right Column: Features List */}
-          <div className="flex flex-col gap-4">
-            {features.map((feature, index) => (
-              <div key={index} className="flex gap-3 items-start">
-                <span className="text-gray-600 text-sm flex-shrink-0 mt-1">•</span>
-                <p className="text-sm md:text-base text-gray-400 font-light">
-                  {feature}
-                </p>
-              </div>
-            ))}
           </div>
         </div>
       </div>

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
 interface RelatedCategoriesBlockProps {
-  currentCategory: 'studio' | 'environments' | 'realities' | 'theatre'
+  currentCategory: 'studio' | 'environments' | 'shows' | 'theatre'
 }
 
 const categories = [
@@ -21,9 +21,9 @@ const categories = [
     icon: '🌍',
   },
   {
-    id: 'realities',
-    name: 'Realities',
-    description: 'Digital narrative experiences',
+    id: 'shows',
+    name: 'Shows',
+    description: 'Cinematic dome stories',
     icon: '✨',
   },
   {

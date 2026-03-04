@@ -50,11 +50,11 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
   const artBannerUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArtBackg-MIwtTMvWE0TRmQidtELMbTop8VeRAE.png'
   
   const artImages = [
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArt1-LkM9nPqRwXyZaBcDeFgHiJkLmNoPqR.png',
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArt2-StUvWxYzAbCdEfGhIjKlMnOpQrStUv.png',
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArt3-WxYzAbCdEfGhIjKlMnOpQrStUvWxYz.png',
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArt4-AbCdEfGhIjKlMnOpQrStUvWxYzAbCd.png',
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArt5-EfGhIjKlMnOpQrStUvWxYzAbCdEfGh.png',
+    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArt1-m4KYdc6BQcLkasgP33aW3ZFJ2nj3Fx.png',
+    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArt2-NPhNLdPp3q4K28r5Yv4uey9UtpHgAt.png',
+    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArt3-RdYjhjx4UGKt8ZAUJqVZsPYA5w4IWz.png',
+    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArt4-8WvAaJvzCMxtmtIkNB52e627HkLHfR.png',
+    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArt5-mWhVHfCKypAjRS2FHFuBjbQlGO97dV.png',
   ]
 
   const artLabels = [

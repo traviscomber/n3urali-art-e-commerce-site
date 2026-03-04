@@ -148,7 +148,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
           <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-8">
             <div className="relative w-4/5 h-4/5 rounded-lg overflow-hidden">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/MossyCircle2%20%282%29-8UVgJhXOggwovOsSji8oFSA2og3aXh.png"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ShowhButton-5zWpjE8wAgaCHbB7ol0bEI2uzXmY8t.png"
                 alt={currentShow.title || 'Show preview'}
                 fill
                 className="object-cover"

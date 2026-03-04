@@ -31,6 +31,31 @@ interface ShowsPageClientProps {
 export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientProps) {
   const [teaserIndex, setTeaserIndex] = useState(0)
 
+  const mythicBannerUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythBackg%20%282%29-UZZUeitXszDkixpZBAL3mYzMq9rEq1.png'
+  
+  const mythicImages = [
+    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png',
+    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth2-5zeFMllXp1WFWUyJgvnpY8plIxwQts.png',
+    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth3-mZG3PGuOFqePUhTm63gOYOXUhfDN6d.png',
+    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth4-W0eVn7cqin99zRFZN90EDL8J39HY9V.png',
+    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth5-HHbnx40rB7gy6IkODw4wqBQWJcPzhY.png',
+  ]
+
+  const mythicLabels = [
+    'El Tayukú Presence',
+    'Halloween in Lego City',
+    'Vibrant Ritual of New Caledonia',
+    'Hages of Blue Ocean',
+    'Angry Wind Spirit',
+  ]
+
+  const mythicCategories = [
+    { name: 'Asian', id: 'asian' },
+    { name: 'Mesoamerican', id: 'mesoamerican' },
+    { name: 'Greek', id: 'greek' },
+    { name: 'Egyptian', id: 'egyptian' },
+  ]
+
   const teasers = [
     {
       video: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/upscaled_4k_1769186425665-tIDvx4aisEE2OnZKa01br1AsjGa0U9.mp4',
@@ -129,6 +154,70 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                 className="object-cover"
                 priority
               />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mythic Section */}
+      <section className="w-full border-b border-slate-700">
+        {/* Full-width Banner with Overlay Text */}
+        <div className="relative w-full h-80 overflow-hidden">
+          <Image
+            src={mythicBannerUrl}
+            alt="Mythic"
+            fill
+            className="object-cover"
+          />
+          {/* Overlay Text */}
+          <div className="absolute inset-0 flex flex-col justify-center px-12 bg-black/40">
+            <div className="flex flex-col gap-4 max-w-2xl">
+              <h2 className="text-6xl font-light text-slate-100 leading-tight">
+                Mythic
+              </h2>
+              <p className="text-slate-200 text-base leading-relaxed max-w-md">
+                The Mythical Universe series transforms <span className="text-cyan-400">symbolic and dreamlike cosmology</span> into immersive dome experiences. Pure atmosphere and emotional immersion.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Category Navigation Tabs */}
+        <div className="relative w-full flex items-center gap-8 px-12 py-8 border-b border-slate-700">
+          <button className="text-slate-400 hover:text-cyan-400 transition-colors">
+            <ChevronLeft size={24} />
+          </button>
+          <button className="text-slate-300 hover:text-cyan-400 transition-colors font-light">Asian</button>
+          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Mesoamerican</button>
+          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Greek</button>
+          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Egyptian</button>
+          <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto">
+            <ChevronRight size={24} />
+          </button>
+        </div>
+
+        {/* Showcase Grid - 3 columns */}
+        <div className="w-full px-12 py-12">
+          <div className="grid grid-cols-3 gap-6">
+            {mythicImages.slice(0, 5).map((url, idx) => (
+              <div key={idx} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                <Image
+                  src={url}
+                  alt={mythicLabels[idx]}
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
+                  <p className="text-slate-100 text-sm font-light">{mythicLabels[idx]}</p>
+                </div>
+              </div>
+            ))}
+
+            {/* Load More - spans the third column */}
+            <div className="flex items-center justify-center">
+              <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
+                Load More
+              </button>
             </div>
           </div>
         </div>

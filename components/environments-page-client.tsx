@@ -89,89 +89,115 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         </div>
       </section>
 
-      {/* Heritage Environments Featured Section */}
+      {/* Heritage Environments Featured Section - Culture */}
       <section className="w-full min-h-screen border-b border-slate-700">
         <div className="w-full h-full flex items-stretch overflow-hidden relative">
-          {/* Left: Heritage Info - 30% width */}
+          {/* Left: Culture Info - 30% width */}
           <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 section-divider">
             <div className="flex flex-col gap-6 max-w-md">
               <h2 className="text-5xl lg:text-6xl font-light text-slate-300 leading-tight">
-                Heritage Environments
+                Culture
               </h2>
 
               <p className="text-slate-400 text-base leading-relaxed">
                 Heritage Environments are immersive journeys inspired by real cultures, architecture, symbolism, and landscapes.
               </p>
-
-              <ul className="space-y-2">
-                <li className="flex gap-3 items-start text-slate-400 text-sm">
-                  <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
-                  <span>Cinematic and respectful</span>
-                </li>
-                <li className="flex gap-3 items-start text-slate-400 text-sm">
-                  <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
-                  <span>Emotional and accessible</span>
-                </li>
-                <li className="flex gap-3 items-start text-slate-400 text-sm">
-                  <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
-                  <span>Engaging for families and events</span>
-                </li>
-              </ul>
             </div>
           </div>
 
-          {/* Right: Featured Image and Category Buttons - 70% width */}
-          <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-12 flex-col gap-8">
+          {/* Right: Featured Image, Navigation Tabs and Showcase Grid - 70% width */}
+          <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-start justify-start px-12 flex-col">
             {/* Main Featured Image */}
-            <div className="relative w-full h-96 rounded-lg overflow-hidden">
+            <div className="relative w-full h-64 rounded-lg overflow-hidden mb-8">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
-                alt="Heritage Environments"
+                alt="Culture"
                 fill
                 className="object-cover"
               />
             </div>
 
-            {/* Category Buttons with Scroll Arrow */}
-            <div className="relative w-full flex items-center gap-6">
-              {/* Category Buttons */}
-              <div className="flex gap-6 flex-wrap">
-                {heritageCategories.map((category, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setHeritageCategoryIndex(idx)}
-                    className="flex flex-col items-center gap-3 group"
-                  >
-                    {/* Category Image or Placeholder */}
-                    <div className={`relative w-24 h-24 rounded-full overflow-hidden border-2 transition-all ${
-                      idx === heritageCategoryIndex ? 'border-cyan-400' : 'border-slate-700'
-                    }`}>
-                      {idx < 3 ? (
-                        <Image
-                          src={categoryImages[idx]}
-                          alt={category.name}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-slate-800 flex items-center justify-center">
-                          <ChevronRight size={32} className="text-slate-600" />
-                        </div>
-                      )}
-                    </div>
-                    <span className="text-slate-300 text-sm font-light">{category.name}</span>
-                  </button>
-                ))}
+            {/* Region Navigation Tabs */}
+            <div className="relative w-full flex items-center gap-8 mb-12 border-b border-slate-700 pb-4">
+              <button className="text-slate-400 hover:text-cyan-400 transition-colors">
+                <ChevronLeft size={24} />
+              </button>
+              <button className="text-slate-300 hover:text-cyan-400 transition-colors font-light">North America</button>
+              <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Polynesia</button>
+              <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Southeast Asia</button>
+              <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Antarctica</button>
+            </div>
+
+            {/* Showcase Grid - 3 columns */}
+            <div className="w-full grid grid-cols-3 gap-6">
+              {/* Row 1 */}
+              <div className="flex flex-col gap-2">
+                <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
+                  <Image
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
+                    alt="Purple sunset halo"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <p className="text-slate-300 text-sm font-light">Purple sunset halo</p>
               </div>
 
-              {/* Scroll More Arrow - Positioned on the right */}
-              <button
-                onClick={handleNextHeritageCategory}
-                className="ml-auto text-slate-400 hover:text-cyan-400 transition-colors p-2"
-                aria-label="View more categories"
-              >
-                <ChevronRight size={32} />
-              </button>
+              <div className="flex flex-col gap-2">
+                <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
+                  <Image
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_0000000084b4720eab101516c1d517ef-isrhjXPFYMJ2NRAjYnKXaqq7UFm5QK.png"
+                    alt="Canoe adventure"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <p className="text-slate-300 text-sm font-light">Canoe adventure</p>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
+                  <Image
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T3-tKVM0mRce88hLOkXMFL3RMTfa90904.png"
+                    alt="Sunset over ancient temple"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <p className="text-slate-300 text-sm font-light">Sunset over ancient temple</p>
+              </div>
+
+              {/* Row 2 */}
+              <div className="flex flex-col gap-2">
+                <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
+                  <Image
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T31-icn8zhQpqszgBmYVNR57HNzAmikXcO.png"
+                    alt="Walking walls of Valparaiso"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <p className="text-slate-300 text-sm font-light">Walking walls of Valparaiso</p>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-800">
+                  <Image
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_00000000ee7071f59683d205a8420d01-MAJ7wyOFcrHAp7zpe0O3CCtNiN39jv.png"
+                    alt="Celestial gates"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <p className="text-slate-300 text-sm font-light">Celestial gates</p>
+              </div>
+
+              {/* Load More - spans the third column */}
+              <div className="flex items-center justify-center">
+                <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
+                  Load More
+                </button>
+              </div>
             </div>
           </div>
         </div>

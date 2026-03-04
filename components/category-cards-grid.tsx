@@ -17,6 +17,13 @@ interface CategoryCardsGridProps {
 }
 
 export function CategoryCardsGrid({ cards }: CategoryCardsGridProps) {
+  const accentColorMap = {
+    gold: 'text-yellow-500',
+    purple: 'text-purple-400',
+    green: 'text-cyan-400',
+    orange: 'text-orange-400',
+  }
+
   return (
     <section className="w-full bg-black py-20 px-4 sm:px-6 lg:px-8 border-b border-gray-600/60">
       <div className="max-w-7xl mx-auto">
@@ -25,7 +32,7 @@ export function CategoryCardsGrid({ cards }: CategoryCardsGridProps) {
             <Link
               key={card.id}
               href={card.link}
-              className="group relative h-80 rounded-lg overflow-hidden cursor-pointer transform transition-transform duration-300 hover:scale-105 shadow-lg bg-gray-900"
+              className="group relative h-80 rounded-lg overflow-hidden cursor-pointer transform transition-transform duration-300 hover:scale-105 shadow-lg"
             >
               {/* Background Image */}
               {card.imageUrl && (
@@ -38,8 +45,18 @@ export function CategoryCardsGrid({ cards }: CategoryCardsGridProps) {
                 />
               )}
 
-              {/* Subtle Dark Overlay */}
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-300" />
+              {/* Dark Overlay */}
+              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all duration-300" />
+
+              {/* Text Content */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                <h3 className="text-4xl lg:text-5xl font-light text-white tracking-wider">
+                  {card.title}
+                </h3>
+                <p className={`text-sm lg:text-base font-light ${accentColorMap[card.accentColor]}`}>
+                  {card.label}
+                </p>
+              </div>
             </Link>
           ))}
         </div>

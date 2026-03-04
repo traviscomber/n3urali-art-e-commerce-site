@@ -349,7 +349,6 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
     </div>
   )
 }
-          <h1 className="text-6xl lg:text-7xl font-light text-slate-400 leading-tight mb-4">
             Environments
           </h1>
           <p className="text-slate-500 text-base font-light mb-6">

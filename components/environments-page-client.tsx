@@ -50,11 +50,11 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
   const mythicBannerUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythBackg%20%282%29-UZZUeitXszDkixpZBAL3mYzMq9rEq1.png'
 
   const mythicImages = [
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythic1-placeholder.png',
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythic2-placeholder.png',
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythic3-placeholder.png',
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythic4-placeholder.png',
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythic5-placeholder.png',
+    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png',
+    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth2-5zeFMllXp1WFWUyJgvnpY8plIxwQts.png',
+    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth3-mZG3PGuOFqePUhTm63gOYOXUhfDN6d.png',
+    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth4-W0eVn7cqin99zRFZN90EDL8J39HY9V.png',
+    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth5-HHbnx40rB7gy6IkODw4wqBQWJcPzhY.png',
   ]
 
   const mythicLabels = [

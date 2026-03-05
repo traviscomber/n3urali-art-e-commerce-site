@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ChevronRight, ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
+import { natureCategoryImages } from '@/lib/constants/nature-images'
 
 interface Collection {
   id: string
@@ -64,11 +65,11 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
       { title: 'Deep Sea Sanctum', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater5.png-h6C4tFhELpOzMwuGcKeqiyPa2uWQHs.jpeg' },
     ],
     'ice-and-snow': [
-      { title: 'Frozen Peaks', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater2-ccZcog7a7Xvp1dPmhcpf8USyi2CFdY.png' },
-      { title: 'Glacier Dreams', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater3-3EBmdD7j5Z1ynv5nsqOqaHXsm9X9zn.png' },
-      { title: 'Snow Cascade', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater4-EgBszqfBqzfVUvFGQPNqqFQAfIjrg2.png' },
-      { title: 'Crystal Palace', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater5.png-h6C4tFhELpOzMwuGcKeqiyPa2uWQHs.jpeg' },
-      { title: 'Arctic Aurora', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png' },
+      { title: 'Aurora Frost Waves', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatIce1-GwbFMJ4qPnUjGxp4JIBhcm6PXMPN16.png' },
+      { title: 'Geometric Snow Summit', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatIce2-KfIygcATAv6vPVXKyCELtQdO9TGNDL.png' },
+      { title: 'Glacial Ice Canyon', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatIce3-ahmLcFSSNGxOExL3XwJ4QADs1Jt4nI.png' },
+      { title: 'Mountain Glacier Flow', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatIce4-Gpuw7wotY0oGlWQiRhhihHtgfSrYy9.png' },
+      { title: 'Frost Flower Aurora', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatIce5-hUL35tqRF58sOaNhG41hZBWjS2vJ5V.png' },
     ],
   }
 

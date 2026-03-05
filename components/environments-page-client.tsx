@@ -140,85 +140,38 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
 
   return (
     <div className="w-full bg-black">
-      {/* Category Detail View Modal */}
-      {selectedNatureCategory && (
-        <section className="w-full border-b border-slate-700">
-          {/* Header with Back Button */}
-          <div className="flex items-center gap-4 px-12 py-6 border-b border-slate-700">
-            <button
-              onClick={() => setSelectedNatureCategory(null)}
-              className="text-slate-400 hover:text-cyan-400 transition-colors text-base font-light"
-            >
-              Back
-            </button>
-            <span className="text-slate-400">|</span>
-            <h2 className="text-slate-200 text-base font-light">
-              {natureCategories.find(cat => cat.id === selectedNatureCategory)?.name || selectedNatureCategory}
-            </h2>
-          </div>
-
-          {/* Image Grid - 5 images only */}
-          <div className="w-full px-12 py-12">
-            <div className="grid grid-cols-3 gap-[4.5rem]">
-              {natureCategoryImages[selectedNatureCategory]?.slice(0, 5).map((image, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => console.log('Image clicked:', image.title)}
-                  className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer text-left"
-                >
-                  <Image
-                    src={image.url}
-                    alt={image.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
-                    <p className="text-white text-base font-light">{image.title}</p>
-                  </div>
-                </button>
-              ))}
-
-              {/* Load More - spans the third column */}
-              <button 
-                onClick={() => console.log('Load More clicked')}
-                className="flex items-center justify-center cursor-pointer"
-              >
-                <span className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
-                  Load More
-                </span>
-              </button>
+      {/* Show detail view if category selected, otherwise show full page */}
+      {!selectedNatureCategory && (
+        <>
+          {/* Intro Section */}
+          <section className="w-full py-16 px-8 lg:px-12 border-b border-slate-700">
+            <div className="max-w-2xl">
+              <h1 className="text-6xl lg:text-7xl font-light text-slate-400 leading-tight mb-4">
+                Environments
+              </h1>
+              <p className="text-slate-500 text-base font-light mb-6">
+                Seamless dome loops designed to charm.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex gap-3 items-start text-slate-400 text-sm">
+                  <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
+                  <span>Endless themed nights without rebuilding your show</span>
+                </li>
+                <li className="flex gap-3 items-start text-slate-400 text-sm">
+                  <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
+                  <span>Clean, seamless material ready to layer and mix</span>
+                </li>
+                <li className="flex gap-3 items-start text-slate-400 text-sm">
+                  <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
+                  <span>Ambient premium visuals that elevate any space</span>
+                </li>
+              </ul>
             </div>
-          </div>
-        </section>
+          </section>
+        </>
       )}
 
-      {/* Intro Section */}
-      <section className="w-full py-16 px-8 lg:px-12 border-b border-slate-700">
-        <div className="max-w-2xl">
-          <h1 className="text-6xl lg:text-7xl font-light text-slate-400 leading-tight mb-4">
-            Environments
-          </h1>
-          <p className="text-slate-500 text-base font-light mb-6">
-            Seamless dome loops designed to charm.
-          </p>
-          <ul className="space-y-3">
-            <li className="flex gap-3 items-start text-slate-400 text-sm">
-              <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
-              <span>Endless themed nights without rebuilding your show</span>
-            </li>
-            <li className="flex gap-3 items-start text-slate-400 text-sm">
-              <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
-              <span>Clean, seamless material ready to layer and mix</span>
-            </li>
-            <li className="flex gap-3 items-start text-slate-400 text-sm">
-              <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
-              <span>Ambient premium visuals that elevate any space</span>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      {/* Nature Section */}
+      {/* Nature Section - Always visible with banner and nav */}
       <section className="w-full border-b border-slate-700">
         {/* Full-width Banner with Overlay Text */}
         <div className="relative w-full h-80 overflow-hidden">
@@ -255,10 +208,60 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           </button>
         </div>
 
-        {/* Showcase Grid - 3 columns */}
-        <div className="w-full px-12 py-12">
-          <div className="grid grid-cols-3 gap-[4.5rem]">
-            {/* Row 1 */}
+        {/* Conditional Content: Show detail view or grid */}
+        {selectedNatureCategory ? (
+          // Detail View Modal
+          <div className="w-full px-12 py-12">
+            {/* Back Button */}
+            <div className="flex items-center gap-4 mb-8">
+              <button
+                onClick={() => setSelectedNatureCategory(null)}
+                className="text-slate-400 hover:text-cyan-400 transition-colors text-base font-light"
+              >
+                Back
+              </button>
+              <span className="text-slate-400">|</span>
+              <h2 className="text-slate-200 text-base font-light">
+                {natureCategories.find(cat => cat.id === selectedNatureCategory)?.name || selectedNatureCategory}
+              </h2>
+            </div>
+
+            {/* Image Grid - 5 images only */}
+            <div className="grid grid-cols-3 gap-[4.5rem]">
+              {natureCategoryImages[selectedNatureCategory]?.slice(0, 5).map((image, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => console.log('Image clicked:', image.title)}
+                  className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer text-left"
+                >
+                  <Image
+                    src={image.url}
+                    alt={image.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
+                    <p className="text-white text-base font-light">{image.title}</p>
+                  </div>
+                </button>
+              ))}
+
+              {/* Load More - spans the third column */}
+              <button 
+                onClick={() => console.log('Load More clicked')}
+                className="flex items-center justify-center cursor-pointer"
+              >
+                <span className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
+                  Load More
+                </span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          // Showcase Grid - 3 columns
+          <div className="w-full px-12 py-12">
+            <div className="grid grid-cols-3 gap-[4.5rem]">
+              {/* Row 1 */}
             <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png"
@@ -328,9 +331,12 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             </div>
           </div>
         </div>
+        )}
       </section>
 
-      {/* Heritage Environments Featured Section - Culture */}
+      {/* Show other sections only if detail view is not open */}
+      {!selectedNatureCategory && (
+        <>
       <section className="w-full border-b border-slate-700">
         {/* Full-width Banner with Overlay Text */}
         <div className="relative w-full h-80 overflow-hidden">
@@ -567,6 +573,8 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           </div>
         </div>
       </section>
+        </>
+      )}
     </div>
   )
 }

@@ -167,7 +167,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         <div className="w-full px-12 py-12">
           <div className="grid grid-cols-3 gap-6">
             {/* Row 1 */}
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+            <div className="relative w-full aspect-[2/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png"
                 alt="Chilled trees forest walking"
@@ -179,7 +179,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+            <div className="relative w-full aspect-[2/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png"
                 alt="Tropical paradise bay"
@@ -191,7 +191,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+            <div className="relative w-full aspect-[2/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat3-LTyR3NMoIATIkcqUzoPaCNqwJ0JscN.png"
                 alt="Mycelia in strange"
@@ -204,7 +204,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             </div>
 
             {/* Row 2 */}
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+            <div className="relative w-full aspect-[2/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png"
                 alt="Lava power"
@@ -216,7 +216,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+            <div className="relative w-full aspect-[2/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat5-4G2FHlE9CWaQ4TUFvXf7JHyJz8n3Hu.png"
                 alt="Dreamy Sponges"
@@ -276,7 +276,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         <div className="w-full px-12 py-12">
           <div className="grid grid-cols-3 gap-6">
             {/* Row 1 */}
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+            <div className="relative w-full aspect-[2/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult1-dhVGWchKNmJw81kGmXDaXIJ5cd2xFk.png"
                 alt="Purple sunset halo"
@@ -288,7 +288,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+            <div className="relative w-full aspect-[2/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult2-g8bXETDkCu4snNrPouTKozSZSfGxMl.png"
                 alt="Canoe adventure"
@@ -300,7 +300,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+            <div className="relative w-full aspect-[2/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult3-rkJrAmWhsEN0xY7OOeNbBueEgYyjBY.png"
                 alt="Sunset over ancient temple"
@@ -313,7 +313,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             </div>
 
             {/* Row 2 */}
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+            <div className="relative w-full aspect-[2/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult4-fOr7dFUw2LF1ihBOtwpZSNb9txsVJq.png"
                 alt="Walking walls of Valparaiso"
@@ -325,7 +325,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+            <div className="relative w-full aspect-[2/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult5-YMhIkyjNnvCMyh91uvItbrfSuoxm5n.png"
                 alt="Celestial gates"
@@ -388,7 +388,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         <div className="w-full px-12 py-12">
           <div className="grid grid-cols-3 gap-6">
             {mythicImages.slice(0, 5).map((url, idx) => (
-              <div key={idx} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+              <div key={idx} className="relative w-full aspect-[2/4] rounded-lg overflow-hidden bg-slate-800 group">
                 <Image
                   src={url}
                   alt={mythicLabels[idx]}
@@ -453,7 +453,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         <div className="w-full px-12 py-12">
           <div className="grid grid-cols-3 gap-6">
             {artImages.slice(0, 5).map((url, idx) => (
-              <div key={idx} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+              <div key={idx} className="relative w-full aspect-[2/4] rounded-lg overflow-hidden bg-slate-800 group">
                 <Image
                   src={url}
                   alt={artLabels[idx]}

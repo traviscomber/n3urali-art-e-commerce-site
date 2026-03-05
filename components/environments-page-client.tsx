@@ -157,15 +157,35 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             </h2>
           </div>
 
-
+          {/* Category Navigation Tabs */}
+          <div className="relative w-full flex items-center gap-8 px-12 py-8 border-b border-slate-700">
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors">
+              <ChevronLeft size={24} />
+            </button>
+            {natureCategories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedNatureCategory(cat.id)}
+                className={`font-light transition-colors ${
+                  selectedNatureCategory === cat.id ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto">
+              <ChevronRight size={24} />
+            </button>
+          </div>
 
           {/* Image Grid */}
           <div className="w-full px-12 py-12">
             <div className="grid grid-cols-3 gap-[4.5rem]">
               {natureCategoryImages[selectedNatureCategory]?.map((image, idx) => (
-                <div
+                <button
                   key={idx}
-                  className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group"
+                  onClick={() => console.log('Image clicked:', image.title)}
+                  className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer text-left"
                 >
                   <Image
                     src={image.url}
@@ -176,15 +196,18 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                   <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
                     <p className="text-white text-base font-light">{image.title}</p>
                   </div>
-                </div>
+                </button>
               ))}
 
               {/* Load More - spans the third column */}
-              <div className="flex items-center justify-center">
-                <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
+              <button 
+                onClick={() => console.log('Load More clicked')}
+                className="flex items-center justify-center cursor-pointer"
+              >
+                <span className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
                   Load More
-                </button>
-              </div>
+                </span>
+              </button>
             </div>
           </div>
         </section>

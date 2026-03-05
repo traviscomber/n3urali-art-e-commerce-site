@@ -74,16 +74,40 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
   }
 
   const cultureCategories = [
-    { name: 'Asia', id: 'asia' },
+    { name: 'Thailand', id: 'thailand' },
+    { name: 'Vietnam', id: 'vietnam' },
+    { name: 'Singapore', id: 'singapore' },
+    { name: 'Indonesia', id: 'indonesia' },
   ]
 
   const cultureCategoryImages: Record<string, { title: string; url: string }[]> = {
-    'asia': [
+    'thailand': [
       { title: 'Golden Thai Temple', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia1-HRCxh5YlcdmtLkVDWr3DjBnWrUEXGq.png' },
       { title: 'Asian City Dome', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia2-eRyAR2PLEdPL6WSub9G1UpDX3lPwCT.png' },
       { title: 'Neon Urban Spirit', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia3-6jpN6hPeYB8wpJuuI3cZOhufpqF9fe.png' },
       { title: 'Spiral Architecture', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia4-hLfAl6AzAoQyiH3Xq3yEoUO7jMQwQP.png' },
       { title: 'Beach Temple Gateway', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia5-XPLQobSduUD7q5Xk8Wi8m2GqBpWNZV.png' },
+    ],
+    'vietnam': [
+      { title: 'Asian City Dome', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia2-eRyAR2PLEdPL6WSub9G1UpDX3lPwCT.png' },
+      { title: 'Neon Urban Spirit', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia3-6jpN6hPeYB8wpJuuI3cZOhufpqF9fe.png' },
+      { title: 'Spiral Architecture', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia4-hLfAl6AzAoQyiH3Xq3yEoUO7jMQwQP.png' },
+      { title: 'Beach Temple Gateway', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia5-XPLQobSduUD7q5Xk8Wi8m2GqBpWNZV.png' },
+      { title: 'Golden Thai Temple', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia1-HRCxh5YlcdmtLkVDWr3DjBnWrUEXGq.png' },
+    ],
+    'singapore': [
+      { title: 'Neon Urban Spirit', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia3-6jpN6hPeYB8wpJuuI3cZOhufpqF9fe.png' },
+      { title: 'Spiral Architecture', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia4-hLfAl6AzAoQyiH3Xq3yEoUO7jMQwQP.png' },
+      { title: 'Beach Temple Gateway', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia5-XPLQobSduUD7q5Xk8Wi8m2GqBpWNZV.png' },
+      { title: 'Golden Thai Temple', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia1-HRCxh5YlcdmtLkVDWr3DjBnWrUEXGq.png' },
+      { title: 'Asian City Dome', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia2-eRyAR2PLEdPL6WSub9G1UpDX3lPwCT.png' },
+    ],
+    'indonesia': [
+      { title: 'Spiral Architecture', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia4-hLfAl6AzAoQyiH3Xq3yEoUO7jMQwQP.png' },
+      { title: 'Beach Temple Gateway', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia5-XPLQobSduUD7q5Xk8Wi8m2GqBpWNZV.png' },
+      { title: 'Golden Thai Temple', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia1-HRCxh5YlcdmtLkVDWr3DjBnWrUEXGq.png' },
+      { title: 'Asian City Dome', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia2-eRyAR2PLEdPL6WSub9G1UpDX3lPwCT.png' },
+      { title: 'Neon Urban Spirit', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultAsia3-6jpN6hPeYB8wpJuuI3cZOhufpqF9fe.png' },
     ],
   }
 
@@ -215,10 +239,28 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             <ChevronLeft size={24} />
           </button>
           <button 
-            onClick={() => setSelectedCultureCategory('asia')}
-            className={`font-light transition-colors ${selectedCultureCategory === 'asia' ? 'text-cyan-400' : 'text-slate-300 hover:text-cyan-400'}`}
+            onClick={() => setSelectedCultureCategory('thailand')}
+            className={`font-light transition-colors ${selectedCultureCategory === 'thailand' ? 'text-cyan-400' : 'text-slate-300 hover:text-cyan-400'}`}
           >
-            Asia
+            Thailand
+          </button>
+          <button 
+            onClick={() => setSelectedCultureCategory('vietnam')}
+            className={`font-light transition-colors ${selectedCultureCategory === 'vietnam' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
+          >
+            Vietnam
+          </button>
+          <button 
+            onClick={() => setSelectedCultureCategory('singapore')}
+            className={`font-light transition-colors ${selectedCultureCategory === 'singapore' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
+          >
+            Singapore
+          </button>
+          <button 
+            onClick={() => setSelectedCultureCategory('indonesia')}
+            className={`font-light transition-colors ${selectedCultureCategory === 'indonesia' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
+          >
+            Indonesia
           </button>
           <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto">
             <ChevronRight size={24} />

@@ -157,31 +157,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             </h2>
           </div>
 
-          {/* Category Navigation Tabs */}
-          <div className="relative w-full flex items-center gap-8 px-12 py-8 border-b border-slate-700">
-            <button className="text-slate-400 hover:text-cyan-400 transition-colors">
-              <ChevronLeft size={24} />
-            </button>
-            {natureCategories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedNatureCategory(cat.id)}
-                className={`font-light transition-colors ${
-                  selectedNatureCategory === cat.id ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'
-                }`}
-              >
-                {cat.name}
-              </button>
-            ))}
-            <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto">
-              <ChevronRight size={24} />
-            </button>
-          </div>
-
-          {/* Image Grid */}
+          {/* Image Grid - 5 images only */}
           <div className="w-full px-12 py-12">
             <div className="grid grid-cols-3 gap-[4.5rem]">
-              {natureCategoryImages[selectedNatureCategory]?.map((image, idx) => (
+              {natureCategoryImages[selectedNatureCategory]?.slice(0, 5).map((image, idx) => (
                 <button
                   key={idx}
                   onClick={() => console.log('Image clicked:', image.title)}

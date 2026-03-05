@@ -31,6 +31,46 @@ interface EnvironmentsPageClientProps {
 export function EnvironmentsPageClient({ collections, environmentImages }: EnvironmentsPageClientProps) {
   const [heritageCategoryIndex, setHeritageCategoryIndex] = useState(0)
   const [artCategoryIndex, setArtCategoryIndex] = useState(0)
+  const [selectedNatureCategory, setSelectedNatureCategory] = useState<string | null>(null)
+  const [natureCategoryIndex, setNatureCategoryIndex] = useState(0)
+
+  const natureCategories = [
+    { name: 'Oceans', id: 'oceans' },
+    { name: 'Volcanoes', id: 'volcanoes' },
+    { name: 'Underwater Life', id: 'underwater-life' },
+    { name: 'Ice and Snow', id: 'ice-and-snow' },
+  ]
+
+  const natureCategoryImages: Record<string, { title: string; url: string }[]> = {
+    'oceans': [
+      { title: 'Cyan corals', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png' },
+      { title: 'Thousands of Tentacles', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png' },
+      { title: 'Dreamy sponge', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat3-LTyR3NMoIATIkcqUzoPaCNqwJ0JscN.png' },
+      { title: 'Jellyfish Rising', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png' },
+      { title: 'Pink Sponges of Far Planet', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat5-4G2FHlE9CWaQ4TUFvXf7JHyJz8n3Hu.png' },
+    ],
+    'volcanoes': [
+      { title: 'Lava power', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png' },
+      { title: 'Tropical paradise bay', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png' },
+      { title: 'Mycelia in strange', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat3-LTyR3NMoIATIkcqUzoPaCNqwJ0JscN.png' },
+      { title: 'Chilled trees forest walking', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png' },
+      { title: 'Dreamy Sponges', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat5-4G2FHlE9CWaQ4TUFvXf7JHyJz8n3Hu.png' },
+    ],
+    'underwater-life': [
+      { title: 'Cyan corals', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png' },
+      { title: 'Thousands of Tentacles', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png' },
+      { title: 'Dreamy sponge', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat3-LTyR3NMoIATIkcqUzoPaCNqwJ0JscN.png' },
+      { title: 'Jellyfish Rising', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png' },
+      { title: 'Pink Sponges of Far Planet', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat5-4G2FHlE9CWaQ4TUFvXf7JHyJz8n3Hu.png' },
+    ],
+    'ice-and-snow': [
+      { title: 'Tropical paradise bay', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png' },
+      { title: 'Lava power', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png' },
+      { title: 'Mycelia in strange', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat3-LTyR3NMoIATIkcqUzoPaCNqwJ0JscN.png' },
+      { title: 'Chilled trees forest walking', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png' },
+      { title: 'Dreamy Sponges', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat5-4G2FHlE9CWaQ4TUFvXf7JHyJz8n3Hu.png' },
+    ],
+  }
 
   const heritageCategories = [
     { name: 'North America', id: 'north-america' },
@@ -100,6 +140,75 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
 
   return (
     <div className="w-full bg-black">
+      {/* Category Detail View Modal */}
+      {selectedNatureCategory && (
+        <section className="w-full border-b border-slate-700">
+          {/* Header with Back Button */}
+          <div className="flex items-center gap-4 px-12 py-6 border-b border-slate-700">
+            <button
+              onClick={() => setSelectedNatureCategory(null)}
+              className="text-slate-400 hover:text-cyan-400 transition-colors text-base font-light"
+            >
+              Back
+            </button>
+            <span className="text-slate-400">|</span>
+            <h2 className="text-slate-200 text-base font-light">
+              {natureCategories.find(cat => cat.id === selectedNatureCategory)?.name || selectedNatureCategory}
+            </h2>
+          </div>
+
+          {/* Category Navigation Tabs */}
+          <div className="relative w-full flex items-center gap-8 px-12 py-8 border-b border-slate-700">
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors">
+              <ChevronLeft size={24} />
+            </button>
+            {natureCategories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedNatureCategory(cat.id)}
+                className={`font-light transition-colors ${
+                  selectedNatureCategory === cat.id ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto">
+              <ChevronRight size={24} />
+            </button>
+          </div>
+
+          {/* Image Grid */}
+          <div className="w-full px-12 py-12">
+            <div className="grid grid-cols-3 gap-[4.5rem]">
+              {natureCategoryImages[selectedNatureCategory]?.map((image, idx) => (
+                <div
+                  key={idx}
+                  className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group"
+                >
+                  <Image
+                    src={image.url}
+                    alt={image.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
+                    <p className="text-white text-base font-light">{image.title}</p>
+                  </div>
+                </div>
+              ))}
+
+              {/* Load More - spans the third column */}
+              <div className="flex items-center justify-center">
+                <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
+                  Load More
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Intro Section */}
       <section className="w-full py-16 px-8 lg:px-12 border-b border-slate-700">
         <div className="max-w-2xl">
@@ -167,7 +276,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         <div className="w-full px-12 py-12">
           <div className="grid grid-cols-3 gap-[4.5rem]">
             {/* Row 1 */}
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+            <button onClick={() => setSelectedNatureCategory('oceans')} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png"
                 alt="Chilled trees forest walking"
@@ -177,9 +286,9 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
                 <p className="text-white text-base font-light">Chilled trees forest walking</p>
               </div>
-            </div>
+            </button>
 
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+            <button onClick={() => setSelectedNatureCategory('volcanoes')} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png"
                 alt="Tropical paradise bay"
@@ -189,9 +298,9 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
                 <p className="text-white text-base font-light">Tropical paradise bay</p>
               </div>
-            </div>
+            </button>
 
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+            <button onClick={() => setSelectedNatureCategory('underwater-life')} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat3-LTyR3NMoIATIkcqUzoPaCNqwJ0JscN.png"
                 alt="Mycelia in strange"
@@ -201,10 +310,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
                 <p className="text-white text-base font-light">Mycelia in strange</p>
               </div>
-            </div>
+            </button>
 
             {/* Row 2 */}
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+            <button onClick={() => setSelectedNatureCategory('ice-and-snow')} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png"
                 alt="Lava power"
@@ -214,7 +323,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
                 <p className="text-white text-base font-light">Lava power</p>
               </div>
-            </div>
+            </button>
 
             <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image

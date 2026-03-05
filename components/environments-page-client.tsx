@@ -334,7 +334,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
 
             <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat5-4G2FHlE9CWaQ4TUFvXf7JHyJz8n3Hu.png"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png"
                 alt="Dreamy Sponges"
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"

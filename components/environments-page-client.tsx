@@ -233,6 +233,11 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           </div>
         </div>
 
+        {/* Asia Header */}
+        <div className="relative w-full px-12 py-6 border-b border-slate-700">
+          <h3 className="text-slate-200 text-base font-light">Southeast Asia</h3>
+        </div>
+
         {/* Region Navigation Tabs */}
         <div className="relative w-full flex items-center gap-8 px-12 py-8 border-b border-slate-700">
           <button className="text-slate-400 hover:text-cyan-400 transition-colors">

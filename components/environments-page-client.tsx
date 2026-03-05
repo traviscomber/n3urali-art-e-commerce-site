@@ -165,7 +165,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
 
         {/* Showcase Grid - 3 columns */}
         <div className="w-full px-12 py-12">
-          <div className="grid grid-cols-3 gap-12">
+          <div className="grid grid-cols-3 gap-[4.5rem]">
             {/* Row 1 */}
             <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
@@ -274,7 +274,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
 
         {/* Showcase Grid - 3 columns */}
         <div className="w-full px-12 py-12">
-          <div className="grid grid-cols-3 gap-12">
+          <div className="grid grid-cols-3 gap-[4.5rem]">
             {/* Row 1 */}
             <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
@@ -386,7 +386,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
 
         {/* Showcase Grid - 3 columns */}
         <div className="w-full px-12 py-12">
-          <div className="grid grid-cols-3 gap-12">
+          <div className="grid grid-cols-3 gap-[4.5rem]">
             {mythicImages.slice(0, 5).map((url, idx) => (
               <div key={idx} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                 <Image
@@ -451,7 +451,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
 
         {/* Showcase Grid - 3 columns */}
         <div className="w-full px-12 py-12">
-          <div className="grid grid-cols-3 gap-12">
+          <div className="grid grid-cols-3 gap-[4.5rem]">
             {artImages.slice(0, 5).map((url, idx) => (
               <div key={idx} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                 <Image

@@ -331,6 +331,9 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         )}
       </section>
 
+      {/* Show Mythic and Art sections only if no detail view is open */}
+      {!selectedNatureCategory && (
+        <>
       {/* Mythic Section */}
       <section className="w-full border-b border-slate-700">
         {/* Full-width Banner with Overlay Text */}

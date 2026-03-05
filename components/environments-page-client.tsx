@@ -44,11 +44,11 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
 
   const natureCategoryImages: Record<string, { title: string; url: string }[]> = {
     'oceans': [
-      { title: 'Luminous Mandalas', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png' },
-      { title: 'Octopus Dream', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater2-ccZcog7a7Xvp1dPmhcpf8USyi2CFdY.png' },
-      { title: 'Coral Abyss', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater3-3EBmdD7j5Z1ynv5nsqOqaHXsm9X9zn.png' },
-      { title: 'Jellyfish Symphony', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater4-EgBszqfBqzfVUvFGQPNqqFQAfIjrg2.png' },
-      { title: 'Deep Sea Sanctum', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater5.png-h6C4tFhELpOzMwuGcKeqiyPa2uWQHs.jpeg' },
+      { title: 'Cosmic Ocean Vortex', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatOceans1-jbOpQIT9umn9y7vmiWYSkJd1wAVeZL.png' },
+      { title: 'Majestic Coastal Cliffs', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatOceans2-aock6r4YqMybpqlHh9JVv7zqD3NsP3.png' },
+      { title: 'Epic Coastal Storm', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatOceans3-aMSmzBJ5q8CrYxLbnDeVWdWsuOTeUe.png' },
+      { title: 'Tropical Island Paradise', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatOceans4-4h11mltwVxcRoklFqCDuxcE6OEvYLW.png' },
+      { title: 'Fractal Ocean Beauty', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatOceans5-zkNiswQ1jsZasGcNk2fStyxfNQBDIw.png' },
     ],
     'volcanoes': [
       { title: 'Volcano Cloud Formation', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatVolcanoes1-o8R36Wf6JIFjeXeht1w940SFnnQPlg.png' },

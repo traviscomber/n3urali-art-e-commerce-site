@@ -233,6 +233,11 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           </div>
         </div>
 
+        )}
+      </section>
+
+      {/* Culture Section */}
+      <section className="w-full border-b border-slate-700">
         {/* Asia Header */}
         <div className="relative w-full px-12 py-6 border-b border-slate-700">
           <h3 className="text-slate-200 text-base font-light">Southeast Asia</h3>
@@ -325,7 +330,50 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           // Showcase Grid - 3 columns
           <div className="w-full px-12 py-12">
             <div className="grid grid-cols-3 gap-[4.5rem]">
-              {/* Culture showcase cards placeholder */}
+              {/* Row 1 */}
+              {Object.entries(cultureCategoryImages).slice(0, 3).map(([key, images]) => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedCultureCategory(key)}
+                  className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer text-left"
+                >
+                  <Image
+                    src={images[0]?.url || ''}
+                    alt={cultureCategories.find(cat => cat.id === key)?.name || key}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
+                    <p className="text-white text-base font-light">{cultureCategories.find(cat => cat.id === key)?.name}</p>
+                  </div>
+                </button>
+              ))}
+
+              {/* Row 2 */}
+              {Object.entries(cultureCategoryImages).slice(3, 4).map(([key, images]) => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedCultureCategory(key)}
+                  className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer text-left"
+                >
+                  <Image
+                    src={images[0]?.url || ''}
+                    alt={cultureCategories.find(cat => cat.id === key)?.name || key}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
+                    <p className="text-white text-base font-light">{cultureCategories.find(cat => cat.id === key)?.name}</p>
+                  </div>
+                </button>
+              ))}
+
+              {/* Load More */}
+              <div className="flex items-center justify-center">
+                <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
+                  Load More
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -157,26 +157,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             </h2>
           </div>
 
-          {/* Category Navigation Tabs */}
-          <div className="relative w-full flex items-center gap-8 px-12 py-8 border-b border-slate-700">
-            <button className="text-slate-400 hover:text-cyan-400 transition-colors">
-              <ChevronLeft size={24} />
-            </button>
-            {natureCategories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedNatureCategory(cat.id)}
-                className={`font-light transition-colors ${
-                  selectedNatureCategory === cat.id ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'
-                }`}
-              >
-                {cat.name}
-              </button>
-            ))}
-            <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto">
-              <ChevronRight size={24} />
-            </button>
-          </div>
+
 
           {/* Image Grid */}
           <div className="w-full px-12 py-12">
@@ -276,7 +257,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         <div className="w-full px-12 py-12">
           <div className="grid grid-cols-3 gap-[4.5rem]">
             {/* Row 1 */}
-            <button onClick={() => setSelectedNatureCategory('oceans')} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer">
+            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png"
                 alt="Chilled trees forest walking"
@@ -286,9 +267,9 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
                 <p className="text-white text-base font-light">Chilled trees forest walking</p>
               </div>
-            </button>
+            </div>
 
-            <button onClick={() => setSelectedNatureCategory('volcanoes')} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer">
+            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png"
                 alt="Tropical paradise bay"
@@ -298,22 +279,22 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
                 <p className="text-white text-base font-light">Tropical paradise bay</p>
               </div>
-            </button>
+            </div>
 
             <button onClick={() => setSelectedNatureCategory('underwater-life')} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat3-LTyR3NMoIATIkcqUzoPaCNqwJ0JscN.png"
-                alt="Mycelia in strange"
+                alt="Underwater Life"
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
               <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
-                <p className="text-white text-base font-light">Mycelia in strange</p>
+                <p className="text-white text-base font-light">Underwater Life</p>
               </div>
             </button>
 
             {/* Row 2 */}
-            <button onClick={() => setSelectedNatureCategory('ice-and-snow')} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer">
+            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png"
                 alt="Lava power"
@@ -323,7 +304,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
                 <p className="text-white text-base font-light">Lava power</p>
               </div>
-            </button>
+            </div>
 
             <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image

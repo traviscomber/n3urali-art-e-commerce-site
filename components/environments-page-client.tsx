@@ -43,18 +43,18 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
 
   const natureCategoryImages: Record<string, { title: string; url: string }[]> = {
     'oceans': [
-      { title: 'Cyan corals', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png' },
-      { title: 'Thousands of Tentacles', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png' },
-      { title: 'Dreamy sponge', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat3-LTyR3NMoIATIkcqUzoPaCNqwJ0JscN.png' },
-      { title: 'Jellyfish Rising', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png' },
-      { title: 'Pink Sponges of Far Planet', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat5-4G2FHlE9CWaQ4TUFvXf7JHyJz8n3Hu.png' },
+      { title: 'Luminous Mandalas', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png' },
+      { title: 'Octopus Dream', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater2-ccZcog7a7Xvp1dPmhcpf8USyi2CFdY.png' },
+      { title: 'Coral Abyss', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater3-3EBmdD7j5Z1ynv5nsqOqaHXsm9X9zn.png' },
+      { title: 'Jellyfish Symphony', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater4-EgBszqfBqzfVUvFGQPNqqFQAfIjrg2.png' },
+      { title: 'Deep Sea Sanctum', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater5.png-h6C4tFhELpOzMwuGcKeqiyPa2uWQHs.jpeg' },
     ],
     'volcanoes': [
-      { title: 'Lava power', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png' },
-      { title: 'Tropical paradise bay', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png' },
-      { title: 'Mycelia in strange', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat3-LTyR3NMoIATIkcqUzoPaCNqwJ0JscN.png' },
-      { title: 'Chilled trees forest walking', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png' },
-      { title: 'Dreamy Sponges', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat5-4G2FHlE9CWaQ4TUFvXf7JHyJz8n3Hu.png' },
+      { title: 'Molten Flows', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater3-3EBmdD7j5Z1ynv5nsqOqaHXsm9X9zn.png' },
+      { title: 'Crater Core', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater4-EgBszqfBqzfVUvFGQPNqqFQAfIjrg2.png' },
+      { title: 'Eruption Peak', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater5.png-h6C4tFhELpOzMwuGcKeqiyPa2uWQHs.jpeg' },
+      { title: 'Lava Cascade', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png' },
+      { title: 'Fire Ring', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater2-ccZcog7a7Xvp1dPmhcpf8USyi2CFdY.png' },
     ],
     'underwater-life': [
       { title: 'Luminous Mandalas', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png' },
@@ -64,11 +64,11 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
       { title: 'Deep Sea Sanctum', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater5.png-h6C4tFhELpOzMwuGcKeqiyPa2uWQHs.jpeg' },
     ],
     'ice-and-snow': [
-      { title: 'Tropical paradise bay', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png' },
-      { title: 'Lava power', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png' },
-      { title: 'Mycelia in strange', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat3-LTyR3NMoIATIkcqUzoPaCNqwJ0JscN.png' },
-      { title: 'Chilled trees forest walking', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png' },
-      { title: 'Dreamy Sponges', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat5-4G2FHlE9CWaQ4TUFvXf7JHyJz8n3Hu.png' },
+      { title: 'Frozen Peaks', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater2-ccZcog7a7Xvp1dPmhcpf8USyi2CFdY.png' },
+      { title: 'Glacier Dreams', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater3-3EBmdD7j5Z1ynv5nsqOqaHXsm9X9zn.png' },
+      { title: 'Snow Cascade', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater4-EgBszqfBqzfVUvFGQPNqqFQAfIjrg2.png' },
+      { title: 'Crystal Palace', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater5.png-h6C4tFhELpOzMwuGcKeqiyPa2uWQHs.jpeg' },
+      { title: 'Arctic Aurora', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png' },
     ],
   }
 
@@ -199,10 +199,30 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           <button className="text-slate-400 hover:text-cyan-400 transition-colors">
             <ChevronLeft size={24} />
           </button>
-          <button className="text-slate-300 hover:text-cyan-400 transition-colors font-light">Oceans</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Volcanoes</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Underwater Life</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Ice and Snow</button>
+          <button 
+            onClick={() => setSelectedNatureCategory('oceans')}
+            className={`font-light transition-colors ${selectedNatureCategory === 'oceans' ? 'text-cyan-400' : 'text-slate-300 hover:text-cyan-400'}`}
+          >
+            Oceans
+          </button>
+          <button 
+            onClick={() => setSelectedNatureCategory('volcanoes')}
+            className={`font-light transition-colors ${selectedNatureCategory === 'volcanoes' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
+          >
+            Volcanoes
+          </button>
+          <button 
+            onClick={() => setSelectedNatureCategory('underwater-life')}
+            className={`font-light transition-colors ${selectedNatureCategory === 'underwater-life' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
+          >
+            Underwater Life
+          </button>
+          <button 
+            onClick={() => setSelectedNatureCategory('ice-and-snow')}
+            className={`font-light transition-colors ${selectedNatureCategory === 'ice-and-snow' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
+          >
+            Ice and Snow
+          </button>
           <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto">
             <ChevronRight size={24} />
           </button>

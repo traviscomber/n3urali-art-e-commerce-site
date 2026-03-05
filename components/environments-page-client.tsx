@@ -233,6 +233,96 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           </div>
         </div>
 
+        {/* Region Navigation Tabs */}
+        <div className="relative w-full flex items-center gap-8 px-12 py-8 border-b border-slate-700">
+          <button className="text-slate-400 hover:text-cyan-400 transition-colors">
+            <ChevronLeft size={24} />
+          </button>
+          <button 
+            onClick={() => setSelectedNatureCategory('oceans')}
+            className={`font-light transition-colors ${selectedNatureCategory === 'oceans' ? 'text-cyan-400' : 'text-slate-300 hover:text-cyan-400'}`}
+          >
+            Oceans
+          </button>
+          <button 
+            onClick={() => setSelectedNatureCategory('volcanoes')}
+            className={`font-light transition-colors ${selectedNatureCategory === 'volcanoes' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
+          >
+            Volcanoes
+          </button>
+          <button 
+            onClick={() => setSelectedNatureCategory('underwater-life')}
+            className={`font-light transition-colors ${selectedNatureCategory === 'underwater-life' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
+          >
+            Underwater Life
+          </button>
+          <button 
+            onClick={() => setSelectedNatureCategory('ice-and-snow')}
+            className={`font-light transition-colors ${selectedNatureCategory === 'ice-and-snow' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
+          >
+            Ice and Snow
+          </button>
+          <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto">
+            <ChevronRight size={24} />
+          </button>
+        </div>
+
+        {/* Conditional Content: Show detail view or grid */}
+        {selectedNatureCategory ? (
+          // Detail View Modal
+          <div className="w-full px-12 py-12">
+            {/* Back Button */}
+            <div className="flex items-center gap-4 mb-8">
+              <button
+                onClick={() => setSelectedNatureCategory(null)}
+                className="text-slate-400 hover:text-cyan-400 transition-colors text-base font-light"
+              >
+                Back
+              </button>
+              <span className="text-slate-400">|</span>
+              <h2 className="text-slate-200 text-base font-light">
+                {natureCategoryImages[selectedNatureCategory] ? selectedNatureCategory.charAt(0).toUpperCase() + selectedNatureCategory.slice(1).replace('-', ' ') : ''}
+              </h2>
+            </div>
+
+            {/* Image Grid - 5 images only */}
+            <div className="grid grid-cols-3 gap-[4.5rem]">
+              {natureCategoryImages[selectedNatureCategory]?.slice(0, 5).map((image, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => console.log('Image clicked:', image.title)}
+                  className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer text-left"
+                >
+                  <Image
+                    src={image.url}
+                    alt={image.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
+                    <p className="text-white text-base font-light">{image.title}</p>
+                  </div>
+                </button>
+              ))}
+
+              {/* Load More - spans the third column */}
+              <button 
+                onClick={() => console.log('Load More clicked')}
+                className="flex items-center justify-center cursor-pointer"
+              >
+                <span className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
+                  Load More
+                </span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          // Showcase Grid - 3 columns
+          <div className="w-full px-12 py-12">
+            <div className="grid grid-cols-3 gap-[4.5rem]">
+              {/* Nature showcase cards would go here */}
+            </div>
+          </div>
         )}
       </section>
 

@@ -103,37 +103,37 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
   const currentShow = shows[0]
 
   return (
-    <div className="w-full bg-black">
+    <div className="w-full max-w-full overflow-hidden bg-black">
       {/* Hero Section */}
-      <section className="w-full h-screen border-b border-slate-700">
-        <div className="w-full h-full flex items-stretch overflow-hidden relative">
-          {/* Left: Title and Content - 30% width with disconnected dividing line */}
-          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 section-divider">
-            <div className="flex flex-col gap-6 max-w-md">
+      <section className="w-full min-h-screen sm:h-screen border-b border-slate-700">
+        <div className="w-full h-full flex flex-col sm:flex-row items-stretch overflow-hidden relative">
+          {/* Left: Title and Content - Full width mobile, 30% on desktop */}
+          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0 section-divider">
+            <div className="flex flex-col gap-4 sm:gap-6 max-w-md">
               <div>
-                <h1 className="text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
+                <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                   Shows
                 </h1>
-                <p className="text-slate-500 text-base font-light mt-2">
+                <p className="text-slate-500 text-xs sm:text-sm md:text-base font-light mt-2">
                   Cinematic Dome Stories
                 </p>
               </div>
 
-              <div className="space-y-4">
-                <p className="text-slate-400 text-base leading-relaxed">
+              <div className="space-y-3 sm:space-y-4">
+                <p className="text-slate-400 text-xs sm:text-sm md:text-base leading-relaxed">
                   {currentShow.description || currentShow.synopsis || 'From mythical realms to sacred atmospheres, immerse in tales of wonder.'}
                 </p>
 
-                <div className="space-y-3 pt-2">
+                <div className="space-y-2 sm:space-y-3 pt-2">
                   <p className="text-slate-400 text-xs font-medium uppercase tracking-widest opacity-60">Perfect for:</p>
-                  <ul className="space-y-1.5">
+                  <ul className="space-y-1 sm:space-y-1.5">
                     {[
                       'Family dome nights',
                       'Cultural programming',
                       'Art and experience-focused events',
                       'Themed event openings',
                     ].map((item, idx) => (
-                      <li key={idx} className="flex gap-3 items-start text-slate-300 text-sm">
+                      <li key={idx} className="flex gap-2 sm:gap-3 items-start text-slate-300 text-xs sm:text-sm">
                         <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                         <span>{item}</span>
                       </li>
@@ -144,8 +144,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
             </div>
           </div>
 
-          {/* Right: Main Show Image - 70% with flex grow to fill remaining space */}
-          <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-8">
+          {/* Right: Main Show Image - Hidden on mobile, 70% on desktop */}
+          <div className="hidden sm:flex sm:flex-1 relative overflow-hidden items-center justify-center px-4 sm:px-8">
             <div className="relative w-4/5 h-4/5 rounded-lg overflow-hidden">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ShowhButton-5zWpjE8wAgaCHbB7ol0bEI2uzXmY8t.png"
@@ -160,9 +160,9 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       </section>
 
       {/* Mythic Section */}
-      <section className="w-full border-b border-slate-700">
+      <section className="w-full max-w-full overflow-hidden border-b border-slate-700">
         {/* Full-width Banner with Overlay Text */}
-        <div className="relative w-full h-80 overflow-hidden">
+        <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
           <Image
             src={mythicBannerUrl}
             alt="Mythic"
@@ -170,52 +170,54 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
             className="object-cover"
           />
           {/* Overlay Text */}
-          <div className="absolute inset-0 flex flex-col justify-center px-12 bg-black/40">
-            <div className="flex flex-col gap-4 max-w-2xl">
-              <h2 className="text-6xl font-light text-slate-100 leading-tight">
+          <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 lg:px-12 bg-black/40">
+            <div className="flex flex-col gap-2 sm:gap-4 max-w-2xl">
+              <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-6xl font-light text-slate-100 leading-tight">
                 Mythic
               </h2>
-              <p className="text-slate-200 text-base leading-relaxed max-w-md">
+              <p className="text-slate-200 text-xs sm:text-sm md:text-base leading-relaxed max-w-md">
                 The Mythical Universe series transforms <span className="text-cyan-400">symbolic and dreamlike cosmology</span> into immersive dome experiences. Pure atmosphere and emotional immersion.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Category Navigation Tabs */}
-        <div className="relative w-full flex items-center gap-8 px-12 py-8 border-b border-slate-700">
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors">
-            <ChevronLeft size={24} />
-          </button>
-          <button className="text-slate-300 hover:text-cyan-400 transition-colors font-light">Asian</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Mesoamerican</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Greek</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Egyptian</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto">
-            <ChevronRight size={24} />
-          </button>
+        {/* Category Navigation Tabs - Mobile Responsive */}
+        <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 border-b border-slate-700">
+          <div className="flex items-center gap-2 sm:gap-4 md:gap-8 min-w-min md:min-w-0">
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0">
+              <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
+            </button>
+            <button className="text-slate-300 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Asian</button>
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Mesoamerican</button>
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Greek</button>
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Egyptian</button>
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto flex-shrink-0">
+              <ChevronRight size={20} className="sm:w-6 sm:h-6" />
+            </button>
+          </div>
         </div>
 
-        {/* Showcase Grid - 3 columns */}
-        <div className="w-full px-12 py-12">
-          <div className="grid grid-cols-3 gap-6">
+        {/* Showcase Grid - Responsive */}
+        <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             {mythicImages.slice(0, 5).map((url, idx) => (
               <div key={idx} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                 <Image
                   src={url}
                   alt={mythicLabels[idx]}
                   fill
-                  className="object-cover"
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
-                  <p className="text-slate-100 text-sm font-light">{mythicLabels[idx]}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-3 sm:p-4">
+                  <p className="text-slate-100 text-xs sm:text-sm font-light line-clamp-2">{mythicLabels[idx]}</p>
                 </div>
               </div>
             ))}
 
-            {/* Load More - spans the third column */}
-            <div className="flex items-center justify-center">
-              <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
+            {/* Load More - spans full width on mobile */}
+            <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1">
+              <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-xs sm:text-sm">
                 Load More
               </button>
             </div>
@@ -224,43 +226,43 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       </section>
 
       {/* Teasers Section */}
-      <section className="w-full h-screen border-b border-slate-700">
-        <div className="w-full h-full flex items-stretch overflow-hidden relative">
-          {/* Left: Teaser Info and Buttons - 30% width */}
-          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 section-divider">
-            <div className="flex flex-col gap-6 max-w-md">
-              <h2 className="text-6xl lg:text-7xl font-light text-slate-300 leading-tight">
+      <section className="w-full max-w-full overflow-hidden min-h-screen sm:h-screen border-b border-slate-700">
+        <div className="w-full h-full flex flex-col sm:flex-row items-stretch overflow-hidden relative">
+          {/* Left: Teaser Info and Buttons - Full width mobile, 30% on desktop */}
+          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0 section-divider">
+            <div className="flex flex-col gap-4 sm:gap-6 max-w-md">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-slate-300 leading-tight">
                 Teasers:
               </h2>
 
-              <p className="text-slate-400 text-base leading-relaxed">
+              <p className="text-slate-400 text-xs sm:text-sm md:text-base leading-relaxed">
                 Full-length shows and dome editions are available. If you are interested in a specific episode or would like to commission a custom production, please contact our team.
               </p>
 
-              <p className="text-slate-400 text-sm">
+              <p className="text-slate-400 text-xs sm:text-sm">
                 We develop immersive content from concept to final delivery.
               </p>
 
-              <div className="space-y-2 text-slate-500 text-xs leading-relaxed">
+              <div className="space-y-1.5 sm:space-y-2 text-slate-500 text-xs sm:text-xs leading-relaxed">
                 <p>Original and consistent character design</p>
                 <p>Cohesive narrative and visual building</p>
                 <p>Dynamic scene editing with special effects</p>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-4 pt-4">
-                <button className="px-6 py-2 border border-cyan-400 text-cyan-400 text-sm font-medium hover:bg-cyan-400/10 transition-colors">
+              <div className="flex gap-2 sm:gap-4 pt-4">
+                <button className="px-3 sm:px-6 py-2 border border-cyan-400 text-cyan-400 text-xs sm:text-sm font-medium hover:bg-cyan-400/10 transition-colors">
                   Send Email
                 </button>
-                <button className="px-6 py-2 border border-cyan-400 text-cyan-400 text-sm font-medium hover:bg-cyan-400/10 transition-colors">
+                <button className="px-3 sm:px-6 py-2 border border-cyan-400 text-cyan-400 text-xs sm:text-sm font-medium hover:bg-cyan-400/10 transition-colors">
                   WhatsApp
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Right: Video Teasers with Arrow Navigation - 70% width */}
-          <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-12">
+          {/* Right: Video Teasers with Arrow Navigation - Hidden on mobile, 70% on desktop */}
+          <div className="hidden sm:flex sm:flex-1 relative overflow-hidden items-center justify-center px-4 sm:px-8">
             {/* Left: Current Teaser with Up/Down Arrows */}
             <div className="relative flex flex-col items-center gap-4">
               {/* Up Arrow */}
@@ -333,101 +335,101 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       </section>
 
       {/* Deliverables Section */}
-      <section className="w-full h-screen border-b border-slate-700">
-        <div className="w-full h-full flex items-stretch overflow-hidden relative">
-          {/* Left: Deliverables Info - 30% width */}
-          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 section-divider">
-            <div className="flex flex-col gap-6 max-w-md">
-              <h2 className="text-6xl lg:text-7xl font-light text-slate-300 leading-tight">
+      <section className="w-full max-w-full overflow-hidden min-h-screen sm:h-screen border-b border-slate-700">
+        <div className="w-full h-full flex flex-col sm:flex-row items-stretch overflow-hidden relative">
+          {/* Left: Deliverables Info - Full width mobile, 30% on desktop */}
+          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0 section-divider">
+            <div className="flex flex-col gap-4 sm:gap-6 max-w-md">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-slate-300 leading-tight">
                 Deliverables
               </h2>
 
-              <p className="text-slate-400 text-base leading-relaxed">
+              <p className="text-slate-400 text-xs sm:text-sm md:text-base leading-relaxed">
                 All content is delivered in professional 4K resolution and optimized for full dome, Fulldome and 360-degree environments.
               </p>
 
-              <div className="space-y-3">
-                <p className="text-slate-500 text-sm font-medium">Our productions include:</p>
-                <ul className="space-y-2 text-slate-400 text-sm">
-                  <li className="flex gap-3 items-start">
+              <div className="space-y-2 sm:space-y-3">
+                <p className="text-slate-500 text-xs sm:text-sm font-medium">Our productions include:</p>
+                <ul className="space-y-1 sm:space-y-2 text-slate-400 text-xs sm:text-sm">
+                  <li className="flex gap-2 sm:gap-3 items-start">
                     <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                     <span>Dome-ready masters</span>
                   </li>
-                  <li className="flex gap-3 items-start">
+                  <li className="flex gap-2 sm:gap-3 items-start">
                     <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                     <span>Character creation (natural)</span>
                   </li>
-                  <li className="flex gap-3 items-start">
+                  <li className="flex gap-2 sm:gap-3 items-start">
                     <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                     <span>Full dome environment and special effects</span>
                   </li>
-                  <li className="flex gap-3 items-start">
+                  <li className="flex gap-2 sm:gap-3 items-start">
                     <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                     <span>Structured storytelling and educational frameworks</span>
                   </li>
                 </ul>
               </div>
 
-              <p className="text-slate-400 text-sm">
+              <p className="text-slate-400 text-xs sm:text-sm">
                 <span className="text-cyan-400 font-semibold">N3uralia360</span> develops scalable immersive content for planetariums, rental domes, and exhibitions everywhere.
               </p>
             </div>
           </div>
 
-          {/* Right: Contact Form - 70% width */}
-          <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-12">
+          {/* Right: Contact Form - Hidden on mobile, 70% on desktop */}
+          <div className="hidden sm:flex sm:flex-1 relative overflow-hidden items-center justify-center px-4 sm:px-8">
             <div className="max-w-md w-full">
-              <h3 className="text-3xl font-light text-slate-300 mb-8">
+              <h3 className="text-2xl sm:text-3xl font-light text-slate-300 mb-6 sm:mb-8">
                 Submit Your Inquiry
               </h3>
 
-              <form className="space-y-6">
+              <form className="space-y-4 sm:space-y-6">
                 <div>
-                  <label className="text-slate-400 text-sm mb-2 block">Your email</label>
+                  <label className="text-slate-400 text-xs sm:text-sm mb-2 block">Your email</label>
                   <input
                     type="email"
                     placeholder="your@email.com"
-                    className="w-full bg-transparent border border-slate-600 text-slate-300 px-4 py-2 text-sm focus:outline-none focus:border-cyan-400 transition-colors"
+                    className="w-full bg-transparent border border-slate-600 text-slate-300 px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:border-cyan-400 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="text-slate-400 text-sm mb-3 block">Choose one:</label>
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-3 cursor-pointer">
+                  <label className="text-slate-400 text-xs sm:text-sm mb-2 sm:mb-3 block">Choose one:</label>
+                  <div className="space-y-2 sm:space-y-3">
+                    <label className="flex items-center gap-2 sm:gap-3 cursor-pointer">
                       <input
                         type="checkbox"
                         className="w-4 h-4 rounded border-slate-600 text-cyan-400 focus:ring-0"
                       />
-                      <span className="text-slate-400 text-sm">I would like to see a demo in my dome</span>
+                      <span className="text-slate-400 text-xs sm:text-sm">I would like to see a demo in my dome</span>
                     </label>
-                    <label className="flex items-center gap-3 cursor-pointer">
+                    <label className="flex items-center gap-2 sm:gap-3 cursor-pointer">
                       <input
                         type="checkbox"
                         className="w-4 h-4 rounded border-slate-600 text-cyan-400 focus:ring-0"
                       />
-                      <span className="text-slate-400 text-sm">I am interested in watching a full episode</span>
+                      <span className="text-slate-400 text-xs sm:text-sm">I am interested in watching a full episode</span>
                     </label>
-                    <label className="flex items-center gap-3 cursor-pointer">
+                    <label className="flex items-center gap-2 sm:gap-3 cursor-pointer">
                       <input
                         type="checkbox"
                         className="w-4 h-4 rounded border-slate-600 text-cyan-400 focus:ring-0"
                       />
-                      <span className="text-slate-400 text-sm">I want to commission a custom show</span>
+                      <span className="text-slate-400 text-xs sm:text-sm">I want to commission a custom show</span>
                     </label>
-                    <label className="flex items-center gap-3 cursor-pointer">
+                    <label className="flex items-center gap-2 sm:gap-3 cursor-pointer">
                       <input
                         type="checkbox"
                         className="w-4 h-4 rounded border-slate-600 text-cyan-400 focus:ring-0"
                       />
-                      <span className="text-slate-400 text-sm">Other</span>
+                      <span className="text-slate-400 text-xs sm:text-sm">Other</span>
                     </label>
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full px-6 py-3 border border-cyan-400 text-cyan-400 text-sm font-medium hover:bg-cyan-400/10 transition-colors"
+                  className="w-full px-4 sm:px-6 py-2 sm:py-3 border border-cyan-400 text-cyan-400 text-xs sm:text-sm font-medium hover:bg-cyan-400/10 transition-colors"
                 >
                   Submit
                 </button>

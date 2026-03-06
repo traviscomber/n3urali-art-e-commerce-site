@@ -67,9 +67,9 @@ export function ShowsSection() {
             </div>
           </div>
 
-          {/* Right Column: Circular Image - Hidden on mobile */}
-          <div className="hidden md:flex justify-center">
-            <div className="relative w-full max-w-md aspect-square rounded-full overflow-hidden shadow-2xl border-2 border-slate-700/60 group">
+          {/* Right Column: Circular Image */}
+          <div className="flex justify-center mt-8 md:mt-0">
+            <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-full md:max-w-md aspect-square rounded-full overflow-hidden shadow-2xl border-2 border-slate-700/60 group">
               <Image
                 src={LANDING_PAGE_IMAGES.shows}
                 alt="Shows - Cinematic dome stories with whimsical creatures"

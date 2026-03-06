@@ -41,8 +41,8 @@ export function HomepageHero({ videoUrl }: HomepageHeroProps) {
             </div>
           </div>
 
-          {/* Right Column: Video - Hidden on mobile */}
-          <div className="hidden md:flex justify-center">
+          {/* Right Column: Video */}
+          <div className="flex justify-center">
             <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-black shadow-2xl border border-slate-700/60 group">
               {videoUrl ? (
                 <video

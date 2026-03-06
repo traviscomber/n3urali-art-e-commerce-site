@@ -334,8 +334,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
         </div>
       </section>
 
-      {/* Deliverables Section */}
-      <section className="w-full max-w-full overflow-hidden min-h-screen sm:h-screen border-b border-slate-700">
+      {/* Deliverables Section - HIDDEN */}
+      <section className="hidden w-full max-w-full overflow-hidden min-h-screen sm:h-screen border-b border-slate-700">
         <div className="w-full h-full flex flex-col sm:flex-row items-stretch overflow-hidden relative">
           {/* Left: Deliverables Info - Full width mobile, 30% on desktop */}
           <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0">

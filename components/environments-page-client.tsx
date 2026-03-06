@@ -140,29 +140,29 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
   }
 
   return (
-    <div className="w-full bg-black">
+    <div className="w-full max-w-full overflow-hidden bg-black">
       {/* Show detail view if category selected, otherwise show full page */}
       {!selectedNatureCategory && (
         <>
           {/* Intro Section */}
-          <section className="w-full py-16 px-8 lg:px-12 border-b border-slate-700">
+          <section className="w-full max-w-full overflow-hidden py-12 sm:py-16 md:py-24 px-4 sm:px-8 lg:px-12 border-b border-slate-700">
             <div className="max-w-2xl">
-              <h1 className="text-6xl lg:text-7xl font-light text-slate-400 leading-tight mb-4">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-light text-slate-400 leading-tight mb-3 sm:mb-4">
                 Environments
               </h1>
-              <p className="text-slate-500 text-base font-light mb-6">
+              <p className="text-slate-500 text-xs sm:text-sm md:text-base font-light mb-4 sm:mb-6">
                 Seamless dome loops designed to charm.
               </p>
-              <ul className="space-y-3">
-                <li className="flex gap-3 items-start text-slate-400 text-sm">
+              <ul className="space-y-2 sm:space-y-3">
+                <li className="flex gap-2 sm:gap-3 items-start text-slate-400 text-xs sm:text-sm">
                   <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                   <span>Endless themed nights without rebuilding your show</span>
                 </li>
-                <li className="flex gap-3 items-start text-slate-400 text-sm">
+                <li className="flex gap-2 sm:gap-3 items-start text-slate-400 text-xs sm:text-sm">
                   <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                   <span>Clean, seamless material ready to layer and mix</span>
                 </li>
-                <li className="flex gap-3 items-start text-slate-400 text-sm">
+                <li className="flex gap-2 sm:gap-3 items-start text-slate-400 text-xs sm:text-sm">
                   <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                   <span>Ambient premium visuals that elevate any space</span>
                 </li>
@@ -173,9 +173,9 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
       )}
 
       {/* Nature Section - Always visible with banner and nav */}
-      <section className="w-full border-b border-slate-700">
+      <section className="w-full max-w-full overflow-hidden border-b border-slate-700">
         {/* Full-width Banner with Overlay Text */}
-        <div className="relative w-full h-80 overflow-hidden">
+        <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
           <Image
             src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatBackg%20%281%29-TLXUR5xYkTXrK8r7ahb8ZseNFWVg53.png"
             alt="Nature"
@@ -183,72 +183,74 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             className="object-cover"
           />
           {/* Overlay Text */}
-          <div className="absolute inset-0 flex flex-col justify-center px-12 bg-black/40">
-            <div className="flex flex-col gap-4 max-w-2xl">
-              <h2 className="text-6xl font-light text-slate-100 leading-tight">
+          <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 lg:px-12 bg-black/40">
+            <div className="flex flex-col gap-2 sm:gap-4 max-w-2xl">
+              <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-6xl font-light text-slate-100 leading-tight">
                 Nature
               </h2>
-              <p className="text-slate-200 text-base leading-relaxed max-w-md">
+              <p className="text-slate-200 text-xs sm:text-sm md:text-base leading-relaxed max-w-md">
                 Explore real world with dreamlike immersive dome interpretations. Travel between UNESCO Sites in seconds or discover diversity of real life reimagined with <span className="text-red-400">immersive</span> creativity.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Region Navigation Tabs */}
-        <div className="relative w-full flex items-center gap-8 px-12 py-8 border-b border-slate-700">
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors">
-            <ChevronLeft size={24} />
-          </button>
-          <button 
-            onClick={() => setSelectedNatureCategory('oceans')}
-            className={`font-light transition-colors ${selectedNatureCategory === 'oceans' ? 'text-cyan-400' : 'text-slate-300 hover:text-cyan-400'}`}
-          >
-            Oceans
-          </button>
-          <button 
-            onClick={() => setSelectedNatureCategory('volcanoes')}
-            className={`font-light transition-colors ${selectedNatureCategory === 'volcanoes' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
-          >
-            Volcanoes
-          </button>
-          <button 
-            onClick={() => setSelectedNatureCategory('underwater-life')}
-            className={`font-light transition-colors ${selectedNatureCategory === 'underwater-life' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
-          >
-            Underwater Life
-          </button>
-          <button 
-            onClick={() => setSelectedNatureCategory('ice-and-snow')}
-            className={`font-light transition-colors ${selectedNatureCategory === 'ice-and-snow' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
-          >
-            Ice and Snow
-          </button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto">
-            <ChevronRight size={24} />
-          </button>
+        {/* Region Navigation Tabs - Mobile Responsive */}
+        <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 border-b border-slate-700">
+          <div className="flex items-center gap-2 sm:gap-4 md:gap-8 min-w-min md:min-w-0">
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0">
+              <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
+            </button>
+            <button 
+              onClick={() => setSelectedNatureCategory('oceans')}
+              className={`font-light transition-colors text-xs sm:text-sm whitespace-nowrap ${selectedNatureCategory === 'oceans' ? 'text-cyan-400' : 'text-slate-300 hover:text-cyan-400'}`}
+            >
+              Oceans
+            </button>
+            <button 
+              onClick={() => setSelectedNatureCategory('volcanoes')}
+              className={`font-light transition-colors text-xs sm:text-sm whitespace-nowrap ${selectedNatureCategory === 'volcanoes' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
+            >
+              Volcanoes
+            </button>
+            <button 
+              onClick={() => setSelectedNatureCategory('underwater-life')}
+              className={`font-light transition-colors text-xs sm:text-sm whitespace-nowrap ${selectedNatureCategory === 'underwater-life' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
+            >
+              Underwater
+            </button>
+            <button 
+              onClick={() => setSelectedNatureCategory('ice-and-snow')}
+              className={`font-light transition-colors text-xs sm:text-sm whitespace-nowrap ${selectedNatureCategory === 'ice-and-snow' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
+            >
+              Ice & Snow
+            </button>
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto flex-shrink-0">
+              <ChevronRight size={20} className="sm:w-6 sm:h-6" />
+            </button>
+          </div>
         </div>
 
         {/* Conditional Content: Show detail view or grid */}
         {selectedNatureCategory ? (
           // Detail View Modal
-          <div className="w-full px-12 py-12">
+          <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
             {/* Back Button */}
-            <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center gap-2 sm:gap-4 mb-6 sm:mb-8">
               <button
                 onClick={() => setSelectedNatureCategory(null)}
-                className="text-slate-400 hover:text-cyan-400 transition-colors text-base font-light"
+                className="text-slate-400 hover:text-cyan-400 transition-colors text-xs sm:text-sm font-light"
               >
                 Back
               </button>
               <span className="text-slate-400">|</span>
-              <h2 className="text-slate-200 text-base font-light">
+              <h2 className="text-slate-200 text-xs sm:text-sm font-light">
                 {natureCategories.find(cat => cat.id === selectedNatureCategory)?.name || selectedNatureCategory}
               </h2>
             </div>
 
-            {/* Image Grid - 5 images only */}
-            <div className="grid grid-cols-3 gap-[4.5rem]">
+            {/* Image Grid - Responsive */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
               {natureCategoryImages[selectedNatureCategory]?.slice(0, 5).map((image, idx) => (
                 <button
                   key={idx}
@@ -261,27 +263,27 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
-                    <p className="text-white text-base font-light">{image.title}</p>
+                  <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                    <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">{image.title}</p>
                   </div>
                 </button>
               ))}
 
-              {/* Load More - spans the third column */}
+              {/* Load More - spans full width on mobile */}
               <button 
                 onClick={() => console.log('Load More clicked')}
-                className="flex items-center justify-center cursor-pointer"
+                className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1 cursor-pointer"
               >
-                <span className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
+                <span className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-xs sm:text-sm">
                   Load More
                 </span>
               </button>
             </div>
           </div>
         ) : (
-          // Showcase Grid - 3 columns
-          <div className="w-full px-12 py-12">
-            <div className="grid grid-cols-3 gap-[4.5rem]">
+          // Showcase Grid - Responsive
+          <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
               {/* Row 1 */}
             <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
@@ -290,8 +292,8 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
-                <p className="text-white text-base font-light">Chilled trees forest walking</p>
+              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Chilled trees forest walking</p>
               </div>
             </div>
 
@@ -302,8 +304,8 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
-                <p className="text-white text-base font-light">Tropical paradise bay</p>
+              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Tropical paradise bay</p>
               </div>
             </div>
 
@@ -314,8 +316,8 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
-                <p className="text-white text-base font-light">Underwater Life</p>
+              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Underwater Life</p>
               </div>
             </button>
 
@@ -327,8 +329,8 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
-                <p className="text-white text-base font-light">Lava power</p>
+              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Lava power</p>
               </div>
             </div>
 
@@ -339,28 +341,29 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
-                <p className="text-white text-base font-light">Dreamy Sponges</p>
+              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Dreamy Sponges</p>
               </div>
             </div>
 
-            {/* Load More - spans the third column */}
-            <div className="flex items-center justify-center">
-              <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
+            {/* Load More - spans full width on mobile */}
+            <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1">
+              <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-xs sm:text-sm">
                 Load More
               </button>
             </div>
           </div>
-        </div>
         )}
       </section>
+        </>
+      )}
 
       {/* Show other sections only if detail view is not open */}
       {!selectedNatureCategory && (
         <>
-      <section className="w-full border-b border-slate-700">
+      <section className="w-full max-w-full overflow-hidden border-b border-slate-700">
         {/* Full-width Banner with Overlay Text */}
-        <div className="relative w-full h-80 overflow-hidden">
+        <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
           <Image
             src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultBackg-eTk9tnAfHGhSUA1ZUSshfm8Ww57D1e.png"
             alt="Culture"
@@ -368,32 +371,37 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             className="object-cover"
           />
           {/* Overlay Text */}
-          <div className="absolute inset-0 flex flex-col justify-center px-12 bg-black/40">
-            <div className="flex flex-col gap-4 max-w-2xl">
-              <h2 className="text-6xl font-light text-slate-100 leading-tight">
+          <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 lg:px-12 bg-black/40">
+            <div className="flex flex-col gap-2 sm:gap-4 max-w-2xl">
+              <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-6xl font-light text-slate-100 leading-tight">
                 Culture
               </h2>
-              <p className="text-slate-200 text-base leading-relaxed max-w-md">
+              <p className="text-slate-200 text-xs sm:text-sm md:text-base leading-relaxed max-w-md">
                 Heritage Environments are immersive journeys inspired by real cultures, architecture, symbolism, and landscapes.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Region Navigation Tabs */}
-        <div className="relative w-full flex items-center gap-8 px-12 py-8 border-b border-slate-700">
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors">
-            <ChevronLeft size={24} />
-          </button>
-          <button className="text-slate-300 hover:text-cyan-400 transition-colors font-light">North America</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Polynesia</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Southeast Asia</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Antarctica</button>
+        {/* Region Navigation Tabs - Mobile Responsive */}
+        <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 border-b border-slate-700">
+          <div className="flex items-center gap-2 sm:gap-4 md:gap-8 min-w-min md:min-w-0">
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0">
+              <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
+            </button>
+            <button className="text-slate-300 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">North America</button>
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Polynesia</button>
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Southeast Asia</button>
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Antarctica</button>
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto flex-shrink-0">
+              <ChevronRight size={20} className="sm:w-6 sm:h-6" />
+            </button>
+          </div>
         </div>
 
-        {/* Showcase Grid - 3 columns */}
-        <div className="w-full px-12 py-12">
-          <div className="grid grid-cols-3 gap-[4.5rem]">
+        {/* Showcase Grid - Responsive */}
+        <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             {/* Row 1 */}
             <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
               <Image
@@ -402,8 +410,8 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
-                <p className="text-white text-base font-light">Purple sunset halo</p>
+              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Purple sunset halo</p>
               </div>
             </div>
 
@@ -414,8 +422,8 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
-                <p className="text-white text-base font-light">Canoe adventure</p>
+              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Canoe adventure</p>
               </div>
             </div>
 
@@ -426,8 +434,8 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
-                <p className="text-white text-base font-light">Sunset over ancient temple</p>
+              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Sunset over ancient temple</p>
               </div>
             </div>
 
@@ -439,8 +447,8 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
-                <p className="text-white text-base font-light">Walking walls of Valparaiso</p>
+              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Walking walls of Valparaiso</p>
               </div>
             </div>
 
@@ -451,14 +459,14 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
-                <p className="text-white text-base font-light">Celestial gates</p>
+              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Celestial gates</p>
               </div>
             </div>
 
-            {/* Load More - spans the third column */}
-            <div className="flex items-center justify-center">
-              <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
+            {/* Load More - spans full width on mobile */}
+            <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1">
+              <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-xs sm:text-sm">
                 Load More
               </button>
             </div>

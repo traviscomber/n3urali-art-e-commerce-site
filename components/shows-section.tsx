@@ -13,30 +13,30 @@ export function ShowsSection() {
   ]
 
   return (
-    <section className="w-full bg-black py-24 px-4 sm:px-6 lg:px-8 border-b border-gray-600/60">
+    <section className="w-full bg-black py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-700/60">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-20 items-center">
           {/* Left Column: Content */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-8">
             <div>
-              <h2 className="text-5xl md:text-6xl lg:text-7xl font-light text-purple-400 mb-2 tracking-tight">
+              <h2 className="text-6xl md:text-7xl lg:text-8xl font-light text-purple-400 mb-3 tracking-tight leading-none">
                 Shows
               </h2>
-              <p className="text-lg md:text-xl text-gray-500 font-light">
+              <p className="text-base md:text-lg text-slate-400 font-light tracking-wide">
                 Cinematic Dome Stories
               </p>
             </div>
 
-            <div className="space-y-4">
-              <p className="text-sm md:text-base text-gray-400 leading-relaxed font-light">
+            <div className="space-y-6">
+              <p className="text-sm md:text-base text-slate-400 leading-relaxed font-light">
                 Designed as mini-shows that hold audience attention from beginning to end, our Shows are perfect for:
               </p>
               
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {useCases.map((useCase, index) => (
                   <li key={index} className="flex gap-3 items-start">
-                    <span className="text-purple-400 text-sm flex-shrink-0 mt-1">•</span>
-                    <span className="text-sm md:text-base text-gray-400 font-light">
+                    <span className="text-purple-400 text-sm flex-shrink-0 mt-1">◆</span>
+                    <span className="text-sm md:text-base text-slate-400 font-light">
                       {useCase}
                     </span>
                   </li>
@@ -44,35 +44,37 @@ export function ShowsSection() {
               </ul>
             </div>
 
-            <Link
-              href="/shows"
-              className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors group w-fit"
-            >
-              <span className="text-sm md:text-base font-light">Explore</span>
-              <svg
-                className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <div className="pt-2">
+              <Link
+                href="/shows"
+                className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-light text-slate-100 border border-purple-400/40 hover:border-purple-400 hover:text-purple-400 transition-all duration-300 group rounded"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
-                />
-              </svg>
-            </Link>
+                <span>Explore Shows</span>
+                <svg
+                  className="w-4 h-4 group-hover:translate-x-1 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              </Link>
+            </div>
           </div>
 
           {/* Right Column: Circular Image */}
           <div className="flex justify-center">
-            <div className="relative w-full max-w-md aspect-square rounded-full overflow-hidden shadow-2xl">
+            <div className="relative w-full max-w-md aspect-square rounded-full overflow-hidden shadow-2xl border-2 border-slate-700/60 group">
               <Image
                 src={LANDING_PAGE_IMAGES.shows}
                 alt="Shows - Cinematic dome stories with whimsical creatures"
                 fill
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
             </div>
           </div>

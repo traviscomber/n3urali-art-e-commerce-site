@@ -151,11 +151,12 @@ export function Header({ videoContext }: HeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-black/80 backdrop-blur-xl supports-[backdrop-filter]:bg-black/80">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between">
-          <Link href="/" className="flex items-center group">
-            <div className="relative h-12 w-48">
+    <header className="sticky top-0 z-50 w-full max-w-full overflow-hidden border-b border-border/50 bg-black/80 backdrop-blur-xl supports-[backdrop-filter]:bg-black/80">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 sm:h-20 items-center justify-between gap-2 sm:gap-4">
+          {/* Logo - Reduced size on mobile */}
+          <Link href="/" className="flex items-center group flex-shrink-0">
+            <div className="relative h-10 sm:h-12 w-32 sm:w-48">
               <Image
                 src="/images/n3uralia-logo.png"
                 alt="N3uralia.art"
@@ -166,47 +167,49 @@ export function Header({ videoContext }: HeaderProps) {
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center space-x-1">
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center space-x-1">
             <Link
               href="/shows"
-              className="relative text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-4 py-2"
+              className="relative text-xs sm:text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-3 sm:px-4 py-2"
             >
               Shows
-              <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
+              <span className="absolute bottom-0 left-3 sm:left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-24px)] sm:group-hover:w-[calc(100%-32px)] transition-all duration-300" />
             </Link>
             <Link
               href="/environments"
-              className="relative text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-4 py-2"
+              className="relative text-xs sm:text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-3 sm:px-4 py-2"
             >
               Environments
-              <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
+              <span className="absolute bottom-0 left-3 sm:left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-24px)] sm:group-hover:w-[calc(100%-32px)] transition-all duration-300" />
             </Link>
             <Link
               href="/theatre"
-              className="relative text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-4 py-2"
+              className="relative text-xs sm:text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-3 sm:px-4 py-2"
             >
               Theatre
-              <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
+              <span className="absolute bottom-0 left-3 sm:left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-24px)] sm:group-hover:w-[calc(100%-32px)] transition-all duration-300" />
             </Link>
             <Link
               href="/studio"
-              className="relative text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-4 py-2"
+              className="relative text-xs sm:text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-3 sm:px-4 py-2"
             >
               Studio
-              <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
+              <span className="absolute bottom-0 left-3 sm:left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-24px)] sm:group-hover:w-[calc(100%-32px)] transition-all duration-300" />
             </Link>
             {isAuthenticated && (
               <Link
                 href="/account/orders"
-                className="relative text-sm font-medium text-slate-400 hover:text-cyan-400 transition-all duration-300 group px-4 py-2"
+                className="relative text-xs sm:text-sm font-medium text-slate-400 hover:text-cyan-400 transition-all duration-300 group px-3 sm:px-4 py-2"
               >
                 Orders
-                <span className="absolute bottom-0 left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-32px)] transition-all duration-300" />
+                <span className="absolute bottom-0 left-3 sm:left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-24px)] sm:group-hover:w-[calc(100%-32px)] transition-all duration-300" />
               </Link>
             )}
           </nav>
 
-          <div className="flex items-center space-x-4">
+          {/* Right Section - Icons and Controls */}
+          <div className="flex items-center gap-1 sm:gap-2 md:gap-4 flex-shrink-0">
             <LanguageToggle />
             <ThemeToggle />
 
@@ -215,11 +218,11 @@ export function Header({ videoContext }: HeaderProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="relative bg-card/50 border-border/50 text-foreground hover:bg-card hover:glow-accent transition-all duration-300"
+                  className="relative bg-card/50 border-border/50 text-foreground hover:bg-card hover:glow-accent transition-all duration-300 p-1.5 sm:p-2"
                 >
                   <ShoppingCart className="h-4 w-4" />
                   {itemCount > 0 && (
-                    <Badge className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground animate-pulse-glow">
+                    <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground animate-pulse-glow">
                       {itemCount}
                     </Badge>
                   )}
@@ -253,9 +256,9 @@ export function Header({ videoContext }: HeaderProps) {
                               />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h4 className="font-medium truncate">{item.title}</h4>
-                              <p className="text-sm text-muted-foreground">{item.license_name}</p>
-                              <p className="text-lg font-semibold mt-1">${item.price.toFixed(2)}</p>
+                              <h4 className="font-medium truncate text-sm">{item.title}</h4>
+                              <p className="text-xs text-muted-foreground">{item.license_name}</p>
+                              <p className="text-base sm:text-lg font-semibold mt-1">${item.price.toFixed(2)}</p>
                             </div>
                             <div className="flex flex-col items-end justify-between">
                               <Button
@@ -276,7 +279,7 @@ export function Header({ videoContext }: HeaderProps) {
                                   >
                                     <Minus className="h-3 w-3" />
                                   </Button>
-                                  <span className="w-8 text-center text-sm">{item.quantity}</span>
+                                  <span className="w-6 sm:w-8 text-center text-xs sm:text-sm">{item.quantity}</span>
                                   <Button
                                     variant="outline"
                                     size="icon"
@@ -292,7 +295,7 @@ export function Header({ videoContext }: HeaderProps) {
                         ))}
                       </div>
                       <div className="border-t pt-4 mt-4 space-y-4">
-                        <div className="flex justify-between items-center text-lg font-semibold">
+                        <div className="flex justify-between items-center text-base sm:text-lg font-semibold">
                           <span>{t("header.total")}</span>
                           <span>${total.toFixed(2)}</span>
                         </div>
@@ -306,12 +309,16 @@ export function Header({ videoContext }: HeaderProps) {
               </SheetContent>
             </Sheet>
 
-            <UserMenu />
+            {/* UserMenu moved into hamburger on mobile */}
+            <div className="hidden sm:block">
+              <UserMenu />
+            </div>
 
+            {/* Mobile Menu Button */}
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden hover:bg-accent/50 transition-all duration-300"
+              className="lg:hidden hover:bg-accent/50 transition-all duration-300 p-1.5 sm:p-2"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -319,40 +326,41 @@ export function Header({ videoContext }: HeaderProps) {
           </div>
         </div>
 
+        {/* Mobile Menu - Full width */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-slate-700 py-6 bg-slate-900/80 backdrop-blur-xl rounded-b-lg">
-            <nav className="flex flex-col space-y-2">
+          <div className="lg:hidden w-full border-t border-slate-700 py-4 bg-slate-900/80 backdrop-blur-xl">
+            <nav className="flex flex-col space-y-1">
               <Link
                 href="/shows"
-                className="text-base font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-3"
+                className="text-sm font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-2.5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Shows
               </Link>
               <Link
                 href="/environments"
-                className="text-base font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-3"
+                className="text-sm font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-2.5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Environments
               </Link>
               <Link
                 href="/theatre"
-                className="text-base font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-3"
+                className="text-sm font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-2.5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Theatre
               </Link>
               <Link
                 href="/studio"
-                className="text-base font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-3"
+                className="text-sm font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-2.5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Studio
               </Link>
               <Link
                 href="/tools"
-                className="text-base font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-3"
+                className="text-sm font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-2.5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Tools
@@ -360,12 +368,16 @@ export function Header({ videoContext }: HeaderProps) {
               {isAuthenticated && (
                 <Link
                   href="/account/orders"
-                  className="text-base font-medium text-slate-400 hover:text-cyan-400 transition-colors px-4 py-3"
+                  className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors px-4 py-2.5"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Orders
                 </Link>
               )}
+              {/* UserMenu in Mobile Menu */}
+              <div className="px-4 py-2.5 border-t border-slate-700 mt-2">
+                <UserMenu />
+              </div>
             </nav>
           </div>
         )}

@@ -51,18 +51,18 @@ export function ContactPageClient() {
         
         setLeadId(nextLeadId)
         setSubmitSuccess(true)
-        setIsSubmitting(true)
         setEmail('')
         setMessage('')
         setSelectedOptions([])
+        // Keep form locked and modal visible for 8 seconds, then auto-close
         setTimeout(() => {
           setSubmitSuccess(false)
-          setIsSubmitting(false)
-        }, 5000)
+        }, 8000)
+      } else {
+        setIsSubmitting(false)
       }
     } catch (error) {
       console.error('Submission error:', error)
-    } finally {
       setIsSubmitting(false)
     }
   }

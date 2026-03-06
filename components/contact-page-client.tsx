@@ -44,10 +44,14 @@ export function ContactPageClient() {
 
       if (response.ok) {
         setSubmitSuccess(true)
+        setIsSubmitting(true)
         setEmail('')
         setMessage('')
         setSelectedOptions([])
-        setTimeout(() => setSubmitSuccess(false), 4000)
+        setTimeout(() => {
+          setSubmitSuccess(false)
+          setIsSubmitting(false)
+        }, 5000)
       }
     } catch (error) {
       console.error('Submission error:', error)
@@ -157,11 +161,25 @@ export function ContactPageClient() {
                 {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
 
-              {/* Success Message */}
+              {/* Success Message - Full Screen Overlay */}
               {submitSuccess && (
-                <div className="p-4 bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 border border-cyan-400/50 rounded text-center animate-in fade-in">
-                  <div className="text-cyan-300 text-sm font-medium mb-1">✨ Message Received!</div>
-                  <p className="text-slate-300 text-xs">We'll get back to you soon. Check your email for updates.</p>
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+                  <div className="bg-slate-900 border border-cyan-400/50 rounded-lg p-8 max-w-md mx-4 text-center space-y-4 animate-in fade-in zoom-in">
+                    <div className="text-4xl">✨</div>
+                    <div>
+                      <h3 className="text-cyan-300 text-lg font-medium mb-2">Message Received!</h3>
+                      <p className="text-slate-300 text-sm">Thanks for reaching out. We'll get back to you soon with all the details you need.</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setSubmitSuccess(false)
+                        setIsSubmitting(false)
+                      }}
+                      className="mt-6 px-6 py-2 border border-cyan-400 text-cyan-400 hover:bg-cyan-400/10 transition-colors text-sm font-medium rounded"
+                    >
+                      Close
+                    </button>
+                  </div>
                 </div>
               )}
             </form>

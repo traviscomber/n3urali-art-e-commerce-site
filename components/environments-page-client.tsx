@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { ChevronRight, ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
 
-// Temporary nature images data
+// Environment sections component - Updated
 const natureCategoryImages = {
   oceans: [
     { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/oceans-1.png', title: 'Deep Blue Oceans' },

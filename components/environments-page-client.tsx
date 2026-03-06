@@ -361,12 +361,13 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
       {/* Show other sections only if detail view is not open */}
       {!selectedNatureCategory && (
         <>
+      {/* Mythic Section */}
       <section className="w-full max-w-full overflow-hidden border-b border-slate-700">
         {/* Full-width Banner with Overlay Text */}
         <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultBackg-eTk9tnAfHGhSUA1ZUSshfm8Ww57D1e.png"
-            alt="Culture"
+            src={mythicBannerUrl}
+            alt="Mythic"
             fill
             className="object-cover"
           />
@@ -374,25 +375,25 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 lg:px-12 bg-black/40">
             <div className="flex flex-col gap-2 sm:gap-4 max-w-2xl">
               <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-6xl font-light text-slate-100 leading-tight">
-                Culture
+                Mythic
               </h2>
               <p className="text-slate-200 text-xs sm:text-sm md:text-base leading-relaxed max-w-md">
-                Heritage Environments are immersive journeys inspired by real cultures, architecture, symbolism, and landscapes.
+                The Mythical Universe series transforms <span className="text-cyan-400">symbolic and dreamlike cosmology</span> into immersive dome experiences. Pure atmosphere and emotional immersion.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Region Navigation Tabs - Mobile Responsive */}
+        {/* Category Navigation Tabs - Mobile Responsive */}
         <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 border-b border-slate-700">
           <div className="flex items-center gap-2 sm:gap-4 md:gap-8 min-w-min md:min-w-0">
             <button className="text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0">
               <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
             </button>
-            <button className="text-slate-300 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">North America</button>
-            <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Polynesia</button>
-            <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Southeast Asia</button>
-            <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Antarctica</button>
+            <button className="text-slate-300 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Asian</button>
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Mesoamerican</button>
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Greek</button>
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Egyptian</button>
             <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto flex-shrink-0">
               <ChevronRight size={20} className="sm:w-6 sm:h-6" />
             </button>
@@ -402,67 +403,19 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         {/* Showcase Grid - Responsive */}
         <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-            {/* Row 1 */}
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult1-dhVGWchKNmJw81kGmXDaXIJ5cd2xFk.png"
-                alt="Purple sunset halo"
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Purple sunset halo</p>
+            {mythicImages.slice(0, 5).map((url, idx) => (
+              <div key={idx} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                <Image
+                  src={url}
+                  alt={mythicLabels[idx]}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                  <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">{mythicLabels[idx]}</p>
+                </div>
               </div>
-            </div>
-
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult2-g8bXETDkCu4snNrPouTKozSZSfGxMl.png"
-                alt="Canoe adventure"
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Canoe adventure</p>
-              </div>
-            </div>
-
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult3-rkJrAmWhsEN0xY7OOeNbBueEgYyjBY.png"
-                alt="Sunset over ancient temple"
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Sunset over ancient temple</p>
-              </div>
-            </div>
-
-            {/* Row 2 */}
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult4-fOr7dFUw2LF1ihBOtwpZSNb9txsVJq.png"
-                alt="Walking walls of Valparaiso"
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Walking walls of Valparaiso</p>
-              </div>
-            </div>
-
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult5-YMhIkyjNnvCMyh91uvItbrfSuoxm5n.png"
-                alt="Celestial gates"
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Celestial gates</p>
-              </div>
-            </div>
+            ))}
 
             {/* Load More - spans full width on mobile */}
             <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1">
@@ -474,74 +427,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         </div>
       </section>
 
-      {/* Mythic Section */}
-      <section className="w-full border-b border-slate-700">
-        {/* Full-width Banner with Overlay Text */}
-        <div className="relative w-full h-80 overflow-hidden">
-          <Image
-            src={mythicBannerUrl}
-            alt="Mythic"
-            fill
-            className="object-cover"
-          />
-          {/* Overlay Text */}
-          <div className="absolute inset-0 flex flex-col justify-center px-12 bg-black/40">
-            <div className="flex flex-col gap-4 max-w-2xl">
-              <h2 className="text-6xl font-light text-slate-100 leading-tight">
-                Mythic
-              </h2>
-              <p className="text-slate-200 text-base leading-relaxed max-w-md">
-                The Mythical Universe series transforms <span className="text-cyan-400">symbolic and dreamlike cosmology</span> into immersive dome experiences. Pure atmosphere and emotional immersion.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Category Navigation Tabs */}
-        <div className="relative w-full flex items-center gap-8 px-12 py-8 border-b border-slate-700">
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors">
-            <ChevronLeft size={24} />
-          </button>
-          <button className="text-slate-300 hover:text-cyan-400 transition-colors font-light">Asian</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Mesoamerican</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Greek</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Egyptian</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto">
-            <ChevronRight size={24} />
-          </button>
-        </div>
-
-        {/* Showcase Grid - 3 columns */}
-        <div className="w-full px-12 py-12">
-          <div className="grid grid-cols-3 gap-[4.5rem]">
-            {mythicImages.slice(0, 5).map((url, idx) => (
-              <div key={idx} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-                <Image
-                  src={url}
-                  alt={mythicLabels[idx]}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
-                  <p className="text-white text-base font-light">{mythicLabels[idx]}</p>
-                </div>
-              </div>
-            ))}
-
-            {/* Load More - spans the third column */}
-            <div className="flex items-center justify-center">
-              <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
-                Load More
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Art Environments Section */}
-      <section className="w-full border-b border-slate-700">
+      <section className="w-full max-w-full overflow-hidden border-b border-slate-700">
         {/* Full-width Banner with Overlay Text */}
-        <div className="relative w-full h-80 overflow-hidden">
+        <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
           <Image
             src={artBannerUrl}
             alt="Art"
@@ -549,36 +438,38 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             className="object-cover"
           />
           {/* Overlay Text */}
-          <div className="absolute inset-0 flex flex-col justify-center px-12 bg-black/40">
-            <div className="flex flex-col gap-4 max-w-2xl">
-              <h2 className="text-6xl font-light text-slate-100 leading-tight">
+          <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 lg:px-12 bg-black/40">
+            <div className="flex flex-col gap-2 sm:gap-4 max-w-2xl">
+              <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-6xl font-light text-slate-100 leading-tight">
                 Art
               </h2>
-              <p className="text-slate-200 text-base leading-relaxed max-w-md">
+              <p className="text-slate-200 text-xs sm:text-sm md:text-base leading-relaxed max-w-md">
                 Performance-Ready Visual Architecture. Bold, cinematic <span className="text-cyan-400">dome worlds</span> created for live performance and immersive stages.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Category Navigation Tabs */}
-        <div className="relative w-full flex items-center gap-8 px-12 py-8 border-b border-slate-700">
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors">
-            <ChevronLeft size={24} />
-          </button>
-          <button className="text-slate-300 hover:text-cyan-400 transition-colors font-light">Architecture</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Landscapes</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Geometry</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Cosmic</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light">Abstract</button>
-          <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto">
-            <ChevronRight size={24} />
-          </button>
+        {/* Category Navigation Tabs - Mobile Responsive */}
+        <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 border-b border-slate-700">
+          <div className="flex items-center gap-2 sm:gap-4 md:gap-8 min-w-min md:min-w-0">
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0">
+              <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
+            </button>
+            <button className="text-slate-300 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Architecture</button>
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Landscapes</button>
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Geometry</button>
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Cosmic</button>
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Abstract</button>
+            <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto flex-shrink-0">
+              <ChevronRight size={20} className="sm:w-6 sm:h-6" />
+            </button>
+          </div>
         </div>
 
-        {/* Showcase Grid - 3 columns */}
-        <div className="w-full px-12 py-12">
-          <div className="grid grid-cols-3 gap-[4.5rem]">
+        {/* Showcase Grid - Responsive */}
+        <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             {artImages.slice(0, 5).map((url, idx) => (
               <div key={idx} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                 <Image
@@ -587,15 +478,15 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-5">
-                  <p className="text-white text-base font-light">{artLabels[idx]}</p>
+                <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                  <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">{artLabels[idx]}</p>
                 </div>
               </div>
             ))}
 
-            {/* Load More - spans the third column */}
-            <div className="flex items-center justify-center">
-              <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-sm">
+            {/* Load More - spans full width on mobile */}
+            <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1">
+              <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-xs sm:text-sm">
                 Load More
               </button>
             </div>

@@ -2,28 +2,20 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { environmentProducts, EnvironmentProduct } from '@/lib/constants/marketplace-products'
+import { EnvironmentProduct } from '@/lib/constants/marketplace-products'
 import { ChevronRight } from 'lucide-react'
 
 interface EnvironmentMarketplaceGridProps {
-  category?: string
+  products: EnvironmentProduct[]
 }
 
-export function EnvironmentMarketplaceGrid({ category }: EnvironmentMarketplaceGridProps) {
-  const products = category
-    ? environmentProducts.filter((p) => p.category === category)
-    : environmentProducts
-
+export function EnvironmentMarketplaceGrid({ products }: EnvironmentMarketplaceGridProps) {
   return (
-    <section className="w-full bg-black py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </div>
-    </section>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
   )
 }
 

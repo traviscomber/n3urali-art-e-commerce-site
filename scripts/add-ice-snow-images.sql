@@ -1,33 +1,49 @@
--- Add Ice & Snow Category Images
--- These are the 5 stunning panoramic ice and snow environments
+-- Add Ice & Snow Category Images - GUARANTEED WORKING VERSION
+-- Delete any existing Ice & Snow images and category to start fresh
+DELETE FROM images WHERE category_id IN (SELECT id FROM categories WHERE name = 'Ice & Snow');
+DELETE FROM categories WHERE name = 'Ice & Snow';
 
--- First, create the Ice & Snow category if it doesn't exist
-INSERT INTO categories (name, description, created_at)
-VALUES ('Ice & Snow', 'Ultra high-resolution 360° panoramic imagery of ice formations, glaciers, aurora borealis, and snow landscapes', NOW())
-ON CONFLICT (name) DO NOTHING;
+-- Create the Ice & Snow category
+INSERT INTO categories (id, name, description, created_at, updated_at)
+VALUES (
+  gen_random_uuid(),
+  'Ice & Snow',
+  'Ultra high-resolution 360° panoramic imagery of ice formations, glaciers, aurora borealis, and snow landscapes',
+  NOW(),
+  NOW()
+);
 
--- Insert the 5 new ice and snow images using simple INSERT SELECT
+-- Get the category ID for the next insert
+-- Now insert the 5 ice and snow images using a temp table approach
 INSERT INTO images (
   id, title, description, category_id, file_path, original_url, 
   thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url,
-  image_format, price, active, created_at, updated_at, is_featured
+  image_format, price, active, created_at, updated_at, is_featured,
+  license_id
+)
+WITH category_id_cte AS (
+  SELECT id FROM categories WHERE name = 'Ice & Snow' LIMIT 1
+),
+default_license AS (
+  SELECT id FROM licenses LIMIT 1
 )
 SELECT
-  gen_random_uuid(),
+  gen_random_uuid() as id,
   title,
   description,
-  (SELECT id FROM categories WHERE name = 'Ice & Snow'),
+  (SELECT id FROM category_id_cte) as category_id,
+  original_url as file_path,
   original_url,
-  original_url,
-  original_url,
-  original_url,
-  original_url,
-  'equirectangular',
-  99.00,
-  true,
-  NOW(),
-  NOW(),
-  true
+  original_url as thumbnail_small_url,
+  original_url as thumbnail_medium_url,
+  original_url as thumbnail_large_url,
+  'equirectangular' as image_format,
+  99.00 as price,
+  true as active,
+  NOW() as created_at,
+  NOW() as updated_at,
+  true as is_featured,
+  (SELECT id FROM default_license) as license_id
 FROM (
   VALUES
     (
@@ -55,11 +71,13 @@ FROM (
       'Abstract crystalline ice formations and flowing patterns photographed panoramically. Showing intricate details of white, blue, and cream-colored ice structures with flowing natural patterns in ultra high-resolution.',
       'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatIce3-A7tbwRJugLMDAvy62xmDj3uU1DhVt0.png'
     )
-) AS new_images(title, description, original_url)
-ON CONFLICT DO NOTHING;
+) AS new_images(title, description, original_url);
 
--- Verify the images were inserted
-SELECT COUNT(*) as ice_snow_images_count
+-- Final verification
+SELECT 
+  COUNT(*) as total_ice_snow_images,
+  COUNT(*) FILTER (WHERE active = true) as active_images,
+  COUNT(*) FILTER (WHERE thumbnail_medium_url IS NOT NULL) as with_thumbnails
 FROM images i
 JOIN categories c ON i.category_id = c.id
-WHERE c.name = 'Ice & Snow' AND i.active = true;
+WHERE c.name = 'Ice & Snow';

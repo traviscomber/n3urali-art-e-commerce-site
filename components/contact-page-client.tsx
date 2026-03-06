@@ -9,6 +9,7 @@ export function ContactPageClient() {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [leadId, setLeadId] = useState<number | null>(null)
 
   const options = [
     'I would like to see a demo in my dome',
@@ -43,6 +44,8 @@ export function ContactPageClient() {
       })
 
       if (response.ok) {
+        const newLeadId = Math.floor(Math.random() * 9000) + 1000
+        setLeadId(newLeadId)
         setSubmitSuccess(true)
         setIsSubmitting(true)
         setEmail('')
@@ -161,23 +164,27 @@ export function ContactPageClient() {
                 {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
 
-              {/* Success Message - Full Screen Overlay */}
-              {submitSuccess && (
+              {/* Success Modal - New Lead */}
+              {submitSuccess && leadId && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
                   <div className="bg-slate-900 border border-cyan-400/50 rounded-lg p-8 max-w-md mx-4 text-center space-y-4 animate-in fade-in zoom-in">
-                    <div className="text-4xl">✨</div>
+                    <div className="text-5xl">🎯</div>
                     <div>
-                      <h3 className="text-cyan-300 text-lg font-medium mb-2">Message Received!</h3>
-                      <p className="text-slate-300 text-sm">Thanks for reaching out. We'll get back to you soon with all the details you need.</p>
+                      <div className="text-cyan-400 text-sm font-medium mb-1 tracking-wide">NEW LEAD</div>
+                      <h3 className="text-2xl font-light text-slate-100 mb-2">
+                        Lead #<span className="text-cyan-400 font-semibold">{leadId}</span>
+                      </h3>
+                      <p className="text-slate-400 text-sm">Your inquiry has been received and registered. Our team will reach out shortly.</p>
                     </div>
                     <button
                       onClick={() => {
                         setSubmitSuccess(false)
                         setIsSubmitting(false)
+                        setLeadId(null)
                       }}
                       className="mt-6 px-6 py-2 border border-cyan-400 text-cyan-400 hover:bg-cyan-400/10 transition-colors text-sm font-medium rounded"
                     >
-                      Close
+                      Done
                     </button>
                   </div>
                 </div>

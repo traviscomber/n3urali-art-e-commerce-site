@@ -5,11 +5,9 @@ import Link from 'next/link'
 
 export function ContactPageClient() {
   const [email, setEmail] = useState('')
-  const [message, setMessage] = useState('')
   const [selectedOptions, setSelectedOptions] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
-  const [submitError, setSubmitError] = useState('')
 
   const options = [
     'I would like to see a demo in my dome',
@@ -28,52 +26,28 @@ export function ContactPageClient() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSubmitError('')
-    
-    if (!email || selectedOptions.length === 0) {
-      setSubmitError('Please enter an email and select at least one option')
-      console.log('[v0] Validation failed - email:', !!email, 'options:', selectedOptions.length)
-      return
-    }
+    if (!email || selectedOptions.length === 0) return
 
     setIsSubmitting(true)
-    console.log('[v0] Form submission started:', { email, selectedOptions })
-    
     try {
-      const payload = {
-        email,
-        message,
-        interests: selectedOptions.join(', '),
-      }
-      console.log('[v0] Sending payload:', payload)
-      
+      // Send to email service
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          email,
+          interests: selectedOptions.join(', '),
+        }),
       })
 
-      console.log('[v0] Response status:', response.status)
-      const responseData = await response.json()
-      console.log('[v0] Response data:', responseData)
-
       if (response.ok) {
-        console.log('[v0] Email sent successfully')
         setSubmitSuccess(true)
-        setSubmitError('')
         setEmail('')
-        setMessage('')
         setSelectedOptions([])
-        setTimeout(() => setSubmitSuccess(false), 5000)
-      } else {
-        const errorMsg = responseData.error || 'Failed to send email'
-        console.error('[v0] Submission failed:', errorMsg)
-        setSubmitError(errorMsg)
+        setTimeout(() => setSubmitSuccess(false), 3000)
       }
     } catch (error) {
-      const errorMsg = String(error)
-      console.error('[v0] Submission error:', error)
-      setSubmitError('Network error: ' + errorMsg)
+      console.error('Submission error:', error)
     } finally {
       setIsSubmitting(false)
     }
@@ -99,13 +73,6 @@ export function ContactPageClient() {
 
       {/* Main Content */}
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-12 sm:py-16">
-        {/* Success Message - Show at top */}
-        {submitSuccess && (
-          <div className="p-4 mb-8 bg-green-900/20 border border-green-500/50 rounded text-green-400 text-sm text-center">
-            ✓ Thank you! We received your inquiry and will contact you soon.
-          </div>
-        )}
-        
         {/* Section Title */}
         <h2 className="text-4xl sm:text-5xl md:text-6xl font-light text-slate-100 mb-12 sm:mb-16">
           Submit Fast Inquiry
@@ -167,17 +134,6 @@ export function ContactPageClient() {
                 </div>
               </div>
 
-              {/* Message Textarea */}
-              <div>
-                <label className="text-slate-400 text-xs font-medium mb-2 block">What do you need? (Optional)</label>
-                <textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Tell us more about what you need..."
-                  className="w-full bg-transparent border border-slate-700 text-slate-300 px-4 py-3 text-sm focus:outline-none focus:border-cyan-400 transition-colors resize-none h-24"
-                />
-              </div>
-
               {/* Submit Button */}
               <button
                 type="submit"
@@ -187,10 +143,10 @@ export function ContactPageClient() {
                 {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
 
-              {/* Error Message */}
-              {submitError && (
-                <div className="p-3 mt-4 bg-red-900/20 border border-red-500/50 rounded text-red-400 text-xs text-center">
-                  {submitError}
+              {/* Success Message */}
+              {submitSuccess && (
+                <div className="p-3 bg-green-900/20 border border-green-500/50 rounded text-green-400 text-xs text-center">
+                  Thank you! We received your inquiry and will contact you soon.
                 </div>
               )}
             </form>

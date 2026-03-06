@@ -108,7 +108,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       <section className="w-full min-h-screen sm:h-screen border-b border-slate-700">
         <div className="w-full h-full flex flex-col sm:flex-row items-stretch overflow-hidden relative">
           {/* Left: Title and Content - Full width mobile, 30% on desktop */}
-          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0 section-divider">
+          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0">
             <div className="flex flex-col gap-4 sm:gap-6 max-w-md">
               <div>
                 <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
@@ -159,8 +159,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
         </div>
       </section>
 
-      {/* Mythic Section */}
-      <section className="w-full max-w-full overflow-hidden border-b border-slate-700">
+      {/* Mythic Section - HIDDEN */}
+      <section className="hidden w-full max-w-full overflow-hidden border-b border-slate-700">
         {/* Full-width Banner with Overlay Text */}
         <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
           <Image
@@ -229,7 +229,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       <section className="w-full max-w-full overflow-hidden min-h-screen sm:h-screen border-b border-slate-700">
         <div className="w-full h-full flex flex-col sm:flex-row items-stretch overflow-hidden relative">
           {/* Left: Teaser Info and Buttons - Full width mobile, 30% on desktop */}
-          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0 section-divider">
+          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0">
             <div className="flex flex-col gap-4 sm:gap-6 max-w-md">
               <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-slate-300 leading-tight">
                 Teasers:
@@ -338,7 +338,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       <section className="w-full max-w-full overflow-hidden min-h-screen sm:h-screen border-b border-slate-700">
         <div className="w-full h-full flex flex-col sm:flex-row items-stretch overflow-hidden relative">
           {/* Left: Deliverables Info - Full width mobile, 30% on desktop */}
-          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0 section-divider">
+          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0">
             <div className="flex flex-col gap-4 sm:gap-6 max-w-md">
               <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-slate-300 leading-tight">
                 Deliverables

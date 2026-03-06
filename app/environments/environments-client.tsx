@@ -134,7 +134,7 @@ export function EnvironmentsClient({ initialContent }: EnvironmentsClientProps) 
           {filteredContent.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredContent.map((item) => (
-                <Link key={item.id} href={`/photo/${item.id}`}>
+                <Link key={item.id} href={`/environments/${item.id}`}>
                   <Card className="group overflow-hidden bg-slate-800/40 border-slate-700 hover:border-emerald-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/20 cursor-pointer h-full">
                     <div className="relative h-64 overflow-hidden">
                       <Image

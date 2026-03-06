@@ -29,40 +29,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('[v0] Sending email via Resend to:', 'info@n3uralia360.art')
+    console.log('[v0] Sending confirmation email to customer:', email)
     console.log('[v0] Resend instance created:', !!resend)
     
-    // Send email to company
-    const companyResult = await resend.emails.send({
-      from: 'travis@nuanu.com',
-      to: 'info@n3uralia360.art',
-      subject: 'New Lead Inquiry from N3uralia360',
-      html: `
-        <h2 style="color: #06b6d4;">🌟 New Lead Inquiry</h2>
-        <p><strong>Customer Email:</strong> ${email}</p>
-        <p><strong>Interests:</strong></p>
-        <p>${interests}</p>
-        ${message ? `<p><strong>Message:</strong></p><p>${message.replace(/\n/g, '<br>')}</p>` : ''}
-        <p><strong>Submitted at:</strong> ${new Date().toISOString()}</p>
-      `,
-    })
-
-    console.log('[v0] Company email response:', companyResult)
-
-    if (companyResult.error) {
-      console.error('[v0] Company email error:', companyResult.error)
-      const errorMessage = typeof companyResult.error === 'string' 
-        ? companyResult.error 
-        : (companyResult.error as any).message || 'Failed to send email'
-      return NextResponse.json(
-        { error: errorMessage },
-        { status: 500 }
-      )
-    }
-
-    // Send confirmation email to customer
-    const customerResult = await resend.emails.send({
-      from: 'travis@nuanu.com',
+    // Send confirmation email to customer with copy of their submission
+    const result = await resend.emails.send({
+      from: 'N3uralia360 <info@n3uralia360.art>',
       to: email,
       replyTo: 'info@n3uralia360.art',
       subject: 'We Received Your Inquiry - N3uralia360',
@@ -92,18 +64,22 @@ export async function POST(request: NextRequest) {
       `,
     })
 
-    console.log('[v0] Customer email response:', customerResult)
+    console.log('[v0] Email response:', result)
 
-    if (customerResult.error) {
-      console.error('[v0] Customer email error:', customerResult.error)
-      const errorMessage = typeof customerResult.error === 'string' 
-        ? customerResult.error 
-        : (customerResult.error as any).message || 'Failed to send confirmation email'
-      console.warn('[v0] Customer email failed but company email sent, continuing...')
+    if (result.error) {
+      console.error('[v0] Email error:', result.error)
+      const errorMessage = typeof result.error === 'string' 
+        ? result.error 
+        : (result.error as any).message || 'Failed to send email'
+      console.error('[v0] Error message:', errorMessage)
+      return NextResponse.json(
+        { error: errorMessage },
+        { status: 500 }
+      )
     }
 
-    console.log('[v0] Emails sent successfully')
-    return NextResponse.json({ success: true, companyEmailId: companyResult.data?.id, customerEmailId: customerResult.data?.id })
+    console.log('[v0] Email sent successfully, ID:', result.data?.id)
+    return NextResponse.json({ success: true, id: result.data?.id })
   } catch (error) {
     console.error('[v0] Contact form error:', error)
     const errorMessage = error instanceof Error 
@@ -111,7 +87,7 @@ export async function POST(request: NextRequest) {
       : typeof error === 'string'
       ? error
       : 'An unexpected error occurred'
-    console.error('[v0] Extracted error message:', errorMessage)
+    console.error('[v0] Error message:', errorMessage)
     return NextResponse.json(
       { error: errorMessage },
       { status: 500 }

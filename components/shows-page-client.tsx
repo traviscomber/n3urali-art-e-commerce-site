@@ -106,12 +106,12 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
     <div className="w-full max-w-full overflow-hidden bg-black">
       {/* Hero Section - Banner Height with Overlay Text */}
       <section className="w-full h-64 sm:h-80 md:h-96 lg:h-[28rem] border-b border-slate-700 relative overflow-hidden">
-        {/* Background Image */}
+        {/* Background Image - Fixed */}
         <Image
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_0000000084b4720eab101516c1d517ef%20%281%29-nDHLlhz2hCO4eWQ8VBdlYq2w2Drwka.png"
           alt="Immersive dome experience with cosmic visualization"
           fill
-          className="object-cover"
+          className="object-cover fixed"
           priority
         />
         
@@ -119,7 +119,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
 
         {/* Content Overlay - Text Inside Banner */}
-        <div className="absolute inset-0 w-full h-full flex flex-col justify-start sm:justify-center py-6 sm:py-8 px-4 sm:px-8 lg:px-12">
+        <div className="absolute inset-0 w-full h-full flex flex-col justify-start sm:justify-center py-6 sm:py-8 px-6 sm:px-16 md:px-24 lg:px-32">
           <div className="flex flex-col gap-4 sm:gap-6 max-w-2xl">
             <div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-slate-100 leading-tight">

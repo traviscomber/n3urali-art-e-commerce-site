@@ -58,9 +58,10 @@ export function ContactPageClient() {
       if (response.ok) {
         console.log('[v0] Email sent successfully')
         setSubmitSuccess(true)
+        setSubmitError('')
         setEmail('')
         setSelectedOptions([])
-        setTimeout(() => setSubmitSuccess(false), 3000)
+        setTimeout(() => setSubmitSuccess(false), 5000)
       } else {
         const errorMsg = responseData.error || 'Failed to send email'
         console.error('[v0] Submission failed:', errorMsg)
@@ -95,6 +96,13 @@ export function ContactPageClient() {
 
       {/* Main Content */}
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-12 sm:py-16">
+        {/* Success Message - Show at top */}
+        {submitSuccess && (
+          <div className="p-4 mb-8 bg-green-900/20 border border-green-500/50 rounded text-green-400 text-sm text-center">
+            ✓ Thank you! We received your inquiry and will contact you soon.
+          </div>
+        )}
+        
         {/* Section Title */}
         <h2 className="text-4xl sm:text-5xl md:text-6xl font-light text-slate-100 mb-12 sm:mb-16">
           Submit Fast Inquiry
@@ -167,15 +175,8 @@ export function ContactPageClient() {
 
               {/* Error Message */}
               {submitError && (
-                <div className="p-3 bg-red-900/20 border border-red-500/50 rounded text-red-400 text-xs text-center">
+                <div className="p-3 mt-4 bg-red-900/20 border border-red-500/50 rounded text-red-400 text-xs text-center">
                   {submitError}
-                </div>
-              )}
-
-              {/* Success Message */}
-              {submitSuccess && (
-                <div className="p-3 bg-green-900/20 border border-green-500/50 rounded text-green-400 text-xs text-center">
-                  Thank you! We received your inquiry and will contact you soon.
                 </div>
               )}
             </form>

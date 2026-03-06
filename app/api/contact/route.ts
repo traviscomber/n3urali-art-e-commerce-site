@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     console.log('[v0] Resend instance created:', !!resend)
     
     const result = await resend.emails.send({
-      from: 'info@n3uralia360.art',
+      from: 'N3uralia360 <info@n3uralia360.art>',
       to: 'info@n3uralia360.art',
       replyTo: 'info@n3uralia360.art',
       subject: 'New Contact Form Submission from N3uralia360',

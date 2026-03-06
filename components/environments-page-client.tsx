@@ -575,7 +575,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                 {mythicImages.slice(0, 5).map((url, idx) => (
-                  <div key={idx} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                  <Link key={idx} href={`/environments/mythic-${idx}`} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                     <Image
                       src={url}
                       alt={mythicLabels[idx]}
@@ -585,7 +585,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                     <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
                       <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">{mythicLabels[idx]}</p>
                     </div>
-                  </div>
+                  </Link>
                 ))}
 
                 <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1">
@@ -637,7 +637,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                 {artImages.slice(0, 5).map((url, idx) => (
-                  <div key={idx} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                  <Link key={idx} href={`/environments/art-${idx}`} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                     <Image
                       src={url}
                       alt={artLabels[idx]}
@@ -647,7 +647,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                     <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
                       <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">{artLabels[idx]}</p>
                     </div>
-                  </div>
+                  </Link>
                 ))}
 
                 <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1">

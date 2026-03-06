@@ -29,25 +29,37 @@ export function ContactPageClient() {
     if (!email || selectedOptions.length === 0) return
 
     setIsSubmitting(true)
+    console.log('[v0] Form submission started:', { email, selectedOptions })
+    
     try {
       // Send to email service
+      const payload = {
+        email,
+        interests: selectedOptions.join(', '),
+      }
+      console.log('[v0] Sending payload:', payload)
+      
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          interests: selectedOptions.join(', '),
-        }),
+        body: JSON.stringify(payload),
       })
 
+      console.log('[v0] Response status:', response.status)
+      const responseData = await response.json()
+      console.log('[v0] Response data:', responseData)
+
       if (response.ok) {
+        console.log('[v0] Email sent successfully')
         setSubmitSuccess(true)
         setEmail('')
         setSelectedOptions([])
         setTimeout(() => setSubmitSuccess(false), 3000)
+      } else {
+        console.error('[v0] Submission failed:', responseData.error)
       }
     } catch (error) {
-      console.error('Submission error:', error)
+      console.error('[v0] Submission error:', error)
     } finally {
       setIsSubmitting(false)
     }

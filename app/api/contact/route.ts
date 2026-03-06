@@ -4,16 +4,25 @@ import { Resend } from 'resend'
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: NextRequest) {
+  console.log('[v0] API route hit: /api/contact')
+  console.log('[v0] RESEND_API_KEY exists:', !!process.env.RESEND_API_KEY)
+  
   try {
-    const { email, interests } = await request.json()
+    const body = await request.json()
+    console.log('[v0] Request body received:', body)
+    
+    const { email, interests } = body
 
     if (!email || !interests) {
+      console.log('[v0] Missing fields - email:', email, 'interests:', interests)
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       )
     }
 
+    console.log('[v0] Sending email via Resend to:', 'info@n3uralia360.art')
+    
     const result = await resend.emails.send({
       from: 'N3uralia360 <onboarding@resend.dev>',
       to: 'info@n3uralia360.art',
@@ -27,19 +36,22 @@ export async function POST(request: NextRequest) {
       `,
     })
 
+    console.log('[v0] Resend response:', result)
+
     if (result.error) {
       console.error('[v0] Resend error:', result.error)
       return NextResponse.json(
-        { error: 'Failed to send email' },
+        { error: 'Failed to send email', details: result.error },
         { status: 500 }
       )
     }
 
+    console.log('[v0] Email sent successfully, ID:', result.data?.id)
     return NextResponse.json({ success: true, id: result.data?.id })
   } catch (error) {
     console.error('[v0] Contact form error:', error)
     return NextResponse.json(
-      { error: 'Failed to send email' },
+      { error: 'Failed to send email', details: String(error) },
       { status: 500 }
     )
   }

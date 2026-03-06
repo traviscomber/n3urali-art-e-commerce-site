@@ -42,10 +42,10 @@ export function EnvironmentsSection() {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 pt-2">
-              <Link href="/environments" className="px-4 sm:px-6 py-2 sm:py-2.5 border border-green-500/50 text-green-400 hover:border-green-500 hover:bg-green-500/10 transition-all text-xs sm:text-sm font-light text-center sm:text-left">
+              <Link href="/environments#nature" className="px-4 sm:px-6 py-2 sm:py-2.5 border border-green-500/50 text-green-400 hover:border-green-500 hover:bg-green-500/10 transition-all text-xs sm:text-sm font-light text-center sm:text-left">
                 FREE Demo
               </Link>
-              <Link href="/environments" className="px-4 sm:px-6 py-2 sm:py-2.5 border border-slate-600/50 text-slate-400 hover:border-slate-500 hover:text-slate-300 transition-all text-xs sm:text-sm font-light text-center sm:text-left">
+              <Link href="/environments#nature" className="px-4 sm:px-6 py-2 sm:py-2.5 border border-slate-600/50 text-slate-400 hover:border-slate-500 hover:text-slate-300 transition-all text-xs sm:text-sm font-light text-center sm:text-left">
                 View Catalogue
               </Link>
             </div>

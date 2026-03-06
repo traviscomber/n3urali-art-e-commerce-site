@@ -92,11 +92,14 @@ export async function POST(request: NextRequest) {
 
               <!-- Contact Info -->
               <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
-                <p style="color: #64748b; margin: 0 0 8px 0; font-size: 14px; line-height: 1.6;">
-                  <strong>Questions or want to reach out?</strong> Reply to this email or contact us directly:
+                <p style="color: #64748b; margin: 0 0 12px 0; font-size: 14px; line-height: 1.6;">
+                  <strong>Questions or want to reach out?</strong>
                 </p>
                 <p style="color: #0369a1; margin: 8px 0 0 0; font-size: 15px;">
                   <strong style="color: #1e293b;">Email:</strong> <a href="mailto:info@n3uralia360.art" style="color: #0369a1; text-decoration: none;">info@n3uralia360.art</a>
+                </p>
+                <p style="color: #0369a1; margin: 8px 0 0 0; font-size: 15px;">
+                  <strong style="color: #1e293b;">WhatsApp:</strong> <a href="https://wa.me/6282340137013" style="color: #0369a1; text-decoration: none;">+62 823 4013 7013</a>
                 </p>
               </div>
             </div>

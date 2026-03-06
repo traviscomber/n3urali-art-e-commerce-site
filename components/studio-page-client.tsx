@@ -40,7 +40,7 @@ export function StudioPageClient() {
   }
 
   return (
-    <div className="w-full bg-black">
+    <div className="w-full max-w-full overflow-hidden bg-black">
       {/* Video Player Section - Full Width (Position #1) */}
       <section className="w-full h-screen flex items-center justify-center bg-black relative overflow-hidden border-b border-slate-700">
         <video
@@ -58,41 +58,41 @@ export function StudioPageClient() {
       </section>
 
       {/* Hero Section - Studio Title + Content + Image */}
-      <section className="w-full h-screen border-b border-slate-700">
-        <div className="w-full h-full flex items-stretch overflow-hidden relative">
-          {/* Left: Title and Content - 30% width with disconnected dividing line */}
-          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 section-divider">
-            <div className="flex flex-col gap-6 max-w-md">
-              <h1 className="text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
+      <section className="w-full min-h-screen sm:h-screen border-b border-slate-700">
+        <div className="w-full h-full flex flex-col sm:flex-row items-stretch overflow-hidden relative">
+          {/* Left: Title and Content - Full width mobile, 30% on desktop */}
+          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0 section-divider">
+            <div className="flex flex-col gap-4 sm:gap-6 max-w-md">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 Studio
               </h1>
               
-              <div className="space-y-5">
-                <p className="text-slate-400 text-base leading-relaxed">
+              <div className="space-y-3 sm:space-y-5">
+                <p className="text-slate-400 text-xs sm:text-sm md:text-base leading-relaxed">
                   N3uralia360 is a content creation studio combining advanced proprietary <a href="#" className="text-cyan-400 hover:text-cyan-300 underline">AI tools</a> with human art direction and real production.
                 </p>
 
                 {/* We create section */}
-                <div className="space-y-3 pt-2">
+                <div className="space-y-2 sm:space-y-3 pt-2">
                   <p className="text-slate-400 text-xs font-medium uppercase tracking-widest opacity-60">We create:</p>
-                  <ul className="space-y-1.5">
-                    <li className="flex gap-3 items-start text-slate-300 text-sm">
+                  <ul className="space-y-1 sm:space-y-1.5">
+                    <li className="flex gap-2 sm:gap-3 items-start text-slate-300 text-xs sm:text-sm">
                       <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                       <span>Full-dome cinematic stories</span>
                     </li>
-                    <li className="flex gap-3 items-start text-slate-300 text-sm">
+                    <li className="flex gap-2 sm:gap-3 items-start text-slate-300 text-xs sm:text-sm">
                       <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                       <span>Seamless dome environments & loops</span>
                     </li>
-                    <li className="flex gap-3 items-start text-slate-300 text-sm">
+                    <li className="flex gap-2 sm:gap-3 items-start text-slate-300 text-xs sm:text-sm">
                       <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                       <span>VR-ready immersive worlds</span>
                     </li>
-                    <li className="flex gap-3 items-start text-slate-300 text-sm">
+                    <li className="flex gap-2 sm:gap-3 items-start text-slate-300 text-xs sm:text-sm">
                       <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                       <span>Educational & cultural series</span>
                     </li>
-                    <li className="flex gap-3 items-start text-slate-300 text-sm">
+                    <li className="flex gap-2 sm:gap-3 items-start text-slate-300 text-xs sm:text-sm">
                       <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
                       <span>Custom immersive productions</span>
                     </li>
@@ -102,11 +102,11 @@ export function StudioPageClient() {
             </div>
           </div>
 
-          {/* Right: Studio Image - 70% with flex grow to fill remaining space */}
-          <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-8">
-            <div className="relative w-4/5 h-4/5">
+          {/* Right: Studio Image - Hidden on mobile, 70% on desktop */}
+          <div className="hidden sm:flex sm:flex-1 relative overflow-hidden items-center justify-center px-4 sm:px-8">
+            <div className="relative w-4/5 h-4/5 rounded-lg overflow-hidden">
               <Image
-                src="/images/studio-hero.jpg"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ShowhButton-5zWpjE8wAgaCHbB7ol0bEI2uzXmY8t.png"
                 alt="N3uralia360 studio dome projection setup with immersive content"
                 fill
                 className="object-contain"
@@ -118,37 +118,37 @@ export function StudioPageClient() {
       </section>
 
       {/* Team Section */}
-      <section className="w-full h-screen border-b border-slate-700">
-        <div className="w-full h-full flex items-stretch overflow-hidden relative">
-          {/* Left: Title and Content - 30% width with disconnected dividing line */}
-          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 section-divider">
-            <div className="flex flex-col gap-8 max-w-md">
-              <h2 className="text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
+      <section className="w-full min-h-screen sm:h-screen border-b border-slate-700">
+        <div className="w-full h-full flex flex-col sm:flex-row items-stretch overflow-hidden relative">
+          {/* Left: Title and Content - Full width mobile, 30% on desktop */}
+          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0 section-divider">
+            <div className="flex flex-col gap-4 sm:gap-8 max-w-md">
+              <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 Team
               </h2>
               
-              <p className="text-slate-400 text-base leading-relaxed">
+              <p className="text-slate-400 text-xs sm:text-sm md:text-base leading-relaxed">
                 N3uralia360 is an AI + human studio. We build immersive content through code, curation, and cinematic motion design.
               </p>
 
               {/* Action Buttons */}
-              <div className="flex gap-4 pt-4">
-                <button className="px-6 py-2 border border-cyan-400 text-cyan-400 text-sm font-medium hover:bg-cyan-400/10 transition-colors">
+              <div className="flex gap-2 sm:gap-4 pt-4">
+                <button className="px-3 sm:px-6 py-2 border border-cyan-400 text-cyan-400 text-xs sm:text-sm font-medium hover:bg-cyan-400/10 transition-colors">
                   Our Tools
                 </button>
-                <button className="px-6 py-2 border border-cyan-400 text-cyan-400 text-sm font-medium hover:bg-cyan-400/10 transition-colors">
+                <button className="px-3 sm:px-6 py-2 border border-cyan-400 text-cyan-400 text-xs sm:text-sm font-medium hover:bg-cyan-400/10 transition-colors">
                   WhatsApp
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Right: Team Members - 70% width */}
-          <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-12">
-            <div className="flex gap-12 justify-center items-end w-full">
+          {/* Right: Team Members - Hidden on mobile, 70% on desktop */}
+          <div className="hidden sm:flex sm:flex-1 relative overflow-hidden items-center justify-center px-4 sm:px-8">
+            <div className="flex flex-col sm:flex-row gap-8 sm:gap-6 lg:gap-12 justify-center items-end w-full">
               {/* Team Member 1 */}
-              <div className="flex flex-col gap-4 items-center text-center">
-                <div className="relative w-48 h-48 rounded-full overflow-hidden border border-slate-700">
+              <div className="flex flex-col gap-3 sm:gap-4 items-center text-center">
+                <div className="relative w-40 h-40 sm:w-36 sm:h-36 lg:w-48 lg:h-48 rounded-full overflow-hidden border border-slate-700 flex-shrink-0">
                   <Image
                     src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/T31-icn8zhQpqszgBmYVNR57HNzAmikXcO.png"
                     alt="Juan Vial - AI Development"
@@ -156,17 +156,17 @@ export function StudioPageClient() {
                     className="object-cover"
                   />
                 </div>
-                <div className="flex flex-col gap-3">
-                  <p className="text-slate-400 text-lg font-light">Juan Vial</p>
-                  <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
+                <div className="flex flex-col gap-2 sm:gap-3">
+                  <p className="text-slate-400 text-base sm:text-lg font-light">Juan Vial</p>
+                  <p className="text-slate-500 text-xs sm:text-sm leading-relaxed max-w-xs">
                     Leads AI development, generative systems, and immersive production architecture.
                   </p>
                 </div>
               </div>
 
               {/* Team Member 2 */}
-              <div className="flex flex-col gap-4 items-center text-center">
-                <div className="relative w-48 h-48 rounded-full overflow-hidden border border-slate-700">
+              <div className="flex flex-col gap-3 sm:gap-4 items-center text-center">
+                <div className="relative w-40 h-40 sm:w-36 sm:h-36 lg:w-48 lg:h-48 rounded-full overflow-hidden border border-slate-700 flex-shrink-0">
                   <Image
                     src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/I-wc9y6bsZ9YaB24VxUIKbDCbvpJnlJe.png"
                     alt="Irina Lebedeva - Visual Identity"
@@ -174,9 +174,9 @@ export function StudioPageClient() {
                     className="object-cover"
                   />
                 </div>
-                <div className="flex flex-col gap-3">
-                  <p className="text-slate-400 text-lg font-light">Irina Lebedeva</p>
-                  <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
+                <div className="flex flex-col gap-2 sm:gap-3">
+                  <p className="text-slate-400 text-base sm:text-lg font-light">Irina Lebedeva</p>
+                  <p className="text-slate-500 text-xs sm:text-sm leading-relaxed max-w-xs">
                     Shapes visual identity, and curates each world into a cohesive immersive experience.
                   </p>
                 </div>
@@ -187,23 +187,23 @@ export function StudioPageClient() {
       </section>
 
       {/* Life/Production Section */}
-      <section className="w-full h-screen border-b border-slate-700">
-        <div className="w-full h-full flex items-stretch overflow-hidden relative">
-          {/* Left: Title - 30% width with disconnected dividing line */}
-          <div className="w-full lg:w-[30%] flex flex-col justify-center py-12 px-8 lg:px-12 flex-shrink-0 section-divider">
-            <div className="flex flex-col gap-6 max-w-md">
-              <h2 className="text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
+      <section className="w-full min-h-screen sm:h-screen border-b border-slate-700">
+        <div className="w-full h-full flex flex-col sm:flex-row items-stretch overflow-hidden relative">
+          {/* Left: Title - Full width mobile, 30% on desktop */}
+          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0 section-divider">
+            <div className="flex flex-col gap-4 sm:gap-6 max-w-md">
+              <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 Life Gallery
               </h2>
-              <p className="text-slate-400 text-base">
+              <p className="text-slate-400 text-xs sm:text-sm md:text-base">
                 Behind the scenes and our content living among physical reality.
               </p>
             </div>
           </div>
 
-          {/* Right: Gallery Carousel - 70% width */}
-          <div className="hidden lg:flex lg:flex-1 relative overflow-hidden items-center justify-center px-12">
-            <div className="relative w-full max-w-2xl flex flex-col gap-6">
+          {/* Right: Gallery Carousel - Hidden on mobile, 70% on desktop */}
+          <div className="hidden sm:flex sm:flex-1 relative overflow-hidden items-center justify-center px-4 sm:px-8">
+            <div className="relative w-full max-w-2xl flex flex-col gap-4 sm:gap-6">
               <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-900 border border-slate-700">
                 <Image
                   src={galleryItems[galleryIndex].image}
@@ -214,24 +214,24 @@ export function StudioPageClient() {
               </div>
               
               {/* Title below image */}
-              <p className="text-4xl md:text-5xl font-light text-white text-center">
+              <p className="text-3xl sm:text-4xl lg:text-5xl font-light text-white text-center">
                 {galleryItems[galleryIndex].title}
               </p>
 
               {/* Navigation Arrows */}
               <button
                 onClick={handlePrevGallery}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-20 text-slate-400 hover:text-cyan-400 transition-colors"
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 sm:-translate-x-20 text-slate-400 hover:text-cyan-400 transition-colors"
                 aria-label="Previous gallery item"
               >
-                <ChevronLeft size={40} />
+                <ChevronLeft size={32} className="sm:w-10 sm:h-10" />
               </button>
               <button
                 onClick={handleNextGallery}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-20 text-slate-400 hover:text-cyan-400 transition-colors"
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 sm:translate-x-20 text-slate-400 hover:text-cyan-400 transition-colors"
                 aria-label="Next gallery item"
               >
-                <ChevronRight size={40} />
+                <ChevronRight size={32} className="sm:w-10 sm:h-10" />
               </button>
             </div>
           </div>

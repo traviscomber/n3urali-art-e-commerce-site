@@ -52,7 +52,7 @@ const nextConfig = {
       type: 'filesystem',
       cacheDirectory: '.next/cache',
       buildDependencies: {
-        config: [__filename],
+        config: ['next.config.mjs'],
       },
       version: 'v1',
       managedPaths: isServer ? ['node_modules'] : ['node_modules'],

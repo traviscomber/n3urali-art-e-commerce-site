@@ -1,17 +1,12 @@
 -- Add Ice & Snow Category Images
--- These are the 5 stunning panoramic ice and snow environments to be restored
+-- These are the 5 stunning panoramic ice and snow environments
 
--- First, get the Ice & Snow category ID (or create if it doesn't exist)
+-- First, create the Ice & Snow category if it doesn't exist
 INSERT INTO categories (name, description, created_at)
 VALUES ('Ice & Snow', 'Ultra high-resolution 360° panoramic imagery of ice formations, glaciers, aurora borealis, and snow landscapes', NOW())
-ON CONFLICT DO NOTHING;
+ON CONFLICT (name) DO NOTHING;
 
--- Get the category ID for insertion
-WITH ice_snow_category AS (
-  SELECT id FROM categories WHERE name = 'Ice & Snow' LIMIT 1
-)
-
--- Insert the 5 new ice and snow images
+-- Insert the 5 new ice and snow images using simple INSERT SELECT
 INSERT INTO images (
   id, title, description, category_id, file_path, original_url, 
   thumbnail_small_url, thumbnail_medium_url, thumbnail_large_url,
@@ -21,8 +16,8 @@ SELECT
   gen_random_uuid(),
   title,
   description,
-  (SELECT id FROM ice_snow_category),
-  file_path,
+  (SELECT id FROM categories WHERE name = 'Ice & Snow'),
+  original_url,
   original_url,
   original_url,
   original_url,

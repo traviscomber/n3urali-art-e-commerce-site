@@ -5,6 +5,7 @@ import Link from 'next/link'
 
 export function ContactPageClient() {
   const [email, setEmail] = useState('')
+  const [message, setMessage] = useState('')
   const [selectedOptions, setSelectedOptions] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
@@ -41,6 +42,7 @@ export function ContactPageClient() {
     try {
       const payload = {
         email,
+        message,
         interests: selectedOptions.join(', '),
       }
       console.log('[v0] Sending payload:', payload)
@@ -60,6 +62,7 @@ export function ContactPageClient() {
         setSubmitSuccess(true)
         setSubmitError('')
         setEmail('')
+        setMessage('')
         setSelectedOptions([])
         setTimeout(() => setSubmitSuccess(false), 5000)
       } else {
@@ -162,6 +165,17 @@ export function ContactPageClient() {
                     </label>
                   ))}
                 </div>
+              </div>
+
+              {/* Message Textarea */}
+              <div>
+                <label className="text-slate-400 text-xs font-medium mb-2 block">What do you need? (Optional)</label>
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Tell us more about what you need..."
+                  className="w-full bg-transparent border border-slate-700 text-slate-300 px-4 py-3 text-sm focus:outline-none focus:border-cyan-400 transition-colors resize-none h-24"
+                />
               </div>
 
               {/* Submit Button */}

@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log('[v0] Request body received:', body)
     
-    const { email, interests } = body
+    const { email, interests, message } = body
 
     if (!email || !interests) {
       console.log('[v0] Missing fields - email:', email, 'interests:', interests)
@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
         <p><strong>Email:</strong> ${email}</p>
         <p><strong>Interests:</strong></p>
         <p>${interests}</p>
+        ${message ? `<p><strong>Message:</strong></p><p>${message.replace(/\n/g, '<br>')}</p>` : ''}
         <p><strong>Submitted at:</strong> ${new Date().toISOString()}</p>
       `,
     })

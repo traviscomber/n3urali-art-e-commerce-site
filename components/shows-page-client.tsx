@@ -301,6 +301,21 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                     <p className="text-white text-xs font-medium text-center px-2">{teasers[(teaserIndex + 1) % teasers.length]?.title}</p>
                   </div>
                 </button>
+
+                {/* Third Teaser Video */}
+                <button
+                  onClick={() => handleTeaserClick((teaserIndex + 2) % teasers.length)}
+                  className={`relative w-32 h-32 rounded-lg overflow-hidden border transition-all border-slate-700 hover:border-cyan-400`}
+                >
+                  <video
+                    src={teasers[(teaserIndex + 2) % teasers.length]?.video}
+                    className="w-full h-full object-cover"
+                    preload="metadata"
+                  />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                    <p className="text-white text-xs font-medium text-center px-2">{teasers[(teaserIndex + 2) % teasers.length]?.title}</p>
+                  </div>
+                </button>
               </div>
 
               {/* Down Arrow */}

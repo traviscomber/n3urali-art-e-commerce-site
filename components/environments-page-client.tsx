@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ChevronRight, ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { natureCategoryImages } from '@/lib/constants/nature-images'
 
 interface Collection {
@@ -221,9 +222,9 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             {/* Image Grid - Responsive */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
               {natureCategoryImages[selectedNatureCategory]?.slice(0, 5).map((image, idx) => (
-                <button
+                <Link
                   key={idx}
-                  onClick={() => console.log('Image clicked:', image.title)}
+                  href={`/environments/${image.id || `${selectedNatureCategory}-${idx}`}`}
                   className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer text-left"
                 >
                   <Image
@@ -235,7 +236,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                   <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
                     <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">{image.title}</p>
                   </div>
-                </button>
+                </Link>
               ))}
 
               {/* Load More - spans full width on mobile */}
@@ -253,7 +254,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           // Showcase Grid - Responsive
           <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-              <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+              <Link href="/environments/nature-showcase-1" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                 <Image
                   src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png"
                   alt="Chilled trees forest walking"
@@ -263,9 +264,9 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
                   <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Chilled trees forest walking</p>
                 </div>
-              </div>
+              </Link>
 
-              <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+              <Link href="/environments/nature-showcase-2" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                 <Image
                   src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png"
                   alt="Tropical paradise bay"
@@ -275,7 +276,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
                   <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Tropical paradise bay</p>
                 </div>
-              </div>
+              </Link>
 
               <button onClick={() => setSelectedNatureCategory('forest')} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer">
                 <Image
@@ -289,7 +290,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 </div>
               </button>
 
-              <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+              <Link href="/environments/nature-showcase-4" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                 <Image
                   src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png"
                   alt="Lava power"
@@ -299,9 +300,9 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
                   <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Lava power</p>
                 </div>
-              </div>
+              </Link>
 
-              <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+              <Link href="/environments/nature-showcase-5" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                 <Image
                   src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png"
                   alt="Dreamy Sponges"
@@ -311,7 +312,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
                   <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Dreamy Sponges</p>
                 </div>
-              </div>
+              </Link>
 
               <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1">
                 <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-xs sm:text-sm">

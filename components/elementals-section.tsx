@@ -20,7 +20,7 @@ const elementals: ElementalCard[] = [
     description: 'Oceans, Volcanoes, Ice & Snow, Underwater Life',
     imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatBackg%20%282%29-aQPuFI2fgsRop1jCuDnxWXhAMBjCVA.png',
     accentColor: 'cyan',
-    link: '/environments?category=nature',
+    link: '/environments#nature',
   },
   {
     title: 'Culture',
@@ -28,7 +28,7 @@ const elementals: ElementalCard[] = [
     description: 'Regions, Traditions, Architecture, Heritage Sites',
     imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultBackg%20%281%29-XbBPuSBSiwRQaM2g09DVzXHzBbTfJF.png',
     accentColor: 'yellow',
-    link: '/environments?category=culture',
+    link: '/environments#culture',
   },
   {
     title: 'Mythic',
@@ -36,7 +36,7 @@ const elementals: ElementalCard[] = [
     description: 'Fantasy, Mythology, Ancient Realms, Cosmic',
     imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythBackg%20%282%29-TyglO2M7f4cLxT7fpr7RoIU1ZHwKtq.png',
     accentColor: 'purple',
-    link: '/environments?category=mythic',
+    link: '/environments#mythic',
   },
   {
     title: 'Art',
@@ -44,7 +44,7 @@ const elementals: ElementalCard[] = [
     description: 'Abstract, Sculptures, Digital Art, Installations',
     imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArtBackg%20%282%29-i2tI6hLUgCcC5qOAEPBzz1g91177C7.png',
     accentColor: 'orange',
-    link: '/environments?category=art',
+    link: '/environments#art',
   },
 ]
 

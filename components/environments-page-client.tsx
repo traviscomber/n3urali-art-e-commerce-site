@@ -142,7 +142,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
       )}
 
       {/* Nature Section - Always visible with banner and nav */}
-      <section className="w-full max-w-full overflow-hidden border-b border-slate-700">
+      <section id="nature" className="w-full max-w-full overflow-hidden border-b border-slate-700">
         {/* Full-width Banner with Overlay Text */}
         <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
           <Image
@@ -327,7 +327,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
       {!selectedNatureCategory && (
         <>
           {/* Culture Section */}
-          <section className="w-full max-w-full overflow-hidden border-b border-slate-700">
+          <section id="culture" className="w-full max-w-full overflow-hidden border-b border-slate-700">
             <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultBackg-eTk9tnAfHGhSUA1ZUSshfm8Ww57D1e.png"
@@ -434,7 +434,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           </section>
 
           {/* Mythic Section */}
-          <section className="w-full max-w-full overflow-hidden border-b border-slate-700">
+          <section id="mythic" className="w-full max-w-full overflow-hidden border-b border-slate-700">
             <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
               <Image
                 src={mythicBannerUrl}
@@ -495,7 +495,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           </section>
 
           {/* Art Section */}
-          <section className="w-full max-w-full overflow-hidden border-b border-slate-700">
+          <section id="art" className="w-full max-w-full overflow-hidden border-b border-slate-700">
             <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
               <Image
                 src={artBannerUrl}

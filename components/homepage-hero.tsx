@@ -9,40 +9,40 @@ interface HomepageHeroProps {
 
 export function HomepageHero({ videoUrl }: HomepageHeroProps) {
   return (
-    <section className="w-full bg-black py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-700/60">
+    <section className="w-full bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-700/60">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-20 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 md:gap-16 lg:gap-20 items-center">
           {/* Left Column: Title, Subtitle, Description */}
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-6 sm:gap-8">
             <div>
-              <h1 className="text-6xl md:text-7xl lg:text-8xl font-light text-blue-300 mb-3 tracking-tight leading-none">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-light text-blue-300 mb-2 sm:mb-3 tracking-tight leading-none">
                 Studio
               </h1>
-              <p className="text-base md:text-lg text-slate-400 font-light tracking-wide">
+              <p className="text-sm sm:text-base md:text-lg text-slate-400 font-light tracking-wide">
                 Built to Perform
               </p>
             </div>
 
-            <div className="space-y-5">
-              <p className="text-sm md:text-base text-slate-400 leading-relaxed font-light">
+            <div className="space-y-3 sm:space-y-5">
+              <p className="text-xs sm:text-sm md:text-base text-slate-400 leading-relaxed font-light">
                 Cinematic dome stories, seamless immersive loops, and VR-ready environments — crafted for dome operators, immersive events, and live performance.
               </p>
-              <p className="text-sm md:text-base text-slate-400 leading-relaxed font-light">
+              <p className="text-xs sm:text-sm md:text-base text-slate-400 leading-relaxed font-light">
                 Projection-ready. Dome-correct. Instantly deployable.
               </p>
             </div>
 
-            <div className="pt-4">
+            <div className="pt-2 sm:pt-4">
               <Link href="/studio">
-                <button className="px-6 py-2.5 text-sm font-light text-slate-100 border border-blue-300/40 hover:border-blue-300 hover:text-blue-300 transition-colors duration-300 rounded">
+                <button className="px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-light text-slate-100 border border-blue-300/40 hover:border-blue-300 hover:text-blue-300 transition-colors duration-300 rounded">
                   Explore Studio
                 </button>
               </Link>
             </div>
           </div>
 
-          {/* Right Column: Video */}
-          <div className="flex justify-center">
+          {/* Right Column: Video - Hidden on mobile */}
+          <div className="hidden md:flex justify-center">
             <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-black shadow-2xl border border-slate-700/60 group">
               {videoUrl ? (
                 <video

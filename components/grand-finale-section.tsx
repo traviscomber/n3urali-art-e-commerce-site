@@ -23,36 +23,36 @@ export function GrandFinaleSection() {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="flex flex-col items-center justify-center min-h-96 text-center gap-8">
-          <div className="space-y-6">
-            <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light text-white tracking-tight leading-none">
-              Ready to Experience<br />the Impossible?
+        <div className="flex flex-col items-center justify-center min-h-64 sm:min-h-80 md:min-h-96 text-center gap-6 sm:gap-8">
+          <div className="space-y-4 sm:space-y-6">
+            <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-light text-white tracking-tight leading-tight sm:leading-none">
+              Ready to Experience<br className="hidden sm:block" />the Impossible?
             </h2>
 
-            <p className="text-base sm:text-lg text-slate-200 font-light max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base md:text-lg text-slate-200 font-light max-w-2xl mx-auto px-2">
               Step into worlds beyond imagination. Dome experiences designed to transcend boundaries and captivate audiences.
             </p>
           </div>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-8">
-            <Link href="/environments">
-              <button className="group relative px-8 py-3.5 rounded border-2 border-cyan-400/50 text-cyan-400 hover:border-cyan-400 hover:bg-cyan-400/10 transition-all duration-300 font-light tracking-wide text-base overflow-hidden">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-6 sm:pt-8 w-full sm:w-auto px-4 sm:px-0">
+            <Link href="/environments" className="w-full sm:w-auto">
+              <button className="group relative w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded border-2 border-cyan-400/50 text-cyan-400 hover:border-cyan-400 hover:bg-cyan-400/10 transition-all duration-300 font-light tracking-wide text-sm sm:text-base overflow-hidden">
                 <span className="relative z-10">Explore All Experiences</span>
                 <div className="absolute inset-0 bg-cyan-400/5 transform scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
               </button>
             </Link>
 
-            <Link href="/studio">
-              <button className="group relative px-8 py-3.5 rounded border-2 border-slate-500/50 text-slate-300 hover:border-slate-400 hover:text-slate-100 transition-all duration-300 font-light tracking-wide text-base overflow-hidden">
+            <Link href="/studio" className="w-full sm:w-auto">
+              <button className="group relative w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded border-2 border-slate-500/50 text-slate-300 hover:border-slate-400 hover:text-slate-100 transition-all duration-300 font-light tracking-wide text-sm sm:text-base overflow-hidden">
                 <span className="relative z-10">Learn About Studio</span>
                 <div className="absolute inset-0 bg-slate-400/5 transform scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
               </button>
             </Link>
           </div>
 
-          {/* Scroll Indicator */}
-          <div className="pt-12">
+          {/* Scroll Indicator - Hidden on mobile */}
+          <div className="pt-8 sm:pt-12 hidden sm:block">
             <div className="w-6 h-10 border-2 border-slate-500 rounded-full flex items-start justify-center p-2 animate-pulse">
               <div className="w-1 h-2 bg-slate-400 rounded-full animate-bounce" />
             </div>

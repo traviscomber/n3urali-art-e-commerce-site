@@ -25,14 +25,14 @@ export function CategoryCardsGrid({ cards }: CategoryCardsGridProps) {
   }
 
   return (
-    <section className="w-full bg-black py-24 px-4 sm:px-6 lg:px-8 border-b border-slate-700/60">
+    <section className="w-full bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-700/60">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 lg:gap-6">
           {cards.map((card) => (
             <Link
               key={card.id}
               href={card.link}
-              className="group relative h-80 rounded-lg overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 shadow-xl border border-slate-700/40 hover:border-slate-600/60"
+              className="group relative h-64 sm:h-72 md:h-80 rounded-lg overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 shadow-xl border border-slate-700/40 hover:border-slate-600/60"
             >
               {/* Background Image */}
               {card.imageUrl && (
@@ -49,11 +49,11 @@ export function CategoryCardsGrid({ cards }: CategoryCardsGridProps) {
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:from-black/70 group-hover:via-black/30 group-hover:to-black/10 transition-all duration-300" />
 
               {/* Text Content */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                <h3 className="text-4xl lg:text-5xl font-light text-white tracking-wider">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 sm:gap-3">
+                <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-white tracking-wider">
                   {card.title}
                 </h3>
-                <p className={`text-xs lg:text-sm font-light tracking-widest uppercase ${accentColorMap[card.accentColor]}`}>
+                <p className={`text-xs sm:text-xs md:text-sm lg:text-sm font-light tracking-widest uppercase ${accentColorMap[card.accentColor]}`}>
                   {card.label}
                 </p>
               </div>

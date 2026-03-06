@@ -5,7 +5,7 @@ import { SECTION_BACKGROUND_IMAGES, ENVIRONMENT_COLLECTIONS } from '@/lib/consta
 
 export function EnvironmentsSection() {
   return (
-    <section className="w-full bg-black py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-700/60 relative overflow-hidden">
+    <section className="w-full bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-700/60 relative overflow-hidden">
       {/* Background Image - Full coverage */}
       <div className="absolute inset-0 opacity-30">
         <Image
@@ -20,32 +20,32 @@ export function EnvironmentsSection() {
       {/* Content overlay */}
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Main Environments Header - Hero Section */}
-        <div className="mb-24 grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+        <div className="mb-16 sm:mb-24 grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 md:gap-16 lg:gap-20 items-center">
           {/* Left Column - Text Content */}
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-6 sm:gap-8">
             <div>
-              <h2 className="text-6xl md:text-7xl lg:text-8xl font-light text-green-400 mb-3 tracking-tight leading-none">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-light text-green-400 mb-2 sm:mb-3 tracking-tight leading-none">
                 Environments
               </h2>
-              <p className="text-base md:text-lg text-slate-400 font-light tracking-wide">
+              <p className="text-sm sm:text-base md:text-lg text-slate-400 font-light tracking-wide">
                 Endless Immersive Backdrops
               </p>
             </div>
 
-            <div className="space-y-5">
-              <p className="text-sm md:text-base text-slate-400 leading-relaxed font-light">
+            <div className="space-y-3 sm:space-y-5">
+              <p className="text-xs sm:text-sm md:text-base text-slate-400 leading-relaxed font-light">
                 Environments are continuous immersive loops crafted using professional motion tuned specifically for dome perception.
               </p>
-              <p className="text-sm md:text-base text-slate-400 leading-relaxed font-light">
+              <p className="text-xs sm:text-sm md:text-base text-slate-400 leading-relaxed font-light">
                 When you need atmosphere and flexibility
               </p>
             </div>
             
-            <div className="flex gap-4 pt-2">
-              <Link href="/environments" className="px-6 py-2.5 border border-green-500/50 text-green-400 hover:border-green-500 hover:bg-green-500/10 transition-all text-sm font-light">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 pt-2">
+              <Link href="/environments" className="px-4 sm:px-6 py-2 sm:py-2.5 border border-green-500/50 text-green-400 hover:border-green-500 hover:bg-green-500/10 transition-all text-xs sm:text-sm font-light text-center sm:text-left">
                 FREE Demo
               </Link>
-              <Link href="/environments" className="px-6 py-2.5 border border-slate-600/50 text-slate-400 hover:border-slate-500 hover:text-slate-300 transition-all text-sm font-light">
+              <Link href="/environments" className="px-4 sm:px-6 py-2 sm:py-2.5 border border-slate-600/50 text-slate-400 hover:border-slate-500 hover:text-slate-300 transition-all text-xs sm:text-sm font-light text-center sm:text-left">
                 View Catalogue
               </Link>
             </div>

@@ -8,6 +8,7 @@ export function ContactPageClient() {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   const options = [
     'I would like to see a demo in my dome',
@@ -26,13 +27,18 @@ export function ContactPageClient() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email || selectedOptions.length === 0) return
+    setSubmitError('')
+    
+    if (!email || selectedOptions.length === 0) {
+      setSubmitError('Please enter an email and select at least one option')
+      console.log('[v0] Validation failed - email:', !!email, 'options:', selectedOptions.length)
+      return
+    }
 
     setIsSubmitting(true)
     console.log('[v0] Form submission started:', { email, selectedOptions })
     
     try {
-      // Send to email service
       const payload = {
         email,
         interests: selectedOptions.join(', '),
@@ -56,10 +62,14 @@ export function ContactPageClient() {
         setSelectedOptions([])
         setTimeout(() => setSubmitSuccess(false), 3000)
       } else {
-        console.error('[v0] Submission failed:', responseData.error)
+        const errorMsg = responseData.error || 'Failed to send email'
+        console.error('[v0] Submission failed:', errorMsg)
+        setSubmitError(errorMsg)
       }
     } catch (error) {
+      const errorMsg = String(error)
       console.error('[v0] Submission error:', error)
+      setSubmitError('Network error: ' + errorMsg)
     } finally {
       setIsSubmitting(false)
     }
@@ -154,6 +164,13 @@ export function ContactPageClient() {
               >
                 {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
+
+              {/* Error Message */}
+              {submitError && (
+                <div className="p-3 bg-red-900/20 border border-red-500/50 rounded text-red-400 text-xs text-center">
+                  {submitError}
+                </div>
+              )}
 
               {/* Success Message */}
               {submitSuccess && (

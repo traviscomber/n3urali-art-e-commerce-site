@@ -7,6 +7,15 @@ export async function POST(request: NextRequest) {
   console.log('[v0] API route hit: /api/contact')
   console.log('[v0] RESEND_API_KEY exists:', !!process.env.RESEND_API_KEY)
   
+  // Check if RESEND_API_KEY is set
+  if (!process.env.RESEND_API_KEY) {
+    console.error('[v0] RESEND_API_KEY not set in environment variables')
+    return NextResponse.json(
+      { error: 'Email service not configured. Please contact the administrator.' },
+      { status: 500 }
+    )
+  }
+  
   try {
     const body = await request.json()
     console.log('[v0] Request body received:', body)
@@ -22,6 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[v0] Sending email via Resend to:', 'info@n3uralia360.art')
+    console.log('[v0] Resend instance created:', !!resend)
     
     const result = await resend.emails.send({
       from: 'N3uralia360 <onboarding@resend.dev>',
@@ -41,7 +51,7 @@ export async function POST(request: NextRequest) {
     if (result.error) {
       console.error('[v0] Resend error:', result.error)
       return NextResponse.json(
-        { error: 'Failed to send email', details: result.error },
+        { error: 'Failed to send email: ' + String(result.error) },
         { status: 500 }
       )
     }
@@ -51,7 +61,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('[v0] Contact form error:', error)
     return NextResponse.json(
-      { error: 'Failed to send email', details: String(error) },
+      { error: 'Failed to send email: ' + String(error) },
       { status: 500 }
     )
   }

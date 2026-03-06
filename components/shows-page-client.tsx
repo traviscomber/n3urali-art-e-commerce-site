@@ -104,8 +104,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
   return (
     <div className="w-full max-w-full overflow-hidden bg-black">
-      {/* Hero Section - Full Width Banner with Overlay Text */}
-      <section className="w-full min-h-screen sm:h-screen border-b border-slate-700 relative overflow-hidden">
+      {/* Hero Section - Banner Height with Overlay Text */}
+      <section className="w-full h-64 sm:h-80 md:h-96 lg:h-[28rem] border-b border-slate-700 relative overflow-hidden">
         {/* Background Image */}
         <Image
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_0000000084b4720eab101516c1d517ef%20%281%29-nDHLlhz2hCO4eWQ8VBdlYq2w2Drwka.png"
@@ -119,33 +119,32 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
 
         {/* Content Overlay - Text Inside Banner */}
-        <div className="absolute inset-0 w-full h-full flex flex-col justify-center px-4 sm:px-8 lg:px-12">
+        <div className="absolute inset-0 w-full h-full flex flex-col justify-start sm:justify-center py-6 sm:py-8 px-4 sm:px-8 lg:px-12">
           <div className="flex flex-col gap-4 sm:gap-6 max-w-2xl">
             <div>
-              <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-slate-100 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-slate-100 leading-tight">
                 Shows
               </h1>
-              <p className="text-slate-200 text-xs sm:text-sm md:text-base font-light mt-2">
+              <p className="text-slate-200 text-xs sm:text-sm md:text-base font-light mt-1">
                 Cinematic Dome Stories
               </p>
             </div>
 
-            <div className="space-y-3 sm:space-y-4">
-              <p className="text-slate-100 text-xs sm:text-sm md:text-base leading-relaxed max-w-xl">
-                {currentShow.description || currentShow.synopsis || 'From mythical realms to sacred atmospheres, immerse in tales of wonder. Experience fully immersive dome content designed for cultural institutions, planetariums, and experiential venues.'}
+            <div className="space-y-2 sm:space-y-3">
+              <p className="text-slate-100 text-xs sm:text-sm leading-relaxed max-w-xl hidden sm:block">
+                {currentShow.description || currentShow.synopsis || 'From mythical realms to sacred atmospheres, immerse in tales of wonder.'}
               </p>
 
-              <div className="space-y-2 sm:space-y-3 pt-2">
+              <div className="space-y-1 sm:space-y-2 pt-1 hidden sm:block">
                 <p className="text-slate-200 text-xs font-medium uppercase tracking-widest opacity-80">Perfect for:</p>
-                <ul className="space-y-1 sm:space-y-1.5">
+                <ul className="space-y-0.5 sm:space-y-1">
                   {[
                     'Family dome nights',
                     'Cultural programming',
                     'Art and experience-focused events',
-                    'Themed event openings',
                   ].map((item, idx) => (
-                    <li key={idx} className="flex gap-2 sm:gap-3 items-start text-slate-100 text-xs sm:text-sm">
-                      <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
+                    <li key={idx} className="flex gap-2 items-start text-slate-100 text-xs">
+                      <span className="text-cyan-400 flex-shrink-0 mt-0.5">•</span>
                       <span>{item}</span>
                     </li>
                   ))}

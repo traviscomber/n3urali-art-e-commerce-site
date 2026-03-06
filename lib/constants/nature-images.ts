@@ -14,11 +14,11 @@ export const natureCategoryImages = {
     { title: 'Cosmic Volcano', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatVolcanoes5-77lwTzAdXa1dmmT65twgKy9nigDeWK.png' },
   ],
   'ice-and-snow': [
-    { title: 'Frozen Peaks', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater2-ccZcog7a7Xvp1dPmhcpf8USyi2CFdY.png' },
-    { title: 'Glacier Dreams', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater3-3EBmdD7j5Z1ynv5nsqOqaHXsm9X9zn.png' },
-    { title: 'Snow Cascade', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater4-EgBszqfBqzfVUvFGQPNqqFQAfIjrg2.png' },
-    { title: 'Crystal Palace', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater5.png-h6C4tFhELpOzMwuGcKeqiyPa2uWQHs.jpeg' },
-    { title: 'Arctic Aurora', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png' },
+    { title: 'Radiant Ice Cave', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatIce3-a3rx2V66twortjCSZ6z3WsYBmFM5gB.png' },
+    { title: 'Aurora Borealis Ice', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatIce5-OcLb45uMBCr7qWkOhxpETVB6GRlilh.png' },
+    { title: 'Glacial Flow', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatIce4-GH6AP8B3KBiUr5yyQGK7x3374Fbiqk.png' },
+    { title: 'Abstract Mountain Ice', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatIce2-I1BxpB6aZ9T5aQLc2yQCtawu3UTA21.png' },
+    { title: 'Arctic Aurora', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatIce1-qb2b0u6bXMvfCKTVfukFtlx2U1U8GK.png' },
   ],
   'forest': [
     { title: 'Ancient Canopy', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png' },

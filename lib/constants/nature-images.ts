@@ -21,10 +21,10 @@ export const natureCategoryImages = {
     { title: 'Arctic Aurora', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatIce1-qb2b0u6bXMvfCKTVfukFtlx2U1U8GK.png' },
   ],
   'forest': [
-    { title: 'Ancient Canopy', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png' },
-    { title: 'Emerald Cathedral', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater2-ccZcog7a7Xvp1dPmhcpf8USyi2CFdY.png' },
-    { title: 'Sunlit Woods', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater3-3EBmdD7j5Z1ynv5nsqOqaHXsm9X9zn.png' },
-    { title: 'Woodland Sanctuary', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater4-EgBszqfBqzfVUvFGQPNqqFQAfIjrg2.png' },
-    { title: 'Deep Forest Glow', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater5.png-h6C4tFhELpOzMwuGcKeqiyPa2uWQHs.jpeg' },
+    { title: 'Fractal Canopy', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatForest5-P8ykkpJ9SyHUf7lMrNQ1LOm8Xv2iLK.png' },
+    { title: 'Skyward Trees', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatForest1-F0TpU6LxfdfvVbddQQ7lPfi9eMdINi.png' },
+    { title: 'Forest Spiral', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatForest2-dFY099cM7OmextlFPPGzc5jIdm593p.png' },
+    { title: 'Luminous Core', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatForest3-S4S0XaZaMQkEJusaSE3bWOZeY3AW6J.png' },
+    { title: 'Galaxy Gateway', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatForest4-tNByaNI3nRcEoY8bQ6kEl47zetVA9u.png' },
   ],
 } as const

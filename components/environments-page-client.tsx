@@ -38,8 +38,8 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
   const natureCategories = [
     { name: 'Oceans', id: 'oceans' },
     { name: 'Volcanoes', id: 'volcanoes' },
-    { name: 'Underwater Life', id: 'underwater-life' },
     { name: 'Ice and Snow', id: 'ice-and-snow' },
+    { name: 'Forest', id: 'forest' },
   ]
 
   const heritageCategories = [
@@ -183,10 +183,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               Volcanoes
             </button>
             <button 
-              onClick={() => setSelectedNatureCategory('underwater-life')}
-              className={`font-light transition-colors text-xs sm:text-sm whitespace-nowrap ${selectedNatureCategory === 'underwater-life' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
+              onClick={() => setSelectedNatureCategory('forest')}
+              className={`font-light transition-colors text-xs sm:text-sm whitespace-nowrap ${selectedNatureCategory === 'forest' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
             >
-              Underwater
+              Forest
             </button>
             <button 
               onClick={() => setSelectedNatureCategory('ice-and-snow')}
@@ -277,15 +277,15 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 </div>
               </div>
 
-              <button onClick={() => setSelectedNatureCategory('underwater-life')} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer">
+              <button onClick={() => setSelectedNatureCategory('forest')} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer">
                 <Image
                   src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat3-LTyR3NMoIATIkcqUzoPaCNqwJ0JscN.png"
-                  alt="Underwater Life"
+                  alt="Forest"
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                  <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Underwater Life</p>
+                  <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Forest</p>
                 </div>
               </button>
 

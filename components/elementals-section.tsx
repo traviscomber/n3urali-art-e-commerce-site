@@ -17,7 +17,7 @@ const elementals: ElementalCard[] = [
   {
     title: 'Nature',
     subtitle: 'Elemental Forces',
-    description: 'Oceans, Volcanoes, Ice & Snow, Underwater Life',
+    description: 'Oceans, Volcanoes, Ice & Snow, Forest',
     imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatBackg%20%282%29-aQPuFI2fgsRop1jCuDnxWXhAMBjCVA.png',
     accentColor: 'cyan',
     link: '/environments#nature',

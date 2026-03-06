@@ -3,13 +3,12 @@
 DELETE FROM images WHERE category_id IN (SELECT id FROM categories WHERE name = 'Ice & Snow');
 DELETE FROM categories WHERE name = 'Ice & Snow';
 
--- Create the Ice & Snow category
-INSERT INTO categories (id, name, description, created_at, updated_at)
+-- Create the Ice & Snow category (categories table only has: id, name, description, created_at)
+INSERT INTO categories (id, name, description, created_at)
 VALUES (
   gen_random_uuid(),
   'Ice & Snow',
   'Ultra high-resolution 360° panoramic imagery of ice formations, glaciers, aurora borealis, and snow landscapes',
-  NOW(),
   NOW()
 );
 

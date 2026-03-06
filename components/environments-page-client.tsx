@@ -3,7 +3,38 @@
 import { useState } from 'react'
 import { ChevronRight, ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
-import { natureCategoryImages } from '@/lib/constants/nature-images'
+
+// Temporary nature images data
+const natureCategoryImages = {
+  oceans: [
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/oceans-1.png', title: 'Deep Blue Oceans' },
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/oceans-2.png', title: 'Coral Reefs' },
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/oceans-3.png', title: 'Ocean Waves' },
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/oceans-4.png', title: 'Blue Horizon' },
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/oceans-5.png', title: 'Ocean Depths' },
+  ],
+  volcanoes: [
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/volcano-1.png', title: 'Erupting Volcano' },
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/volcano-2.png', title: 'Lava Flow' },
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/volcano-3.png', title: 'Volcanic Landscape' },
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/volcano-4.png', title: 'Fire Mountain' },
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/volcano-5.png', title: 'Volcanic Peak' },
+  ],
+  'underwater-life': [
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/underwater-1.png', title: 'Tropical Fish' },
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/underwater-2.png', title: 'Sea Creatures' },
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/underwater-3.png', title: 'Ocean Life' },
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/underwater-4.png', title: 'Submarine World' },
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/underwater-5.png', title: 'Deep Sea' },
+  ],
+  'ice-and-snow': [
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ice-1.png', title: 'Snowy Peaks' },
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ice-2.png', title: 'Frozen Landscape' },
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ice-3.png', title: 'Icy Wonderland' },
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ice-4.png', title: 'Arctic Beauty' },
+    { url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ice-5.png', title: 'Winter Magic' },
+  ],
+}
 
 interface Collection {
   id: string

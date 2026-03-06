@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 
+// Environment sections component
 interface Collection {
   id: string
   title: string

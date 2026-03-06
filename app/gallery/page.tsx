@@ -3,7 +3,7 @@ import GalleryClient from "./gallery-client"
 import { getCategories, getGalleryStats, getImages } from "@/app/actions/admin-actions"
 
 export const dynamic = "force-dynamic"
-export const revalidate = 600 // 10 minutes
+export const revalidate = 0 // Force no caching - always fetch fresh data
 
 export const metadata: Metadata = {
   title: "Browse Premium 360° Assets | Licensed AI Environments for VR, Games & Production",

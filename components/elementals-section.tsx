@@ -57,37 +57,13 @@ const accentColorMap: Record<string, string> = {
 
 export function ElementalsSection() {
   return (
-    <section className="w-full bg-black border-b border-slate-700/60">
-      <div className="space-y-8 p-4 md:p-8">
-        {elementals.map((elemental, index) => (
-          <Link
-            key={elemental.title}
-            href={elemental.link}
-            className="group relative w-full h-80 sm:h-96 md:h-96 lg:h-screen overflow-hidden bg-slate-800 transition-all duration-300 hover:brightness-110 block rounded-lg"
-          >
-            {/* Background Image - Full Banner */}
-            <Image
-              src={elemental.imageUrl}
-              alt={elemental.title}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500 rounded-lg"
-              priority={index === 0}
-            />
-
-            {/* Dark Overlay with gradient */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-transparent group-hover:from-black/80 group-hover:via-black/60 transition-all duration-300 rounded-lg" />
-
-            {/* Content - Left side aligned with logo */}
-            <div className="absolute inset-0 flex flex-col justify-center items-start p-4 sm:p-8 md:p-12 lg:p-16 pl-4 sm:pl-8 md:pl-32 lg:pl-96">
-              <div className="space-y-4 sm:space-y-6 max-w-2xl">
-                <div className="text-left">
-                  <h3 className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-light text-white tracking-tight mb-2 sm:mb-3 leading-none">
-                    {elemental.title}
-                  </h3>
-                  <p className={`text-xs sm:text-sm font-light tracking-widest uppercase text-left ${accentColorMap[elemental.accentColor]?.split(' ')[0]}`}>
-                    {elemental.subtitle}
-                  </p>
-                </div>
+    <section className="w-full max-w-full overflow-hidden bg-black py-12 sm:py-16 md:py-24 lg:py-32 space-y-4 sm:space-y-6 md:space-y-8 lg:space-y-12">
+      <div className="space-y-3 sm:space-y-4 px-4 sm:px-6 lg:px-8">
+        <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-light text-white tracking-tight">
+          Elementals
+        </h2>
+        <p className="text-sm sm:text-base text-slate-400 font-light">Immersive loops that set the tone</p>
+      </div>
 
                 <p className="text-xs sm:text-sm md:text-base text-slate-300 font-light leading-relaxed text-left">
                   {elemental.description}

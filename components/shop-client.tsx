@@ -38,7 +38,7 @@ export function ShopClient() {
   return (
     <>
       {/* Hero Section */}
-      <section className="w-full py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-700/60">
+      <section className="w-full max-w-full overflow-hidden py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-700/60">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-light text-white mb-3 sm:mb-4 tracking-tight">
             Shop
@@ -53,7 +53,7 @@ export function ShopClient() {
       </section>
 
       {/* Filters Section */}
-      <section className="w-full py-6 sm:py-8 px-4 sm:px-6 lg:px-8 border-b border-slate-700/60 bg-black/50 sticky top-0 z-40">
+      <section className="w-full max-w-full overflow-hidden py-6 sm:py-8 px-4 sm:px-6 lg:px-8 border-b border-slate-700/60 bg-black/50 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col gap-3 sm:gap-6">
             {/* Category Filter */}
@@ -98,7 +98,7 @@ export function ShopClient() {
       </section>
 
       {/* Products Grid */}
-      <section className="w-full py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
+      <section className="w-full max-w-full overflow-hidden py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {sortedProducts.length > 0 ? (
             <EnvironmentMarketplaceGrid products={sortedProducts} />
@@ -117,7 +117,7 @@ export function ShopClient() {
       </section>
 
       {/* Info Section */}
-      <section className="w-full py-12 sm:py-24 px-4 sm:px-6 lg:px-8 border-t border-slate-700/60">
+      <section className="w-full max-w-full overflow-hidden py-12 sm:py-24 px-4 sm:px-6 lg:px-8 border-t border-slate-700/60">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-12">
             <div className="text-center">
@@ -143,7 +143,7 @@ export function ShopClient() {
       </section>
 
       {/* CTA Section */}
-      <section className="w-full py-12 sm:py-24 px-4 sm:px-6 lg:px-8 border-t border-slate-700/60 bg-slate-900/30">
+      <section className="w-full max-w-full overflow-hidden py-12 sm:py-24 px-4 sm:px-6 lg:px-8 border-t border-slate-700/60 bg-slate-900/30">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-2xl sm:text-3xl md:text-5xl font-light text-white mb-4 sm:mb-6">Need Custom Content?</h2>
           <p className="text-slate-400 text-base sm:text-lg font-light mb-6 sm:mb-8 max-w-2xl mx-auto px-2">

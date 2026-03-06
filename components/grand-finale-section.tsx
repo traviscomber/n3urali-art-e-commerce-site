@@ -7,7 +7,7 @@ const FINALE_IMAGE = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gr
 
 export function GrandFinaleSection() {
   return (
-    <section className="w-full bg-black py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <section className="w-full max-w-full overflow-hidden bg-black py-16 sm:py-24 md:py-32 relative">
       {/* Background Image - Full coverage */}
       <div className="absolute inset-0">
         <Image

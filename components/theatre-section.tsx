@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 export function TheatreSection() {
   return (
-    <section className="w-full bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 border-t border-slate-700/60">
+    <section className="w-full max-w-full overflow-hidden bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 border-t border-slate-700/60">
       <div className="max-w-7xl mx-auto px-0">
         <div className="flex flex-col items-center text-center gap-6 sm:gap-8">
           <div className="space-y-2 sm:space-y-4">

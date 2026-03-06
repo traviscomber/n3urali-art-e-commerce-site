@@ -59,22 +59,20 @@ export function EnvironmentsSection() {
         <div className="h-px bg-slate-700/40 mb-24" />
 
         {/* Environment Collections Container */}
-        <div className="space-y-24">
-          {/* Collection 1: Heritage Environments */}
+        {/* HIDDEN: Heritage Environments, Mythical Universe, and Art Spaces sections */}
+        {/* <div className="space-y-24">
           <EnvironmentCollection
             {...ENVIRONMENT_COLLECTIONS.heritage}
           />
 
-          {/* Collection 2: Mythical Universe */}
           <EnvironmentCollection
             {...ENVIRONMENT_COLLECTIONS.mythical}
           />
 
-          {/* Collection 3: Art Spaces */}
           <EnvironmentCollection
             {...ENVIRONMENT_COLLECTIONS.art}
           />
-        </div>
+        </div> */}
       </div>
     </section>
   )

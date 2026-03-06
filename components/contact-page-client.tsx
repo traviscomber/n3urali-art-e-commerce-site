@@ -5,6 +5,7 @@ import Link from 'next/link'
 
 export function ContactPageClient() {
   const [email, setEmail] = useState('')
+  const [message, setMessage] = useState('')
   const [selectedOptions, setSelectedOptions] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
@@ -36,6 +37,7 @@ export function ContactPageClient() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email,
+          message,
           interests: selectedOptions.join(', '),
         }),
       })
@@ -43,8 +45,9 @@ export function ContactPageClient() {
       if (response.ok) {
         setSubmitSuccess(true)
         setEmail('')
+        setMessage('')
         setSelectedOptions([])
-        setTimeout(() => setSubmitSuccess(false), 3000)
+        setTimeout(() => setSubmitSuccess(false), 4000)
       }
     } catch (error) {
       console.error('Submission error:', error)
@@ -134,6 +137,17 @@ export function ContactPageClient() {
                 </div>
               </div>
 
+              {/* Message Textarea */}
+              <div>
+                <label className="text-slate-400 text-xs font-medium mb-2 block">Tell us what you need (Optional)</label>
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Share any details about your project or requirements..."
+                  className="w-full bg-transparent border border-slate-700 text-slate-300 px-4 py-3 text-sm focus:outline-none focus:border-cyan-400 transition-colors resize-none h-28"
+                />
+              </div>
+
               {/* Submit Button */}
               <button
                 type="submit"
@@ -145,8 +159,9 @@ export function ContactPageClient() {
 
               {/* Success Message */}
               {submitSuccess && (
-                <div className="p-3 bg-green-900/20 border border-green-500/50 rounded text-green-400 text-xs text-center">
-                  Thank you! We received your inquiry and will contact you soon.
+                <div className="p-4 bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 border border-cyan-400/50 rounded text-center animate-in fade-in">
+                  <div className="text-cyan-300 text-sm font-medium mb-1">✨ Message Received!</div>
+                  <p className="text-slate-300 text-xs">We'll get back to you soon. Check your email for updates.</p>
                 </div>
               )}
             </form>

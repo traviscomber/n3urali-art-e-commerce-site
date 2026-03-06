@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import Image from 'next/image'
 
 interface HomepageHeroProps {
@@ -32,9 +33,11 @@ export function HomepageHero({ videoUrl }: HomepageHeroProps) {
             </div>
 
             <div className="pt-4">
-              <button className="px-6 py-2.5 text-sm font-light text-slate-100 border border-blue-300/40 hover:border-blue-300 hover:text-blue-300 transition-colors duration-300 rounded">
-                Explore Studio
-              </button>
+              <Link href="/studio">
+                <button className="px-6 py-2.5 text-sm font-light text-slate-100 border border-blue-300/40 hover:border-blue-300 hover:text-blue-300 transition-colors duration-300 rounded">
+                  Explore Studio
+                </button>
+              </Link>
             </div>
           </div>
 

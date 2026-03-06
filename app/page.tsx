@@ -5,7 +5,9 @@ import { HomepageHero } from "@/components/homepage-hero"
 import { CategoryCardsGrid } from "@/components/category-cards-grid"
 import { ShowsSection } from "@/components/shows-section"
 import { EnvironmentsSection } from "@/components/environments-section"
+import { ElementalsSection } from "@/components/elementals-section"
 import { TheatreSection } from "@/components/theatre-section"
+import { GrandFinaleSection } from "@/components/grand-finale-section"
 
 export const metadata: Metadata = {
   title: "n3uralia360 — Immersive Worlds. Cultural Stories.",
@@ -97,8 +99,14 @@ export default async function HomePage() {
       {/* Environments Section */}
       <EnvironmentsSection />
 
+      {/* Elementals Section - Nature, Culture, Mythic, Art */}
+      <ElementalsSection />
+
       {/* Theatre Section */}
       <TheatreSection />
+
+      {/* Grand Finale Section */}
+      <GrandFinaleSection />
     </main>
   )
 }

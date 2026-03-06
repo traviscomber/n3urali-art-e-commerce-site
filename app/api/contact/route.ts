@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     
     // Send confirmation email to customer with copy of their submission
     const result = await resend.emails.send({
-      from: 'N3uralia360 <travis@nuanu.com>',
+      from: 'N3uralia360 <info@n3uralia360.art>',
       to: email,
       replyTo: 'info@n3uralia360.art',
       subject: 'We Received Your Inquiry - N3uralia360',

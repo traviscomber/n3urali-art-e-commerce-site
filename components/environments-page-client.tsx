@@ -83,7 +83,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
   ]
 
   const artBannerUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArtBackg-MIwtTMvWE0TRmQidtELMbTop8VeRAE.png'
-  
+
   const artImages = [
     'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArt1-m4KYdc6BQcLkasgP33aW3ZFJ2nj3Fx.png',
     'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArt2-NPhNLdPp3q4K28r5Yv4uey9UtpHgAt.png',
@@ -253,73 +253,71 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           // Showcase Grid - Responsive
           <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-              {/* Row 1 */}
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png"
-                alt="Chilled trees forest walking"
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Chilled trees forest walking</p>
+              <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png"
+                  alt="Chilled trees forest walking"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                  <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Chilled trees forest walking</p>
+                </div>
               </div>
-            </div>
 
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png"
-                alt="Tropical paradise bay"
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Tropical paradise bay</p>
+              <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png"
+                  alt="Tropical paradise bay"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                  <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Tropical paradise bay</p>
+                </div>
               </div>
-            </div>
 
-            <button onClick={() => setSelectedNatureCategory('underwater-life')} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat3-LTyR3NMoIATIkcqUzoPaCNqwJ0JscN.png"
-                alt="Underwater Life"
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Underwater Life</p>
-              </div>
-            </button>
-
-            {/* Row 2 */}
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png"
-                alt="Lava power"
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Lava power</p>
-              </div>
-            </div>
-
-            <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png"
-                alt="Dreamy Sponges"
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Dreamy Sponges</p>
-              </div>
-            </div>
-
-            {/* Load More - spans full width on mobile */}
-            <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1">
-              <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-xs sm:text-sm">
-                Load More
+              <button onClick={() => setSelectedNatureCategory('underwater-life')} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat3-LTyR3NMoIATIkcqUzoPaCNqwJ0JscN.png"
+                  alt="Underwater Life"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                  <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Underwater Life</p>
+                </div>
               </button>
+
+              <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png"
+                  alt="Lava power"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                  <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Lava power</p>
+                </div>
+              </div>
+
+              <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png"
+                  alt="Dreamy Sponges"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                  <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Dreamy Sponges</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1">
+                <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-xs sm:text-sm">
+                  Load More
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -328,9 +326,115 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
       {/* Show other sections only if detail view is not open */}
       {!selectedNatureCategory && (
         <>
+          {/* Culture Section */}
+          <section className="w-full max-w-full overflow-hidden border-b border-slate-700">
+            <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultBackg-eTk9tnAfHGhSUA1ZUSshfm8Ww57D1e.png"
+                alt="Culture"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 lg:px-12 bg-black/40">
+                <div className="flex flex-col gap-2 sm:gap-4 max-w-2xl">
+                  <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-6xl font-light text-slate-100 leading-tight">
+                    Culture
+                  </h2>
+                  <p className="text-slate-200 text-xs sm:text-sm md:text-base leading-relaxed max-w-md">
+                    Heritage Environments are immersive journeys inspired by real cultures, architecture, symbolism, and landscapes.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 border-b border-slate-700">
+              <div className="flex items-center gap-2 sm:gap-4 md:gap-8 min-w-min md:min-w-0">
+                <button className="text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0">
+                  <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
+                </button>
+                <button className="text-slate-300 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">North America</button>
+                <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Polynesia</button>
+                <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Southeast Asia</button>
+                <button className="text-slate-400 hover:text-cyan-400 transition-colors font-light text-xs sm:text-sm whitespace-nowrap">Antarctica</button>
+                <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto flex-shrink-0">
+                  <ChevronRight size={20} className="sm:w-6 sm:h-6" />
+                </button>
+              </div>
+            </div>
+
+            <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
+                <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                  <Image
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult1-dhVGWchKNmJw81kGmXDaXIJ5cd2xFk.png"
+                    alt="Purple sunset halo"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                    <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Purple sunset halo</p>
+                  </div>
+                </div>
+
+                <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                  <Image
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult2-g8bXETDkCu4snNrPouTKozSZSfGxMl.png"
+                    alt="Canoe adventure"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                    <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Canoe adventure</p>
+                  </div>
+                </div>
+
+                <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                  <Image
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult3-rkJrAmWhsEN0xY7OOeNbBueEgYyjBY.png"
+                    alt="Sunset over ancient temple"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                    <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Sunset over ancient temple</p>
+                  </div>
+                </div>
+
+                <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                  <Image
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult4-fOr7dFUw2LF1ihBOtwpZSNb9txsVJq.png"
+                    alt="Walking walls of Valparaiso"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                    <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Walking walls of Valparaiso</p>
+                  </div>
+                </div>
+
+                <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                  <Image
+                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult5-YMhIkyjNnvCMyh91uvItbrfSuoxm5n.png"
+                    alt="Celestial gates"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                    <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Celestial gates</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1">
+                  <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-xs sm:text-sm">
+                    Load More
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* Mythic Section */}
           <section className="w-full max-w-full overflow-hidden border-b border-slate-700">
-            {/* Full-width Banner with Overlay Text */}
             <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
               <Image
                 src={mythicBannerUrl}
@@ -338,7 +442,6 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 fill
                 className="object-cover"
               />
-              {/* Overlay Text */}
               <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 lg:px-12 bg-black/40">
                 <div className="flex flex-col gap-2 sm:gap-4 max-w-2xl">
                   <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-6xl font-light text-slate-100 leading-tight">
@@ -351,7 +454,6 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            {/* Category Navigation Tabs - Mobile Responsive */}
             <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 border-b border-slate-700">
               <div className="flex items-center gap-2 sm:gap-4 md:gap-8 min-w-min md:min-w-0">
                 <button className="text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0">
@@ -367,7 +469,6 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            {/* Showcase Grid - Responsive */}
             <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                 {mythicImages.slice(0, 5).map((url, idx) => (
@@ -384,7 +485,6 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                   </div>
                 ))}
 
-                {/* Load More - spans full width on mobile */}
                 <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1">
                   <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-xs sm:text-sm">
                     Load More
@@ -394,9 +494,8 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             </div>
           </section>
 
-          {/* Art Environments Section */}
+          {/* Art Section */}
           <section className="w-full max-w-full overflow-hidden border-b border-slate-700">
-            {/* Full-width Banner with Overlay Text */}
             <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
               <Image
                 src={artBannerUrl}
@@ -404,7 +503,6 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 fill
                 className="object-cover"
               />
-              {/* Overlay Text */}
               <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 lg:px-12 bg-black/40">
                 <div className="flex flex-col gap-2 sm:gap-4 max-w-2xl">
                   <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-6xl font-light text-slate-100 leading-tight">
@@ -417,7 +515,6 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            {/* Category Navigation Tabs - Mobile Responsive */}
             <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 border-b border-slate-700">
               <div className="flex items-center gap-2 sm:gap-4 md:gap-8 min-w-min md:min-w-0">
                 <button className="text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0">
@@ -434,7 +531,6 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            {/* Showcase Grid - Responsive */}
             <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                 {artImages.slice(0, 5).map((url, idx) => (
@@ -451,7 +547,6 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                   </div>
                 ))}
 
-                {/* Load More - spans full width on mobile */}
                 <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1">
                   <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-xs sm:text-sm">
                     Load More

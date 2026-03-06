@@ -58,7 +58,7 @@ const accentColorMap: Record<string, string> = {
 export function ElementalsSection() {
   return (
     <section className="w-full max-w-full overflow-hidden bg-black py-12 sm:py-16 md:py-24 lg:py-32 space-y-4 sm:space-y-6 md:space-y-8 lg:space-y-12">
-      <div className="space-y-3 sm:space-y-4 px-4 sm:px-6 lg:px-8">
+      <div className="space-y-3 sm:space-y-4 px-4 sm:px-6 lg:px-8 hidden">
         <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-light text-white tracking-tight">
           Elementals
         </h2>

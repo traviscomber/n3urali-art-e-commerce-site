@@ -75,29 +75,29 @@ export function ElementalsSection() {
             />
 
             {/* Dark Overlay with gradient */}
-            <div className="absolute inset-0 bg-gradient-to-l from-black/90 via-black/70 to-transparent group-hover:from-black/80 group-hover:via-black/60 transition-all duration-300 rounded-lg" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-transparent group-hover:from-black/80 group-hover:via-black/60 transition-all duration-300 rounded-lg" />
 
-            {/* Content - Right side aligned */}
-            <div className="absolute inset-0 flex flex-col justify-center items-end p-8 sm:p-12 lg:p-16">
+            {/* Content - Left side aligned with logo */}
+            <div className="absolute inset-0 flex flex-col justify-center items-start p-8 sm:p-12 lg:p-16">
               <div className="space-y-6 max-w-2xl">
-                <div className="text-right">
+                <div className="text-left">
                   <h3 className="text-7xl sm:text-8xl lg:text-9xl font-light text-white tracking-tight mb-3 leading-none">
                     {elemental.title}
                   </h3>
-                  <p className={`text-xs sm:text-sm font-light tracking-widest uppercase text-right ${accentColorMap[elemental.accentColor]?.split(' ')[0]}`}>
+                  <p className={`text-xs sm:text-sm font-light tracking-widest uppercase text-left ${accentColorMap[elemental.accentColor]?.split(' ')[0]}`}>
                     {elemental.subtitle}
                   </p>
                 </div>
 
-                <p className="text-sm md:text-base text-slate-300 font-light leading-relaxed text-right">
+                <p className="text-sm md:text-base text-slate-300 font-light leading-relaxed text-left">
                   {elemental.description}
                 </p>
 
-                <div className="inline-flex items-center gap-2 pt-4 flex-row-reverse">
-                  <ChevronRight className={`w-5 h-5 transform group-hover:translate-x-2 transition-transform ${accentColorMap[elemental.accentColor]?.split(' ')[0]}`} />
+                <div className="inline-flex items-center gap-2 pt-4">
                   <span className={`text-sm md:text-base font-light transition-all group-hover:gap-3 ${accentColorMap[elemental.accentColor]}`}>
                     Explore
                   </span>
+                  <ChevronRight className={`w-5 h-5 transform group-hover:translate-x-2 transition-transform ${accentColorMap[elemental.accentColor]?.split(' ')[0]}`} />
                 </div>
               </div>
             </div>

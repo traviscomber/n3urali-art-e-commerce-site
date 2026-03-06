@@ -6,6 +6,35 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
+        userAgent: 'Googlebot',
+        allow: '/',
+        disallow: [
+          '/admin/',
+          '/dashboard/',
+          '/api/',
+          '/auth/reset-password',
+          '/debug-',
+          '/fix-cors',
+          '/setup-',
+          '/test-',
+        ],
+        crawlDelay: 0,
+      },
+      {
+        userAgent: 'Googlebot-Image',
+        allow: '/',
+        crawlDelay: 0,
+      },
+      {
+        userAgent: 'Bingbot',
+        allow: '/',
+        disallow: [
+          '/admin/',
+          '/dashboard/',
+          '/api/',
+        ],
+      },
+      {
         userAgent: '*',
         allow: '/',
         disallow: [
@@ -14,8 +43,14 @@ export default function robots(): MetadataRoute.Robots {
           '/account/',
           '/api/',
           '/auth/reset-password',
+          '/debug-',
+          '/fix-cors',
+          '/setup-',
+          '/test-',
         ],
+        crawlDelay: 1,
       },
+      // Block AI training bots
       {
         userAgent: 'GPTBot',
         disallow: ['/'],
@@ -36,7 +71,12 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: 'Claude-Web',
         disallow: ['/'],
       },
+      {
+        userAgent: 'Perplexity',
+        disallow: ['/'],
+      },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
+    host: baseUrl,
   }
 }

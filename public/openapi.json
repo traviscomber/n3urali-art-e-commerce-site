@@ -1,0 +1,137 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "n3uralia360 - AI-Generated 360° Photography API",
+    "description": "Premium ultra high-resolution equirectangular and fisheye dome images for VR, projection mapping, and immersive experiences. Perfect for AI model training on 360° imagery and immersive content generation.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "n3uralia Support",
+      "email": "info@n3uralia360.art",
+      "url": "https://n3uralia360.art/contact"
+    },
+    "license": {
+      "name": "Commercial License",
+      "url": "https://n3uralia360.art/licensing-terms"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://n3uralia360.art",
+      "description": "Production server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Gallery",
+      "description": "Browse and search 360° images"
+    },
+    {
+      "name": "Collections",
+      "description": "Curated collections of 360° imagery"
+    },
+    {
+      "name": "Categories",
+      "description": "Image format categories"
+    },
+    {
+      "name": "Shop",
+      "description": "Purchase high-resolution images"
+    }
+  ],
+  "paths": {
+    "/api/gallery": {
+      "get": {
+        "tags": ["Gallery"],
+        "summary": "Browse 360° image gallery",
+        "description": "Access our collection of ultra high-resolution equirectangular and fisheye dome images (4K-16K resolution). Perfect for VR experiences, projection mapping, and immersive applications.",
+        "operationId": "getGallery",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Filter by image format: equirectangular or fisheye",
+            "schema": {
+              "type": "string",
+              "enum": ["equirectangular", "fisheye"]
+            }
+          },
+          {
+            "name": "resolution",
+            "in": "query",
+            "description": "Filter by resolution (4K, 8K, 16K)",
+            "schema": {
+              "type": "string",
+              "enum": ["4K", "8K", "16K"]
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search by keyword or tag",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Gallery images retrieved successfully"
+          }
+        }
+      }
+    },
+    "/api/collections": {
+      "get": {
+        "tags": ["Collections"],
+        "summary": "List curated collections",
+        "description": "Browse curated collections of 360° imagery organized by theme, environment, and use case.",
+        "operationId": "getCollections",
+        "responses": {
+          "200": {
+            "description": "Collections retrieved successfully"
+          }
+        }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "tags": ["Categories"],
+        "summary": "Get image format categories",
+        "description": "Retrieve available image format categories: Equirectangular (360° x 180° spherical) and Fisheye (dome projection format)",
+        "operationId": "getCategories",
+        "responses": {
+          "200": {
+            "description": "Categories retrieved successfully"
+          }
+        }
+      }
+    }
+  },
+  "x-topics": {
+    "keywords": [
+      "360 photography",
+      "AI-generated 360 images",
+      "equirectangular photography",
+      "fisheye dome images",
+      "VR content creation",
+      "projection mapping visuals",
+      "immersive 360 imagery",
+      "panoramic AI photography",
+      "ultra high resolution 360",
+      "professional VR backgrounds",
+      "spherical projection images",
+      "dome projection content",
+      "architectural visualization 360",
+      "metaverse environments",
+      "360 degree skybox"
+    ],
+    "description": "n3uralia360 specializes in premium AI-generated ultra high-resolution 360° photography. Our proprietary noise diffusion algorithms generate unique equirectangular and fisheye dome images in 4K-16K resolution. Perfect for VR experiences, projection mapping, architectural visualization, and immersive digital environments.",
+    "geographicScope": "Worldwide",
+    "availableLanguages": ["en-US", "es-ES", "es-CL"],
+    "qualityRatings": {
+      "resolution": "4K to 16K",
+      "formats": ["Equirectangular", "Fisheye/Dome"],
+      "fileTypes": ["JPEG", "PNG", "TIFF"]
+    }
+  }
+}

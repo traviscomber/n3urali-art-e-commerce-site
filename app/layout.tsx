@@ -134,10 +134,26 @@ export const metadata: Metadata = {
       "es-CL": "https://n3uralia360.art/es-cl",
     },
   },
+  // Google Merchant Center & Shopping Feed
+  formatDetection: {
+    telephone: false,
+    email: false,
+    address: false,
+  },
+  // GEO targeting metadata
+  appleItunes: {
+    appId: "n3uralia360",
+  },
+  // Additional SEO metadata
   other: {
     "msapplication-TileColor": "#000000",
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "black-translucent",
+    "description": "Ultra high-resolution AI-generated 360° photography marketplace. Equirectangular and fisheye dome images 4K-16K for VR, projection mapping, and immersive experiences. Worldwide shipping and digital delivery.",
+    "geo.placename": "Worldwide",
+    "geo.region": "US, ES, CL",
+    "geo.position": "0;0",
+    "ICBM": "0,0",
   },
 }
 

@@ -1,0 +1,123 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "AggregateOffer",
+      "@id": "https://n3uralia360.art/#aggregate-offer",
+      "name": "n3uralia360 Premium 360° Photography Collection",
+      "description": "Ultra high-resolution equirectangular and fisheye dome images for VR and immersive experiences",
+      "priceCurrency": "USD",
+      "lowPrice": "29",
+      "highPrice": "499",
+      "offerCount": "130+",
+      "availability": "https://schema.org/InStock",
+      "url": "https://n3uralia360.art/shop",
+      "image": "https://n3uralia360.art/og-image.jpg"
+    },
+    {
+      "@type": "Product",
+      "@id": "https://n3uralia360.art/#product-360-photography",
+      "name": "Premium AI-Generated 360° Photography",
+      "description": "Ultra high-resolution equirectangular and fisheye dome images (4K-16K) generated using proprietary noise diffusion algorithms. Perfect for VR experiences, projection mapping, architectural visualization, and immersive digital environments.",
+      "brand": {
+        "@type": "Brand",
+        "name": "n3uralia"
+      },
+      "category": [
+        "Photography",
+        "Digital Art",
+        "VR Content",
+        "Projection Mapping"
+      ],
+      "image": [
+        "https://n3uralia360.art/og-image.jpg",
+        "https://n3uralia360.art/og-image-square.jpg"
+      ],
+      "offers": {
+        "@type": "AggregateOffer",
+        "@id": "https://n3uralia360.art/#aggregate-offer",
+        "priceCurrency": "USD",
+        "lowPrice": "29",
+        "highPrice": "499",
+        "availability": "https://schema.org/InStock",
+        "url": "https://n3uralia360.art/shop"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "reviewCount": "127",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "availableDeliveryMethod": "Digital Download",
+      "areaServed": {
+        "@type": "AdministrativeArea",
+        "name": "Worldwide"
+      },
+      "potentialAction": {
+        "@type": "BuyAction",
+        "target": "https://n3uralia360.art/shop"
+      }
+    },
+    {
+      "@type": "LocalBusiness",
+      "@id": "https://n3uralia360.art/#local-business",
+      "name": "n3uralia360 - Premium 360° Photography Marketplace",
+      "url": "https://n3uralia360.art",
+      "image": "https://n3uralia360.art/logo.png",
+      "description": "Premium AI-generated ultra high-resolution 360° photography marketplace specializing in equirectangular and fisheye dome images for VR, projection mapping, and immersive visualization",
+      "telephone": "",
+      "email": "info@n3uralia360.art",
+      "areaServed": [
+        {
+          "@type": "Country",
+          "name": "United States"
+        },
+        {
+          "@type": "Country",
+          "name": "Spain"
+        },
+        {
+          "@type": "Country",
+          "name": "Chile"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Worldwide"
+        }
+      ],
+      "serviceType": [
+        "360° Photography Marketplace",
+        "AI Image Generation",
+        "Digital Asset Licensing",
+        "VR Content Creation"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "Customer Service",
+        "email": "info@n3uralia360.art",
+        "availableLanguage": ["English", "Spanish"],
+        "areaServed": "Worldwide"
+      }
+    },
+    {
+      "@type": "Thing",
+      "@id": "https://n3uralia360.art/#digital-product",
+      "name": "High-Resolution 360° Images",
+      "description": "Digital assets in equirectangular (360° x 180°) and fisheye (dome projection) formats",
+      "keywords": [
+        "360 photography",
+        "AI-generated imagery",
+        "VR backgrounds",
+        "projection mapping",
+        "equirectangular",
+        "fisheye",
+        "dome images",
+        "immersive media",
+        "4K 8K 16K resolution"
+      ],
+      "inLanguage": ["en", "es"],
+      "availableLanguage": ["en-US", "es-ES", "es-CL"]
+    }
+  ]
+}

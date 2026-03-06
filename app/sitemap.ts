@@ -21,22 +21,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .select('code, updated_at')
       .order('updated_at', { ascending: false })
     
-    // Get all categories
-    const { data: categories } = await supabase
-      .from('categories')
-      .select('name')
-      .order('name')
-    
-    // Static pages
-    const routes = [
+    // Static pages - organized by priority for SEO
+    const staticPages = [
+      // Homepage - highest priority
       {
         url: baseUrl,
         lastModified: new Date(),
         changeFrequency: 'daily' as const,
-        priority: 1,
+        priority: 1.0,
       },
+      // Primary galleries
       {
         url: `${baseUrl}/gallery`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.95,
+      },
+      {
+        url: `${baseUrl}/browse`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.95,
+      },
+      {
+        url: `${baseUrl}/shop`,
         lastModified: new Date(),
         changeFrequency: 'daily' as const,
         priority: 0.9,
@@ -47,42 +55,108 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: 'daily' as const,
         priority: 0.9,
       },
+      // Categories
+      {
+        url: `${baseUrl}/categories/equirectangular`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.85,
+      },
+      {
+        url: `${baseUrl}/categories/fisheye`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.85,
+      },
+      // Collections
       {
         url: `${baseUrl}/collection`,
         lastModified: new Date(),
         changeFrequency: 'weekly' as const,
         priority: 0.8,
       },
+      // Content pages
       {
-        url: `${baseUrl}/browse`,
+        url: `${baseUrl}/shows`,
         lastModified: new Date(),
-        changeFrequency: 'daily' as const,
+        changeFrequency: 'weekly' as const,
+        priority: 0.85,
+      },
+      {
+        url: `${baseUrl}/environments`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.85,
+      },
+      {
+        url: `${baseUrl}/theatre`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
         priority: 0.8,
       },
       {
+        url: `${baseUrl}/theatre/all`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+      },
+      {
+        url: `${baseUrl}/works`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+      },
+      {
+        url: `${baseUrl}/realities`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+      },
+      // Information pages
+      {
         url: `${baseUrl}/about`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.75,
+      },
+      {
+        url: `${baseUrl}/studio`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.75,
+      },
+      {
+        url: `${baseUrl}/studio/process`,
         lastModified: new Date(),
         changeFrequency: 'monthly' as const,
         priority: 0.7,
       },
       {
+        url: `${baseUrl}/commission`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.75,
+      },
+      {
         url: `${baseUrl}/contact`,
         lastModified: new Date(),
         changeFrequency: 'monthly' as const,
-        priority: 0.6,
+        priority: 0.7,
       },
+      // Legal/Terms
       {
         url: `${baseUrl}/licensing-terms`,
         lastModified: new Date(),
-        changeFrequency: 'monthly' as const,
-        priority: 0.6,
+        changeFrequency: 'yearly' as const,
+        priority: 0.5,
       },
       {
         url: `${baseUrl}/licensing-contract`,
         lastModified: new Date(),
-        changeFrequency: 'monthly' as const,
-        priority: 0.6,
+        changeFrequency: 'yearly' as const,
+        priority: 0.5,
       },
+      // Auth pages (for completeness)
       {
         url: `${baseUrl}/auth/login`,
         lastModified: new Date(),
@@ -97,7 +171,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       },
     ]
     
-    // Add image detail pages
+    // Add image detail pages - dynamic from database
     const imageRoutes = (images || []).map((image) => ({
       url: `${baseUrl}/photo/${image.id}`,
       lastModified: new Date(image.updated_at),
@@ -105,7 +179,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }))
     
-    // Add collection pages
+    // Add collection pages - dynamic from database
     const collectionRoutes = (collections || []).map((collection) => ({
       url: `${baseUrl}/collection/${collection.code}`,
       lastModified: new Date(collection.updated_at),
@@ -113,15 +187,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }))
     
-    // Add category pages
-    const categoryRoutes = (categories || []).map((category) => ({
-      url: `${baseUrl}/gallery?category=${encodeURIComponent(category.name)}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.7,
-    }))
-    
-    return [...routes, ...imageRoutes, ...collectionRoutes, ...categoryRoutes]
+    return [...staticPages, ...collectionRoutes, ...imageRoutes]
   } catch (error) {
     console.error('[v0] Sitemap generation error:', error)
     // Return at least static routes on error
@@ -130,10 +196,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: 'https://n3uralia360.art',
         lastModified: new Date(),
         changeFrequency: 'daily' as const,
-        priority: 1,
+        priority: 1.0,
       },
       {
         url: 'https://n3uralia360.art/gallery',
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.95,
+      },
+      {
+        url: 'https://n3uralia360.art/browse',
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.95,
+      },
+      {
+        url: 'https://n3uralia360.art/shop',
         lastModified: new Date(),
         changeFrequency: 'daily' as const,
         priority: 0.9,

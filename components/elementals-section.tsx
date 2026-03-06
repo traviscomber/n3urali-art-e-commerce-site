@@ -78,7 +78,7 @@ export function ElementalsSection() {
             <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-transparent group-hover:from-black/80 group-hover:via-black/60 transition-all duration-300 rounded-lg" />
 
             {/* Content - Left side aligned with logo */}
-            <div className="absolute inset-0 flex flex-col justify-center items-start p-8 sm:p-12 lg:p-16 pl-20 sm:pl-32 lg:pl-48">
+            <div className="absolute inset-0 flex flex-col justify-center items-start p-8 sm:p-12 lg:p-16 pl-40 sm:pl-64 lg:pl-96">
               <div className="space-y-6 max-w-2xl">
                 <div className="text-left">
                   <h3 className="text-7xl sm:text-8xl lg:text-9xl font-light text-white tracking-tight mb-3 leading-none">

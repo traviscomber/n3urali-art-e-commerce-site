@@ -117,13 +117,18 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         const imagesByCategory: { [key: string]: DatabaseImage[] } = {}
 
         for (const category of categories) {
+          console.log('[v0] Fetching images for category:', category)
           const response = await fetch(`/api/environments/images-by-category?category=${encodeURIComponent(category)}`)
+          console.log('[v0] API response status for', category, ':', response.status)
           if (response.ok) {
             const data = await response.json()
+            console.log('[v0] Fetched images for', category, ':', data.images?.length || 0, 'images')
+            console.log('[v0] First image ID:', data.images?.[0]?.id)
             imagesByCategory[category] = data.images || []
           }
         }
 
+        console.log('[v0] Final databaseImages state:', imagesByCategory)
         setDatabaseImages(imagesByCategory)
       } catch (error) {
         console.error('[v0] Failed to fetch nature category images:', error)
@@ -293,56 +298,68 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
               {/* Chilled trees - Links to actual ocean images */}
               {databaseImages['Oceans'] && databaseImages['Oceans'].length > 0 ? (
-                <Link href={`/environments/${databaseImages['Oceans'][0].id}`} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-                  <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png"
-                    alt="Chilled trees forest walking"
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                    <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Chilled trees forest walking</p>
-                  </div>
-                </Link>
+                <>
+                  {console.log('[v0] Using Oceans database ID:', databaseImages['Oceans'][0].id)}
+                  <Link href={`/environments/${databaseImages['Oceans'][0].id}`} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                    <Image
+                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png"
+                      alt="Chilled trees forest walking"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                      <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Chilled trees forest walking</p>
+                    </div>
+                  </Link>
+                </>
               ) : (
-                <Link href="/environments/nature-showcase-1" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-                  <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png"
-                    alt="Chilled trees forest walking"
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                    <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Chilled trees forest walking</p>
-                  </div>
-                </Link>
+                <>
+                  {console.log('[v0] Using placeholder ID for Chilled trees')}
+                  <Link href="/environments/nature-showcase-1" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                    <Image
+                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png"
+                      alt="Chilled trees forest walking"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                      <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Chilled trees forest walking</p>
+                    </div>
+                  </Link>
+                </>
               )}
 
               {/* Tropical paradise - Links to actual volcano images */}
               {databaseImages['Volcanoes'] && databaseImages['Volcanoes'].length > 0 ? (
-                <Link href={`/environments/${databaseImages['Volcanoes'][0].id}`} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-                  <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png"
-                    alt="Tropical paradise bay"
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                    <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Tropical paradise bay</p>
-                  </div>
-                </Link>
+                <>
+                  {console.log('[v0] Using Volcanoes database ID for Tropical paradise:', databaseImages['Volcanoes'][0].id)}
+                  <Link href={`/environments/${databaseImages['Volcanoes'][0].id}`} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                    <Image
+                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png"
+                      alt="Tropical paradise bay"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                      <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Tropical paradise bay</p>
+                    </div>
+                  </Link>
+                </>
               ) : (
-                <Link href="/environments/nature-showcase-2" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-                  <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png"
-                    alt="Tropical paradise bay"
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                    <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Tropical paradise bay</p>
-                  </div>
-                </Link>
+                <>
+                  {console.log('[v0] Using placeholder ID for Tropical paradise')}
+                  <Link href="/environments/nature-showcase-2" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                    <Image
+                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png"
+                      alt="Tropical paradise bay"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                      <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Tropical paradise bay</p>
+                    </div>
+                  </Link>
+                </>
               )}
 
               <button onClick={() => setSelectedNatureCategory('forest')} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer">
@@ -359,56 +376,68 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
 
               {/* Lava power - Links to actual volcano images */}
               {databaseImages['Volcanoes'] && databaseImages['Volcanoes'].length > 2 ? (
-                <Link href={`/environments/${databaseImages['Volcanoes'][2].id}`} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-                  <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png"
-                    alt="Lava power"
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                    <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Lava power</p>
-                  </div>
-                </Link>
+                <>
+                  {console.log('[v0] Using Volcanoes database ID for Lava power (Eruption Energy):', databaseImages['Volcanoes'][2].id)}
+                  <Link href={`/environments/${databaseImages['Volcanoes'][2].id}`} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                    <Image
+                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png"
+                      alt="Lava power"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                      <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Lava power</p>
+                    </div>
+                  </Link>
+                </>
               ) : (
-                <Link href="/environments/nature-showcase-4" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-                  <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png"
-                    alt="Lava power"
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                    <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Lava power</p>
-                  </div>
-                </Link>
+                <>
+                  {console.log('[v0] Using placeholder ID for Lava power')}
+                  <Link href="/environments/nature-showcase-4" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                    <Image
+                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png"
+                      alt="Lava power"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                      <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Lava power</p>
+                    </div>
+                  </Link>
+                </>
               )}
 
               {/* Dreamy Sponges - Links to actual ocean images */}
               {databaseImages['Oceans'] && databaseImages['Oceans'].length > 1 ? (
-                <Link href={`/environments/${databaseImages['Oceans'][1].id}`} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-                  <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png"
-                    alt="Dreamy Sponges"
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                    <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Dreamy Sponges</p>
-                  </div>
-                </Link>
+                <>
+                  {console.log('[v0] Using Oceans database ID for Dreamy Sponges:', databaseImages['Oceans'][1].id)}
+                  <Link href={`/environments/${databaseImages['Oceans'][1].id}`} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                    <Image
+                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png"
+                      alt="Dreamy Sponges"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                      <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Dreamy Sponges</p>
+                    </div>
+                  </Link>
+                </>
               ) : (
-                <Link href="/environments/nature-showcase-5" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
-                  <Image
-                    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png"
-                    alt="Dreamy Sponges"
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                    <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Dreamy Sponges</p>
-                  </div>
-                </Link>
+                <>
+                  {console.log('[v0] Using placeholder ID for Dreamy Sponges')}
+                  <Link href="/environments/nature-showcase-5" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                    <Image
+                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png"
+                      alt="Dreamy Sponges"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
+                      <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Dreamy Sponges</p>
+                    </div>
+                  </Link>
+                </>
               )}
 
               <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1">

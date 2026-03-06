@@ -31,30 +31,7 @@ interface ShowsPageClientProps {
 export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientProps) {
   const [teaserIndex, setTeaserIndex] = useState(0)
 
-  const mythicBannerUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythBackg%20%282%29-UZZUeitXszDkixpZBAL3mYzMq9rEq1.png'
-  
-  const mythicImages = [
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png',
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth2-5zeFMllXp1WFWUyJgvnpY8plIxwQts.png',
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth3-mZG3PGuOFqePUhTm63gOYOXUhfDN6d.png',
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth4-W0eVn7cqin99zRFZN90EDL8J39HY9V.png',
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth5-HHbnx40rB7gy6IkODw4wqBQWJcPzhY.png',
-  ]
-
-  const mythicLabels = [
-    'El Tayukú Presence',
-    'Halloween in Lego City',
-    'Vibrant Ritual of New Caledonia',
-    'Hages of Blue Ocean',
-    'Angry Wind Spirit',
-  ]
-
-  const mythicCategories = [
-    { name: 'Asian', id: 'asian' },
-    { name: 'Mesoamerican', id: 'mesoamerican' },
-    { name: 'Greek', id: 'greek' },
-    { name: 'Egyptian', id: 'egyptian' },
-  ]
+  // Mythic section constants - HIDDEN - Removed for cleanup
 
   const teasers = [
     {
@@ -159,8 +136,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
         </div>
       </section>
 
-      {/* Mythic Section */}
-      <section className="w-full max-w-full overflow-hidden border-b border-slate-700">
+      {/* Mythic Section - HIDDEN */}
+      <section className="hidden w-full max-w-full overflow-hidden border-b border-slate-700">
         {/* Full-width Banner with Overlay Text */}
         <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
           <Image

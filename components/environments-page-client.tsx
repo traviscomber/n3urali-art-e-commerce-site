@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronRight, ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -25,6 +25,12 @@ interface EnvironmentImage {
   content_category?: string
 }
 
+interface DatabaseImage {
+  id: string
+  title: string
+  thumbnail_medium_url: string
+}
+
 interface EnvironmentsPageClientProps {
   collections: Collection[]
   environmentImages: EnvironmentImage[]
@@ -35,6 +41,8 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
   const [artCategoryIndex, setArtCategoryIndex] = useState(0)
   const [selectedNatureCategory, setSelectedNatureCategory] = useState<string | null>(null)
   const [natureCategoryIndex, setNatureCategoryIndex] = useState(0)
+  const [databaseImages, setDatabaseImages] = useState<{ [key: string]: DatabaseImage[] }>({})
+  const [imagesLoading, setImagesLoading] = useState(true)
 
   const natureCategories = [
     { name: 'Oceans', id: 'oceans' },
@@ -100,6 +108,32 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
     'Sky with Diamonds',
     'Prismatic Sky',
   ]
+
+  // Fetch real image IDs from database
+  useEffect(() => {
+    const fetchCategoryImages = async () => {
+      try {
+        const categories = ['Oceans', 'Volcanoes', 'Ice & Snow', 'Forest']
+        const imagesByCategory: { [key: string]: DatabaseImage[] } = {}
+
+        for (const category of categories) {
+          const response = await fetch(`/api/environments/images-by-category?category=${encodeURIComponent(category)}`)
+          if (response.ok) {
+            const data = await response.json()
+            imagesByCategory[category] = data.images || []
+          }
+        }
+
+        setDatabaseImages(imagesByCategory)
+      } catch (error) {
+        console.error('[v0] Failed to fetch nature category images:', error)
+      } finally {
+        setImagesLoading(false)
+      }
+    }
+
+    fetchCategoryImages()
+  }, [])
 
   const handleNextHeritageCategory = () => {
     setHeritageCategoryIndex((prev) => (prev + 1) % heritageCategories.length)
@@ -221,20 +255,23 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
 
             {/* Image Grid - Responsive */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-              {natureCategoryImages[selectedNatureCategory]?.slice(0, 5).map((image, idx) => (
+              {(databaseImages[selectedNatureCategory] && databaseImages[selectedNatureCategory].length > 0 
+                ? databaseImages[selectedNatureCategory] 
+                : natureCategoryImages[selectedNatureCategory] || [])
+                ?.slice(0, 5).map((image, idx) => (
                 <Link
                   key={idx}
-                  href={`/environments/${image.id || `${selectedNatureCategory}-${idx}`}`}
+                  href={`/environments/${(image as any).id || `${selectedNatureCategory}-${idx}`}`}
                   className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group cursor-pointer text-left"
                 >
                   <Image
-                    src={image.url}
-                    alt={image.title}
+                    src={(image as any).thumbnail_medium_url || (image as any).url}
+                    alt={(image as any).title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
-                    <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">{image.title}</p>
+                    <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">{(image as any).title}</p>
                   </div>
                 </Link>
               ))}

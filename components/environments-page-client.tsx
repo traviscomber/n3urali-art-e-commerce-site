@@ -355,8 +355,6 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           </div>
         )}
       </section>
-        </>
-      )}
 
       {/* Show other sections only if detail view is not open */}
       {!selectedNatureCategory && (

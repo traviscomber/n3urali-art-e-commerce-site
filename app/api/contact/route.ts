@@ -139,6 +139,80 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[v0] Email sent successfully, ID:', result.data?.id)
+    
+    // Send a copy to admin at info@n3uralia360.art (with same beautiful format)
+    const adminResult = await resend.emails.send({
+      from: 'N3uralia360 <info@n3uralia360.art>',
+      to: 'travis@nuanu.com',
+      replyTo: 'info@n3uralia360.art',
+      subject: `New Lead - ${email}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: white;">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); padding: 40px 20px; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">🌟 New Lead Inquiry</h1>
+              <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Incoming Opportunity</p>
+            </div>
+
+            <!-- Main Content -->
+            <div style="padding: 40px 30px; background-color: #ffffff;">
+              <p style="color: #1e293b; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
+                A new inquiry has been received from a potential client interested in N3uralia360's immersive experiences.
+              </p>
+
+              <!-- Lead Details Box -->
+              <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 2px solid #06b6d4; border-radius: 8px; padding: 25px; margin: 30px 0;">
+                <h3 style="color: #0369a1; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">Lead Details</h3>
+                
+                <div style="margin-bottom: 16px;">
+                  <p style="color: #475569; margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Client Email</p>
+                  <p style="color: #0369a1; margin: 0; font-size: 15px; word-break: break-all;">
+                    <a href="mailto:${email}" style="color: #0369a1; text-decoration: none; font-weight: 500;">${email}</a>
+                  </p>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                  <p style="color: #475569; margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Interests</p>
+                  <p style="color: #1e293b; margin: 0; font-size: 15px;">${interests}</p>
+                </div>
+
+                ${message ? `
+                <div style="margin-bottom: 0;">
+                  <p style="color: #475569; margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Client Message</p>
+                  <p style="color: #1e293b; margin: 0; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">${message}</p>
+                </div>
+                ` : ''}
+              </div>
+
+              <!-- Submission Time -->
+              <div style="background-color: #f8fafc; border-radius: 8px; padding: 16px; margin: 30px 0;">
+                <p style="color: #64748b; margin: 0; font-size: 13px;">
+                  <strong style="color: #1e293b;">Received:</strong> ${new Date().toLocaleString()}
+                </p>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="background-color: #0f172a; padding: 30px; text-align: center; border-top: 4px solid #06b6d4;">
+              <h4 style="color: #06b6d4; margin: 0 0 10px 0; font-size: 16px; font-weight: 600; letter-spacing: 0.5px;">N3URALIA360</h4>
+              <p style="color: #94a3b8; margin: 0 0 15px 0; font-size: 13px;">Immersive Experiences • 360° Creative Solutions</p>
+              <p style="color: #64748b; margin: 0; font-size: 12px;">© 2026 N3uralia360. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    })
+
+    console.log('[v0] Admin copy sent, ID:', adminResult.data?.id)
+
     return NextResponse.json({ success: true, id: result.data?.id })
   } catch (error) {
     console.error('[v0] Contact form error:', error)

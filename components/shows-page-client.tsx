@@ -275,7 +275,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                 {/* Current Teaser Video */}
                 <button
                   onClick={() => handleTeaserClick(teaserIndex)}
-                  className={`relative w-60 h-60 rounded-lg overflow-hidden border transition-all border-cyan-400 shadow-lg shadow-cyan-400/30`}
+                  className={`relative w-32 h-32 rounded-lg overflow-hidden border transition-all border-cyan-400 shadow-lg shadow-cyan-400/30`}
                 >
                   <video
                     src={teasers[teaserIndex]?.video}
@@ -290,7 +290,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                 {/* Next Teaser Video */}
                 <button
                   onClick={() => handleTeaserClick((teaserIndex + 1) % teasers.length)}
-                  className={`relative w-60 h-60 rounded-lg overflow-hidden border transition-all border-slate-700 hover:border-cyan-400`}
+                  className={`relative w-32 h-32 rounded-lg overflow-hidden border transition-all border-slate-700 hover:border-cyan-400`}
                 >
                   <video
                     src={teasers[(teaserIndex + 1) % teasers.length]?.video}
@@ -315,7 +315,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
             {/* Right: Main Video Preview */}
             <div className="relative flex-1 flex flex-col items-center ml-12">
-              <div className="relative w-full max-w-2xl aspect-video rounded-lg overflow-hidden bg-slate-900 border border-slate-700 video-player-container">
+              <div className="relative w-full max-w-4xl aspect-video rounded-lg overflow-hidden bg-slate-900 border border-slate-700 video-player-container">
                 <video
                   data-main-player
                   src={teasers[teaserIndex]?.video}

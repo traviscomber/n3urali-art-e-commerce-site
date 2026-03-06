@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { EnvironmentMarketplaceGrid } from '@/components/environment-marketplace-grid'
-import { MARKETPLACE_PRODUCTS } from '@/lib/constants/marketplace-products'
+import { environmentProducts } from '@/lib/constants/marketplace-products'
 
 export function ShopClient() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
@@ -11,15 +11,15 @@ export function ShopClient() {
 
   const categories = [
     { id: 'all', label: 'All Environments', color: 'text-white' },
-    { id: 'nature', label: 'Nature', color: 'text-cyan-400' },
+    { id: 'elemental', label: 'Nature', color: 'text-cyan-400' },
     { id: 'culture', label: 'Culture', color: 'text-yellow-400' },
     { id: 'mythic', label: 'Mythic', color: 'text-purple-400' },
-    { id: 'art', label: 'Art', color: 'text-orange-400' },
+    { id: 'abstract', label: 'Art', color: 'text-orange-400' },
   ]
 
   const filteredProducts = selectedCategory === 'all'
-    ? MARKETPLACE_PRODUCTS
-    : MARKETPLACE_PRODUCTS.filter(product => product.category === selectedCategory)
+    ? environmentProducts
+    : environmentProducts.filter(product => product.category === selectedCategory)
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortBy) {

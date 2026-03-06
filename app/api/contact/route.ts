@@ -39,28 +39,85 @@ export async function POST(request: NextRequest) {
       replyTo: 'info@n3uralia360.art',
       subject: 'We Received Your Inquiry - N3uralia360',
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 28px;">✨ Your Vision is on its Way!</h1>
-          </div>
-          <div style="background: #f8fafc; padding: 30px; border-radius: 0 0 8px 8px;">
-            <p style="color: #334155; margin-bottom: 20px;">Thank you for reaching out to N3uralia360.</p>
-            
-            <div style="background: white; border-left: 4px solid #06b6d4; padding: 15px; margin: 20px 0;">
-              <h3 style="color: #06b6d4; margin-top: 0;">Your Submission Summary</h3>
-              <p style="color: #475569; margin: 8px 0;"><strong>Email:</strong> ${email}</p>
-              <p style="color: #475569; margin: 8px 0;"><strong>Interests:</strong> ${interests}</p>
-              ${message ? `<p style="color: #475569; margin: 8px 0;"><strong>Your Message:</strong><br>${message.replace(/\n/g, '<br>')}</p>` : ''}
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: white;">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); padding: 40px 20px; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">✨ Your Vision is on its Way!</h1>
+              <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Thank you for connecting with us</p>
             </div>
-            
-            <p style="color: #64748b; line-height: 1.6;">We're excited to explore what's possible for your immersive experience. Our team will review your inquiry and connect with you shortly to discuss how we can bring your ideas to life.</p>
-            
-            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 25px 0;">
-            
-            <p style="color: #94a3b8; font-size: 12px;">N3uralia360 | Immersive Experiences</p>
-            <p style="color: #94a3b8; font-size: 12px;">If you have any questions, reply to this email and we'll get back to you soon.</p>
+
+            <!-- Main Content -->
+            <div style="padding: 40px 30px; background-color: #ffffff;">
+              <!-- Welcome Message -->
+              <p style="color: #1e293b; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
+                Thank you for reaching out to <strong>N3uralia360</strong>. We're thrilled to learn more about your vision for immersive experiences.
+              </p>
+
+              <!-- Submission Summary Box -->
+              <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 2px solid #06b6d4; border-radius: 8px; padding: 25px; margin: 30px 0;">
+                <h3 style="color: #0369a1; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">Your Submission Summary</h3>
+                
+                <div style="margin-bottom: 16px;">
+                  <p style="color: #475569; margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Email Address</p>
+                  <p style="color: #0369a1; margin: 0; font-size: 15px; word-break: break-all;">
+                    <a href="mailto:${email}" style="color: #0369a1; text-decoration: none; font-weight: 500;">${email}</a>
+                  </p>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                  <p style="color: #475569; margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Interests</p>
+                  <p style="color: #1e293b; margin: 0; font-size: 15px;">${interests}</p>
+                </div>
+
+                ${message ? `
+                <div style="margin-bottom: 0;">
+                  <p style="color: #475569; margin: 0 0 6px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Your Message</p>
+                  <p style="color: #1e293b; margin: 0; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">${message}</p>
+                </div>
+                ` : ''}
+              </div>
+
+              <!-- Next Steps -->
+              <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin: 30px 0;">
+                <h4 style="color: #1e293b; margin: 0 0 12px 0; font-size: 16px; font-weight: 600;">What's Next?</h4>
+                <p style="color: #475569; margin: 0; font-size: 14px; line-height: 1.6;">Our team will carefully review your inquiry and reach out within 24-48 hours to discuss how we can bring your immersive vision to life. We'll provide tailored solutions and next steps based on your specific needs.</p>
+              </div>
+
+              <!-- Contact Info -->
+              <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                <p style="color: #64748b; margin: 0 0 8px 0; font-size: 14px; line-height: 1.6;">
+                  <strong>Questions or want to reach out?</strong> Reply to this email or contact us directly:
+                </p>
+                <p style="color: #0369a1; margin: 8px 0 0 0; font-size: 15px;">
+                  <strong style="color: #1e293b;">Email:</strong> <a href="mailto:info@n3uralia360.art" style="color: #0369a1; text-decoration: none;">info@n3uralia360.art</a>
+                </p>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="background-color: #0f172a; padding: 30px; text-align: center; border-top: 4px solid #06b6d4;">
+              <h4 style="color: #06b6d4; margin: 0 0 10px 0; font-size: 16px; font-weight: 600; letter-spacing: 0.5px;">N3URALIA360</h4>
+              <p style="color: #94a3b8; margin: 0 0 15px 0; font-size: 13px;">Immersive Experiences • 360° Creative Solutions</p>
+              
+              <p style="color: #64748b; margin: 0 0 20px 0; font-size: 12px; line-height: 1.6;">
+                We create dreamlike immersive experiences that bridge technology, art, and creativity. Explore real-world environments reimagined through innovative 360° visualization.
+              </p>
+              
+              <p style="color: #475569; margin: 0; font-size: 11px;">
+                © 2026 N3uralia360. All rights reserved.<br>
+                <a href="https://www.n3uralia360.art" style="color: #06b6d4; text-decoration: none;">Visit our website</a>
+              </p>
+            </div>
           </div>
-        </div>
+        </body>
+        </html>
       `,
     })
 

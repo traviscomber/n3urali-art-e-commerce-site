@@ -58,46 +58,46 @@ const accentColorMap: Record<string, string> = {
 export function ElementalsSection() {
   return (
     <section className="w-full bg-black border-b border-slate-700/60">
-      <div className="space-y-0">
+      <div className="space-y-8 p-4 md:p-8">
         {elementals.map((elemental, index) => (
           <Link
             key={elemental.title}
             href={elemental.link}
-            className="group relative w-full h-screen md:h-96 overflow-hidden bg-slate-800 transition-all duration-300 hover:brightness-110 block"
+            className="group relative w-full h-screen md:h-96 overflow-hidden bg-slate-800 transition-all duration-300 hover:brightness-110 block rounded-lg"
           >
             {/* Background Image - Full Banner */}
             <Image
               src={elemental.imageUrl}
               alt={elemental.title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              className="object-cover group-hover:scale-105 transition-transform duration-500 rounded-lg"
               priority={index === 0}
             />
 
             {/* Dark Overlay with gradient */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30 group-hover:from-black/80 group-hover:via-black/60 group-hover:to-black/20 transition-all duration-300" />
+            <div className="absolute inset-0 bg-gradient-to-l from-black/90 via-black/70 to-transparent group-hover:from-black/80 group-hover:via-black/60 transition-all duration-300 rounded-lg" />
 
-            {/* Content - Left side aligned */}
-            <div className="absolute inset-0 flex flex-col justify-center p-8 sm:p-12 lg:p-16 max-w-2xl">
-              <div className="space-y-6">
-                <div>
+            {/* Content - Right side aligned */}
+            <div className="absolute inset-0 flex flex-col justify-center items-end p-8 sm:p-12 lg:p-16">
+              <div className="space-y-6 max-w-2xl">
+                <div className="text-right">
                   <h3 className="text-7xl sm:text-8xl lg:text-9xl font-light text-white tracking-tight mb-3 leading-none">
                     {elemental.title}
                   </h3>
-                  <p className={`text-xs sm:text-sm font-light tracking-widest uppercase ${accentColorMap[elemental.accentColor]?.split(' ')[0]}`}>
+                  <p className={`text-xs sm:text-sm font-light tracking-widest uppercase text-right ${accentColorMap[elemental.accentColor]?.split(' ')[0]}`}>
                     {elemental.subtitle}
                   </p>
                 </div>
 
-                <p className="text-sm md:text-base text-slate-300 font-light leading-relaxed">
+                <p className="text-sm md:text-base text-slate-300 font-light leading-relaxed text-right">
                   {elemental.description}
                 </p>
 
-                <div className="inline-flex items-center gap-2 pt-4">
+                <div className="inline-flex items-center gap-2 pt-4 flex-row-reverse">
+                  <ChevronRight className={`w-5 h-5 transform group-hover:translate-x-2 transition-transform ${accentColorMap[elemental.accentColor]?.split(' ')[0]}`} />
                   <span className={`text-sm md:text-base font-light transition-all group-hover:gap-3 ${accentColorMap[elemental.accentColor]}`}>
                     Explore
                   </span>
-                  <ChevronRight className={`w-5 h-5 transform group-hover:translate-x-2 transition-transform ${accentColorMap[elemental.accentColor]?.split(' ')[0]}`} />
                 </div>
               </div>
             </div>

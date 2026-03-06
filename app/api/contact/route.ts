@@ -140,10 +140,10 @@ export async function POST(request: NextRequest) {
 
     console.log('[v0] Email sent successfully, ID:', result.data?.id)
     
-    // Send a copy to admin at info@n3uralia360.art (with same beautiful format)
+    // Send a copy to admin at info@n3uralia360.com (with same beautiful format)
     const adminResult = await resend.emails.send({
       from: 'N3uralia360 <info@n3uralia360.art>',
-      to: 'travis@nuanu.com',
+      to: 'info@n3uralia360.com',
       replyTo: 'info@n3uralia360.art',
       subject: `New Lead - ${email}`,
       html: `

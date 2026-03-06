@@ -49,9 +49,13 @@ export async function POST(request: NextRequest) {
     console.log('[v0] Resend response:', result)
 
     if (result.error) {
-      console.error('[v0] Resend error:', result.error)
+      console.error('[v0] Resend error object:', result.error)
+      const errorMessage = typeof result.error === 'string' 
+        ? result.error 
+        : (result.error as any).message || 'Failed to send email'
+      console.error('[v0] Extracted error message:', errorMessage)
       return NextResponse.json(
-        { error: 'Failed to send email: ' + String(result.error) },
+        { error: errorMessage },
         { status: 500 }
       )
     }
@@ -60,8 +64,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, id: result.data?.id })
   } catch (error) {
     console.error('[v0] Contact form error:', error)
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : typeof error === 'string'
+      ? error
+      : 'An unexpected error occurred'
+    console.error('[v0] Extracted error message:', errorMessage)
     return NextResponse.json(
-      { error: 'Failed to send email: ' + String(error) },
+      { error: errorMessage },
       { status: 500 }
     )
   }

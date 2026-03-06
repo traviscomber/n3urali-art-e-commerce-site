@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react'
 import { ChevronRight, ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { natureCategoryImages } from '@/lib/constants/nature-images'
+
+// Lazy import to avoid webpack serialization warning for large constants
+let natureCategoryImages: any = {}
 
 interface Collection {
   id: string
@@ -113,22 +115,33 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
   useEffect(() => {
     const fetchCategoryImages = async () => {
       try {
+        // Dynamically import large constants to avoid webpack serialization warning
+        const { natureCategoryImages: imageData } = await import('@/lib/constants/nature-images')
+        natureCategoryImages = imageData
+        
+        console.log('[v0] Fetching category images')
         const categories = ['Oceans', 'Volcanoes', 'Ice & Snow', 'Forest']
         const imagesByCategory: { [key: string]: DatabaseImage[] } = {}
 
         for (const category of categories) {
-          console.log('[v0] Fetching images for category:', category)
-          const response = await fetch(`/api/environments/images-by-category?category=${encodeURIComponent(category)}`)
-          console.log('[v0] API response status for', category, ':', response.status)
-          if (response.ok) {
-            const data = await response.json()
-            console.log('[v0] Fetched images for', category, ':', data.images?.length || 0, 'images')
-            console.log('[v0] First image ID:', data.images?.[0]?.id)
-            imagesByCategory[category] = data.images || []
+          try {
+            console.log('[v0] Fetching images for category:', category)
+            const response = await fetch(`/api/environments/images-by-category?category=${encodeURIComponent(category)}`)
+            console.log('[v0] API response status:', response.status)
+            
+            if (response.ok) {
+              const data = await response.json()
+              console.log('[v0] Got', data.images?.length || 0, 'images for', category)
+              if (data.images && data.images.length > 0) {
+                imagesByCategory[category] = data.images
+              }
+            }
+          } catch (err) {
+            console.error('[v0] Error fetching category', category, ':', err)
           }
         }
 
-        console.log('[v0] Final databaseImages state:', imagesByCategory)
+        console.log('[v0] Final imagesByCategory:', Object.keys(imagesByCategory))
         setDatabaseImages(imagesByCategory)
       } catch (error) {
         console.error('[v0] Failed to fetch nature category images:', error)

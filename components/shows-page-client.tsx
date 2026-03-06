@@ -225,7 +225,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       <section className="w-full max-w-full overflow-hidden min-h-screen sm:h-screen border-b border-slate-700">
         <div className="w-full h-full flex flex-col sm:flex-row items-stretch overflow-hidden relative">
           {/* Left: Teaser Info and Buttons - Full width mobile, 30% on desktop */}
-          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0">
+          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-6 sm:px-16 md:px-24 lg:px-32 flex-shrink-0">
             <div className="flex flex-col gap-4 sm:gap-6 max-w-md">
               <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-slate-300 leading-tight">
                 Teasers:
@@ -258,7 +258,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
           </div>
 
           {/* Right: Video Teasers with Arrow Navigation - Hidden on mobile, 70% on desktop */}
-          <div className="hidden sm:flex sm:flex-1 relative overflow-hidden items-center justify-center px-4 sm:px-8">
+          <div className="hidden sm:flex sm:flex-1 relative overflow-hidden items-center justify-end px-6 sm:px-16 md:px-24 lg:px-32">
             {/* Left: Current Teaser with Up/Down Arrows */}
             <div className="relative flex flex-col items-center gap-4">
               {/* Up Arrow */}

@@ -42,37 +42,6 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
     { name: 'Ice and Snow', id: 'ice-and-snow' },
   ]
 
-  const natureCategoryImages: Record<string, { title: string; url: string }[]> = {
-    'oceans': [
-      { title: 'Cosmic Ocean Vortex', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatOceans1-jbOpQIT9umn9y7vmiWYSkJd1wAVeZL.png' },
-      { title: 'Majestic Coastal Cliffs', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatOceans2-aock6r4YqMybpqlHh9JVv7zqD3NsP3.png' },
-      { title: 'Epic Coastal Storm', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatOceans3-aMSmzBJ5q8CrYxLbnDeVWdWsuOTeUe.png' },
-      { title: 'Tropical Island Paradise', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatOceans4-4h11mltwVxcRoklFqCDuxcE6OEvYLW.png' },
-      { title: 'Fractal Ocean Beauty', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatOceans5-zkNiswQ1jsZasGcNk2fStyxfNQBDIw.png' },
-    ],
-    'volcanoes': [
-      { title: 'Volcano Cloud Formation', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatVolcanoes1-o8R36Wf6JIFjeXeht1w940SFnnQPlg.png' },
-      { title: 'Molten Planet', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatVolcanoes2-B88FSRjakiZhmoNHCayPjX5jWyLnhJ.png' },
-      { title: 'Eruption Energy', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatVolcanoes3-xzG2LlcvD1KO65PH3PLtnrRoQbdBek.png' },
-      { title: 'Lava Tunnel', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatVolcanoes4-GqCBCEBveggzTS3UJ5kpk0rJJmCugk.png' },
-      { title: 'Cosmic Volcano', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatVolcanoes5-77lwTzAdXa1dmmT65twgKy9nigDeWK.png' },
-    ],
-    'underwater-life': [
-      { title: 'Luminous Mandalas', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png' },
-      { title: 'Octopus Dream', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater2-ccZcog7a7Xvp1dPmhcpf8USyi2CFdY.png' },
-      { title: 'Coral Abyss', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater3-3EBmdD7j5Z1ynv5nsqOqaHXsm9X9zn.png' },
-      { title: 'Jellyfish Symphony', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater4-EgBszqfBqzfVUvFGQPNqqFQAfIjrg2.png' },
-      { title: 'Deep Sea Sanctum', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater5.png-h6C4tFhELpOzMwuGcKeqiyPa2uWQHs.jpeg' },
-    ],
-    'ice-and-snow': [
-      { title: 'Aurora Frost Waves', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatIce1-GwbFMJ4qPnUjGxp4JIBhcm6PXMPN16.png' },
-      { title: 'Geometric Snow Summit', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatIce2-KfIygcATAv6vPVXKyCELtQdO9TGNDL.png' },
-      { title: 'Glacial Ice Canyon', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatIce3-ahmLcFSSNGxOExL3XwJ4QADs1Jt4nI.png' },
-      { title: 'Mountain Glacier Flow', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatIce4-Gpuw7wotY0oGlWQiRhhihHtgfSrYy9.png' },
-      { title: 'Frost Flower Aurora', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatIce5-hUL35tqRF58sOaNhG41hZBWjS2vJ5V.png' },
-    ],
-  }
-
   const heritageCategories = [
     { name: 'North America', id: 'north-america' },
     { name: 'South America', id: 'south-america' },

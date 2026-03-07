@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Image from 'next/image'
+import { useLanguage } from '@/lib/contexts/language-context'
 
 interface Collection {
   id: string
@@ -29,6 +30,7 @@ interface ShowsPageClientProps {
 }
 
 export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientProps) {
+  const { t } = useLanguage()
   const [teaserIndex, setTeaserIndex] = useState(0)
 
   const mythicBannerUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythBackg%20%282%29-UZZUeitXszDkixpZBAL3mYzMq9rEq1.png'
@@ -71,6 +73,18 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
     },
   ]
 
+  const perfectForItems = [
+    t('showsPage.perfectFor1'),
+    t('showsPage.perfectFor2'),
+    t('showsPage.perfectFor3'),
+  ]
+
+  const characterFeatures = [
+    t('showsPage.characterDesign'),
+    t('showsPage.narrativeBuilding'),
+    t('showsPage.effectsEditing'),
+  ]
+
   const handlePrevTeaser = () => {
     setTeaserIndex((prev) => (prev - 1 + teasers.length) % teasers.length)
   }
@@ -81,7 +95,6 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
   const handleTeaserClick = (idx: number) => {
     setTeaserIndex(idx)
-    // Auto-play video when clicked
     setTimeout(() => {
       const videoElement = document.querySelector('video[data-main-player]') as HTMLVideoElement
       if (videoElement) {
@@ -123,12 +136,32 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
           <div className="flex flex-col gap-4 sm:gap-6 max-w-2xl">
             <div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-slate-100 leading-tight">
-                Shows
+                {t('showsPage.pageTitle')}
               </h1>
               <p className="text-slate-200 text-xs sm:text-sm md:text-base font-light mt-1">
-                Cinematic Dome Stories
+                {t('showsPage.pageSubtitle')}
               </p>
             </div>
+
+            <div className="space-y-2 sm:space-y-3">
+              <p className="text-slate-100 text-xs sm:text-sm leading-relaxed max-w-xl hidden sm:block">
+                {currentShow.description || currentShow.synopsis || t('showsPage.descriptionDefault')}
+              </p>
+
+              <div className="space-y-1 sm:space-y-2 pt-1 hidden sm:block">
+                <p className="text-slate-200 text-xs font-medium uppercase tracking-widest opacity-80">{t('showsPage.perfectFor')}</p>
+                <ul className="space-y-0.5 sm:space-y-1">
+                  {perfectForItems.map((item, idx) => (
+                    <li key={idx} className="flex gap-2 items-start">
+                      <span className="text-cyan-400 text-xs sm:text-sm flex-shrink-0 mt-0.5">•</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
 
             <div className="space-y-2 sm:space-y-3">
               <p className="text-slate-100 text-xs sm:text-sm leading-relaxed max-w-xl hidden sm:block">
@@ -214,7 +247,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
             {/* Load More - spans full width on mobile */}
             <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1">
               <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-xs sm:text-sm">
-                Load More
+                {t('showsPage.loadMore')}
               </button>
             </div>
           </div>
@@ -228,30 +261,30 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
           <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-6 sm:px-16 md:px-24 lg:px-32 flex-shrink-0">
             <div className="flex flex-col gap-4 sm:gap-6 max-w-md">
               <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-slate-300 leading-tight">
-                Teasers:
+                {t('showsPage.teasersTitle')}
               </h2>
 
               <p className="text-slate-400 text-xs sm:text-sm md:text-base leading-relaxed">
-                Full-length shows and dome editions are available. If you are interested in a specific episode or would like to commission a custom production, please contact our team.
+                {t('showsPage.teasersDesc1')}
               </p>
 
               <p className="text-slate-400 text-xs sm:text-sm">
-                We develop immersive content from concept to final delivery.
+                {t('showsPage.teasersDesc2')}
               </p>
 
               <div className="space-y-1.5 sm:space-y-2 text-slate-500 text-xs sm:text-xs leading-relaxed">
-                <p>Original and consistent character design</p>
-                <p>Cohesive narrative and visual building</p>
-                <p>Dynamic scene editing with special effects</p>
+                {characterFeatures.map((feature, idx) => (
+                  <p key={idx}>{feature}</p>
+                ))}
               </div>
 
               {/* Action Buttons */}
               <div className="flex gap-2 sm:gap-4 pt-4">
                 <button className="px-3 sm:px-6 py-2 border border-cyan-400 text-cyan-400 text-xs sm:text-sm font-medium hover:bg-cyan-400/10 transition-colors">
-                  Send Email
+                  {t('showsPage.sendEmail')}
                 </button>
                 <button className="px-3 sm:px-6 py-2 border border-cyan-400 text-cyan-400 text-xs sm:text-sm font-medium hover:bg-cyan-400/10 transition-colors">
-                  WhatsApp
+                  {t('showsPage.whatsapp')}
                 </button>
               </div>
             </div>

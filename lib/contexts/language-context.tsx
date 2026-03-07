@@ -94,6 +94,24 @@ const translations = {
     "shows.useCase4": "Aperturas de eventos temáticos",
     "shows.exploreShows": "Explorar Shows",
 
+    // Shows Page - Detailed Page
+    "showsPage.pageTitle": "Shows",
+    "showsPage.pageSubtitle": "Historias de Domo Cinemático",
+    "showsPage.descriptionDefault": "De reinos míticos a atmósferas sagradas, sumérgete en historias de maravilla.",
+    "showsPage.perfectFor": "Perfecto para:",
+    "showsPage.perfectFor1": "Noches de domo familiar",
+    "showsPage.perfectFor2": "Programación cultural",
+    "showsPage.perfectFor3": "Eventos enfocados en arte y experiencias",
+    "showsPage.teasersTitle": "Teasers:",
+    "showsPage.teasersDesc1": "Shows de larga duración y ediciones para domo disponibles. Si estás interesado en un episodio específico o deseas encargar una producción personalizada, contacta a nuestro equipo.",
+    "showsPage.teasersDesc2": "Desarrollamos contenido inmersivo de concepto a entrega final.",
+    "showsPage.characterDesign": "Diseño de personajes original y consistente",
+    "showsPage.narrativeBuilding": "Construcción narrativa y visual cohesiva",
+    "showsPage.effectsEditing": "Edición de escenas dinámica con efectos especiales",
+    "showsPage.sendEmail": "Enviar Email",
+    "showsPage.whatsapp": "WhatsApp",
+    "showsPage.loadMore": "Cargar Más",
+
     // Environments Section - Landing Page
     "environments.landingTitle": "Ambientes",
     "environments.landingSubtitle": "Fondos Inmersivos Infinitos",
@@ -503,6 +521,24 @@ const translations = {
     "shows.useCase3": "Branded immersive presentations",
     "shows.useCase4": "Themed event openings",
     "shows.exploreShows": "Explore Shows",
+
+    // Shows Page - Detailed Page
+    "showsPage.pageTitle": "Shows",
+    "showsPage.pageSubtitle": "Cinematic Dome Stories",
+    "showsPage.descriptionDefault": "From mythical realms to sacred atmospheres, immerse in tales of wonder.",
+    "showsPage.perfectFor": "Perfect for:",
+    "showsPage.perfectFor1": "Family dome nights",
+    "showsPage.perfectFor2": "Cultural programming",
+    "showsPage.perfectFor3": "Art and experience-focused events",
+    "showsPage.teasersTitle": "Teasers:",
+    "showsPage.teasersDesc1": "Full-length shows and dome editions are available. If you are interested in a specific episode or would like to commission a custom production, please contact our team.",
+    "showsPage.teasersDesc2": "We develop immersive content from concept to final delivery.",
+    "showsPage.characterDesign": "Original and consistent character design",
+    "showsPage.narrativeBuilding": "Cohesive narrative and visual building",
+    "showsPage.effectsEditing": "Dynamic scene editing with special effects",
+    "showsPage.sendEmail": "Send Email",
+    "showsPage.whatsapp": "WhatsApp",
+    "showsPage.loadMore": "Load More",
 
     // Environments Section - Landing Page
     "environments.landingTitle": "Environments",

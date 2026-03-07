@@ -3,50 +3,45 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ChevronRight } from 'lucide-react'
+import { useLanguage } from '@/lib/contexts/language-context'
 
-interface ElementalCard {
-  title: string
-  subtitle: string
-  description: string
-  imageUrl: string
-  accentColor: string
-  link: string
-}
+export function ElementalsSection() {
+  const { t } = useLanguage()
 
-const elementals: ElementalCard[] = [
-  {
-    title: 'Nature',
-    subtitle: 'Elemental Forces',
-    description: 'Oceans, Volcanoes, Ice & Snow, Forest',
-    imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatBackg%20%282%29-aQPuFI2fgsRop1jCuDnxWXhAMBjCVA.png',
-    accentColor: 'cyan',
-    link: '/environments#nature',
-  },
-  {
-    title: 'Culture',
-    subtitle: 'Heritage & Stories',
-    description: 'Regions, Traditions, Architecture, Heritage Sites',
-    imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultBackg%20%281%29-XbBPuSBSiwRQaM2g09DVzXHzBbTfJF.png',
-    accentColor: 'yellow',
-    link: '/environments#culture',
-  },
-  {
-    title: 'Mythic',
-    subtitle: 'Legendary Worlds',
-    description: 'Fantasy, Mythology, Ancient Realms, Cosmic',
-    imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythBackg%20%282%29-TyglO2M7f4cLxT7fpr7RoIU1ZHwKtq.png',
-    accentColor: 'purple',
-    link: '/environments#mythic',
-  },
-  {
-    title: 'Art',
-    subtitle: 'Creative Expression',
-    description: 'Abstract, Sculptures, Digital Art, Installations',
-    imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArtBackg%20%282%29-i2tI6hLUgCcC5qOAEPBzz1g91177C7.png',
-    accentColor: 'orange',
-    link: '/environments#art',
-  },
-]
+  const elementals = [
+    {
+      title: t('elementals.nature'),
+      subtitle: t('elementals.natureSubtitle'),
+      description: 'Oceans, Volcanoes, Ice & Snow, Forest',
+      imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatBackg%20%282%29-aQPuFI2fgsRop1jCuDnxWXhAMBjCVA.png',
+      accentColor: 'cyan',
+      link: '/environments#nature',
+    },
+    {
+      title: t('elementals.culture'),
+      subtitle: t('elementals.cultureSubtitle'),
+      description: 'Regions, Traditions, Architecture, Heritage Sites',
+      imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultBackg%20%281%29-XbBPuSBSiwRQaM2g09DVzXHzBbTfJF.png',
+      accentColor: 'yellow',
+      link: '/environments#culture',
+    },
+    {
+      title: t('elementals.mythic'),
+      subtitle: t('elementals.mythicSubtitle'),
+      description: 'Fantasy, Mythology, Ancient Realms, Cosmic',
+      imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythBackg%20%282%29-TyglO2M7f4cLxT7fpr7RoIU1ZHwKtq.png',
+      accentColor: 'purple',
+      link: '/environments#mythic',
+    },
+    {
+      title: t('elementals.art'),
+      subtitle: t('elementals.artSubtitle'),
+      description: 'Abstract, Sculptures, Digital Art, Installations',
+      imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArtBackg%20%282%29-i2tI6hLUgCcC5qOAEPBzz1g91177C7.png',
+      accentColor: 'orange',
+      link: '/environments#art',
+    },
+  ]
 
 const accentColorMap: Record<string, string> = {
   cyan: 'text-cyan-400 border-cyan-400/40 hover:border-cyan-400 hover:text-cyan-400',

@@ -2,12 +2,15 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { useLanguage } from '@/lib/contexts/language-context'
 
 interface HomepageHeroProps {
   videoUrl?: string
 }
 
 export function HomepageHero({ videoUrl }: HomepageHeroProps) {
+  const { t } = useLanguage()
+  
   return (
     <section className="w-full max-w-full overflow-hidden bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-700/60">
       <div className="max-w-7xl mx-auto">
@@ -16,26 +19,26 @@ export function HomepageHero({ videoUrl }: HomepageHeroProps) {
           <div className="flex flex-col gap-6 sm:gap-8">
             <div>
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-light text-blue-300 mb-2 sm:mb-3 tracking-tight leading-none">
-                Studio
+                {t('hero.studioTitle')}
               </h1>
               <p className="text-sm sm:text-base md:text-lg text-slate-400 font-light tracking-wide">
-                Built to Perform
+                {t('hero.studioSubtitle')}
               </p>
             </div>
 
             <div className="space-y-3 sm:space-y-5">
               <p className="text-xs sm:text-sm md:text-base text-slate-400 leading-relaxed font-light">
-                Cinematic dome stories, seamless immersive loops, and VR-ready environments — crafted for dome operators, immersive events, and live performance.
+                {t('hero.studioDesc1')}
               </p>
               <p className="text-xs sm:text-sm md:text-base text-slate-400 leading-relaxed font-light">
-                Projection-ready. Dome-correct. Instantly deployable.
+                {t('hero.studioDesc2')}
               </p>
             </div>
 
             <div className="pt-2 sm:pt-4">
               <Link href="/studio">
                 <button className="px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-light text-slate-100 border border-blue-300/40 hover:border-blue-300 hover:text-blue-300 transition-colors duration-300 rounded">
-                  Explore Studio
+                  {t('hero.exploreStudio')}
                 </button>
               </Link>
             </div>
@@ -60,7 +63,7 @@ export function HomepageHero({ videoUrl }: HomepageHeroProps) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <p className="text-slate-400 text-sm">Video not available</p>
+                    <p className="text-slate-400 text-sm">{t('hero.videoNotAvailable')}</p>
                   </div>
                 </div>
               )}

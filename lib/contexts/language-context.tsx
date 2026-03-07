@@ -76,6 +76,48 @@ const translations = {
     "hero.viewDetails": "Ver Detalles y Licencia",
     "hero.offToday": "% Disponible",
 
+    // Homepage Hero Section
+    "hero.studioTitle": "Studio",
+    "hero.studioSubtitle": "Construido para Ejecutar",
+    "hero.studioDesc1": "Historias de domo cinemático, loops inmersivos sin costuras, y ambientes listos para VR — elaborados para operadores de domo, eventos inmersivos y performance en vivo.",
+    "hero.studioDesc2": "Listo para proyección. Domo-correcto. Instantáneamente deployable.",
+    "hero.exploreStudio": "Explorar Studio",
+    "hero.videoNotAvailable": "Video no disponible",
+
+    // Shows Section - Landing Page
+    "shows.title": "Shows",
+    "shows.subtitle": "Historias de Domo Cinemático",
+    "shows.description": "Diseñados como mini-shows que mantienen la atención del público de principio a fin, nuestros Shows son perfectos para:",
+    "shows.useCase1": "Programación de domo escolar",
+    "shows.useCase2": "Segmentos principales de festival",
+    "shows.useCase3": "Presentaciones inmersivas con marca",
+    "shows.useCase4": "Aperturas de eventos temáticos",
+    "shows.exploreShows": "Explorar Shows",
+
+    // Environments Section - Landing Page
+    "environments.landingTitle": "Ambientes",
+    "environments.landingSubtitle": "Fondos Inmersivos Infinitos",
+    "environments.landingDesc1": "Los Ambientes son loops inmersivos continuos elaborados utilizando movimiento profesional sintonizado específicamente para la percepción de domo.",
+    "environments.landingDesc2": "Cuando necesitas atmósfera y flexibilidad",
+    "environments.freeDemo": "Demo GRATIS",
+    "environments.viewCatalogue": "Ver Catálogo",
+
+    // Elementals Section
+    "elementals.nature": "Naturaleza",
+    "elementals.natureSubtitle": "Fuerzas Elementales",
+    "elementals.mythic": "Mítico",
+    "elementals.mythicSubtitle": "Mundos Legendarios",
+    "elementals.art": "Arte",
+    "elementals.artSubtitle": "Expresión Creativa",
+    "elementals.culture": "Cultura",
+    "elementals.cultureSubtitle": "Patrimonio e Historias",
+
+    // Grand Finale Section
+    "finale.heading": "¿Listo para Experimentar\nlo Imposible?",
+    "finale.description": "Entra en mundos más allá de la imaginación. Experiencias de domo diseñadas para trascender fronteras y cautivar audiencias.",
+    "finale.exploreAll": "Explorar Todas las Experiencias",
+    "finale.learnStudio": "Aprende Sobre Studio",
+
     // Collection Section
     "collection.badge": "Colecciones Destacadas",
     "collection.title": "Colecciones",
@@ -443,6 +485,48 @@ const translations = {
     "hero.imageOfDay": "Featured Work",
     "hero.viewDetails": "View Details & License",
     "hero.offToday": "% Available",
+
+    // Homepage Hero Section
+    "hero.studioTitle": "Studio",
+    "hero.studioSubtitle": "Built to Perform",
+    "hero.studioDesc1": "Cinematic dome stories, seamless immersive loops, and VR-ready environments — crafted for dome operators, immersive events, and live performance.",
+    "hero.studioDesc2": "Projection-ready. Dome-correct. Instantly deployable.",
+    "hero.exploreStudio": "Explore Studio",
+    "hero.videoNotAvailable": "Video not available",
+
+    // Shows Section - Landing Page
+    "shows.title": "Shows",
+    "shows.subtitle": "Cinematic Dome Stories",
+    "shows.description": "Designed as mini-shows that hold audience attention from beginning to end, our Shows are perfect for:",
+    "shows.useCase1": "School dome programming",
+    "shows.useCase2": "Festival headline segments",
+    "shows.useCase3": "Branded immersive presentations",
+    "shows.useCase4": "Themed event openings",
+    "shows.exploreShows": "Explore Shows",
+
+    // Environments Section - Landing Page
+    "environments.landingTitle": "Environments",
+    "environments.landingSubtitle": "Endless Immersive Backdrops",
+    "environments.landingDesc1": "Environments are continuous immersive loops crafted using professional motion tuned specifically for dome perception.",
+    "environments.landingDesc2": "When you need atmosphere and flexibility",
+    "environments.freeDemo": "FREE Demo",
+    "environments.viewCatalogue": "View Catalogue",
+
+    // Elementals Section
+    "elementals.nature": "Nature",
+    "elementals.natureSubtitle": "Elemental Forces",
+    "elementals.mythic": "Mythic",
+    "elementals.mythicSubtitle": "Legendary Worlds",
+    "elementals.art": "Art",
+    "elementals.artSubtitle": "Creative Expression",
+    "elementals.culture": "Culture",
+    "elementals.cultureSubtitle": "Heritage & Stories",
+
+    // Grand Finale Section
+    "finale.heading": "Ready to Experience\\nthe Impossible?",
+    "finale.description": "Step into worlds beyond imagination. Dome experiences designed to transcend boundaries and captivate audiences.",
+    "finale.exploreAll": "Explore All Experiences",
+    "finale.learnStudio": "Learn About Studio",
 
     // Collection Section
     "collection.badge": "Featured Collections",

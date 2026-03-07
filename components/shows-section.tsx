@@ -3,13 +3,16 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { LANDING_PAGE_IMAGES } from '@/lib/constants/image-urls'
+import { useLanguage } from '@/lib/contexts/language-context'
 
 export function ShowsSection() {
+  const { t } = useLanguage()
+  
   const useCases = [
-    'School dome programming',
-    'Festival headline segments',
-    'Branded immersive presentations',
-    'Themed event openings',
+    t('shows.useCase1'),
+    t('shows.useCase2'),
+    t('shows.useCase3'),
+    t('shows.useCase4'),
   ]
 
   return (
@@ -20,16 +23,16 @@ export function ShowsSection() {
           <div className="flex flex-col gap-6 sm:gap-8">
             <div>
               <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-light text-purple-400 mb-2 sm:mb-3 tracking-tight leading-none">
-                Shows
+                {t('shows.title')}
               </h2>
               <p className="text-sm sm:text-base md:text-lg text-slate-400 font-light tracking-wide">
-                Cinematic Dome Stories
+                {t('shows.subtitle')}
               </p>
             </div>
 
             <div className="space-y-4 sm:space-y-6">
               <p className="text-xs sm:text-sm md:text-base text-slate-400 leading-relaxed font-light">
-                Designed as mini-shows that hold audience attention from beginning to end, our Shows are perfect for:
+                {t('shows.description')}
               </p>
               
               <ul className="space-y-2 sm:space-y-3">
@@ -49,7 +52,7 @@ export function ShowsSection() {
                 href="/shows"
                 className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-light text-slate-100 border border-purple-400/40 hover:border-purple-400 hover:text-purple-400 transition-all duration-300 group rounded"
               >
-                <span>Explore Shows</span>
+                <span>{t('shows.exploreShows')}</span>
                 <svg
                   className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform"
                   fill="none"

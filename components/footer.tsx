@@ -13,37 +13,37 @@ export function Footer() {
 
   const footerSections = [
     {
-      title: "Explore",
+      titleKey: "footer.exploreTitle",
       links: [
-        { label: "Gallery", href: "/gallery" },
-        { label: "Collections", href: "/collection" },
-        { label: "All Works", href: "/all" },
-        { label: "Theatre Mode", href: "/theatre" },
+        { labelKey: "footer.gallery", href: "/gallery" },
+        { labelKey: "footer.collections", href: "/collection" },
+        { labelKey: "footer.allWorks", href: "/all" },
+        { labelKey: "footer.theatreMode", href: "/theatre" },
       ],
     },
     {
-      title: "About",
+      titleKey: "footer.aboutTitle",
       links: [
-        { label: "About N3uralia360", href: "/about" },
-        { label: "Studio Process", href: "/studio/process" },
-        { label: "Commission", href: "/commission" },
-        { label: "Contact", href: "/contact" },
+        { labelKey: "footer.aboutN3uralia", href: "/about" },
+        { labelKey: "footer.studioProcess", href: "/studio/process" },
+        { labelKey: "footer.commission", href: "/commission" },
+        { labelKey: "footer.contact", href: "/contact" },
       ],
     },
     {
-      title: "Legal",
+      titleKey: "footer.legalTitle",
       links: [
-        { label: "Licensing Terms", href: "/licensing-terms" },
-        { label: "Licensing Contract", href: "/licensing-contract" },
+        { labelKey: "footer.licensingTerms", href: "/licensing-terms" },
+        { labelKey: "footer.licensingContract", href: "/licensing-contract" },
       ],
     },
     {
-      title: "Account",
+      titleKey: "footer.accountTitle",
       links: [
-        { label: "Profile", href: "/account/profile" },
-        { label: "Orders", href: "/account/orders" },
-        { label: "Downloads", href: "/account/downloads" },
-        { label: "Settings", href: "/account/settings" },
+        { labelKey: "footer.profile", href: "/account/profile" },
+        { labelKey: "footer.orders", href: "/account/orders" },
+        { labelKey: "footer.downloads", href: "/account/downloads" },
+        { labelKey: "footer.settings", href: "/account/settings" },
       ],
     },
   ]
@@ -57,7 +57,7 @@ export function Footer() {
           <div className="lg:col-span-1">
             <h3 className="text-lg font-bold mb-4">N3uralia360</h3>
             <p className="text-sm text-muted-foreground mb-6">
-              Cultural immersive media studio creating experiences across dome installations, VR environments, and spatial media.
+              {t("footer.brandDescription")}
             </p>
             {/* Contact Info */}
             <div className="space-y-3">
@@ -76,15 +76,15 @@ export function Footer() {
               </div>
               <div className="flex items-start gap-2">
                 <Clock className="w-4 h-4 text-muted-foreground mt-1 flex-shrink-0" />
-                <span className="text-sm text-muted-foreground">Available 24/7</span>
+                <span className="text-sm text-muted-foreground">{t("footer.available247")}</span>
               </div>
             </div>
           </div>
 
           {/* Navigation Sections */}
           {footerSections.map((section) => (
-            <div key={section.title}>
-              <h4 className="font-semibold text-sm mb-4">{section.title}</h4>
+            <div key={section.titleKey}>
+              <h4 className="font-semibold text-sm mb-4">{t(section.titleKey)}</h4>
               <ul className="space-y-2">
                 {section.links.map((link) => (
                   <li key={link.href}>
@@ -92,7 +92,7 @@ export function Footer() {
                       href={link.href}
                       className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      {link.label}
+                      {t(link.labelKey)}
                     </Link>
                   </li>
                 ))}

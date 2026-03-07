@@ -173,35 +173,35 @@ export function Header({ videoContext }: HeaderProps) {
               href="/shows"
               className="relative text-xs sm:text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-3 sm:px-4 py-2"
             >
-              Shows
+              {t("nav.shows")}
               <span className="absolute bottom-0 left-3 sm:left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-24px)] sm:group-hover:w-[calc(100%-32px)] transition-all duration-300" />
             </Link>
             <Link
               href="/environments"
               className="relative text-xs sm:text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-3 sm:px-4 py-2"
             >
-              Environments
+              {t("nav.environments")}
               <span className="absolute bottom-0 left-3 sm:left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-24px)] sm:group-hover:w-[calc(100%-32px)] transition-all duration-300" />
             </Link>
             <Link
               href="/theatre"
               className="relative text-xs sm:text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-3 sm:px-4 py-2"
             >
-              Theatre
+              {t("nav.theatre")}
               <span className="absolute bottom-0 left-3 sm:left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-24px)] sm:group-hover:w-[calc(100%-32px)] transition-all duration-300" />
             </Link>
             <Link
               href="/studio"
               className="relative text-xs sm:text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-3 sm:px-4 py-2"
             >
-              Studio
+              {t("nav.studio")}
               <span className="absolute bottom-0 left-3 sm:left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-24px)] sm:group-hover:w-[calc(100%-32px)] transition-all duration-300" />
             </Link>
             <Link
               href="/contact"
               className="relative text-xs sm:text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-3 sm:px-4 py-2"
             >
-              Contact
+              {t("nav.contact")}
               <span className="absolute bottom-0 left-3 sm:left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-24px)] sm:group-hover:w-[calc(100%-32px)] transition-all duration-300" />
             </Link>
             {isAuthenticated && (
@@ -209,7 +209,7 @@ export function Header({ videoContext }: HeaderProps) {
                 href="/account/orders"
                 className="relative text-xs sm:text-sm font-medium text-slate-400 hover:text-cyan-400 transition-all duration-300 group px-3 sm:px-4 py-2"
               >
-                Orders
+                {t("nav.orders")}
                 <span className="absolute bottom-0 left-3 sm:left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-24px)] sm:group-hover:w-[calc(100%-32px)] transition-all duration-300" />
               </Link>
             )}
@@ -342,35 +342,35 @@ export function Header({ videoContext }: HeaderProps) {
                 className="text-sm font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-2.5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Shows
+                {t("nav.shows")}
               </Link>
               <Link
                 href="/environments"
                 className="text-sm font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-2.5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Environments
+                {t("nav.environments")}
               </Link>
               <Link
                 href="/theatre"
                 className="text-sm font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-2.5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Theatre
+                {t("nav.theatre")}
               </Link>
               <Link
                 href="/studio"
                 className="text-sm font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-2.5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Studio
+                {t("nav.studio")}
               </Link>
               <Link
                 href="/tools"
                 className="text-sm font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-2.5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Tools
+                {t("nav.tools")}
               </Link>
               {isAuthenticated && (
                 <Link
@@ -378,7 +378,7 @@ export function Header({ videoContext }: HeaderProps) {
                   className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors px-4 py-2.5"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Orders
+                  {t("nav.orders")}
                 </Link>
               )}
               {/* UserMenu in Mobile Menu */}

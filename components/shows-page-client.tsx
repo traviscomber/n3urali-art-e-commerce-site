@@ -33,6 +33,25 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
   const { t } = useLanguage()
   const [teaserIndex, setTeaserIndex] = useState(0)
 
+  // Map of English descriptions to translation keys for dynamic translation
+  const descriptionMap: Record<string, string> = {
+    "Explore the extraordinary landscapes and sacred sites of Chile, South America's most geographically diverse nation. From the Atacama Desert to Patagonian glaciers, from ancient Inca roads to mystical Puma​ín forests, discover Chile through multiple immersive 360° collections.": "shows.description.chile",
+  }
+
+  // Function to get translated description or fallback to original
+  const getTranslatedDescription = (description: string | undefined): string => {
+    if (!description) return t('showsPage.descriptionDefault')
+    
+    // Check if we have a translation key for this description
+    const translationKey = descriptionMap[description]
+    if (translationKey) {
+      return t(translationKey)
+    }
+    
+    // Fallback to original description
+    return description
+  }
+
   const mythicBannerUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythBackg%20%282%29-UZZUeitXszDkixpZBAL3mYzMq9rEq1.png'
   
   const mythicImages = [
@@ -145,7 +164,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
             <div className="space-y-2 sm:space-y-3">
               <p className="text-slate-100 text-xs sm:text-sm leading-relaxed max-w-xl hidden sm:block">
-                {currentShow.description || currentShow.synopsis || t('showsPage.descriptionDefault')}
+                {getTranslatedDescription(currentShow.description || currentShow.synopsis)}
               </p>
 
               <div className="space-y-1 sm:space-y-2 pt-1 hidden sm:block">

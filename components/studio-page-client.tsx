@@ -3,8 +3,10 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Image from 'next/image'
+import { useLanguage } from '@/lib/contexts/language-context'
 
 export function StudioPageClient() {
+  const { t } = useLanguage()
   const [galleryIndex, setGalleryIndex] = useState(0)
 
   const teamMembers = [
@@ -53,7 +55,7 @@ export function StudioPageClient() {
         />
         <div className="absolute inset-0 bg-black/20" />
         <div className="relative z-10 text-5xl md:text-7xl font-light text-white text-center">
-          Video player
+          {t('studio.videoPlayer')}
         </div>
       </section>
 
@@ -64,37 +66,37 @@ export function StudioPageClient() {
           <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0 section-divider">
             <div className="flex flex-col gap-4 sm:gap-6 max-w-md">
               <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
-                Studio
+                {t('studio.title')}
               </h1>
               
               <div className="space-y-3 sm:space-y-5">
                 <p className="text-slate-400 text-xs sm:text-sm md:text-base leading-relaxed">
-                  N3uralia360 is a content creation studio combining advanced proprietary <a href="#" className="text-cyan-400 hover:text-cyan-300 underline">AI tools</a> with human art direction and real production.
+                  N3uralia360 is a content creation studio combining advanced proprietary <a href="#" className="text-cyan-400 hover:text-cyan-300 underline">{t('studio.aiToolsLink')}</a> with human art direction and real production.
                 </p>
 
                 {/* We create section */}
                 <div className="space-y-2 sm:space-y-3 pt-2">
-                  <p className="text-slate-400 text-xs font-medium uppercase tracking-widest opacity-60">We create:</p>
+                  <p className="text-slate-400 text-xs font-medium uppercase tracking-widest opacity-60">{t('studio.weCreate')}</p>
                   <ul className="space-y-1 sm:space-y-1.5">
                     <li className="flex gap-2 sm:gap-3 items-start text-slate-300 text-xs sm:text-sm">
                       <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
-                      <span>Full-dome cinematic stories</span>
+                      <span>{t('studio.fullDome')}</span>
                     </li>
                     <li className="flex gap-2 sm:gap-3 items-start text-slate-300 text-xs sm:text-sm">
                       <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
-                      <span>Seamless dome environments & loops</span>
+                      <span>{t('studio.seamlessDome')}</span>
                     </li>
                     <li className="flex gap-2 sm:gap-3 items-start text-slate-300 text-xs sm:text-sm">
                       <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
-                      <span>VR-ready immersive worlds</span>
+                      <span>{t('studio.vrReady')}</span>
                     </li>
                     <li className="flex gap-2 sm:gap-3 items-start text-slate-300 text-xs sm:text-sm">
                       <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
-                      <span>Educational & cultural series</span>
+                      <span>{t('studio.educational')}</span>
                     </li>
                     <li className="flex gap-2 sm:gap-3 items-start text-slate-300 text-xs sm:text-sm">
                       <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
-                      <span>Custom immersive productions</span>
+                      <span>{t('studio.custom')}</span>
                     </li>
                   </ul>
                 </div>
@@ -124,20 +126,20 @@ export function StudioPageClient() {
           <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0 section-divider">
             <div className="flex flex-col gap-4 sm:gap-8 max-w-md">
               <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
-                Team
+                {t('studio.teamTitle')}
               </h2>
               
               <p className="text-slate-400 text-xs sm:text-sm md:text-base leading-relaxed">
-                N3uralia360 is an AI + human studio. We build immersive content through code, curation, and cinematic motion design.
+                {t('studio.teamDescription')}
               </p>
 
               {/* Action Buttons */}
               <div className="flex gap-2 sm:gap-4 pt-4">
                 <button className="px-3 sm:px-6 py-2 border border-cyan-400 text-cyan-400 text-xs sm:text-sm font-medium hover:bg-cyan-400/10 transition-colors">
-                  Our Tools
+                  {t('studio.ourTools')}
                 </button>
                 <button className="px-3 sm:px-6 py-2 border border-cyan-400 text-cyan-400 text-xs sm:text-sm font-medium hover:bg-cyan-400/10 transition-colors">
-                  WhatsApp
+                  {t('studio.whatsapp')}
                 </button>
               </div>
             </div>

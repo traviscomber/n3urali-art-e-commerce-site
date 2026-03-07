@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import { useSearchParams } from "next/navigation"
 
 type Language = "es" | "en"
 
@@ -8,6 +9,7 @@ interface LanguageContextType {
   language: Language
   setLanguage: (lang: Language) => void
   t: (key: string) => string
+  isLoaded: boolean
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
@@ -337,6 +339,12 @@ const translations = {
     "collections.browseButton": "Explorar Galería",
     "collections.exploreCollection": "Explorar Colección",
 
+    // Shows & Theatre Pages (Spanish)
+    "shows.theatreTitle": "Teatro",
+    "shows.theatreSubtitle": "Sumérgete en experiencias de video curadas",
+    "shows.theatreDescription": "Pantalla más grande ofrece mejor experiencia. Mira nuestra colección curada de contenido inmersivo de domo en un entorno de escala de cine.",
+    "shows.enterTheatre": "Entrar al Teatro",
+
     "footer.legal": "Legal",
     "footer.licenseTerms": "Términos de Licencia",
   },
@@ -662,6 +670,43 @@ const translations = {
     "collections.browseButton": "Browse Gallery",
     "collections.exploreCollection": "Explore Collection",
 
+    // Studio Page
+    "studio.title": "Studio",
+    "studio.description": "N3uralia360 is a content creation studio combining advanced proprietary AI tools with human art direction and real production.",
+    "studio.aiToolsLink": "AI tools",
+    "studio.weCreate": "We create:",
+    "studio.fullDome": "Full-dome cinematic stories",
+    "studio.seamlessDome": "Seamless dome environments & loops",
+    "studio.vrReady": "VR-ready immersive worlds",
+    "studio.educational": "Educational & cultural series",
+    "studio.custom": "Custom immersive productions",
+    "studio.teamTitle": "Team",
+    "studio.teamDescription": "N3uralia360 is an AI + human studio. We build immersive content through code, curation, and cinematic motion design.",
+    "studio.ourTools": "Our Tools",
+    "studio.whatsapp": "WhatsApp",
+    "studio.videoPlayer": "Video player",
+
+    // Environments Page
+    "environments.natureTitle": "Nature",
+    "environments.natureDescription": "Explore real world with dreamlike immersive dome interpretations. Travel between UNESCO Sites in seconds or discover diversity of real life reimagined with immersive creativity.",
+    "environments.oceans": "Oceans",
+    "environments.volcanoes": "Volcanoes",
+    "environments.forest": "Forest",
+    "environments.iceSnow": "Ice & Snow",
+    "environments.back": "Back",
+    "environments.heritageTitle": "Heritage",
+    "environments.heritageDescription": "Heritage Environments are immersive journeys inspired by real cultures, architecture, symbolism, and landscapes.",
+    "environments.mythicTitle": "Mythic",
+    "environments.mythicDescription": "The Mythical Universe series transforms symbolic and dreamlike cosmology into immersive dome experiences. Pure atmosphere and emotional immersion.",
+    "environments.artTitle": "Art",
+    "environments.artDescription": "Algorithmically generated original art immersions that reimagine visuality, texture, and movement as surrounding 360° spaces.",
+
+    // Shows & Theatre Pages
+    "shows.theatreTitle": "Theatre",
+    "shows.theatreSubtitle": "Immerse yourself in curated video experiences",
+    "shows.theatreDescription": "Bigger screen brings better experience. Watch our curated collection of immersive dome content on a cinema-scale environment.",
+    "shows.enterTheatre": "Enter Theatre",
+
     "footer.legal": "Legal",
     "footer.licenseTerms": "License Terms",
   },
@@ -669,14 +714,32 @@ const translations = {
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>("en")
+  const [isLoaded, setIsLoaded] = useState(false)
+  const searchParams = useSearchParams()
 
   useEffect(() => {
-    // Load saved language preference or default to Spanish
+    // Check URL query param first (?lang=es)
+    const urlLang = searchParams?.get("lang") as Language
+    if (urlLang && (urlLang === "es" || urlLang === "en")) {
+      setLanguageState(urlLang)
+      localStorage.setItem("language", urlLang)
+      setIsLoaded(true)
+      return
+    }
+
+    // Fall back to localStorage
     const saved = localStorage.getItem("language") as Language
     if (saved && (saved === "es" || saved === "en")) {
       setLanguageState(saved)
+    } else {
+      // Fall back to browser language or default to English
+      const browserLang = typeof navigator !== "undefined" ? navigator.language.split("-")[0] : "en"
+      const defaultLang = (browserLang === "es" ? "es" : "en") as Language
+      setLanguageState(defaultLang)
+      localStorage.setItem("language", defaultLang)
     }
-  }, [])
+    setIsLoaded(true)
+  }, [searchParams])
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)
@@ -687,7 +750,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return translations[language][key] || key
   }
 
-  return <LanguageContext.Provider value={{ language, setLanguage, t }}>{children}</LanguageContext.Provider>
+  return <LanguageContext.Provider value={{ language, setLanguage, t, isLoaded }}>{children}</LanguageContext.Provider>
 }
 
 export function useLanguage() {

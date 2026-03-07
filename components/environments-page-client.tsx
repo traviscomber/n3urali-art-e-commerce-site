@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { ChevronRight, ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useLanguage } from '@/lib/contexts/language-context'
 
 // Lazy import to avoid webpack serialization warning for large constants
 let natureCategoryImages: any = {}
@@ -39,6 +40,7 @@ interface EnvironmentsPageClientProps {
 }
 
 export function EnvironmentsPageClient({ collections, environmentImages }: EnvironmentsPageClientProps) {
+  const { t } = useLanguage()
   const [heritageCategoryIndex, setHeritageCategoryIndex] = useState(0)
   const [artCategoryIndex, setArtCategoryIndex] = useState(0)
   const [selectedNatureCategory, setSelectedNatureCategory] = useState<string | null>(null)
@@ -208,10 +210,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 lg:px-12 bg-black/40">
             <div className="flex flex-col gap-2 sm:gap-4 max-w-2xl">
               <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-6xl font-light text-slate-100 leading-tight">
-                Nature
+                {t('environments.natureTitle')}
               </h2>
               <p className="text-slate-200 text-xs sm:text-sm md:text-base leading-relaxed max-w-md">
-                Explore real world with dreamlike immersive dome interpretations. Travel between UNESCO Sites in seconds or discover diversity of real life reimagined with <span className="text-red-400">immersive</span> creativity.
+                {t('environments.natureDescription')}
               </p>
             </div>
           </div>
@@ -227,25 +229,25 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               onClick={() => setSelectedNatureCategory('oceans')}
               className={`font-light transition-colors text-xs sm:text-sm whitespace-nowrap ${selectedNatureCategory === 'oceans' ? 'text-cyan-400' : 'text-slate-300 hover:text-cyan-400'}`}
             >
-              Oceans
+              {t('environments.oceans')}
             </button>
             <button 
               onClick={() => setSelectedNatureCategory('volcanoes')}
               className={`font-light transition-colors text-xs sm:text-sm whitespace-nowrap ${selectedNatureCategory === 'volcanoes' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
             >
-              Volcanoes
+              {t('environments.volcanoes')}
             </button>
             <button 
               onClick={() => setSelectedNatureCategory('forest')}
               className={`font-light transition-colors text-xs sm:text-sm whitespace-nowrap ${selectedNatureCategory === 'forest' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
             >
-              Forest
+              {t('environments.forest')}
             </button>
             <button 
               onClick={() => setSelectedNatureCategory('ice-and-snow')}
               className={`font-light transition-colors text-xs sm:text-sm whitespace-nowrap ${selectedNatureCategory === 'ice-and-snow' ? 'text-cyan-400' : 'text-slate-400 hover:text-cyan-400'}`}
             >
-              Ice & Snow
+              {t('environments.iceSnow')}
             </button>
             <button className="text-slate-400 hover:text-cyan-400 transition-colors ml-auto flex-shrink-0">
               <ChevronRight size={20} className="sm:w-6 sm:h-6" />
@@ -263,7 +265,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 onClick={() => setSelectedNatureCategory(null)}
                 className="text-slate-400 hover:text-cyan-400 transition-colors text-xs sm:text-sm font-light"
               >
-                Back
+                {t('environments.back')}
               </button>
               <span className="text-slate-400">|</span>
               <h2 className="text-slate-200 text-xs sm:text-sm font-light">
@@ -454,10 +456,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 lg:px-12 bg-black/40">
                 <div className="flex flex-col gap-2 sm:gap-4 max-w-2xl">
                   <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-6xl font-light text-slate-100 leading-tight">
-                    Culture
+                    {t('environments.heritageTitle')}
                   </h2>
                   <p className="text-slate-200 text-xs sm:text-sm md:text-base leading-relaxed max-w-md">
-                    Heritage Environments are immersive journeys inspired by real cultures, architecture, symbolism, and landscapes.
+                    {t('environments.heritageDescription')}
                   </p>
                 </div>
               </div>
@@ -561,10 +563,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 lg:px-12 bg-black/40">
                 <div className="flex flex-col gap-2 sm:gap-4 max-w-2xl">
                   <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-6xl font-light text-slate-100 leading-tight">
-                    Mythic
+                    {t('environments.mythicTitle')}
                   </h2>
                   <p className="text-slate-200 text-xs sm:text-sm md:text-base leading-relaxed max-w-md">
-                    The Mythical Universe series transforms <span className="text-cyan-400">symbolic and dreamlike cosmology</span> into immersive dome experiences. Pure atmosphere and emotional immersion.
+                    {t('environments.mythicDescription')}
                   </p>
                 </div>
               </div>
@@ -622,10 +624,10 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 lg:px-12 bg-black/40">
                 <div className="flex flex-col gap-2 sm:gap-4 max-w-2xl">
                   <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-6xl font-light text-slate-100 leading-tight">
-                    Art
+                    {t('environments.artTitle')}
                   </h2>
                   <p className="text-slate-200 text-xs sm:text-sm md:text-base leading-relaxed max-w-md">
-                    Performance-Ready Visual Architecture. Bold, cinematic <span className="text-cyan-400">dome worlds</span> created for live performance and immersive stages.
+                    {t('environments.artDescription')}
                   </p>
                 </div>
               </div>

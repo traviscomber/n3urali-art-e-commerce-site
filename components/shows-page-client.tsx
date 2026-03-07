@@ -42,13 +42,19 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
   const getTranslatedDescription = (description: string | undefined): string => {
     if (!description) return t('showsPage.descriptionDefault')
     
-    // Check if we have a translation key for this description
-    const translationKey = descriptionMap[description]
-    if (translationKey) {
-      return t(translationKey)
+    console.log("[v0] Raw description from DB:", description)
+    console.log("[v0] Description length:", description.length)
+    console.log("[v0] Description contains Chile:", description.includes('Chile'))
+    console.log("[v0] Description contains Atacama:", description.includes('Atacama'))
+    
+    // Check if it's the Chile description by looking for key keywords
+    if (description.includes('Chile') && description.includes('Atacama')) {
+      console.log("[v0] Detected Chile description, translating...")
+      return t('shows.description.chile')
     }
     
     // Fallback to original description
+    console.log("[v0] Falling back to original description")
     return description
   }
 

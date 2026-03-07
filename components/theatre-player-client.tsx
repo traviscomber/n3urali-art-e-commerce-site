@@ -172,7 +172,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
                 onClick={() => setIsViewerOpen(true)}
                 className="absolute inset-0 m-auto w-24 h-24 rounded-full border-2 border-gray-600 hover:border-cyan-500 transition-all duration-300 flex items-center justify-center z-10 hover:scale-110 hover:bg-black/20"
               >
-                <span className="text-cyan-400 text-lg font-light tracking-wider group-hover:text-cyan-300 transition-colors">GO</span>
+                <span className="text-cyan-400 text-lg font-light tracking-wider group-hover:text-cyan-300 transition-colors">{t('theatre.goButton')}</span>
               </button>
 
               {/* Info overlay */}
@@ -203,7 +203,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
                 onClick={handlePrevious}
                 disabled={relatedImages.length <= 1}
                 className="p-3 rounded-full border border-gray-700 hover:border-cyan-500 hover:bg-cyan-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Previous panorama"
+                aria-label={t('theatre.ariaLabelPrevious')}
               >
                 <ChevronLeft className="w-6 h-6 text-gray-400 hover:text-cyan-400" />
               </button>
@@ -221,7 +221,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
                         ? 'bg-cyan-500 w-8'
                         : 'bg-gray-600 hover:bg-gray-500'
                     }`}
-                    aria-label={`Go to panorama ${index + 1}`}
+                    aria-label={t('theatre.ariaLabelPanorama').replace('{index}', (index + 1).toString())}
                   />
                 ))}
               </div>
@@ -230,7 +230,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
                 onClick={handleNext}
                 disabled={relatedImages.length <= 1}
                 className="p-3 rounded-full border border-gray-700 hover:border-cyan-500 hover:bg-cyan-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Next panorama"
+                aria-label={t('theatre.ariaLabelNext')}
               >
                 <ChevronRight className="w-6 h-6 text-gray-400 hover:text-cyan-400" />
               </button>

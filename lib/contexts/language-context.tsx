@@ -172,6 +172,10 @@ const translations = {
     "theatre.clickGo": "Haz clic en GO para explorar en 360°",
     "theatre.defaultDescription": "Explora esta experiencia panorámica inmersiva",
     "theatre.panoramicExperience": "Experiencia Panorámica",
+    "theatre.goButton": "GO",
+    "theatre.ariaLabelPrevious": "Panorama anterior",
+    "theatre.ariaLabelNext": "Siguiente panorama",
+    "theatre.ariaLabelPanorama": "Ir al panorama {index}",
 
     // Contact Page
     "contact.back": "Atrás",
@@ -441,7 +445,7 @@ const translations = {
     "about.mission.p1":
       "En n3uralia360.art, parte del grupo n3uralia, creemos que el contenido visual inmersivo debe ser accesible, de alta calidad y elaborado profesionalmente. Nuestra misión es proporcionar a creadores, arquitectos y empresas las herramientas y el contenido que necesitan para dar vida a sus visiones.",
     "about.mission.p2":
-      "A través de técnicas avanzadas de generación y mejora de IA desarrolladas dentro del ecosistema del grupo n3uralia, entregamos calidad sin precedentes en imágenes 360° y fisheye que cumplen con los estándares exigentes de aplicaciones profesionales.",
+      "A través de t��cnicas avanzadas de generación y mejora de IA desarrolladas dentro del ecosistema del grupo n3uralia, entregamos calidad sin precedentes en imágenes 360° y fisheye que cumplen con los estándares exigentes de aplicaciones profesionales.",
     "about.offer.title": "Lo que Ofrecemos",
     "about.offer.item1": "Imágenes equirectangulares 360° de alta resolución",
     "about.offer.item2": "Fotografía profesional con lente fisheye",
@@ -704,6 +708,10 @@ const translations = {
     "theatre.clickGo": "Click GO to explore in 360°",
     "theatre.defaultDescription": "Explore this immersive panoramic experience",
     "theatre.panoramicExperience": "Panoramic Experience",
+    "theatre.goButton": "GO",
+    "theatre.ariaLabelPrevious": "Previous panorama",
+    "theatre.ariaLabelNext": "Next panorama",
+    "theatre.ariaLabelPanorama": "Go to panorama {index}",
 
     // Contact Page
     "contact.back": "Back",

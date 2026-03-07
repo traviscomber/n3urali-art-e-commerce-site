@@ -106,8 +106,8 @@ export function StudioPageClient() {
           <div className="hidden sm:flex sm:flex-1 relative overflow-hidden items-center justify-center px-4 sm:px-8">
             <div className="relative w-4/5 h-4/5 rounded-lg overflow-hidden">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ShowhButton-5zWpjE8wAgaCHbB7ol0bEI2uzXmY8t.png"
-                alt="N3uralia360 studio dome projection setup with immersive content"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/StudioPH1%20%282%29.png-MUbwmGnNIo5DpzwPuuFBiVuFBL7zqb.jpeg"
+                alt="N3uralia360 studio dome projection setup with immersive content displayed on dome"
                 fill
                 className="object-contain"
                 priority

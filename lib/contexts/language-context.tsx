@@ -202,6 +202,16 @@ const translations = {
     "environments.mythicGreek": "Griego",
     "environments.mythicEgyptian": "Egipcio",
 
+    // Environments Section Titles & Descriptions
+    "environments.natureTitle": "Naturaleza",
+    "environments.natureDescription": "Explora el mundo real con interpretaciones de domo inmersivo onírico. Viaja entre Sitios Patrimonio de la UNESCO en segundos o descubre la diversidad de la vida real reimaginada con creatividad inmersiva.",
+    "environments.heritageTitle": "Patrimonio",
+    "environments.heritageDescription": "Los Ambientes de Patrimonio son viajes inmersivos inspirados en culturas reales, arquitectura, simbolismo y paisajes.",
+    "environments.mythicTitle": "Mítico",
+    "environments.mythicDescription": "La serie del Universo Mítico transforma la cosmología simbólica y onírica en experiencias de domo inmersivo. Pura atmósfera e inmersión emocional.",
+    "environments.artTitle": "Arte",
+    "environments.artDescription": "Inmersiones de arte original generadas algorítmicamente que reimaginan la visualidad, textura y movimiento como espacios 360° envolventes.",
+
     // Collection Section
     "collection.badge": "Colecciones Destacadas",
     "collection.title": "Colecciones",

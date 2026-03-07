@@ -161,6 +161,47 @@ const translations = {
     "finale.exploreAll": "Explorar Todas las Experiencias",
     "finale.learnStudio": "Aprende Sobre Studio",
 
+    // Environments Page - Main
+    "environmentsPage.title": "Ambientes",
+    "environmentsPage.subtitle": "Loops inmersivos sin costura diseñados para encantar.",
+    "environmentsPage.benefit1": "Noches temáticas sin fin sin reconstruir tu show",
+    "environmentsPage.benefit2": "Material limpio y sin costura listo para superponer y mezclar",
+    "environmentsPage.benefit3": "Visuales premium ambiente que elevan cualquier espacio",
+    "environmentsPage.back": "Atrás",
+    "environmentsPage.loadMore": "Cargar Más",
+    
+    // Environments Page - Nature Categories
+    "environments.oceans": "Océanos",
+    "environments.volcanoes": "Volcanes",
+    "environments.forest": "Bosque",
+    "environments.iceSnow": "Hielo y Nieve",
+    
+    // Environments Page - Heritage Categories
+    "environments.northAmerica": "América del Norte",
+    "environments.southAmerica": "América del Sur",
+    "environments.asia": "Asia",
+    "environments.more": "Más",
+    
+    // Environments Page - Art Categories
+    "environments.architecture": "Arquitectura",
+    "environments.landscapes": "Paisajes",
+    "environments.geometry": "Geometría",
+    "environments.cosmic": "Cósmico",
+    "environments.abstract": "Abstracto",
+    
+    // Environments Page - Art Labels
+    "environments.artLabel1": "Jungla de Origami",
+    "environments.artLabel2": "Árbol Cibernético",
+    "environments.artLabel3": "Mandala Esmeralda",
+    "environments.artLabel4": "Cielo con Diamantes",
+    "environments.artLabel5": "Cielo Prismático",
+    
+    // Environments Page - Mythic Categories (same as shows)
+    "environments.mythicAsian": "Asiático",
+    "environments.mythicMesoamerican": "Mesoamericano",
+    "environments.mythicGreek": "Griego",
+    "environments.mythicEgyptian": "Egipcio",
+
     // Collection Section
     "collection.badge": "Colecciones Destacadas",
     "collection.title": "Colecciones",
@@ -602,10 +643,51 @@ const translations = {
     "elementals.cultureSubtitle": "Heritage & Stories",
 
     // Grand Finale Section
-    "finale.heading": "Ready to Experience\\nthe Impossible?",
+    "finale.heading": "Ready to Experience\nthe Impossible?",
     "finale.description": "Step into worlds beyond imagination. Dome experiences designed to transcend boundaries and captivate audiences.",
     "finale.exploreAll": "Explore All Experiences",
     "finale.learnStudio": "Learn About Studio",
+
+    // Environments Page - Main
+    "environmentsPage.title": "Environments",
+    "environmentsPage.subtitle": "Seamless dome loops designed to charm.",
+    "environmentsPage.benefit1": "Endless themed nights without rebuilding your show",
+    "environmentsPage.benefit2": "Clean, seamless material ready to layer and mix",
+    "environmentsPage.benefit3": "Ambient premium visuals that elevate any space",
+    "environmentsPage.back": "Back",
+    "environmentsPage.loadMore": "Load More",
+    
+    // Environments Page - Nature Categories
+    "environments.oceans": "Oceans",
+    "environments.volcanoes": "Volcanoes",
+    "environments.forest": "Forest",
+    "environments.iceSnow": "Ice and Snow",
+    
+    // Environments Page - Heritage Categories
+    "environments.northAmerica": "North America",
+    "environments.southAmerica": "South America",
+    "environments.asia": "Asia",
+    "environments.more": "More",
+    
+    // Environments Page - Art Categories
+    "environments.architecture": "Architecture",
+    "environments.landscapes": "Landscapes",
+    "environments.geometry": "Geometry",
+    "environments.cosmic": "Cosmic",
+    "environments.abstract": "Abstract",
+    
+    // Environments Page - Art Labels
+    "environments.artLabel1": "Origami Jungle",
+    "environments.artLabel2": "Cyber Tree",
+    "environments.artLabel3": "Emerald Mandala",
+    "environments.artLabel4": "Sky with Diamonds",
+    "environments.artLabel5": "Prismatic Sky",
+    
+    // Environments Page - Mythic Categories
+    "environments.mythicAsian": "Asian",
+    "environments.mythicMesoamerican": "Mesoamerican",
+    "environments.mythicGreek": "Greek",
+    "environments.mythicEgyptian": "Egyptian",
 
     // Collection Section
     "collection.badge": "Featured Collections",

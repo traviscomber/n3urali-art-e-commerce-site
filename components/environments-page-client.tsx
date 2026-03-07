@@ -49,25 +49,25 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
   const [imagesLoading, setImagesLoading] = useState(true)
 
   const natureCategories = [
-    { name: 'Oceans', id: 'oceans' },
-    { name: 'Volcanoes', id: 'volcanoes' },
-    { name: 'Ice and Snow', id: 'ice-and-snow' },
-    { name: 'Forest', id: 'forest' },
+    { name: t('environments.oceans'), id: 'oceans' },
+    { name: t('environments.volcanoes'), id: 'volcanoes' },
+    { name: t('environments.iceSnow'), id: 'ice-and-snow' },
+    { name: t('environments.forest'), id: 'forest' },
   ]
 
   const heritageCategories = [
-    { name: 'North America', id: 'north-america' },
-    { name: 'South America', id: 'south-america' },
-    { name: 'Asia', id: 'asia' },
-    { name: 'More', id: 'more' },
+    { name: t('environments.northAmerica'), id: 'north-america' },
+    { name: t('environments.southAmerica'), id: 'south-america' },
+    { name: t('environments.asia'), id: 'asia' },
+    { name: t('environments.more'), id: 'more' },
   ]
 
   const artCategories = [
-    { name: 'Architecture', id: 'architecture' },
-    { name: 'Landscapes', id: 'landscapes' },
-    { name: 'Geometry', id: 'geometry' },
-    { name: 'Cosmic', id: 'cosmic' },
-    { name: 'Abstract', id: 'abstract' },
+    { name: t('environments.architecture'), id: 'architecture' },
+    { name: t('environments.landscapes'), id: 'landscapes' },
+    { name: t('environments.geometry'), id: 'geometry' },
+    { name: t('environments.cosmic'), id: 'cosmic' },
+    { name: t('environments.abstract'), id: 'abstract' },
   ]
 
   const mythicBannerUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythBackg%20%282%29-UZZUeitXszDkixpZBAL3mYzMq9rEq1.png'
@@ -81,18 +81,18 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
   ]
 
   const mythicLabels = [
-    'El Tayukú Presence',
-    'Halloween in Lego City',
-    'Vibrant Ritual of New Caledonia',
-    'Hages of Blue Ocean',
-    'Angry Wind Spirit',
+    t('shows.mythicLabel1'),
+    t('shows.mythicLabel2'),
+    t('shows.mythicLabel3'),
+    t('shows.mythicLabel4'),
+    t('shows.mythicLabel5'),
   ]
 
   const mythicCategories = [
-    { name: 'Asian', id: 'asian' },
-    { name: 'Mesoamerican', id: 'mesoamerican' },
-    { name: 'Greek', id: 'greek' },
-    { name: 'Egyptian', id: 'egyptian' },
+    { name: t('environments.mythicAsian'), id: 'asian' },
+    { name: t('environments.mythicMesoamerican'), id: 'mesoamerican' },
+    { name: t('environments.mythicGreek'), id: 'greek' },
+    { name: t('environments.mythicEgyptian'), id: 'egyptian' },
   ]
 
   const artBannerUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsArtBackg-MIwtTMvWE0TRmQidtELMbTop8VeRAE.png'
@@ -106,11 +106,11 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
   ]
 
   const artLabels = [
-    'Origami Jungle',
-    'Cyber Tree',
-    'Emerald Mandala',
-    'Sky with Diamonds',
-    'Prismatic Sky',
+    t('environments.artLabel1'),
+    t('environments.artLabel2'),
+    t('environments.artLabel3'),
+    t('environments.artLabel4'),
+    t('environments.artLabel5'),
   ]
 
   // Fetch real image IDs from database
@@ -172,23 +172,23 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           <section className="w-full max-w-full overflow-hidden py-12 sm:py-16 md:py-24 px-4 sm:px-8 lg:px-12 border-b border-slate-700">
             <div className="max-w-2xl">
               <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-light text-slate-400 leading-tight mb-3 sm:mb-4">
-                Environments
+                {t('environmentsPage.title')}
               </h1>
               <p className="text-slate-500 text-xs sm:text-sm md:text-base font-light mb-4 sm:mb-6">
-                Seamless dome loops designed to charm.
+                {t('environmentsPage.subtitle')}
               </p>
               <ul className="space-y-2 sm:space-y-3">
                 <li className="flex gap-2 sm:gap-3 items-start text-slate-400 text-xs sm:text-sm">
                   <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
-                  <span>Endless themed nights without rebuilding your show</span>
+                  <span>{t('environmentsPage.benefit1')}</span>
                 </li>
                 <li className="flex gap-2 sm:gap-3 items-start text-slate-400 text-xs sm:text-sm">
                   <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
-                  <span>Clean, seamless material ready to layer and mix</span>
+                  <span>{t('environmentsPage.benefit2')}</span>
                 </li>
                 <li className="flex gap-2 sm:gap-3 items-start text-slate-400 text-xs sm:text-sm">
                   <span className="text-cyan-400 flex-shrink-0 mt-1">•</span>
-                  <span>Ambient premium visuals that elevate any space</span>
+                  <span>{t('environmentsPage.benefit3')}</span>
                 </li>
               </ul>
             </div>
@@ -265,7 +265,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 onClick={() => setSelectedNatureCategory(null)}
                 className="text-slate-400 hover:text-cyan-400 transition-colors text-xs sm:text-sm font-light"
               >
-                {t('environments.back')}
+                {t('environmentsPage.back')}
               </button>
               <span className="text-slate-400">|</span>
               <h2 className="text-slate-200 text-xs sm:text-sm font-light">
@@ -302,7 +302,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1 cursor-pointer"
               >
                 <span className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-xs sm:text-sm">
-                  Load More
+                  {t('environmentsPage.loadMore')}
                 </span>
               </button>
             </div>

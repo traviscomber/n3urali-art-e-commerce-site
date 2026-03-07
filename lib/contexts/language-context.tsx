@@ -112,6 +112,24 @@ const translations = {
     "showsPage.whatsapp": "WhatsApp",
     "showsPage.loadMore": "Cargar Más",
 
+    // Shows Page - Mythic Labels
+    "shows.mythicLabel1": "Presencia del Tayukú",
+    "shows.mythicLabel2": "Halloween en Ciudad Lego",
+    "shows.mythicLabel3": "Ritual Vibrante de Nueva Caledonia",
+    "shows.mythicLabel4": "Hages del Océano Azul",
+    "shows.mythicLabel5": "Espíritu del Viento Furioso",
+
+    // Shows Page - Mythic Categories
+    "shows.categoryAsian": "Asiático",
+    "shows.categoryMesoamerican": "Mesoamericano",
+    "shows.categoryGreek": "Griego",
+    "shows.categoryEgyptian": "Egipcio",
+
+    // Shows Page - Teaser Titles
+    "shows.teaserTitle1": "Video Teaser 1",
+    "shows.teaserTitle2": "Video Teaser 2",
+    "shows.teaserTitle3": "Video Teaser 3",
+
     // Environments Section - Landing Page
     "environments.landingTitle": "Ambientes",
     "environments.landingSubtitle": "Fondos Inmersivos Infinitos",
@@ -539,6 +557,24 @@ const translations = {
     "showsPage.sendEmail": "Send Email",
     "showsPage.whatsapp": "WhatsApp",
     "showsPage.loadMore": "Load More",
+
+    // Shows Page - Mythic Labels
+    "shows.mythicLabel1": "El Tayukú Presence",
+    "shows.mythicLabel2": "Halloween in Lego City",
+    "shows.mythicLabel3": "Vibrant Ritual of New Caledonia",
+    "shows.mythicLabel4": "Hages of Blue Ocean",
+    "shows.mythicLabel5": "Angry Wind Spirit",
+
+    // Shows Page - Mythic Categories
+    "shows.categoryAsian": "Asian",
+    "shows.categoryMesoamerican": "Mesoamerican",
+    "shows.categoryGreek": "Greek",
+    "shows.categoryEgyptian": "Egyptian",
+
+    // Shows Page - Teaser Titles
+    "shows.teaserTitle1": "Teaser Video 1",
+    "shows.teaserTitle2": "Teaser Video 2",
+    "shows.teaserTitle3": "Teaser Video 3",
 
     // Environments Section - Landing Page
     "environments.landingTitle": "Environments",

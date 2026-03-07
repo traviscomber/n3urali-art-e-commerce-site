@@ -44,32 +44,32 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
   ]
 
   const mythicLabels = [
-    'El Tayukú Presence',
-    'Halloween in Lego City',
-    'Vibrant Ritual of New Caledonia',
-    'Hages of Blue Ocean',
-    'Angry Wind Spirit',
+    t('shows.mythicLabel1'),
+    t('shows.mythicLabel2'),
+    t('shows.mythicLabel3'),
+    t('shows.mythicLabel4'),
+    t('shows.mythicLabel5'),
   ]
 
   const mythicCategories = [
-    { name: 'Asian', id: 'asian' },
-    { name: 'Mesoamerican', id: 'mesoamerican' },
-    { name: 'Greek', id: 'greek' },
-    { name: 'Egyptian', id: 'egyptian' },
+    { name: t('shows.categoryAsian'), id: 'asian' },
+    { name: t('shows.categoryMesoamerican'), id: 'mesoamerican' },
+    { name: t('shows.categoryGreek'), id: 'greek' },
+    { name: t('shows.categoryEgyptian'), id: 'egyptian' },
   ]
 
   const teasers = [
     {
       video: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/upscaled_4k_1769186425665-tIDvx4aisEE2OnZKa01br1AsjGa0U9.mp4',
-      title: 'Teaser Video 1',
+      title: t('shows.teaserTitle1'),
     },
     {
       video: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/upscaled_4k_1769188268692-hzRqYyG3px6XWnyqOeymrygNVHapDN.mp4',
-      title: 'Teaser Video 2',
+      title: t('shows.teaserTitle2'),
     },
     {
       video: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/upscaled_4k_1769187422672-86GC3cBIId4ahyMtCrRkhq9BS8zVM5.mp4',
-      title: 'Teaser Video 3',
+      title: t('shows.teaserTitle3'),
     },
   ]
 

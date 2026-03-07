@@ -131,11 +131,11 @@ const translations = {
     "shows.teaserTitle3": "Video Teaser 3",
 
     // Shows Page - Sample Show Data
-    "shows.sampleShowTitle": "Meet Mosey — Guide of the Nile, Multiverse",
-    "shows.sampleShowDescription": "From mythical realms to sacred atmospheres, immerse in tales of wonder.",
+    "shows.sampleShowTitle": "Conoce a Mosey — Guía del Nilo, Multiverso",
+    "shows.sampleShowDescription": "De reinos míticos a atmósferas sagradas, sumérgete en historias de maravilla.",
 
     // Shows Collections - Database Descriptions
-    "shows.description.chile": "Explore the extraordinary landscapes and sacred sites of Chile, South America's most geographically diverse nation. From the Atacama Desert to Patagonian glaciers, from ancient Inca roads to mystical Puma​ín forests, discover Chile through multiple immersive 360° collections.",
+    "shows.description.chile": "Explora los paisajes extraordinarios y sitios sagrados de Chile, la nación más geográficamente diversa de América del Sur. Desde el Desierto de Atacama hasta los glaciares patagónicos, desde antiguas rutas incas hasta bosques místicos de Puma​ín, descubre Chile a través de múltiples colecciones inmersivas 360°.",
 
     // Environments Section - Landing Page
     "environments.landingTitle": "Ambientes",

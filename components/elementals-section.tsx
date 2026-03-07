@@ -8,6 +8,13 @@ import { useLanguage } from '@/lib/contexts/language-context'
 export function ElementalsSection() {
   const { t } = useLanguage()
 
+  const accentColorMap: Record<string, string> = {
+    cyan: 'text-cyan-400 border-cyan-400/40 hover:border-cyan-400 hover:text-cyan-400',
+    yellow: 'text-yellow-400 border-yellow-400/40 hover:border-yellow-400 hover:text-yellow-400',
+    purple: 'text-purple-400 border-purple-400/40 hover:border-purple-400 hover:text-purple-400',
+    orange: 'text-orange-400 border-orange-400/40 hover:border-orange-400 hover:text-orange-400',
+  }
+
   const elementals = [
     {
       title: t('elementals.nature'),
@@ -43,14 +50,6 @@ export function ElementalsSection() {
     },
   ]
 
-const accentColorMap: Record<string, string> = {
-  cyan: 'text-cyan-400 border-cyan-400/40 hover:border-cyan-400 hover:text-cyan-400',
-  yellow: 'text-yellow-400 border-yellow-400/40 hover:border-yellow-400 hover:text-yellow-400',
-  purple: 'text-purple-400 border-purple-400/40 hover:border-purple-400 hover:text-purple-400',
-  orange: 'text-orange-400 border-orange-400/40 hover:border-orange-400 hover:text-orange-400',
-}
-
-export function ElementalsSection() {
   return (
     <section className="w-full max-w-full overflow-hidden bg-black py-12 sm:py-16 md:py-24 lg:py-32 space-y-4 sm:space-y-6 md:space-y-8 lg:space-y-12">
       <div className="space-y-3 sm:space-y-4 px-4 sm:px-6 lg:px-8 hidden">

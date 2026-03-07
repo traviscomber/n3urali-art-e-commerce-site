@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { PanoramaViewerPSV } from '@/components/panorama-viewer-psv'
 import { ChevronRight, ChevronLeft } from 'lucide-react'
+import { useLanguage } from '@/lib/contexts/language-context'
 
 interface Image {
   id: string
@@ -29,6 +30,7 @@ interface TheatrePlayerClientProps {
 }
 
 export function TheatrePlayerClient({ images, collections }: TheatrePlayerClientProps) {
+  const { t } = useLanguage()
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [isViewerOpen, setIsViewerOpen] = useState(false)
   const [fadeOut, setFadeOut] = useState(false)
@@ -82,8 +84,8 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
     return (
       <div className="min-h-screen w-full bg-black flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-3xl font-light text-gray-400 mb-4">No Equirectangular Images Available</h2>
-          <p className="text-gray-500">Check back soon for immersive 360° experiences.</p>
+          <h2 className="text-3xl font-light text-gray-400 mb-4">{t('theatre.noImages')}</h2>
+          <p className="text-gray-500">{t('theatre.checkBack')}</p>
         </div>
       </div>
     )
@@ -126,7 +128,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
       {isViewerOpen && (
         <PanoramaViewerPSV
           imageUrl={imageUrl}
-          title={currentImage.title || 'Panoramic Experience'}
+          title={currentImage.title || t('theatre.panoramicExperience')}
           onClose={() => setIsViewerOpen(false)}
           relaxMode={true}
           fov={130}
@@ -141,13 +143,13 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
           {/* Header Section */}
           <div className="pt-20 pb-12 text-center border-b border-gray-800">
             <h1 className="text-5xl md:text-6xl font-light text-gray-400 mb-6 tracking-wide">
-              Theatre
+              {t('theatre.title')}
             </h1>
             <div className="space-y-2 text-gray-500 text-sm md:text-base">
-              <p>Immerse yourself. No special requirements</p>
-              <p>Bigger screen brings better experience</p>
-              <p className="mt-4">A Living Immersive Catalog</p>
-              <p>New worlds are released regularly</p>
+              <p>{t('theatre.tagline1')}</p>
+              <p>{t('theatre.tagline2')}</p>
+              <p className="mt-4">{t('theatre.tagline3')}</p>
+              <p>{t('theatre.tagline4')}</p>
             </div>
           </div>
 
@@ -177,7 +179,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
                 <div className="p-6">
                   <h3 className="text-xl font-light text-white">{currentImage.title}</h3>
-                  <p className="text-sm text-gray-300 mt-2">Click GO to explore in 360°</p>
+                  <p className="text-sm text-gray-300 mt-2">{t('theatre.clickGo')}</p>
                 </div>
               </div>
             </div>
@@ -188,7 +190,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
                 {currentImage.title}
               </h2>
               <p className="text-gray-500">
-                {currentImage.description || 'Explore this immersive panoramic experience'}
+                {currentImage.description || t('theatre.defaultDescription')}
               </p>
               <p className="text-gray-600 text-sm mt-2">
                 {currentRelatedIndex} of {relatedImages.length}

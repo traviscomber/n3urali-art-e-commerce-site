@@ -107,8 +107,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
   const shows = collections.length > 0 ? collections : [
     {
       id: '1',
-      title: 'Meet Mosey — Guide of the Nile, Multiverse',
-      description: 'From mythical realms to sacred atmospheres, immerse in tales of wonder.',
+      title: t('shows.sampleShowTitle'),
+      description: t('shows.sampleShowDescription'),
       code: 'mosey',
     },
   ]

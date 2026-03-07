@@ -130,6 +130,10 @@ const translations = {
     "shows.teaserTitle2": "Video Teaser 2",
     "shows.teaserTitle3": "Video Teaser 3",
 
+    // Shows Page - Sample Show Data
+    "shows.sampleShowTitle": "Conoce a Mosey — Guía del Nilo, Multiverso",
+    "shows.sampleShowDescription": "De reinos míticos a atmósferas sagradas, sumérgete en historias de maravilla.",
+
     // Environments Section - Landing Page
     "environments.landingTitle": "Ambientes",
     "environments.landingSubtitle": "Fondos Inmersivos Infinitos",

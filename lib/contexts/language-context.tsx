@@ -162,13 +162,13 @@ const translations = {
 
     // Elementals Section
     "elementals.nature": "Naturaleza",
-    "elementals.natureSubtitle": "ELEMENTALS.NATURESUBTITLE",
+    "elementals.natureSubtitle": "Los mundos vivientes de la Tierra.",
     "elementals.culture": "Cultura",
-    "elementals.cultureSubtitle": "ELEMENTALS.CULTURESUBTITLE",
+    "elementals.cultureSubtitle": "Viaja a través de civilizaciones.",
     "elementals.mythic": "Mítico",
-    "elementals.mythicSubtitle": "ELEMENTALS.MYTHICSUBTITLE",
+    "elementals.mythicSubtitle": "Leyendas cobran vida.",
     "elementals.art": "Arte",
-    "elementals.artSubtitle": "ELEMENTALS.ARTSUBTITLE",
+    "elementals.artSubtitle": "Atmósfera visual pura.",
 
     // Theatre
     "theatre.panoramicExperience": "Experiencia Panorámica",
@@ -422,13 +422,13 @@ const translations = {
 
     // Elementals Section
     "elementals.nature": "Nature",
-    "elementals.natureSubtitle": "ELEMENTALS.NATURESUBTITLE",
+    "elementals.natureSubtitle": "The living worlds of Earth.",
     "elementals.culture": "Culture",
-    "elementals.cultureSubtitle": "ELEMENTALS.CULTURESUBTITLE",
+    "elementals.cultureSubtitle": "Travel through civilizations.",
     "elementals.mythic": "Mythic",
-    "elementals.mythicSubtitle": "ELEMENTALS.MYTHICSUBTITLE",
+    "elementals.mythicSubtitle": "Legends brought to life.",
     "elementals.art": "Art",
-    "elementals.artSubtitle": "ELEMENTALS.ARTSUBTITLE",
+    "elementals.artSubtitle": "Pure visual atmosphere.",
 
     // Theatre
     "theatre.panoramicExperience": "Panoramic Experience",

@@ -57,7 +57,7 @@ export function EnvironmentVideoDetailClient({
 
   const handleWhatsAppContact = () => {
     const message = `Hi, I'm interested in ${video.title}. Please send me more information.`
-    const phoneNumber = "1234567890" // Replace with your WhatsApp number
+    const phoneNumber = "6282340137013" // WhatsApp number
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`)
   }
 

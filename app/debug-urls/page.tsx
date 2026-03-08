@@ -1,5 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 
+// Mark this page as dynamic since it queries the database
+export const dynamic = 'force-dynamic'
+
 export default async function DebugUrlsPage() {
   const supabase = await createClient()
 

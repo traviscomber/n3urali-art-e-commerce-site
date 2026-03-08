@@ -124,24 +124,15 @@ export default function WorkDetailPage() {
         {/* Formats Section */}
         <div className="mb-12">
           <h2 className="text-2xl font-bold tracking-tight mb-6">Available Formats</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {work.formats && work.formats.length > 0 ? (
-              work.formats.map((format) => (
-                <Card key={format.id} className="p-4 hover:border-primary transition-colors cursor-pointer">
-                  <div className="relative w-full aspect-square rounded-md overflow-hidden mb-3 bg-muted">
-                    <Image
-                      src={format.thumbnail_large_url || '/placeholder.svg'}
-                      alt={format.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <h3 className="font-semibold text-sm mb-1">{format.title}</h3>
-                  <p className="text-xs text-muted-foreground mb-3">{format.format_edition}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">${format.price}</span>
-                    <Button size="sm" variant="outline">
-                      Add to Cart
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {work.formats && Object.keys(work.formats).length > 0 ? (
+              Object.entries(work.formats).map(([formatType, count]) => (
+                <Card key={formatType} className="p-4 hover:border-primary transition-colors cursor-pointer">
+                  <div className="text-center">
+                    <h3 className="font-semibold text-lg mb-2 capitalize">{formatType}</h3>
+                    <p className="text-sm text-muted-foreground mb-3">{count} Available</p>
+                    <Button size="sm" variant="outline" className="w-full">
+                      View Details
                     </Button>
                   </div>
                 </Card>

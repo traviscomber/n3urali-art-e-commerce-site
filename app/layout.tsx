@@ -348,17 +348,19 @@ export default function RootLayout({
           <AuthProvider>
             <CartProvider>
               <TagFilterProvider>
-                <LanguageProvider>
-                  <MusicPlayerProvider>
-                    <ToastProvider>
-                      <Header />
-                      {children}
-                      <CartSidebar />
-                      <Analytics />
-                      <SpeedInsights />
-                    </ToastProvider>
-                  </MusicPlayerProvider>
-                </LanguageProvider>
+                <Suspense fallback={null}>
+                  <LanguageProvider>
+                    <MusicPlayerProvider>
+                      <ToastProvider>
+                        <Header />
+                        {children}
+                        <CartSidebar />
+                        <Analytics />
+                        <SpeedInsights />
+                      </ToastProvider>
+                    </MusicPlayerProvider>
+                  </LanguageProvider>
+                </Suspense>
               </TagFilterProvider>
             </CartProvider>
           </AuthProvider>

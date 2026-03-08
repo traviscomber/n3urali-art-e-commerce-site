@@ -47,8 +47,8 @@ export default function SimpleAdminPage() {
       if (imagesResult.success) {
         setImages(imagesResult.data)
         // Extract unique categories from images
-        const uniqueCategories = imagesResult.data.reduce((acc, image) => {
-          if (image.category_name && !acc.find((cat) => cat.name === image.category_name)) {
+        const uniqueCategories = imagesResult.data.reduce((acc: { id: string; name: string }[], image: any) => {
+          if (image.category_name && !acc.find((cat: { id: string; name: string }) => cat.name === image.category_name)) {
             acc.push({ id: image.category_id, name: image.category_name })
           }
           return acc
@@ -73,7 +73,7 @@ export default function SimpleAdminPage() {
     is_featured: false,
   })
 
-  const handleImageSubmit = async (e) => {
+  const handleImageSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 

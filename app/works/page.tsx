@@ -121,7 +121,7 @@ export default function WorksPage() {
                   {/* Hero Image */}
                   <div className="relative w-full aspect-video overflow-hidden bg-muted">
                     <Image
-                      src={work.featured_image_url || '/placeholder.svg'}
+                      src="/placeholder.svg"
                       alt={work.work_title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"

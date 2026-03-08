@@ -5,8 +5,13 @@ import { createContext, useContext, useState, useEffect, useMemo, useCallback } 
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
 
+// Extend the User type with custom properties
+interface ExtendedUser extends User {
+  is_admin?: boolean
+}
+
 interface AuthContextType {
-  user: User | null
+  user: ExtendedUser | null
   isAuthenticated: boolean
   isLoading: boolean
   signOut: () => Promise<void>
@@ -16,7 +21,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<ExtendedUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isInitialized, setIsInitialized] = useState(false)
   const [supabase, setSupabase] = useState<ReturnType<typeof createClient> | null>(null)
@@ -46,13 +51,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: { session },
       } = await supabase.auth.getSession()
 
-      setUser(session?.user ?? null)
+      if (session?.user) {
+        // Check if user is admin from profiles table
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .single()
+
+        const extendedUser: ExtendedUser = {
+          ...session.user,
+          is_admin: profile?.role === "admin",
+        }
+        setUser(extendedUser)
+      } else {
+        setUser(null)
+      }
 
       // Subscribe to auth changes only after manual initialization
       const {
         data: { subscription },
       } = supabase.auth.onAuthStateChange(async (event, session) => {
-        setUser(session?.user ?? null)
+        if (session?.user) {
+          // Check if user is admin from profiles table
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", session.user.id)
+            .single()
+
+          const extendedUser: ExtendedUser = {
+            ...session.user,
+            is_admin: profile?.role === "admin",
+          }
+          setUser(extendedUser)
+        } else {
+          setUser(null)
+        }
       })
 
       return () => subscription.unsubscribe()

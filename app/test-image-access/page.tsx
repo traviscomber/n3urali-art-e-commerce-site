@@ -28,7 +28,7 @@ export default function TestImageAccessPage() {
         const img = new Image()
         img.crossOrigin = "anonymous"
 
-        const loadPromise = new Promise((resolve, reject) => {
+        const loadPromise: Promise<{ success: boolean; width: number; height: number }> = new Promise((resolve, reject) => {
           img.onload = () => resolve({ success: true, width: img.width, height: img.height })
           img.onerror = () => reject(new Error("Failed to load image"))
           setTimeout(() => reject(new Error("Timeout")), 10000)

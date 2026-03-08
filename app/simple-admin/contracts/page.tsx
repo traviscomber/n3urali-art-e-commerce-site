@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge"
 import { FileText, DollarSign, Calendar, Shield, ArrowLeft, Wallet, Copy } from "lucide-react"
 import { Contract069 } from "./contract-069"
 
+// Mark this page as dynamic since it uses client-side hooks
+export const dynamic = 'force-dynamic'
+
 interface Contract {
   id: string
   customer: string

@@ -55,8 +55,12 @@ function CameraSetup() {
     // Position camera at center, looking slightly up
     camera.position.set(0, 50, 0)
     camera.lookAt(0, 0, 0)
-    camera.fov = 85
-    camera.updateProjectionMatrix()
+    
+    // Only set fov if this is a PerspectiveCamera
+    if (camera instanceof THREE.PerspectiveCamera) {
+      camera.fov = 85
+      camera.updateProjectionMatrix()
+    }
   }, [camera])
 
   return null

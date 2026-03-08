@@ -106,8 +106,9 @@ Please forward these links to the customer.`
 
       await loadPayments()
     } else {
-      console.error("[v0] Approval failed:", result.error)
-      toast.error("Failed to approve payment: " + result.error)
+      const errorMsg = !result.success && "error" in result ? result.error : "Unknown error"
+      console.error("[v0] Approval failed:", errorMsg)
+      toast.error("Failed to approve payment: " + errorMsg)
     }
     setProcessingId(null)
   }

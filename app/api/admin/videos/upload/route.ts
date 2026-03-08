@@ -35,23 +35,27 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(arrayBuffer)
 
     // Upload to Supabase - try videos bucket first, fallback to assets
-    let uploadData: any
-    let uploadError: any
-    let bucketName: string = "videos"
+    let uploadData: any = null
+    let uploadError: any = null
+    let bucketName = "videos"
 
-    ({ data: uploadData, error: uploadError } = await supabase.storage
+    const uploadResult = await supabase.storage
       .from(bucketName)
       .upload(filePath, buffer, { cacheControl: "3600", upsert: false })
-    )
+    
+    uploadData = uploadResult.data
+    uploadError = uploadResult.error
 
     if (uploadError) {
       console.log("[v0] Videos bucket failed, trying assets bucket")
       bucketName = "assets"
       
-      ({ data: uploadData, error: uploadError } = await supabase.storage
+      const retryResult = await supabase.storage
         .from(bucketName)
         .upload(filePath, buffer, { cacheControl: "3600", upsert: false })
-      )
+      
+      uploadData = retryResult.data
+      uploadError = retryResult.error
     }
 
     if (uploadError) {

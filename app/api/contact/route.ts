@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     console.log('[v0] Resend instance created:', !!resend)
     
     // Send confirmation email to customer with copy of their submission
-    const result = await resend.emails.send({
+    const result: any = await resend.emails.send({
       from: 'N3uralia360 <info@n3uralia360.art>',
       to: email,
       replyTo: 'info@n3uralia360.art',
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
     console.log('[v0] Email sent successfully, ID:', result.data?.id)
     
     // Send a copy to admin at info@n3uralia360.art (with same beautiful format)
-    const adminResult = await resend.emails.send({
+    const adminResult: any = await resend.emails.send({
       from: 'N3uralia360 <info@n3uralia360.art>',
       to: 'info@n3uralia360.art',
       replyTo: 'info@n3uralia360.art',

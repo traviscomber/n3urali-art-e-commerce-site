@@ -14,10 +14,10 @@ import { getImages, createImageWithCategory } from "@/app/actions/admin-actions"
 export default function SimpleAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [password, setPassword] = useState("")
-  const [images, setImages] = useState([])
-  const [categories, setCategories] = useState([])
+  const [images, setImages] = useState<any[]>([])
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
   const [loading, setLoading] = useState(false)
-  const [editingImage, setEditingImage] = useState(null)
+  const [editingImage, setEditingImage] = useState<any>(null)
 
   const handleLogin = () => {
     if (password === "admin123") {

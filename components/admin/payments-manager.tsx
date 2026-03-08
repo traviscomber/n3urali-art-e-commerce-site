@@ -61,7 +61,7 @@ export function PaymentsManager() {
     const result = await approvePayment(payment.id)
     console.log("[v0] Approval result:", JSON.stringify(result, null, 2))
 
-    if (result.success && result.data) {
+    if (result.success && "data" in result && result.data) {
       console.log("[v0] Download links received:", result.data.downloadLinks?.length || 0)
       
       toast.success(`Payment approved! Download links generated for ${payment.user_email}`)

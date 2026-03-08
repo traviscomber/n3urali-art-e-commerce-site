@@ -1,8 +1,6 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/contexts/language-context"
-import { Globe } from "lucide-react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 
 export function LanguageToggle() {
@@ -22,17 +20,40 @@ export function LanguageToggle() {
   }
 
   return (
-    <Button
-      variant="ghost"
-      size="sm"
+    <button
       onClick={handleLanguageChange}
-      className="relative text-foreground hover:bg-accent hover:text-foreground transition-all duration-300 group"
+      className="relative inline-flex items-center justify-between w-16 h-8 px-1 bg-slate-800 border border-slate-700 rounded-full transition-colors duration-300 hover:border-cyan-500/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
       title={language === "es" ? "Switch to English" : "Cambiar a Español"}
+      aria-label={`Language toggle: ${language === "es" ? "Switch to English" : "Switch to Spanish"}`}
     >
-      <div className="flex items-center gap-2">
-        <Globe className="w-4 h-4" />
-        <span className="text-sm font-medium">{language === "es" ? "ES" : "EN"}</span>
-      </div>
-    </Button>
+      {/* Sliding background indicator */}
+      <div
+        className={`absolute w-7 h-6 bg-cyan-500/20 rounded-full transition-transform duration-300 ${
+          language === "es" ? "translate-x-0" : "translate-x-8"
+        }`}
+      />
+      
+      {/* EN label */}
+      <span
+        className={`relative z-10 w-7 text-center text-xs font-medium transition-colors duration-300 ${
+          language === "en"
+            ? "text-cyan-400"
+            : "text-slate-500"
+        }`}
+      >
+        EN
+      </span>
+      
+      {/* ES label */}
+      <span
+        className={`relative z-10 w-7 text-center text-xs font-medium transition-colors duration-300 ${
+          language === "es"
+            ? "text-cyan-400"
+            : "text-slate-500"
+        }`}
+      >
+        ES
+      </span>
+    </button>
   )
 }

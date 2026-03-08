@@ -101,7 +101,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
             setIsLoading(false)
           },
           undefined,
-          (error) => {
+          (error: any) => {
             console.error('[v0] Texture load error:', error)
             setError('Failed to load panorama image')
             setIsLoading(false)

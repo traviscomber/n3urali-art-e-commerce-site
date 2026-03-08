@@ -28,7 +28,7 @@ export function EnvironmentsSectionClient() {
           {/* Left Column - Text Content */}
           <div className="flex flex-col gap-6 sm:gap-8">
             <div>
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-light text-green-400 mb-2 sm:mb-3 tracking-tight leading-none">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-light text-cyan-400 mb-2 sm:mb-3 tracking-tight leading-none">
                 {t('environments.landingTitle')}
               </h2>
               <p className="text-sm sm:text-base md:text-lg text-slate-400 font-light tracking-wide">
@@ -46,7 +46,7 @@ export function EnvironmentsSectionClient() {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 pt-2">
-              <Link href="/environments" className="px-4 sm:px-6 py-2 sm:py-2.5 border border-green-500/50 text-green-400 hover:border-green-500 hover:bg-green-500/10 transition-all text-xs sm:text-sm font-light text-center sm:text-left">
+              <Link href="/environments" className="px-4 sm:px-6 py-2 sm:py-2.5 border border-cyan-500/50 text-cyan-400 hover:border-cyan-500 hover:bg-cyan-500/10 transition-all text-xs sm:text-sm font-light text-center sm:text-left">
                 {t('environments.freeDemo')}
               </Link>
               <Link href="/environments" className="px-4 sm:px-6 py-2 sm:py-2.5 border border-slate-600/50 text-slate-400 hover:border-slate-500 hover:text-slate-300 transition-all text-xs sm:text-sm font-light text-center sm:text-left">

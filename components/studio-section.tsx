@@ -55,7 +55,7 @@ export function StudioSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left Column - Content */}
           <div className="flex flex-col">
-            <h2 className="text-5xl md:text-6xl lg:text-7xl font-light text-gray-500 mb-8 tracking-tight">
+            <h2 className="text-5xl md:text-6xl lg:text-7xl font-light text-cyan-400 mb-8 tracking-tight">
               Studio
             </h2>
 

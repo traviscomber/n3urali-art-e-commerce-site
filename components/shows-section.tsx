@@ -22,7 +22,7 @@ export function ShowsSection() {
           {/* Left Column: Content */}
           <div className="flex flex-col gap-6 sm:gap-8">
             <div>
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-light text-purple-400 mb-2 sm:mb-3 tracking-tight leading-none">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-light text-cyan-400 mb-2 sm:mb-3 tracking-tight leading-none">
                 {t('shows.title')}
               </h2>
               <p className="text-sm sm:text-base md:text-lg text-slate-400 font-light tracking-wide">

@@ -31,7 +31,7 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const imageRef = useRef<HTMLImageElement>(null)
-  const animationRef = useRef<number>()
+  const animationRef = useRef<number | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

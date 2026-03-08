@@ -3,7 +3,7 @@
 import Image from 'next/image'
 
 interface CategoryHeroBlockProps {
-  category: 'studio' | 'environments' | 'shows' | 'theatre'
+  category: 'studio' | 'environments' | 'shows' | 'theatre' | 'realities'
   title: string
   subtitle: string
   description: string
@@ -26,6 +26,9 @@ const categoryConfig = {
   },
   theatre: {
     textColor: 'text-orange-400',
+  },
+  realities: {
+    textColor: 'text-cyan-400',
   },
 }
 

@@ -16,6 +16,9 @@ const USDT_WALLET_ADDRESS = process.env.NEXT_PUBLIC_USDT_WALLET_ADDRESS || "TJ1i
 const USDT_RATE = 1.0 // 1 USD = 1 USDT
 const WHATSAPP_PHONE = "56940946660"
 
+// Mark this page as dynamic since it uses client-side hooks and search parameters
+export const dynamic = 'force-dynamic'
+
 export default function CheckoutPage() {
   const { items, total, clearCart } = useCart()
   const [orderComplete, setOrderComplete] = useState(false)

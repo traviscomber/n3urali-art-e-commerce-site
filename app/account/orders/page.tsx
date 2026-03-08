@@ -11,15 +11,13 @@ import { useAuth } from "@/lib/contexts/auth-context"
 
 interface OrderItem {
   id: string
-  image_id: string
-  license_id: string
   price: number
-  download_count: number
-  download_limit: number
   images: {
+    id: string
     title: string
-    thumbnail_url: string
-  }
+    thumbnail_medium_url: string
+    original_url: string
+  }[]
 }
 
 interface Order {

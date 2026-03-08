@@ -661,13 +661,36 @@ const translations = {
     "environments.artDescription": "Algorithmically generated original art immersions that reimagine visuality, texture, and movement as surrounding 360° spaces.",
 
     // Shows & Theatre Pages
-    "shows.theatreTitle": "Theatre",
-    "shows.theatreSubtitle": "Immerse yourself in curated video experiences",
-    "shows.theatreDescription": "Bigger screen brings better experience. Watch our curated collection of immersive dome content on a cinema-scale environment.",
-    "shows.enterTheatre": "Enter Theatre",
+    "shows.theatreTitle": "Teatro",
+    "shows.theatreSubtitle": "Sumérgete en experiencias de video curadas",
+    "shows.theatreDescription": "Pantalla más grande trae mejor experiencia. Mira nuestra colección curada de contenido de domo inmersivo en ambiente de escala de cine.",
+    "shows.enterTheatre": "Entra al Teatro",
+
+    // Contact Page
+    "contact.back": "Atrás",
+    "contact.formTitle": "Formulario de Contacto",
+    "contact.sectionTitle": "Enviar Consulta Rápida",
+    "contact.whatsappTitle": "WhatsApp",
+    "contact.whatsappDescription": "Contáctanos y responderemos en pocas horas",
+    "contact.contactNow": "Contacta Ahora",
+    "contact.emailTitle": "Email",
+    "contact.emailLabel": "Tu Email",
+    "contact.emailPlaceholder": "tu@email.com",
+    "contact.chooseOptions": "Elige una o más:",
+    "contact.option1": "Me gustaría ver una demo en mi domo",
+    "contact.option2": "Estoy interesado en ver un episodio completo",
+    "contact.option3": "Envíame el catálogo completo",
+    "contact.option4": "Quiero encargar un show personalizado",
+    "contact.messageLabel": "Cuéntanos qué necesitas (Opcional)",
+    "contact.messagePlaceholder": "Comparte detalles sobre tu proyecto o requisitos...",
+    "contact.submitButton": "Enviar",
+    "contact.submitting": "Enviando...",
+    "contact.successTitle": "¡Tu visión está en camino!",
+    "contact.successMessage": "Gracias por comunicarte. Estamos emocionados de explorar qué es posible para tu experiencia inmersiva. Nuestro equipo se conectará contigo pronto para dar vida a tus ideas.",
+    "contact.close": "Cerrar",
 
     "footer.legal": "Legal",
-    "footer.licenseTerms": "License Terms",
+    "footer.licenseTerms": "Términos de Licencia",
   },
   en: {
     // Language reference for conditional rendering

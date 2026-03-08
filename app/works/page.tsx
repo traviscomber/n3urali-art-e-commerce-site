@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
 import { getWorks } from '@/app/actions/works-actions'
 import type { Work } from '@/types/works'
-import { getAllWorks } from '@/app/actions/works-actions' // Import getAllWorks
 
 // Mark this page as dynamic since it uses client-side hooks and search parameters
 export const dynamic = 'force-dynamic'

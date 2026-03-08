@@ -6,6 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { CheckCircle, XCircle, AlertCircle, Loader2 } from "lucide-react"
 
+// Mark this page as dynamic since it uses client-side hooks
+export const dynamic = 'force-dynamic'
+
 export default function FixCorsPage() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<any>(null)

@@ -436,6 +436,15 @@ export default function PhotoDetailPage() {
       return
     }
 
+    if (!image) {
+      toast({
+        title: "Error",
+        description: "Image not found",
+        variant: "destructive",
+      })
+      return
+    }
+
     setPurchasing(true)
     try {
       const finalPrice = auctionPrice || image.price

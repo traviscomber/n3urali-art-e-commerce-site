@@ -72,15 +72,11 @@ export function ImageGallery({ images = [], onImageSelect }: ImageGalleryProps) 
 
     addItem({
       id: `${selectedImageForLicense.id}-${license.id}`,
-      imageId: selectedImageForLicense.id,
       title: selectedImageForLicense.title,
       price: totalPrice,
-      licenseId: license.id,
-      licenseName: license.name,
-      licensePrice: license.price,
-      previewUrl: selectedImageForLicense.preview_url,
-      category: selectedImageForLicense.category,
-      quantity: 1,
+      license_id: license.id,
+      license_name: license.name,
+      preview_image_url: selectedImageForLicense.preview_url,
     })
 
     setSelectedImageForLicense(null)

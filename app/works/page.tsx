@@ -47,8 +47,8 @@ export default function WorksPage() {
       results = results.filter(
         (work) =>
           work.work_title.toLowerCase().includes(query) ||
-          work.synopsis.toLowerCase().includes(query) ||
-          work.cultural_inspiration.toLowerCase().includes(query)
+          (work.synopsis?.toLowerCase() || "").includes(query) ||
+          (work.cultural_inspiration?.toLowerCase() || "").includes(query)
       )
     }
 

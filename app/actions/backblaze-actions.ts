@@ -339,7 +339,7 @@ export async function uploadToBackblaze(
         "Content-Type": "application/octet-stream",
         "X-Bz-Content-Sha1": "do_not_verify",
       },
-      body: buffer,
+      body: new Uint8Array(buffer),
     })
 
     console.log("[v0] File upload response status:", uploadResponse.status)

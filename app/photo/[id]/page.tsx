@@ -445,22 +445,25 @@ export default function PhotoDetailPage() {
       return
     }
 
+    // Type assertion after null check to help TypeScript narrow the type
+    const validImage = image as NonNullable<typeof image>
+
     setPurchasing(true)
     try {
-      const finalPrice = auctionPrice || image.price
+      const finalPrice = auctionPrice || validImage.price
 
       console.log("[v0] Adding item to cart:", {
-        imageId: image.id,
-        title: image.title,
+        imageId: validImage.id,
+        title: validImage.title,
         price: finalPrice,
       })
 
       // Use preview_image_url instead of previewUrl, and proper license_id/license_name
       addItem({
-        id: image.id,
-        title: image.title,
+        id: validImage.id,
+        title: validImage.title,
         price: finalPrice,
-        preview_image_url: image.thumbnail_url || image.image_url,
+        preview_image_url: validImage.thumbnail_url || validImage.image_url,
         license_id: "standard",
         license_name: "Standard License",
       })
@@ -468,7 +471,7 @@ export default function PhotoDetailPage() {
       // Show success toast
       toast({
         title: "Added to cart",
-        description: `"${image.title}" has been added to your cart.`,
+        description: `"${validImage.title}" has been added to your cart.`,
       })
 
       // Redirect to checkout after brief delay

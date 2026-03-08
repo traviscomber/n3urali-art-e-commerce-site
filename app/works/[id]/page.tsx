@@ -10,14 +10,14 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowLeft, Download, ShoppingCart } from 'lucide-react'
 import { getWorkDetail } from '@/app/actions/works-actions'
-import type { Work } from '@/types/works'
+import type { WorkDetail } from '@/types/works'
 
 const getWorkById = getWorkDetail; // Declare the variable here
 
 export default function WorkDetailPage() {
   const params = useParams()
   const workId = params.id as string
-  const [work, setWork] = useState<Work | null>(null)
+  const [work, setWork] = useState<WorkDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -26,7 +26,7 @@ export default function WorkDetailPage() {
       try {
         setIsLoading(true)
         const data = await getWorkDetail(workId)
-        setWork(data as Work | null)
+        setWork(data as WorkDetail | null)
       } catch (err) {
         console.error('[v0] Failed to load work:', err)
         setError('Failed to load work details')
@@ -79,7 +79,7 @@ export default function WorkDetailPage() {
           <div className="lg:col-span-2">
             <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted border border-border">
               <Image
-                src={work.featured_image_url || '/placeholder.svg'}
+                src={work.images?.[0]?.thumbnail_medium_url || '/placeholder.svg'}
                 alt={work.work_title}
                 fill
                 className="object-cover"

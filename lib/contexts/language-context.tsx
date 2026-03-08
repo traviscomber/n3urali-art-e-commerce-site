@@ -173,507 +173,29 @@ const translations = {
     "theatre.defaultDescription": "Explora esta experiencia panorámica inmersiva",
     "theatre.panoramicExperience": "Experiencia Panorámica",
     "theatre.goButton": "GO",
-    "theatre.ariaLabelPrevious": "Panorama anterior",
-    "theatre.ariaLabelNext": "Siguiente panorama",
-    "theatre.ariaLabelPanorama": "Ir al panorama {index}",
+    "theatre.ariaLabelPrevious": "Previous panorama",
+    "theatre.ariaLabelNext": "Next panorama",
+    "theatre.ariaLabelPanorama": "Go to panorama {index}",
 
-    // Contact Page
-    "contact.back": "Atrás",
-    "contact.formTitle": "Formulario de Contacto",
-    "contact.sectionTitle": "Enviar Consulta Rápida",
-    "contact.whatsappTitle": "WhatsApp",
-    "contact.whatsappDescription": "Contáctanos y responderemos en pocas horas",
-    "contact.contactNow": "Contacta Ahora",
-    "contact.emailTitle": "Email",
-    "contact.emailLabel": "Tu Email",
-    "contact.emailPlaceholder": "tu@email.com",
-    "contact.chooseOptions": "Elige una o más:",
-    "contact.option1": "Me gustaría ver una demo en mi domo",
-    "contact.option2": "Estoy interesado en ver un episodio completo",
-    "contact.option3": "Envíame el catálogo completo",
-    "contact.option4": "Quiero encargar un show personalizado",
-    "contact.messageLabel": "Cuéntanos qué necesitas (Opcional)",
-    "contact.messagePlaceholder": "Comparte detalles sobre tu proyecto o requisitos...",
-    "contact.submitButton": "Enviar",
-    "contact.submitting": "Enviando...",
-    "contact.successTitle": "¡Tu visión está en camino!",
-    "contact.successMessage": "Gracias por comunicarte. Estamos emocionados de explorar qué es posible para tu experiencia inmersiva. Nuestro equipo se conectará contigo pronto para dar vida a tus ideas.",
-    "contact.close": "Cerrar",
+    // Theatre Panorama Titles & Descriptions
+    "theatre.panorama.aurora": "Aurora Borealis Ice Formations",
+    "theatre.panorama.auroraDesc": "Mystical arctic scene with fractal-like ice formations and aurora borealis effect. Blending crystalline structures in blues, whites, and creams with ethereal northern lights.",
+    "theatre.panorama.glacial": "Glacial Valley Aurora",
+    "theatre.panorama.glacialDesc": "Aerial view of glacial formations showing flowing ice patterns in deep blues, whites, and browns. Capturing the dynamic nature of glacier movement.",
+    "theatre.panorama.abstractMountain": "Abstract Mountain Ice Vortex",
+    "theatre.panorama.abstractMountainDesc": "Surreal abstract landscape blending snow-capped mountains with organic flowing patterns in white, brown, and gold stripes.",
+    "theatre.panorama.radiantIce": "Radiant Ice Cave",
+    "theatre.panorama.radiantIceDesc": "Dramatic ice cave environment with radiating golden sunlight creating starburst effects through layered blue and white ice formations.",
+    "theatre.panorama.crystalline": "Crystalline Ice Shards",
+    "theatre.panorama.crystallineDesc": "Abstract crystalline ice formations and flowing patterns photographed panoramically with intricate details in ultra high-resolution.",
+    "theatre.panorama.immersiveWorlds": "Immersive Worlds - Panoramic View",
+    "theatre.panorama.immersiveWorldsDesc": "Explore boundless digital realms in 360 degrees",
+    "theatre.panorama.culturalJourneys": "Cultural Journeys - Indo Expedition",
+    "theatre.panorama.culturalJourneysDesc": "Stories from around the world in immersive 360 panorama",
+    "theatre.panorama.digitalArt": "Digital Art - Contemporary Expression",
+    "theatre.panorama.digitalArtDesc": "Contemporary artistic expressions in 360 immersive format",
 
-    // Environments Page - Main
-    "environmentsPage.title": "Ambientes",
-    "environmentsPage.subtitle": "Loops inmersivos sin costura diseñados para encantar.",
-    "environmentsPage.benefit1": "Noches temáticas sin fin sin reconstruir tu show",
-    "environmentsPage.benefit2": "Material limpio y sin costura listo para superponer y mezclar",
-    "environmentsPage.benefit3": "Visuales premium ambiente que elevan cualquier espacio",
-    "environmentsPage.back": "Atrás",
-    "environmentsPage.loadMore": "Cargar Más",
-    
-    // Environments Page - Nature Categories
-    "environments.oceans": "Océanos",
-    "environments.volcanoes": "Volcanes",
-    "environments.forest": "Bosque",
-    "environments.iceSnow": "Hielo y Nieve",
-    
-    // Environments Page - Heritage Categories
-    "environments.northAmerica": "América del Norte",
-    "environments.southAmerica": "América del Sur",
-    "environments.asia": "Asia",
-    "environments.more": "Más",
-    
-    // Environments Page - Art Categories
-    "environments.architecture": "Arquitectura",
-    "environments.landscapes": "Paisajes",
-    "environments.geometry": "Geometría",
-    "environments.cosmic": "Cósmico",
-    "environments.abstract": "Abstracto",
-    
-    // Environments Page - Art Labels
-    "environments.artLabel1": "Jungla de Origami",
-    "environments.artLabel2": "Árbol Cibernético",
-    "environments.artLabel3": "Mandala Esmeralda",
-    "environments.artLabel4": "Cielo con Diamantes",
-    "environments.artLabel5": "Cielo Prismático",
-    
-    // Environments Page - Mythic Categories (same as shows)
-    "environments.mythicAsian": "Asiático",
-    "environments.mythicMesoamerican": "Mesoamericano",
-    "environments.mythicGreek": "Griego",
-    "environments.mythicEgyptian": "Egipcio",
-
-    // Environments Section Titles & Descriptions
-    "environments.natureTitle": "Naturaleza",
-    "environments.natureDescription": "Explora el mundo real con interpretaciones de domo inmersivo onírico. Viaja entre Sitios Patrimonio de la UNESCO en segundos o descubre la diversidad de la vida real reimaginada con creatividad inmersiva.",
-    "environments.heritageTitle": "Patrimonio",
-    "environments.heritageDescription": "Los Ambientes de Patrimonio son viajes inmersivos inspirados en culturas reales, arquitectura, simbolismo y paisajes.",
-    "environments.mythicTitle": "Mítico",
-    "environments.mythicDescription": "La serie del Universo Mítico transforma la cosmología simbólica y onírica en experiencias de domo inmersivo. Pura atmósfera e inmersión emocional.",
-    "environments.artTitle": "Arte",
-    "environments.artDescription": "Inmersiones de arte original generadas algorítmicamente que reimaginan la visualidad, textura y movimiento como espacios 360° envolventes.",
-
-    // Collection Section
-    "collection.badge": "Colecciones Destacadas",
-    "collection.title": "Colecciones",
-    "collection.titleHighlight": "Culturales",
-    "collection.viewComplete": "Ver Colección Completa",
-    "collection.off": "% Licencia",
-
-    // Auction Section
-    "auction.badge": "⚡ Edición Limitada",
-    "auction.title": "Obras",
-    "auction.titleHighlight": "Destacadas",
-    "auction.subtitle":
-      "Obras inmersivas curadas de nuestra investigación creativa más reciente. Cada mes destacamos obras que exploran nuevas narrativas y territorios culturales.",
-    "auction.tip": "✨ Curado por directores del estudio • Cada obra lleva contexto cultural y procedencia artística",
-    "auction.hotDeal": "¡DESTACADO!",
-    "auction.endsIn": "Destacado Hasta",
-    "auction.buyNow": "Ver Obra",
-    left: "restante", // Adding "left" translation for auction countdown timer
-    minutes: "Minutos",
-    seconds: "Segundos",
-    untilPricesReset: "Hasta que se reinicien los precios",
-    instant: "Instantáneo",
-
-    // CTA Cards
-    "cta.collection.title": "Colecciones",
-    "cta.collection.subtitle": "Obras temáticas curadas",
-    "cta.collection.price": "$299+",
-    "cta.collection.priceNote": "Por nivel de licencia",
-    "cta.collection.button": "Explorar Colecciones",
-    "cta.gallery.title": "Galería",
-    "cta.gallery.subtitle": "Navega todas las obras y formatos",
-    "cta.gallery.count": "50+",
-    "cta.gallery.countNote": "Obras inmersivas",
-    "cta.gallery.button": "Explorar Galería",
-    "cta.signIn.title": "Cuenta",
-    "cta.signIn.subtitle": "Accede a tus licencias y descargas",
-    "cta.signIn.access": "Seguro",
-    "cta.signIn.accessNote": "Gestión de licencias",
-    "cta.signIn.button": "Iniciar Sesión",
-
-    // Stats Section
-    "stats.resolution": "8K-16K",
-    "stats.resolutionNote": "Ultra resolución",
-    "stats.instant": "Seguro",
-    "stats.instantNote": "Entrega Licenciada",
-    "stats.vr": "Espacial",
-    "stats.vrNote": "Domo, VR, Performance",
-
-    // Featured Gallery
-    "featured.badge": "Galería Destacada",
-    "featured.title": "Explora Nuestra",
-    "featured.titleHighlight": "Colección 360° Premium",
-    "featured.subtitle": "Navega nuestra selección curada de imágenes domo, equirectangulares y de colección destacada",
-
-    // FAQ Section
-    "faq.badge": "Nuestro Trabajo",
-    "faq.title": "Preservación Cultural a Través de",
-    "faq.titleHighlight": "Tecnología Inmersiva",
-    "faq.subtitle":
-      "Cómo combinamos inteligencia artificial con respeto cultural para documentar y preservar el patrimonio de pueblos originarios.",
-
-    "faq.q1.title": "¿Qué es la documentación inmersiva 360° y por qué es importante para el patrimonio cultural?",
-    "faq.q1.answer":
-      "La documentación inmersiva 360° captura espacios y ambientes culturales completos, permitiendo que las futuras generaciones experimenten estos lugares como si estuvieran presentes físicamente. A diferencia de la fotografía tradicional que solo muestra fragmentos, nuestras capturas esféricas preservan la totalidad del contexto espacial, los detalles arquitectónicos, y la atmósfera de sitios culturales.\n\nEsto es especialmente crítico para sitios de pueblos originarios en Asia que enfrentan amenazas de urbanización, cambio climático, o simplemente el paso del tiempo. Nuestras imágenes equirectangulares permiten crear archivos digitales permanentes que pueden usarse para educación, investigación académica, y experiencias de realidad virtual que acercan estas culturas a personas de todo el mundo sin el impacto del turismo masivo.",
-
-    "faq.q2.title": "¿Cómo utilizan la inteligencia artificial en sus proyectos de preservación cultural?",
-    "faq.q2.answer":
-      "Nuestro enfoque combina captura fotográfica real con técnicas de IA para restauración, reconstrucción y mejora de calidad. Utilizamos algoritmos de difusión de ruido para generar reconstrucciones de alta fidelidad de espacios dañados o parcialmente perdidos, guiados siempre por documentación histórica auténtica y consulta con las comunidades locales.\n\nPara sitios bien preservados, empleamos upscaling neuronal y corrección de color algorítmica para crear archivos de hasta 16K de resolución desde capturas originales, revelando detalles imperceptibles a simple vista. En proyectos con pueblos originarios en Asia, hemos trabajado documentando templos ancestrales, sitios ceremoniales, y espacios comunitarios, siempre con pleno consentimiento y participación de las comunidades.\n\nNuestra tecnología también permite crear reconstrucciones de sitios históricos basadas en descripciones orales y memorias comunitarias, dando forma visual a patrimonio intangible que de otra forma se perdería.",
-
-    "faq.q3.title": "¿Cómo garantizan el respeto cultural en su trabajo con pueblos originarios?",
-    "faq.q3.answer":
-      "El respeto cultural es nuestro principio fundamental. Cada proyecto comienza con diálogo extenso con las comunidades, obteniendo permisos explícitos no solo para la captura, sino también para el uso y distribución de las imágenes. Reconocemos que muchos espacios tienen significado sagrado o restricciones culturales sobre quién puede acceder a ellos.\n\nEn nuestro trabajo en Asia, hemos establecido protocolos que incluyen: consulta con líderes comunitarios y autoridades culturales, capacitación de miembros locales en las técnicas de captura para que sean ellos quienes documenten sus propios espacios cuando sea apropiado, acuerdos de propiedad intelectual que reconocen los derechos de las comunidades sobre su patrimonio, y retorno de beneficios económicos a las comunidades cuando el material se comercializa.\n\nNuestras imágenes nunca se publican sin aprobación explícita, y respetamos restricciones sobre acceso a espacios sagrados o ceremoniales. La tecnología es solo una herramienta; el conocimiento y la decisión siempre permanecen en manos de las comunidades.",
-
-    "faq.q4.title": "¿Qué especificaciones técnicas manejan para archivos de preservación cultural?",
-    "faq.q4.answer":
-      "Para trabajos de preservación cultural, utilizamos los más altos estándares técnicos para garantizar longevidad y fidelidad de los archivos:\n\n• Resoluciones desde 8K (7680×4320) hasta 16K (15360×8640) en formato equirectangular\n• Archivos RAW sin compresión para máxima fidelidad\n• Profundidad de color de 16-bit para capturar rangos dinámicos completos\n• Metadatos exhaustivos incluyendo coordenadas GPS, fecha, condiciones de captura, y contexto cultural\n• Múltiples copias en formatos de archivo abiertos (TIFF, PNG) para evitar obsolescencia tecnológica\n• Documentación complementaria con información contextual, histórica y cultural\n\nTodos los archivos cumplen con estándares internacionales de preservación digital establecidos por UNESCO y bibliotecas nacionales. Trabajamos con instituciones académicas para asegurar que estos archivos puedan ser accedidos por investigadores durante décadas.",
-
-    "faq.q5.title": "¿Qué proyectos han desarrollado con pueblos originarios en Asia?",
-    "faq.q5.answer":
-      "Hemos colaborado con diversas comunidades en proyectos de documentación y preservación:\n\n• Templos ancestrales: Documentación 360° de arquitectura religiosa tradicional en riesgo, incluyendo detalles de tallado en madera, murales, y espacios ceremoniales\n• Sitios ceremoniales naturales: Captura de espacios sagrados en bosques y montañas, preservando tanto el entorno natural como el significado cultural\n• Reconstrucciones digitales: Recreación de espacios históricos perdidos basados en memoria oral y documentos ancestrales, trabajando estrechamente con ancianos de las comunidades\n• Educación cultural: Desarrollo de experiencias VR para escuelas locales que enseñan a las nuevas generaciones sobre sus propias tradiciones en formatos accesibles y atractivos\n\nCada proyecto es único y adaptado a las necesidades específicas de cada comunidad. Nuestro objetivo no es solo crear archivos estáticos, sino herramientas vivas que las comunidades puedan usar para educación, turismo cultural sostenible, y fortalecimiento de identidad.",
-
-    "faq.q6.title": "¿Cómo pueden las instituciones culturales y educativas acceder a este material?",
-    "faq.q6.answer":
-      "Trabajamos con múltiples modelos según el proyecto:\n\n**Instituciones educativas y académicas:** Acceso gratuito o de bajo costo para investigación, educación y preservación. Buscamos maximizar el impacto educativo mientras respetamos los acuerdos con las comunidades.\n\n**Museos y centros culturales:** Licencias especiales para exhibiciones, tanto físicas (proyecciones dome, instalaciones inmersivas) como virtuales. Estos proyectos incluyen material contextual y colaboración con las comunidades originarias.\n\n**Proyectos comerciales éticos:** Para documentales, producciones educativas o experiencias turísticas virtuales, ofrecemos licencias que incluyen porcentaje de beneficios que retorna directamente a las comunidades.\n\nCada caso se evalúa individualmente, priorizando siempre el respeto cultural y el beneficio para las comunidades originarias. Contacta con nosotros para discutir proyectos específicos. Las comunidades siempre tienen derecho de veto sobre el uso de imágenes de su patrimonio.",
-
-    // Gallery
-    "gallery.badge": "Curado. Licenciado. Listo para Producción.",
-    "gallery.title": "Activos 360° Premium",
-    "gallery.titleHighlight": "Creados por Algoritmos de IA",
-    "gallery.subtitle":
-      "Deja de perder tiempo en prompts y límites de generación. Explora nuestra colección de ambientes perfectos algorítmicamente que abarcan monumentos patrimoniales, ciudades futuristas e infinitas variaciones atmosféricas—todos descargables instantáneamente.",
-    "gallery.stats.resolution": "16K",
-    "gallery.stats.resolutionLabel": "Ultra Resolución",
-    "gallery.stats.assets": "Activos Listos",
-    "gallery.stats.waitTime": "0s",
-    "gallery.stats.waitTimeLabel": "Tiempo de Espera",
-    "gallery.stats.licensed": "100%",
-    "gallery.stats.licensedLabel": "Licenciado",
-    "gallery.algorithmNote":
-      "Cada imagen potenciada por algoritmos de difusión de ruido propietarios que capturan movimiento, profundidad y riqueza atmosférica en escenarios diversos—desde preservación cultural hasta futuros especulativos",
-    "gallery.formats": "Formatos",
-    "gallery.formatsNote": "Tipos de proyección 360°",
-    "gallery.allFormats": "Todos los Formatos",
-    "gallery.collections": "Colecciones",
-    "gallery.collectionsNote": "Colecciones temáticas curadas",
-    "gallery.exploreDataset": "Explora la Diversidad de Conjuntos de Datos Rico",
-    "gallery.datasetNote":
-      "Cada categoría representa miles de escenarios de entrenamiento, capturando diversas condiciones de iluminación, clima, períodos de tiempo y atmosféricos",
-    "gallery.allCollections": "Todas las Colecciones",
-    "gallery.multiEraStyles": "Estilos Multi-Época",
-    "gallery.temporalLighting": "Iluminación Temporal",
-    "gallery.materialTexture": "Textura Material",
-    "gallery.heritageTitle": "Colección Patrimonio",
-    "gallery.heritageSubtitle": "Donde la Historia Encuentra la Innovación",
-    "gallery.heritageDescription":
-      "Nuestro pilar patrimonial captura el alma de monumentos culturales a través de análisis algorítmico avanzado. A diferencia de la fotografía estática, cada cuadro contiene profundidad infinita—el desgaste de piedra antigua, la danza de luz natural sobre arquitectura, el peso atmosférico de siglos.",
-    "gallery.heritageUseCase":
-      "Perfecto para museos virtuales, preservación cultural, visualización arquitectónica e inmersión educativa.",
-    "gallery.exploreHeritage": "Explorar Colección Completa de Patrimonio",
-    "gallery.exploreDatasetTitle": "Explora la Diversidad de Conjuntos de Datos Rico",
-    "gallery.datasetDescription":
-      "Más allá del patrimonio, nuestro motor algorítmico ha dominado futuros distópicos, paisajes oníricos surrealistas, expansión urbana, fenómenos naturales y ambientes especulativos.",
-
-    // Use Cases Section
-    "useCases.badge": "Aplicaciones Industriales",
-    "useCases.title": "Listo para Producción Para",
-    "useCases.titleHighlight": "Cada Visión Creativa",
-    "useCases.subtitle":
-      "A diferencia de herramientas de generación que requieren prompts e iteraciones, nuestra colección curada entrega activos instantáneos con derechos administrados, confiados por profesionales",
-    "useCases.gameDev": "Desarrollo de Juegos",
-    "useCases.gameDevDesc":
-      "Skyboxes y ambientes para juegos VR/AR. Listos para HDRI, formatos optimizados, integración instantánea en Unity/Unreal.",
-    "useCases.virtualProd": "Producción Virtual",
-    "useCases.virtualProdDesc":
-      "Fondos para pantallas LED, contenido de mapeo de proyección. Resolución 16K con iluminación auténtica y profundidad atmosférica.",
-    "useCases.archViz": "Visualización Arquitectónica",
-    "useCases.archVizDesc":
-      "Contextos ambientales realistas para renders arquitectónicos. Monumentos patrimoniales, escenas urbanas, paisajes naturales.",
-    "useCases.metaverse": "Metaverso y Web3",
-    "useCases.metaverseDesc":
-      "Ambientes de mundos virtuales, fondos NFT, experiencias inmersivas. Activos únicos creados algorítmicamente.",
-    "useCases.digitalArt": "Arte Digital y NFTs",
-    "useCases.digitalArtDesc":
-      "Obras de arte 360° exclusivas con licencias verificables. Ediciones limitadas, calidad de coleccionista y autenticidad.",
-    "useCases.education": "Educación y Museos",
-    "useCases.educationDesc":
-      "Tours virtuales, preservación cultural, aprendizaje inmersivo. Sitios patrimoniales capturados con precisión algorítmica.",
-
-    // Comparison Section
-    "comparison.title": "La Alternativa Inteligente a",
-    "comparison.titleHighlight": "Herramientas de Generación y Activos Gratuitos",
-    "comparison.genTools": "Herramientas de Generación",
-    "comparison.genToolsNote": "Skybox AI, PanoPulse, etc.",
-    "comparison.genToolCon1": "Límites de generación mensual ($120-$578/año)",
-    "comparison.genToolCon2": "Prompting de prueba y error requerido",
-    "comparison.genToolCon3": "Calidad impredecible y consistencia de estilo",
-    "comparison.genToolCon4": "Tiempo gastado generando vs. creando",
-    "comparison.genToolCon5": "Claridad limitada de licencias comerciales",
-    "comparison.ourPlatform": "n3uralia360.art",
-    "comparison.ourPlatformNote": "Marketplace Premium Curado",
-    "comparison.ourPro1": "Paga una vez, usa para siempre - desde $75/imagen",
-    "comparison.ourPro2": "Descarga instantánea, calidad lista para producción",
-    "comparison.ourPro3": "Colección curada por escenario y estilo",
-    "comparison.ourPro4": "Empieza a crear inmediatamente, sin configuración",
-    "comparison.ourPro5": "Licencia comercial completa con indemnización",
-    "comparison.legalTitle": "Protección Legal Incluida",
-    "comparison.legalDesc":
-      "A diferencia de bibliotecas de stock genéricas donde el contenido generado por IA crea incertidumbre de derechos de autor, cada imagen de n3uralia360.art viene con licencia comercial completa e indemnización.",
-
-    // CTA
-    "cta.readyToTransform": "Eleva tus Proyectos con",
-    "cta.creativeVision": "Activos 360° Premium",
-    "cta.joinThousands": "Únete a miles de creadores que confían en n3uralia360.art para sus proyectos inmersivos",
-    "cta.startExploring": "Comenzar a Explorar",
-
-    "about.badge": "Acerca de n3uralia360.art • Parte del Grupo n3uralia",
-    "about.title": "Revolucionando",
-    "about.titleHighlight": "Contenido Visual",
-    "about.titleEnd": "para Profesionales",
-    "about.subtitle":
-      "Somos pioneros en el futuro de imágenes inmersivas con tecnología de IA de vanguardia y contenido 360° de grado profesional que transforma cómo las personas experimentan ambientes digitales. Como parte del innovador grupo n3uralia, entregamos calidad suprema a través de tecnología de plataforma avanzada.",
-    "about.whyChoose.badge": "¿Por qué elegir n3uralia360.art?",
-    "about.whyChoose.title": "Lo que nos hace diferentes en fotografía 360°",
-    "about.whyChoose.subtitle": "Respaldados por los estándares de innovación y excelencia del grupo n3uralia",
-    "about.aiGenerated.title": "100% Contenido Generado por IA",
-    "about.aiGenerated.desc":
-      "A diferencia de las empresas de fotografía tradicionales, cada imagen se crea desde cero utilizando tecnología de IA propietaria desarrollada por el grupo n3uralia. Esto significa escenas únicas que no existen en ningún otro lugar, con iluminación y composición perfectas que serían imposibles de capturar naturalmente.",
-    "about.professional.title": "Calidad de Grado Profesional",
-    "about.professional.desc":
-      "Nuestro pipeline de mejora personalizado, impulsado por la tecnología del grupo n3uralia, transforma la salida de IA en imágenes profesionales con resolución 4K-16K. Cada imagen cumple con los estándares exigentes requeridos para aplicaciones VR comerciales, mapeo de proyección y visualización arquitectónica.",
-    "about.mission.title": "Nuestra Misión",
-    "about.mission.p1":
-      "En n3uralia360.art, parte del grupo n3uralia, creemos que el contenido visual inmersivo debe ser accesible, de alta calidad y elaborado profesionalmente. Nuestra misión es proporcionar a creadores, arquitectos y empresas las herramientas y el contenido que necesitan para dar vida a sus visiones.",
-    "about.mission.p2":
-      "A través de t��cnicas avanzadas de generación y mejora de IA desarrolladas dentro del ecosistema del grupo n3uralia, entregamos calidad sin precedentes en imágenes 360° y fisheye que cumplen con los estándares exigentes de aplicaciones profesionales.",
-    "about.offer.title": "Lo que Ofrecemos",
-    "about.offer.item1": "Imágenes equirectangulares 360° de alta resolución",
-    "about.offer.item2": "Fotografía profesional con lente fisheye",
-    "about.offer.item3": "Calidad de imagen mejorada por IA y detalle a través de la tecnología del grupo n3uralia",
-    "about.offer.item4": "Licencias flexibles para uso comercial",
-    "about.offer.item5": "Descargas y acceso instantáneos",
-    "about.technology.title": "Nuestra Tecnología",
-    "about.technology.subtitle": "Impulsado por el ecosistema innovador de plataformas del grupo n3uralia",
-    "about.technology.ai.title": "Mejora de IA",
-    "about.technology.ai.desc":
-      "Redes neuronales avanzadas mejoran la calidad y el detalle de las imágenes a través de las plataformas del grupo n3uralia",
-    "about.technology.capture.title": "Captura Profesional",
-    "about.technology.capture.desc": "Equipo de última generación para una captura de imagen prístina",
-    "about.technology.qa.title": "Garantía de Calidad",
-    "about.technology.qa.desc":
-      "Pruebas rigurosas aseguran que cada imagen cumpla con los estándares del grupo n3uralia",
-    "about.faq.badge": "Preguntas Frecuentes",
-    "about.faq.title": "Aprende Más Sobre Nuestra",
-    "about.faq.titleHighlight": "Empresa y Proceso",
-    "about.faq.subtitle":
-      "Preguntas comunes sobre n3uralia360.art, nuestra tecnología y cómo creamos imágenes 360° profesionales.",
-    "about.faq1.q": "¿Qué es n3uralia360.art y cómo comenzó la empresa?",
-    "about.faq1.a":
-      "n3uralia360.art es una empresa pionera en fotografía 360° generada por IA, parte del innovador grupo n3uralia. Fuimos fundados para cerrar la brecha entre las limitaciones de la fotografía tradicional y la creciente demanda de contenido visual inmersivo. Reconocimos que crear imágenes 360° de alta calidad era costoso, consumía tiempo y a menudo imposible para muchos escenarios creativos. Nuestra solución combina generación de IA de vanguardia con técnicas de mejora profesional desarrolladas dentro del ecosistema del grupo n3uralia para entregar imágenes inmersivas únicas y de alta calidad que cumplen con estándares profesionales.",
-    "about.faq2.q": "¿Cómo se compara la fotografía generada por IA con la fotografía 360° tradicional?",
-    "about.faq2.a":
-      "La fotografía generada por IA ofrece varias ventajas sobre los métodos tradicionales: posibilidades creativas ilimitadas sin restricciones físicas, control perfecto de iluminación y composición, escenas únicas que no existen en la realidad y calidad consistente sin dependencias del clima o la ubicación. Mientras que la fotografía tradicional captura ambientes reales, nuestro enfoque de IA impulsado por la tecnología del grupo n3uralia crea mundos completamente nuevos con calidad de grado profesional, a menudo superando lo que es posible con equipos y técnicas convencionales.",
-    "about.faq3.q": "¿Qué estándares de calidad mantiene n3uralia360.art?",
-    "about.faq3.a":
-      "Mantenemos estándares de calidad rigurosos en todo nuestro pipeline, respaldados por los estándares de excelencia del grupo n3uralia. Cada imagen se somete a mejora profesional para lograr resolución 4K-16K con claridad, precisión de color y detalle superiores. Nuestro proceso de mejora propietario asegura calidad consistente que cumple con los requisitos exigentes de aplicaciones VR comerciales, instalaciones de mapeo de proyección y proyectos de visualización arquitectónica. Probamos cada imagen para especificaciones técnicas y calidad visual antes de hacerla disponible.",
-    "about.faq4.q": "¿n3uralia360.art ofrece proyectos de imágenes 360° personalizados?",
-    "about.faq4.a":
-      "Sí, ofrecemos proyectos de imágenes 360° personalizados para clientes con requisitos específicos. Nuestras capacidades de generación de IA, impulsadas por la tecnología del grupo n3uralia, nos permiten crear ambientes únicos, espacios arquitectónicos o escenas artísticas adaptadas a las necesidades de tu proyecto. Los proyectos personalizados incluyen consulta sobre especificaciones técnicas, múltiples rondas de revisión y entrega en tus formatos y resoluciones preferidos. Contáctanos para discutir tus requisitos específicos y cronograma para soluciones de imágenes personalizadas.",
-    "about.faq5.q": "¿Puedes explicar el pipeline tecnológico de n3uralia360.art?",
-    "about.faq5.a":
-      "Nuestro pipeline tecnológico consta de tres etapas principales: generación de IA utilizando modelos propietarios entrenados específicamente para imágenes 360° dentro del ecosistema del grupo n3uralia, mejora profesional a través de herramientas personalizadas que mejoran la resolución y la calidad, y pruebas de garantía de calidad para asegurar que cada imagen cumpla con nuestros estándares profesionales. Cada herramienta en nuestro pipeline está construida desde cero por el grupo n3uralia, dándonos control completo sobre el proceso creativo y la calidad de la salida final. Este enfoque nos permite entregar constantemente imágenes únicas y de alta calidad que superan las limitaciones de la fotografía tradicional.",
-    "about.ready.title": "¿Listo para Empezar?",
-    "about.ready.subtitle":
-      "Únete a miles de profesionales que confían en n3uralia360.art y el grupo n3uralia para sus necesidades de contenido inmersivo.",
-    "about.ready.browse": "Explorar Galería",
-    "about.ready.contact": "Contáctanos",
-
-    // Email Contact Modal
-    "contact.title": "Contáctanos",
-    "contact.description": "Ponte en contacto con N3uralia360",
-    "contact.emailLabel": "Dirección de Correo",
-    "contact.copy": "Copiar",
-    "contact.copied": "Copiado",
-    "contact.quotationTitle": "Solicita una Cotización",
-    "contact.quotationIntro": "Al solicitar una cotización para nuestros servicios o productos, por favor incluye:",
-    "contact.quotationItem1": "Tipo de proyecto (instalación de domo, ambiente VR, medios espaciales, etc.)",
-    "contact.quotationItem2": "Tamaño y especificaciones del lugar",
-    "contact.quotationItem3": "Cronograma y rango presupuestario (si aplica)",
-    "contact.quotationItem4": "Tu información de contacto y método de comunicación preferido",
-    "contact.quotationItem5": "Cualquier imagen de referencia, inspiración o requisitos detallados",
-    "contact.quotationResponse": "Nuestro equipo proporcionará una cotización personalizada dentro de 24-48 horas.",
-    "contact.instructionsTitle": "Cómo Contactarnos",
-    "contact.instruction1": "Copia la dirección de correo arriba",
-    "contact.instruction2": "Abre tu cliente de correo preferido (Gmail, Outlook, Apple Mail, etc.)",
-    "contact.instruction3": "Pega la dirección de correo en el campo 'Para'",
-    "contact.instruction4": "Escribe tu mensaje con los detalles anteriores y envía",
-    "contact.responseTime": "Generalmente respondemos dentro de 24 horas en días hábiles.",
-    "contact.benefitsTitle": "¿Por qué usar tu cliente de correo?",
-    "contact.benefit1": "✓ Usa cualquier proveedor de correo (Gmail, Outlook, Apple Mail, etc.)",
-    "contact.benefit2": "✓ Mantén tu historial de correos y mensajes enviados",
-    "contact.benefit3": "✓ Respuesta más rápida y mejor comunicación",
-    "contact.benefit4": "✓ Tu privacidad y seguridad",
-    "contact.closeButton": "Cerrar",
-
-    "header.shoppingCart": "Carrito de Compras",
-    "header.cartEmpty": "Tu carrito está vacío",
-    "header.total": "Total",
-    "header.proceedToCheckout": "Proceder al Pago",
-
-    "collections.badge": "Colecciones Curadas",
-    "collections.title": "Historias Visuales en",
-    "collections.titleHighlight": "Detalle Inmersivo",
-    "collections.subtitle":
-      "Cada colección es una narrativa cuidadosamente elaborada—desde monumentos antiguos preservando el patrimonio humano hasta paisajes futuristas imaginando el mañana. Descubre conjuntos temáticos diseñados para creadores que valoran el arte y la autenticidad.",
-    "collections.stats.collections": "Colecciones",
-    "collections.stats.resolution": "Resolución",
-    "collections.stats.format": "Formato",
-    "collections.coming.soon": "Próximamente",
-    "collections.coming.desc":
-      "Nuestros curadores están ensamblando colecciones extraordinarias. Vuelve pronto para descubrir narrativas visuales inmersivas.",
-    "collections.coming.exploreImages": "Explorar Imágenes Individuales",
-    "collections.subcollections": "Explorar Sub-Colecciones",
-    "collections.format": "Formato",
-    "collections.format.360": "360° Panorámico",
-    "collections.license": "Licencia",
-    "collections.license.commercial": "Uso Comercial",
-    "collections.viewFull": "Ver Colección Completa",
-    "collections.individualPurchase": "Compra Individual",
-    "collections.buyingSeparately": "Comprando todas las {count} fotos por separado",
-    "collections.bundlePrice": "Precio del Paquete",
-    "collections.completeCollection": "Colección completa",
-    "collections.youSave": "Ahorras",
-    "collections.preferIndividual": "¿Prefieres Imágenes Individuales?",
-    "collections.browseGallery":
-      "Explora nuestra galería completa para encontrar imágenes 360° específicas con filtros avanzados por formato, tema y estilo. Perfecto para proyectos de un solo uso.",
-    "collections.browseButton": "Explorar Galería",
-    "collections.exploreCollection": "Explorar Colección",
-
-    // Shows & Theatre Pages (Spanish)
-    "shows.theatreTitle": "Teatro",
-    "shows.theatreSubtitle": "Sumérgete en experiencias de video curadas",
-    "shows.theatreDescription": "Pantalla más grande ofrece mejor experiencia. Mira nuestra colección curada de contenido inmersivo de domo en un entorno de escala de cine.",
-    "shows.enterTheatre": "Entrar al Teatro",
-
-    "footer.legal": "Legal",
-    "footer.licenseTerms": "Términos de Licencia",
-  },
-  en: {
-    // Language reference for conditional rendering
-    language: "en",
-
-    // Navigation
-    "nav.collection": "Collection",
-    "nav.gallery": "Gallery",
-    "nav.theatre": "Theatre",
-    "nav.myOrders": "My Orders",
-    "nav.shows": "Shows",
-    "nav.environments": "Environments",
-    "nav.studio": "Studio",
-    "nav.contact": "Contact",
-    "nav.orders": "Orders",
-    "nav.tools": "Tools",
-
-    // Header
-    "header.shoppingCart": "Shopping Cart",
-    "header.cartEmpty": "Your cart is empty",
-    "header.checkout": "Proceed to Checkout",
-
-    // Footer
-    "footer.brandDescription": "Cultural immersive media studio creating experiences across dome installations, VR environments, and spatial media.",
-    "footer.available247": "Available 24/7",
-    "footer.exploreTitle": "Explore",
-    "footer.gallery": "Gallery",
-    "footer.collections": "Collections",
-    "footer.allWorks": "All Works",
-    "footer.theatreMode": "Theatre Mode",
-    "footer.aboutTitle": "About",
-    "footer.aboutN3uralia": "About N3uralia360",
-    "footer.studioProcess": "Studio Process",
-    "footer.commission": "Commission",
-    "footer.contact": "Contact",
-    "footer.legalTitle": "Legal",
-    "footer.licensingTerms": "Licensing Terms",
-    "footer.licensingContract": "Licensing Contract",
-    "footer.accountTitle": "Account",
-    "footer.profile": "Profile",
-    "footer.orders": "Orders",
-    "footer.downloads": "Downloads",
-    "footer.settings": "Settings",
-    "footer.copyright": "© {year} N3uralia360. All rights reserved.",
-    "footer.poweredBy": "Powered by N3uralia360 Studios",
-
-    // Hero Section
-    "hero.badge": "Immersive. Cultural. Authorial.",
-    "hero.title": "Immersive Worlds.",
-    "hero.titleHighlight": "Cultural Stories.",
-    "hero.subtitle":
-      "N3uralia360 is a cultural immersive media studio. We author experiences across dome installations, VR environments, performance loops, and spatial media. Each work begins with deep cultural research and unfolds through collaborative artistic vision.",
-    "hero.description":
-      "From heritage preservation to speculative futures, from institutional commissions to curated public collections—we create immersive narratives that transcend boundaries and engage audiences at the intersection of culture, art, and technology.",
-    "hero.cta.explore": "Explore Works",
-    "hero.cta.demo": "View Our Studio",
-    "hero.videoPlaceholder": "[ Immersive Environment Backdrop ]",
-
-    "hero.imageOfDay": "Featured Work",
-    "hero.viewDetails": "View Details & License",
-    "hero.offToday": "% Available",
-
-    // Homepage Hero Section
-    "hero.studioTitle": "Studio",
-    "hero.studioSubtitle": "Built to Perform",
-    "hero.studioDesc1": "Cinematic dome stories, seamless immersive loops, and VR-ready environments — crafted for dome operators, immersive events, and live performance.",
-    "hero.studioDesc2": "Projection-ready. Dome-correct. Instantly deployable.",
-    "hero.exploreStudio": "Explore Studio",
-    "hero.videoNotAvailable": "Video not available",
-
-    // Shows Section - Landing Page
-    "shows.title": "Shows",
-    "shows.subtitle": "Cinematic Dome Stories",
-    "shows.description": "Designed as mini-shows that hold audience attention from beginning to end, our Shows are perfect for:",
-    "shows.useCase1": "School dome programming",
-    "shows.useCase2": "Festival headline segments",
-    "shows.useCase3": "Branded immersive presentations",
-    "shows.useCase4": "Themed event openings",
-    "shows.exploreShows": "Explore Shows",
-
-    // Shows Page - Detailed Page
-    "showsPage.pageTitle": "Shows",
-    "showsPage.pageSubtitle": "Cinematic Dome Stories",
-    "showsPage.descriptionDefault": "From mythical realms to sacred atmospheres, immerse in tales of wonder.",
-    "showsPage.perfectFor": "Perfect for:",
-    "showsPage.perfectFor1": "Family dome nights",
-    "showsPage.perfectFor2": "Cultural programming",
-    "showsPage.perfectFor3": "Art and experience-focused events",
-    "showsPage.teasersTitle": "Teasers:",
-    "showsPage.teasersDesc1": "Full-length shows and dome editions are available. If you are interested in a specific episode or would like to commission a custom production, please contact our team.",
-    "showsPage.teasersDesc2": "We develop immersive content from concept to final delivery.",
-    "showsPage.characterDesign": "Original and consistent character design",
-    "showsPage.narrativeBuilding": "Cohesive narrative and visual building",
-    "showsPage.effectsEditing": "Dynamic scene editing with special effects",
-    "showsPage.sendEmail": "Send Email",
-    "showsPage.whatsapp": "WhatsApp",
-    "showsPage.loadMore": "Load More",
-
-    // Shows Page - Mythic Labels
-    "shows.mythicLabel1": "El Tayukú Presence",
-    "shows.mythicLabel2": "Halloween in Lego City",
-    "shows.mythicLabel3": "Vibrant Ritual of New Caledonia",
-    "shows.mythicLabel4": "Hages of Blue Ocean",
-    "shows.mythicLabel5": "Angry Wind Spirit",
-
-    // Shows Page - Mythic Categories
-    "shows.categoryAsian": "Asian",
-    "shows.categoryMesoamerican": "Mesoamerican",
-    "shows.categoryGreek": "Greek",
-    "shows.categoryEgyptian": "Egyptian",
-
-    // Shows Page - Teaser Titles
-    "shows.teaserTitle1": "Teaser Video 1",
-    "shows.teaserTitle2": "Teaser Video 2",
-    "shows.teaserTitle3": "Teaser Video 3",
-
-    // Environments Section - Landing Page
+    // Environments Section
     "environments.landingTitle": "Environments",
     "environments.landingSubtitle": "Endless Immersive Backdrops",
     "environments.landingDesc1": "Environments are continuous immersive loops crafted using professional motion tuned specifically for dome perception.",
@@ -709,9 +231,27 @@ const translations = {
     "theatre.defaultDescription": "Explore this immersive panoramic experience",
     "theatre.panoramicExperience": "Panoramic Experience",
     "theatre.goButton": "GO",
-    "theatre.ariaLabelPrevious": "Previous panorama",
-    "theatre.ariaLabelNext": "Next panorama",
-    "theatre.ariaLabelPanorama": "Go to panorama {index}",
+    "theatre.ariaLabelPrevious": "Panorama anterior",
+    "theatre.ariaLabelNext": "Siguiente panorama",
+    "theatre.ariaLabelPanorama": "Ir al panorama {index}",
+
+    // Theatre Panorama Titles & Descriptions (Spanish)
+    "theatre.panorama.aurora": "Formaciones de Aurora Boreal de Hielo",
+    "theatre.panorama.auroraDesc": "Escena ártica mística con formaciones de hielo fractales y efecto de aurora boreal. Mezclando estructuras cristalinas en azules, blancos y cremas con luces del norte etéreas.",
+    "theatre.panorama.glacial": "Aurora del Valle Glacial",
+    "theatre.panorama.glacialDesc": "Vista aérea de formaciones glaciales mostrando patrones de flujo de hielo en azules profundos, blancos y marrones. Capturando la naturaleza dinámica del movimiento del glaciar.",
+    "theatre.panorama.abstractMountain": "Vórtice de Hielo de Montaña Abstracto",
+    "theatre.panorama.abstractMountainDesc": "Paisaje surreal que mezcla montañas cubiertas de nieve con patrones orgánicos fluidos en rayas blancas, marrones y doradas.",
+    "theatre.panorama.radiantIce": "Cueva de Hielo Radiante",
+    "theatre.panorama.radiantIceDesc": "Dramático ambiente de cueva de hielo con luz solar dorada radiante creando efectos de ráfaga a través de formaciones de hielo azul y blanco estratificadas.",
+    "theatre.panorama.crystalline": "Fragmentos de Hielo Cristalino",
+    "theatre.panorama.crystallineDesc": "Formaciones de hielo cristalino abstracto y patrones de flujo fotografiados panorámicamente con detalles intrincados en resolución ultra alta.",
+    "theatre.panorama.immersiveWorlds": "Mundos Inmersivos - Vista Panorámica",
+    "theatre.panorama.immersiveWorldsDesc": "Explora reinos digitales sin límites en 360 grados",
+    "theatre.panorama.culturalJourneys": "Viajes Culturales - Expedición Indo",
+    "theatre.panorama.culturalJourneysDesc": "Historias de alrededor del mundo en panorama inmersivo 360",
+    "theatre.panorama.digitalArt": "Arte Digital - Expresión Contemporánea",
+    "theatre.panorama.digitalArtDesc": "Expresiones artísticas contemporáneas en formato inmersivo 360",
 
     // Contact Page
     "contact.back": "Back",

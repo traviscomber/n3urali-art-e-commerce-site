@@ -35,6 +35,37 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
   const [isViewerOpen, setIsViewerOpen] = useState(false)
   const [fadeOut, setFadeOut] = useState(false)
 
+  // Map of panorama titles to translation keys for dynamic translation
+  const panoramaMap: Record<string, { title: string; desc: string }> = {
+    "Aurora Borealis Ice Formations": { title: "theatre.panorama.aurora", desc: "theatre.panorama.auroraDesc" },
+    "Glacial Valley Aurora": { title: "theatre.panorama.glacial", desc: "theatre.panorama.glacialDesc" },
+    "Abstract Mountain Ice Vortex": { title: "theatre.panorama.abstractMountain", desc: "theatre.panorama.abstractMountainDesc" },
+    "Radiant Ice Cave": { title: "theatre.panorama.radiantIce", desc: "theatre.panorama.radiantIceDesc" },
+    "Crystalline Ice Shards": { title: "theatre.panorama.crystalline", desc: "theatre.panorama.crystallineDesc" },
+    "Immersive Worlds - Panoramic View": { title: "theatre.panorama.immersiveWorlds", desc: "theatre.panorama.immersiveWorldsDesc" },
+    "Cultural Journeys - Indo Expedition": { title: "theatre.panorama.culturalJourneys", desc: "theatre.panorama.culturalJourneysDesc" },
+    "Digital Art - Contemporary Expression": { title: "theatre.panorama.digitalArt", desc: "theatre.panorama.digitalArtDesc" },
+  }
+
+  // Function to get translated panorama title
+  const getTranslatedTitle = (title: string | undefined): string => {
+    if (!title) return t('theatre.panoramicExperience')
+    const mapping = panoramaMap[title]
+    if (mapping) {
+      return t(mapping.title)
+    }
+    return title
+  }
+
+  // Function to get translated panorama description
+  const getTranslatedDescription = (description: string | undefined, title: string | undefined): string => {
+    if (title && panoramaMap[title]) {
+      const mapping = panoramaMap[title]
+      return t(mapping.desc)
+    }
+    return description || t('theatre.defaultDescription')
+  }
+
   // Get all related images (same primary subcategory tag)
   // Primary tag (first tag) represents the subcategory like "Forest", "Ocean", etc.
   const getRelatedImages = (imageIndex: number): Image[] => {
@@ -128,7 +159,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
       {isViewerOpen && (
         <PanoramaViewerPSV
           imageUrl={imageUrl}
-          title={currentImage.title || t('theatre.panoramicExperience')}
+          title={getTranslatedTitle(currentImage.title)}
           onClose={() => setIsViewerOpen(false)}
           relaxMode={true}
           fov={130}
@@ -178,7 +209,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
               {/* Info overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
                 <div className="p-6">
-                  <h3 className="text-xl font-light text-white">{currentImage.title}</h3>
+                  <h3 className="text-xl font-light text-white">{getTranslatedTitle(currentImage.title)}</h3>
                   <p className="text-sm text-gray-300 mt-2">{t('theatre.clickGo')}</p>
                 </div>
               </div>
@@ -187,10 +218,10 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
             {/* Image Info */}
             <div className="text-center mb-12">
               <h2 className="text-3xl font-light text-gray-300 mb-2">
-                {currentImage.title}
+                {getTranslatedTitle(currentImage.title)}
               </h2>
               <p className="text-gray-500">
-                {currentImage.description || t('theatre.defaultDescription')}
+                {getTranslatedDescription(currentImage.description, currentImage.title)}
               </p>
               <p className="text-gray-600 text-sm mt-2">
                 {currentRelatedIndex} of {relatedImages.length}

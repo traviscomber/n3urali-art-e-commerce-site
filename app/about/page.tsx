@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   keywords: ["about N3uralia360", "immersive media", "360 photography", "cultural storytelling", "dome installation", "VR experience"],
 }
 
+// Mark as dynamic to prevent prerender issues with language context
+export const dynamic = 'force-dynamic'
+
 export default function AboutPage() {
   const values = [
     {

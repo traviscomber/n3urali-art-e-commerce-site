@@ -106,7 +106,7 @@ Please forward these links to the customer.`
 
       await loadPayments()
     } else {
-      const errorMsg = !result.success && "error" in result ? result.error : "Unknown error"
+      const errorMsg = "error" in result ? result.error : "Unknown error"
       console.error("[v0] Approval failed:", errorMsg)
       toast.error("Failed to approve payment: " + errorMsg)
     }
@@ -160,7 +160,8 @@ Thank you for your purchase!`
       setRejectReason("")
       setSelectedPayment(null)
     } else {
-      toast.error("Failed to reject payment: " + result.error)
+      const errorMsg = "error" in result ? result.error : "Unknown error"
+      toast.error("Failed to reject payment: " + errorMsg)
     }
     setProcessingId(null)
   }

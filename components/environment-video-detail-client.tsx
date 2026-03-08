@@ -122,6 +122,47 @@ export function EnvironmentVideoDetailClient({
                   View Licensing Options
                 </Button>
               </div>
+
+              {/* Logos & Awards Section */}
+              <div className="pt-4 space-y-4">
+                <p className="text-xs text-slate-500 uppercase tracking-wider font-light">Trusted by</p>
+                <div className="space-y-3">
+                  {/* Awards Grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Award/Logo 1 */}
+                    <div className="bg-slate-900/40 border border-slate-800 rounded-lg p-3 flex items-center justify-center h-16 hover:border-slate-700 transition-colors">
+                      <div className="text-center">
+                        <div className="text-cyan-400 font-light text-xs">★★★★★</div>
+                        <p className="text-slate-400 text-xs mt-1">5 Star Rated</p>
+                      </div>
+                    </div>
+
+                    {/* Award/Logo 2 */}
+                    <div className="bg-slate-900/40 border border-slate-800 rounded-lg p-3 flex items-center justify-center h-16 hover:border-slate-700 transition-colors">
+                      <div className="text-center">
+                        <div className="text-cyan-400 text-xl font-light">◆</div>
+                        <p className="text-slate-400 text-xs mt-1">Award Winner</p>
+                      </div>
+                    </div>
+
+                    {/* Award/Logo 3 */}
+                    <div className="bg-slate-900/40 border border-slate-800 rounded-lg p-3 flex items-center justify-center h-16 hover:border-slate-700 transition-colors">
+                      <div className="text-center">
+                        <div className="text-cyan-400 font-light text-xs">ISO 9001</div>
+                        <p className="text-slate-400 text-xs mt-1">Certified</p>
+                      </div>
+                    </div>
+
+                    {/* Award/Logo 4 */}
+                    <div className="bg-slate-900/40 border border-slate-800 rounded-lg p-3 flex items-center justify-center h-16 hover:border-slate-700 transition-colors">
+                      <div className="text-center">
+                        <div className="text-cyan-400 font-light text-xs">10+ Years</div>
+                        <p className="text-slate-400 text-xs mt-1">Experience</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Right - Video Player (Doubled in Size) */}

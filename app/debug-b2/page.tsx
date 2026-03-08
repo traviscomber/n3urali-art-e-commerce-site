@@ -1,3 +1,6 @@
+// Mark as dynamic to prevent prerender issues
+export const dynamic = 'force-dynamic'
+
 export default function DebugB2Page() {
   const bucketName = process.env.BACKBLAZE_BUCKET_NAME
   const bucketId = process.env.BACKBLAZE_BUCKET_ID

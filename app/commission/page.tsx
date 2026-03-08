@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: "Commission custom immersive experiences from N3uralia360. Dome installations, VR environments, performance loops, and spatial media for museums, institutions, and brands.",
 }
 
+export const dynamic = 'force-dynamic'
+
 export default function CommissionPage() {
   const commissionTypes = [
     {

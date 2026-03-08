@@ -591,7 +591,7 @@ export default function BrowsePage() {
                       WebkitUserSelect: "none",
                       WebkitUserDrag: "none",
                       WebkitTouchCallout: "none",
-                    }}
+                    } as React.CSSProperties}
                     onContextMenu={(e) => e.preventDefault()}
                     onDragStart={(e) => e.preventDefault()}
                     draggable={false}

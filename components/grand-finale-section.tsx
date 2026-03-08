@@ -43,18 +43,16 @@ export function GrandFinaleSection() {
           </div>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-6 sm:pt-8 w-full sm:w-auto px-4 sm:px-0">
-            <Link href="/environments" className="w-full sm:w-auto">
-              <button className="group relative w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded border-2 border-cyan-400/50 text-cyan-400 hover:border-cyan-400 hover:bg-cyan-400/10 transition-all duration-300 font-light tracking-wide text-sm sm:text-base overflow-hidden">
-                <span className="relative z-10">{t('finale.exploreAll')}</span>
-                <div className="absolute inset-0 bg-cyan-400/5 transform scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
+          <div className="flex flex-col gap-4 pt-6 sm:pt-8 w-full px-4 sm:px-0 sm:max-w-sm">
+            <Link href="/environments" className="w-full">
+              <button className="w-full px-6 py-3 bg-slate-600 text-white font-medium hover:bg-slate-700 transition-colors rounded-lg">
+                {t('finale.exploreAll')}
               </button>
             </Link>
 
-            <Link href="/studio" className="w-full sm:w-auto">
-              <button className="group relative w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded border-2 border-slate-500/50 text-slate-300 hover:border-slate-400 hover:text-slate-100 transition-all duration-300 font-light tracking-wide text-sm sm:text-base overflow-hidden">
-                <span className="relative z-10">{t('finale.learnStudio')}</span>
-                <div className="absolute inset-0 bg-slate-400/5 transform scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
+            <Link href="/studio" className="w-full">
+              <button className="w-full px-6 py-3 border border-slate-500 text-slate-300 font-medium hover:text-slate-100 hover:border-slate-400 transition-colors rounded-lg">
+                {t('finale.learnStudio')}
               </button>
             </Link>
           </div>

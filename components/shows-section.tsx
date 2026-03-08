@@ -50,11 +50,11 @@ export function ShowsSection() {
             <div className="pt-2">
               <Link
                 href="/shows"
-                className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-light text-slate-100 border border-purple-400/40 hover:border-purple-400 hover:text-purple-400 transition-all duration-300 group rounded"
+                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white bg-slate-600 hover:bg-slate-700 transition-all duration-300 rounded-lg"
               >
                 <span>{t('shows.exploreShows')}</span>
                 <svg
-                  className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform"
+                  className="w-4 h-4 group-hover:translate-x-1 transition-transform"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

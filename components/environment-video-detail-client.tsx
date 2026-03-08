@@ -114,11 +114,11 @@ export function EnvironmentVideoDetailClient({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-4">
-                <Button className="bg-slate-700 hover:bg-slate-600 text-white border-0">
+              <div className="flex flex-col gap-4 w-full">
+                <button className="w-full px-6 py-3 bg-slate-600 text-white font-medium hover:bg-slate-700 transition-colors rounded-lg">
                   Request Private Demo
-                </Button>
-                <Button variant="outline" className="border-slate-700 text-slate-300 hover:text-white">
+                </button>
+                <Button variant="outline" className="w-full border-slate-700 text-slate-300 hover:text-white">
                   View Licensing Options
                 </Button>
               </div>

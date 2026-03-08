@@ -45,11 +45,11 @@ export function EnvironmentsSectionClient() {
               </p>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 pt-2">
-              <Link href="/environments" className="px-4 sm:px-6 py-2 sm:py-2.5 border border-cyan-500/50 text-cyan-400 hover:border-cyan-500 hover:bg-cyan-500/10 transition-all text-xs sm:text-sm font-light text-center sm:text-left">
+            <div className="flex flex-col gap-3 pt-2">
+              <Link href="/environments" className="w-full px-6 py-3 bg-slate-600 text-white font-medium hover:bg-slate-700 transition-all text-sm text-center rounded-lg">
                 {t('environments.freeDemo')}
               </Link>
-              <Link href="/environments" className="px-4 sm:px-6 py-2 sm:py-2.5 border border-slate-600/50 text-slate-400 hover:border-slate-500 hover:text-slate-300 transition-all text-xs sm:text-sm font-light text-center sm:text-left">
+              <Link href="/environments" className="w-full px-6 py-3 border border-slate-600 text-slate-300 font-medium hover:border-slate-500 hover:text-slate-200 transition-all text-sm text-center rounded-lg">
                 {t('environments.viewCatalogue')}
               </Link>
             </div>

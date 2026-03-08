@@ -165,7 +165,7 @@ export function ContactPageClient() {
               <button
                 type="submit"
                 disabled={!email || selectedOptions.length === 0 || isSubmitting}
-                className="w-full px-6 py-3 border border-cyan-400 text-cyan-400 text-sm font-medium hover:bg-cyan-400/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-8"
+                className="w-full px-6 py-3 mt-8 bg-slate-600 text-white font-medium hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-lg"
               >
                 {isSubmitting ? t('contact.submitting') : t('contact.submitButton')}
               </button>

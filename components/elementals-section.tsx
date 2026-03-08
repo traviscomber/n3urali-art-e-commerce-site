@@ -100,7 +100,7 @@ export function ElementalsSection() {
                 </p>
 
                 <Link href={elemental.link} className="inline-block pt-2">
-                  <button className="px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-light text-cyan-400 border border-cyan-400/40 hover:border-cyan-400 hover:bg-cyan-400/10 transition-all duration-300 rounded">
+                  <button className="px-6 py-3 text-sm font-medium text-white bg-slate-600 hover:bg-slate-700 transition-all duration-300 rounded-lg">
                     Explore
                   </button>
                 </Link>

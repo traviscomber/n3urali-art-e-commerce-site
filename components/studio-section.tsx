@@ -80,9 +80,9 @@ export function StudioSection() {
 
             <Link
               href="/studio"
-              className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors group w-fit"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-slate-600 text-white font-medium hover:bg-slate-700 transition-all rounded-lg"
             >
-              <span className="text-sm md:text-base font-light">Explore Studio</span>
+              <span className="text-sm md:text-base">Explore Studio</span>
               <svg
                 className="w-5 h-5 group-hover:translate-x-1 transition-transform"
                 fill="none"

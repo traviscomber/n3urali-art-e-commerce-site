@@ -71,6 +71,16 @@ const translations = {
     "collections.browseGallery": "Explora nuestra galería completa de imágenes",
     "collections.browseButton": "Explorar Galería",
 
+    // Elementals Section
+    "elementals.nature": "Naturaleza",
+    "elementals.natureSubtitle": "ELEMENTALS.NATURESUBTITLE",
+    "elementals.culture": "Cultura",
+    "elementals.cultureSubtitle": "ELEMENTALS.CULTURESUBTITLE",
+    "elementals.mythic": "Mítico",
+    "elementals.mythicSubtitle": "ELEMENTALS.MYTHICSUBTITLE",
+    "elementals.art": "Arte",
+    "elementals.artSubtitle": "ELEMENTALS.ARTSUBTITLE",
+
     // Theatre
     "theatre.panoramicExperience": "Experiencia Panorámica",
     "theatre.defaultDescription": "Sumérgete en una experiencia inmersiva 360°",
@@ -166,6 +176,16 @@ const translations = {
     "collections.preferIndividual": "Prefer to Buy Individually?",
     "collections.browseGallery": "Browse our complete image gallery",
     "collections.browseButton": "Browse Gallery",
+
+    // Elementals Section
+    "elementals.nature": "Nature",
+    "elementals.natureSubtitle": "ELEMENTALS.NATURESUBTITLE",
+    "elementals.culture": "Culture",
+    "elementals.cultureSubtitle": "ELEMENTALS.CULTURESUBTITLE",
+    "elementals.mythic": "Mythic",
+    "elementals.mythicSubtitle": "ELEMENTALS.MYTHICSUBTITLE",
+    "elementals.art": "Art",
+    "elementals.artSubtitle": "ELEMENTALS.ARTSUBTITLE",
 
     // Theatre
     "theatre.panoramicExperience": "Panoramic Experience",

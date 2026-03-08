@@ -35,8 +35,9 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(arrayBuffer)
 
     // Upload to Supabase - try videos bucket first, fallback to assets
-    let uploadData, uploadError
-    let bucketName = "videos"
+    let uploadData: any
+    let uploadError: any
+    let bucketName: string = "videos"
 
     ({ data: uploadData, error: uploadError } = await supabase.storage
       .from(bucketName)

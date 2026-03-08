@@ -140,10 +140,6 @@ export const metadata: Metadata = {
     email: false,
     address: false,
   },
-  // GEO targeting metadata
-  appleItunes: {
-    appId: "n3uralia360",
-  },
   // Additional SEO metadata
   other: {
     "msapplication-TileColor": "#000000",
@@ -154,6 +150,7 @@ export const metadata: Metadata = {
     "geo.region": "US, ES, CL",
     "geo.position": "0;0",
     "ICBM": "0,0",
+    "apple-itunes-app": "app-id=n3uralia360",
   },
 }
 

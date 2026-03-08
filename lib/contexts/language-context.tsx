@@ -706,7 +706,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }
 
   const t = (key: string): string => {
-    return translations[language][key] || key
+    // Ensure we have a valid language object, fallback to English if not
+    const translationObj = translations[language] || translations.en
+    return translationObj[key as keyof typeof translationObj] || key
   }
 
   return <LanguageContext.Provider value={{ language, setLanguage, t, isLoaded }}>{children}</LanguageContext.Provider>

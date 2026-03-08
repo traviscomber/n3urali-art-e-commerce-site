@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react'
 import { Trash2 } from 'lucide-react'
 
+// Mark this page as dynamic since it uses client-side hooks and interacts with dynamic data
+export const dynamic = 'force-dynamic'
+
 export default function AdminPage() {
   const [images, setImages] = useState<any[]>([])
   const [loading, setLoading] = useState(true)

@@ -46,6 +46,7 @@ export function AuthButton() {
   }, [supabase]) // Updated dependency array to [supabase]
 
   const handleSignOut = async () => {
+    if (!supabase) return
     await supabase.auth.signOut()
     router.push("/")
   }

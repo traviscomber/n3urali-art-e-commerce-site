@@ -2,9 +2,47 @@ import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { cookies } from "next/headers"
 
-async function getCurrentUser(sessionToken: string) {
-  // In a proper Supabase setup, you'd validate the session token
-  return null
+interface UserProfile {
+  user_id: string
+  email: string
+  full_name: string
+  avatar_url: string | null
+  is_admin: boolean
+}
+
+async function getCurrentUser(sessionToken: string): Promise<UserProfile | null> {
+  try {
+    const supabase = await createClient()
+    
+    // Get the authenticated user from Supabase
+    const { data: { user }, error: authError } = await supabase.auth.getUser(sessionToken)
+    
+    if (authError || !user) {
+      return null
+    }
+
+    // Get the user's profile
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single()
+
+    if (profileError || !profile) {
+      return null
+    }
+
+    return {
+      user_id: user.id,
+      email: user.email || "",
+      full_name: profile.full_name || "",
+      avatar_url: profile.avatar_url || null,
+      is_admin: profile.role === "admin",
+    }
+  } catch (error) {
+    console.error("[v0] Error getting current user:", error)
+    return null
+  }
 }
 
 export async function GET(request: NextRequest) {

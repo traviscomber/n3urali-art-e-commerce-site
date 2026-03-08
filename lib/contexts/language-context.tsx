@@ -850,8 +850,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }
 
   const t = (key: string): string => {
-    // Ensure we have a valid language object, fallback to English if not
-    const translationObj = translations[language] || translations.en
+    // Default to English if language is undefined or invalid
+    const validLanguage = (language === "es" || language === "en") ? language : "en"
+    const translationObj = translations[validLanguage as keyof typeof translations]
+    if (!translationObj) {
+      // Fallback to English if even that fails
+      const enObj = translations.en
+      return enObj?.[key as keyof typeof enObj] || key
+    }
     return translationObj[key as keyof typeof translationObj] || key
   }
 

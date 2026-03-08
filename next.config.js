@@ -34,10 +34,7 @@ const nextConfig = {
     minimumCacheTTL: 31536000, // 1 year
   },
 
-  // Enable SWR optimization
-  swcMinify: true,
-
-  // Compression
+  // Enable compression
   compress: true,
 }
 

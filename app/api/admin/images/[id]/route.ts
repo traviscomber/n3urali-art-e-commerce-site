@@ -3,12 +3,12 @@ import { createClient } from "@/lib/supabase/server"
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createClient()
     const body = await request.json()
-    const { id } = params
 
     // Update image in database
     const { data, error } = await supabase
@@ -38,11 +38,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createClient()
-    const { id } = params
 
     // Get image details before deletion
     const { data: image, error: fetchError } = await supabase

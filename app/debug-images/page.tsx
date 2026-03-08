@@ -6,6 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 
+// Mark this page as dynamic since it uses client-side hooks
+export const dynamic = 'force-dynamic'
+
 interface ImageTest {
   url: string
   status: "testing" | "success" | "failed" | "cors-error"

@@ -102,7 +102,7 @@ async function getCollectionImages(collectionId: string): Promise<CollectionImag
     .select(`
       id,
       position,
-      image:images (
+      image:images!inner (
         id,
         title,
         description,
@@ -122,7 +122,14 @@ async function getCollectionImages(collectionId: string): Promise<CollectionImag
     return []
   }
 
-  return data as CollectionImage[]
+  // Transform the data to flatten the image array
+  const transformedData = data?.map((item: any) => ({
+    id: item.id,
+    position: item.position,
+    image: Array.isArray(item.image) ? item.image[0] : item.image,
+  })) || []
+
+  return transformedData as CollectionImage[]
 }
 
 // Create a new collection

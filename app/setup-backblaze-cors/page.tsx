@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
+// Mark this page as dynamic since it uses client-side hooks
+export const dynamic = 'force-dynamic'
+
 export default function SetupBackblazeCorsPage() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<any>(null)

@@ -3,11 +3,11 @@ import { createAdminClient } from "@/lib/supabase/server"
 
 export async function GET(
   _request: Request,
-  { params }: { params: { code: string } }
+  { params }: { params: Promise<{ code: string }> }
 ) {
   try {
+    const { code } = await params
     const supabase = createAdminClient()
-    const code = params.code
 
     const { data, error } = await supabase
       .from("collections")

@@ -1,5 +1,7 @@
 "use client"
 
+export const dynamic = 'force-dynamic'
+
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type React from "react"
@@ -15,9 +17,6 @@ import { Badge } from "@/components/ui/badge"
 const USDT_WALLET_ADDRESS = process.env.NEXT_PUBLIC_USDT_WALLET_ADDRESS || "TJ1iodaRdVm5e7yKLy3Uck3dw1iKDbmJ4a"
 const USDT_RATE = 1.0 // 1 USD = 1 USDT
 const WHATSAPP_PHONE = "56940946660"
-
-// Mark this page as dynamic since it uses client-side hooks and search parameters
-export const dynamic = 'force-dynamic'
 
 export default function CheckoutPage() {
   const { items, total, clearCart } = useCart()

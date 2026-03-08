@@ -366,6 +366,13 @@ export function Header({ videoContext }: HeaderProps) {
                 {t("nav.studio")}
               </Link>
               <Link
+                href="/contact"
+                className="text-sm font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-2.5"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {t("nav.contact")}
+              </Link>
+              <Link
                 href="/tools"
                 className="text-sm font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-2.5"
                 onClick={() => setIsMobileMenuOpen(false)}

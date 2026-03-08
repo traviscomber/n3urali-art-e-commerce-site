@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
+// Mark as dynamic to prevent prerender issues
+export const dynamic = 'force-dynamic'
+
 export default function TestImageAccessPage() {
   const [testResults, setTestResults] = useState<any[]>([])
   const [loading, setLoading] = useState(false)

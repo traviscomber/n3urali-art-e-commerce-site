@@ -1,20 +1,22 @@
 /** @type {import('next').NextConfig} */
+const path = require('path')
+
 const nextConfig = {
   webpack: (config, { isServer }) => {
     // Optimize webpack cache for large string serialization
     config.cache = {
       type: 'filesystem',
-      cacheDirectory: '.next/cache',
+      cacheDirectory: path.resolve(__dirname, '.next/cache'),
       compression: 'gzip',
       hashAlgorithm: 'md4',
       name: 'nextjs-webpack',
-      store: 'pack', // Use pack format for better compression
+      store: 'pack',
       version: '1.0.0',
-      maxAge: 1000 * 60 * 60 * 24, // 24 hours
+      maxAge: 1000 * 60 * 60 * 24,
       buildDependencies: {
         config: [__filename],
       },
-      managedPaths: isServer ? ['node_modules'] : [],
+      managedPaths: isServer ? [path.resolve(__dirname, 'node_modules')] : [],
       immutablePaths: [],
       profile: false,
       readonly: process.env.CI === 'true',
@@ -40,10 +42,9 @@ const nextConfig = {
         hostname: 'via.placeholder.com',
       },
     ],
-    minimumCacheTTL: 31536000, // 1 year
+    minimumCacheTTL: 31536000,
   },
 
-  // Enable compression
   compress: true,
 }
 

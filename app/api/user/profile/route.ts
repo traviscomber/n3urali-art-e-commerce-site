@@ -60,13 +60,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Invalid session" }, { status: 401 })
     }
 
+    const userProfile: UserProfile = user
+
     return NextResponse.json({
       user: {
-        id: user.user_id,
-        email: user.email,
-        full_name: user.full_name,
-        avatar_url: user.avatar_url,
-        is_admin: user.is_admin,
+        id: userProfile.user_id,
+        email: userProfile.email,
+        full_name: userProfile.full_name,
+        avatar_url: userProfile.avatar_url,
+        is_admin: userProfile.is_admin,
       },
     })
   } catch (error) {

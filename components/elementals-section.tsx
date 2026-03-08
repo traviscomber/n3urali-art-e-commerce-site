@@ -61,10 +61,9 @@ export function ElementalsSection() {
 
       <div className="px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-6">
         {elementals.map((elemental, index) => (
-          <Link
+          <div
             key={elemental.title}
-            href={elemental.link}
-            className="group relative w-full h-80 sm:h-96 md:h-96 lg:h-screen overflow-hidden bg-slate-800 transition-all duration-300 hover:brightness-110 block rounded-lg"
+            className="group relative w-full h-80 sm:h-96 md:h-96 lg:h-96 overflow-hidden bg-slate-800 transition-all duration-300 block rounded-lg"
           >
             {/* Background Image - Full Banner */}
             <Image
@@ -78,31 +77,33 @@ export function ElementalsSection() {
             {/* Dark Overlay with gradient */}
             <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-transparent group-hover:from-black/80 group-hover:via-black/60 transition-all duration-300 rounded-lg" />
 
-            {/* Content - Left side aligned with logo */}
-            <div className="absolute inset-0 flex flex-col justify-center items-start p-4 sm:p-8 md:p-12 lg:p-16 pl-4 sm:pl-8 md:pl-32 lg:pl-96">
-              <div className="space-y-4 sm:space-y-6 max-w-2xl">
-                <div className="text-left">
-                  <h3 className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-light text-white tracking-tight mb-2 sm:mb-3 leading-none">
+            {/* Content - Left side aligned */}
+            <div className="absolute inset-0 flex flex-col justify-center items-start p-4 sm:p-8 md:p-12 lg:p-16">
+              <div className="space-y-6 sm:space-y-8 max-w-2xl">
+                <div className="text-left space-y-2 sm:space-y-3">
+                  {/* Horizontal line above title */}
+                  <div className="w-12 sm:w-16 h-px bg-cyan-400/60"></div>
+                  
+                  <h3 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-white tracking-tight leading-none">
                     {elemental.title}
                   </h3>
-                  <p className={`text-xs sm:text-sm font-light tracking-widest uppercase text-left ${accentColorMap[elemental.accentColor]?.split(' ')[0]}`}>
+                  <p className="text-xs sm:text-sm font-light tracking-widest text-slate-400">
                     {elemental.subtitle}
                   </p>
                 </div>
 
-                <p className="text-xs sm:text-sm md:text-base text-slate-300 font-light leading-relaxed text-left">
+                <p className="text-xs sm:text-sm text-slate-300 font-light leading-relaxed max-w-md">
                   {elemental.description}
                 </p>
 
-                <div className="inline-flex items-center gap-2 pt-2 sm:pt-4">
-                  <span className={`text-xs sm:text-sm md:text-base font-light transition-all group-hover:gap-3 ${accentColorMap[elemental.accentColor]}`}>
+                <Link href={elemental.link} className="inline-block pt-2">
+                  <button className="px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-light text-cyan-400 border border-cyan-400/40 hover:border-cyan-400 hover:bg-cyan-400/10 transition-all duration-300 rounded">
                     Explore
-                  </span>
-                  <ChevronRight className={`w-4 h-4 sm:w-5 sm:h-5 transform group-hover:translate-x-2 transition-transform ${accentColorMap[elemental.accentColor]?.split(' ')[0]}`} />
-                </div>
+                  </button>
+                </Link>
               </div>
             </div>
-          </Link>
+          </div>
         ))}
       </div>
     </section>

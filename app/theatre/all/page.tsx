@@ -32,7 +32,7 @@ export default async function AllCollectionsTheatrePage() {
   const allCollectionImages = allCollectionData
     .filter(Boolean)
     .flatMap((collection) =>
-      collection.images.map((img) => ({
+      collection.images.map((img: any) => ({
         ...img.image,
         collectionTitle: collection.title,
         collectionCode: collection.code,

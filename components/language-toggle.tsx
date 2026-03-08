@@ -1,22 +1,13 @@
 "use client"
 
 import { useLanguage } from "@/lib/contexts/language-context"
-import { useRouter, useSearchParams, usePathname } from "next/navigation"
 
 export function LanguageToggle() {
   const { language, setLanguage } = useLanguage()
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const pathname = usePathname()
 
   const handleLanguageChange = () => {
     const newLang = language === "es" ? "en" : "es"
     setLanguage(newLang)
-    
-    // Update URL with language parameter for persistence
-    const params = new URLSearchParams(searchParams || "")
-    params.set("lang", newLang)
-    router.push(`${pathname}?${params.toString()}`, { scroll: false })
   }
 
   return (

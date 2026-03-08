@@ -6,6 +6,9 @@ export const metadata = {
   description: "The page you're looking for doesn't exist on n3uralia360.art - Premium 360° Digital Photography platform.",
 }
 
+// Mark as dynamic to prevent prerender issues
+export const dynamic = 'force-dynamic'
+
 export default function NotFound() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">

@@ -24,12 +24,12 @@ interface OrderItem {
 
 interface Order {
   id: string
-  order_number: string
+  order_number?: string
   status: string
   total_amount: string | number
   created_at: string
   order_items: OrderItem[]
-  payment_method: string
+  payment_method?: string
   payment_id?: string
   user_email?: string
   user_name?: string

@@ -161,7 +161,7 @@ export function StudioPageClient() {
                 <div className="flex flex-col gap-2 sm:gap-3">
                   <p className="text-slate-400 text-base sm:text-lg font-light">Juan Vial</p>
                   <p className="text-slate-500 text-xs sm:text-sm leading-relaxed max-w-xs">
-                    Leads AI development, generative systems, and immersive production architecture.
+                    {t('studio.juanBio')}
                   </p>
                 </div>
               </div>
@@ -179,7 +179,7 @@ export function StudioPageClient() {
                 <div className="flex flex-col gap-2 sm:gap-3">
                   <p className="text-slate-400 text-base sm:text-lg font-light">Irina Lebedeva</p>
                   <p className="text-slate-500 text-xs sm:text-sm leading-relaxed max-w-xs">
-                    Shapes visual identity, and curates each world into a cohesive immersive experience.
+                    {t('studio.irinaBio')}
                   </p>
                 </div>
               </div>
@@ -195,10 +195,10 @@ export function StudioPageClient() {
           <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0 section-divider">
             <div className="flex flex-col gap-4 sm:gap-6 max-w-md">
               <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
-                Life Gallery
+                {t('studio.lifeGalleryTitle')}
               </h2>
               <p className="text-slate-400 text-xs sm:text-sm md:text-base">
-                Behind the scenes and our content living among physical reality.
+                {t('studio.lifeGalleryDescription')}
               </p>
             </div>
           </div>
@@ -224,14 +224,14 @@ export function StudioPageClient() {
               <button
                 onClick={handlePrevGallery}
                 className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 sm:-translate-x-20 text-slate-400 hover:text-cyan-400 transition-colors"
-                aria-label="Previous gallery item"
+                aria-label={t('studio.galleryPrevious')}
               >
                 <ChevronLeft size={32} className="sm:w-10 sm:h-10" />
               </button>
               <button
                 onClick={handleNextGallery}
                 className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 sm:translate-x-20 text-slate-400 hover:text-cyan-400 transition-colors"
-                aria-label="Next gallery item"
+                aria-label={t('studio.galleryNext')}
               >
                 <ChevronRight size={32} className="sm:w-10 sm:h-10" />
               </button>

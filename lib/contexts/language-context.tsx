@@ -253,6 +253,14 @@ const translations = {
     "theatre.panorama.digitalArt": "Arte Digital - Expresión Contemporánea",
     "theatre.panorama.digitalArtDesc": "Expresiones artísticas contemporáneas en formato inmersivo 360",
 
+    // Studio Page - Life Gallery & Team
+    "studio.lifeGalleryTitle": "Galería de Vida",
+    "studio.lifeGalleryDescription": "Detrás de cámaras y nuestro contenido viviendo en la realidad física.",
+    "studio.juanBio": "Lidera el desarrollo de IA, sistemas generativos y arquitectura de producción inmersiva.",
+    "studio.irinaBio": "Define la identidad visual y cura cada mundo en una experiencia inmersiva cohesiva.",
+    "studio.galleryPrevious": "Elemento de galería anterior",
+    "studio.galleryNext": "Siguiente elemento de galería",
+
     // Contact Page
     "contact.back": "Back",
     "contact.formTitle": "Contact Form",
@@ -275,6 +283,14 @@ const translations = {
     "contact.successTitle": "Your vision is on its way!",
     "contact.successMessage": "Thank you for reaching out. We're excited to explore what's possible for your immersive experience. Our team will connect with you shortly to bring your ideas to life.",
     "contact.close": "Close",
+
+    // Studio Page - Life Gallery & Team
+    "studio.lifeGalleryTitle": "Life Gallery",
+    "studio.lifeGalleryDescription": "Behind the scenes and our content living among physical reality.",
+    "studio.juanBio": "Leads AI development, generative systems, and immersive production architecture.",
+    "studio.irinaBio": "Shapes visual identity, and curates each world into a cohesive immersive experience.",
+    "studio.galleryPrevious": "Previous gallery item",
+    "studio.galleryNext": "Next gallery item",
 
     // Environments Page - Main
     "environmentsPage.title": "Environments",

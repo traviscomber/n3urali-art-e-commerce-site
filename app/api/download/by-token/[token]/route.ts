@@ -2,10 +2,13 @@ import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { ImageUrlHandler } from "@/lib/image-url-handler"
 
-export async function GET(request: NextRequest, { params }: { params: { token: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ token: string }> }
+) {
   try {
+    const { token } = await params
     console.log("[v0] Download verification started")
-    const token = params.token
     console.log("[v0] Received token:", token)
 
     if (!token) {

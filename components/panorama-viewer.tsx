@@ -269,7 +269,6 @@ export const PanoramaViewer = React.memo(function PanoramaViewer({
     img.onerror = (e) => {
       console.error("[v0] Failed to load panorama image from URL:", imageUrl)
       console.error("[v0] Image error event:", e)
-      console.error("[v0] Error type:", img.error)
     }
     img.src = imageUrl
     imageRef.current = img

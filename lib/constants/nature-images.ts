@@ -1,7 +1,7 @@
 export const natureCategoryImages = {
   'oceans': [
     { title: 'Luminous Mandalas', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater1-32cco29YdW82Sg3nv1RIWp43PKLSYN.png' },
-    { title: 'Octopus Dream', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater2-ccZcog7a7Xvp1dPmhcpf8USyi2CFdY.png' },
+    { title: 'Octopus Dream', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater2-ccZcog7a7Xvp1dPmhcpf8USyi2CFdY.png', videoUrl: 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f107083962ade84fb_d20260307_m223701_c005_v0501021_t0017_u01772923021602' },
     { title: 'Coral Abyss', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater3-3EBmdD7j5Z1ynv5nsqOqaHXsm9X9zn.png' },
     { title: 'Jellyfish Symphony', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater4-EgBszqfBqzfVUvFGQPNqqFQAfIjrg2.png' },
     { title: 'Deep Sea Sanctum', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatUnderwater5.png-h6C4tFhELpOzMwuGcKeqiyPa2uWQHs.jpeg' },

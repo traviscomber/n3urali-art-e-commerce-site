@@ -10,8 +10,6 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Mail, MapPin, Calendar, User, Briefcase, DollarSign, Clock } from 'lucide-react'
 
-const supabase = createClient()
-
 interface Commission {
   id: string
   organization_name: string
@@ -30,24 +28,13 @@ interface Commission {
 
 export default function CommissionsAdminPage() {
   const { user } = useAuth()
+  const supabase = createClient()
   const [commissions, setCommissions] = useState<Commission[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedStatus, setSelectedStatus] = useState<string>('new')
   const [searchQuery, setSearchQuery] = useState('')
-  const [supabase, setSupabase] = useState<ReturnType<typeof createClient> | null>(null)
 
   useEffect(() => {
-    try {
-      if (typeof window !== "undefined") {
-        setSupabase(createClient())
-      }
-    } catch (error) {
-      console.error("[v0] Failed to create Supabase client:", error)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!supabase) return
     // Redirect if not admin
     if (user?.email !== 'travis@nuanu.com') {
       window.location.href = '/'
@@ -55,7 +42,7 @@ export default function CommissionsAdminPage() {
     }
 
     loadCommissions()
-  }, [user, supabase])
+  }, [user])
 
   const loadCommissions = async () => {
     try {

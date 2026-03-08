@@ -274,6 +274,12 @@ const translations = {
     "footer.orders": "Pedidos",
     "footer.downloads": "Descargas",
     "footer.settings": "Configuración",
+
+    // Finale Section
+    "finale.heading": "Experimenta la\nInmersión",
+    "finale.description": "Explora nuestras experiencias inmersivas full-dome, instalaciones de realidad virtual y actuaciones interactivas diseñadas para transformar espacios.",
+    "finale.exploreAll": "Explorar Todo",
+    "finale.learnStudio": "Conocer Estudio",
   },
   en: {
     // Language reference for conditional rendering
@@ -534,6 +540,12 @@ const translations = {
     "footer.orders": "Orders",
     "footer.downloads": "Downloads",
     "footer.settings": "Settings",
+
+    // Finale Section
+    "finale.heading": "Experience the\nImmersion",
+    "finale.description": "Explore our full-dome immersive experiences, VR installations, and interactive performances designed to transform spaces.",
+    "finale.exploreAll": "Explore All",
+    "finale.learnStudio": "Learn Studio",
   },
 }
 

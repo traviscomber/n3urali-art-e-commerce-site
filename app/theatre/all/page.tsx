@@ -40,7 +40,7 @@ export default async function AllCollectionsTheatrePage() {
     )
 
   // Combine gallery images
-  const formattedGalleryImages = galleryImages.map((img: any) => ({
+  const formattedGalleryImages = (galleryImages.success ? galleryImages.data : []).map((img: any) => ({
     id: img.id,
     title: img.title,
     description: img.description,

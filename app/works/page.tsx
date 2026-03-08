@@ -60,7 +60,7 @@ export default function WorksPage() {
     setFilteredWorks(results)
   }, [searchQuery, selectedAudience, works])
 
-  const audiences = Array.from(new Set(works.map((w) => w.audience_type)))
+  const audiences = Array.from(new Set(works.map((w) => w.audience_type).filter((a) => a !== undefined)))
 
   return (
     <main className="min-h-screen bg-background">

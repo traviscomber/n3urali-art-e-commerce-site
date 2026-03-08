@@ -278,7 +278,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               {(databaseImages[selectedNatureCategory] && databaseImages[selectedNatureCategory].length > 0 
                 ? databaseImages[selectedNatureCategory] 
                 : natureCategoryImages[selectedNatureCategory] || [])
-                ?.slice(0, 5).map((image, idx) => (
+                ?.slice(0, 5).map((image: any, idx) => (
                 <Link
                   key={idx}
                   href={`/environments/${(image as any).id || `${selectedNatureCategory}-${idx}`}`}

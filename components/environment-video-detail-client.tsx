@@ -99,10 +99,10 @@ export function EnvironmentVideoDetailClient({
 
       {/* Main Content */}
       <section className="py-12 px-4">
-        <div className="container mx-auto max-w-6xl">
+        <div className="container mx-auto max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-16">
             {/* Left Content */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className="lg:col-span-1 space-y-8">
               {/* Description */}
               <div className="space-y-4">
                 <p className="text-slate-300 leading-relaxed text-sm">
@@ -124,10 +124,10 @@ export function EnvironmentVideoDetailClient({
               </div>
             </div>
 
-            {/* Right - Video Player */}
-            <div className="lg:col-span-1">
+            {/* Right - Video Player (Doubled in Size) */}
+            <div className="lg:col-span-2">
               {video.videoUrl ? (
-                <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-900 shadow-xl shadow-cyan-500/10">
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-900 shadow-2xl shadow-cyan-500/20 group">
                   <video
                     src={video.videoUrl}
                     controls
@@ -137,9 +137,14 @@ export function EnvironmentVideoDetailClient({
                     playsInline
                     className="w-full h-full object-contain"
                   />
+                  {/* Fullscreen Indicator Overlay */}
+                  <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-lg flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <Maximize2 className="w-4 h-4 text-cyan-400" />
+                    <span className="text-xs text-slate-300 font-light">Press F to fullscreen</span>
+                  </div>
                 </div>
               ) : (
-                <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-900 shadow-xl shadow-cyan-500/10">
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-900 shadow-2xl shadow-cyan-500/20">
                   <Image
                     src={video.thumbnail_medium_url || video.original_url || "/placeholder.svg"}
                     alt={video.title}

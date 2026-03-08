@@ -28,7 +28,7 @@ function EnvironmentCollection({
   highlightIndex = 1,
 }: EnvironmentCollectionProps) {
   return (
-    <div className="space-y-12 pb-24 border-b border-slate-700/40">
+    <div className="space-y-12 pb-24 /40">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
         <div>

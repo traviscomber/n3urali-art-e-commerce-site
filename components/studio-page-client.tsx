@@ -44,7 +44,7 @@ export function StudioPageClient() {
   return (
     <div className="w-full max-w-full overflow-hidden bg-black">
       {/* Video Player Section - Full Width (Position #1) */}
-      <section className="w-full h-screen flex items-center justify-center bg-black relative overflow-hidden border-b border-slate-700">
+      <section className="w-full h-screen flex items-center justify-center bg-black relative overflow-hidden">
         <video
           src="https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f1103aff7f35b2839_d20260222_m230525_c005_v0501012_t0023_u01771801525343"
           autoPlay
@@ -57,10 +57,10 @@ export function StudioPageClient() {
       </section>
 
       {/* Hero Section - Studio Title + Content + Image */}
-      <section className="w-full min-h-screen sm:h-screen border-b border-slate-700">
+      <section className="w-full min-h-screen sm:h-screen">
         <div className="w-full h-full flex flex-col sm:flex-row items-stretch overflow-hidden relative">
           {/* Left: Title and Content - Full width mobile, 30% on desktop */}
-          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0 section-divider">
+          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0">
             <div className="flex flex-col gap-4 sm:gap-6 max-w-md">
               <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 {t('studio.title')}
@@ -117,10 +117,10 @@ export function StudioPageClient() {
       </section>
 
       {/* Team Section */}
-      <section className="w-full min-h-screen sm:h-screen border-b border-slate-700">
+      <section className="w-full min-h-screen sm:h-screen">
         <div className="w-full h-full flex flex-col sm:flex-row items-stretch overflow-hidden relative">
           {/* Left: Title and Content - Full width mobile, 30% on desktop */}
-          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0 section-divider">
+          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0">
             <div className="flex flex-col gap-4 sm:gap-8 max-w-md">
               <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 {t('studio.teamTitle')}
@@ -186,10 +186,10 @@ export function StudioPageClient() {
       </section>
 
       {/* Life/Production Section */}
-      <section className="w-full min-h-screen sm:h-screen border-b border-slate-700">
+      <section className="w-full min-h-screen sm:h-screen">
         <div className="w-full h-full flex flex-col sm:flex-row items-stretch overflow-hidden relative">
           {/* Left: Title - Full width mobile, 30% on desktop */}
-          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0 section-divider">
+          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0">
             <div className="flex flex-col gap-4 sm:gap-6 max-w-md">
               <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 {t('studio.lifeGalleryTitle')}

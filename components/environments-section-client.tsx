@@ -9,7 +9,7 @@ export function EnvironmentsSectionClient() {
   const { t } = useLanguage()
 
   return (
-    <section className="w-full max-w-full overflow-hidden bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-700/60 relative">
+    <section className="w-full max-w-full overflow-hidden bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 /60 relative">
       {/* Background Image - Full coverage */}
       <div className="absolute inset-0 opacity-30">
         <Image

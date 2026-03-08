@@ -143,7 +143,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
   return (
     <div className="w-full max-w-full overflow-hidden bg-black">
       {/* Hero Section - Banner Height with Overlay Text */}
-      <section className="w-full h-64 sm:h-80 md:h-96 lg:h-[28rem] border-b border-slate-700 relative overflow-hidden">
+      <section className="w-full h-64 sm:h-80 md:h-96 lg:h-[28rem] relative overflow-hidden">
         {/* Background Image - Fixed */}
         <Image
           src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_0000000084b4720eab101516c1d517ef%20%281%29-nDHLlhz2hCO4eWQ8VBdlYq2w2Drwka.png"
@@ -190,7 +190,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       </section>
 
       {/* Teasers Section */}
-      <section className="w-full max-w-full overflow-hidden bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-700">
+      <section className="w-full max-w-full overflow-hidden bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 ">
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-[1fr_2fr] gap-8 sm:gap-12 md:gap-16 lg:gap-20 items-center">
           {/* Left: Teaser Info and Buttons */}
           <div className="w-full flex flex-col justify-center py-8 sm:py-12">
@@ -283,7 +283,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       </section>
 
       {/* Shows Collection Grid Section */}
-      <section className="w-full max-w-full overflow-hidden bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 border-b border-slate-700">
+      <section className="w-full max-w-full overflow-hidden bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 ">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-6 sm:gap-8 md:gap-12">
             {shows.slice(0, 6).map((show, idx) => (

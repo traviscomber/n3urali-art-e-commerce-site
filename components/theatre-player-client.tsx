@@ -172,7 +172,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
       {!isViewerOpen && (
         <>
           {/* Header Section */}
-          <div className="pt-20 pb-12 text-center border-b border-gray-800">
+          <div className="pt-20 pb-12 text-center ">
             <h1 className="text-5xl md:text-6xl font-light text-gray-400 mb-6 tracking-wide">
               {t('theatre.title')}
             </h1>

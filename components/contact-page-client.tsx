@@ -77,7 +77,7 @@ export function ContactPageClient() {
   return (
     <main className="w-full min-h-screen bg-black">
       {/* Header Navigation */}
-      <div className="w-full px-4 sm:px-8 lg:px-12 py-8 sm:py-12 border-b border-slate-700">
+      <div className="w-full px-4 sm:px-8 lg:px-12 py-8 sm:py-12 ">
         <div className="flex items-center gap-2 sm:gap-4">
           <Link href="/" className="text-slate-400 hover:text-cyan-400 transition-colors text-xs sm:text-sm font-light">
             {t('contact.back')}

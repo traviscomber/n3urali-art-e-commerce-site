@@ -169,7 +169,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
       {!selectedNatureCategory && (
         <>
           {/* Intro Section */}
-          <section className="w-full max-w-full overflow-hidden py-12 sm:py-16 md:py-24 px-4 sm:px-8 lg:px-12 border-b border-slate-700">
+          <section className="w-full max-w-full overflow-hidden py-12 sm:py-16 md:py-24 px-4 sm:px-8 lg:px-12 ">
             <div className="max-w-2xl">
               <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-light text-slate-400 leading-tight mb-3 sm:mb-4">
                 {t('environmentsPage.title')}
@@ -197,7 +197,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
       )}
 
       {/* Nature Section - Always visible with banner and nav */}
-      <section id="nature" className="w-full max-w-full overflow-hidden border-b border-slate-700">
+      <section id="nature" className="w-full max-w-full overflow-hidden ">
         {/* Full-width Banner with Overlay Text */}
         <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
           <Image
@@ -220,7 +220,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         </div>
 
         {/* Region Navigation Tabs - Mobile Responsive */}
-        <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 border-b border-slate-700">
+        <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 ">
           <div className="flex items-center gap-2 sm:gap-4 md:gap-8 min-w-min md:min-w-0">
             <button className="text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0">
               <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
@@ -445,7 +445,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
       {!selectedNatureCategory && (
         <>
           {/* Culture Section */}
-          <section id="culture" className="w-full max-w-full overflow-hidden border-b border-slate-700">
+          <section id="culture" className="w-full max-w-full overflow-hidden ">
             <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCultBackg-eTk9tnAfHGhSUA1ZUSshfm8Ww57D1e.png"
@@ -465,7 +465,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 border-b border-slate-700">
+            <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 ">
               <div className="flex items-center gap-2 sm:gap-4 md:gap-8 min-w-min md:min-w-0">
                 <button className="text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0">
                   <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
@@ -552,7 +552,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           </section>
 
           {/* Mythic Section */}
-          <section id="mythic" className="w-full max-w-full overflow-hidden border-b border-slate-700">
+          <section id="mythic" className="w-full max-w-full overflow-hidden ">
             <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
               <Image
                 src={mythicBannerUrl}
@@ -572,7 +572,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 border-b border-slate-700">
+            <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 ">
               <div className="flex items-center gap-2 sm:gap-4 md:gap-8 min-w-min md:min-w-0">
                 <button className="text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0">
                   <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
@@ -613,7 +613,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           </section>
 
           {/* Art Section */}
-          <section id="art" className="w-full max-w-full overflow-hidden border-b border-slate-700">
+          <section id="art" className="w-full max-w-full overflow-hidden ">
             <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
               <Image
                 src={artBannerUrl}
@@ -633,7 +633,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 border-b border-slate-700">
+            <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 ">
               <div className="flex items-center gap-2 sm:gap-4 md:gap-8 min-w-min md:min-w-0">
                 <button className="text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0">
                   <ChevronLeft size={20} className="sm:w-6 sm:h-6" />

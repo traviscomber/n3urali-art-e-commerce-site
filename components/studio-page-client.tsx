@@ -54,9 +54,6 @@ export function StudioPageClient() {
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-black/20" />
-        <div className="relative z-10 text-5xl md:text-7xl font-light text-white text-center">
-          {t('studio.videoPlayer')}
-        </div>
       </section>
 
       {/* Hero Section - Studio Title + Content + Image */}

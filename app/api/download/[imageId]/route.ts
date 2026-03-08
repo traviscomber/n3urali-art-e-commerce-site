@@ -2,9 +2,13 @@ import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { ImageUrlHandler } from "@/lib/image-url-handler"
 
-export async function POST(request: NextRequest, { params }: { params: { imageId: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ imageId: string }> }
+) {
   try {
-    console.log("[v0] Download API called for image:", params.imageId)
+    const { imageId } = await params
+    console.log("[v0] Download API called for image:", imageId)
 
     const body = await request.json()
     const { order_item_id, license_id } = body
@@ -18,7 +22,7 @@ export async function POST(request: NextRequest, { params }: { params: { imageId
         images!inner(image_url, original_file_url, title, thumbnail_url)
       `)
       .eq("id", order_item_id)
-      .eq("image_id", params.imageId)
+      .eq("image_id", imageId)
       .eq("orders.status", "completed")
 
     if (error) {

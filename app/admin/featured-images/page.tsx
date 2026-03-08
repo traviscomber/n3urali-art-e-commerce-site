@@ -42,7 +42,7 @@ export default function FeaturedImagesAdmin() {
       setImages(data)
 
       // Pre-select currently featured images
-      const featured = new Set(data.filter((img: ImageType) => img.featured_collection).map((img: ImageType) => img.id))
+      const featured = new Set<string>(data.filter((img: ImageType) => img.featured_collection).map((img: ImageType) => img.id))
       setSelectedImages(featured)
     } catch (error) {
       toast({

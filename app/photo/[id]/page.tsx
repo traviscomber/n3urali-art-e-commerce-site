@@ -679,13 +679,12 @@ export default function PhotoDetailPage() {
                               style={{
                                 left: "5%",
                                 top: "5%",
-                                textStroke: "1px rgba(255,255,255,0.08)",
                                 WebkitTextStroke: "1px rgba(255,255,255,0.08)",
                                 textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                                 userSelect: "none",
                                 WebkitUserSelect: "none",
                                 MozUserSelect: "none",
-                              }}
+                              } as any}
                             >
                               n3uralia360.art
                             </div>
@@ -694,13 +693,12 @@ export default function PhotoDetailPage() {
                               style={{
                                 right: "5%",
                                 bottom: "5%",
-                                textStroke: "1px rgba(255,255,255,0.08)",
                                 WebkitTextStroke: "1px rgba(255,255,255,0.08)",
                                 textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
                                 userSelect: "none",
                                 WebkitUserSelect: "none",
                                 MozUserSelect: "none",
-                              }}
+                              } as any}
                             >
                               n3uralia360.art
                             </div>

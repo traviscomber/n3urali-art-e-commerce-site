@@ -116,7 +116,7 @@ export default function SimpleAdminPage() {
     setLoading(false)
   }
 
-  const handleEdit = (image) => {
+  const handleEdit = (image: any) => {
     setEditingImage(image)
     setNewImage({
       title: image.title || "",
@@ -132,13 +132,13 @@ export default function SimpleAdminPage() {
     })
   }
 
-  const handleDelete = async (imageId) => {
+  const handleDelete = async (imageId: string) => {
     if (!confirm("Are you sure you want to delete this image?")) return
 
     alert("Delete functionality needs to be implemented with server actions")
   }
 
-  const toggleStatus = async (image, field) => {
+  const toggleStatus = async (image: any, field: string) => {
     alert("Toggle functionality needs to be implemented with server actions")
   }
 

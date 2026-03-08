@@ -93,14 +93,19 @@ export default function OrdersPage() {
 
   const handleDownload = async (item: OrderItem) => {
     try {
-      const response = await fetch(`/api/download/${item.image_id}`, {
+      // Get the first image from the item
+      if (!item.images || item.images.length === 0) {
+        throw new Error("No image found in this order item")
+      }
+
+      const image = item.images[0]
+      const response = await fetch(`/api/download/${image.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           order_item_id: item.id,
-          license_id: item.license_id,
         }),
       })
 
@@ -118,20 +123,24 @@ export default function OrdersPage() {
       const a = document.createElement("a")
       a.style.display = "none"
       a.href = url
-      a.download = `${item.images.title}.jpg`
+      a.download = `${image.title}.jpg`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
 
-      toast.success(`Downloaded ${item.images.title}`)
+      toast.success(`Downloaded ${image.title}`)
     } catch (error) {
       toast.error("Download failed. Please try again.")
     }
   }
 
   const handlePreview = (item: OrderItem) => {
-    window.open(`/photo/${item.image_id}`, "_blank")
+    if (!item.images || item.images.length === 0) {
+      toast.error("No image found to preview")
+      return
+    }
+    window.open(`/photo/${item.images[0].id}`, "_blank")
   }
 
   const handleViewOrder = (orderId: string) => {

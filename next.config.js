@@ -2,14 +2,23 @@
 const nextConfig = {
   webpack: (config, { isServer }) => {
     // Optimize webpack cache for large string serialization
-    if (config.cache && typeof config.cache === 'object') {
-      config.cache = {
-        ...config.cache,
-        maxAge: 1000 * 60 * 60 * 24, // 24 hours
-        buildDependencies: {
-          config: [__filename],
-        },
-      }
+    config.cache = {
+      type: 'filesystem',
+      cacheDirectory: '.next/cache',
+      compression: 'gzip',
+      hashAlgorithm: 'md4',
+      name: 'nextjs-webpack',
+      store: 'pack', // Use pack format for better compression
+      version: '1.0.0',
+      maxAge: 1000 * 60 * 60 * 24, // 24 hours
+      buildDependencies: {
+        config: [__filename],
+      },
+      managedPaths: isServer ? ['node_modules'] : [],
+      immutablePaths: [],
+      profile: false,
+      readonly: process.env.CI === 'true',
+      maxMemoryGenerations: 5,
     }
 
     return config

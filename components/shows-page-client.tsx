@@ -282,8 +282,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
         </div>
       </section>
 
-      {/* Shows Collection Grid Section */}
-      <section className="w-full max-w-full overflow-hidden bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-12 md:px-16 lg:px-20 ">
+      {/* Shows Collection Grid Section - Hidden on shows page */}
+      <section className="w-full max-w-full overflow-hidden bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-12 md:px-16 lg:px-20 hidden">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-6 sm:gap-8 md:gap-12">
             {shows.slice(0, 6).map((show, idx) => (

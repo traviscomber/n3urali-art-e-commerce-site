@@ -5,9 +5,9 @@ import { MusicPlayerProvider } from "@/lib/contexts/music-player-context"
 import { createClient } from "@/lib/supabase/server"
 
 interface TheatreCollectionPageProps {
-  params: {
+  params: Promise<{
     code: string
-  }
+  }>
 }
 
 export default async function TheatreCollectionPage({ params }: TheatreCollectionPageProps) {

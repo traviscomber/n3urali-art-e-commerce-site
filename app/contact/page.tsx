@@ -5,6 +5,8 @@ export const metadata = {
   description: 'Get in touch with N3uralia360 for immersive dome experiences, inquiries, and collaborations.',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default function ContactPage() {
   return <ContactPageClient />
 }

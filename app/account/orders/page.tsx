@@ -243,19 +243,16 @@ export default function OrdersPage() {
                   {order.order_items.map((item) => (
                     <div key={item.id} className="flex items-center gap-4 p-4 border rounded-lg">
                       <img
-                        src={item.images.thumbnail_url || "/placeholder.svg"}
-                        alt={item.images.title}
+                        src={item.images?.[0]?.thumbnail_medium_url || "/placeholder.svg"}
+                        alt={item.images?.[0]?.title || "Product image"}
                         className="w-16 h-16 object-cover rounded"
                       />
                       <div className="flex-1">
-                        <h4 className="font-semibold">{item.images.title}</h4>
+                        <h4 className="font-semibold">{item.images?.[0]?.title || "Product"}</h4>
                         <div className="flex items-center gap-2 mt-1">
                           <Badge className={getLicenseBadgeColor("standard")} variant="secondary">
                             Standard License
                           </Badge>
-                          <span className="text-sm text-muted-foreground">
-                            Downloads: {item.download_count}/{item.download_limit}
-                          </span>
                         </div>
                       </div>
                       <div className="text-right">

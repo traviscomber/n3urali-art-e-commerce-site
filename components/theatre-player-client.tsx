@@ -185,7 +185,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
           </div>
 
           {/* Featured Panorama Section */}
-          <div className="w-full px-6 py-16 max-w-7xl mx-auto">
+          <div className="w-full px-4 sm:px-12 md:px-16 lg:px-20 py-16 max-w-full">
             {/* Panorama Teaser */}
             <div className="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden mb-12 border border-gray-700 group">
               <div

@@ -77,7 +77,7 @@ export function ContactPageClient() {
   return (
     <main className="w-full min-h-screen bg-black">
       {/* Header Navigation */}
-      <div className="w-full px-4 sm:px-8 lg:px-12 py-8 sm:py-12 ">
+      <div className="w-full px-4 sm:px-12 md:px-16 lg:px-20 py-8 sm:py-12 ">
         <div className="flex items-center gap-2 sm:gap-4">
           <Link href="/" className="text-slate-400 hover:text-cyan-400 transition-colors text-xs sm:text-sm font-light">
             {t('contact.back')}
@@ -88,7 +88,7 @@ export function ContactPageClient() {
       </div>
 
       {/* Main Content */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-12 sm:py-16">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-12 md:px-16 lg:px-20 py-12 sm:py-16">
         {/* Section Title */}
         <h2 className="text-4xl sm:text-5xl md:text-6xl font-light text-slate-100 mb-12 sm:mb-16">
           {t('contact.sectionTitle')}

@@ -190,7 +190,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       </section>
 
       {/* Teasers Section */}
-      <section className="w-full max-w-full overflow-hidden bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 ">
+      <section className="w-full max-w-full overflow-hidden bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-12 md:px-16 lg:px-20 ">
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-[1fr_2fr] gap-8 sm:gap-12 md:gap-16 lg:gap-20 items-center">
           {/* Left: Teaser Info and Buttons */}
           <div className="w-full flex flex-col justify-center py-8 sm:py-12">
@@ -283,7 +283,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       </section>
 
       {/* Shows Collection Grid Section */}
-      <section className="w-full max-w-full overflow-hidden bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 ">
+      <section className="w-full max-w-full overflow-hidden bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-12 md:px-16 lg:px-20 ">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-6 sm:gap-8 md:gap-12">
             {shows.slice(0, 6).map((show, idx) => (

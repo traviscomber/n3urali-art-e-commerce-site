@@ -169,7 +169,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
       {!selectedNatureCategory && (
         <>
           {/* Intro Section */}
-          <section className="w-full max-w-full overflow-hidden py-12 sm:py-16 md:py-24 px-4 sm:px-8 lg:px-12 ">
+          <section className="w-full max-w-full overflow-hidden py-12 sm:py-16 md:py-24 px-4 sm:px-12 md:px-16 lg:px-20 ">
             <div className="max-w-2xl">
               <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-light text-slate-400 leading-tight mb-3 sm:mb-4">
                 {t('environmentsPage.title')}
@@ -207,7 +207,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
             className="object-cover"
           />
           {/* Overlay Text */}
-          <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 lg:px-12 bg-black/40">
+          <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-12 md:px-16 lg:px-20 bg-black/40">
             <div className="flex flex-col gap-2 sm:gap-4 max-w-2xl">
               <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-6xl font-light text-slate-100 leading-tight">
                 {t('environments.natureTitle')}
@@ -220,7 +220,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         </div>
 
         {/* Region Navigation Tabs - Mobile Responsive */}
-        <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 ">
+        <div className="relative w-full overflow-x-auto px-4 sm:px-12 md:px-16 lg:px-20 py-4 sm:py-8 ">
           <div className="flex items-center gap-2 sm:gap-4 md:gap-8 min-w-min md:min-w-0">
             <button className="text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0">
               <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
@@ -258,7 +258,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
         {/* Conditional Content: Show detail view or grid */}
         {selectedNatureCategory ? (
           // Detail View Modal
-          <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
+          <div className="w-full max-w-full overflow-hidden px-4 sm:px-12 md:px-16 lg:px-20 py-8 sm:py-12">
             {/* Back Button */}
             <div className="flex items-center gap-2 sm:gap-4 mb-6 sm:mb-8">
               <button
@@ -309,7 +309,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
           </div>
         ) : (
           // Showcase Grid - Responsive
-          <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
+          <div className="w-full max-w-full overflow-hidden px-4 sm:px-12 md:px-16 lg:px-20 py-8 sm:py-12">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
               {/* Chilled trees - Links to actual ocean images or placeholder */}
               {databaseImages['Oceans'] && databaseImages['Oceans'].length > 0 ? (
@@ -453,7 +453,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 fill
                 className="object-cover"
               />
-              <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 lg:px-12 bg-black/40">
+              <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-12 md:px-16 lg:px-20 bg-black/40">
                 <div className="flex flex-col gap-2 sm:gap-4 max-w-2xl">
                   <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-6xl font-light text-slate-100 leading-tight">
                     {t('environments.heritageTitle')}
@@ -465,7 +465,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 ">
+            <div className="relative w-full overflow-x-auto px-4 sm:px-12 md:px-16 lg:px-20 py-4 sm:py-8 ">
               <div className="flex items-center gap-2 sm:gap-4 md:gap-8 min-w-min md:min-w-0">
                 <button className="text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0">
                   <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
@@ -480,7 +480,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
+            <div className="w-full max-w-full overflow-hidden px-4 sm:px-12 md:px-16 lg:px-20 py-8 sm:py-12">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                 <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                   <Image
@@ -560,7 +560,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 fill
                 className="object-cover"
               />
-              <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 lg:px-12 bg-black/40">
+              <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-12 md:px-16 lg:px-20 bg-black/40">
                 <div className="flex flex-col gap-2 sm:gap-4 max-w-2xl">
                   <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-6xl font-light text-slate-100 leading-tight">
                     {t('environments.mythicTitle')}
@@ -572,7 +572,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 ">
+            <div className="relative w-full overflow-x-auto px-4 sm:px-12 md:px-16 lg:px-20 py-4 sm:py-8 ">
               <div className="flex items-center gap-2 sm:gap-4 md:gap-8 min-w-min md:min-w-0">
                 <button className="text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0">
                   <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
@@ -587,7 +587,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
+            <div className="w-full max-w-full overflow-hidden px-4 sm:px-12 md:px-16 lg:px-20 py-8 sm:py-12">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                 {mythicImages.slice(0, 5).map((url, idx) => (
                   <Link key={idx} href={`/environments/mythic-${idx}`} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
@@ -621,7 +621,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                 fill
                 className="object-cover"
               />
-              <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-8 lg:px-12 bg-black/40">
+              <div className="absolute inset-0 flex flex-col justify-center px-4 sm:px-12 md:px-16 lg:px-20 bg-black/40">
                 <div className="flex flex-col gap-2 sm:gap-4 max-w-2xl">
                   <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-6xl font-light text-slate-100 leading-tight">
                     {t('environments.artTitle')}
@@ -633,7 +633,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="relative w-full overflow-x-auto px-4 sm:px-8 lg:px-12 py-4 sm:py-8 ">
+            <div className="relative w-full overflow-x-auto px-4 sm:px-12 md:px-16 lg:px-20 py-4 sm:py-8 ">
               <div className="flex items-center gap-2 sm:gap-4 md:gap-8 min-w-min md:min-w-0">
                 <button className="text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0">
                   <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
@@ -649,7 +649,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
               </div>
             </div>
 
-            <div className="w-full max-w-full overflow-hidden px-4 sm:px-8 lg:px-12 py-8 sm:py-12">
+            <div className="w-full max-w-full overflow-hidden px-4 sm:px-12 md:px-16 lg:px-20 py-8 sm:py-12">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                 {artImages.slice(0, 5).map((url, idx) => (
                   <Link key={idx} href={`/environments/art-${idx}`} className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">

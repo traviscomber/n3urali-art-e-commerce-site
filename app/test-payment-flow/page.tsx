@@ -6,6 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle2, XCircle, Loader2, ExternalLink } from 'lucide-react'
 
+// Mark this page as dynamic since it uses client-side hooks
+export const dynamic = 'force-dynamic'
+
 export default function TestPaymentFlowPage() {
   const [simulationLog, setSimulationLog] = useState<Array<{
     step: string

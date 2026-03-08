@@ -18,6 +18,7 @@ interface Video {
   image_format: string
   price: number
   created_at: string
+  videoUrl?: string
 }
 
 interface Category {
@@ -123,17 +124,31 @@ export function EnvironmentVideoDetailClient({
               </div>
             </div>
 
-            {/* Right - Video Preview */}
+            {/* Right - Video Player */}
             <div className="lg:col-span-1">
-              <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-900 shadow-xl shadow-cyan-500/10">
-                <Image
-                  src={video.thumbnail_medium_url || video.original_url || "/placeholder.svg"}
-                  alt={video.title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
+              {video.videoUrl ? (
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-900 shadow-xl shadow-cyan-500/10">
+                  <video
+                    src={video.videoUrl}
+                    controls
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-900 shadow-xl shadow-cyan-500/10">
+                  <Image
+                    src={video.thumbnail_medium_url || video.original_url || "/placeholder.svg"}
+                    alt={video.title}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                </div>
+              )}
             </div>
           </div>
 

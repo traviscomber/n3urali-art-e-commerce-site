@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { ArrowLeft } from "lucide-react"
 import { EnvironmentVideoDetailClient } from "@/components/environment-video-detail-client"
+import { natureCategoryImages } from "@/lib/constants/nature-images"
 
 interface EnvironmentVideo {
   id: string
@@ -19,6 +20,7 @@ interface EnvironmentVideo {
   price: number
   active: boolean
   created_at: string
+  videoUrl?: string
 }
 
 export const revalidate = 3600
@@ -71,45 +73,69 @@ export default async function EnvironmentVideoPage({
     }
   }
 
-  // If no video found or placeholder ID, use mock data
+  // If no video found or placeholder ID, use mock data from natureCategoryImages
   if (!video) {
-    // Extract category name from placeholder ID (e.g., "nature-showcase-4" -> "Nature")
-    let categoryName = "Nature"
-    if (id.includes("volcano")) categoryName = "Volcanoes"
-    if (id.includes("ocean")) categoryName = "Oceans"
-    if (id.includes("ice")) categoryName = "Ice & Snow"
-    if (id.includes("forest")) categoryName = "Forest"
+    // Extract category name from placeholder ID (e.g., "oceans-1" -> category: "oceans", index: 1)
+    const parts = id.split('-')
+    const categoryKey = parts.slice(0, -1).join('-') || id
+    const index = parseInt(parts[parts.length - 1], 10) || 0
 
-    const { data: mockCategory } = await supabase
-      .from("categories")
-      .select("*")
-      .eq("name", categoryName)
-      .single()
-    category = mockCategory
+    const categoryImages = natureCategoryImages[categoryKey as keyof typeof natureCategoryImages]
+    const imageData = categoryImages?.[index]
 
-    // Create mock video data for showcase
-    video = {
-      id,
-      title: id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-      description: `A stunning ${categoryName.toLowerCase()} environment video showcasing breathtaking natural scenes perfect for immersive dome installations and event programming.`,
-      category_id: mockCategory?.id || '',
-      original_url: 'https://via.placeholder.com/1920x1080?text=Video+Preview',
-      thumbnail_medium_url: 'https://via.placeholder.com/1280x720?text=Video',
-      image_format: '4096 x 4096',
-      price: 2500,
-      active: true,
-      created_at: new Date().toISOString(),
-    }
+    if (imageData) {
+      // Use data from natureCategoryImages constants
+      video = {
+        id,
+        title: imageData.title,
+        description: `A stunning ${categoryKey.toLowerCase()} environment video showcasing breathtaking natural scenes perfect for immersive dome installations and event programming.`,
+        category_id: '',
+        original_url: imageData.url,
+        thumbnail_medium_url: imageData.url,
+        image_format: '4096 x 4096',
+        price: 2500,
+        active: true,
+        created_at: new Date().toISOString(),
+        videoUrl: (imageData as any).videoUrl,
+      }
+    } else {
+      // Fallback to generic mock data if no category image found
+      let categoryName = "Nature"
+      if (id.includes("volcano")) categoryName = "Volcanoes"
+      if (id.includes("ocean")) categoryName = "Oceans"
+      if (id.includes("ice")) categoryName = "Ice & Snow"
+      if (id.includes("forest")) categoryName = "Forest"
 
-    // Fetch related videos from the category if category found
-    if (mockCategory) {
-      const { data: related } = await supabase
-        .from("images")
+      const { data: mockCategory } = await supabase
+        .from("categories")
         .select("*")
-        .eq("category_id", mockCategory.id)
-        .eq("active", true)
-        .limit(4)
-      relatedVideos = related || []
+        .eq("name", categoryName)
+        .single()
+      category = mockCategory
+
+      video = {
+        id,
+        title: id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+        description: `A stunning ${categoryName.toLowerCase()} environment video showcasing breathtaking natural scenes perfect for immersive dome installations and event programming.`,
+        category_id: mockCategory?.id || '',
+        original_url: 'https://via.placeholder.com/1920x1080?text=Video+Preview',
+        thumbnail_medium_url: 'https://via.placeholder.com/1280x720?text=Video',
+        image_format: '4096 x 4096',
+        price: 2500,
+        active: true,
+        created_at: new Date().toISOString(),
+      }
+
+      // Fetch related videos from the category if category found
+      if (mockCategory) {
+        const { data: related } = await supabase
+          .from("images")
+          .select("*")
+          .eq("category_id", mockCategory.id)
+          .eq("active", true)
+          .limit(4)
+        relatedVideos = related || []
+      }
     }
   }
 
@@ -140,3 +166,4 @@ export default async function EnvironmentVideoPage({
     </main>
   )
 }
+

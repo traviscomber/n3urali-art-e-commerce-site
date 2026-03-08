@@ -60,7 +60,7 @@ export function StudioPageClient() {
       <section className="w-full min-h-screen sm:h-screen">
         <div className="w-full h-full flex flex-col sm:flex-row items-stretch overflow-hidden relative">
           {/* Left: Title and Content - Full width mobile, 30% on desktop */}
-          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0">
+          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-12 md:px-16 lg:px-20 flex-shrink-0">
             <div className="flex flex-col gap-4 sm:gap-6 max-w-md">
               <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 {t('studio.title')}
@@ -120,7 +120,7 @@ export function StudioPageClient() {
       <section className="w-full min-h-screen sm:h-screen">
         <div className="w-full h-full flex flex-col sm:flex-row items-stretch overflow-hidden relative">
           {/* Left: Title and Content - Full width mobile, 30% on desktop */}
-          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0">
+          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-12 md:px-16 lg:px-20 flex-shrink-0">
             <div className="flex flex-col gap-4 sm:gap-8 max-w-md">
               <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 {t('studio.teamTitle')}
@@ -189,7 +189,7 @@ export function StudioPageClient() {
       <section className="w-full min-h-screen sm:h-screen">
         <div className="w-full h-full flex flex-col sm:flex-row items-stretch overflow-hidden relative">
           {/* Left: Title - Full width mobile, 30% on desktop */}
-          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-8 lg:px-12 flex-shrink-0">
+          <div className="w-full sm:w-[30%] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-12 md:px-16 lg:px-20 flex-shrink-0">
             <div className="flex flex-col gap-4 sm:gap-6 max-w-md">
               <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-slate-300 leading-tight">
                 {t('studio.lifeGalleryTitle')}

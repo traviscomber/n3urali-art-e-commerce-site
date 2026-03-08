@@ -48,10 +48,11 @@ export function ContactPageClient() {
       if (response.ok) {
         // Generate sequential lead ID from localStorage
         const storedLeadCount = localStorage.getItem('leadCount')
-        const nextLeadId = (parseInt(storedLeadCount || '0') + 1).toString().padStart(3, '0')
-        localStorage.setItem('leadCount', nextLeadId)
+        const nextCount = parseInt(storedLeadCount || '0') + 1
+        const nextLeadId = nextCount.toString().padStart(3, '0')
+        localStorage.setItem('leadCount', nextCount.toString())
         
-        setLeadId(nextLeadId)
+        setLeadId(nextCount)
         setSubmitSuccess(true)
         setEmail('')
         setMessage('')

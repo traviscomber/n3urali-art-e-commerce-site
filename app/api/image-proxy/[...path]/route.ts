@@ -1,9 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { WorkingBackblazeStorage } from "@/lib/backblaze-working"
 
-export async function GET(request: NextRequest, { params }: { params: { path: string[] } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   try {
-    const imagePath = params.path.join("/")
+    const { path } = await params
+    const imagePath = path.join("/")
     console.log("[v0] Image proxy request for:", imagePath)
 
     // Initialize Backblaze storage

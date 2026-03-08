@@ -38,6 +38,8 @@ export function AddToCartButton({
         title: product.title,
         price: product.price,
         preview_image_url: product.preview_image_url,
+        license_id: "standard",
+        license_name: "Standard License",
       })
 
       setJustAdded(true)

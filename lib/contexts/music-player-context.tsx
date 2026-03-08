@@ -9,7 +9,7 @@ interface MusicPlayerContextType {
   volume: number
   setVolume: (volume: number) => void
   currentTrackIndex: number
-  setCurrentTrackIndex: (index: number) => void
+  setCurrentTrackIndex: (index: number | ((prev: number) => number)) => void
   playlist: string[]
   setPlaylist: (playlist: string[]) => void
   collectionTitle: string

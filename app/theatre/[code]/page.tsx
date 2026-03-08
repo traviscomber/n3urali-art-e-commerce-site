@@ -77,7 +77,7 @@ export default async function TheatreCollectionPage({ params }: TheatreCollectio
 
   const collection = result.data
 
-  const images = (collection.images || []).map((collectionImage) => ({
+  const images = (collection.images || []).map((collectionImage: any) => ({
     id: collectionImage.image.id,
     title: collectionImage.image.title,
     description: collectionImage.image.description,

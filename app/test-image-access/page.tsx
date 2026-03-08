@@ -46,14 +46,16 @@ export default function TestImageAccessPage() {
 
         console.log(`[v0] Image loaded successfully: ${url}`)
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        
         results.push({
           url,
           status: "❌ FAILED",
-          details: error.message,
+          details: errorMessage,
           success: false,
         })
 
-        console.log(`[v0] Image failed to load: ${url} - ${error.message}`)
+        console.log(`[v0] Image failed to load: ${url} - ${errorMessage}`)
       }
     }
 

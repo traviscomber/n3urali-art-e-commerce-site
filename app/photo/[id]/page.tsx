@@ -659,7 +659,7 @@ export default function PhotoDetailPage() {
                           MozUserSelect: "none",
                           WebkitUserDrag: "none",
                           WebkitTouchCallout: "none",
-                        }}
+                        } as any}
                       />
 
                       <div

@@ -73,7 +73,6 @@ export function ProductCard({ product, onView360, priority = false }: ProductCar
         preview_image_url: product.thumbnail_medium_url,
         license_id: product.license_id,
         license_name: product.licenses?.name || "Standard License",
-        quantity: 1,
       })
     } finally {
       setIsLoading(false)

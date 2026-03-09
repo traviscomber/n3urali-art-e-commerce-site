@@ -1,7 +1,7 @@
 'use client'
 
 import { AdminTheatrePhotoUpload } from '@/components/admin-theatre-photo-upload'
-import { CreateTheatreFoldersButton } from '@/components/create-theatre-folders-button'
+import { CreateTheatreImageFoldersButton } from '@/components/create-theatre-image-folders-button'
 
 export default function AdminTheatrePhotos() {
   return (
@@ -12,9 +12,9 @@ export default function AdminTheatrePhotos() {
           <h2 className="text-3xl font-light text-slate-100 mb-4">Backblaze Setup</h2>
           <div className="bg-slate-900 border border-slate-700 rounded-lg p-6 space-y-4">
             <p className="text-slate-300">
-              Create all 32 theatre photo (equirectangular) category folders in Backblaze B2. Each folder corresponds to one of the video categories and uses the same 4 parent categories.
+              Create all 32 theatre photo (equirectangular) category folders in Backblaze. Structure: THEATRE/Categories/[Parent]/[Subcategory]/
             </p>
-            <CreateTheatreFoldersButton />
+            <CreateTheatreImageFoldersButton />
           </div>
         </div>
 

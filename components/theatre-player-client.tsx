@@ -177,7 +177,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
       {isViewerOpen && (
         <PanoramaViewerPSV
           imageUrl={imageUrl}
-          title={getTranslatedTitle(currentImage.title)}
+          title={getProperTitle(currentImage)}
           onClose={() => setIsViewerOpen(false)}
           relaxMode={true}
           fov={130}

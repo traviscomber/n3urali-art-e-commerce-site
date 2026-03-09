@@ -8,6 +8,7 @@ import { EnvironmentsSection } from "@/components/environments-section"
 import { ElementalsSection } from "@/components/elementals-section"
 import { TheatreSection } from "@/components/theatre-section"
 import { GrandFinaleSection } from "@/components/grand-finale-section"
+import { FAQSection } from "@/components/faq-section"
 
 export const metadata: Metadata = {
   title: "n3uralia360 — Immersive Worlds. Cultural Stories.",
@@ -107,6 +108,9 @@ export default async function HomePage() {
 
       {/* Grand Finale Section */}
       <GrandFinaleSection />
+
+      {/* FAQ Section */}
+      <FAQSection />
     </main>
   )
 }

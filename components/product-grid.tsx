@@ -105,8 +105,10 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
   }, [images])
 
   const loadImages = async (append = false) => {
-    if (initialImages && initialImages.length > 0 && !append) {
-      console.log('[v0] Using pre-filtered images, skipping DB load')
+    if (!initialImages || initialImages.length === 0) {
+      setHasMoreInDB(false)
+    }
+    if (initialImages && initialImages.length > 0) {
       setLoading(false)
       setHasMoreInDB(false)
       return
@@ -119,6 +121,11 @@ export function ProductGrid({ initialImages = [], categoryId }: ProductGridProps
     }
 
     try {
+      // Ensure Supabase client is initialized before querying
+      if (!supabase) {
+        throw new Error("Supabase client not initialized")
+      }
+
       const startIndex = append ? images.length : 0
       const endIndex = startIndex + BATCH_SIZE - 1
 

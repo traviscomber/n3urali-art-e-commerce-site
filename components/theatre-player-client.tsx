@@ -228,7 +228,6 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
                 <div className="p-6">
                   <h3 className="text-xl font-light text-white">{getProperTitle(currentImage)}</h3>
-                  <p className="text-sm text-gray-300 mt-2">{t('theatre.clickGo')}</p>
                 </div>
               </div>
             </div>

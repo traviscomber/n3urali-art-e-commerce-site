@@ -1,12 +1,14 @@
 -- Seed 32 Video Categories mapped to 4 parent categories
 -- This script adds all video subcategories to the existing categories table
+-- Uses ON CONFLICT to skip any categories that already exist
 
 -- NATURE Categories
 INSERT INTO public.categories (name, description) VALUES 
   ('Ocean-Surreal', 'Surreal oceanic experiences and dreamlike water environments'),
   ('Ocean-Underwater-Life', 'Underwater life and marine ecosystems'),
   ('Insects', 'Close-up immersive experiences with insects and micro-nature'),
-  ('Beads', 'Organic and natural bead patterns and textures');
+  ('Beads', 'Organic and natural bead patterns and textures')
+ON CONFLICT (name) DO NOTHING;
 
 -- CULTURE Categories  
 INSERT INTO public.categories (name, description) VALUES
@@ -23,12 +25,14 @@ INSERT INTO public.categories (name, description) VALUES
   ('Korea', 'Korean cultural heritage and traditions'),
   ('Galleries', 'Gallery installations and art spaces'),
   ('Vietnam-Theatre', 'Vietnamese theatre traditions and performances'),
-  ('India-Taj-Mahal', 'Indian architectural wonders and cultural landmarks');
+  ('India-Taj-Mahal', 'Indian architectural wonders and cultural landmarks')
+ON CONFLICT (name) DO NOTHING;
 
 -- MYTHIC Categories
 INSERT INTO public.categories (name, description) VALUES
   ('Mythic-Indonesia', 'Indonesian mythology and legendary narratives'),
-  ('Mythic-Chile', 'Chilean mythology and indigenous legends');
+  ('Mythic-Chile', 'Chilean mythology and indigenous legends')
+ON CONFLICT (name) DO NOTHING;
 
 -- ART Categories
 INSERT INTO public.categories (name, description) VALUES
@@ -41,7 +45,8 @@ INSERT INTO public.categories (name, description) VALUES
   ('Silver-Techno', 'Silver and technological aesthetic experiences'),
   ('Bifi-Geometry', 'Bifurcated and complex geometric patterns'),
   ('Tunnels', 'Tunnel experiences and passage art'),
-  ('Uncategorized', 'Content that doesnt fit standard categories');
+  ('Uncategorized', 'Content that doesnt fit standard categories')
+ON CONFLICT (name) DO NOTHING;
 
 -- Verify insertion
 -- SELECT COUNT(*) as total_categories FROM public.categories;

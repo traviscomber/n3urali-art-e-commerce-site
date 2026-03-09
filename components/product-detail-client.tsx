@@ -101,7 +101,6 @@ export function ProductDetailClient({ image }: ProductDetailClientProps) {
         preview_image_url: image.thumbnail_medium_url,
         license_id: selectedLicenseId,
         license_name: selectedLicense?.name || image.licenses?.name || "Standard License",
-        quantity: 1,
       })
     } finally {
       setIsLoading(false)

@@ -102,7 +102,7 @@ export class WorkingBackblazeStorage {
           "Content-Type": contentType,
           "Content-Length": fileBuffer.length.toString(),
         },
-        body: fileBuffer,
+        body: new Uint8Array(fileBuffer),
       })
 
       if (!uploadResponse.ok) {

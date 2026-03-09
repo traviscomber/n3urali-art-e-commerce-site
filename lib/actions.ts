@@ -302,22 +302,46 @@ export async function updateImage(imageId: string, updateData: ImageUpdateData) 
       }
     }
 
-    const updateQuery = `
-      UPDATE images 
-      SET ${updateFields.join(", ")} 
-      WHERE id = $${updateValues.length + 1}
-      RETURNING *
-    `
-    updateValues.push(imageId)
+    // Build update object from updateData
+    const updatePayload: any = {}
+    if (updateData.title !== undefined) {
+      updatePayload.title = updateData.title
+    }
+    if (updateData.description !== undefined) {
+      updatePayload.description = updateData.description
+    }
+    if (updateData.category_id !== undefined) {
+      updatePayload.category_id = updateData.category_id
+    }
+    if (updateData.price !== undefined) {
+      updatePayload.price = updateData.price
+    }
+    if (updateData.file_url !== undefined) {
+      updatePayload.image_url = updateData.file_url
+    }
+    if (updateData.thumbnail_url !== undefined) {
+      updatePayload.thumbnail_url = updateData.thumbnail_url
+    }
+    if (updateData.active !== undefined) {
+      updatePayload.active = updateData.active
+    }
+    if (updateData.featured !== undefined) {
+      updatePayload.featured = updateData.featured
+    }
+    updatePayload.updated_at = new Date().toISOString()
 
     const supabase = await createClient()
-    const { data: updatedImages, error: updateError } = await supabase.unsafe(updateQuery, updateValues)
+    const { data: updatedImages, error: updateError } = await supabase
+      .from("images")
+      .update(updatePayload)
+      .eq("id", imageId)
+      .select()
 
     if (updateError) {
       throw updateError
     }
 
-    const updatedImage = updatedImages[0]
+    const updatedImage = updatedImages?.[0]
 
     console.log("[v0] Successfully updated image:", updatedImage.id)
 

@@ -184,7 +184,7 @@ export function WatermarkedImage({
           WebkitUserDrag: "none",
           WebkitTouchCallout: "none",
           pointerEvents: "none",
-        }}
+        } as any}
         onContextMenu={(e) => e.preventDefault()}
         onDragStart={(e) => e.preventDefault()}
       />

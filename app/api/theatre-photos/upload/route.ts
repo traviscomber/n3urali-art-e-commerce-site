@@ -41,7 +41,8 @@ export async function POST(request: NextRequest) {
     const categoryPath = `THEATRE/Categories/${category}`
 
     console.log('[v0] Theatre photo upload - Category:', category)
-    console.log('[v0] Theatre photo upload - Path:', categoryPath)
+    console.log('[v0] Theatre photo upload - Title:', title)
+    console.log('[v0] Theatre photo upload - Description:', description)
 
     // Authenticate with Backblaze B2
     const b2ApiKey = process.env.BACKBLAZE_API_KEY
@@ -168,6 +169,13 @@ export async function POST(request: NextRequest) {
     // Step 5: Save to Supabase database
     const supabase = await createClient()
 
+    console.log('[v0] Saving to database with:', {
+      title: title || file.name,
+      content_category: category,
+      image_format: 'equirectangular',
+      file_path: fileName
+    })
+
     const { data: savedImage, error: dbError } = await supabase
       .from('images')
       .insert({
@@ -190,6 +198,8 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+
+    console.log('[v0] Successfully saved to database:', savedImage)
 
     return NextResponse.json({
       success: true,

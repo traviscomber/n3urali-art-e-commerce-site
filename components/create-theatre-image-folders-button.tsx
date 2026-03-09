@@ -21,25 +21,19 @@ export function CreateTheatreImageFoldersButton() {
     setResults(null)
 
     try {
-      console.log('[v0] Calling create theatre folders API...')
       const response = await fetch('/api/admin/backblaze/create-theatre-folders', {
         method: 'POST',
       })
 
-      console.log('[v0] Response status:', response.status)
-      
       if (!response.ok) {
         const errorData = await response.json()
-        console.log('[v0] Error response:', errorData)
         throw new Error(errorData.error || 'Failed to create folders')
       }
 
       const data = await response.json()
-      console.log('[v0] Success response:', data)
       setResults(data)
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'An error occurred'
-      console.log('[v0] Button error caught:', errorMsg)
       setError(errorMsg)
     } finally {
       setIsLoading(false)

@@ -21,7 +21,7 @@ export function CreateTheatreImageFoldersButton() {
     setResults(null)
 
     try {
-      const response = await fetch('/api/admin/backblaze/create-theatre-image-folders', {
+      const response = await fetch('/api/admin/setup/create-theatre-folders', {
         method: 'POST',
       })
 

@@ -1,28 +1,28 @@
 "use client"
 
 import { useEffect } from "react"
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from "web-vitals"
+import { onCLS, onFID, onFCP, onLCP, onTTFB } from "web-vitals"
 
 export function WebVitalsTracker() {
   useEffect(() => {
     // Track Core Web Vitals
-    getCLS((metric) => {
+    onCLS((metric) => {
       trackPerformanceMetric("CLS", metric.value)
     })
 
-    getFID((metric) => {
+    onFID((metric) => {
       trackPerformanceMetric("FID", metric.value)
     })
 
-    getFCP((metric) => {
+    onFCP((metric) => {
       trackPerformanceMetric("FCP", metric.value)
     })
 
-    getLCP((metric) => {
+    onLCP((metric) => {
       trackPerformanceMetric("LCP", metric.value)
     })
 
-    getTTFB((metric) => {
+    onTTFB((metric) => {
       trackPerformanceMetric("TTFB", metric.value)
     })
   }, [])

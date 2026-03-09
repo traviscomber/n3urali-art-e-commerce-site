@@ -34,12 +34,10 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://n3uralia360.art"),
   icons: {
     icon: [
-      { url: '/icon-32x32.png?v=3', sizes: '32x32', type: 'image/png' },
-      { url: '/icon-192x192.png?v=3', sizes: '192x192', type: 'image/png' },
-      { url: '/icon-512x512.png?v=3', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon.png?v=4', sizes: 'any', type: 'image/png' },
     ],
-    apple: '/apple-icon.png?v=3',
-    shortcut: '/icon-32x32.png?v=3',
+    apple: '/favicon.png?v=4',
+    shortcut: '/favicon.png?v=4',
   },
   keywords: [
     "360 photography",

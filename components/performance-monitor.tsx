@@ -68,12 +68,12 @@ export function PerformanceMonitor() {
       const connectionType = connection?.effectiveType || "unknown"
 
       setMetrics({
-        pageLoadTime: navigation.loadEventEnd - navigation.navigationStart,
+        pageLoadTime: navigation.loadEventEnd - navigation.fetchStart,
         firstContentfulPaint: fcp,
         largestContentfulPaint: lcp,
         cumulativeLayoutShift: 0, // Would need to implement CLS measurement
         firstInputDelay: 0, // Would need to implement FID measurement
-        timeToInteractive: navigation.domInteractive - navigation.navigationStart,
+        timeToInteractive: navigation.domInteractive - navigation.fetchStart,
         memoryUsage,
         connectionType,
         isOnline: navigator.onLine,

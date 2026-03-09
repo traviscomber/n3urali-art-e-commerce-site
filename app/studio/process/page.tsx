@@ -91,6 +91,91 @@ export default function StudioProcessPage() {
           </Link>
         </div>
       </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 px-4">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-4xl font-bold mb-12 text-center">Frequently Asked Questions</h2>
+          <div className="space-y-6">
+            <details className="group border border-primary/20 rounded-lg p-6 hover:border-primary/40 transition-colors">
+              <summary className="flex cursor-pointer items-center justify-between font-semibold text-lg">
+                What is N3uralia360?
+                <span className="transition group-open:rotate-180">▼</span>
+              </summary>
+              <p className="mt-4 text-muted-foreground">
+                N3uralia360 is an immersive content studio creating 360° experiences across domes, VR environments, spatial installations, and digital media. We blend cultural storytelling with cutting-edge immersive technology.
+              </p>
+            </details>
+
+            <details className="group border border-primary/20 rounded-lg p-6 hover:border-primary/40 transition-colors">
+              <summary className="flex cursor-pointer items-center justify-between font-semibold text-lg">
+                How can I license your environments?
+                <span className="transition group-open:rotate-180">▼</span>
+              </summary>
+              <p className="mt-4 text-muted-foreground">
+                We offer multiple licensing models including individual licenses, institutional licenses, and custom commercial arrangements. Visit our licensing page or contact us for details tailored to your needs.
+              </p>
+            </details>
+
+            <details className="group border border-primary/20 rounded-lg p-6 hover:border-primary/40 transition-colors">
+              <summary className="flex cursor-pointer items-center justify-between font-semibold text-lg">
+                Can I commission a custom immersive experience?
+                <span className="transition group-open:rotate-180">▼</span>
+              </summary>
+              <p className="mt-4 text-muted-foreground">
+                Absolutely. We work with cultural institutions, brands, and organizations to create bespoke immersive experiences. Visit our commission page to start a project.
+              </p>
+            </details>
+
+            <details className="group border border-primary/20 rounded-lg p-6 hover:border-primary/40 transition-colors">
+              <summary className="flex cursor-pointer items-center justify-between font-semibold text-lg">
+                What formats do you create for?
+                <span className="transition group-open:rotate-180">▼</span>
+              </summary>
+              <p className="mt-4 text-muted-foreground">
+                We specialize in fulldome experiences, VR environments, spatial installations, performance loops, and social-first content. Each format is thoughtfully adapted for its venue and audience.
+              </p>
+            </details>
+
+            <details className="group border border-primary/20 rounded-lg p-6 hover:border-primary/40 transition-colors">
+              <summary className="flex cursor-pointer items-center justify-between font-semibold text-lg">
+                What support do you provide after purchase?
+                <span className="transition group-open:rotate-180">▼</span>
+              </summary>
+              <p className="mt-4 text-muted-foreground">
+                We provide technical support, documentation, and guidance for implementation. For commercial or institutional licenses, we offer ongoing support packages.
+              </p>
+            </details>
+
+            <details className="group border border-primary/20 rounded-lg p-6 hover:border-primary/40 transition-colors">
+              <summary className="flex cursor-pointer items-center justify-between font-semibold text-lg">
+                How do I get started with a free demo?
+                <span className="transition group-open:rotate-180">▼</span>
+              </summary>
+              <p className="mt-4 text-muted-foreground">
+                Click the "Free Demo" button to reach us via WhatsApp. We'll provide access to sample environments and answer any questions about our offerings.
+              </p>
+            </details>
+
+            <details className="group border border-primary/20 rounded-lg p-6 hover:border-primary/40 transition-colors">
+              <summary className="flex cursor-pointer items-center justify-between font-semibold text-lg">
+                Do you work internationally?
+                <span className="transition group-open:rotate-180">▼</span>
+              </summary>
+              <p className="mt-4 text-muted-foreground">
+                Yes, we collaborate with partners and institutions worldwide. Our immersive experiences can be deployed globally with proper licensing and technical adaptation.
+              </p>
+            </details>
+
+            <div className="mt-12 p-8 bg-primary/5 rounded-lg border border-primary/20 text-center">
+              <p className="text-lg mb-4">Still have questions?</p>
+              <Link href="https://wa.me/6282340137013?text=Hi%20N3uralia360%2C%20I%20have%20a%20question%20about%20your%20services." target="_blank" rel="noopener noreferrer">
+                <Button>Contact Us via WhatsApp</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   )
 }

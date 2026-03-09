@@ -204,13 +204,6 @@ export function Header({ videoContext }: HeaderProps) {
               {t("nav.contact")}
               <span className="absolute bottom-0 left-3 sm:left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-24px)] sm:group-hover:w-[calc(100%-32px)] transition-all duration-300" />
             </Link>
-            <Link
-              href="/faq"
-              className="relative text-xs sm:text-sm font-medium text-slate-200 hover:text-cyan-400 transition-all duration-300 group px-3 sm:px-4 py-2"
-            >
-              {t("nav.faq")}
-              <span className="absolute bottom-0 left-3 sm:left-4 w-0 h-0.5 bg-cyan-400 group-hover:w-[calc(100%-24px)] sm:group-hover:w-[calc(100%-32px)] transition-all duration-300" />
-            </Link>
             {isAuthenticated && (
               <Link
                 href="/account/orders"
@@ -378,13 +371,6 @@ export function Header({ videoContext }: HeaderProps) {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {t("nav.contact")}
-              </Link>
-              <Link
-                href="/faq"
-                className="text-sm font-medium text-slate-200 hover:text-cyan-400 transition-colors px-4 py-2.5"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {t("nav.faq")}
               </Link>
               <Link
                 href="/tools"

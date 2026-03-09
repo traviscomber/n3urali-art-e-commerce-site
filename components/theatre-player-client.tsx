@@ -219,9 +219,9 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
               {/* GO Button - Opens full auto-rotating panorama */}
               <button
                 onClick={() => setIsViewerOpen(true)}
-                className="absolute inset-0 m-auto w-24 h-24 rounded-full border-2 border-gray-600 hover:border-cyan-500 transition-all duration-300 flex items-center justify-center z-10 hover:scale-110 hover:bg-black/20"
+                className="absolute inset-0 m-auto w-32 h-32 rounded-full border-2 border-cyan-500 hover:border-cyan-400 transition-all duration-300 flex items-center justify-center z-10 hover:scale-125 hover:bg-cyan-500/20 shadow-lg shadow-cyan-500/50 hover:shadow-cyan-500/80"
               >
-                <span className="text-cyan-400 text-lg font-light tracking-wider group-hover:text-cyan-300 transition-colors">{t('theatre.goButton')}</span>
+                <span className="text-cyan-400 text-2xl font-semibold tracking-wider group-hover:text-cyan-200 transition-colors">{t('theatre.goButton')}</span>
               </button>
 
               {/* Info overlay */}

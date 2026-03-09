@@ -167,9 +167,58 @@ export async function POST(request: Request) {
         continue
       }
 
+      // Generate proper image name using OpenAI vision API
+      let imageTitle = filename.replace(/\.[^/.]+$/, '') // Default to filename
+      
+      try {
+        // Use OpenAI to analyze the image and generate a descriptive name
+        const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4-vision',
+            messages: [
+              {
+                role: 'user',
+                content: [
+                  {
+                    type: 'image_url',
+                    image_url: {
+                      url: downloadUrl,
+                    },
+                  },
+                  {
+                    type: 'text',
+                    text: `Analyze this equirectangular/panoramic image and generate a single concise, descriptive name (2-4 words max) that captures the main subject or mood. Examples: "Mountain Peak", "Ocean Horizon", "Desert Dunes", "Ancient Architecture". Only return the name, nothing else.`,
+                  },
+                ],
+              },
+            ],
+            max_tokens: 50,
+          }),
+        })
+
+        if (openaiResponse.ok) {
+          const openaiData = await openaiResponse.json()
+          const generatedName = openaiData.choices?.[0]?.message?.content?.trim()
+          if (generatedName) {
+            imageTitle = generatedName
+            console.log(`[v0] Generated title for ${filename}: ${imageTitle}`)
+          }
+        } else {
+          console.warn(`[v0] OpenAI analysis failed for ${filename}, using filename`)
+        }
+      } catch (openaiError) {
+        console.warn(`[v0] OpenAI error for ${filename}:`, openaiError)
+        // Continue with filename as title
+      }
+
       // Insert into database
       const { error: insertError } = await supabase.from('images').insert({
-        title: filename.replace(/\.[^/.]+$/, ''), // Remove file extension for title
+        title: imageTitle,
         description: `Theatre photo - ${contentCategory}`,
         image_format: 'equirectangular',
         content_category: contentCategory,

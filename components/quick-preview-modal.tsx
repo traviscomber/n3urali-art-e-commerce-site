@@ -38,13 +38,11 @@ export function QuickPreviewModal({ image, isOpen, onClose, onViewFull }: QuickP
   const handleAddToCart = () => {
     addItem({
       id: image.id,
-      imageId: image.id,
       title: image.title,
       price: image.price,
-      licenseType: "standard",
-      previewUrl: image.preview_url,
-      category: image.category,
-      quantity: 1,
+      preview_image_url: image.preview_url,
+      license_id: "standard",
+      license_name: "Standard License",
     })
 
     showToast({

@@ -310,8 +310,8 @@ export async function updateImage(imageId: string, updateData: ImageUpdateData) 
     if (updateData.description !== undefined) {
       updatePayload.description = updateData.description
     }
-    if (updateData.category_id !== undefined) {
-      updatePayload.category_id = updateData.category_id
+    if (updateData.category !== undefined) {
+      updatePayload.category = updateData.category
     }
     if (updateData.price !== undefined) {
       updatePayload.price = updateData.price

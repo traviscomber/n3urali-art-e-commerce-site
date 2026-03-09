@@ -84,7 +84,7 @@ export function VirtualGallery({
 
   // Setup intersection observer for infinite scroll
   useEffect(() => {
-    if (!loadMoreTrigger || !onLoadMore) return
+    if (!loadMoreTriggerRef.current || !onLoadMore) return
 
     observerRef.current = new IntersectionObserver(
       ([entry]) => {

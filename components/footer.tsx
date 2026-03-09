@@ -90,7 +90,7 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-primary hover:text-primary/80 transition-colors font-medium"
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {t(link.labelKey)}
                     </Link>
@@ -109,11 +109,11 @@ export function Footer() {
               © {currentYear} N3uralia360. All rights reserved. | Cultural immersive media studio creating experiences across dome installations, VR environments, performance loops, and spatial media.
             </p>
             <div className="flex gap-4">
-              <Link href="/licensing-terms" className="text-xs text-primary hover:text-primary/80 transition-colors font-medium">
+              <Link href="/licensing-terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 Terms
               </Link>
-              <span className="text-xs text-primary/60">•</span>
-              <Link href="/contact" className="text-xs text-primary hover:text-primary/80 transition-colors font-medium">
+              <span className="text-xs text-muted-foreground">•</span>
+              <Link href="/contact" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 Support
               </Link>
             </div>

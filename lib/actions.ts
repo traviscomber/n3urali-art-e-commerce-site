@@ -249,7 +249,9 @@ export async function updateImage(imageId: string, updateData: ImageUpdateData) 
           ])
           .select("id")
 
-        categoryId = newCategories.data[0].id
+        if (newCategories.data && newCategories.data.length > 0) {
+          categoryId = newCategories.data[0].id
+        }
       }
     }
 

@@ -14,6 +14,7 @@ interface Image {
   image_format?: string
   description?: string
   tags?: string[]
+  content_category?: string // Theatre photo category (e.g., "Nature/Ocean-Surreal")
 }
 
 interface Collection {
@@ -66,11 +67,18 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
     return description || t('theatre.defaultDescription')
   }
 
-  // Get all related images (same primary subcategory tag)
-  // Primary tag (first tag) represents the subcategory like "Forest", "Ocean", etc.
+  // Get all related images (same category or primary subcategory tag)
+  // For theatre photos: uses content_category (e.g., "Nature/Ocean-Surreal")
+  // For legacy images: uses first tag as primary subcategory
   const getRelatedImages = (imageIndex: number): Image[] => {
     const currentImage = images[imageIndex]
     
+    // If this is a theatre photo with content_category, group by that
+    if (currentImage?.content_category) {
+      return images.filter(img => img.content_category === currentImage.content_category)
+    }
+    
+    // Legacy: group by first tag
     if (!currentImage?.tags || currentImage.tags.length === 0) {
       // If no tags, return only this image
       return [currentImage]

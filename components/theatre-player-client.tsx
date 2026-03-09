@@ -48,23 +48,24 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
     "Digital Art - Contemporary Expression": { title: "theatre.panorama.digitalArt", desc: "theatre.panorama.digitalArtDesc" },
   }
 
-  // Function to get translated panorama title
-  const getTranslatedTitle = (title: string | undefined): string => {
-    if (!title) return t('theatre.panoramicExperience')
-    const mapping = panoramaMap[title]
-    if (mapping) {
-      return t(mapping.title)
+  // Generate proper title from content_category or filename
+  const getProperTitle = (image: Image): string => {
+    if (image.content_category) {
+      // Extract category from path like "Art/Bosch-Graspher" -> "Bosch Graspher"
+      const parts = image.content_category.split('/')
+      const subcategory = parts[parts.length - 1] || image.content_category
+      return subcategory
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ')
     }
-    return title
+    // Fallback to title
+    return image.title || 'Untitled'
   }
 
   // Function to get translated panorama description
-  const getTranslatedDescription = (description: string | undefined, title: string | undefined): string => {
-    if (title && panoramaMap[title]) {
-      const mapping = panoramaMap[title]
-      return t(mapping.desc)
-    }
-    return description || t('theatre.defaultDescription')
+  const getTranslatedDescription = (description: string | undefined): string => {
+    return description || ''
   }
 
   // Get all related images (same category or primary subcategory tag)
@@ -217,19 +218,16 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
               {/* Info overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
                 <div className="p-6">
-                  <h3 className="text-xl font-light text-white">{getTranslatedTitle(currentImage.title)}</h3>
+                  <h3 className="text-xl font-light text-white">{getProperTitle(currentImage)}</h3>
                   <p className="text-sm text-gray-300 mt-2">{t('theatre.clickGo')}</p>
                 </div>
               </div>
             </div>
 
-            {/* Image Info */}
+            {/* Image Info - REMOVED DUPLICATE TITLE */}
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-light text-gray-300 mb-2">
-                {getTranslatedTitle(currentImage.title)}
-              </h2>
               <p className="text-gray-500">
-                {getTranslatedDescription(currentImage.description, currentImage.title)}
+                {getTranslatedDescription(currentImage.description)}
               </p>
               <p className="text-gray-600 text-sm mt-2">
                 {currentRelatedIndex} of {relatedImages.length}

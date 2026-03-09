@@ -47,7 +47,7 @@ export function EnvironmentsSectionClient() {
             
             <div className="flex flex-col gap-3 pt-2">
               <a 
-                href="https://wa.me/?text=Hi%20N3uralia360%2C%20I%20would%20like%20to%20request%20the%20free%20demo%20access%20to%20your%20environments."
+                href="https://wa.me/6282340137013?text=Hi%20N3uralia360%2C%20I%20would%20like%20to%20request%20the%20free%20demo%20access%20to%20your%20environments."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full px-6 py-3 bg-slate-600 text-white font-medium hover:bg-slate-700 transition-all text-sm text-center rounded-lg"

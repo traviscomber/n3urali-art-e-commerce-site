@@ -7,7 +7,7 @@ import { environmentProducts } from '@/lib/constants/marketplace-products'
 
 export function ShopClient() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [sortBy, setSortBy] = useState<'featured' | 'price-low' | 'price-high' | 'newest'>('featured')
+  const [sortBy, setSortBy] = useState<'price-low' | 'price-high'>('price-low')
 
   const categories = [
     { id: 'all', label: 'All Environments', color: 'text-white' },
@@ -27,11 +27,8 @@ export function ShopClient() {
         return Number(a.price) - Number(b.price)
       case 'price-high':
         return Number(b.price) - Number(a.price)
-      case 'newest':
-        return new Date(b.releaseDate).getTime() - new Date(a.releaseDate).getTime()
-      case 'featured':
       default:
-        return (b.featured ? 1 : 0) - (a.featured ? 1 : 0)
+        return 0
     }
   })
 

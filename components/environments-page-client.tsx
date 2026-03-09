@@ -47,28 +47,30 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
   const [natureCategoryIndex, setNatureCategoryIndex] = useState(0)
   const [databaseImages, setDatabaseImages] = useState<{ [key: string]: DatabaseImage[] }>({})
   const [imagesLoading, setImagesLoading] = useState(true)
+  const [videoCategoriesLoaded, setVideoCategoriesLoaded] = useState(false)
 
-  const natureCategories = [
+  // Existing hardcoded categories (NEVER DELETE)
+  const [natureCategories, setNatureCategories] = useState([
     { name: t('environments.oceans'), id: 'oceans' },
     { name: t('environments.volcanoes'), id: 'volcanoes' },
     { name: t('environments.iceSnow'), id: 'ice-and-snow' },
     { name: t('environments.forest'), id: 'forest' },
-  ]
+  ])
 
-  const heritageCategories = [
+  const [heritageCategories, setHeritageCategories] = useState([
     { name: t('environments.northAmerica'), id: 'north-america' },
     { name: t('environments.southAmerica'), id: 'south-america' },
     { name: t('environments.asia'), id: 'asia' },
     { name: t('environments.more'), id: 'more' },
-  ]
+  ])
 
-  const artCategories = [
+  const [artCategories, setArtCategories] = useState([
     { name: t('environments.architecture'), id: 'architecture' },
     { name: t('environments.landscapes'), id: 'landscapes' },
     { name: t('environments.geometry'), id: 'geometry' },
     { name: t('environments.cosmic'), id: 'cosmic' },
     { name: t('environments.abstract'), id: 'abstract' },
-  ]
+  ])
 
   const mythicBannerUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythBackg%20%282%29-UZZUeitXszDkixpZBAL3mYzMq9rEq1.png'
 
@@ -113,15 +115,15 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
     t('environments.artLabel5'),
   ]
 
-  // Fetch real image IDs from database
+  // Fetch real image IDs from database AND video categories
   useEffect(() => {
-    const fetchCategoryImages = async () => {
+    const fetchCategoriesAndImages = async () => {
       try {
         // Dynamically import large constants to avoid webpack serialization warning
         const { natureCategoryImages: imageData } = await import('@/lib/constants/nature-images')
         natureCategoryImages = imageData
         
-        console.log('[v0] Fetching category images')
+        console.log('[v0] Fetching category images and video categories')
         const categories = ['Oceans', 'Volcanoes', 'Ice & Snow', 'Forest']
         const imagesByCategory: { [key: string]: DatabaseImage[] } = {}
 
@@ -145,14 +147,60 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
 
         console.log('[v0] Final imagesByCategory:', Object.keys(imagesByCategory))
         setDatabaseImages(imagesByCategory)
+
+        // Fetch 32 video categories from database
+        try {
+          console.log('[v0] Fetching video categories from database')
+          const videoCategoriesResponse = await fetch('/api/categories/all')
+          
+          if (videoCategoriesResponse.ok) {
+            const { categories: allCategories } = await videoCategoriesResponse.json()
+            console.log('[v0] Got', allCategories?.length || 0, 'total categories from database')
+            
+            // Map video categories to the 4 parent categories
+            const videoNatureCategories = allCategories.filter((cat: any) => 
+              ['Ocean-Surreal', 'Ocean-Underwater-Life', 'Insects', 'Beads'].includes(cat.name)
+            ).map((cat: any) => ({ name: cat.name, id: cat.id }))
+            
+            const videoCultureCategories = allCategories.filter((cat: any) => 
+              ['Turkey', 'Japan', 'Halloween', 'Indonesia-Tribes', 'Thailand', 'Australia', 'Indonesian-Temples', 
+               'Africa', 'Chile-Tribes', 'Argentina-Rio', 'Korea', 'Galleries', 'Vietnam-Theatre', 'India-Taj-Mahal'].includes(cat.name)
+            ).map((cat: any) => ({ name: cat.name, id: cat.id }))
+            
+            const videoArtCategories = allCategories.filter((cat: any) => 
+              ['Bosch-Graspher', 'Faces', 'Golden-Objects', 'Shapes', 'Children', 'Architecture', 
+               'Silver-Techno', 'Bifi-Geometry', 'Tunnels', 'Uncategorized'].includes(cat.name)
+            ).map((cat: any) => ({ name: cat.name, id: cat.id }))
+            
+            const videoMythicCategories = allCategories.filter((cat: any) => 
+              ['Mythic-Indonesia', 'Mythic-Chile'].includes(cat.name)
+            ).map((cat: any) => ({ name: cat.name, id: cat.id }))
+
+            // Append video categories to existing categories
+            if (videoNatureCategories.length > 0) {
+              setNatureCategories(prev => [...prev, ...videoNatureCategories])
+            }
+            if (videoCultureCategories.length > 0) {
+              setHeritageCategories(prev => [...prev, ...videoCultureCategories])
+            }
+            if (videoArtCategories.length > 0) {
+              setArtCategories(prev => [...prev, ...videoArtCategories])
+            }
+
+            console.log('[v0] Video categories loaded and appended')
+            setVideoCategoriesLoaded(true)
+          }
+        } catch (err) {
+          console.error('[v0] Error fetching video categories:', err)
+        }
       } catch (error) {
-        console.error('[v0] Failed to fetch nature category images:', error)
+        console.error('[v0] Failed to fetch categories and images:', error)
       } finally {
         setImagesLoading(false)
       }
     }
 
-    fetchCategoryImages()
+    fetchCategoriesAndImages()
   }, [])
 
   const handleNextHeritageCategory = () => {

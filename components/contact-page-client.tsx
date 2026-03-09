@@ -200,7 +200,63 @@ export function ContactPageClient() {
             </form>
           </div>
         </div>
-      </div>
-    </main>
+
+        {/* FAQ Section */}
+        <div className="mt-20 sm:mt-24">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-light text-slate-100 mb-12 sm:mb-16">
+            {t('contact.faqTitle')}
+          </h2>
+          <div className="space-y-6">
+            <details className="group border border-slate-700 rounded-lg p-6 sm:p-8 hover:border-cyan-400/50 transition-colors">
+              <summary className="flex cursor-pointer items-center justify-between font-light text-lg sm:text-xl text-slate-100">
+                {t('contact.faq1Question')}
+                <span className="transition group-open:rotate-180 text-cyan-400">▼</span>
+              </summary>
+              <p className="mt-4 text-slate-400 text-sm sm:text-base leading-relaxed">
+                {t('contact.faq1Answer')}
+              </p>
+            </details>
+
+            <details className="group border border-slate-700 rounded-lg p-6 sm:p-8 hover:border-cyan-400/50 transition-colors">
+              <summary className="flex cursor-pointer items-center justify-between font-light text-lg sm:text-xl text-slate-100">
+                {t('contact.faq2Question')}
+                <span className="transition group-open:rotate-180 text-cyan-400">▼</span>
+              </summary>
+              <p className="mt-4 text-slate-400 text-sm sm:text-base leading-relaxed">
+                {t('contact.faq2Answer')}
+              </p>
+            </details>
+
+            <details className="group border border-slate-700 rounded-lg p-6 sm:p-8 hover:border-cyan-400/50 transition-colors">
+              <summary className="flex cursor-pointer items-center justify-between font-light text-lg sm:text-xl text-slate-100">
+                {t('contact.faq3Question')}
+                <span className="transition group-open:rotate-180 text-cyan-400">▼</span>
+              </summary>
+              <p className="mt-4 text-slate-400 text-sm sm:text-base leading-relaxed">
+                {t('contact.faq3Answer')}
+              </p>
+            </details>
+
+            <details className="group border border-slate-700 rounded-lg p-6 sm:p-8 hover:border-cyan-400/50 transition-colors">
+              <summary className="flex cursor-pointer items-center justify-between font-light text-lg sm:text-xl text-slate-100">
+                {t('contact.faq4Question')}
+                <span className="transition group-open:rotate-180 text-cyan-400">▼</span>
+              </summary>
+              <p className="mt-4 text-slate-400 text-sm sm:text-base leading-relaxed">
+                {t('contact.faq4Answer')}
+              </p>
+            </details>
+
+            <details className="group border border-slate-700 rounded-lg p-6 sm:p-8 hover:border-cyan-400/50 transition-colors">
+              <summary className="flex cursor-pointer items-center justify-between font-light text-lg sm:text-xl text-slate-100">
+                {t('contact.faq5Question')}
+                <span className="transition group-open:rotate-180 text-cyan-400">▼</span>
+              </summary>
+              <p className="mt-4 text-slate-400 text-sm sm:text-base leading-relaxed">
+                {t('contact.faq5Answer')}
+              </p>
+            </details>
+          </div>
+        </div>
   )
 }

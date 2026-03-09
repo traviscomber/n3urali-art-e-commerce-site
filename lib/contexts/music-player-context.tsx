@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react'
 
 interface MusicPlayerContextType {
-  audioRef: React.RefObject<HTMLAudioElement>
+  audioRef: React.RefObject<HTMLAudioElement | null>
   isPlaying: boolean
   setIsPlaying: (playing: boolean) => void
   volume: number

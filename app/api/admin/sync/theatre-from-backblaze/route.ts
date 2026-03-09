@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { openai } from '@ai-sdk/openai'
-import { generateText } from 'ai'
 
 interface B2File {
   fileId: string
@@ -169,39 +167,12 @@ export async function POST(request: Request) {
         continue
       }
 
-      // Generate proper image name using OpenAI vision API via AI SDK
-      let imageTitle = filename.replace(/\.[^/.]+$/, '') // Default to filename
-      
-      try {
-        // Use AI SDK to analyze the image with GPT-4 Vision
-        const { text: generatedName } = await generateText({
-          model: openai('gpt-4-turbo'),
-          messages: [
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'image',
-                  image: downloadUrl,
-                },
-                {
-                  type: 'text',
-                  text: `Analyze this equirectangular/panoramic image and generate a single concise, descriptive name (2-4 words max) that captures the main subject or mood. Examples: "Mountain Peak", "Ocean Horizon", "Desert Dunes", "Ancient Architecture". Only return the name, nothing else.`,
-                },
-              ],
-            },
-          ],
-          maxTokens: 50,
-        })
-
-        if (generatedName?.trim()) {
-          imageTitle = generatedName.trim()
-          console.log(`[v0] Generated title for ${filename}: ${imageTitle}`)
-        }
-      } catch (aiError) {
-        console.warn(`[v0] AI analysis failed for ${filename}:`, aiError instanceof Error ? aiError.message : 'Unknown error')
-        // Continue with filename as title
-      }
+      // Generate simple title from filename - clean and readable
+      const imageTitle = filename
+        .replace(/\.[^/.]+$/, '') // Remove file extension
+        .replace(/[-_]/g, ' ') // Replace dashes and underscores with spaces
+        .replace(/\d{4}-\d{2}-\d{2}.*$/, '') // Remove dates and timestamps
+        .trim()
 
       // Insert into database
       const { error: insertError } = await supabase.from('images').insert({

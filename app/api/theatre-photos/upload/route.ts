@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Map category name to Backblaze folder path
-    const categoryPath = `VIDS/Categories/Theatre/${category}`
+    const categoryPath = `THEATRE/Categories/${category}`
 
     console.log('[v0] Theatre photo upload - Category:', category)
     console.log('[v0] Theatre photo upload - Path:', categoryPath)

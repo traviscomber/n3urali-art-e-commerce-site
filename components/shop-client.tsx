@@ -24,9 +24,9 @@ export function ShopClient() {
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortBy) {
       case 'price-low':
-        return a.price - b.price
+        return Number(a.price) - Number(b.price)
       case 'price-high':
-        return b.price - a.price
+        return Number(b.price) - Number(a.price)
       case 'newest':
         return new Date(b.releaseDate).getTime() - new Date(a.releaseDate).getTime()
       case 'featured':

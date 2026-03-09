@@ -48,10 +48,15 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
     "Digital Art - Contemporary Expression": { title: "theatre.panorama.digitalArt", desc: "theatre.panorama.digitalArtDesc" },
   }
 
-  // Generate proper title from content_category or filename
+  // Generate proper title - use actual image title if available, fall back to category name
   const getProperTitle = (image: Image): string => {
+    // First priority: use the actual image title (set from filename during sync)
+    if (image.title && image.title.trim()) {
+      return image.title
+    }
+    
+    // Fallback: extract category name from content_category path
     if (image.content_category) {
-      // Extract category from path like "Art/Bosch-Graspher" -> "Bosch Graspher"
       const parts = image.content_category.split('/')
       const subcategory = parts[parts.length - 1] || image.content_category
       return subcategory
@@ -59,8 +64,8 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ')
     }
-    // Fallback to title
-    return image.title || 'Untitled'
+    
+    return 'Untitled'
   }
 
   // Function to get translated panorama description

@@ -167,16 +167,9 @@ export async function POST(request: Request) {
         continue
       }
 
-      // Generate simple title from filename - clean and readable
-      const imageTitle = filename
-        .replace(/\.[^/.]+$/, '') // Remove file extension
-        .replace(/[-_]/g, ' ') // Replace dashes and underscores with spaces
-        .replace(/\d{4}-\d{2}-\d{2}.*$/, '') // Remove dates and timestamps
-        .trim()
-
       // Insert into database
       const { error: insertError } = await supabase.from('images').insert({
-        title: imageTitle,
+        title: filename.replace(/\.[^/.]+$/, ''), // Remove file extension for title
         description: `Theatre photo - ${contentCategory}`,
         image_format: 'equirectangular',
         content_category: contentCategory,

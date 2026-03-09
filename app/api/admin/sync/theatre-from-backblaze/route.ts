@@ -43,6 +43,15 @@ const CATEGORIES = {
   ],
 }
 
+export async function GET() {
+  return NextResponse.json({
+    message: 'Theatre Backblaze Sync Endpoint',
+    description: 'Scans THEATRE/Categories/ folder in Backblaze and imports all images to Supabase',
+    usage: 'Make a POST request to this endpoint to start the sync',
+    method: 'POST',
+  })
+}
+
 export async function POST(request: Request) {
   try {
     const apiKey = process.env.BACKBLAZE_API_KEY

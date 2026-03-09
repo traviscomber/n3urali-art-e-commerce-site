@@ -2,6 +2,7 @@
 
 import { AdminTheatrePhotoUpload } from '@/components/admin-theatre-photo-upload'
 import { CreateTheatreImageFoldersButton } from '@/components/create-theatre-image-folders-button'
+import { SyncTheatreFromBackblazeButton } from '@/components/sync-theatre-from-backblaze-button'
 
 export default function AdminTheatrePhotos() {
   return (
@@ -10,11 +11,18 @@ export default function AdminTheatrePhotos() {
         {/* Backblaze Setup Section */}
         <div>
           <h2 className="text-3xl font-light text-slate-100 mb-4">Backblaze Setup</h2>
-          <div className="bg-slate-900 border border-slate-700 rounded-lg p-6 space-y-4">
-            <p className="text-slate-300">
-              Create all 32 theatre photo (equirectangular) category folders in Backblaze. Structure: THEATRE/Categories/[Parent]/[Subcategory]/
-            </p>
-            <CreateTheatreImageFoldersButton />
+          <div className="bg-slate-900 border border-slate-700 rounded-lg p-6 space-y-6">
+            <div>
+              <p className="text-slate-300 mb-4">
+                Create all 32 theatre photo (equirectangular) category folders in Backblaze. Structure: THEATRE/Categories/[Parent]/[Subcategory]/
+              </p>
+              <CreateTheatreImageFoldersButton />
+            </div>
+
+            <hr className="border-slate-700" />
+
+            {/* Sync Section */}
+            <SyncTheatreFromBackblazeButton />
           </div>
         </div>
 
@@ -30,6 +38,7 @@ export default function AdminTheatrePhotos() {
               <li>Image is recorded in database with Backblaze path</li>
               <li>Images automatically appear in Theatre Mode</li>
               <li>Auto-rotates related images every 30 seconds in Theatre player</li>
+              <li>Or use "Sync Theatre Photos from Backblaze" above to import existing photos</li>
             </ul>
           </div>
         </div>

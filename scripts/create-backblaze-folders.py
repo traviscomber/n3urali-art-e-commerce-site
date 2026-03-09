@@ -6,14 +6,11 @@ Uses B2 API to create the folder structure for video categories
 
 import os
 import json
-import requests
-from pathlib import Path
-from dotenv import load_dotenv
+import urllib.request
+import urllib.error
+import base64
 
-# Load environment variables
-load_dotenv()
-
-# Backblaze B2 credentials
+# Backblaze B2 credentials from environment
 APPLICATION_KEY_ID = os.getenv('BACKBLAZE_API_KEY')
 APPLICATION_KEY = os.getenv('BACKBLAZE_APPLICATION_KEY')
 BUCKET_NAME = os.getenv('BACKBLAZE_BUCKET_NAME', 'Neuraliart')
@@ -29,21 +26,37 @@ CATEGORIES = {
             'Silver-Techno', 'Bifi-Geometry', 'Tunnels', 'Uncategorized']
 }
 
+def make_request(url, method='GET', headers=None, data=None):
+    """Make HTTP request using only standard library"""
+    if headers is None:
+        headers = {}
+    
+    try:
+        if data is not None:
+            data = json.dumps(data).encode('utf-8')
+            headers['Content-Type'] = 'application/json'
+        
+        req = urllib.request.Request(url, data=data, headers=headers, method=method)
+        with urllib.request.urlopen(req) as response:
+            return json.loads(response.read().decode('utf-8'))
+    except urllib.error.HTTPError as e:
+        print(f'❌ HTTP Error: {e.code} - {e.reason}')
+        return None
+    except Exception as e:
+        print(f'❌ Request failed: {e}')
+        return None
+
 def get_b2_auth_token():
     """Authenticate with Backblaze B2 API"""
     auth_url = 'https://api.backblazeb2.com/b2api/v2/b2_authorize_account'
     
-    try:
-        response = requests.get(
-            auth_url,
-            auth=(APPLICATION_KEY_ID, APPLICATION_KEY)
-        )
-        response.raise_for_status()
-        auth_data = response.json()
-        return auth_data
-    except requests.exceptions.RequestException as e:
-        print(f'❌ Authentication failed: {e}')
-        return None
+    # Create Basic Auth header
+    credentials = f'{APPLICATION_KEY_ID}:{APPLICATION_KEY}'
+    encoded = base64.b64encode(credentials.encode()).decode()
+    
+    headers = {'Authorization': f'Basic {encoded}'}
+    
+    return make_request(auth_url, headers=headers)
 
 def get_bucket_id(auth_data):
     """Get the bucket ID from account info"""
@@ -53,26 +66,23 @@ def get_bucket_id(auth_data):
     
     url = f'{api_url}/b2api/v2/b2_list_buckets'
     headers = {'Authorization': auth_token}
-    params = {'accountId': account_id}
     
-    try:
-        response = requests.get(url, headers=headers, params=params)
-        response.raise_for_status()
-        buckets = response.json()['buckets']
-        
-        for bucket in buckets:
-            if bucket['bucketName'] == BUCKET_NAME:
-                return bucket['bucketId']
-        
-        print(f'❌ Bucket "{BUCKET_NAME}" not found')
+    data = {'accountId': account_id}
+    response = make_request(url, method='POST', headers=headers, data=data)
+    
+    if not response or 'buckets' not in response:
+        print(f'❌ Failed to list buckets')
         return None
-    except requests.exceptions.RequestException as e:
-        print(f'❌ Failed to get bucket ID: {e}')
-        return None
+    
+    for bucket in response['buckets']:
+        if bucket['bucketName'] == BUCKET_NAME:
+            return bucket['bucketId']
+    
+    print(f'❌ Bucket "{BUCKET_NAME}" not found')
+    return None
 
 def create_folder(auth_data, bucket_id, folder_path):
     """Create a folder in B2 by uploading an empty marker file"""
-    account_id = auth_data['accountId']
     api_url = auth_data['apiUrl']
     auth_token = auth_data['authorizationToken']
     
@@ -81,32 +91,29 @@ def create_folder(auth_data, bucket_id, folder_path):
     headers = {'Authorization': auth_token}
     data = {'bucketId': bucket_id}
     
+    upload_info = make_request(url, method='POST', headers=headers, data=data)
+    if not upload_info:
+        return False
+    
+    # Create .folder_marker file to represent folder
+    marker_file = f'{folder_path}/.folder_marker'
+    
+    upload_url = upload_info['uploadUrl']
+    upload_token = upload_info['authorizationToken']
+    
+    file_headers = {
+        'Authorization': upload_token,
+        'X-Bz-File-Name': marker_file,
+        'Content-Type': 'text/plain',
+        'X-Bz-Content-Sha1': 'da39a3ee5e6b4b0d3255bfef95601890afd80709',  # SHA1 of empty string
+    }
+    
     try:
-        response = requests.post(url, headers=headers, json=data)
-        response.raise_for_status()
-        upload_info = response.json()
-        
-        # Create .folder_marker file to represent folder
-        marker_file = f'{folder_path}/.folder_marker'
-        
-        upload_url = upload_info['uploadUrl']
-        upload_token = upload_info['authorizationToken']
-        
-        file_headers = {
-            'Authorization': upload_token,
-            'X-Bz-File-Name': marker_file,
-            'Content-Type': 'text/plain',
-            'X-Bz-Content-Sha1': 'da39a3ee5e6b4b0d3255bfef95601890afd80709',  # SHA1 of empty string
-        }
-        
-        response = requests.post(
-            upload_url,
-            headers=file_headers,
-            data=b''
-        )
-        response.raise_for_status()
-        return True
-    except requests.exceptions.RequestException as e:
+        req = urllib.request.Request(upload_url, data=b'', headers=file_headers, method='POST')
+        with urllib.request.urlopen(req) as response:
+            response.read()
+            return True
+    except Exception as e:
         print(f'⚠️  Failed to create folder {folder_path}: {e}')
         return False
 

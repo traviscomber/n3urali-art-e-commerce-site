@@ -28,6 +28,7 @@ const translations = {
     "nav.environments": "Ambientes",
     "nav.studio": "Studio",
     "nav.contact": "Contacto",
+    "nav.faq": "Preguntas Frecuentes",
     "nav.orders": "Pedidos",
     "nav.tools": "Herramientas",
 
@@ -294,6 +295,7 @@ const translations = {
     "nav.environments": "Environments",
     "nav.studio": "Studio",
     "nav.contact": "Contact",
+    "nav.faq": "FAQ",
     "nav.orders": "Orders",
     "nav.tools": "Tools",
 

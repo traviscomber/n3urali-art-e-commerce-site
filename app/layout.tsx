@@ -9,6 +9,7 @@ import { TagFilterProvider } from "@/lib/contexts/tag-filter-context"
 import { LanguageProvider } from "@/lib/contexts/language-context"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { CartSidebar } from "@/components/cart-sidebar"
 import { ToastProvider } from "@/components/toast-notifications"
 import { Analytics } from "@vercel/analytics/react"
@@ -351,6 +352,7 @@ export default function RootLayout({
                       <ToastProvider>
                         <Header />
                         {children}
+                        <Footer />
                         <CartSidebar />
                         <Analytics />
                         <SpeedInsights />

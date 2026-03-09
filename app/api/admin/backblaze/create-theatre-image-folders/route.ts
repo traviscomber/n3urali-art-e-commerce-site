@@ -12,7 +12,7 @@ const CATEGORIES = {
 
 async function authenticateB2() {
   const response = await fetch('https://api.backblazeb2.com/b2api/v2/b2_authorize_account', {
-    method: 'POST',
+    method: 'GET',
     headers: {
       'Authorization': 'Basic ' + Buffer.from(
         `${process.env.BACKBLAZE_API_KEY}:${process.env.BACKBLAZE_APPLICATION_KEY}`
@@ -117,10 +117,11 @@ export async function POST(request: NextRequest) {
           }
         } catch (error) {
           results.failed++
+          const errorMsg = error instanceof Error ? error.message : 'Unknown error'
           results.folders.push({ 
             path: folderPath, 
             status: 'error',
-            error: error instanceof Error ? error.message : 'Unknown error'
+            error: errorMsg
           })
         }
       }
@@ -134,10 +135,11 @@ export async function POST(request: NextRequest) {
       folders: results.folders,
     })
   } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : 'Failed to create folders'
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to create folders',
+        error: errorMsg,
       },
       { status: 500 }
     )

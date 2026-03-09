@@ -26,13 +26,15 @@ export function CreateTheatreImageFoldersButton() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create folders')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create folders')
       }
 
       const data = await response.json()
       setResults(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      const errorMsg = err instanceof Error ? err.message : 'An error occurred'
+      setError(errorMsg)
     } finally {
       setIsLoading(false)
     }

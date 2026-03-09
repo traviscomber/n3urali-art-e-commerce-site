@@ -48,21 +48,25 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
     "Digital Art - Contemporary Expression": { title: "theatre.panorama.digitalArt", desc: "theatre.panorama.digitalArtDesc" },
   }
 
-  // Generate proper title - use actual image title if available, fall back to category name
+  // Generate proper title - show category name from content_category (e.g., "Art/Escher")
   const getProperTitle = (image: Image): string => {
-    // First priority: use the actual image title (set from filename during sync)
-    if (image.title && image.title.trim()) {
-      return image.title
+    // First priority: use the category name from content_category
+    if (image.content_category) {
+      // Format "Art/Bosch-Graspher" -> "Art / Bosch Graspher"
+      const parts = image.content_category.split('/')
+      return parts
+        .map(part =>
+          part
+            .split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ')
+        )
+        .join(' / ')
     }
     
-    // Fallback: extract category name from content_category path
-    if (image.content_category) {
-      const parts = image.content_category.split('/')
-      const subcategory = parts[parts.length - 1] || image.content_category
-      return subcategory
-        .split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ')
+    // Fallback: use image title
+    if (image.title && image.title.trim()) {
+      return image.title
     }
     
     return 'Untitled'

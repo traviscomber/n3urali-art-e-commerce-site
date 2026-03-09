@@ -46,7 +46,7 @@ export function EnvironmentsSectionClient() {
             </div>
             
             <div className="flex flex-col gap-3 pt-2">
-              <Link href="/environments" className="w-full px-6 py-3 bg-slate-600 text-white font-medium hover:bg-slate-700 transition-all text-sm text-center rounded-lg">
+              <Link href="/auth/login" className="w-full px-6 py-3 bg-slate-600 text-white font-medium hover:bg-slate-700 transition-all text-sm text-center rounded-lg">
                 {t('environments.freeDemo')}
               </Link>
               <Link href="/environments" className="w-full px-6 py-3 border border-slate-600 text-slate-300 font-medium hover:border-slate-500 hover:text-slate-200 transition-all text-sm text-center rounded-lg">

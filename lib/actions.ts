@@ -206,7 +206,7 @@ export async function getImages() {
       images?.map((image) => ({
         ...image,
         file_url: image.image_url,
-        category: image.categories?.name,
+        category: image.categories?.[0]?.name || null,
       })) || []
 
     console.log("[v0] Successfully fetched", transformedImages.length, "images")

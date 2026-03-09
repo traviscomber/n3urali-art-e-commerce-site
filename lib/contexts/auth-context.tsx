@@ -69,9 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Subscribe to auth changes only after manual initialization
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange(async (event, session) => {
+      supabase.auth.onAuthStateChange(async (event, session) => {
         if (session?.user) {
           // Check if user is admin from profiles table
           const { data: profile } = await supabase
@@ -89,8 +87,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null)
         }
       })
-
-      return () => subscription.unsubscribe()
     } catch (error) {
       // Auth initialization failed silently
     } finally {

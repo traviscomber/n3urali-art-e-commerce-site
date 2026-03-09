@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { openai } from '@ai-sdk/openai'
+import { generateText } from 'ai'
 
 interface B2File {
   fileId: string
@@ -167,52 +169,37 @@ export async function POST(request: Request) {
         continue
       }
 
-      // Generate proper image name using OpenAI vision API
+      // Generate proper image name using OpenAI vision API via AI SDK
       let imageTitle = filename.replace(/\.[^/.]+$/, '') // Default to filename
       
       try {
-        // Use OpenAI to analyze the image and generate a descriptive name
-        const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'gpt-4-vision',
-            messages: [
-              {
-                role: 'user',
-                content: [
-                  {
-                    type: 'image_url',
-                    image_url: {
-                      url: downloadUrl,
-                    },
-                  },
-                  {
-                    type: 'text',
-                    text: `Analyze this equirectangular/panoramic image and generate a single concise, descriptive name (2-4 words max) that captures the main subject or mood. Examples: "Mountain Peak", "Ocean Horizon", "Desert Dunes", "Ancient Architecture". Only return the name, nothing else.`,
-                  },
-                ],
-              },
-            ],
-            max_tokens: 50,
-          }),
+        // Use AI SDK to analyze the image with GPT-4 Vision
+        const { text: generatedName } = await generateText({
+          model: openai('gpt-4-turbo'),
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'image',
+                  image: downloadUrl,
+                },
+                {
+                  type: 'text',
+                  text: `Analyze this equirectangular/panoramic image and generate a single concise, descriptive name (2-4 words max) that captures the main subject or mood. Examples: "Mountain Peak", "Ocean Horizon", "Desert Dunes", "Ancient Architecture". Only return the name, nothing else.`,
+                },
+              ],
+            },
+          ],
+          maxTokens: 50,
         })
 
-        if (openaiResponse.ok) {
-          const openaiData = await openaiResponse.json()
-          const generatedName = openaiData.choices?.[0]?.message?.content?.trim()
-          if (generatedName) {
-            imageTitle = generatedName
-            console.log(`[v0] Generated title for ${filename}: ${imageTitle}`)
-          }
-        } else {
-          console.warn(`[v0] OpenAI analysis failed for ${filename}, using filename`)
+        if (generatedName?.trim()) {
+          imageTitle = generatedName.trim()
+          console.log(`[v0] Generated title for ${filename}: ${imageTitle}`)
         }
-      } catch (openaiError) {
-        console.warn(`[v0] OpenAI error for ${filename}:`, openaiError)
+      } catch (aiError) {
+        console.warn(`[v0] AI analysis failed for ${filename}:`, aiError instanceof Error ? aiError.message : 'Unknown error')
         // Continue with filename as title
       }
 

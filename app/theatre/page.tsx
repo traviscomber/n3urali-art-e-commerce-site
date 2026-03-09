@@ -11,27 +11,25 @@ export const revalidate = 3600
 export default async function TheatrePage() {
   const supabase = await createClient()
 
-  // Fetch equirectangular images from Backblaze THEATRE folders
-  // These are uploaded via the admin theatre photo upload with content_category set
-  const { data: theatreImages } = await supabase
+  // Fetch equirectangular images organized by category
+  // Theatre photos have content_category set (e.g., "Nature/Ocean-Surreal")
+  const { data: images, error } = await supabase
     .from('images')
     .select('id, title, original_url, image_format, description, tags, thumbnail_medium_url, upscaled_url, content_category, created_at')
     .eq('image_format', 'equirectangular')
     .eq('active', true)
-    .like('file_path', 'THEATRE/Categories/%')
+    .order('content_category', { ascending: true })
     .order('created_at', { ascending: false })
 
-  // Also fetch legacy equirectangular images (from before THEATRE folder structure)
-  const { data: legacyImages } = await supabase
-    .from('images')
-    .select('id, title, original_url, image_format, description, tags, thumbnail_medium_url, upscaled_url, content_category, created_at')
-    .eq('image_format', 'equirectangular')
-    .eq('active', true)
-    .not('file_path', 'like', 'THEATRE/Categories/%')
-    .order('created_at', { ascending: false })
+  if (error) {
+    console.error('[v0] Error fetching theatre images:', error)
+  }
 
-  // Combine both sets
-  const images = [...(theatreImages || []), ...(legacyImages || [])]
+  console.log('[v0] Fetched theatre images:', images?.length || 0)
+  if (images && images.length > 0) {
+    console.log('[v0] First image:', images[0])
+    console.log('[v0] Categories found:', [...new Set(images.map(img => img.content_category))].join(', '))
+  }
 
   // Fetch collections with their images
   const { data: collections } = await supabase

@@ -120,6 +120,11 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           side: THREE.BackSide,
         })
         const sphere = new THREE.Mesh(geometry, material)
+        
+        // Apply initial yaw rotation to hide the seam
+        sphere.rotation.y = initialYaw
+        console.log('[v0] Applied initial yaw rotation:', initialYaw, 'radians')
+        
         scene.add(sphere)
 
         sceneRef.current = scene

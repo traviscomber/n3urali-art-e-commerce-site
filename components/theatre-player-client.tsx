@@ -206,6 +206,23 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
           <div className="w-full px-4 sm:px-12 md:px-16 lg:px-20 py-16 max-w-full">
             {/* Panorama Teaser with Cross-Dissolve */}
             <div className="relative w-full md:w-2/3 lg:w-1/2 mx-auto aspect-square bg-gray-900 rounded-lg overflow-hidden mb-12 border border-gray-700 group">
+              {/* Next Image - Fades In (under current) */}
+              {relatedImages.length > 1 && (
+                <div
+                  className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+                    fadeOut ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  style={{
+                    backgroundImage: `url('${
+                      relatedImages[(relatedImages.findIndex(img => img.id === currentImage.id) + 1) % relatedImages.length]?.thumbnail_medium_url ||
+                      relatedImages[(relatedImages.findIndex(img => img.id === currentImage.id) + 1) % relatedImages.length]?.original_url ||
+                      ''
+                    }')`,
+                    backgroundPosition: 'center',
+                  }}
+                />
+              )}
+
               {/* Current Image - Fades Out */}
               <div
                 className={`absolute inset-0 bg-cover bg-center cursor-pointer transition-opacity duration-1000 ${

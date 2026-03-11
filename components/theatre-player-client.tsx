@@ -183,6 +183,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
           fov={130}
           sphereScale={5000}
           rotationSpeed={0.0002}
+          initialYaw={Math.PI}
         />
       )}
 

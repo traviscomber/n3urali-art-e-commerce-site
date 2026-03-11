@@ -12,6 +12,7 @@ interface PanoramaViewerPSVProps {
   sphereScale?: number // Sphere radius (default 5000)
   rotationSpeed?: number // Auto-rotation speed (default 0.0002)
   geometrySegments?: number // Sphere geometry segments (default 128)
+  initialYaw?: number // Initial rotation offset in radians to hide seam (default Math.PI for back of sphere)
 }
 
 export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
@@ -23,6 +24,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   sphereScale = 5000,
   rotationSpeed = 0.0002,
   geometrySegments = 128,
+  initialYaw = Math.PI, // Default to 180 degrees (back of sphere, hiding the seam)
 }: PanoramaViewerPSVProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -32,7 +34,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   const rendererRef = useRef<any>(null)
   const sphereRef = useRef<any>(null)
   const cameraRef = useRef<any>(null)
-  const rotationYRef = useRef(0)
+  const rotationYRef = useRef(initialYaw) // Start with initialYaw offset
   const currentFovRef = useRef(fov)
 
   useEffect(() => {
@@ -207,7 +209,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         rendererRef.current.dispose()
       }
     }
-  }, [imageUrl, relaxMode, fov, sphereScale, rotationSpeed, geometrySegments])
+  }, [imageUrl, relaxMode, fov, sphereScale, rotationSpeed, geometrySegments, initialYaw])
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {

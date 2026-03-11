@@ -232,8 +232,6 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
                 </div>
               </div>
             </div>
-              </div>
-            </div>
 
             {/* Image Info - REMOVED DUPLICATE TITLE */}
             <div className="text-center mb-12">

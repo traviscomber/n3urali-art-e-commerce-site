@@ -31,288 +31,198 @@ interface ShowsPageClientProps {
 
 export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientProps) {
   const { t } = useLanguage()
-  const [teaserIndex, setTeaserIndex] = useState(0)
+  const [projectIndex, setProjectIndex] = useState(0)
 
-  // Map of English descriptions to translation keys for dynamic translation
-  const descriptionMap: Record<string, string> = {
-    "Explore the extraordinary landscapes and sacred sites of Chile, South America's most geographically diverse nation. From the Atacama Desert to Patagonian glaciers, from ancient Inca roads to mystical Puma​ín forests, discover Chile through multiple immersive 360° collections.": "shows.description.chile",
-  }
-
-  // Function to get translated description or fallback to original
   const getTranslatedDescription = (description: string | undefined): string => {
     if (!description) return t('showsPage.descriptionDefault')
-    
-    console.log("[v0] Raw description from DB:", description)
-    console.log("[v0] Description length:", description.length)
-    console.log("[v0] Description contains Chile:", description.includes('Chile'))
-    console.log("[v0] Description contains Atacama:", description.includes('Atacama'))
-    
-    // Check if it's the Chile description by looking for key keywords
     if (description.includes('Chile') && description.includes('Atacama')) {
-      console.log("[v0] Detected Chile description, translating...")
       return t('shows.description.chile')
     }
-    
-    // Fallback to original description
-    console.log("[v0] Falling back to original description")
     return description
   }
 
-  const mythicBannerUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMythBackg%20%282%29-UZZUeitXszDkixpZBAL3mYzMq9rEq1.png'
-  
-  const mythicImages = [
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png',
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth2-5zeFMllXp1WFWUyJgvnpY8plIxwQts.png',
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth3-mZG3PGuOFqePUhTm63gOYOXUhfDN6d.png',
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth4-W0eVn7cqin99zRFZN90EDL8J39HY9V.png',
-    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth5-HHbnx40rB7gy6IkODw4wqBQWJcPzhY.png',
-  ]
-
-  const mythicLabels = [
-    t('shows.mythicLabel1'),
-    t('shows.mythicLabel2'),
-    t('shows.mythicLabel3'),
-    t('shows.mythicLabel4'),
-    t('shows.mythicLabel5'),
-  ]
-
-  const mythicCategories = [
-    { name: t('shows.categoryAsian'), id: 'asian' },
-    { name: t('shows.categoryMesoamerican'), id: 'mesoamerican' },
-    { name: t('shows.categoryGreek'), id: 'greek' },
-    { name: t('shows.categoryEgyptian'), id: 'egyptian' },
-  ]
-
-  const teasers = [
-    {
-      video: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/upscaled_4k_1769186425665-tIDvx4aisEE2OnZKa01br1AsjGa0U9.mp4',
-      title: t('shows.teaserTitle1'),
-    },
-    {
-      video: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/upscaled_4k_1769188268692-hzRqYyG3px6XWnyqOeymrygNVHapDN.mp4',
-      title: t('shows.teaserTitle2'),
-    },
-    {
-      video: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/upscaled_4k_1769187422672-86GC3cBIId4ahyMtCrRkhq9BS8zVM5.mp4',
-      title: t('shows.teaserTitle3'),
-    },
-  ]
-
-  const perfectForItems = [
-    t('showsPage.perfectFor1'),
-    t('showsPage.perfectFor2'),
-    t('showsPage.perfectFor3'),
-  ]
-
-  const characterFeatures = [
-    t('showsPage.characterDesign'),
-    t('showsPage.narrativeBuilding'),
-    t('showsPage.effectsEditing'),
-  ]
-
-  const handlePrevTeaser = () => {
-    setTeaserIndex((prev) => (prev - 1 + teasers.length) % teasers.length)
+  const currentShow = collections.length > 0 ? collections[0] : {
+    id: '1',
+    title: t('shows.sampleShowTitle'),
+    description: t('shows.sampleShowDescription'),
+    code: 'mosey',
   }
 
-  const handleNextTeaser = () => {
-    setTeaserIndex((prev) => (prev + 1) % teasers.length)
-  }
+  // Featured still image
+  const featuredImage = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png'
 
-  const handleTeaserClick = (idx: number) => {
-    setTeaserIndex(idx)
-    setTimeout(() => {
-      const videoElement = document.querySelector('video[data-main-player]') as HTMLVideoElement
-      if (videoElement) {
-        videoElement.play()
-      }
-    }, 0)
-  }
+  // Project thumbnails (using teaserImages or fallback)
+  const projects = teaserImages.slice(0, 4).map((img) => ({
+    id: img.id,
+    title: img.title,
+    image: img.thumbnail_medium_url || img.original_url || '',
+  }))
 
-  // Sample shows data (fallback if no collections)
-  const shows = collections.length > 0 ? collections : [
-    {
-      id: '1',
-      title: t('shows.sampleShowTitle'),
-      description: t('shows.sampleShowDescription'),
-      code: 'mosey',
-    },
+  // Fallback projects if no images
+  const projectsData = projects.length > 0 ? projects : [
+    { id: '1', title: 'Project 1', image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png' },
+    { id: '2', title: 'Project 2', image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth2-5zeFMllXp1WFWUyJgvnpY8plIxwQts.png' },
+    { id: '3', title: 'Project 3', image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth3-mZG3PGuOFqePUhTm63gOYOXUhfDN6d.png' },
+    { id: '4', title: 'Project 4', image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth4-W0eVn7cqin99zRFZN90EDL8J39HY9V.png' },
   ]
 
-  const currentShow = shows[0]
+  const productionSections = [
+    {
+      title: t('showsPage.worldBuilding'),
+      description: t('showsPage.worldBuildingDesc'),
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png',
+    },
+    {
+      title: t('showsPage.characters'),
+      description: t('showsPage.charactersDesc'),
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth2-5zeFMllXp1WFWUyJgvnpY8plIxwQts.png',
+    },
+    {
+      title: t('showsPage.story'),
+      description: t('showsPage.storyDesc'),
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth3-mZG3PGuOFqePUhTm63gOYOXUhfDN6d.png',
+    },
+    {
+      title: t('showsPage.soundNarration'),
+      description: t('showsPage.soundNarrationDesc'),
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth4-W0eVn7cqin99zRFZN90EDL8J39HY9V.png',
+    },
+    {
+      title: t('showsPage.mastering'),
+      description: t('showsPage.masteringDesc'),
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth5-HHbnx40rB7gy6IkODw4wqBQWJcPzhY.png',
+    },
+  ]
 
   return (
     <div className="w-full max-w-full overflow-hidden bg-black">
-      {/* Hero Section - Banner Height with Overlay Text */}
-      <section className="w-full h-64 sm:h-80 md:h-96 lg:h-[28rem] relative overflow-hidden">
-        {/* Background Image - Fixed */}
-        <Image
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/file_0000000084b4720eab101516c1d517ef%20%281%29-nDHLlhz2hCO4eWQ8VBdlYq2w2Drwka.png"
-          alt="Immersive dome experience with cosmic visualization"
-          fill
-          className="object-cover fixed"
-          priority
-        />
-        
-        {/* Overlay gradient for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
-
-        {/* Content Overlay - Text Inside Banner */}
-        <div className="absolute inset-0 w-full h-full flex flex-col justify-start sm:justify-center py-6 sm:py-8 px-6 sm:px-16 md:px-24 lg:px-32">
-          <div className="flex flex-col gap-4 sm:gap-6 max-w-2xl">
-            <div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-slate-100 leading-tight">
-                {t('showsPage.pageTitle')}
-              </h1>
-              <p className="text-slate-200 text-xs sm:text-sm md:text-base font-light mt-1">
-                {t('showsPage.pageSubtitle')}
-              </p>
-            </div>
-
-            <div className="space-y-2 sm:space-y-3">
-              <p className="text-slate-100 text-xs sm:text-sm leading-relaxed max-w-xl hidden sm:block">
-                {getTranslatedDescription(currentShow.description || currentShow.synopsis)}
-              </p>
-
-              <div className="space-y-1 sm:space-y-2 pt-1 hidden sm:block">
-                <p className="text-slate-200 text-xs font-medium uppercase tracking-widest opacity-80">{t('showsPage.perfectFor')}</p>
-                <ul className="space-y-0.5 sm:space-y-1">
-                  {perfectForItems.map((item, idx) => (
-                    <li key={idx} className="flex gap-2 items-start">
-                      <span className="text-cyan-400 text-xs sm:text-sm flex-shrink-0 mt-0.5">•</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Teasers Section */}
-      <section className="w-full max-w-full overflow-hidden bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-12 md:px-16 lg:px-20 ">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-[1fr_2fr] gap-8 sm:gap-12 md:gap-16 lg:gap-20 items-center">
-          {/* Left: Teaser Info and Buttons */}
-          <div className="w-full flex flex-col justify-center py-8 sm:py-12">
-            <div className="flex flex-col gap-4 sm:gap-6 max-w-md">
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-slate-300 leading-tight">
-                {t('showsPage.teasersTitle')}
-              </h2>
-
-              <p className="text-slate-400 text-xs sm:text-sm md:text-base leading-relaxed">
-                {t('showsPage.teasersDesc1')}
-              </p>
-
-              <p className="text-slate-400 text-xs sm:text-sm">
-                {t('showsPage.teasersDesc2')}
-              </p>
-
-              <div className="space-y-1.5 sm:space-y-2 text-slate-500 text-xs sm:text-xs leading-relaxed">
-                {characterFeatures.map((feature, idx) => (
-                  <p key={idx}>{feature}</p>
-                ))}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-2 sm:gap-4 pt-4">
-                <button className="px-3 sm:px-6 py-2 border border-cyan-400 text-cyan-400 text-xs sm:text-sm font-medium hover:bg-cyan-400/10 transition-colors">
-                  {t('showsPage.sendEmail')}
-                </button>
-                <button className="px-3 sm:px-6 py-2 border border-cyan-400 text-cyan-400 text-xs sm:text-sm font-medium hover:bg-cyan-400/10 transition-colors">
-                  {t('showsPage.whatsapp')}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Video Player with Controls */}
-          <div className="w-full flex flex-col gap-4 sm:gap-6">
-            {/* Main Video Player */}
-            <div className="relative w-full bg-black rounded-lg overflow-hidden shadow-2xl border border-slate-700">
-              <video
-                key={teaserIndex}
-                src={teasers[teaserIndex].video}
-                controls
-                autoPlay
-                loop
-                muted
-                playsInline
-                data-main-player
-                className="w-full h-auto"
-              />
-            </div>
-
-            {/* Thumbnail Carousel Navigation */}
-            <div className="flex items-center justify-between gap-2 sm:gap-4">
-              <button
-                onClick={handlePrevTeaser}
-                className="p-2 rounded border border-slate-600 hover:border-cyan-400 text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0"
-              >
-                <ChevronLeft size={20} />
-              </button>
-
-              <div className="flex gap-2 sm:gap-3 flex-1 overflow-x-auto">
-                {teasers.map((teaser, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleTeaserClick(idx)}
-                    className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded border-2 transition-all ${
-                      idx === teaserIndex
-                        ? 'border-cyan-400'
-                        : 'border-slate-600 hover:border-slate-500'
-                    }`}
-                  >
-                    <video
-                      src={teaser.video}
-                      className="w-full h-full object-cover"
-                      muted
-                    />
-                  </button>
-                ))}
-              </div>
-
-              <button
-                onClick={handleNextTeaser}
-                className="p-2 rounded border border-slate-600 hover:border-cyan-400 text-slate-400 hover:text-cyan-400 transition-colors flex-shrink-0"
-              >
-                <ChevronRight size={20} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Shows Collection Grid Section - Hidden on shows page */}
-      <section className="w-full max-w-full overflow-hidden bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-12 md:px-16 lg:px-20 hidden">
+      {/* Hero Section */}
+      <section className="w-full py-12 sm:py-16 md:py-20 px-6 sm:px-12 md:px-16 lg:px-24">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-6 sm:gap-8 md:gap-12">
-            {shows.slice(0, 6).map((show, idx) => (
-              <div
-                key={show.id}
-                className="group cursor-pointer rounded-lg overflow-hidden border border-slate-700 hover:border-cyan-400/50 transition-all"
-              >
-                <div className="aspect-video bg-slate-900 flex items-center justify-center group-hover:bg-slate-800 transition-colors">
-                  <div className="text-center">
-                    <p className="text-slate-400 text-xs sm:text-sm font-light">
-                      {show.title}
-                    </p>
-                  </div>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-light text-slate-100 mb-2">
+            {t('showsPage.pageTitle')}
+          </h1>
+          <p className="text-slate-400 text-sm sm:text-base mb-6">
+            {t('showsPage.pageSubtitle')}
+          </p>
+          <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-3xl mb-4">
+            {getTranslatedDescription(currentShow.description || currentShow.synopsis)}
+          </p>
+        </div>
+      </section>
+
+      {/* Featured Still Image Section */}
+      <section className="w-full py-12 sm:py-16 md:py-20 px-6 sm:px-12 md:px-16 lg:px-24">
+        <div className="max-w-7xl mx-auto">
+          <div className="relative bg-slate-900 rounded-lg overflow-hidden aspect-video sm:aspect-auto sm:h-96 md:h-[28rem]">
+            <Image
+              src={featuredImage}
+              alt="Featured still image"
+              fill
+              className="object-cover"
+            />
+            <div className="absolute top-4 right-4 bg-black/60 px-3 py-1 rounded text-slate-300 text-xs font-light">
+              Still Image
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Projects Section */}
+      <section className="w-full py-12 sm:py-16 md:py-20 px-6 sm:px-12 md:px-16 lg:px-24 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-light text-slate-100 mb-8">
+            Projects:
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-8 md:gap-12">
+            {/* Left: Thumbnails */}
+            <div className="flex flex-col gap-3">
+              {projectsData.map((project, idx) => (
+                <div
+                  key={project.id}
+                  onClick={() => setProjectIndex(idx)}
+                  className={`relative cursor-pointer rounded overflow-hidden aspect-square transition-all ${
+                    idx === projectIndex ? 'ring-2 ring-cyan-400' : 'opacity-60 hover:opacity-80'
+                  }`}
+                >
+                  <Image
+                    src={project.image}
+                    alt={project.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Right: Main Display */}
+            <div className="relative bg-slate-900 rounded-lg overflow-hidden aspect-video sm:aspect-auto sm:h-96 md:h-full flex items-center justify-center">
+              <Image
+                src={projectsData[projectIndex].image}
+                alt={projectsData[projectIndex].title}
+                fill
+                className="object-cover"
+              />
+              <div className="absolute top-4 right-4 bg-black/60 px-3 py-1 rounded text-slate-300 text-xs font-light">
+                Video player
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Production Section */}
+      <section className="w-full py-12 sm:py-16 md:py-20 px-6 sm:px-12 md:px-16 lg:px-24 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-light text-slate-100 mb-4">
+            Production
+          </h2>
+          <p className="text-slate-400 text-sm sm:text-base mb-12 leading-relaxed">
+            {t('showsPage.productionDesc')}
+          </p>
+
+          <div className="space-y-8 md:space-y-12">
+            {productionSections.map((section, idx) => (
+              <div key={idx} className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-6 md:gap-12 items-center">
+                {/* Image */}
+                <div className="relative bg-slate-800 rounded-lg overflow-hidden aspect-square md:aspect-auto md:h-80">
+                  <Image
+                    src={section.image}
+                    alt={section.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+
+                {/* Content */}
+                <div className="flex flex-col gap-4">
+                  <h3 className="text-2xl sm:text-3xl font-light text-slate-100">
+                    {section.title}
+                  </h3>
+                  <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                    {section.description}
+                  </p>
                 </div>
               </div>
             ))}
-
-            {/* Load More - spans full width on mobile */}
-            <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1">
-              <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-xs sm:text-sm">
-                {t('showsPage.loadMore')}
-              </button>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* Mythic Section - Hidden for now */}
-      {/* Future: Add mythic environments section here */}
+      {/* Collaboration Section */}
+      <section className="w-full py-12 sm:py-16 md:py-20 px-6 sm:px-12 md:px-16 lg:px-24 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-light text-slate-100 mb-4">
+            Collaboration
+          </h2>
+          <p className="text-slate-400 text-sm sm:text-base leading-relaxed max-w-3xl mb-8">
+            {t('showsPage.collaborationDesc')}
+          </p>
+          <button className="px-6 py-2 border border-cyan-400 text-cyan-400 text-sm font-light hover:bg-cyan-400/10 transition-colors rounded">
+            {t('showsPage.contactNow')}
+          </button>
+        </div>
+      </section>
     </div>
   )
 }

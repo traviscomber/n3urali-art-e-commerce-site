@@ -22,10 +22,10 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
       
       setTimeout(() => {
         // Update the index AFTER waiting for transition to complete PLUS extra buffer
-        // This ensures the 2-second fade fully finishes rendering before React re-renders
+        // This ensures the 1-second fade fully finishes rendering before React re-renders
         setCurrentIdx(prev => (prev + 1) % carouselImages.length)
         setIsTransitioning(false)
-      }, 2100) // 2100ms: 2000ms for CSS transition + 100ms buffer to ensure fade fully completes
+      }, 1100) // 1100ms: 1000ms for CSS transition + 100ms buffer to ensure fade fully completes
     }, 20000) // 20 seconds per image
 
     return () => clearInterval(interval)
@@ -45,7 +45,7 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
       <div className="relative w-full aspect-video bg-gray-900 overflow-hidden mb-12 border border-gray-700 group">
         {/* Current image - visible by default, only loads when not transitioning */}
         <div
-          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-2000 ${
+          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
             isTransitioning ? 'opacity-0' : 'opacity-100'
           }`}
           style={{
@@ -58,7 +58,7 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
         {/* Next image - only renders during transition to avoid loading 2 images */}
         {isTransitioning && (
           <div
-            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-2000 opacity-100`}
+            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-100`}
             style={{
               backgroundImage: `url('${nextImage.thumbnail_medium_url || nextImage.original_url}')`,
               backgroundPosition: 'center',

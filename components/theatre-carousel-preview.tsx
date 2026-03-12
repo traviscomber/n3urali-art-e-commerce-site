@@ -62,9 +62,8 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
   return (
     <>
       <div className="w-full py-16">
-        {/* Seamless carousel with cross-dissolve */}
+        {/* Seamless carousel with cross-dissolve and GO button */}
         <div 
-          onClick={() => setIsViewerOpen(true)}
           className="relative w-full aspect-video bg-gray-900 overflow-hidden mb-12 border border-gray-700 group cursor-pointer hover:border-gray-500 transition-colors"
         >
           {/* Current image - visible by default, only loads when not transitioning */}
@@ -91,14 +90,23 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
             />
           )}
 
-          {/* Hover overlay with play icon */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" />
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
 
-          {/* Image info overlay */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white">
-            <h3 className="text-2xl font-light">{currentImage.title || 'Theatre Collection'}</h3>
-            <p className="text-sm text-gray-300 mt-2">{currentImage.description || ''}</p>
-          </div>
+          {/* Centered GO button */}
+          <button
+            onClick={() => setIsViewerOpen(true)}
+            className="absolute inset-0 flex items-center justify-center group"
+          >
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-20 h-20 border-2 border-white rounded-full flex items-center justify-center group-hover:scale-110 transition-transform group-hover:border-amber-100">
+                <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
+              <span className="text-white text-lg font-light tracking-widest group-hover:text-amber-100 transition-colors">GO</span>
+            </div>
+          </button>
         </div>
       </div>
 

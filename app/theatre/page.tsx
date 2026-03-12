@@ -153,16 +153,29 @@ export default async function TheatrePage() {
 
       {/* Showcases */}
       <section className="px-6 md:px-12 lg:px-20 py-16 max-w-7xl mx-auto">
-        <div className="bg-gray-800/30 border border-gray-700 p-12 rounded-lg">
-          <h2 className="text-3xl font-light mb-4 text-amber-50">Showcases</h2>
-          <p className="text-gray-300 leading-relaxed">
-            Collections can be presented on large displays, immersive domes, or architectural screens, allowing viewers to explore and analyze the visual environments through interactive viewing modes.
-          </p>
-          <div className="mt-8 space-y-2 text-gray-400 text-sm">
-            <p>• Gallery Mode</p>
-            <p>• Sequence Display</p>
-            <p>• Collection and Galleries</p>
-            <p>• Custom Presentations</p>
+        <div className="relative w-full rounded-lg overflow-hidden border border-gray-700 mb-12">
+          {/* Showcases Image Background */}
+          <div 
+            className="w-full h-96 bg-cover bg-center"
+            style={{
+              backgroundImage: 'url(https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Showcases-ecKK0TlU1ssDlpMKv8TOK79CKRdB1F.png)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          />
+          
+          {/* Content Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent flex flex-col justify-center px-8 md:px-12 lg:px-20">
+            <h2 className="text-4xl md:text-5xl font-light mb-6 text-amber-50">Showcases</h2>
+            <p className="text-gray-200 leading-relaxed max-w-2xl mb-8">
+              Collections can be presented on large displays, immersive domes, or architectural screens, allowing viewers to explore and analyze the visual environments through interactive viewing modes.
+            </p>
+            <div className="space-y-2 text-gray-300 text-sm max-w-2xl">
+              <p>• Gallery Mode</p>
+              <p>• Sequence Display</p>
+              <p>• Collection and Galleries</p>
+              <p>• Custom Presentations</p>
+            </div>
           </div>
         </div>
       </section>

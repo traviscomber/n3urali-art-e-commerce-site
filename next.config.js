@@ -18,6 +18,11 @@ const nextConfig = {
     minimumCacheTTL: 31536000,
   },
   compress: true,
+  webpack: (config, { isServer }) => {
+    // Disable webpack cache to avoid stale cache issues from project directory changes
+    config.cache = false
+    return config
+  },
 }
 
 module.exports = nextConfig

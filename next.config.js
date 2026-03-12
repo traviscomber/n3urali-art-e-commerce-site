@@ -22,17 +22,11 @@ const nextConfig = {
     maxInactiveAge: 1000,
     pagesBufferLength: 2,
   },
-  webpack: (config) => {
-    // Force webpack to use memory-only cache with explicit error handler
-    // This completely prevents attempts to read the corrupted old project path
+  webpack: (config, { isServer }) => {
+    // Disable all filesystem caching to avoid issues with old project paths
     config.cache = {
       type: 'memory',
-      cacheUnaffected: false,
-    }
-    config.output.hashFunction = 'xxhash64'
-    config.infrastructureLogging = { 
-      level: 'error',
-      debug: []
+      maxAge: 0
     }
     return config
   },

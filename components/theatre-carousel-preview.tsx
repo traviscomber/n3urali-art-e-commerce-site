@@ -38,14 +38,14 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
     return () => clearInterval(interval)
   }, [carouselImages.length, isViewerOpen])
 
-  // Auto-rotate panorama in fullscreen viewer with fade transitions
+  // Auto-rotate panorama in fullscreen viewer
   useEffect(() => {
     if (!isViewerOpen) return
     if (carouselImages.length <= 1) return
 
     const interval = setInterval(() => {
       setCurrentIdx(prev => (prev + 1) % carouselImages.length)
-    }, 20000) // 20 seconds per image in viewer (1.5 second fade will happen automatically)
+    }, 20000) // 20 seconds per image in viewer
 
     return () => clearInterval(interval)
   }, [isViewerOpen, carouselImages.length])
@@ -110,7 +110,7 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
         </div>
       )}
 
-      {/* Panorama Viewer - Fullscreen Modal with smooth transitions */}
+      {/* Panorama Viewer - Fullscreen Modal */}
       {isViewerOpen && imageUrl && (
         <div className="fixed inset-0 z-50 bg-black">
           <PanoramaViewerPSV
@@ -122,7 +122,6 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
             sphereScale={5000}
             rotationSpeed={0.0002}
             initialYaw={0}
-            transitionDuration={1500}
           />
         </div>
       )}

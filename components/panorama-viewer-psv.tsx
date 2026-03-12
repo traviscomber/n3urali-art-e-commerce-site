@@ -179,9 +179,9 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         const animate = () => {
           animationRef.current = requestAnimationFrame(animate)
 
-          // Smooth blend transition (1200ms for silky transitions)
+          // Ultra-fast transition (300ms for instant feel)
           if (isTransitioningRef.current && materialRef.current) {
-            transitionProgressRef.current += 0.016 / 1.2 // 1200ms transition at 60fps
+            transitionProgressRef.current += 0.016 / 0.3 // 300ms transition at 60fps
             if (transitionProgressRef.current >= 1) {
               transitionProgressRef.current = 1
               isTransitioningRef.current = false

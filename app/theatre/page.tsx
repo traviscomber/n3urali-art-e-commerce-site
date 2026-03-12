@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import { useLanguage } from '@/lib/hooks/useLanguage'
+import { useLanguage } from '@/lib/contexts/language-context'
 
 // Category cards data
 const CATEGORIES = [

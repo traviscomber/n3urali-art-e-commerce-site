@@ -204,9 +204,9 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
           </div>
 
           {/* Featured Panorama Section */}
-          <div className="w-full px-4 sm:px-12 md:px-16 lg:px-20 py-16 max-w-full">
+          <div className="w-full py-16">
             {/* Panorama Teaser with Cross-Dissolve */}
-            <div className="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden mb-12 border border-gray-700 group">
+            <div className="relative w-full aspect-video bg-gray-900 overflow-hidden mb-12 border border-gray-700 group">
               {/* Next Image - Fades In (under current) */}
               {relatedImages.length > 1 && (
                 <div

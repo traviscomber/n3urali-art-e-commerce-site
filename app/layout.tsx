@@ -16,7 +16,7 @@ import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { MusicPlayerProvider } from "@/lib/contexts/music-player-context"
 
-// Force redeploy trigger
+// Force cache clear: Clear stale webpack cache - theatre page rebuild
 
 const montserrat = Montserrat({
   subsets: ["latin"],

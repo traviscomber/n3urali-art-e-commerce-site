@@ -24,9 +24,13 @@ const nextConfig = {
     pagesBufferLength: 2,
   },
   webpack: (config) => {
-    // Completely disable webpack caching to prevent corruption from old project path
-    // The restored build cache contains corrupted pack files trying to write to /vercel/share/v0-next-shadcn/
+    // Prevent webpack from using ANY filesystem cache - must use memory only
+    // Set cache to false AND disable cacheHandler to prevent PackFileCacheStrategy errors
     config.cache = false
+    config.infrastructureLogging = {
+      level: 'error',
+      debug: ['webpack.cache.PackFileCacheStrategy'], // Suppress the cache warnings
+    }
     return config
   },
 }

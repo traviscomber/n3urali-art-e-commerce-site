@@ -223,8 +223,23 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
       }
     }
 
-    window.addEventListener('keydown', handleKeyPress)
-    return () => window.removeEventListener('keydown', handleKeyPress)
+    const handleWindowResize = () => {
+      if (rendererRef.current && cameraRef.current && canvasRef.current) {
+        const width = window.innerWidth
+        const height = window.innerHeight
+        
+        cameraRef.current.aspect = width / height
+        cameraRef.current.updateProjectionMatrix()
+        rendererRef.current.setSize(width, height)
+        console.log('[v0] Window resized, updated panorama dimensions to:', width, 'x', height)
+      }
+    }
+
+    window.addEventListener('resize', handleWindowResize)
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress)
+      window.removeEventListener('resize', handleWindowResize)
+    }
   }, [onClose])
 
   return (

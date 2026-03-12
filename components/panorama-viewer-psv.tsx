@@ -55,11 +55,14 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         renderer.setClearColor(0x000000)
         renderer.outputColorSpace = THREE.sRGBColorSpace
 
-        // Load texture first with optimization
+        // Load texture first with optimization and CORS support
         const textureLoader = new THREE.TextureLoader()
+        textureLoader.setCrossOrigin('anonymous')
+        
         textureLoader.load(
           imageUrl,
           (loadedTexture) => {
+            console.log('[v0] Texture loaded successfully')
             // Optimize texture quality and performance
             loadedTexture.encoding = THREE.sRGBColorSpace
             loadedTexture.generateMipmaps = true
@@ -85,10 +88,12 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
             setIsLoading(false)
             console.log('[v0] Panorama loaded successfully with high quality')
           },
-          undefined,
+          (progress) => {
+            console.log('[v0] Texture loading progress:', Math.round((progress.loaded / progress.total) * 100) + '%')
+          },
           (err) => {
             console.error('[v0] Texture load failed:', err)
-            setError('Failed to load panorama')
+            setError('Failed to load panorama image')
             setIsLoading(false)
           }
         )

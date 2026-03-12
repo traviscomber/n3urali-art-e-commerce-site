@@ -59,8 +59,8 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         // Scene setup
         const scene = new THREE.Scene()
         const camera = new THREE.PerspectiveCamera(fov, width / height, 0.1, 100000)
-        camera.position.set(0, 0, 0)
-        camera.lookAt(0, 0, 0)
+        camera.position.set(0, 0, 0) // Camera at center of sphere (inside for 360 view)
+        camera.lookAt(0, 0, -1) // Look forward
 
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false })
         renderer.setSize(width, height)
@@ -70,11 +70,9 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         
         // Create sphere FIRST before loading texture
         const geometry = new THREE.SphereGeometry(sphereScale, geometrySegments, geometrySegments)
-        geometry.scale(-1, 1, 1)
         const material = new THREE.MeshBasicMaterial({
           map: null,
-          side: THREE.BackSide,
-          color: 0x333333,
+          side: THREE.BackSide, // Render inside of sphere
           toneMapped: false, // OPTIMIZATION: disable tone mapping for faster rendering
         })
         const sphere = new THREE.Mesh(geometry, material)

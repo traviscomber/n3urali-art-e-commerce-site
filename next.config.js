@@ -22,12 +22,9 @@ const nextConfig = {
     maxInactiveAge: 1000,
     pagesBufferLength: 2,
   },
-  webpack: (config, { isServer }) => {
-    // Disable all filesystem caching to avoid issues with old project paths
-    config.cache = {
-      type: 'memory',
-      maxAge: 0
-    }
+  webpack: (config) => {
+    // Completely disable webpack cache to prevent old path issues
+    config.cache = false
     return config
   },
 }

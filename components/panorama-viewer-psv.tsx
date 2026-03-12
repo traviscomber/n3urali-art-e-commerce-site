@@ -98,23 +98,41 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         renderer.setClearColor(0x000000, 1)
         renderer.autoClear = false
         console.log('[v0] Renderer initialized, size:', width, 'x', height)
-        // Load panorama image with CORS - OPTIMIZED
+
+        // Create sphere geometry and material FIRST (before loading texture)
+        const geometry = new THREE.SphereGeometry(sphereScale, 64, 64)
+        geometry.scale(-1, 1, 1)
+        const material = new THREE.MeshBasicMaterial({
+          map: null, // Will be set when texture loads
+          side: THREE.BackSide,
+          color: 0x333333, // Dark grey placeholder while loading
+        })
+        const sphere = new THREE.Mesh(geometry, material)
+        sphere.rotation.y = initialYaw
+        scene.add(sphere)
+        
+        materialRef.current = material
+        sphereRef.current = sphere
+        sceneRef.current = scene
+        rendererRef.current = renderer
+        cameraRef.current = camera
+        rotationYRef.current = initialYaw
+        
+        console.log('[v0] Sphere and material created')
+
+        // Now load panorama image with CORS - OPTIMIZED
         const textureLoader = new THREE.TextureLoader()
         console.log('[v0] Loading texture from:', imageUrl)
         
         const texture = textureLoader.load(
           imageUrl,
           () => {
-            console.log('[v0] Texture loaded successfully, queuing transition')
-            // Store as pending texture to be displayed on next transition
-            pendingTextureRef.current = texture
+            console.log('[v0] Texture loaded successfully')
+            // Apply texture to material immediately
+            material.map = texture
+            material.needsUpdate = true
+            material.color.setHex(0xffffff) // Reset color to white
             
-            // Auto-start transition if not already transitioning
-            if (!isTransitioningRef.current && materialRef.current) {
-              isTransitioningRef.current = true
-              transitionStartTimeRef.current = performance.now()
-              materialRef.current.transparent = true
-            }
             setIsLoading(false)
           },
           undefined,
@@ -127,29 +145,6 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         texture.encoding = THREE.sRGBColorSpace
         texture.wrapS = THREE.RepeatWrapping
         texture.wrapT = THREE.ClampToEdgeWrapping
-
-        // Create optimized sphere geometry - REDUCED segments for performance
-        // 64 segments instead of 128 for 75% geometry reduction while maintaining quality
-        const geometry = new THREE.SphereGeometry(sphereScale, 64, 64)
-        geometry.scale(-1, 1, 1) // Mirror X axis for proper orientation
-        const material = new THREE.MeshBasicMaterial({
-          map: texture,
-          side: THREE.BackSide,
-        })
-        const sphere = new THREE.Mesh(geometry, material)
-        
-        // Apply initial yaw rotation
-        sphere.rotation.y = initialYaw
-        rotationYRef.current = initialYaw
-        console.log('[v0] Applied initial yaw rotation:', initialYaw, 'radians')
-        
-        scene.add(sphere)
-
-        sceneRef.current = scene
-        rendererRef.current = renderer
-        sphereRef.current = sphere
-        materialRef.current = material // Store material for texture swaps
-        cameraRef.current = camera
 
         // Mouse wheel zoom control (zoom out only)
         const handleWheel = (e: WheelEvent) => {

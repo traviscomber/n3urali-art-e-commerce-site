@@ -61,67 +61,69 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
 
   return (
     <>
-      <div className="w-full py-16">
-        {/* Seamless carousel with cross-dissolve and GO button */}
-        <div 
-          className="relative w-full aspect-video bg-gray-900 overflow-hidden mb-12 border border-gray-700 group cursor-pointer hover:border-gray-500 transition-colors"
-        >
-          {/* Current image - visible by default, only loads when not transitioning */}
-          <div
-            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
-              isTransitioning ? 'opacity-0' : 'opacity-100'
-            }`}
-            style={{
-              backgroundImage: `url('${currentImage.thumbnail_medium_url || currentImage.original_url}')`,
-              backgroundPosition: 'center',
-              backgroundSize: 'cover',
-            }}
-          />
-
-          {/* Next image - only renders during transition to avoid loading 2 images */}
-          {isTransitioning && (
+      {/* Carousel Preview - Only shown when viewer is closed */}
+      {!isViewerOpen && (
+        <div className="w-full py-16">
+          {/* Seamless carousel with cross-dissolve and GO button */}
+          <div 
+            className="relative w-full aspect-video bg-gray-900 overflow-hidden mb-12 border border-gray-700 group cursor-pointer hover:border-gray-500 transition-colors"
+          >
+            {/* Current image - visible by default, only loads when not transitioning */}
             <div
-              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-100`}
+              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+                isTransitioning ? 'opacity-0' : 'opacity-100'
+              }`}
               style={{
-                backgroundImage: `url('${nextImage.thumbnail_medium_url || nextImage.original_url}')`,
+                backgroundImage: `url('${currentImage.thumbnail_medium_url || currentImage.original_url}')`,
                 backgroundPosition: 'center',
                 backgroundSize: 'cover',
               }}
             />
-          )}
 
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
+            {/* Next image - only renders during transition to avoid loading 2 images */}
+            {isTransitioning && (
+              <div
+                className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-100`}
+                style={{
+                  backgroundImage: `url('${nextImage.thumbnail_medium_url || nextImage.original_url}')`,
+                  backgroundPosition: 'center',
+                  backgroundSize: 'cover',
+                }}
+              />
+            )}
 
-          {/* Centered GO button */}
-          <button
-            onClick={() => setIsViewerOpen(true)}
-            className="absolute inset-0 flex items-center justify-center group"
-          >
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-20 h-20 border-2 border-white rounded-full flex items-center justify-center group-hover:scale-110 transition-transform group-hover:border-amber-100">
-                <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
+            {/* Centered GO button */}
+            <button
+              onClick={() => setIsViewerOpen(true)}
+              className="absolute inset-0 flex items-center justify-center group"
+            >
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-20 h-20 border-2 border-white rounded-full flex items-center justify-center group-hover:scale-110 transition-transform group-hover:border-amber-100">
+                  <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+                <span className="text-white text-lg font-light tracking-widest group-hover:text-amber-100 transition-colors">GO</span>
               </div>
-              <span className="text-white text-lg font-light tracking-widest group-hover:text-amber-100 transition-colors">GO</span>
-            </div>
-          </button>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Panorama Viewer Modal */}
+      {/* Panorama Viewer - Fullscreen Modal */}
       {isViewerOpen && imageUrl && (
-        <PanoramaViewerPSV
-          imageUrl={imageUrl}
-          title={currentImage.title || 'Theatre Collection'}
-          onClose={() => setIsViewerOpen(false)}
-          relaxMode={true}
-          fov={130}
-          sphereScale={5000}
-          rotationSpeed={0.0002}
-          initialYaw={0}
-        />
+        <div className="fixed inset-0 z-50 bg-black">
+          <PanoramaViewerPSV
+            imageUrl={imageUrl}
+            title={currentImage.title || 'Theatre Collection'}
+            onClose={() => setIsViewerOpen(false)}
+            relaxMode={true}
+            fov={130}
+            sphereScale={5000}
+            rotationSpeed={0.0002}
+            initialYaw={0}
+          />
+        </div>
       )}
     </>
   )

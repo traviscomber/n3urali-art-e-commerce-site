@@ -38,18 +38,35 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
     return () => clearInterval(interval)
   }, [carouselImages.length, isViewerOpen])
 
-  // Auto-rotate panorama in fullscreen viewer with INSTANT transitions
+  // Auto-rotate panorama in fullscreen viewer with smart preloading
   useEffect(() => {
     if (!isViewerOpen) return
     if (carouselImages.length <= 1) return
 
-    const interval = setInterval(() => {
-      // INSTANT: change image immediately with no delay
+    // Preload next image at 15 seconds (5 seconds before transition)
+    const preloadTimer = setInterval(() => {
+      const nextIdx = (currentIdx + 1) % carouselImages.length
+      const nextImage = carouselImages[nextIdx]
+      const nextImageUrl = nextImage.original_url || nextImage.upscaled_url
+      
+      // Preload by creating an img element - browser caches it
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.src = nextImageUrl
+      console.log('[v0] Preloading next panorama image:', nextImageUrl)
+    }, 15000) // Preload at 15 seconds
+
+    // Transition at 20 seconds (texture is already loaded and cached)
+    const transitionTimer = setInterval(() => {
+      console.log('[v0] INSTANT transition - next image texture is pre-cached')
       setCurrentIdx(prev => (prev + 1) % carouselImages.length)
     }, 20000) // 20 seconds per image
 
-    return () => clearInterval(interval)
-  }, [isViewerOpen, carouselImages.length])
+    return () => {
+      clearInterval(preloadTimer)
+      clearInterval(transitionTimer)
+    }
+  }, [isViewerOpen, carouselImages.length, currentIdx])
 
   if (carouselImages.length === 0) {
     return <div className="w-full aspect-video bg-gray-900 rounded-lg border border-gray-700" />

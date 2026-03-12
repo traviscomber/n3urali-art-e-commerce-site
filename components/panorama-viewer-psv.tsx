@@ -13,6 +13,7 @@ interface PanoramaViewerPSVProps {
   rotationSpeed?: number // Auto-rotation speed (default 0.0002)
   geometrySegments?: number // Sphere geometry segments (default 128)
   initialYaw?: number // Initial rotation offset in radians to hide seam (default Math.PI for back of sphere)
+  transitionDuration?: number // Fade transition duration in ms (default 1500)
 }
 
 export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
@@ -25,6 +26,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   rotationSpeed = 0.0002,
   geometrySegments = 128,
   initialYaw = Math.PI, // Default to 180 degrees (back of sphere, hiding the seam)
+  transitionDuration = 1500, // 1.5 second fade transition
 }: PanoramaViewerPSVProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -36,6 +38,9 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   const cameraRef = useRef<any>(null)
   const rotationYRef = useRef(initialYaw) // Start with initialYaw offset
   const currentFovRef = useRef(fov)
+  const nextSphereRef = useRef<any>(null) // Reference for transition target sphere
+  const transitionProgressRef = useRef(0) // 0-1 progress of transition
+  const isTransitioningRef = useRef(false) // Whether currently transitioning
 
   useEffect(() => {
     const loadPanorama = async () => {
@@ -99,7 +104,21 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         const texture = textureLoader.load(
           imageUrl,
           () => {
-            console.log('[v0] Texture loaded successfully')
+            console.log('[v0] Texture loaded successfully, starting transition')
+            
+            // If already transitioning, skip to use this as the target
+            if (isTransitioningRef.current) {
+              // Replace the next sphere with this new image
+              if (nextSphereRef.current && sceneRef.current) {
+                sceneRef.current.remove(nextSphereRef.current)
+                nextSphereRef.current.geometry.dispose()
+                nextSphereRef.current.material.dispose()
+              }
+            }
+            
+            // Start fade transition
+            isTransitioningRef.current = true
+            transitionProgressRef.current = 0
             setIsLoading(false)
           },
           undefined,
@@ -132,6 +151,25 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         rendererRef.current = renderer
         sphereRef.current = sphere
         cameraRef.current = camera
+        
+        // Create reference function to generate next sphere for transitions
+        const createNextSphere = (newTexture: any) => {
+          const nextGeometry = new THREE.SphereGeometry(sphereScale, geometrySegments, geometrySegments)
+          const nextMaterial = new THREE.MeshBasicMaterial({
+            map: newTexture,
+            side: THREE.BackSide,
+            transparent: true,
+            opacity: 0, // Start invisible
+          })
+          const nextMesh = new THREE.Mesh(nextGeometry, nextMaterial)
+          nextMesh.rotation.y = initialYaw
+          scene.add(nextMesh)
+          nextSphereRef.current = nextMesh
+          return nextMesh
+        }
+        
+        // Store createNextSphere function in scene for later use
+        (scene as any).createNextSphere = createNextSphere
 
         // Mouse wheel zoom control (zoom out only)
         const handleWheel = (e: WheelEvent) => {
@@ -158,14 +196,49 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         renderer.render(scene, camera)
         console.log(`[v0] Initial render completed with FOV ${fov}`)
 
-        // Animation loop with consistent rendering
+        // Animation loop with consistent rendering and transition support
         const animate = () => {
           animationRef.current = requestAnimationFrame(animate)
+
+          // Handle fade transition between panoramas
+          if (isTransitioningRef.current && nextSphereRef.current && sphereRef.current) {
+            transitionProgressRef.current += 1 / (transitionDuration / 16.67) // Smooth 60fps progress
+            
+            if (transitionProgressRef.current >= 1) {
+              // Transition complete
+              transitionProgressRef.current = 1
+              isTransitioningRef.current = false
+              
+              // Swap spheres: remove old, keep new as current
+              scene.remove(sphereRef.current)
+              sphereRef.current.geometry.dispose()
+              sphereRef.current.material.dispose()
+              
+              sphereRef.current = nextSphereRef.current
+              nextSphereRef.current = null
+              
+              // Reset new sphere opacity to full
+              sphereRef.current.material.transparent = false
+              sphereRef.current.material.opacity = 1
+              
+              console.log('[v0] Transition complete, new panorama is now active')
+            } else {
+              // Mid-transition: fade out old, fade in new
+              sphereRef.current.material.transparent = true
+              sphereRef.current.material.opacity = 1 - transitionProgressRef.current
+              nextSphereRef.current.material.opacity = transitionProgressRef.current
+            }
+          }
 
           // Slow auto-rotation in relax mode (rotate the sphere itself)
           if (relaxMode && sphereRef.current) {
             rotationYRef.current += rotationSpeed
             sphereRef.current.rotation.y = rotationYRef.current
+            
+            // Also rotate next sphere during transition
+            if (nextSphereRef.current) {
+              nextSphereRef.current.rotation.y = rotationYRef.current
+            }
           }
 
           renderer.clear()
@@ -215,7 +288,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         rendererRef.current.dispose()
       }
     }
-  }, [imageUrl, relaxMode, fov, sphereScale, rotationSpeed, geometrySegments, initialYaw])
+  }, [imageUrl, relaxMode, fov, sphereScale, rotationSpeed, geometrySegments, initialYaw, transitionDuration])
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {

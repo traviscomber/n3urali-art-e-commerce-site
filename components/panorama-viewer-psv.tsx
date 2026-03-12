@@ -34,8 +34,12 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   const rendererRef = useRef<any>(null)
   const sphereRef = useRef<any>(null)
   const cameraRef = useRef<any>(null)
-  const rotationYRef = useRef(initialYaw) // Start with initialYaw offset
+  const rotationYRef = useRef(initialYaw)
   const currentFovRef = useRef(fov)
+  const transitionLayerRef = useRef<any>(null)
+  const transitionProgressRef = useRef(0)
+  const isTransitioningRef = useRef(false)
+  const materialRef = useRef<any>(null)
 
   useEffect(() => {
     const loadPanorama = async () => {
@@ -92,14 +96,22 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         renderer.setClearColor(0x000000, 1)
         renderer.autoClear = false
         console.log('[v0] Renderer initialized, size:', width, 'x', height)
+        
         // Load panorama image with CORS
         const textureLoader = new THREE.TextureLoader()
+        textureLoader.setCrossOrigin('anonymous')
         console.log('[v0] Loading texture from:', imageUrl)
         
         const texture = textureLoader.load(
           imageUrl,
           () => {
             console.log('[v0] Texture loaded successfully')
+            // If transitioning, swap to this texture instantly
+            if (isTransitioningRef.current && materialRef.current) {
+              materialRef.current.map = texture
+              materialRef.current.needsUpdate = true
+              isTransitioningRef.current = true // Keep transition state for fade
+            }
             setIsLoading(false)
           },
           undefined,
@@ -118,12 +130,13 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         const material = new THREE.MeshBasicMaterial({
           map: texture,
           side: THREE.BackSide,
+          toneMapped: false, // Fast rendering
         })
         const sphere = new THREE.Mesh(geometry, material)
         
         // Apply initial yaw rotation and reset the rotation ref for new image
         sphere.rotation.y = initialYaw
-        rotationYRef.current = initialYaw // Reset rotation tracker for this new image
+        rotationYRef.current = initialYaw
         console.log('[v0] Applied initial yaw rotation:', initialYaw, 'radians, reset rotation tracker')
         
         scene.add(sphere)
@@ -131,6 +144,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         sceneRef.current = scene
         rendererRef.current = renderer
         sphereRef.current = sphere
+        materialRef.current = material
         cameraRef.current = camera
 
         // Mouse wheel zoom control (zoom out only)
@@ -161,6 +175,22 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         // Animation loop with consistent rendering
         const animate = () => {
           animationRef.current = requestAnimationFrame(animate)
+
+          // Fast transition fade effect (800ms total)
+          if (isTransitioningRef.current && materialRef.current) {
+            transitionProgressRef.current += 0.016 / 0.8 // Normalize to 800ms at 60fps
+            if (transitionProgressRef.current >= 1) {
+              transitionProgressRef.current = 1
+              isTransitioningRef.current = false
+              materialRef.current.opacity = 1
+              materialRef.current.transparent = false
+            } else {
+              // Smooth opacity transition
+              materialRef.current.opacity = transitionProgressRef.current
+              materialRef.current.transparent = true
+            }
+            materialRef.current.needsUpdate = true
+          }
 
           // Slow auto-rotation in relax mode (rotate the sphere itself)
           if (relaxMode && sphereRef.current) {

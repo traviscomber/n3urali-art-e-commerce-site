@@ -22,11 +22,15 @@ const nextConfig = {
     maxInactiveAge: 1000,
     pagesBufferLength: 2,
   },
-  webpack: (config, { isServer }) => {
-    // Disable all filesystem caching to avoid issues with old project paths
+  webpack: (config) => {
+    // Set webpack cache to filesystem for production builds
+    // This is required for valid webpack configuration
     config.cache = {
-      type: 'memory',
-      maxAge: 0
+      type: 'filesystem',
+      cacheDirectory: '.next/cache/webpack',
+      buildDependencies: {
+        config: [__filename],
+      },
     }
     return config
   },

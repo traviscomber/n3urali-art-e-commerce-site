@@ -18,13 +18,14 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
   // Get only equirectangular images for carousel
   const carouselImages = images.filter(img => img.image_format === 'equirectangular').slice(0, 10)
 
-  // Extract folder name from URL (e.g., "flowsketch-chile-mapuche-mythology-pillan-volcan-fuego-openai-dalle3-royal-2026-01-26t21-42-38")
-  const extractFolderName = (url: string) => {
+  // Extract folder name from file_path (e.g., "VIDS/Categories/Nature/Ocean-Surreal/filename.mov" -> "Ocean-Surreal")
+  const extractFolderName = (filePath: string | null | undefined) => {
+    if (!filePath) return 'Theatre Collection'
     try {
-      const urlObj = new URL(url)
-      const pathParts = urlObj.pathname.split('/')
-      // Get the folder name (last part before filename, or second to last if it's a file)
-      const folderName = pathParts[pathParts.length - 2] || pathParts[pathParts.length - 3] || 'Theatre Collection'
+      // Split by forward slash to get path parts
+      const parts = filePath.split('/')
+      // Get the last non-empty part before the filename (which is the actual folder)
+      let folderName = parts[parts.length - 2] || 'Theatre Collection'
       // Replace hyphens with spaces and capitalize each word
       return folderName
         .split('-')
@@ -163,7 +164,7 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
         <div className="fixed inset-0 z-50 bg-black">
           <PanoramaViewerPSV
             imageUrl={imageUrl}
-            title={extractFolderName(imageUrl)}
+            title={extractFolderName(currentImage.file_path)}
             onClose={() => setIsViewerOpen(false)}
             relaxMode={true}
             fov={130}

@@ -18,6 +18,23 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
   // Get only equirectangular images for carousel
   const carouselImages = images.filter(img => img.image_format === 'equirectangular').slice(0, 10)
 
+  // Extract folder name from URL (e.g., "flowsketch-chile-mapuche-mythology-pillan-volcan-fuego-openai-dalle3-royal-2026-01-26t21-42-38")
+  const extractFolderName = (url: string) => {
+    try {
+      const urlObj = new URL(url)
+      const pathParts = urlObj.pathname.split('/')
+      // Get the folder name (last part before filename, or second to last if it's a file)
+      const folderName = pathParts[pathParts.length - 2] || pathParts[pathParts.length - 3] || 'Theatre Collection'
+      // Replace hyphens with spaces and capitalize each word
+      return folderName
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
+    } catch {
+      return 'Theatre Collection'
+    }
+  }
+
   useEffect(() => {
     if (carouselImages.length <= 1) return
     if (isViewerOpen) return // Don't auto-rotate when viewer is open
@@ -146,7 +163,7 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
         <div className="fixed inset-0 z-50 bg-black">
           <PanoramaViewerPSV
             imageUrl={imageUrl}
-            title={currentImage.title || 'Theatre Collection'}
+            title={extractFolderName(imageUrl)}
             onClose={() => setIsViewerOpen(false)}
             relaxMode={true}
             fov={130}

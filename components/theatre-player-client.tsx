@@ -35,7 +35,6 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [isViewerOpen, setIsViewerOpen] = useState(false)
   const [fadeOut, setFadeOut] = useState(false)
-  const [nextImageLoading, setNextImageLoading] = useState(false)
 
   // Map of panorama titles to translation keys for dynamic translation
   const panoramaMap: Record<string, { title: string; desc: string }> = {
@@ -114,9 +113,6 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
     // If only 1 related image, no need to rotate
     if (relatedImages.length <= 1) return
 
-    // Start pre-loading the next image immediately, not waiting until later
-    setNextImageLoading(true)
-
     const interval = setInterval(() => {
       // Quick cross-dissolve transition (300ms for seamless loop)
       setFadeOut(true)
@@ -128,9 +124,6 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
         const nextImage = relatedImages[nextIdx]
         const nextImageIndex = images.findIndex(img => img.id === nextImage.id)
         setSelectedImageIndex(nextImageIndex)
-        
-        // Immediately start pre-loading the image after that one
-        setNextImageLoading(true)
         setFadeOut(false)
       }, 300) // 300ms cross-dissolve (fast, seamless)
     }, 20000) // 20 seconds per image
@@ -216,8 +209,8 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
           <div className="w-full py-16">
             {/* Panorama Carousel with Cross-Dissolve Transition */}
             <div className="relative w-full aspect-video bg-gray-900 overflow-hidden mb-12 border border-gray-700 group">
-              {/* Next Image - Pre-buffering, fades in during transition */}
-              {nextImageLoading && relatedImages.length > 1 && (
+              {/* Next Image - Always pre-rendered, fades in during transition */}
+              {relatedImages.length > 1 && (
                 <div
                   className={`absolute inset-0 bg-cover bg-center transition-opacity duration-300 ${
                     fadeOut ? 'opacity-100' : 'opacity-0'

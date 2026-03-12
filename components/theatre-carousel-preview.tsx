@@ -31,7 +31,7 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
         setTimeout(() => {
           setIsTransitioning(false)
         }, 50) // Small delay to prevent class reset blink
-      }, 500) // Match the CSS transition duration (duration-500 = 500ms)
+      }, 1000) // Match the CSS transition duration (duration-1000 = 1000ms for smoother fade)
     }, 20000)
 
     return () => clearInterval(interval)
@@ -50,7 +50,7 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
       <div className="relative w-full aspect-video bg-gray-900 overflow-hidden mb-12 border border-gray-700 group">
         {/* Current image - visible by default */}
         <div
-          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-500 ${
+          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
             isTransitioning ? 'opacity-0' : 'opacity-100'
           }`}
           style={{
@@ -62,7 +62,7 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
 
         {/* Next image - fades in */}
         <div
-          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-500 ${
+          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
             isTransitioning ? 'opacity-100' : 'opacity-0'
           }`}
           style={{

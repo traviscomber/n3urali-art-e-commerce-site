@@ -18,6 +18,8 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
     if (carouselImages.length <= 1) return
 
     const interval = setInterval(() => {
+      // Start transition at 19 seconds (last second of 20-second display)
+      // This creates an overlapping fade where the next image appears while current is still visible
       setIsTransitioning(true)
       
       setTimeout(() => {
@@ -26,7 +28,7 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
         setCurrentIdx(prev => (prev + 1) % carouselImages.length)
         setIsTransitioning(false)
       }, 1100) // 1100ms: 1000ms for CSS transition + 100ms buffer to ensure fade fully completes
-    }, 20000) // 20 seconds per image
+    }, 19000) // Start the 1-second fade at 19 seconds, so it happens during the last second of display
 
     return () => clearInterval(interval)
   }, [carouselImages.length])

@@ -124,7 +124,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
         setSelectedImageIndex(nextImageIndex)
         setSlideDirection(null)
       }, 1000) // 1 second slide duration
-    }, 30000) // 30 seconds
+    }, 20000) // 20 seconds
 
     return () => clearInterval(interval)
   }, [isViewerOpen, selectedImageIndex, images])
@@ -183,7 +183,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
           fov={130}
           sphereScale={5000}
           rotationSpeed={0.0002}
-          initialYaw={Math.PI}
+          initialYaw={0}
         />
       )}
 

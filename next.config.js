@@ -19,8 +19,10 @@ const nextConfig = {
   },
   compress: true,
   webpack: (config, { isServer }) => {
-    // Disable webpack cache to avoid stale cache issues from project directory changes
-    config.cache = false
+    // Use memory cache only - no filesystem cache to avoid stale cache path issues
+    config.cache = {
+      type: 'memory'
+    }
     return config
   },
 }

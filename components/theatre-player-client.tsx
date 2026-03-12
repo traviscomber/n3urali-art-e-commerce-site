@@ -114,25 +114,25 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
     // If only 1 related image, no need to rotate
     if (relatedImages.length <= 1) return
 
+    // Start pre-loading the next image immediately, not waiting until later
+    setNextImageLoading(true)
+
     const interval = setInterval(() => {
-      // Pre-buffer next image 3 seconds before transition
-      setNextImageLoading(true)
+      // Quick cross-dissolve transition (300ms for seamless loop)
+      setFadeOut(true)
       
       setTimeout(() => {
-        // Cross-dissolve transition after 3 seconds of buffering (17 seconds into 20-second cycle)
-        setFadeOut(true)
+        // Find current image in related images and rotate to next
+        const currentIdx = relatedImages.findIndex(img => img.id === images[selectedImageIndex].id)
+        const nextIdx = (currentIdx + 1) % relatedImages.length
+        const nextImage = relatedImages[nextIdx]
+        const nextImageIndex = images.findIndex(img => img.id === nextImage.id)
+        setSelectedImageIndex(nextImageIndex)
         
-        setTimeout(() => {
-          // Find current image in related images and rotate to next
-          const currentIdx = relatedImages.findIndex(img => img.id === images[selectedImageIndex].id)
-          const nextIdx = (currentIdx + 1) % relatedImages.length
-          const nextImage = relatedImages[nextIdx]
-          const nextImageIndex = images.findIndex(img => img.id === nextImage.id)
-          setSelectedImageIndex(nextImageIndex)
-          setFadeOut(false)
-          setNextImageLoading(false)
-        }, 1000) // 1 second cross-dissolve duration
-      }, 17000) // Start buffering at 17 seconds into the 20-second cycle
+        // Immediately start pre-loading the image after that one
+        setNextImageLoading(true)
+        setFadeOut(false)
+      }, 300) // 300ms cross-dissolve (fast, seamless)
     }, 20000) // 20 seconds per image
 
     return () => clearInterval(interval)
@@ -219,7 +219,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
               {/* Next Image - Pre-buffering, fades in during transition */}
               {nextImageLoading && relatedImages.length > 1 && (
                 <div
-                  className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+                  className={`absolute inset-0 bg-cover bg-center transition-opacity duration-300 ${
                     fadeOut ? 'opacity-100' : 'opacity-0'
                   }`}
                   style={{
@@ -236,7 +236,7 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
 
               {/* Current Image - Fades out during transition */}
               <div
-                className={`absolute inset-0 bg-cover bg-center cursor-pointer transition-opacity duration-1000 ${
+                className={`absolute inset-0 bg-cover bg-center cursor-pointer transition-opacity duration-300 ${
                   fadeOut ? 'opacity-0' : 'opacity-100'
                 }`}
                 style={{

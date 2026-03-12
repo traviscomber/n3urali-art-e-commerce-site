@@ -18,10 +18,15 @@ const nextConfig = {
     minimumCacheTTL: 31536000,
   },
   compress: true,
+  onDemandEntries: {
+    maxInactiveAge: 1000,
+    pagesBufferLength: 2,
+  },
   webpack: (config, { isServer }) => {
-    // Use memory cache only - no filesystem cache to avoid stale cache path issues
+    // Disable all filesystem caching to avoid issues with old project paths
     config.cache = {
-      type: 'memory'
+      type: 'memory',
+      maxAge: 0
     }
     return config
   },

@@ -38,14 +38,22 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
     return () => clearInterval(interval)
   }, [carouselImages.length, isViewerOpen])
 
-  // Auto-rotate panorama in fullscreen viewer
+  // Auto-rotate panorama in fullscreen viewer with preload + blend transitions
   useEffect(() => {
     if (!isViewerOpen) return
     if (carouselImages.length <= 1) return
 
     const interval = setInterval(() => {
-      setCurrentIdx(prev => (prev + 1) % carouselImages.length)
-    }, 20000) // 20 seconds per image in viewer
+      console.log('[v0] Starting transition: preload next image')
+      // Transition starts: next image begins loading and will blend in
+      setIsTransitioning(true)
+      
+      setTimeout(() => {
+        console.log('[v0] Transition complete: advancing to next image')
+        setCurrentIdx(prev => (prev + 1) % carouselImages.length)
+        setIsTransitioning(false)
+      }, 1200) // 1200ms blend transition
+    }, 20000) // 20 seconds per image
 
     return () => clearInterval(interval)
   }, [isViewerOpen, carouselImages.length])

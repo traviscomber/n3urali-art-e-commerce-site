@@ -175,17 +175,18 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         renderer.render(scene, camera)
         console.log(`[v0] Initial render completed with FOV ${fov}`)
 
-        // Animation loop optimized for speed
+        // Animation loop optimized for speed with smooth blending
         const animate = () => {
           animationRef.current = requestAnimationFrame(animate)
 
-          // Ultra-fast transition (skip expensive calculations)
+          // Smooth blend transition (1200ms for silky transitions)
           if (isTransitioningRef.current && materialRef.current) {
-            transitionProgressRef.current += 0.033 / 0.6 // 600ms transition at 30fps
+            transitionProgressRef.current += 0.016 / 1.2 // 1200ms transition at 60fps
             if (transitionProgressRef.current >= 1) {
               transitionProgressRef.current = 1
               isTransitioningRef.current = false
               materialRef.current.transparent = false
+              materialRef.current.opacity = 1
             } else {
               materialRef.current.opacity = transitionProgressRef.current
               materialRef.current.transparent = true

@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 
+const path = require('path')
+
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -23,9 +25,14 @@ const nextConfig = {
     maxInactiveAge: 1000,
     pagesBufferLength: 2,
   },
-  webpack: (config) => {
-    // Force webpack cache to false - prevents PackFileCacheStrategy from using corrupted old project cache
-    config.cache = false
+  webpack: (config, { dir }) => {
+    // Force webpack cache to use current project directory with absolute path
+    // This prevents webpack from trying to access the old project path
+    config.cache = {
+      type: 'filesystem',
+      cacheDirectory: path.join(dir, '.next', 'cache', 'webpack'),
+      name: 'client-webpack-cache',
+    }
     config.infrastructureLogging = { level: 'none' }
     return config
   },

@@ -23,9 +23,17 @@ const nextConfig = {
     pagesBufferLength: 2,
   },
   webpack: (config) => {
-    // Completely disable webpack caching to prevent corruption from old project paths
-    config.cache = false
-    config.infrastructureLogging = { level: 'error' }
+    // Force webpack to use memory-only cache with explicit error handler
+    // This completely prevents attempts to read the corrupted old project path
+    config.cache = {
+      type: 'memory',
+      cacheUnaffected: false,
+    }
+    config.output.hashFunction = 'xxhash64'
+    config.infrastructureLogging = { 
+      level: 'error',
+      debug: []
+    }
     return config
   },
 }

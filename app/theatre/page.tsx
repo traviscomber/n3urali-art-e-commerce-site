@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useLanguage } from '@/lib/contexts/language-context'
+import { TheatrePlayerClient } from '@/components/theatre-player-client'
+import { useEffect } from 'react'
 
 // Category cards data
 const CATEGORIES = [
@@ -56,6 +58,27 @@ const ACCESS_MODES = [
 export default function TheatrePage() {
   const { t } = useLanguage()
   const [selectedCategory, setSelectedCategory] = useState(null)
+  const [images, setImages] = useState([])
+  const [collections, setCollections] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Fetch theatre images from Supabase
+  useEffect(() => {
+    async function fetchTheatreImages() {
+      try {
+        const response = await fetch('/api/theatre-photos/get-all')
+        const data = await response.json()
+        setImages(data.images || [])
+        setCollections(data.collections || [])
+      } catch (error) {
+        console.error('Error fetching theatre images:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchTheatreImages()
+  }, [])
 
   return (
     <main className="min-h-screen w-full bg-black text-white">
@@ -132,24 +155,20 @@ export default function TheatrePage() {
         </div>
       </section>
 
-      {/* Gallery Section */}
+      {/* Theatre Player - Gallery Section */}
       <section className="px-6 md:px-12 lg:px-20 py-20 max-w-7xl mx-auto">
-        <h2 className="text-4xl font-light mb-12 text-amber-50">Gallery</h2>
-        
-        {/* Featured Image */}
-        <div className="relative w-full h-96 md:h-screen/2 bg-gradient-to-br from-gray-900 to-black rounded-lg overflow-hidden mb-20 border border-gray-700 group">
-          <div className="w-full h-full bg-cover bg-center" style={{
-            backgroundImage: 'url(https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=1400&q=80)',
-            backgroundPosition: 'center'
-          }} />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-center justify-center">
-            <button className="w-20 h-20 rounded-full border-2 border-cyan-400 hover:border-cyan-300 flex items-center justify-center transition-all hover:scale-125 hover:bg-cyan-400/20 hover:shadow-lg hover:shadow-cyan-400/50">
-              <span className="text-cyan-400 text-3xl font-light">GO</span>
-            </button>
+        {!isLoading && images.length > 0 && (
+          <TheatrePlayerClient images={images} collections={collections} />
+        )}
+        {isLoading && (
+          <div className="text-center py-20">
+            <p className="text-gray-400">Loading gallery...</p>
           </div>
-        </div>
+        )}
+      </section>
 
-        {/* From Image to Environment */}
+      {/* From Image to Environment */}
+      <section className="px-6 md:px-12 lg:px-20 py-20 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20 items-center">
           <div>
             <h3 className="text-3xl font-light mb-4 text-amber-50">From Image to Environment</h3>

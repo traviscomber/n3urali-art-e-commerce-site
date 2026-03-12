@@ -34,7 +34,8 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
   const { t } = useLanguage()
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [isViewerOpen, setIsViewerOpen] = useState(false)
-  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null)
+  const [fadeOut, setFadeOut] = useState(false)
+  const [nextImageLoading, setNextImageLoading] = useState(false)
 
   // Map of panorama titles to translation keys for dynamic translation
   const panoramaMap: Record<string, { title: string; desc: string }> = {
@@ -114,17 +115,25 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
     if (relatedImages.length <= 1) return
 
     const interval = setInterval(() => {
-      setSlideDirection('right') // Current slides right, next slides in from left
+      // Pre-buffer next image 3 seconds before transition
+      setNextImageLoading(true)
+      
       setTimeout(() => {
-        // Find current image in related images and rotate to next
-        const currentIdx = relatedImages.findIndex(img => img.id === images[selectedImageIndex].id)
-        const nextIdx = (currentIdx + 1) % relatedImages.length
-        const nextImage = relatedImages[nextIdx]
-        const nextImageIndex = images.findIndex(img => img.id === nextImage.id)
-        setSelectedImageIndex(nextImageIndex)
-        setSlideDirection(null)
-      }, 1000) // 1 second slide duration
-    }, 20000) // 20 seconds
+        // Cross-dissolve transition after 3 seconds of buffering (17 seconds into 20-second cycle)
+        setFadeOut(true)
+        
+        setTimeout(() => {
+          // Find current image in related images and rotate to next
+          const currentIdx = relatedImages.findIndex(img => img.id === images[selectedImageIndex].id)
+          const nextIdx = (currentIdx + 1) % relatedImages.length
+          const nextImage = relatedImages[nextIdx]
+          const nextImageIndex = images.findIndex(img => img.id === nextImage.id)
+          setSelectedImageIndex(nextImageIndex)
+          setFadeOut(false)
+          setNextImageLoading(false)
+        }, 1000) // 1 second cross-dissolve duration
+      }, 17000) // Start buffering at 17 seconds into the 20-second cycle
+    }, 20000) // 20 seconds per image
 
     return () => clearInterval(interval)
   }, [isViewerOpen, selectedImageIndex, images])
@@ -205,13 +214,13 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
 
           {/* Featured Panorama Section */}
           <div className="w-full py-16">
-            {/* Panorama Carousel with Slide Transitions */}
+            {/* Panorama Carousel with Cross-Dissolve Transition */}
             <div className="relative w-full aspect-video bg-gray-900 overflow-hidden mb-12 border border-gray-700 group">
-              {/* Next Image - Slides In from Left */}
-              {relatedImages.length > 1 && (
+              {/* Next Image - Pre-buffering, fades in during transition */}
+              {nextImageLoading && relatedImages.length > 1 && (
                 <div
-                  className={`absolute inset-0 bg-cover bg-center transition-transform duration-1000 ${
-                    slideDirection === 'right' ? 'translate-x-0' : 'translate-x-[-100%]'
+                  className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+                    fadeOut ? 'opacity-100' : 'opacity-0'
                   }`}
                   style={{
                     backgroundImage: `url('${
@@ -220,18 +229,20 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
                       ''
                     }')`,
                     backgroundPosition: 'center',
+                    backgroundSize: 'cover',
                   }}
                 />
               )}
 
-              {/* Current Image - Slides Out to Right */}
+              {/* Current Image - Fades out during transition */}
               <div
-                className={`absolute inset-0 bg-cover bg-center cursor-pointer transition-transform duration-1000 ${
-                  slideDirection === 'right' ? 'translate-x-[100%]' : 'translate-x-0'
+                className={`absolute inset-0 bg-cover bg-center cursor-pointer transition-opacity duration-1000 ${
+                  fadeOut ? 'opacity-0' : 'opacity-100'
                 }`}
                 style={{
                   backgroundImage: `url('${currentImage.thumbnail_medium_url || imageUrl}')`,
                   backgroundPosition: 'center',
+                  backgroundSize: 'cover',
                 }}
               />
 

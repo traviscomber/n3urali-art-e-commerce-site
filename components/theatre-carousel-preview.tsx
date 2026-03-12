@@ -42,7 +42,7 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
     <div className="w-full py-16">
       {/* Seamless carousel with cross-dissolve */}
       <div className="relative w-full aspect-video bg-gray-900 overflow-hidden mb-12 border border-gray-700 group">
-        {/* Current image - visible by default */}
+        {/* Current image - visible by default, only loads when not transitioning */}
         <div
           className={`absolute inset-0 bg-cover bg-center transition-opacity duration-2000 ${
             isTransitioning ? 'opacity-0' : 'opacity-100'
@@ -54,17 +54,17 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
           }}
         />
 
-        {/* Next image - fades in */}
-        <div
-          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-2000 ${
-            isTransitioning ? 'opacity-100' : 'opacity-0'
-          }`}
-          style={{
-            backgroundImage: `url('${nextImage.thumbnail_medium_url || nextImage.original_url}')`,
-            backgroundPosition: 'center',
-            backgroundSize: 'cover',
-          }}
-        />
+        {/* Next image - only renders during transition to avoid loading 2 images */}
+        {isTransitioning && (
+          <div
+            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-2000 opacity-100`}
+            style={{
+              backgroundImage: `url('${nextImage.thumbnail_medium_url || nextImage.original_url}')`,
+              backgroundPosition: 'center',
+              backgroundSize: 'cover',
+            }}
+          />
+        )}
 
         {/* Image info overlay */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white">

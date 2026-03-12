@@ -21,10 +21,11 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
       setIsTransitioning(true)
       
       setTimeout(() => {
-        // Only update the index AFTER the fade is complete, then immediately reset transition state
+        // Update the index AFTER waiting for transition to complete PLUS extra buffer
+        // This ensures the 2-second fade fully finishes rendering before React re-renders
         setCurrentIdx(prev => (prev + 1) % carouselImages.length)
         setIsTransitioning(false)
-      }, 2000) // 2 second cross-dissolve (duration-2000 = 2000ms)
+      }, 2100) // 2100ms: 2000ms for CSS transition + 100ms buffer to ensure fade fully completes
     }, 20000) // 20 seconds per image
 
     return () => clearInterval(interval)

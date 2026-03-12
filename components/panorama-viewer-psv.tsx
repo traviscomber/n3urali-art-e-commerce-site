@@ -2,18 +2,19 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { X, ZoomOut, ZoomIn } from 'lucide-react'
+import * as THREE from 'three'
 
 interface PanoramaViewerPSVProps {
   imageUrl: string
   title: string
   onClose?: () => void
   relaxMode?: boolean
-  fov?: number // Field of view (default 75 for comfortable viewing)
-  sphereScale?: number // Sphere radius (default 5000)
-  rotationSpeed?: number // Auto-rotation speed (default 0.0002)
-  geometrySegments?: number // Sphere geometry segments (default 128)
-  initialYaw?: number // Initial rotation offset in radians to hide seam (default Math.PI for back of sphere)
-  transitionDuration?: number // Fade transition duration in ms (default 1500)
+  fov?: number
+  sphereScale?: number
+  rotationSpeed?: number
+  geometrySegments?: number
+  initialYaw?: number
+  transitionDuration?: number
 }
 
 export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
@@ -24,9 +25,9 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   fov = 75,
   sphereScale = 5000,
   rotationSpeed = 0.0002,
-  geometrySegments = 128,
-  initialYaw = Math.PI, // Default to 180 degrees (back of sphere, hiding the seam)
-  transitionDuration = 1500, // 1.5 second fade transition
+  geometrySegments = 64, // OPTIMIZED: reduced from 128
+  initialYaw = Math.PI,
+  transitionDuration = 800, // FAST: reduced from 1500ms
 }: PanoramaViewerPSVProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -36,11 +37,12 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   const rendererRef = useRef<any>(null)
   const sphereRef = useRef<any>(null)
   const cameraRef = useRef<any>(null)
-  const rotationYRef = useRef(initialYaw) // Start with initialYaw offset
+  const rotationYRef = useRef(initialYaw)
   const currentFovRef = useRef(fov)
-  const nextSphereRef = useRef<any>(null) // Reference for transition target sphere
-  const transitionProgressRef = useRef(0) // 0-1 progress of transition
-  const isTransitioningRef = useRef(false) // Whether currently transitioning
+  const pendingTextureRef = useRef<any>(null)
+  const isTransitioningRef = useRef(false)
+  const transitionStartTimeRef = useRef(0)
+  const materialRef = useRef<any>(null)
 
   useEffect(() => {
     const loadPanorama = async () => {
@@ -50,75 +52,51 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           return
         }
 
-        // Load Three.js from CDN
-        const script = document.createElement('script')
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'
-        script.async = true
-        script.onload = () => {
-          initThreePanorama()
-        }
-        script.onerror = () => {
-          setError('Failed to load 3D library')
-          setIsLoading(false)
-        }
-        document.body.appendChild(script)
-      } catch (err) {
-        setError('Failed to initialize panorama viewer')
-        setIsLoading(false)
-      }
-    }
-
-    const initThreePanorama = () => {
-      const THREE = (window as any).THREE
-      if (!THREE || !canvasRef.current) {
-        console.log('[v0] Three.js not available or canvas missing')
-        setError('3D library not available')
-        setIsLoading(false)
-        return
-      }
-
-      try {
         const canvas = canvasRef.current
         const width = window.innerWidth
         const height = window.innerHeight
 
-        console.log('[v0] Initializing panorama with dimensions:', width, 'x', height)
-
-        // Scene setup with configurable FOV
+        // Scene setup
         const scene = new THREE.Scene()
         const camera = new THREE.PerspectiveCamera(fov, width / height, 0.1, 100000)
         camera.position.set(0, 0, 0)
         camera.lookAt(0, 0, 0)
-        console.log(`[v0] Camera created with FOV: ${fov}, position:`, camera.position, 'aspect:', width / height)
 
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false })
         renderer.setSize(width, height)
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
         renderer.setClearColor(0x000000, 1)
         renderer.autoClear = false
-        console.log('[v0] Renderer initialized, size:', width, 'x', height)
-        // Load panorama image with CORS
-        const textureLoader = new THREE.TextureLoader()
-        console.log('[v0] Loading texture from:', imageUrl)
         
+        // Create sphere FIRST before loading texture
+        const geometry = new THREE.SphereGeometry(sphereScale, geometrySegments, geometrySegments)
+        geometry.scale(-1, 1, 1)
+        const material = new THREE.MeshBasicMaterial({
+          map: null,
+          side: THREE.BackSide,
+          color: 0x333333,
+          toneMapped: false, // OPTIMIZATION: disable tone mapping for faster rendering
+        })
+        const sphere = new THREE.Mesh(geometry, material)
+        sphere.rotation.y = initialYaw
+        scene.add(sphere)
+
+        materialRef.current = material
+        sphereRef.current = sphere
+        sceneRef.current = scene
+        rendererRef.current = renderer
+        cameraRef.current = camera
+        rotationYRef.current = initialYaw
+
+        // Load texture
+        const textureLoader = new THREE.TextureLoader()
         const texture = textureLoader.load(
           imageUrl,
           () => {
-            console.log('[v0] Texture loaded successfully, starting transition')
-            
-            // If already transitioning, skip to use this as the target
-            if (isTransitioningRef.current) {
-              // Replace the next sphere with this new image
-              if (nextSphereRef.current && sceneRef.current) {
-                sceneRef.current.remove(nextSphereRef.current)
-                nextSphereRef.current.geometry.dispose()
-                nextSphereRef.current.material.dispose()
-              }
-            }
-            
-            // Start fade transition
-            isTransitioningRef.current = true
-            transitionProgressRef.current = 0
+            // Apply texture immediately
+            material.map = texture
+            material.needsUpdate = true
+            material.color.setHex(0xffffff)
             setIsLoading(false)
           },
           undefined,
@@ -129,116 +107,48 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           }
         )
         texture.encoding = THREE.sRGBColorSpace
-        texture.wrapS = THREE.RepeatWrapping
-        texture.wrapT = THREE.ClampToEdgeWrapping
 
-        // Create configurable sphere geometry for equirectangular panorama
-        const geometry = new THREE.SphereGeometry(sphereScale, geometrySegments, geometrySegments)
-        const material = new THREE.MeshBasicMaterial({
-          map: texture,
-          side: THREE.BackSide,
-        })
-        const sphere = new THREE.Mesh(geometry, material)
-        
-        // Apply initial yaw rotation and reset the rotation ref for new image
-        sphere.rotation.y = initialYaw
-        rotationYRef.current = initialYaw // Reset rotation tracker for this new image
-        console.log('[v0] Applied initial yaw rotation:', initialYaw, 'radians, reset rotation tracker')
-        
-        scene.add(sphere)
-
-        sceneRef.current = scene
-        rendererRef.current = renderer
-        sphereRef.current = sphere
-        cameraRef.current = camera
-        
-        // Create reference function to generate next sphere for transitions
-        const createNextSphere = (newTexture: any) => {
-          const nextGeometry = new THREE.SphereGeometry(sphereScale, geometrySegments, geometrySegments)
-          const nextMaterial = new THREE.MeshBasicMaterial({
-            map: newTexture,
-            side: THREE.BackSide,
-            transparent: true,
-            opacity: 0, // Start invisible
-          })
-          const nextMesh = new THREE.Mesh(nextGeometry, nextMaterial)
-          nextMesh.rotation.y = initialYaw
-          scene.add(nextMesh)
-          nextSphereRef.current = nextMesh
-          return nextMesh
-        }
-        
-        // Store createNextSphere function in scene for later use
-        (scene as any).createNextSphere = createNextSphere
-
-        // Mouse wheel zoom control (zoom out only)
+        // Zoom control
         const handleWheel = (e: WheelEvent) => {
           e.preventDefault()
-          
-          // Zoom out on scroll down
           if (e.deltaY > 0) {
             currentFovRef.current = Math.min(currentFovRef.current + 2, 170)
-            camera.fov = currentFovRef.current
-            camera.updateProjectionMatrix()
-          }
-          // Zoom in on scroll up
-          else if (e.deltaY < 0) {
+          } else if (e.deltaY < 0) {
             currentFovRef.current = Math.max(currentFovRef.current - 2, fov)
-            camera.fov = currentFovRef.current
-            camera.updateProjectionMatrix()
           }
+          camera.fov = currentFovRef.current
+          camera.updateProjectionMatrix()
         }
 
         canvas.addEventListener('wheel', handleWheel, { passive: false })
 
-        // Render initial frame immediately with correct camera
-        renderer.clear()
-        renderer.render(scene, camera)
-        console.log(`[v0] Initial render completed with FOV ${fov}`)
-
-        // Animation loop with consistent rendering and transition support
+        // FAST animation loop - single sphere with material updates
         const animate = () => {
           animationRef.current = requestAnimationFrame(animate)
 
-          // Handle fade transition between panoramas
-          if (isTransitioningRef.current && nextSphereRef.current && sphereRef.current) {
-            transitionProgressRef.current += 1 / (transitionDuration / 16.67) // Smooth 60fps progress
-            
-            if (transitionProgressRef.current >= 1) {
-              // Transition complete
-              transitionProgressRef.current = 1
+          // Handle fast texture transition
+          if (isTransitioningRef.current && pendingTextureRef.current && materialRef.current) {
+            const elapsed = performance.now() - transitionStartTimeRef.current
+            const progress = Math.min(elapsed / transitionDuration, 1)
+
+            if (progress >= 1) {
+              // Swap texture instantly
               isTransitioningRef.current = false
-              
-              // Swap spheres: remove old, keep new as current
-              scene.remove(sphereRef.current)
-              sphereRef.current.geometry.dispose()
-              sphereRef.current.material.dispose()
-              
-              sphereRef.current = nextSphereRef.current
-              nextSphereRef.current = null
-              
-              // Reset new sphere opacity to full
-              sphereRef.current.material.transparent = false
-              sphereRef.current.material.opacity = 1
-              
-              console.log('[v0] Transition complete, new panorama is now active')
+              materialRef.current.map = pendingTextureRef.current
+              materialRef.current.needsUpdate = true
+              materialRef.current.transparent = false
+              pendingTextureRef.current = null
             } else {
-              // Mid-transition: fade out old, fade in new
-              sphereRef.current.material.transparent = true
-              sphereRef.current.material.opacity = 1 - transitionProgressRef.current
-              nextSphereRef.current.material.opacity = transitionProgressRef.current
+              // Opacity fade during transition
+              materialRef.current.transparent = true
+              materialRef.current.opacity = 1 - progress * 0.9
             }
           }
 
-          // Slow auto-rotation in relax mode (rotate the sphere itself)
+          // Auto-rotation
           if (relaxMode && sphereRef.current) {
             rotationYRef.current += rotationSpeed
             sphereRef.current.rotation.y = rotationYRef.current
-            
-            // Also rotate next sphere during transition
-            if (nextSphereRef.current) {
-              nextSphereRef.current.rotation.y = rotationYRef.current
-            }
           }
 
           renderer.clear()
@@ -247,7 +157,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
 
         animate()
 
-        // Handle window resize
+        // Resize handler
         const handleResize = () => {
           const newWidth = window.innerWidth
           const newHeight = window.innerHeight
@@ -258,74 +168,43 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
 
         window.addEventListener('resize', handleResize)
 
-        // Cleanup
         return () => {
           window.removeEventListener('resize', handleResize)
           canvas.removeEventListener('wheel', handleWheel)
-          if (animationRef.current) {
-            cancelAnimationFrame(animationRef.current)
-          }
+          if (animationRef.current) cancelAnimationFrame(animationRef.current)
           renderer.dispose()
           geometry.dispose()
           material.dispose()
           texture.dispose()
         }
       } catch (err) {
-        console.error('[v0] Panorama initialization error:', err)
-        setError('Failed to initialize panorama viewer')
+        console.error('[v0] Panorama error:', err)
+        setError('Failed to initialize panorama')
         setIsLoading(false)
       }
     }
 
     loadPanorama()
 
-    // Cleanup function
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
-      }
-      if (rendererRef.current) {
-        rendererRef.current.dispose()
-      }
+      if (animationRef.current) cancelAnimationFrame(animationRef.current)
+      if (rendererRef.current) rendererRef.current.dispose()
     }
   }, [imageUrl, relaxMode, fov, sphereScale, rotationSpeed, geometrySegments, initialYaw, transitionDuration])
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && onClose) {
-        onClose()
-      }
+      if (e.key === 'Escape' && onClose) onClose()
     }
 
-    const handleWindowResize = () => {
-      if (rendererRef.current && cameraRef.current && canvasRef.current) {
-        const width = window.innerWidth
-        const height = window.innerHeight
-        
-        cameraRef.current.aspect = width / height
-        cameraRef.current.updateProjectionMatrix()
-        rendererRef.current.setSize(width, height)
-        console.log('[v0] Window resized, updated panorama dimensions to:', width, 'x', height)
-      }
-    }
-
-    window.addEventListener('resize', handleWindowResize)
-    return () => {
-      window.removeEventListener('keydown', handleKeyPress)
-      window.removeEventListener('resize', handleWindowResize)
-    }
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
   }, [onClose])
 
   return (
     <div className="w-full h-screen bg-black relative overflow-hidden">
-      {/* Canvas for panorama */}
-      <canvas
-        ref={canvasRef}
-        className="w-full h-full block"
-        style={{ display: 'block' }}
-      />
+      <canvas ref={canvasRef} className="w-full h-full block" />
 
-      {/* Loading State */}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="text-center">
@@ -335,31 +214,24 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         </div>
       )}
 
-      {/* Error State */}
       {error && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-50">
           <div className="text-center">
             <p className="text-red-400 text-lg mb-4">{error}</p>
-            <button
-              onClick={onClose}
-              className="px-6 py-2 border border-red-500 text-red-400 rounded hover:bg-red-500/10 transition"
-            >
+            <button onClick={onClose} className="px-6 py-2 border border-red-500 text-red-400 rounded hover:bg-red-500/10">
               Close
             </button>
           </div>
         </div>
       )}
 
-      {/* Title and Close Button Overlay */}
       {!isLoading && !error && (
         <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-6 z-10">
-          {/* Top: Title */}
           <div className="pointer-events-auto">
             <h2 className="text-white text-2xl font-light tracking-wide">{title}</h2>
-            <p className="text-gray-400 text-sm mt-1">Relax and explore • Scroll to zoom</p>
+            <p className="text-gray-400 text-sm mt-1">Scroll to zoom</p>
           </div>
 
-          {/* Right Side: Zoom Controls */}
           <div className="absolute right-6 top-1/2 transform -translate-y-1/2 pointer-events-auto flex flex-col gap-3">
             <button
               onClick={() => {
@@ -369,8 +241,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
                   cameraRef.current.updateProjectionMatrix()
                 }
               }}
-              className="p-3 border border-gray-600 rounded-lg text-gray-400 hover:text-white hover:border-cyan-500 transition-all duration-300 bg-black/30 hover:bg-cyan-500/10"
-              title="Zoom in"
+              className="p-3 border border-gray-600 rounded-lg text-gray-400 hover:text-white hover:border-cyan-500 transition-all bg-black/30 hover:bg-cyan-500/10"
             >
               <ZoomIn size={20} />
             </button>
@@ -383,19 +254,14 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
                   cameraRef.current.updateProjectionMatrix()
                 }
               }}
-              className="p-3 border border-gray-600 rounded-lg text-gray-400 hover:text-white hover:border-cyan-500 transition-all duration-300 bg-black/30 hover:bg-cyan-500/10"
-              title="Zoom out"
+              className="p-3 border border-gray-600 rounded-lg text-gray-400 hover:text-white hover:border-cyan-500 transition-all bg-black/30 hover:bg-cyan-500/10"
             >
               <ZoomOut size={20} />
             </button>
           </div>
 
-          {/* Bottom: Close Button */}
           <div className="pointer-events-auto">
-            <button
-              onClick={onClose}
-              className="px-6 py-2 border border-gray-600 rounded-lg text-gray-400 hover:text-white hover:border-white transition-all duration-300 font-light"
-            >
+            <button onClick={onClose} className="px-6 py-2 border border-gray-600 rounded-lg text-gray-400 hover:text-white hover:border-white transition-all font-light">
               Close (ESC)
             </button>
           </div>
@@ -405,7 +271,6 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   )
 })
 
-// Extend Window interface for TypeScript
 declare global {
   interface Window {
     THREE: any

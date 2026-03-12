@@ -1,12 +1,14 @@
-'use client'
-
-import { useState } from 'react'
-import Link from 'next/link'
-import { useLanguage } from '@/lib/contexts/language-context'
+import { createClient } from '@/lib/supabase/server'
 import { TheatrePlayerClient } from '@/components/theatre-player-client'
-import { useEffect } from 'react'
+import Link from 'next/link'
 
-// Category cards data
+export const metadata = {
+  title: 'Theatre - N3uralia',
+  description: 'A Curated Gallery of Immersive Worlds',
+}
+
+export const revalidate = 3600
+
 const CATEGORIES = [
   {
     id: 'nature',
@@ -39,46 +41,40 @@ const ACCESS_MODES = [
     id: 'discovery',
     title: 'Discovery',
     description: 'Explore the collection freely. Perfect for casual browsing and discovery of new immersive worlds.',
-    icon: '🔍'
   },
   {
     id: 'professional',
     title: 'Professional',
     description: 'Advanced navigation controls for design professionals seeking reference imagery or inspiration.',
-    icon: '⚙️'
   },
   {
     id: 'venue',
     title: 'Venue',
     description: 'Installation mode designed for museums, galleries, and immersive venues.',
-    icon: '🎭'
   }
 ]
 
-export default function TheatrePage() {
-  const { t } = useLanguage()
-  const [selectedCategory, setSelectedCategory] = useState(null)
-  const [images, setImages] = useState([])
-  const [collections, setCollections] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
+export default async function TheatrePage() {
+  const supabase = await createClient()
 
-  // Fetch theatre images from Supabase
-  useEffect(() => {
-    async function fetchTheatreImages() {
-      try {
-        const response = await fetch('/api/theatre-photos/get-all')
-        const data = await response.json()
-        setImages(data.images || [])
-        setCollections(data.collections || [])
-      } catch (error) {
-        console.error('Error fetching theatre images:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+  // Fetch equirectangular theatre images
+  const { data: images = [], error } = await supabase
+    .from('images')
+    .select('id, title, original_url, image_format, description, tags, thumbnail_medium_url, upscaled_url, content_category, file_path, active, created_at')
+    .eq('image_format', 'equirectangular')
+    .eq('active', true)
+    .not('content_category', 'is', null)
+    .order('content_category', { ascending: true })
+    .order('created_at', { ascending: false })
 
-    fetchTheatreImages()
-  }, [])
+  // Fetch collections
+  const { data: collections = [] } = await supabase
+    .from('collections')
+    .select('*')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+
+  if (error) console.error('[v0] Error fetching theatre images:', error)
 
   return (
     <main className="min-h-screen w-full bg-black text-white">
@@ -106,7 +102,6 @@ export default function TheatrePage() {
           {CATEGORIES.map(category => (
             <button
               key={category.id}
-              onClick={() => setSelectedCategory(category.id)}
               className={`group relative p-8 bg-gradient-to-br ${category.color} to-gray-900/20 border border-gray-700 hover:border-gray-500 rounded-lg transition-all duration-300 text-left hover:scale-105 cursor-pointer`}
             >
               <h3 className="text-3xl font-light mb-2 group-hover:text-amber-100 transition-colors">{category.title}</h3>
@@ -126,13 +121,10 @@ export default function TheatrePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           {ACCESS_MODES.map(mode => (
             <div key={mode.id} className="bg-gray-900/50 border border-gray-800 p-8 rounded-lg hover:border-gray-600 transition-colors">
-              <div className="text-4xl mb-4">{mode.icon}</div>
               <h3 className="text-xl font-light mb-3">{mode.title}</h3>
               <p className="text-gray-400 text-sm leading-relaxed">{mode.description}</p>
               <Link href={`#${mode.id}`} className="inline-block mt-6 px-6 py-2 border border-gray-600 hover:border-amber-400 rounded text-sm transition-colors hover:text-amber-100">
-                {mode.id === 'discovery' && 'Discovery Portal'}
-                {mode.id === 'professional' && 'Professional Tools'}
-                {mode.id === 'venue' && 'Venue Access'}
+                Learn More
               </Link>
             </div>
           ))}
@@ -155,14 +147,13 @@ export default function TheatrePage() {
         </div>
       </section>
 
-      {/* Theatre Player - Gallery Section */}
-      <section className="px-6 md:px-12 lg:px-20 py-20 max-w-7xl mx-auto">
-        {!isLoading && images.length > 0 && (
+      {/* Theatre Player - Full Width */}
+      <section className="w-full py-20">
+        {images.length > 0 ? (
           <TheatrePlayerClient images={images} collections={collections} />
-        )}
-        {isLoading && (
-          <div className="text-center py-20">
-            <p className="text-gray-400">Loading gallery...</p>
+        ) : (
+          <div className="text-center py-20 px-6">
+            <p className="text-gray-400">No theatre images available</p>
           </div>
         )}
       </section>
@@ -176,7 +167,7 @@ export default function TheatrePage() {
               Many of the worlds presented in the Theatre began as static imagery and have been processed through innovative diffusion refinement techniques that evolve the scenes into sophisticated, immersive environments.
             </p>
             <p className="text-gray-400 text-sm">
-              The Theatre transforms functioning as both a gallery and a creative laboratory.
+              The Theatre functions as both a gallery and a creative laboratory.
             </p>
           </div>
           <div className="h-64 md:h-96 rounded-lg overflow-hidden border border-gray-700">
@@ -198,7 +189,6 @@ export default function TheatrePage() {
         </div>
       </section>
 
-      {/* Footer Spacing */}
       <div className="h-20" />
     </main>
   )

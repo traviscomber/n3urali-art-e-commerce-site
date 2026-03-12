@@ -22,10 +22,12 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
       setIsTransitioning(true)
       
       setTimeout(() => {
+        // After transition completes, update indices
+        // Next image becomes current, and calculate the new next image
         setCurrentIdx(prev => (prev + 1) % carouselImages.length)
-        setNextIdx(prev => (prev + 1) % carouselImages.length)
+        setNextIdx(prev => (prev + 2) % carouselImages.length)
         setIsTransitioning(false)
-      }, 400)
+      }, 500) // Match the CSS transition duration (duration-500 = 500ms)
     }, 20000)
 
     return () => clearInterval(interval)

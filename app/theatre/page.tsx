@@ -149,8 +149,8 @@ export default async function TheatrePage() {
 
       {/* Theatre Player - Full Width */}
       <section className="w-full py-20">
-        {images.length > 0 ? (
-          <TheatrePlayerClient images={images} collections={collections} />
+        {(images || []).length > 0 ? (
+          <TheatrePlayerClient images={images || []} collections={collections || []} />
         ) : (
           <div className="text-center py-20 px-6">
             <p className="text-gray-400">No theatre images available</p>

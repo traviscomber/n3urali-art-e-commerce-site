@@ -23,14 +23,12 @@ const nextConfig = {
     maxInactiveAge: 1000,
     pagesBufferLength: 2,
   },
+  cacheHandler: null,
+  cacheMaxMemorySize: 0,
   webpack: (config) => {
-    // Prevent webpack from using ANY filesystem cache - must use memory only
-    // Set cache to false AND disable cacheHandler to prevent PackFileCacheStrategy errors
+    // Force webpack cache to false - prevents PackFileCacheStrategy from using corrupted old project cache
     config.cache = false
-    config.infrastructureLogging = {
-      level: 'error',
-      debug: ['webpack.cache.PackFileCacheStrategy'], // Suppress the cache warnings
-    }
+    config.infrastructureLogging = { level: 'silent' }
     return config
   },
 }

@@ -26,12 +26,16 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
         // Next image becomes current, and calculate the new next image
         setCurrentIdx(prev => (prev + 1) % carouselImages.length)
         setNextIdx(prev => (prev + 2) % carouselImages.length)
-        setIsTransitioning(false)
+        
+        // Reset transitioning state after a brief delay to let opacity classes apply smoothly
+        setTimeout(() => {
+          setIsTransitioning(false)
+        }, 50) // Small delay to prevent class reset blink
       }, 500) // Match the CSS transition duration (duration-500 = 500ms)
     }, 20000)
 
     return () => clearInterval(interval)
-  }, [carouselImages.length])
+  }, [carouselImages.length, currentIdx, nextIdx])
 
   if (carouselImages.length === 0) {
     return <div className="w-full aspect-video bg-gray-900 rounded-lg border border-gray-700" />

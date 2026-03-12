@@ -58,7 +58,7 @@ export default async function TheatrePage() {
   const supabase = await createClient()
 
   // Fetch equirectangular theatre images
-  const { data: images = [], error } = await supabase
+  const { data: imagesData, error } = await supabase
     .from('images')
     .select('id, title, original_url, image_format, description, tags, thumbnail_medium_url, upscaled_url, content_category, file_path, active, created_at')
     .eq('image_format', 'equirectangular')
@@ -68,11 +68,14 @@ export default async function TheatrePage() {
     .order('created_at', { ascending: false })
 
   // Fetch collections
-  const { data: collections = [] } = await supabase
+  const { data: collectionsData } = await supabase
     .from('collections')
     .select('*')
     .eq('is_active', true)
     .order('created_at', { ascending: false })
+
+  const images = imagesData || []
+  const collections = collectionsData || []
 
   if (error) console.error('[v0] Error fetching theatre images:', error)
 
@@ -149,8 +152,8 @@ export default async function TheatrePage() {
 
       {/* Theatre Player - Full Width */}
       <section className="w-full py-20">
-        {(images || []).length > 0 ? (
-          <TheatrePlayerClient images={images || []} collections={collections || []} />
+        {images.length > 0 ? (
+          <TheatrePlayerClient images={images} collections={collections} />
         ) : (
           <div className="text-center py-20 px-6">
             <p className="text-gray-400">No theatre images available</p>

@@ -1,5 +1,4 @@
 /** @type {import('next').NextConfig} */
-const path = require('path')
 
 const nextConfig = {
   images: {
@@ -25,14 +24,9 @@ const nextConfig = {
     pagesBufferLength: 2,
   },
   webpack: (config) => {
-    // Set webpack cache to filesystem with ABSOLUTE path for production builds
-    config.cache = {
-      type: 'filesystem',
-      cacheDirectory: path.resolve('.next/cache/webpack'),
-      buildDependencies: {
-        config: [__filename],
-      },
-    }
+    // Completely disable webpack caching to prevent corruption from old project path
+    // The restored build cache contains corrupted pack files trying to write to /vercel/share/v0-next-shadcn/
+    config.cache = false
     return config
   },
 }

@@ -40,6 +40,9 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   const transitionProgressRef = useRef(0)
   const isTransitioningRef = useRef(false)
   const materialRef = useRef<any>(null)
+  const nextTextureRef = useRef<any>(null) // Pre-loaded next texture
+  const preloadTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const nextImageUrlRef = useRef<string | null>(null)
 
   useEffect(() => {
     const loadPanorama = async () => {

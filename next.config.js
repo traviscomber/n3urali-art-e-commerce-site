@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const path = require('path')
+
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -23,11 +25,10 @@ const nextConfig = {
     pagesBufferLength: 2,
   },
   webpack: (config) => {
-    // Set webpack cache to filesystem for production builds
-    // This is required for valid webpack configuration
+    // Set webpack cache to filesystem with ABSOLUTE path for production builds
     config.cache = {
       type: 'filesystem',
-      cacheDirectory: '.next/cache/webpack',
+      cacheDirectory: path.resolve('.next/cache/webpack'),
       buildDependencies: {
         config: [__filename],
       },

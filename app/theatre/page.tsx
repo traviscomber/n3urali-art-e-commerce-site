@@ -102,15 +102,32 @@ export default async function TheatrePage() {
       {/* Category Grid */}
       <section className="px-6 md:px-12 lg:px-20 py-16 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {CATEGORIES.map(category => (
-            <button
-              key={category.id}
-              className={`group relative p-8 bg-gradient-to-br ${category.color} to-gray-900/20 border border-gray-700 hover:border-gray-500 rounded-lg transition-all duration-300 text-left hover:scale-105 cursor-pointer`}
-            >
-              <h3 className="text-3xl font-light mb-2 group-hover:text-amber-100 transition-colors">{category.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">{category.description}</p>
-            </button>
-          ))}
+          {CATEGORIES.map((category, index) => {
+            const images = [
+              'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatrecard1-KS7txT33WCKlyFXonD8HCCdAzxPTga.png',
+              'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatrecard3-UaaXg7KQTpFbTkm7lUNPbY2cAQTnXo.png',
+              'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatrecard2-QFFV4ItZ8sqpWekmsFrL8s4rzbplUW.png',
+              'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatrecard4-uRigMYs3nTQDbC7kH0WYBLfYIFdcxJ.png'
+            ]
+            return (
+              <button
+                key={category.id}
+                className="group relative p-8 bg-gradient-to-br from-gray-900/60 to-gray-900/20 border border-gray-700 hover:border-gray-500 rounded-lg transition-all duration-300 text-left hover:scale-105 cursor-pointer overflow-hidden"
+              >
+                {/* Background Image */}
+                <div 
+                  className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-60 transition-opacity duration-300"
+                  style={{ backgroundImage: `url('${images[index]}')` }}
+                />
+                
+                {/* Content Overlay */}
+                <div className="relative z-10">
+                  <h3 className="text-3xl font-light mb-2 group-hover:text-amber-100 transition-colors">{category.title}</h3>
+                  <p className="text-gray-300 text-sm leading-relaxed">{category.description}</p>
+                </div>
+              </button>
+            )
+          })}
         </div>
       </section>
 

@@ -66,7 +66,7 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
       clearInterval(preloadTimer)
       clearInterval(transitionTimer)
     }
-  }, [isViewerOpen, carouselImages.length, currentIdx])
+  }, [isViewerOpen, carouselImages.length])
 
   if (carouselImages.length === 0) {
     return <div className="w-full aspect-video bg-gray-900 rounded-lg border border-gray-700" />

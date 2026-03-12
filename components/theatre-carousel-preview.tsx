@@ -27,10 +27,10 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
         setCurrentIdx(prev => (prev + 1) % carouselImages.length)
         setNextIdx(prev => (prev + 2) % carouselImages.length)
         
-        // Reset transitioning state after a brief delay to let opacity classes apply smoothly
+        // Reset transitioning state after a longer delay to let the state update settle
         setTimeout(() => {
           setIsTransitioning(false)
-        }, 50) // Small delay to prevent class reset blink
+        }, 100) // Longer delay to prevent blink during re-render
       }, 1000) // Match the CSS transition duration (duration-1000 = 1000ms for smoother fade)
     }, 20000)
 

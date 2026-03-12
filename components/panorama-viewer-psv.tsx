@@ -48,21 +48,31 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           canvas,
           antialias: true,
           alpha: false,
+          powerPreference: 'high-performance', // Use high-performance GPU
         })
         renderer.setSize(width, height)
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
         renderer.setClearColor(0x000000)
+        renderer.outputColorSpace = THREE.sRGBColorSpace
 
-        // Load texture first
+        // Load texture first with optimization
         const textureLoader = new THREE.TextureLoader()
         textureLoader.load(
           imageUrl,
           (loadedTexture) => {
-            // Create sphere with loaded texture
-            const geometry = new THREE.SphereGeometry(1000, 64, 64)
+            // Optimize texture quality and performance
+            loadedTexture.encoding = THREE.sRGBColorSpace
+            loadedTexture.generateMipmaps = true
+            loadedTexture.minFilter = THREE.LinearMipmapLinearFilter
+            loadedTexture.magFilter = THREE.LinearFilter
+            loadedTexture.anisotropy = Math.min(16, renderer.capabilities.maxAnisotropy)
+            
+            // Create sphere with HIGH quality geometry for better rendering (128 segments)
+            const geometry = new THREE.SphereGeometry(1000, 128, 128)
             const material = new THREE.MeshBasicMaterial({
               map: loadedTexture,
               side: THREE.BackSide,
+              toneMapped: false, // Disable tone mapping for faster rendering
             })
             const sphere = new THREE.Mesh(geometry, material)
             scene.add(sphere)
@@ -73,7 +83,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
             cameraRef.current = camera
 
             setIsLoading(false)
-            console.log('[v0] Panorama loaded successfully')
+            console.log('[v0] Panorama loaded successfully with high quality')
           },
           undefined,
           (err) => {

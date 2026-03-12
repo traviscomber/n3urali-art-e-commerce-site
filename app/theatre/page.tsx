@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { TheatrePlayerClient } from '@/components/theatre-player-client'
+import { TheatreCarouselPreview } from '@/components/theatre-carousel-preview'
 import Link from 'next/link'
 
 export const metadata = {
@@ -150,10 +150,10 @@ export default async function TheatrePage() {
         </div>
       </section>
 
-      {/* Theatre Player - Full Width */}
+      {/* Theatre Carousel Preview - Full Width */}
       <section className="w-full py-20">
         {images.length > 0 ? (
-          <TheatrePlayerClient images={images} collections={collections} />
+          <TheatreCarouselPreview images={images} collections={collections} />
         ) : (
           <div className="text-center py-20 px-6">
             <p className="text-gray-400">No theatre images available</p>

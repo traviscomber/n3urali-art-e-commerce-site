@@ -90,9 +90,9 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         camera.lookAt(0, 0, 0)
         console.log(`[v0] Camera created with FOV: ${fov}, position:`, camera.position, 'aspect:', width / height)
 
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: false })
         renderer.setSize(width, height)
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        renderer.setPixelRatio(1) // Lock to 1x for speed, not 2x
         renderer.setClearColor(0x000000, 1)
         renderer.autoClear = false
         console.log('[v0] Renderer initialized, size:', width, 'x', height)
@@ -125,12 +125,12 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         texture.wrapS = THREE.RepeatWrapping
         texture.wrapT = THREE.ClampToEdgeWrapping
 
-        // Create configurable sphere geometry for equirectangular panorama
-        const geometry = new THREE.SphereGeometry(sphereScale, geometrySegments, geometrySegments)
+        // Create OPTIMIZED sphere geometry (48 segments for 7x less geometry than 128)
+        const geometry = new THREE.SphereGeometry(sphereScale, 48, 48)
         const material = new THREE.MeshBasicMaterial({
           map: texture,
           side: THREE.BackSide,
-          toneMapped: false, // Fast rendering
+          toneMapped: false,
         })
         const sphere = new THREE.Mesh(geometry, material)
         
@@ -172,33 +172,28 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         renderer.render(scene, camera)
         console.log(`[v0] Initial render completed with FOV ${fov}`)
 
-        // Animation loop with consistent rendering
+        // Animation loop optimized for speed
         const animate = () => {
           animationRef.current = requestAnimationFrame(animate)
 
-          // Fast transition fade effect (800ms total)
+          // Ultra-fast transition (skip expensive calculations)
           if (isTransitioningRef.current && materialRef.current) {
-            transitionProgressRef.current += 0.016 / 0.8 // Normalize to 800ms at 60fps
+            transitionProgressRef.current += 0.033 / 0.6 // 600ms transition at 30fps
             if (transitionProgressRef.current >= 1) {
               transitionProgressRef.current = 1
               isTransitioningRef.current = false
-              materialRef.current.opacity = 1
               materialRef.current.transparent = false
             } else {
-              // Smooth opacity transition
               materialRef.current.opacity = transitionProgressRef.current
               materialRef.current.transparent = true
             }
-            materialRef.current.needsUpdate = true
           }
 
-          // Slow auto-rotation in relax mode (rotate the sphere itself)
+          // Only rotate if relaxMode is on (skip if false)
           if (relaxMode && sphereRef.current) {
-            rotationYRef.current += rotationSpeed
-            sphereRef.current.rotation.y = rotationYRef.current
+            sphereRef.current.rotation.y += rotationSpeed
           }
 
-          renderer.clear()
           renderer.render(scene, camera)
         }
 

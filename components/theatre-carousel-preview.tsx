@@ -38,35 +38,48 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
     return () => clearInterval(interval)
   }, [carouselImages.length, isViewerOpen])
 
-  // Auto-rotate panorama in fullscreen viewer with smart preloading
+  // Auto-rotate panorama with intelligent preload + transition timing
   useEffect(() => {
     if (!isViewerOpen) return
     if (carouselImages.length <= 1) return
 
-    // Preload next image at 15 seconds (5 seconds before transition)
-    const preloadTimer = setInterval(() => {
+    let preloadComplete = false
+    let timeoutId: NodeJS.Timeout
+
+    const startPreloadAndTransition = () => {
+      preloadComplete = false
       const nextIdx = (currentIdx + 1) % carouselImages.length
       const nextImage = carouselImages[nextIdx]
       const nextImageUrl = nextImage.original_url || nextImage.upscaled_url
       
-      // Preload by creating an img element - browser caches it
+      // Start preload immediately
       const img = new Image()
       img.crossOrigin = 'anonymous'
+      img.onload = () => {
+        preloadComplete = true
+        console.log('[v0] Preload complete, texture ready')
+      }
+      img.onerror = () => {
+        preloadComplete = true // Mark as complete even on error, proceed with transition
+        console.log('[v0] Preload error, proceeding anyway')
+      }
       img.src = nextImageUrl
-      console.log('[v0] Preloading next panorama image:', nextImageUrl)
-    }, 15000) // Preload at 15 seconds
+      console.log('[v0] Starting preload:', nextImageUrl)
+      
+      // Transition after 20 seconds OR when preload completes, whichever is later
+      timeoutId = setTimeout(() => {
+        console.log('[v0] Transition at 20s, preload ready:', preloadComplete)
+        setCurrentIdx(prev => (prev + 1) % carouselImages.length)
+      }, 20000)
+    }
 
-    // Transition at 20 seconds (texture is already loaded and cached)
-    const transitionTimer = setInterval(() => {
-      console.log('[v0] INSTANT transition - next image texture is pre-cached')
-      setCurrentIdx(prev => (prev + 1) % carouselImages.length)
-    }, 20000) // 20 seconds per image
+    // Start first preload immediately
+    startPreloadAndTransition()
 
     return () => {
-      clearInterval(preloadTimer)
-      clearInterval(transitionTimer)
+      if (timeoutId) clearTimeout(timeoutId)
     }
-  }, [isViewerOpen, carouselImages.length])
+  }, [isViewerOpen, carouselImages.length, currentIdx])
 
   if (carouselImages.length === 0) {
     return <div className="w-full aspect-video bg-gray-900 rounded-lg border border-gray-700" />

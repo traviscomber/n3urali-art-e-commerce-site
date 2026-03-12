@@ -104,9 +104,9 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
     })
   }
 
-  // Auto-rotate related images every 30 seconds when in fullscreen viewer
+  // Auto-rotate in carousel preview every 20 seconds with cross-dissolve
   useEffect(() => {
-    if (!isViewerOpen) return // Only auto-rotate when viewer IS open
+    if (isViewerOpen) return // Don't auto-rotate when viewer is open
 
     const relatedImages = getRelatedImages(selectedImageIndex)
 
@@ -126,6 +126,27 @@ export function TheatrePlayerClient({ images, collections }: TheatrePlayerClient
         setSelectedImageIndex(nextImageIndex)
         setFadeOut(false)
       }, 300) // 300ms cross-dissolve (fast, seamless)
+    }, 20000) // 20 seconds per image
+
+    return () => clearInterval(interval)
+  }, [isViewerOpen, selectedImageIndex, images])
+
+  // Auto-rotate in panorama viewer every 20 seconds
+  useEffect(() => {
+    if (!isViewerOpen) return // Only auto-rotate when viewer IS open
+
+    const relatedImages = getRelatedImages(selectedImageIndex)
+
+    // If only 1 related image, no need to rotate
+    if (relatedImages.length <= 1) return
+
+    const interval = setInterval(() => {
+      // Find current image in related images and rotate to next
+      const currentIdx = relatedImages.findIndex(img => img.id === images[selectedImageIndex].id)
+      const nextIdx = (currentIdx + 1) % relatedImages.length
+      const nextImage = relatedImages[nextIdx]
+      const nextImageIndex = images.findIndex(img => img.id === nextImage.id)
+      setSelectedImageIndex(nextImageIndex)
     }, 20000) // 20 seconds per image
 
     return () => clearInterval(interval)

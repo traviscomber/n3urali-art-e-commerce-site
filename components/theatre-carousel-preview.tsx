@@ -9,7 +9,6 @@ interface CarouselPreviewProps {
 
 export function TheatreCarouselPreview({ images, collections }: CarouselPreviewProps) {
   const [currentIdx, setCurrentIdx] = useState(0)
-  const [nextIdx, setNextIdx] = useState(1)
   const [isTransitioning, setIsTransitioning] = useState(false)
 
   // Get only equirectangular images for carousel
@@ -22,26 +21,21 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
       setIsTransitioning(true)
       
       setTimeout(() => {
-        // After transition completes, update indices
-        // Next image becomes current, and calculate the new next image
+        // Only update the index AFTER the fade is complete, then immediately reset transition state
         setCurrentIdx(prev => (prev + 1) % carouselImages.length)
-        setNextIdx(prev => (prev + 2) % carouselImages.length)
-        
-        // Reset transitioning state after a longer delay to let the state update settle
-        setTimeout(() => {
-          setIsTransitioning(false)
-        }, 100) // Longer delay to prevent blink during re-render
-      }, 1000) // Match the CSS transition duration (duration-1000 = 1000ms for smoother fade)
-    }, 20000)
+        setIsTransitioning(false)
+      }, 2000) // 2 second cross-dissolve (duration-2000 = 2000ms)
+    }, 20000) // 20 seconds per image
 
     return () => clearInterval(interval)
-  }, [carouselImages.length, currentIdx, nextIdx])
+  }, [carouselImages.length])
 
   if (carouselImages.length === 0) {
     return <div className="w-full aspect-video bg-gray-900 rounded-lg border border-gray-700" />
   }
 
   const currentImage = carouselImages[currentIdx]
+  const nextIdx = (currentIdx + 1) % carouselImages.length
   const nextImage = carouselImages[nextIdx]
 
   return (
@@ -50,7 +44,7 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
       <div className="relative w-full aspect-video bg-gray-900 overflow-hidden mb-12 border border-gray-700 group">
         {/* Current image - visible by default */}
         <div
-          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-2000 ${
             isTransitioning ? 'opacity-0' : 'opacity-100'
           }`}
           style={{
@@ -62,7 +56,7 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
 
         {/* Next image - fades in */}
         <div
-          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-2000 ${
             isTransitioning ? 'opacity-100' : 'opacity-0'
           }`}
           style={{

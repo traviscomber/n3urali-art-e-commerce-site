@@ -19,6 +19,9 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
   const [isViewerOpen, setIsViewerOpen] = useState(false)
   const [currentCategory, setCurrentCategory] = useState<string | null>(null)
 
+  // Define the 4 main categories we want to display
+  const MAIN_CATEGORIES = ['Nature', 'Culture', 'Mythic', 'Art']
+
   // Filter equirectangular images
   const allCarouselImages = images.filter(img => img.image_format === 'equirectangular')
 
@@ -32,7 +35,8 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
     return acc
   }, {} as Record<string, any[]>)
 
-  const categories = Object.keys(imagesByCategory).sort()
+  // Filter to only show the 4 main categories that have images
+  const categories = MAIN_CATEGORIES.filter(cat => imagesByCategory[cat] && imagesByCategory[cat].length > 0).sort()
 
   // Initialize with first category
   useEffect(() => {

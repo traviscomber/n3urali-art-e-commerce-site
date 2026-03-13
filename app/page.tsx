@@ -44,6 +44,9 @@ export default async function HomePage() {
   
   console.log('[v0] HomePage - Featured collection fetched')
 
+  // Fallback images for each category - using button design images
+  const fallbackImages: Record<string, string | null> = LANDING_PAGE_IMAGES
+
   // Fetch first image from each category for the category cards
   const categories = [
     { key: 'studio', title: 'STUDIO', label: 'Production', link: '/studio', accent: 'gold' as const },
@@ -131,3 +134,4 @@ export default async function HomePage() {
       <GrandFinaleSection />
     </main>
   )
+}

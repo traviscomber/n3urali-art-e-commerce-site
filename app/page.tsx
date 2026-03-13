@@ -31,16 +31,20 @@ export default async function HomePage() {
   console.log('[v0] HomePage - Supabase client created')
 
   // Fetch featured collection with video URL
-  const { data: featuredCollection } = await supabase
-    .from("collections")
-    .select("id, title, description, video_url, featured_image_url")
-    .eq("is_featured", true)
-    .eq("is_active", true)
-    .single()
-    .catch(err => {
-      console.error('[v0] Error fetching featured collection:', err)
-      return { data: null }
-    })
+  let featuredCollection = null
+  try {
+    const { data } = await supabase
+      .from("collections")
+      .select("id, title, description, video_url, featured_image_url")
+      .eq("is_featured", true)
+      .eq("is_active", true)
+      .single()
+    
+    featuredCollection = data
+  } catch (err) {
+    console.error('[v0] Error fetching featured collection:', err)
+    featuredCollection = null
+  }
   
   console.log('[v0] HomePage - Featured collection fetched')
 

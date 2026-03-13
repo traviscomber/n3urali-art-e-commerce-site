@@ -16,8 +16,11 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
   const [isViewerOpen, setIsViewerOpen] = useState(false)
   const [currentCategory, setCurrentCategory] = useState<string | null>(null)
 
-  // Get only equirectangular images for carousel
-  const allCarouselImages = images.filter(img => img.image_format === 'equirectangular').slice(0, 50)
+  // Get only equirectangular images for carousel - NO SLICE LIMIT, show all
+  const allCarouselImages = images.filter(img => img.image_format === 'equirectangular')
+
+  console.log('[v0] TheatreCarouselPreview - total images:', images.length)
+  console.log('[v0] TheatreCarouselPreview - equirectangular images:', allCarouselImages.length)
 
   // Group images by content_category
   const imagesByCategory = allCarouselImages.reduce((acc, img) => {
@@ -28,6 +31,8 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
     acc[category].push(img)
     return acc
   }, {} as Record<string, any[]>)
+
+  console.log('[v0] TheatreCarouselPreview - categories:', Object.keys(imagesByCategory))
 
   // Get sorted categories (order matters for display)
   const categories = Object.keys(imagesByCategory).sort()
@@ -126,7 +131,15 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
   }, [isViewerOpen, carouselImages.length, currentIdx])
 
   if (carouselImages.length === 0) {
-    return <div className="w-full aspect-video bg-gray-900 rounded-lg border border-gray-700" />
+    return (
+      <div className="w-full py-16 px-6 md:px-12 lg:px-20">
+        <div className="max-w-7xl mx-auto bg-red-900/20 border border-red-700 rounded-lg p-8 text-center">
+          <p className="text-red-400 font-light">No equirectangular images found</p>
+          <p className="text-red-300 text-sm mt-2">Total images in database: {images.length}</p>
+          <p className="text-red-300 text-sm">Categories available: {categories.length > 0 ? categories.join(', ') : 'None'}</p>
+        </div>
+      </div>
+    )
   }
 
   const currentImage = carouselImages[currentIdx]

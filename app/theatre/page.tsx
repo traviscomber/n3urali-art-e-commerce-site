@@ -57,13 +57,11 @@ const ACCESS_MODES = [
 export default async function TheatrePage() {
   const supabase = await createClient()
 
-  // Fetch equirectangular theatre images
+  // Fetch equirectangular theatre images - get ALL equirectangular images regardless of filters
   const { data: imagesData, error } = await supabase
     .from('images')
     .select('id, title, original_url, image_format, description, tags, thumbnail_medium_url, upscaled_url, content_category, file_path, active, created_at')
     .eq('image_format', 'equirectangular')
-    .eq('active', true)
-    .not('content_category', 'is', null)
     .order('content_category', { ascending: true })
     .order('created_at', { ascending: false })
 
@@ -78,6 +76,13 @@ export default async function TheatrePage() {
   const collections = collectionsData || []
 
   if (error) console.error('[v0] Error fetching theatre images:', error)
+  console.log('[v0] Total images fetched:', images.length)
+  console.log('[v0] Images by category:', images.reduce((acc: any, img: any) => {
+    const cat = img.content_category || 'uncategorized'
+    acc[cat] = (acc[cat] || 0) + 1
+    return acc
+  }, {}))
+  console.log('[v0] Sample images:', images.slice(0, 3).map(img => ({ id: img.id, title: img.title, category: img.content_category, format: img.image_format })))
 
   // Group images by content_category to get featured images for each category
   const imagesByCategory = (images as any[]).reduce((acc, img) => {

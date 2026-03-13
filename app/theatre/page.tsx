@@ -7,7 +7,8 @@ export const metadata = {
   description: 'A Curated Gallery of Immersive Worlds',
 }
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 const CATEGORIES = [
   {
@@ -56,14 +57,34 @@ const ACCESS_MODES = [
 export default async function TheatrePage() {
   const supabase = await createClient()
 
-  // Fetch equirectangular theatre images
-  const { data: imagesData, error } = await supabase
-    .from('images')
-    .select('id, title, original_url, image_format, description, tags, thumbnail_medium_url, upscaled_url, content_category, file_path, active, created_at')
-    .eq('image_format', 'equirectangular')
-    .order('created_at', { ascending: false })
+  let images: any[] = []
+  let error: any = null
 
-  const images = imagesData || []
+  try {
+    // Set a 10 second timeout for the query
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 10000)
+
+    const response = await supabase
+      .from('images')
+      .select('id, title, original_url, image_format, description, tags, thumbnail_medium_url, upscaled_url, content_category, file_path, active, created_at')
+      .eq('image_format', 'equirectangular')
+      .order('created_at', { ascending: false })
+      .limit(500) // Limit to 500 images to prevent timeout
+    
+    clearTimeout(timeout)
+    
+    if (response.error) {
+      error = response.error
+      images = []
+    } else {
+      images = response.data || []
+    }
+  } catch (err) {
+    console.error('[v0] Theatre page query error:', err)
+    error = err
+    images = []
+  }
 
   if (error) {
     console.error('[v0] Error fetching theatre images:', error)

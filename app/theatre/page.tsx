@@ -84,11 +84,14 @@ export default async function TheatrePage() {
   }, {} as Record<string, any[]>)
 
   const getCategoryImage = (categoryTitle: string): string => {
-    const categoryImages = imagesByCategory[categoryTitle] || []
-    if (categoryImages.length > 0 && categoryImages[0].thumbnail_medium_url) {
-      return categoryImages[0].thumbnail_medium_url
+    // Use specific theatre card images for each category
+    const cardImages: Record<string, string> = {
+      'Nature': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatrecard1-Ye9WN1hlv9Mkv1RbaX6GDUFcoSfjOm.png',
+      'Mythic': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatrecard3-eMkeu84pDpyyfrBdUW0ToJXXd8xlD2.png',
+      'Culture': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatrecard2-D8l39s6V8WkU8ns9a9EAzeNcgiC7Ah.png',
+      'Art': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatrecard4-glgnzD3EjP9bmcF2cjr0qOwk30dJcv.png'
     }
-    return ''
+    return cardImages[categoryTitle] || ''
   }
 
   return (

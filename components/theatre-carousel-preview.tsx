@@ -1,5 +1,6 @@
 'use client'
 
+// Theatre carousel with category grouping and auto-rotation
 import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 

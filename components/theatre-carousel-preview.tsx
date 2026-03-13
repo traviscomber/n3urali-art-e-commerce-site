@@ -11,13 +11,22 @@ const PanoramaViewerPSV = dynamic(
 interface CarouselPreviewProps {
   images: any[]
   collections: any[]
+  selectedCategory?: string | null
+  shouldAutoPlay?: boolean
+  onAutoPlayComplete?: () => void
 }
 
-export function TheatreCarouselPreview({ images, collections }: CarouselPreviewProps) {
+export function TheatreCarouselPreview({ 
+  images, 
+  collections,
+  selectedCategory: initialCategory = null,
+  shouldAutoPlay = false,
+  onAutoPlayComplete
+}: CarouselPreviewProps) {
   const [currentIdx, setCurrentIdx] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [isViewerOpen, setIsViewerOpen] = useState(false)
-  const [currentCategory, setCurrentCategory] = useState<string | null>(null)
+  const [currentCategory, setCurrentCategory] = useState<string | null>(initialCategory)
 
   // Define the 4 main categories we want to display
   const MAIN_CATEGORIES = ['Nature', 'Culture', 'Mythic', 'Art']

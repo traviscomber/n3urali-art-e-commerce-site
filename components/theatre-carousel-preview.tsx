@@ -16,13 +16,10 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
   const [isViewerOpen, setIsViewerOpen] = useState(false)
   const [currentCategory, setCurrentCategory] = useState<string | null>(null)
 
-  // Get only equirectangular images for carousel - NO SLICE LIMIT, show all
+  // Filter equirectangular images
   const allCarouselImages = images.filter(img => img.image_format === 'equirectangular')
 
-  console.log('[v0] TheatreCarouselPreview - total images:', images.length)
-  console.log('[v0] TheatreCarouselPreview - equirectangular images:', allCarouselImages.length)
-
-  // Group images by content_category FIRST so we can use it everywhere
+  // Group by category
   const imagesByCategory = allCarouselImages.reduce((acc, img) => {
     const category = img.content_category || 'Uncategorized'
     if (!acc[category]) {
@@ -32,32 +29,26 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
     return acc
   }, {} as Record<string, any[]>)
 
-  // Get sorted categories (order matters for display) - DEFINE BEFORE USING
   const categories = Object.keys(imagesByCategory).sort()
-  
-  console.log('[v0] TheatreCarouselPreview - categories:', categories)
-  
-  // Set default category on mount
+
+  // Initialize with first category
   useEffect(() => {
     if (!currentCategory && categories.length > 0) {
       setCurrentCategory(categories[0])
     }
   }, [categories, currentCategory])
 
-  // Get images for current category, or all if none selected
+  // Get current category images
   const carouselImages = currentCategory && imagesByCategory[currentCategory] 
     ? imagesByCategory[currentCategory]
     : allCarouselImages
 
-  // Extract folder name from file_path (e.g., "VIDS/Categories/Nature/Ocean-Surreal/filename.mov" -> "Ocean-Surreal")
-  const extractFolderName = (filePath: string | null | undefined) => {
+  // Extract folder name from file_path
+  const extractFolderName = (filePath: string | null | undefined): string => {
     if (!filePath) return 'Theatre Collection'
     try {
-      // Split by forward slash to get path parts
       const parts = filePath.split('/')
-      // Get the last non-empty part before the filename (which is the actual folder)
       let folderName = parts[parts.length - 2] || 'Theatre Collection'
-      // Replace hyphens with spaces and capitalize each word
       return folderName
         .split('-')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -67,27 +58,23 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
     }
   }
 
+  // Carousel auto-rotate
   useEffect(() => {
     if (carouselImages.length <= 1) return
-    if (isViewerOpen) return // Don't auto-rotate when viewer is open
+    if (isViewerOpen) return
 
     const interval = setInterval(() => {
-      // Start transition at 17 seconds (last 3 seconds of 20-second display)
-      // This creates a longer overlapping fade where the next image appears while current is still visible
       setIsTransitioning(true)
-      
       setTimeout(() => {
-        // Update the index AFTER waiting for transition to complete PLUS extra buffer
-        // This ensures the 1-second fade fully finishes rendering before React re-renders
         setCurrentIdx(prev => (prev + 1) % carouselImages.length)
         setIsTransitioning(false)
-      }, 1100) // 1100ms: 1000ms for CSS transition + 100ms buffer to ensure fade fully completes
-    }, 17000) // Start the 1-second fade at 17 seconds, giving 3 seconds of overlap before the next image cycle
+      }, 1100)
+    }, 17000)
 
     return () => clearInterval(interval)
   }, [carouselImages.length, isViewerOpen])
 
-  // Auto-rotate panorama with intelligent preload + transition timing
+  // Panorama viewer preload
   useEffect(() => {
     if (!isViewerOpen) return
     if (carouselImages.length <= 1) return
@@ -101,28 +88,21 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
       const nextImage = carouselImages[nextIdx]
       const nextImageUrl = nextImage.original_url || nextImage.upscaled_url
       
-      // Start preload immediately
       const img = new Image()
       img.crossOrigin = 'anonymous'
       img.onload = () => {
         preloadComplete = true
-        console.log('[v0] Preload complete, texture ready')
       }
       img.onerror = () => {
-        preloadComplete = true // Mark as complete even on error, proceed with transition
-        console.log('[v0] Preload error, proceeding anyway')
+        preloadComplete = true
       }
       img.src = nextImageUrl
-      console.log('[v0] Starting preload:', nextImageUrl)
       
-      // Transition after 20 seconds OR when preload completes, whichever is later
       timeoutId = setTimeout(() => {
-        console.log('[v0] Transition at 20s, preload ready:', preloadComplete)
         setCurrentIdx(prev => (prev + 1) % carouselImages.length)
       }, 20000)
     }
 
-    // Start first preload immediately
     startPreloadAndTransition()
 
     return () => {
@@ -130,13 +110,14 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
     }
   }, [isViewerOpen, carouselImages.length, currentIdx])
 
+  // Empty state
   if (carouselImages.length === 0) {
     return (
       <div className="w-full py-16 px-6 md:px-12 lg:px-20">
         <div className="max-w-7xl mx-auto bg-red-900/20 border border-red-700 rounded-lg p-8 text-center">
           <p className="text-red-400 font-light">No equirectangular images found</p>
-          <p className="text-red-300 text-sm mt-2">Total images in database: {images.length}</p>
-          <p className="text-red-300 text-sm">Categories available: {categories.length > 0 ? categories.join(', ') : 'None'}</p>
+          <p className="text-red-300 text-sm mt-2">Total images: {images.length}</p>
+          <p className="text-red-300 text-sm">Categories: {categories.length > 0 ? categories.join(', ') : 'None'}</p>
         </div>
       </div>
     )
@@ -223,6 +204,11 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
                   <span className="text-white text-lg font-light tracking-widest group-hover:text-amber-100 transition-colors">GO</span>
                 </div>
               </button>
+            </div>
+
+            {/* Image counter */}
+            <div className="text-gray-400 text-sm font-light">
+              {currentIdx + 1} / {carouselImages.length}
             </div>
           </div>
         </div>

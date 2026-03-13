@@ -26,7 +26,9 @@ export const metadata: Metadata = {
 export const revalidate = 3600
 
 export default async function HomePage() {
+  console.log('[v0] HomePage - Starting render')
   const supabase = await createClient()
+  console.log('[v0] HomePage - Supabase client created')
 
   // Fetch featured collection with video URL
   const { data: featuredCollection } = await supabase
@@ -35,6 +37,12 @@ export default async function HomePage() {
     .eq("is_featured", true)
     .eq("is_active", true)
     .single()
+    .catch(err => {
+      console.error('[v0] Error fetching featured collection:', err)
+      return { data: null }
+    })
+  
+  console.log('[v0] HomePage - Featured collection fetched')
 
   // Fetch first image from each category for the category cards
   const categories = [
@@ -44,13 +52,45 @@ export default async function HomePage() {
     { key: 'theatre', title: 'THEATRE', label: 'Online', link: '/theatre', accent: 'orange' as const },
   ]
 
-  // Fallback images for each category - using button design images
-  const fallbackImages: Record<string, string | null> = LANDING_PAGE_IMAGES
-
+  console.log('[v0] HomePage - Starting category cards')
+  
   const categoryCards = await Promise.all(
     categories.map(async (cat) => {
-      // For theatre and shows, always use the fallback button design image
-      if (cat.key === 'theatre' || cat.key === 'shows') {
+      try {
+        // For theatre and shows, always use the fallback button design image
+        if (cat.key === 'theatre' || cat.key === 'shows') {
+          return {
+            id: cat.key,
+            title: cat.title,
+            label: cat.label,
+            link: cat.link,
+            imageUrl: fallbackImages[cat.key],
+            accentColor: cat.accent,
+          }
+        }
+
+        const { data } = await supabase
+          .from("images")
+          .select("id, title, original_url, upscaled_url, thumbnail_large_url")
+          .eq("content_category", cat.key)
+          .eq("active", true)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single()
+          .catch(() => ({ data: null }))
+
+        const imageUrl = data?.upscaled_url || data?.original_url || fallbackImages[cat.key]
+
+        return {
+          id: cat.key,
+          title: cat.title,
+          label: cat.label,
+          link: cat.link,
+          imageUrl: imageUrl || null,
+          accentColor: cat.accent,
+        }
+      } catch (err) {
+        console.error(`[v0] Error loading category ${cat.key}:`, err)
         return {
           id: cat.key,
           title: cat.title,
@@ -60,28 +100,10 @@ export default async function HomePage() {
           accentColor: cat.accent,
         }
       }
-
-      const { data } = await supabase
-        .from("images")
-        .select("id, title, original_url, upscaled_url, thumbnail_large_url")
-        .eq("content_category", cat.key)
-        .eq("active", true)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single()
-
-      const imageUrl = data?.upscaled_url || data?.original_url || fallbackImages[cat.key]
-
-      return {
-        id: cat.key,
-        title: cat.title,
-        label: cat.label,
-        link: cat.link,
-        imageUrl: imageUrl || null,
-        accentColor: cat.accent,
-      }
     })
   )
+  
+  console.log('[v0] HomePage - Category cards complete, rendering...')
 
   return (
     <main className="min-h-screen w-full bg-black">
@@ -109,4 +131,3 @@ export default async function HomePage() {
       <GrandFinaleSection />
     </main>
   )
-}

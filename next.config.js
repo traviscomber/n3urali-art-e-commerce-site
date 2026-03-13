@@ -25,11 +25,9 @@ const nextConfig = {
     maxInactiveAge: 1000,
     pagesBufferLength: 2,
   },
-  webpack: (config, { dir }) => {
-    // Completely disable webpack caching to force fresh compilation
-    // This prevents old cached files from the previous project path from being used
+  webpack: (config, { isServer }) => {
+    // Force clean build
     config.cache = false
-    config.infrastructureLogging = { level: 'error' }
     return config
   },
 }

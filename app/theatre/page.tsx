@@ -79,6 +79,31 @@ export default async function TheatrePage() {
 
   if (error) console.error('[v0] Error fetching theatre images:', error)
 
+  // Group images by content_category to get featured images for each category
+  const imagesByCategory = (images as any[]).reduce((acc, img) => {
+    if (!acc[img.content_category]) {
+      acc[img.content_category] = []
+    }
+    acc[img.content_category].push(img)
+    return acc
+  }, {} as Record<string, any[]>)
+
+  // Get first image from each category or use fallback
+  const getCategoryImage = (categoryId: string): string => {
+    const categoryImages = imagesByCategory[categoryId] || imagesByCategory[CATEGORIES.find(c => c.id === categoryId)?.title] || []
+    if (categoryImages.length > 0 && categoryImages[0].thumbnail_medium_url) {
+      return categoryImages[0].thumbnail_medium_url
+    }
+    // Fallback to default images if no database images found
+    const fallbackMap: Record<string, string> = {
+      'nature': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatrecard1-KS7txT33WCKlyFXonD8HCCdAzxPTga.png',
+      'mythic': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatrecard3-UaaXg7KQTpFbTkm7lUNPbY2cAQTnXo.png',
+      'culture': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatrecard2-QFFV4ItZ8sqpWekmsFrL8s4rzbplUW.png',
+      'art': 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatrecard4-uRigMYs3nTQDbC7kH0WYBLfYIFdcxJ.png'
+    }
+    return fallbackMap[categoryId] || ''
+  }
+
   return (
     <main className="min-h-screen w-full bg-black text-white">
       {/* Hero Header */}
@@ -99,25 +124,20 @@ export default async function TheatrePage() {
         </div>
       </section>
 
-      {/* Category Grid */}
+      {/* Category Grid - Uses first image from each category */}
       <section className="px-6 md:px-12 lg:px-20 py-16 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {CATEGORIES.map((category, index) => {
-            const images = [
-              'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatrecard1-KS7txT33WCKlyFXonD8HCCdAzxPTga.png',
-              'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatrecard3-UaaXg7KQTpFbTkm7lUNPbY2cAQTnXo.png',
-              'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatrecard2-QFFV4ItZ8sqpWekmsFrL8s4rzbplUW.png',
-              'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Theatrecard4-uRigMYs3nTQDbC7kH0WYBLfYIFdcxJ.png'
-            ]
+          {CATEGORIES.map((category) => {
+            const categoryImage = getCategoryImage(category.id)
             return (
               <button
                 key={category.id}
                 className="group relative p-8 bg-gradient-to-br from-gray-900/60 to-gray-900/20 border border-gray-700 hover:border-gray-500 rounded-lg transition-all duration-300 text-left hover:scale-105 cursor-pointer overflow-hidden"
               >
-                {/* Background Image */}
+                {/* Background Image from Database or Fallback */}
                 <div 
                   className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-60 transition-opacity duration-300"
-                  style={{ backgroundImage: `url('${images[index]}')` }}
+                  style={{ backgroundImage: `url('${categoryImage}')` }}
                 />
                 
                 {/* Content Overlay */}

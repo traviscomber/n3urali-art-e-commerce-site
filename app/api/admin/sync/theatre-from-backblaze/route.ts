@@ -125,12 +125,13 @@ export async function POST(request: Request) {
     let allFiles: B2File[] = []
     let nextFileName: string | null = null
     let pageCount = 0
+    let filesResponse: Response
 
     do {
       pageCount++
       console.log(`[v0] Fetching page ${pageCount} of files...`)
       
-      const filesResponse: Response = await fetch(`${apiUrl}/b2api/v2/b2_list_file_names`, {
+      filesResponse = await fetch(`${apiUrl}/b2api/v2/b2_list_file_names`, {
         method: 'POST',
         headers: {
           Authorization: authorizationToken,

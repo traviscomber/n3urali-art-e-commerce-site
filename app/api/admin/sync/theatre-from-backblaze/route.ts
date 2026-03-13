@@ -121,22 +121,43 @@ export async function POST(request: Request) {
       throw new Error(`Bucket ${bucketName} not found`)
     }
 
-    // List all files in THEATRE/Categories/ folder
-    const filesResponse = await fetch(`${apiUrl}/b2api/v2/b2_list_file_names`, {
-      method: 'POST',
-      headers: {
-        Authorization: authorizationToken,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        bucketId: bucket.bucketId,
-        startFileName: 'THEATRE/Categories/',
-        prefix: 'THEATRE/Categories/',
-      }),
-    })
+    // List all files in THEATRE/Categories/ folder with pagination
+    let allFiles: B2File[] = []
+    let nextFileName: string | null = null
+    let pageCount = 0
 
-    const filesData = await filesResponse.json()
-    const files = filesData.files || []
+    do {
+      pageCount++
+      console.log(`[v0] Fetching page ${pageCount} of files...`)
+      
+      const filesResponse = await fetch(`${apiUrl}/b2api/v2/b2_list_file_names`, {
+        method: 'POST',
+        headers: {
+          Authorization: authorizationToken,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bucketId: bucket.bucketId,
+          startFileName: nextFileName || 'THEATRE/Categories/',
+          prefix: 'THEATRE/Categories/',
+          maxFileCount: 10000, // Request max files per page
+        }),
+      })
+
+      const filesData = await filesResponse.json()
+      const files = filesData.files || []
+      allFiles = allFiles.concat(files)
+      nextFileName = filesData.nextFileName || null
+
+      console.log(`[v0] Page ${pageCount}: Got ${files.length} files, next: ${nextFileName ? 'yes' : 'no'}`)
+
+      // Break if no more files
+      if (!nextFileName || files.length === 0) {
+        break
+      }
+    } while (nextFileName)
+
+    const files = allFiles
 
     console.log(`[v0] Found ${files.length} files in THEATRE/Categories/`)
 

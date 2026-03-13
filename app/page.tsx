@@ -84,7 +84,6 @@ export default async function HomePage() {
           .order("created_at", { ascending: false })
           .limit(1)
           .single()
-          .catch(() => ({ data: null }))
 
         const imageUrl = data?.upscaled_url || data?.original_url || fallbackImages[cat.key]
 

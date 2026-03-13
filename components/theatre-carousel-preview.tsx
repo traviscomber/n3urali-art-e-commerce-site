@@ -215,7 +215,7 @@ export function TheatreCarouselPreview({
             fov={130}
             sphereScale={5000}
             rotationSpeed={0.0002}
-            initialYaw={Math.PI}
+            initialYaw={0}
           />
         </div>
       )}

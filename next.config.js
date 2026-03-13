@@ -26,16 +26,10 @@ const nextConfig = {
     pagesBufferLength: 2,
   },
   webpack: (config, { dir }) => {
-    // Force webpack cache to use current project directory with absolute path
-    // Set maxAge to 0 to prevent cache reuse and force fresh builds
-    config.cache = {
-      type: 'filesystem',
-      cacheDirectory: path.join(dir, '.next', 'cache', 'webpack'),
-      name: 'client-webpack-cache',
-      maxAge: 0, // Disable cache aging to prevent old cache corruption issues
-      hashAlgorithm: 'md4',
-    }
-    config.infrastructureLogging = { level: 'error' } // Only show errors, not warnings
+    // Completely disable webpack caching to force fresh compilation
+    // This prevents old cached files from the previous project path from being used
+    config.cache = false
+    config.infrastructureLogging = { level: 'error' }
     return config
   },
 }

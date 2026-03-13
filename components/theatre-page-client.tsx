@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { TheatreCarouselPreview } from './theatre-carousel-preview'
+import { TheatreCarouselPreview } from '@/components/theatre-carousel-preview'
 
 const CATEGORIES = [
   {

@@ -14,9 +14,35 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
   const [currentIdx, setCurrentIdx] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [isViewerOpen, setIsViewerOpen] = useState(false)
+  const [currentCategory, setCurrentCategory] = useState<string | null>(null)
 
   // Get only equirectangular images for carousel
-  const carouselImages = images.filter(img => img.image_format === 'equirectangular').slice(0, 10)
+  const allCarouselImages = images.filter(img => img.image_format === 'equirectangular').slice(0, 50)
+
+  // Group images by content_category
+  const imagesByCategory = allCarouselImages.reduce((acc, img) => {
+    const category = img.content_category || 'Uncategorized'
+    if (!acc[category]) {
+      acc[category] = []
+    }
+    acc[category].push(img)
+    return acc
+  }, {} as Record<string, any[]>)
+
+  // Get sorted categories (order matters for display)
+  const categories = Object.keys(imagesByCategory).sort()
+  
+  // Set default category on mount
+  useEffect(() => {
+    if (!currentCategory && categories.length > 0) {
+      setCurrentCategory(categories[0])
+    }
+  }, [categories])
+
+  // Get images for current category, or all if none selected
+  const carouselImages = currentCategory && imagesByCategory[currentCategory] 
+    ? imagesByCategory[currentCategory]
+    : allCarouselImages
 
   // Extract folder name from file_path (e.g., "VIDS/Categories/Nature/Ocean-Surreal/filename.mov" -> "Ocean-Surreal")
   const extractFolderName = (filePath: string | null | undefined) => {
@@ -110,13 +136,42 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
 
   return (
     <>
+      {/* Category Navigation Tabs */}
+      {categories.length > 1 && (
+        <div className="w-full px-6 md:px-12 lg:px-20 py-8 border-b border-gray-700">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex gap-4 overflow-x-auto pb-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => {
+                    setCurrentCategory(category)
+                    setCurrentIdx(0)
+                    setIsTransitioning(false)
+                  }}
+                  className={`px-6 py-2 whitespace-nowrap rounded-lg transition-all font-light ${
+                    currentCategory === category
+                      ? 'bg-amber-600/20 border border-amber-400 text-amber-100'
+                      : 'bg-gray-900/50 border border-gray-700 text-gray-300 hover:border-gray-500 hover:text-gray-100'
+                  }`}
+                >
+                  {category}
+                  <span className="ml-2 text-xs opacity-70">({imagesByCategory[category].length})</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Carousel Preview - Only shown when viewer is closed */}
       {!isViewerOpen && (
-        <div className="w-full py-16">
-          {/* Seamless carousel with cross-dissolve and GO button */}
-          <div 
-            className="relative w-full aspect-video bg-gray-900 overflow-hidden mb-12 border border-gray-700 group cursor-pointer hover:border-gray-500 transition-colors"
-          >
+        <div className="w-full py-16 px-6 md:px-12 lg:px-20">
+          <div className="max-w-7xl mx-auto">
+            {/* Seamless carousel with cross-dissolve and GO button */}
+            <div 
+              className="relative w-full aspect-video bg-gray-900 overflow-hidden mb-12 border border-gray-700 group cursor-pointer hover:border-gray-500 transition-colors"
+            >
             {/* Current image - visible by default, only loads when not transitioning */}
             <div
               className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
@@ -155,6 +210,8 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
                 <span className="text-white text-lg font-light tracking-widest group-hover:text-amber-100 transition-colors">GO</span>
               </div>
             </button>
+          </div>
+        </div>
           </div>
         </div>
       )}

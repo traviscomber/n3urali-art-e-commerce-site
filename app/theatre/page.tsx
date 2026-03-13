@@ -95,7 +95,16 @@ export default async function TheatrePage() {
 
   // Get first image from each category or use fallback
   const getCategoryImage = (categoryId: string): string => {
-    const categoryImages = imagesByCategory[categoryId] || imagesByCategory[CATEGORIES.find(c => c.id === categoryId)?.title] || []
+    // Try to get by category ID first, then try by category title
+    let categoryImages = imagesByCategory[categoryId]
+    if (!categoryImages) {
+      const categoryTitle = CATEGORIES.find(c => c.id === categoryId)?.title
+      if (categoryTitle) {
+        categoryImages = imagesByCategory[categoryTitle]
+      }
+    }
+    categoryImages = categoryImages || []
+    
     if (categoryImages.length > 0 && categoryImages[0].thumbnail_medium_url) {
       return categoryImages[0].thumbnail_medium_url
     }

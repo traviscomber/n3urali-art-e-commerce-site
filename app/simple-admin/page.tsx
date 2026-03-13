@@ -13,6 +13,8 @@ export default function AdminPage() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [syncing, setSyncing] = useState(false)
+  const [syncResult, setSyncResult] = useState<any>(null)
 
   useEffect(() => {
     console.log('[v0] Page loaded')
@@ -110,10 +112,79 @@ export default function AdminPage() {
     }
   }
 
+  const syncTheatreFromBackblaze = async (clearExisting: boolean = false) => {
+    try {
+      setSyncing(true)
+      setSyncResult(null)
+      
+      const res = await fetch('/api/admin/sync/theatre-from-backblaze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clearExisting }),
+      })
+      
+      const data = await res.json()
+      setSyncResult(data)
+      
+      if (data.success) {
+        alert(`Sync successful! Imported: ${data.summary.imported}, Skipped: ${data.summary.skipped}`)
+        loadImages()
+      } else {
+        alert(`Sync failed: ${data.error}`)
+      }
+    } catch (err) {
+      alert('Error: ' + (err instanceof Error ? err.message : 'Sync failed'))
+      setSyncResult({ error: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setSyncing(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-black p-8">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold text-white mb-8">Admin Panel</h1>
+
+        {/* Sync Theatre Images from Backblaze */}
+        <div className="bg-blue-950 p-6 rounded-lg mb-8 border border-blue-700">
+          <h2 className="text-xl text-white mb-4">Sync Theatre Images from Backblaze</h2>
+          <p className="text-slate-300 text-sm mb-4">Scans THEATRE/Categories/ folder and imports all images to the database.</p>
+          <div className="flex gap-4">
+            <button
+              onClick={() => syncTheatreFromBackblaze(false)}
+              disabled={syncing}
+              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded disabled:opacity-50 font-semibold"
+            >
+              {syncing ? 'Syncing...' : 'Sync Images'}
+            </button>
+            <button
+              onClick={() => {
+                if (confirm('This will DELETE all existing theatre images first, then re-import. Continue?')) {
+                  syncTheatreFromBackblaze(true)
+                }
+              }}
+              disabled={syncing}
+              className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded disabled:opacity-50 font-semibold"
+            >
+              {syncing ? 'Syncing...' : 'Clear & Sync All'}
+            </button>
+          </div>
+          {syncResult && (
+            <div className="mt-4 p-4 bg-slate-800 rounded border border-slate-600">
+              {syncResult.success ? (
+                <div className="text-green-400">
+                  <p className="font-semibold">✓ Sync Successful</p>
+                  <p>Total files in theatre: {syncResult.summary.totalFilesInTheatre}</p>
+                  <p>Image files: {syncResult.summary.imageFiles}</p>
+                  <p>Imported: {syncResult.summary.imported}</p>
+                  <p>Skipped: {syncResult.summary.skipped}</p>
+                </div>
+              ) : (
+                <p className="text-red-400">Error: {syncResult.error}</p>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Add Image from Backblaze URL */}
         <div className="bg-slate-900 p-6 rounded-lg mb-8 border border-slate-700">

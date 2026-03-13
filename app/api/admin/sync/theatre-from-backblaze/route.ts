@@ -54,6 +54,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const { clearExisting } = await request.json().catch(() => ({}))
+    
     const apiKey = process.env.BACKBLAZE_API_KEY
     const applicationKey = process.env.BACKBLAZE_APPLICATION_KEY
     const bucketName = process.env.BACKBLAZE_BUCKET_NAME
@@ -63,6 +65,27 @@ export async function POST(request: Request) {
         { error: 'Backblaze credentials not configured' },
         { status: 400 }
       )
+    }
+
+    const supabase = await createClient()
+
+    // Clear existing theatre images if requested
+    if (clearExisting) {
+      console.log('[v0] Clearing existing theatre images from database...')
+      const { error: deleteError } = await supabase
+        .from('images')
+        .delete()
+        .eq('image_format', 'equirectangular')
+        .like('file_path', 'THEATRE/Categories/%')
+
+      if (deleteError) {
+        console.error('[v0] Error clearing existing images:', deleteError)
+        return NextResponse.json(
+          { error: `Failed to clear existing images: ${deleteError.message}` },
+          { status: 500 }
+        )
+      }
+      console.log('[v0] Cleared existing theatre images')
     }
 
     // Authenticate with B2
@@ -130,7 +153,6 @@ export async function POST(request: Request) {
     console.log(`[v0] Found ${imageFiles.length} image files`)
 
     // Parse each file to extract category and create database entry
-    const supabase = await createClient()
     let imported = 0
     let skipped = 0
     const results = []

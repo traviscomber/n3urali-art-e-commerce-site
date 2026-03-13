@@ -22,7 +22,7 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
   console.log('[v0] TheatreCarouselPreview - total images:', images.length)
   console.log('[v0] TheatreCarouselPreview - equirectangular images:', allCarouselImages.length)
 
-  // Group images by content_category
+  // Group images by content_category FIRST so we can use it everywhere
   const imagesByCategory = allCarouselImages.reduce((acc, img) => {
     const category = img.content_category || 'Uncategorized'
     if (!acc[category]) {
@@ -32,10 +32,10 @@ export function TheatreCarouselPreview({ images, collections }: CarouselPreviewP
     return acc
   }, {} as Record<string, any[]>)
 
-  console.log('[v0] TheatreCarouselPreview - categories:', Object.keys(imagesByCategory))
-
-  // Get sorted categories (order matters for display)
+  // Get sorted categories (order matters for display) - DEFINE BEFORE USING
   const categories = Object.keys(imagesByCategory).sort()
+  
+  console.log('[v0] TheatreCarouselPreview - categories:', categories)
   
   // Set default category on mount
   useEffect(() => {

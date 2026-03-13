@@ -88,7 +88,7 @@ export function TheatreCarouselPreview({
         setCurrentIdx(prev => (prev + 1) % carouselImages.length)
         setIsTransitioning(false)
       }, 1100)
-    }, 17000)
+    }, 30000)
 
     return () => clearInterval(interval)
   }, [carouselImages.length, isViewerOpen])
@@ -112,7 +112,7 @@ export function TheatreCarouselPreview({
     
     timeoutId = setTimeout(() => {
       setCurrentIdx(prev => (prev + 1) % carouselImages.length)
-    }, 20000)
+    }, 30000)
 
     return () => {
       if (timeoutId) clearTimeout(timeoutId)

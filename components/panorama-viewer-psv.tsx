@@ -125,7 +125,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           }
         )
         texture.encoding = THREE.sRGBColorSpace
-        texture.wrapS = THREE.RepeatWrapping
+        texture.wrapS = THREE.ClampToEdgeWrapping
         texture.wrapT = THREE.ClampToEdgeWrapping
 
         // Create OPTIMIZED sphere geometry (48 segments for 7x less geometry than 128)

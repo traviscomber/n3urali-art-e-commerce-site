@@ -34,13 +34,16 @@ export function TheatreCarouselPreview({
   // Filter equirectangular images
   const allCarouselImages = images.filter(img => img.image_format === 'equirectangular')
 
-  // Group by category
+  // Group by MAIN category (extract first part of content_category like "Nature" from "Nature/Ocean-Surreal")
   const imagesByCategory = allCarouselImages.reduce((acc, img) => {
-    const category = img.content_category || 'Uncategorized'
-    if (!acc[category]) {
-      acc[category] = []
+    // Extract main category from content_category (format: "MainCategory/Subcategory")
+    const fullCategory = img.content_category || 'Uncategorized'
+    const mainCategory = fullCategory.split('/')[0] // Get first part before the slash
+    
+    if (!acc[mainCategory]) {
+      acc[mainCategory] = []
     }
-    acc[category].push(img)
+    acc[mainCategory].push(img)
     return acc
   }, {} as Record<string, any[]>)
 

@@ -216,7 +216,7 @@ export default async function TheatrePage() {
           </div>
           <div className="h-64 md:h-80 rounded-lg overflow-hidden border border-gray-800 bg-gray-900/20">
             <div className="w-full h-full bg-cover bg-center" style={{
-              backgroundImage: 'url(https://images.unsplash.com/photo-1578321272176-e69f6e9ff59e?w=800&q=80)'
+              backgroundImage: 'url(https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Imatoenv-PglM2dLLJt3S1ss795wqe2XdSC3noa.png)'
             }} />
           </div>
         </div>

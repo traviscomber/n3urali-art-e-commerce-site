@@ -40,7 +40,6 @@ export default async function TheatrePage() {
     .from('images')
     .select('id, title, original_url, image_format, description, tags, thumbnail_medium_url, upscaled_url, content_category, file_path, active, created_at')
     .eq('image_format', 'equirectangular')
-    .order('content_category', { ascending: true })
     .order('created_at', { ascending: false })
 
   const images = imagesData || []
@@ -48,6 +47,9 @@ export default async function TheatrePage() {
   if (error) {
     console.error('[v0] Error fetching theatre images:', error)
   }
+
+  // Shuffle images to get random display
+  const shuffledImages = [...images].sort(() => Math.random() - 0.5)
 
   // Get first image from each category for the category cards
   const imagesByCategory = (images as any[]).reduce((acc, img) => {
@@ -75,6 +77,20 @@ export default async function TheatrePage() {
 
   return (
     <main className="min-h-screen w-full bg-black text-white">
+      {/* Theatre Carousel - Shows random images on load */}
+      <section className="w-full">
+        {images.length > 0 ? (
+          <TheatreCarouselPreview 
+            images={shuffledImages} 
+            collections={[]}
+          />
+        ) : (
+          <div className="text-center py-20 px-6">
+            <p className="text-gray-400">Loading images from Backblaze...</p>
+          </div>
+        )}
+      </section>
+
       {/* Hero Header */}
       <section className="px-6 md:px-12 lg:px-20 py-20 md:py-32 max-w-7xl mx-auto">
         <h1 className="text-5xl md:text-7xl font-light mb-4 text-amber-50">Theatre</h1>
@@ -87,11 +103,15 @@ export default async function TheatrePage() {
           <p className="leading-relaxed">
             Each panoramic image is an equirectangular capture representing the visual foundation of immersive productions.
           </p>
+          <p className="leading-relaxed text-sm text-gray-400">
+            Explore our 4 domains below or click GO to enter any panoramic environment.
+          </p>
         </div>
       </section>
 
-      {/* Category Grid */}
-      <section className="px-6 md:px-12 lg:px-20 py-16 max-w-7xl mx-auto">
+      {/* Category Grid - Click to filter carousel by category */}
+      <section className="px-6 md:px-12 lg:px-20 py-16 max-w-7xl mx-auto border-t border-gray-800">
+        <h2 className="text-3xl font-light mb-12 text-amber-50">Explore by Domain</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {CATEGORIES.map((category) => {
             const categoryImage = getCategoryImage(category.title)
@@ -99,7 +119,7 @@ export default async function TheatrePage() {
             return (
               <div
                 key={category.id}
-                className="group relative p-8 bg-gradient-to-br from-gray-900/60 to-gray-900/20 border border-gray-700 hover:border-gray-500 rounded-lg transition-all duration-300 text-left hover:scale-105 cursor-pointer overflow-hidden"
+                className="group relative p-8 bg-gradient-to-br from-gray-900/60 to-gray-900/20 border border-gray-700 hover:border-amber-400 rounded-lg transition-all duration-300 text-left hover:scale-105 cursor-pointer overflow-hidden"
               >
                 {/* Background Image */}
                 <div 
@@ -121,22 +141,8 @@ export default async function TheatrePage() {
         </div>
       </section>
 
-      {/* Theatre Carousel - Shows all filtered images by category */}
-      <section className="w-full py-20 border-t border-gray-800">
-        {images.length > 0 ? (
-          <TheatreCarouselPreview 
-            images={images} 
-            collections={[]}
-          />
-        ) : (
-          <div className="text-center py-20 px-6">
-            <p className="text-gray-400">Loading images from Backblaze...</p>
-          </div>
-        )}
-      </section>
-
       {/* Footer Section */}
-      <section className="px-6 md:px-12 lg:px-20 py-20 max-w-7xl mx-auto">
+      <section className="px-6 md:px-12 lg:px-20 py-20 max-w-7xl mx-auto border-t border-gray-800">
         <div className="bg-gray-900/50 border border-gray-700 p-12 md:p-16 rounded-lg">
           <h2 className="text-3xl font-light mb-6 text-amber-50">Collaborate with Us</h2>
           <p className="text-gray-300 leading-relaxed mb-8">

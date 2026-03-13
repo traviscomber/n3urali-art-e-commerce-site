@@ -145,6 +145,10 @@ export async function POST(request: Request) {
         }),
       })
 
+      if (!filesResponse.ok) {
+        throw new Error(`B2 list files failed: ${filesResponse.statusText}`)
+      }
+
       const filesData = await filesResponse.json()
       const files = filesData.files || []
       allFiles = allFiles.concat(files)

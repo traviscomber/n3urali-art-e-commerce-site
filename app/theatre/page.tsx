@@ -77,8 +77,25 @@ export default async function TheatrePage() {
 
   return (
     <main className="min-h-screen w-full bg-black text-white">
+      {/* Hero Header - Explains what the theatre is FIRST */}
+      <section className="px-6 md:px-12 lg:px-20 py-16 md:py-20 max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-5xl md:text-7xl font-light mb-4 text-amber-50">N3urali Theatre</h1>
+          <p className="text-xl md:text-2xl font-light text-gray-400">A Curated Gallery of Immersive Worlds</p>
+        </div>
+        
+        <div className="space-y-6 text-gray-300 max-w-3xl">
+          <p className="leading-relaxed">
+            The N3urali Theatre presents a collection of 360° equirectangular panoramic environments designed to be experienced as living, breathing spaces. Each image is a window into immersive worlds spanning four distinct domains.
+          </p>
+          <p className="leading-relaxed text-sm text-gray-400">
+            Click any image below to enter the panoramic viewer and explore in fullscreen. Use the domain filters to discover curated collections within Nature, Culture, Mythic Realms, and Art.
+          </p>
+        </div>
+      </section>
+
       {/* Theatre Carousel - Shows random images on load */}
-      <section className="w-full">
+      <section className="w-full border-t border-gray-800">
         {images.length > 0 ? (
           <TheatreCarouselPreview 
             images={shuffledImages} 
@@ -89,24 +106,6 @@ export default async function TheatrePage() {
             <p className="text-gray-400">Loading images from Backblaze...</p>
           </div>
         )}
-      </section>
-
-      {/* Hero Header */}
-      <section className="px-6 md:px-12 lg:px-20 py-20 md:py-32 max-w-7xl mx-auto">
-        <h1 className="text-5xl md:text-7xl font-light mb-4 text-amber-50">Theatre</h1>
-        <p className="text-xl md:text-2xl font-light text-gray-400 mb-12">A Curated Gallery of Immersive Worlds</p>
-        
-        <div className="space-y-6 text-gray-300 max-w-3xl">
-          <p className="leading-relaxed">
-            The N3urali Theatre presents a collection of visual environments designed to be experienced as living, breathing spaces.
-          </p>
-          <p className="leading-relaxed">
-            Each panoramic image is an equirectangular capture representing the visual foundation of immersive productions.
-          </p>
-          <p className="leading-relaxed text-sm text-gray-400">
-            Explore our 4 domains below or click GO to enter any panoramic environment.
-          </p>
-        </div>
       </section>
 
       {/* Category Grid - Click to filter carousel by category */}

@@ -340,22 +340,29 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
     if (!enableFestivalTransitions || !autoAdvanceInterval || !onAutoAdvance) return
     if (isTransitioningRef.current) return
     
+    const CROSSFADE_DURATION = 600 // 600ms for smooth crossfade
+    
+    // Start crossfade early so it completes by the autoAdvanceInterval time
+    const crossfadeStartTime = autoAdvanceInterval - CROSSFADE_DURATION - 50 // 50ms buffer
+    
     const timeout = setTimeout(() => {
       // Only advance if next image is preloaded and ready
       if (nextSphereRef.current && nextMaterialRef.current) {
         transitionProgressRef.current = 0
         isTransitioningRef.current = true
-        console.log('[v0] Starting auto-advance crossfade transition')
+        console.log('[v0] Starting auto-advance crossfade transition (finishes at ~30s)')
         
         // After transition completes, advance to next image
         const transitionTimeout = setTimeout(() => {
-          console.log('[v0] Auto-advance callback triggered')
+          console.log('[v0] Crossfade complete, auto-advance to next image')
           onAutoAdvance?.()
-        }, 700) // 600ms crossfade + 100ms buffer
+        }, CROSSFADE_DURATION + 50)
         
         return () => clearTimeout(transitionTimeout)
+      } else {
+        console.warn('[v0] Next image not preloaded yet, skipping crossfade')
       }
-    }, autoAdvanceInterval)
+    }, crossfadeStartTime)
     
     return () => clearTimeout(timeout)
   }, [autoAdvanceInterval, enableFestivalTransitions, onAutoAdvance])

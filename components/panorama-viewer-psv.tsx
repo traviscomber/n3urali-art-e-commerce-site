@@ -62,7 +62,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   // Fade effect timing - track elapsed time in current image
   const imageStartTimeRef = useRef<number | null>(null)
   const FADE_IN_DURATION = 3000 // 3 seconds fade in
-  const FADE_OUT_START_TIME = 33000 // Start fade out at 33 seconds (36 - 3)
+  const FADE_OUT_START_TIME = 27000 // Start fade out at 27 seconds (30 - 3 for fade duration)
 
   useEffect(() => {
     const loadPanorama = async () => {
@@ -293,7 +293,6 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
             if (elapsedTime >= FADE_OUT_START_TIME - 1000 && elapsedTime <= FADE_OUT_START_TIME + FADE_IN_DURATION + 1000) {
               console.log(`[v0] TIMING: elapsedTime=${elapsedTime}ms, START=${FADE_OUT_START_TIME}ms, END=${FADE_OUT_START_TIME + FADE_IN_DURATION}ms, transitioning=${isTransitioningRef.current}`)
             }
-            
             // Fade in from 0-3 seconds
             if (elapsedTime < FADE_IN_DURATION) {
               const fadeInProgress = elapsedTime / FADE_IN_DURATION
@@ -308,7 +307,6 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
                 ? 4 * fadeOutProgress * fadeOutProgress * fadeOutProgress
                 : 1 - Math.pow(-2 * fadeOutProgress + 2, 3) / 2
               fadedOpacity = 1 - cubicEase
-              console.log(`[v0] FADE-OUT ACTIVE: progress=${fadeOutProgress.toFixed(3)}, easeProgress=${cubicEase.toFixed(3)}, fadedOpacity=${fadedOpacity.toFixed(3)}`)
             }
           }
 

@@ -378,13 +378,12 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
     preloadNextImage()
   }, [nextImageUrl])
 
-  // Auto-advance to next image with seamless 3-second crossfade (33-36 seconds for 36s loop)
+  // Auto-advance to next image with seamless 4-second crossfade (32-36 seconds for 36s loop)
   useEffect(() => {
     if (!enableFestivalTransitions || !autoAdvanceInterval || !onAutoAdvance) return
     if (isTransitioningRef.current) return
     
-    const CROSSFADE_DURATION = 3000 // 3 seconds for gentle overlapping crossfade
-    
+    const CROSSFADE_DURATION = 4000 // 4 seconds for smooth, extended fade
     // Start crossfade at (total - 3 seconds) so it completes by the interval
     // For 36s loop: fade from second 33-36
     const crossfadeStartTime = autoAdvanceInterval - CROSSFADE_DURATION

@@ -303,6 +303,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
                 ? 4 * fadeOutProgress * fadeOutProgress * fadeOutProgress
                 : 1 - Math.pow(-2 * fadeOutProgress + 2, 3) / 2
               fadedOpacity = 1 - cubicEase
+              console.log(`[v0] FADE-OUT: elapsedTime=${elapsedTime}ms, progress=${fadeOutProgress.toFixed(3)}, fadedOpacity=${fadedOpacity.toFixed(3)}`)
             }
           }
 

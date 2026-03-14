@@ -416,6 +416,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         setIsLoading(false)
       }
     }
+    }
 
     loadPanorama()
 

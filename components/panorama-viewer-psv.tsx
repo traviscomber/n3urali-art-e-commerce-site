@@ -289,6 +289,11 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           if (imageStartTimeRef.current) {
             const elapsedTime = Date.now() - imageStartTimeRef.current
             
+            // Debug: log timing every second during fade-out window
+            if (elapsedTime >= FADE_OUT_START_TIME - 1000 && elapsedTime <= FADE_OUT_START_TIME + FADE_IN_DURATION + 1000) {
+              console.log(`[v0] TIMING: elapsedTime=${elapsedTime}ms, START=${FADE_OUT_START_TIME}ms, END=${FADE_OUT_START_TIME + FADE_IN_DURATION}ms, transitioning=${isTransitioningRef.current}`)
+            }
+            
             // Fade in from 0-3 seconds
             if (elapsedTime < FADE_IN_DURATION) {
               const fadeInProgress = elapsedTime / FADE_IN_DURATION
@@ -303,7 +308,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
                 ? 4 * fadeOutProgress * fadeOutProgress * fadeOutProgress
                 : 1 - Math.pow(-2 * fadeOutProgress + 2, 3) / 2
               fadedOpacity = 1 - cubicEase
-              console.log(`[v0] FADE-OUT: elapsedTime=${elapsedTime}ms, progress=${fadeOutProgress.toFixed(3)}, fadedOpacity=${fadedOpacity.toFixed(3)}`)
+              console.log(`[v0] FADE-OUT ACTIVE: progress=${fadeOutProgress.toFixed(3)}, easeProgress=${cubicEase.toFixed(3)}, fadedOpacity=${fadedOpacity.toFixed(3)}`)
             }
           }
 

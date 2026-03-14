@@ -362,16 +362,6 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
             rotationYRef.current = rotationSpeed
           }
 
-          // Smooth camera FOV transitions
-          if (cameraFovTransitionRef.current !== currentFovRef.current) {
-            const fovDifference = currentFovRef.current - cameraFovTransitionRef.current
-            cameraFovTransitionRef.current += fovDifference * 0.1
-            if (cameraRef.current) {
-              cameraRef.current.fov = cameraFovTransitionRef.current
-              cameraRef.current.updateProjectionMatrix()
-            }
-          }
-
           // Auto-rotate if relaxMode enabled
           if (relaxMode && sphereRef.current) {
             sphereRef.current.rotation.y += rotationYRef.current
@@ -386,30 +376,6 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         }
 
         animate()
-
-        // Handle window resize
-        const handleResize = () => {
-          const newWidth = window.innerWidth
-          const newHeight = window.innerHeight
-          camera.aspect = newWidth / newHeight
-          camera.updateProjectionMatrix()
-          renderer.setSize(newWidth, newHeight)
-        }
-
-        window.addEventListener('resize', handleResize)
-
-        // Cleanup
-        return () => {
-          window.removeEventListener('resize', handleResize)
-          canvas.removeEventListener('wheel', handleWheel)
-          if (animationRef.current) {
-            cancelAnimationFrame(animationRef.current)
-          }
-          renderer.dispose()
-          geometry.dispose()
-          material.dispose()
-          texture.dispose()
-        }
       } catch (err) {
         console.error('[v0] Panorama initialization error:', err)
         setError('Failed to initialize panorama viewer')

@@ -402,9 +402,6 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
     
     return () => clearTimeout(timeout)
   }, [autoAdvanceInterval, enableFestivalTransitions, onAutoAdvance])
-    
-    return () => clearTimeout(timeout)
-  }, [autoAdvanceInterval, enableFestivalTransitions, onAutoAdvance])
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {

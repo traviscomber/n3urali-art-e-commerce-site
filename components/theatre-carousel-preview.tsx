@@ -244,7 +244,7 @@ export function TheatreCarouselPreview({
             rotationSpeed={0.0002}
             initialYaw={0}
             enableFestivalTransitions={true}
-            autoAdvanceInterval={30000}
+            autoAdvanceInterval={36000}
           />
         </div>
       )}

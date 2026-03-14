@@ -55,6 +55,10 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   const nextImageUrlRef = useRef<string | null>(null)
   const cameraFovTransitionRef = useRef(fov)
   const rotationSpeedTransitionRef = useRef(rotationSpeed)
+  // Touch/drag control references
+  const mouseDownRef = useRef(false)
+  const mouseXRef = useRef(0)
+  const mouseDeltaRef = useRef(0)
 
   useEffect(() => {
     const loadPanorama = async () => {
@@ -118,10 +122,14 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         renderer.outputColorSpace = THREE.SRGBColorSpace
         console.log('[v0] Renderer initialized with high quality settings, size:', width, 'x', height)
         
-        // Load panorama image with CORS
+        // Load panorama image with CORS and adaptive quality
         const textureLoader = new THREE.TextureLoader()
         textureLoader.setCrossOrigin('anonymous')
-        console.log('[v0] Loading texture from:', imageUrl)
+        
+        // Adaptive geometry quality based on device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        const geometrySegments = isMobile ? 128 : 256 // Reduce segments on mobile
+        console.log('[v0] Loading texture from:', imageUrl, '- Device:', isMobile ? 'Mobile' : 'Desktop')
         
         const texture = textureLoader.load(
           imageUrl,
@@ -142,8 +150,8 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         texture.minFilter = THREE.LinearFilter // Smooth filtering to prevent artifacts
         texture.magFilter = THREE.LinearFilter
 
-        // Create high-quality sphere geometry (256 segments for smooth curves without seams)
-        const geometry = new THREE.SphereGeometry(sphereScale, 256, 256)
+        // Create high-quality sphere geometry (adaptive segments based on device)
+        const geometry = new THREE.SphereGeometry(sphereScale, geometrySegments, geometrySegments)
         const material = new THREE.MeshBasicMaterial({
           map: texture,
           side: THREE.BackSide,
@@ -181,7 +189,70 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           }
         }
 
+        // Mouse drag to pan panorama
+        const handleMouseDown = (e: MouseEvent) => {
+          mouseDownRef.current = true
+          mouseXRef.current = e.clientX
+          mouseDeltaRef.current = 0
+        }
+
+        const handleMouseMove = (e: MouseEvent) => {
+          if (!mouseDownRef.current || !sphereRef.current) return
+          
+          const deltaX = e.clientX - mouseXRef.current
+          mouseDeltaRef.current = deltaX * 0.005 // Sensitivity factor
+          mouseXRef.current = e.clientX
+          
+          // Apply pan rotation
+          if (sphereRef.current) {
+            sphereRef.current.rotation.y -= mouseDeltaRef.current
+          }
+          if (nextSphereRef.current) {
+            nextSphereRef.current.rotation.y -= mouseDeltaRef.current
+          }
+        }
+
+        const handleMouseUp = () => {
+          mouseDownRef.current = false
+          mouseDeltaRef.current = 0
+        }
+
+        // Touch controls for mobile
+        const handleTouchStart = (e: TouchEvent) => {
+          if (e.touches.length === 1) {
+            mouseDownRef.current = true
+            mouseXRef.current = e.touches[0].clientX
+          }
+        }
+
+        const handleTouchMove = (e: TouchEvent) => {
+          if (!mouseDownRef.current || e.touches.length !== 1 || !sphereRef.current) return
+          
+          const deltaX = e.touches[0].clientX - mouseXRef.current
+          mouseDeltaRef.current = deltaX * 0.005
+          mouseXRef.current = e.touches[0].clientX
+          
+          if (sphereRef.current) {
+            sphereRef.current.rotation.y -= mouseDeltaRef.current
+          }
+          if (nextSphereRef.current) {
+            nextSphereRef.current.rotation.y -= mouseDeltaRef.current
+          }
+        }
+
+        const handleTouchEnd = () => {
+          mouseDownRef.current = false
+          mouseDeltaRef.current = 0
+        }
+
         canvas.addEventListener('wheel', handleWheel, { passive: false })
+        canvas.addEventListener('mousedown', handleMouseDown)
+        canvas.addEventListener('mousemove', handleMouseMove)
+        canvas.addEventListener('mouseup', handleMouseUp)
+        canvas.addEventListener('mouseleave', handleMouseUp)
+        canvas.addEventListener('touchstart', handleTouchStart, { passive: true })
+        canvas.addEventListener('touchmove', handleTouchMove, { passive: true })
+        canvas.addEventListener('touchend', handleTouchEnd, { passive: true })
 
         // Render initial frame
         renderer.clear()

@@ -204,18 +204,23 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
               transitionProgressRef.current = 1
               isTransitioningRef.current = false
               
-              // Ensure next layer is now fully visible
-              materialRef.current.opacity = 0
-              materialRef.current.transparent = true
-              nextMaterialRef.current.opacity = 1
-              nextMaterialRef.current.transparent = false
+              // SWAP references: next becomes current, old is removed
+              // Remove old sphere from scene
+              sceneRef.current?.remove(sphereRef.current)
               
-              // Cleanup old sphere after transition completes
-              if (nextSphereRef.current) {
-                sceneRef.current?.remove(nextSphereRef.current)
-              }
+              // Swap sphere and material references
+              sphereRef.current = nextSphereRef.current
+              materialRef.current = nextMaterialRef.current
+              
+              // Ensure current layer is fully visible
+              materialRef.current.opacity = 1
+              materialRef.current.transparent = false
+              
+              // Clear next references
               nextSphereRef.current = null
               nextMaterialRef.current = null
+              
+              console.log('[v0] Crossfade complete, next image now current')
             } else {
               // Ultra-smooth easing function for imperceptible transitions
               const easeProgress = transitionProgressRef.current < 0.5 

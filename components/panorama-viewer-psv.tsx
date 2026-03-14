@@ -303,7 +303,6 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
                 ? 4 * fadeOutProgress * fadeOutProgress * fadeOutProgress
                 : 1 - Math.pow(-2 * fadeOutProgress + 2, 3) / 2
               fadedOpacity = 1 - cubicEase
-              console.log(`[v0] FADE-OUT: elapsed=${elapsedTime}ms, progress=${fadeOutProgress.toFixed(3)}, easeProgress=${cubicEase.toFixed(3)}, opacity=${fadedOpacity.toFixed(3)}`)
             }
           }
 
@@ -343,8 +342,11 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
               }
               
               // Apply fade-out effect to current image and crossfade to next
+              // Current image: apply both crossfade (1 - easeProgress) AND fade-out effect (fadedOpacity)
               materialRef.current.opacity = Math.max(0, (1 - easeProgress) * fadedOpacity)
-              materialRef.current.transparent = easeProgress > 0
+              materialRef.current.transparent = easeProgress > 0 || fadedOpacity < 1
+              
+              // Next image: simple crossfade in (no fade effect needed, it already has fade-in)
               nextMaterialRef.current.opacity = Math.min(1, easeProgress)
               nextMaterialRef.current.transparent = easeProgress < 1
               

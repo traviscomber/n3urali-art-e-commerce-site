@@ -179,20 +179,24 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         renderer.render(scene, camera)
         console.log(`[v0] Initial render completed with FOV ${fov}`)
 
-        // Animation loop optimized for speed with smooth blending and festival transitions
+        // Animation loop optimized for 30 FPS with smooth transitions
+        let lastFrameTime = Date.now()
         const animate = () => {
           animationRef.current = requestAnimationFrame(animate)
+          
+          const currentTime = Date.now()
+          const deltaTime = (currentTime - lastFrameTime) / 1000 // Convert to seconds
+          lastFrameTime = currentTime
 
           // Smooth fade transition (600ms for elegant feel in festival mode)
           if (isTransitioningRef.current && materialRef.current) {
-            transitionProgressRef.current += 0.016 / 0.6 // 600ms transition at 60fps
+            transitionProgressRef.current += deltaTime / 0.6 // 600ms transition
             if (transitionProgressRef.current >= 1) {
               transitionProgressRef.current = 1
               isTransitioningRef.current = false
               materialRef.current.transparent = false
               materialRef.current.opacity = 1
-              // Reset rotation speed to normal after transition
-              rotationYRef.current = initialYaw
+              // Don't reset rotation - let it continue naturally
             } else {
               // Smooth easing function for elegant transition
               const easeProgress = transitionProgressRef.current < 0.5 
@@ -202,9 +206,12 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
               materialRef.current.opacity = easeProgress
               materialRef.current.transparent = true
               
-              // Gentle pause during transition (slow rotation speed)
-              rotationYRef.current = initialYaw + (rotationSpeed * 0.3 * easeProgress)
+              // Gentle pause during transition (slow rotation speed by 70%)
+              rotationYRef.current = rotationSpeed * (1 - 0.7 * easeProgress)
             }
+          } else {
+            // Normal rotation when not transitioning
+            rotationYRef.current = rotationSpeed
           }
 
           // Smooth camera FOV transition for zoom effects

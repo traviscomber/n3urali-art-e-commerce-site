@@ -265,6 +265,11 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           if (relaxMode && sphereRef.current) {
             sphereRef.current.rotation.y += rotationYRef.current
           }
+          
+          // Keep next sphere rotation in sync during preload and crossfade
+          if (nextSphereRef.current) {
+            nextSphereRef.current.rotation.y += rotationYRef.current
+          }
 
           renderer.render(scene, camera)
         }

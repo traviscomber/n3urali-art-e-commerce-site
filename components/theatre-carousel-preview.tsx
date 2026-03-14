@@ -34,7 +34,7 @@ export function TheatreCarouselPreview({
   // Filter equirectangular images
   const allCarouselImages = images.filter(img => img.image_format === 'equirectangular')
 
-  // Group by MAIN category (extract first part of content_category like "Nature" from "Nature/Ocean-Surreal")
+  // Group by MAIN category and sort sequentially within each category
   const imagesByCategory = allCarouselImages.reduce((acc, img) => {
     // Extract main category from content_category (format: "MainCategory/Subcategory")
     const fullCategory = img.content_category || 'Uncategorized'
@@ -46,6 +46,15 @@ export function TheatreCarouselPreview({
     acc[mainCategory].push(img)
     return acc
   }, {} as Record<string, any[]>)
+
+  // Sort images within each category by file_path for sequential playback
+  Object.keys(imagesByCategory).forEach(category => {
+    imagesByCategory[category].sort((a, b) => {
+      const pathA = a.file_path || ''
+      const pathB = b.file_path || ''
+      return pathA.localeCompare(pathB)
+    })
+  })
 
   // Filter to only show the 4 main categories that have images
   const categories = MAIN_CATEGORIES.filter(cat => imagesByCategory[cat] && imagesByCategory[cat].length > 0).sort()
@@ -213,7 +222,19 @@ export function TheatreCarouselPreview({
             title={extractFolderName(currentImage.file_path)}
             onClose={() => setIsViewerOpen(false)}
             onAutoAdvance={() => {
-              setCurrentIdx(prev => (prev + 1) % carouselImages.length)
+              const nextIdx = (currentIdx + 1) % carouselImages.length
+              
+              // If we've reached the end of current category, move to next category
+              if (nextIdx === 0 && currentCategory) {
+                const currentCategoryIndex = categories.indexOf(currentCategory)
+                const nextCategoryIndex = (currentCategoryIndex + 1) % categories.length
+                setCurrentCategory(categories[nextCategoryIndex])
+                setCurrentIdx(0)
+                console.log('[v0] Category complete, moving to:', categories[nextCategoryIndex])
+              } else {
+                // Continue within current category
+                setCurrentIdx(nextIdx)
+              }
             }}
             relaxMode={true}
             fov={130}

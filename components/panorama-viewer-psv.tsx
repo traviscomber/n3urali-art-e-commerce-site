@@ -59,6 +59,10 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   const mouseDownRef = useRef(false)
   const mouseXRef = useRef(0)
   const mouseDeltaRef = useRef(0)
+  // Fade effect timing - track elapsed time in current image
+  const imageStartTimeRef = useRef<number | null>(null)
+  const FADE_IN_DURATION = 3000 // 3 seconds fade in
+  const FADE_OUT_START_TIME = 33000 // Start fade out at 33 seconds (36 - 3)
 
   useEffect(() => {
     const loadPanorama = async () => {
@@ -274,7 +278,11 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
             firstFrameRendered = true
             setIsLoading(false)
             console.log('[v0] First frame rendered, loading complete')
-          }          // Dual-layer crossfade transition with enhanced fade effects
+            // Reset fade timer when new image starts
+            imageStartTimeRef.current = Date.now()
+          }
+
+          // Dual-layer crossfade transition with enhanced fade effects
           if (isTransitioningRef.current && materialRef.current && nextMaterialRef.current) {
             transitionProgressRef.current += deltaTime / 3.0 // 3-second crossfade
             if (transitionProgressRef.current >= 1) {
@@ -319,10 +327,37 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
               rotationYRef.current = rotationSpeed * (1 - 0.9 * easeProgress)
             }
           } else {
-            // Normal state - current layer fully visible
+            // Normal state - apply fade in/out effects based on elapsed time
             if (materialRef.current) {
-              materialRef.current.opacity = 1
-              materialRef.current.transparent = false
+              let opacity = 1
+              
+              if (imageStartTimeRef.current) {
+                const elapsedTime = Date.now() - imageStartTimeRef.current
+                
+                // Fade in from 0-3 seconds
+                if (elapsedTime < FADE_IN_DURATION) {
+                  const fadeInProgress = elapsedTime / FADE_IN_DURATION
+                  // Use cubic easing for smooth fade in
+                  opacity = fadeInProgress < 0.5 
+                    ? 4 * fadeInProgress * fadeInProgress * fadeInProgress
+                    : 1 - Math.pow(-2 * fadeInProgress + 2, 3) / 2
+                  console.log(`[v0] Fade in - elapsed: ${elapsedTime}ms, opacity: ${opacity.toFixed(2)}`)
+                }
+                // Fade out from 33-36 seconds  
+                else if (elapsedTime >= FADE_OUT_START_TIME) {
+                  const fadeOutProgress = (elapsedTime - FADE_OUT_START_TIME) / FADE_IN_DURATION
+                  if (fadeOutProgress <= 1) {
+                    // Use cubic easing for smooth fade out
+                    opacity = 1 - (fadeOutProgress < 0.5 
+                      ? 4 * fadeOutProgress * fadeOutProgress * fadeOutProgress
+                      : 1 - Math.pow(-2 * fadeOutProgress + 2, 3) / 2)
+                    console.log(`[v0] Fade out - elapsed: ${elapsedTime}ms, opacity: ${opacity.toFixed(2)}`)
+                  }
+                }
+              }
+              
+              materialRef.current.opacity = opacity
+              materialRef.current.transparent = opacity < 1
             }
             rotationYRef.current = rotationSpeed
           }

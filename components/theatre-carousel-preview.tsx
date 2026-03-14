@@ -49,7 +49,7 @@ export function TheatreCarouselPreview({
 
   // Sort images within each category by file_path for sequential playback
   Object.keys(imagesByCategory).forEach(category => {
-    imagesByCategory[category].sort((a, b) => {
+    imagesByCategory[category].sort((a: any, b: any) => {
       const pathA = a.file_path || ''
       const pathB = b.file_path || ''
       return pathA.localeCompare(pathB)

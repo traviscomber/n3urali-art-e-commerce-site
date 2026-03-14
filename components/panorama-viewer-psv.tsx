@@ -127,7 +127,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           imageUrl,
           () => {
             console.log('[v0] Texture loaded successfully')
-            setIsLoading(false)
+            // Don't hide loading here - let it hide after first render
           },
           undefined,
           (error: any) => {
@@ -190,14 +190,20 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
 
         // Animation loop optimized for 30 FPS with dual-layer crossfade
         let lastFrameTime = Date.now()
+        let firstFrameRendered = false
         const animate = () => {
           animationRef.current = requestAnimationFrame(animate)
           
           const currentTime = Date.now()
           const deltaTime = (currentTime - lastFrameTime) / 1000
           lastFrameTime = currentTime
-
-          // Dual-layer crossfade transition (3 seconds from second 27-30 for gentle festival transitions)
+          
+          // Hide loading spinner on first frame render
+          if (!firstFrameRendered) {
+            firstFrameRendered = true
+            setIsLoading(false)
+            console.log('[v0] First frame rendered, loading complete')
+          }          // Dual-layer crossfade transition (3 seconds from second 27-30 for gentle festival transitions)
           if (isTransitioningRef.current && materialRef.current && nextMaterialRef.current) {
             transitionProgressRef.current += deltaTime / 3.0 // 3-second crossfade
             if (transitionProgressRef.current >= 1) {

@@ -427,7 +427,6 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
       if (rendererRef.current && cameraRef.current && canvasRef.current) {
         const width = window.innerWidth
         const height = window.innerHeight
-        
         cameraRef.current.aspect = width / height
         cameraRef.current.updateProjectionMatrix()
         rendererRef.current.setSize(width, height)

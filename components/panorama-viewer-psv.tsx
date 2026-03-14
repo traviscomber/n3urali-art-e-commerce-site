@@ -382,26 +382,22 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         console.log('[v0] Starting 3-second crossfade (sec 27-30)')
         
         // After crossfade completes, advance to next image
-        const transitionTimeout = setTimeout(() => {
+        setTimeout(() => {
           console.log('[v0] Crossfade complete, advancing to next image')
           onAutoAdvance?.()
         }, CROSSFADE_DURATION)
-        
-        return () => clearTimeout(transitionTimeout)
       } else {
         console.warn('[v0] Next image not ready, waiting for preload to complete...')
         // If not ready, wait a bit and retry
-        const retryTimeout = setTimeout(() => {
+        setTimeout(() => {
           if (nextSphereRef.current && nextMaterialRef.current) {
             transitionProgressRef.current = 0
             isTransitioningRef.current = true
-            const retryTransitionTimeout = setTimeout(() => {
+            setTimeout(() => {
               onAutoAdvance?.()
             }, CROSSFADE_DURATION)
-            return () => clearTimeout(retryTransitionTimeout)
           }
         }, 100)
-        return () => clearTimeout(retryTimeout)
       }
     }, crossfadeStartTime)
     

@@ -222,6 +222,8 @@ export function TheatreCarouselPreview({
             title={extractFolderName(currentImage.file_path)}
             onClose={() => setIsViewerOpen(false)}
             onAutoAdvance={() => {
+              // Auto-advance just updates the index, viewer stays open
+              // The panorama viewer's effect will update imageUrl/nextImageUrl props
               const nextIdx = (currentIdx + 1) % carouselImages.length
               
               // If we've reached the end of current category, move to next category
@@ -230,7 +232,7 @@ export function TheatreCarouselPreview({
                 const nextCategoryIndex = (currentCategoryIndex + 1) % categories.length
                 setCurrentCategory(categories[nextCategoryIndex])
                 setCurrentIdx(0)
-                console.log('[v0] Category complete, moving to:', categories[nextCategoryIndex])
+                console.log('[v0] Category complete, continuing to:', categories[nextCategoryIndex])
               } else {
                 // Continue within current category
                 setCurrentIdx(nextIdx)

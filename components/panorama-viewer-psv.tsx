@@ -284,9 +284,32 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
             console.log(`[v0] FADE TIMER RESET: imageStartTime=${now}ms, FADE_OUT_START_TIME=${FADE_OUT_START_TIME}ms, FADE_OUT_END_TIME=${FADE_OUT_START_TIME + FADE_IN_DURATION}ms`)
           }
 
+          // Track fade timing for ALL states (including during transitions)
+          let fadedOpacity = 1
+          if (imageStartTimeRef.current) {
+            const elapsedTime = Date.now() - imageStartTimeRef.current
+            
+            // Fade in from 0-3 seconds
+            if (elapsedTime < FADE_IN_DURATION) {
+              const fadeInProgress = elapsedTime / FADE_IN_DURATION
+              fadedOpacity = fadeInProgress < 0.5 
+                ? 4 * fadeInProgress * fadeInProgress * fadeInProgress
+                : 1 - Math.pow(-2 * fadeInProgress + 2, 3) / 2
+            }
+            // Fade out from 33-36 seconds (DURING crossfade transition)
+            else if (elapsedTime >= FADE_OUT_START_TIME && elapsedTime <= FADE_OUT_START_TIME + FADE_IN_DURATION) {
+              const fadeOutProgress = (elapsedTime - FADE_OUT_START_TIME) / FADE_IN_DURATION
+              const cubicEase = fadeOutProgress < 0.5 
+                ? 4 * fadeOutProgress * fadeOutProgress * fadeOutProgress
+                : 1 - Math.pow(-2 * fadeOutProgress + 2, 3) / 2
+              fadedOpacity = 1 - cubicEase
+              console.log(`[v0] FADE-OUT: elapsed=${elapsedTime}ms, progress=${fadeOutProgress.toFixed(3)}, easeProgress=${cubicEase.toFixed(3)}, opacity=${fadedOpacity.toFixed(3)}`)
+            }
+          }
+
           // Dual-layer crossfade transition with enhanced fade effects
           if (isTransitioningRef.current && materialRef.current && nextMaterialRef.current) {
-            transitionProgressRef.current += deltaTime / 3.0 // 3-second crossfade
+            transitionProgressRef.current += deltaTime / 4.0 // 4-second crossfade
             if (transitionProgressRef.current >= 1) {
               transitionProgressRef.current = 1
               isTransitioningRef.current = false
@@ -318,6 +341,24 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
                 const p = 2 * transitionProgressRef.current - 2
                 easeProgress = 0.5 * p * p * p + 1
               }
+              
+              // Apply fade-out effect to current image and crossfade to next
+              materialRef.current.opacity = Math.max(0, (1 - easeProgress) * fadedOpacity)
+              materialRef.current.transparent = easeProgress > 0
+              nextMaterialRef.current.opacity = Math.min(1, easeProgress)
+              nextMaterialRef.current.transparent = easeProgress < 1
+              
+              // Gentle rotation during transition (slows to 10% speed at midpoint)
+              rotationYRef.current = rotationSpeed * (1 - 0.9 * easeProgress)
+            }
+          } else {
+            // Normal state - apply fade effects when not transitioning
+            if (materialRef.current) {
+              materialRef.current.opacity = fadedOpacity
+              materialRef.current.transparent = fadedOpacity < 1
+            }
+            rotationYRef.current = rotationSpeed
+          }
               
               // Fade current image out while fading next image in
               materialRef.current.opacity = Math.max(0, 1 - easeProgress)

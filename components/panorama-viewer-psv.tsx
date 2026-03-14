@@ -35,6 +35,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   const sceneRef = useRef<any>(null)
   const rendererRef = useRef<any>(null)
   const sphereRef = useRef<any>(null)
+  const nextSphereRef = useRef<any>(null) // Secondary sphere for crossfade
   const cameraRef = useRef<any>(null)
   const rotationYRef = useRef(initialYaw)
   const currentFovRef = useRef(fov)
@@ -42,6 +43,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   const transitionProgressRef = useRef(0)
   const isTransitioningRef = useRef(false)
   const materialRef = useRef<any>(null)
+  const nextMaterialRef = useRef<any>(null) // Material for next sphere
   const nextTextureRef = useRef<any>(null) // Pre-loaded next texture
   const preloadTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const nextImageUrlRef = useRef<string | null>(null)
@@ -113,12 +115,6 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           imageUrl,
           () => {
             console.log('[v0] Texture loaded successfully')
-            // If transitioning, swap to this texture instantly
-            if (isTransitioningRef.current && materialRef.current) {
-              materialRef.current.map = texture
-              materialRef.current.needsUpdate = true
-              isTransitioningRef.current = true // Keep transition state for fade
-            }
             setIsLoading(false)
           },
           undefined,
@@ -141,10 +137,9 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         })
         const sphere = new THREE.Mesh(geometry, material)
         
-        // Apply initial yaw rotation and reset the rotation ref for new image
+        // Apply initial yaw rotation
         sphere.rotation.y = initialYaw
-        rotationYRef.current = initialYaw
-        console.log('[v0] Applied initial yaw rotation:', initialYaw, 'radians, reset rotation tracker')
+        rotationYRef.current = 0 // Reset rotation speed for continuous motion
         
         scene.add(sphere)
 
@@ -154,17 +149,15 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         materialRef.current = material
         cameraRef.current = camera
 
-        // Mouse wheel zoom control (zoom out only)
+        // Mouse wheel zoom control
         const handleWheel = (e: WheelEvent) => {
           e.preventDefault()
           
-          // Zoom out on scroll down
           if (e.deltaY > 0) {
             currentFovRef.current = Math.min(currentFovRef.current + 2, 170)
             camera.fov = currentFovRef.current
             camera.updateProjectionMatrix()
           }
-          // Zoom in on scroll up
           else if (e.deltaY < 0) {
             currentFovRef.current = Math.max(currentFovRef.current - 2, fov)
             camera.fov = currentFovRef.current
@@ -174,57 +167,70 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
 
         canvas.addEventListener('wheel', handleWheel, { passive: false })
 
-        // Render initial frame immediately with correct camera
+        // Render initial frame
         renderer.clear()
         renderer.render(scene, camera)
         console.log(`[v0] Initial render completed with FOV ${fov}`)
 
-        // Animation loop optimized for 30 FPS with smooth transitions
+        // Animation loop optimized for 30 FPS with dual-layer crossfade
         let lastFrameTime = Date.now()
         const animate = () => {
           animationRef.current = requestAnimationFrame(animate)
           
           const currentTime = Date.now()
-          const deltaTime = (currentTime - lastFrameTime) / 1000 // Convert to seconds
+          const deltaTime = (currentTime - lastFrameTime) / 1000
           lastFrameTime = currentTime
 
-          // Smooth fade transition (600ms for elegant feel in festival mode)
-          if (isTransitioningRef.current && materialRef.current) {
-            transitionProgressRef.current += deltaTime / 0.6 // 600ms transition
+          // Dual-layer crossfade transition (600ms for smooth festival transitions)
+          if (isTransitioningRef.current && materialRef.current && nextMaterialRef.current) {
+            transitionProgressRef.current += deltaTime / 0.6
             if (transitionProgressRef.current >= 1) {
               transitionProgressRef.current = 1
               isTransitioningRef.current = false
-              materialRef.current.transparent = false
+              
+              // Cleanup old sphere
               materialRef.current.opacity = 1
-              // Don't reset rotation - let it continue naturally
+              materialRef.current.transparent = false
+              if (nextSphereRef.current) {
+                sceneRef.current?.remove(nextSphereRef.current)
+              }
+              nextSphereRef.current = null
+              nextMaterialRef.current = null
             } else {
-              // Smooth easing function for elegant transition
+              // Smooth easing for elegant crossfade
               const easeProgress = transitionProgressRef.current < 0.5 
                 ? 2 * transitionProgressRef.current * transitionProgressRef.current 
                 : 1 - Math.pow(-2 * transitionProgressRef.current + 2, 2) / 2
               
-              materialRef.current.opacity = easeProgress
+              // Crossfade both layers for zero black frames
+              materialRef.current.opacity = 1 - easeProgress
               materialRef.current.transparent = true
+              nextMaterialRef.current.opacity = easeProgress
+              nextMaterialRef.current.transparent = true
               
-              // Gentle pause during transition (slow rotation speed by 70%)
+              // Gentle rotation during transition
               rotationYRef.current = rotationSpeed * (1 - 0.7 * easeProgress)
             }
           } else {
-            // Normal rotation when not transitioning
+            // Normal state
+            if (materialRef.current) {
+              materialRef.current.opacity = 1
+              materialRef.current.transparent = false
+            }
             rotationYRef.current = rotationSpeed
           }
 
-          // Smooth camera FOV transition for zoom effects
+          // Smooth camera FOV transitions
           if (cameraFovTransitionRef.current !== currentFovRef.current) {
             const fovDifference = currentFovRef.current - cameraFovTransitionRef.current
-            cameraFovTransitionRef.current += fovDifference * 0.1 // Smooth interpolation
+            cameraFovTransitionRef.current += fovDifference * 0.1
             if (cameraRef.current) {
               cameraRef.current.fov = cameraFovTransitionRef.current
               cameraRef.current.updateProjectionMatrix()
             }
           }
 
-          // Only rotate if relaxMode is on (skip if false)
+          // Auto-rotate if relaxMode enabled
           if (relaxMode && sphereRef.current) {
             sphereRef.current.rotation.y += rotationYRef.current
           }
@@ -266,7 +272,6 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
 
     loadPanorama()
 
-    // Cleanup function
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current)
@@ -276,6 +281,57 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
       }
     }
   }, [imageUrl, relaxMode, fov, sphereScale, rotationSpeed, geometrySegments, initialYaw])
+
+  // Preload next image and create crossfade transition sphere
+  useEffect(() => {
+    if (!imageUrl || !rendererRef.current || !sceneRef.current || !materialRef.current) return
+    
+    const loadNextImage = async () => {
+      try {
+        const THREE = (window as any).THREE
+        if (!THREE) return
+        
+        const textureLoader = new THREE.TextureLoader()
+        textureLoader.setCrossOrigin('anonymous')
+        
+        const newTexture = await new Promise<any>((resolve, reject) => {
+          textureLoader.load(imageUrl, resolve, undefined, reject)
+        })
+        
+        // Create material for next sphere
+        const nextMaterial = new THREE.MeshBasicMaterial({
+          map: newTexture,
+          side: THREE.BackSide,
+          transparent: true,
+          opacity: 0,
+          toneMapped: false,
+        })
+        
+        // Create next sphere with same geometry
+        if (sphereRef.current && sphereRef.current.geometry) {
+          const nextSphere = new THREE.Mesh(sphereRef.current.geometry, nextMaterial)
+          nextSphere.rotation.y = sphereRef.current.rotation.y
+          
+          sceneRef.current.add(nextSphere)
+          nextSphereRef.current = nextSphere
+          nextMaterialRef.current = nextMaterial
+          
+          // Trigger smooth crossfade
+          transitionProgressRef.current = 0
+          isTransitioningRef.current = true
+          
+          console.log('[v0] Smooth crossfade transition initiated')
+        }
+      } catch (err) {
+        console.error('[v0] Error creating crossfade:', err)
+      }
+    }
+    
+    // Only initiate new transition if not already transitioning
+    if (!isTransitioningRef.current) {
+      loadNextImage()
+    }
+  }, [imageUrl])
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -292,10 +348,10 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         cameraRef.current.aspect = width / height
         cameraRef.current.updateProjectionMatrix()
         rendererRef.current.setSize(width, height)
-        console.log('[v0] Window resized, updated panorama dimensions to:', width, 'x', height)
       }
     }
 
+    window.addEventListener('keydown', handleKeyPress)
     window.addEventListener('resize', handleWindowResize)
     return () => {
       window.removeEventListener('keydown', handleKeyPress)
@@ -337,7 +393,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         </div>
       )}
 
-      {/* Title and Close Button Overlay */}
+      {/* Title and Controls Overlay */}
       {!isLoading && !error && (
         <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-6 z-10">
           {/* Top: Title */}
@@ -392,7 +448,6 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   )
 })
 
-// Extend Window interface for TypeScript
 declare global {
   interface Window {
     THREE: any

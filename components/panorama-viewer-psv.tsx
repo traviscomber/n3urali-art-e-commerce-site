@@ -360,49 +360,6 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
             rotationYRef.current = rotationSpeed
           }
               
-              // Fade current image out while fading next image in
-              materialRef.current.opacity = Math.max(0, 1 - easeProgress)
-              materialRef.current.transparent = easeProgress > 0
-              nextMaterialRef.current.opacity = Math.min(1, easeProgress)
-              nextMaterialRef.current.transparent = easeProgress < 1
-              
-              // Gentle rotation during transition (slows to 10% speed at midpoint)
-              rotationYRef.current = rotationSpeed * (1 - 0.9 * easeProgress)
-            }
-          } else {
-            // Normal state - apply fade in/out effects based on elapsed time
-            if (materialRef.current) {
-              let opacity = 1
-              
-              if (imageStartTimeRef.current) {
-                const elapsedTime = Date.now() - imageStartTimeRef.current
-                
-                // Fade in from 0-3 seconds
-                if (elapsedTime < FADE_IN_DURATION) {
-                  const fadeInProgress = elapsedTime / FADE_IN_DURATION
-                  // Use cubic easing for smooth fade in
-                  opacity = fadeInProgress < 0.5 
-                    ? 4 * fadeInProgress * fadeInProgress * fadeInProgress
-                    : 1 - Math.pow(-2 * fadeInProgress + 2, 3) / 2
-                }
-                // Fade out from 33-36 seconds  
-                else if (elapsedTime >= FADE_OUT_START_TIME && elapsedTime <= FADE_OUT_START_TIME + FADE_IN_DURATION) {
-                  const fadeOutProgress = (elapsedTime - FADE_OUT_START_TIME) / FADE_IN_DURATION
-                  // Use cubic easing for smooth fade out
-                  const cubicEase = fadeOutProgress < 0.5 
-                    ? 4 * fadeOutProgress * fadeOutProgress * fadeOutProgress
-                    : 1 - Math.pow(-2 * fadeOutProgress + 2, 3) / 2
-                  opacity = 1 - cubicEase
-                  console.log(`[v0] FADE-OUT: elapsed=${elapsedTime}ms, progress=${fadeOutProgress.toFixed(3)}, easeProgress=${cubicEase.toFixed(3)}, opacity=${opacity.toFixed(3)}`)
-                }
-              }
-              
-              materialRef.current.opacity = opacity
-              materialRef.current.transparent = opacity < 1
-            }
-            rotationYRef.current = rotationSpeed
-          }
-
           // Auto-rotate if relaxMode enabled
           if (relaxMode && sphereRef.current) {
             sphereRef.current.rotation.y += rotationYRef.current

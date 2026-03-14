@@ -12,7 +12,8 @@ interface PanoramaViewerPSVProps {
   sphereScale?: number // Sphere radius (default 5000)
   rotationSpeed?: number // Auto-rotation speed (default 0.0002)
   geometrySegments?: number // Sphere geometry segments (default 128)
-  initialYaw?: number // Initial rotation offset in radians to hide seam (default Math.PI for back of sphere)
+  initialYaw?: number // Initial rotation offset in radians to hide seam (default 0 for center)
+  enableFestivalTransitions?: boolean // Enable smooth transitions for festival mode
 }
 
 export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
@@ -24,7 +25,8 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   sphereScale = 5000,
   rotationSpeed = 0.0002,
   geometrySegments = 128,
-  initialYaw = Math.PI, // Default to 180 degrees (back of sphere, hiding the seam)
+  initialYaw = 0, // Default to 0 for center
+  enableFestivalTransitions = false,
 }: PanoramaViewerPSVProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -43,6 +45,8 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   const nextTextureRef = useRef<any>(null) // Pre-loaded next texture
   const preloadTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const nextImageUrlRef = useRef<string | null>(null)
+  const cameraFovTransitionRef = useRef(fov)
+  const rotationSpeedTransitionRef = useRef(rotationSpeed)
 
   useEffect(() => {
     const loadPanorama = async () => {
@@ -175,27 +179,47 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         renderer.render(scene, camera)
         console.log(`[v0] Initial render completed with FOV ${fov}`)
 
-        // Animation loop optimized for speed with smooth blending
+        // Animation loop optimized for speed with smooth blending and festival transitions
         const animate = () => {
           animationRef.current = requestAnimationFrame(animate)
 
-          // Ultra-fast transition (300ms for instant feel)
+          // Smooth fade transition (600ms for elegant feel in festival mode)
           if (isTransitioningRef.current && materialRef.current) {
-            transitionProgressRef.current += 0.016 / 0.3 // 300ms transition at 60fps
+            transitionProgressRef.current += 0.016 / 0.6 // 600ms transition at 60fps
             if (transitionProgressRef.current >= 1) {
               transitionProgressRef.current = 1
               isTransitioningRef.current = false
               materialRef.current.transparent = false
               materialRef.current.opacity = 1
+              // Reset rotation speed to normal after transition
+              rotationYRef.current = initialYaw
             } else {
-              materialRef.current.opacity = transitionProgressRef.current
+              // Smooth easing function for elegant transition
+              const easeProgress = transitionProgressRef.current < 0.5 
+                ? 2 * transitionProgressRef.current * transitionProgressRef.current 
+                : 1 - Math.pow(-2 * transitionProgressRef.current + 2, 2) / 2
+              
+              materialRef.current.opacity = easeProgress
               materialRef.current.transparent = true
+              
+              // Gentle pause during transition (slow rotation speed)
+              rotationYRef.current = initialYaw + (rotationSpeed * 0.3 * easeProgress)
+            }
+          }
+
+          // Smooth camera FOV transition for zoom effects
+          if (cameraFovTransitionRef.current !== currentFovRef.current) {
+            const fovDifference = currentFovRef.current - cameraFovTransitionRef.current
+            cameraFovTransitionRef.current += fovDifference * 0.1 // Smooth interpolation
+            if (cameraRef.current) {
+              cameraRef.current.fov = cameraFovTransitionRef.current
+              cameraRef.current.updateProjectionMatrix()
             }
           }
 
           // Only rotate if relaxMode is on (skip if false)
           if (relaxMode && sphereRef.current) {
-            sphereRef.current.rotation.y += rotationSpeed
+            sphereRef.current.rotation.y += rotationYRef.current
           }
 
           renderer.render(scene, camera)

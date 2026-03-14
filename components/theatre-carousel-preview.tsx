@@ -216,6 +216,7 @@ export function TheatreCarouselPreview({
             sphereScale={5000}
             rotationSpeed={0.0002}
             initialYaw={0}
+            enableFestivalTransitions={true}
           />
         </div>
       )}

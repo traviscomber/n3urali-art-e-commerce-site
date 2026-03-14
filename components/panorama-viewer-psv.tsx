@@ -5,8 +5,10 @@ import { X, ZoomOut, ZoomIn } from 'lucide-react'
 
 interface PanoramaViewerPSVProps {
   imageUrl: string
+  nextImageUrl?: string // URL of next image for early preloading
   title: string
   onClose?: () => void
+  onAutoAdvance?: () => void // Callback when auto-advance should happen
   relaxMode?: boolean
   fov?: number // Field of view (default 75 for comfortable viewing)
   sphereScale?: number // Sphere radius (default 5000)
@@ -14,12 +16,15 @@ interface PanoramaViewerPSVProps {
   geometrySegments?: number // Sphere geometry segments (default 128)
   initialYaw?: number // Initial rotation offset in radians to hide seam (default 0 for center)
   enableFestivalTransitions?: boolean // Enable smooth transitions for festival mode
+  autoAdvanceInterval?: number // Time in ms before auto-advancing (default 30000ms)
 }
 
 export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   imageUrl,
+  nextImageUrl,
   title,
   onClose,
+  onAutoAdvance,
   relaxMode = true,
   fov = 75,
   sphereScale = 5000,
@@ -27,6 +32,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
   geometrySegments = 128,
   initialYaw = 0, // Default to 0 for center
   enableFestivalTransitions = false,
+  autoAdvanceInterval = 30000,
 }: PanoramaViewerPSVProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -282,11 +288,11 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
     }
   }, [imageUrl, relaxMode, fov, sphereScale, rotationSpeed, geometrySegments, initialYaw])
 
-  // Preload next image and create crossfade transition sphere
+  // Preload next image EARLY for smooth crossfade - triggers well before transition
   useEffect(() => {
-    if (!imageUrl || !rendererRef.current || !sceneRef.current || !materialRef.current) return
+    if (!nextImageUrl || !rendererRef.current || !sceneRef.current || !sphereRef.current?.geometry) return
     
-    const loadNextImage = async () => {
+    const preloadNextImage = async () => {
       try {
         const THREE = (window as any).THREE
         if (!THREE) return
@@ -294,44 +300,65 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         const textureLoader = new THREE.TextureLoader()
         textureLoader.setCrossOrigin('anonymous')
         
-        const newTexture = await new Promise<any>((resolve, reject) => {
-          textureLoader.load(imageUrl, resolve, undefined, reject)
-        })
+        console.log('[v0] Early preloading next panorama:', nextImageUrl)
         
-        // Create material for next sphere
-        const nextMaterial = new THREE.MeshBasicMaterial({
-          map: newTexture,
-          side: THREE.BackSide,
-          transparent: true,
-          opacity: 0,
-          toneMapped: false,
-        })
-        
-        // Create next sphere with same geometry
-        if (sphereRef.current && sphereRef.current.geometry) {
+        textureLoader.load(nextImageUrl, (newTexture) => {
+          // Create material for next sphere
+          const nextMaterial = new THREE.MeshBasicMaterial({
+            map: newTexture,
+            side: THREE.BackSide,
+            transparent: true,
+            opacity: 0,
+            toneMapped: false,
+          })
+          
+          // Create next sphere ready for crossfade
           const nextSphere = new THREE.Mesh(sphereRef.current.geometry, nextMaterial)
           nextSphere.rotation.y = sphereRef.current.rotation.y
           
           sceneRef.current.add(nextSphere)
           nextSphereRef.current = nextSphere
           nextMaterialRef.current = nextMaterial
+          nextTextureRef.current = newTexture
           
-          // Trigger smooth crossfade
-          transitionProgressRef.current = 0
-          isTransitioningRef.current = true
-          
-          console.log('[v0] Smooth crossfade transition initiated')
-        }
+          console.log('[v0] Next panorama preloaded and ready for crossfade')
+        }, undefined, (err) => {
+          console.error('[v0] Error preloading next image:', err)
+        })
       } catch (err) {
-        console.error('[v0] Error creating crossfade:', err)
+        console.error('[v0] Preload error:', err)
       }
     }
     
-    // Only initiate new transition if not already transitioning
-    if (!isTransitioningRef.current) {
-      loadNextImage()
-    }
-  }, [imageUrl])
+    // Preload after a short delay to ensure scene is ready
+    const timeout = setTimeout(preloadNextImage, 500)
+    return () => clearTimeout(timeout)
+  }, [nextImageUrl])
+
+  // Auto-advance to next image with crossfade when timer expires
+  useEffect(() => {
+    if (!enableFestivalTransitions || !autoAdvanceInterval || !onAutoAdvance) return
+    if (isTransitioningRef.current) return
+    
+    const timeout = setTimeout(() => {
+      // Only advance if next image is preloaded and ready
+      if (nextSphereRef.current && nextMaterialRef.current) {
+        transitionProgressRef.current = 0
+        isTransitioningRef.current = true
+        console.log('[v0] Starting auto-advance crossfade transition')
+        
+        // After transition completes, advance to next image
+        const transitionTimeout = setTimeout(() => {
+          console.log('[v0] Auto-advance callback triggered')
+          onAutoAdvance?.()
+        }, 700) // 600ms crossfade + 100ms buffer
+        
+        return () => clearTimeout(transitionTimeout)
+      }
+    }, autoAdvanceInterval)
+    
+    return () => clearTimeout(timeout)
+  }, [autoAdvanceInterval, enableFestivalTransitions, onAutoAdvance])
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {

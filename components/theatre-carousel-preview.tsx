@@ -209,14 +209,19 @@ export function TheatreCarouselPreview({
         <div className="fixed inset-0 z-50 bg-black">
           <PanoramaViewerPSV
             imageUrl={imageUrl}
+            nextImageUrl={carouselImages[(currentIdx + 1) % carouselImages.length]?.original_url}
             title={extractFolderName(currentImage.file_path)}
             onClose={() => setIsViewerOpen(false)}
+            onAutoAdvance={() => {
+              setCurrentIdx(prev => (prev + 1) % carouselImages.length)
+            }}
             relaxMode={true}
             fov={130}
             sphereScale={5000}
             rotationSpeed={0.0002}
             initialYaw={0}
             enableFestivalTransitions={true}
+            autoAdvanceInterval={30000}
           />
         </div>
       )}

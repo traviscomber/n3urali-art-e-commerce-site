@@ -345,12 +345,12 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
                 // Fade out from 33-36 seconds  
                 else if (elapsedTime >= FADE_OUT_START_TIME) {
                   const fadeOutProgress = (elapsedTime - FADE_OUT_START_TIME) / FADE_IN_DURATION
-                  if (fadeOutProgress <= 1) {
-                    // Use cubic easing for smooth fade out
-                    opacity = 1 - (fadeOutProgress < 0.5 
-                      ? 4 * fadeOutProgress * fadeOutProgress * fadeOutProgress
-                      : 1 - Math.pow(-2 * fadeOutProgress + 2, 3) / 2)
-                  }
+                  // Clamp progress between 0 and 1
+                  const clampedProgress = Math.min(Math.max(fadeOutProgress, 0), 1)
+                  // Use cubic easing for smooth fade out
+                  opacity = 1 - (clampedProgress < 0.5 
+                    ? 4 * clampedProgress * clampedProgress * clampedProgress
+                    : 1 - Math.pow(-2 * clampedProgress + 2, 3) / 2)
                 }
               }
               

@@ -302,11 +302,11 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
     }
   }, [imageUrl, relaxMode, fov, sphereScale, rotationSpeed, geometrySegments, initialYaw])
 
-  // Preload next image EARLY for smooth crossfade - triggers well before transition
+  // Preload next image IMMEDIATELY and continuously for zero-delay playback
   useEffect(() => {
     if (!nextImageUrl || !rendererRef.current || !sceneRef.current || !sphereRef.current?.geometry) return
     
-    const preloadNextImage = async () => {
+    const preloadNextImage = () => {
       try {
         const THREE = (window as any).THREE
         if (!THREE) return
@@ -314,7 +314,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         const textureLoader = new THREE.TextureLoader()
         textureLoader.setCrossOrigin('anonymous')
         
-        console.log('[v0] Early preloading next panorama:', nextImageUrl)
+        console.log('[v0] Preloading next panorama immediately:', nextImageUrl)
         
         textureLoader.load(nextImageUrl, (newTexture: any) => {
           // Optimize texture for seamless crossfade
@@ -331,7 +331,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
             transparent: true,
             opacity: 0,
             toneMapped: false,
-            depthTest: false, // Prevent z-fighting during crossfade
+            depthTest: false,
             depthWrite: false,
           })
           
@@ -344,7 +344,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           nextMaterialRef.current = nextMaterial
           nextTextureRef.current = newTexture
           
-          console.log('[v0] Next panorama preloaded and ready for seamless crossfade')
+          console.log('[v0] Next panorama fully loaded and ready, no delay on transition')
         }, undefined, (err: any) => {
           console.error('[v0] Error preloading next image:', err)
         })
@@ -353,39 +353,55 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
       }
     }
     
-    // Preload after a short delay to ensure scene is ready
-    const timeout = setTimeout(preloadNextImage, 500)
-    return () => clearTimeout(timeout)
+    // Start preload immediately, no delay
+    preloadNextImage()
   }, [nextImageUrl])
 
-  // Auto-advance to next image with crossfade when timer expires
+  // Auto-advance to next image with seamless 3-second crossfade (27-30 seconds)
   useEffect(() => {
     if (!enableFestivalTransitions || !autoAdvanceInterval || !onAutoAdvance) return
     if (isTransitioningRef.current) return
     
-    const CROSSFADE_DURATION = 600 // 600ms for smooth crossfade
+    const CROSSFADE_DURATION = 3000 // 3 seconds for gentle overlapping crossfade
     
-    // Start crossfade early so it completes by the autoAdvanceInterval time
-    const crossfadeStartTime = autoAdvanceInterval - CROSSFADE_DURATION - 50 // 50ms buffer
+    // Start crossfade at 27 seconds so it completes by 30 seconds
+    const crossfadeStartTime = autoAdvanceInterval - CROSSFADE_DURATION
+    
+    console.log('[v0] Auto-advance scheduled: crossfade at', crossfadeStartTime, 'ms, complete at', autoAdvanceInterval, 'ms')
     
     const timeout = setTimeout(() => {
-      // Only advance if next image is preloaded and ready
+      // Check if next image is preloaded
       if (nextSphereRef.current && nextMaterialRef.current) {
         transitionProgressRef.current = 0
         isTransitioningRef.current = true
-        console.log('[v0] Starting auto-advance crossfade transition (finishes at ~30s)')
+        console.log('[v0] Starting 3-second crossfade (sec 27-30)')
         
-        // After transition completes, advance to next image
+        // After crossfade completes, advance to next image
         const transitionTimeout = setTimeout(() => {
-          console.log('[v0] Crossfade complete, auto-advance to next image')
+          console.log('[v0] Crossfade complete, advancing to next image')
           onAutoAdvance?.()
-        }, CROSSFADE_DURATION + 50)
+        }, CROSSFADE_DURATION)
         
         return () => clearTimeout(transitionTimeout)
       } else {
-        console.warn('[v0] Next image not preloaded yet, skipping crossfade')
+        console.warn('[v0] Next image not ready, waiting for preload to complete...')
+        // If not ready, wait a bit and retry
+        const retryTimeout = setTimeout(() => {
+          if (nextSphereRef.current && nextMaterialRef.current) {
+            transitionProgressRef.current = 0
+            isTransitioningRef.current = true
+            const retryTransitionTimeout = setTimeout(() => {
+              onAutoAdvance?.()
+            }, CROSSFADE_DURATION)
+            return () => clearTimeout(retryTransitionTimeout)
+          }
+        }, 100)
+        return () => clearTimeout(retryTimeout)
       }
     }, crossfadeStartTime)
+    
+    return () => clearTimeout(timeout)
+  }, [autoAdvanceInterval, enableFestivalTransitions, onAutoAdvance])
     
     return () => clearTimeout(timeout)
   }, [autoAdvanceInterval, enableFestivalTransitions, onAutoAdvance])

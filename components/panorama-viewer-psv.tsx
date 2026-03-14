@@ -105,12 +105,18 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         camera.lookAt(0, 0, 0)
         console.log(`[v0] Camera created with FOV: ${fov}, position:`, camera.position, 'aspect:', width / height)
 
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: false })
+        const renderer = new THREE.WebGLRenderer({ 
+          canvas, 
+          antialias: true, // Enable antialiasing for smooth edges
+          alpha: false,
+          precision: 'highp', // High precision for accurate rendering
+        })
         renderer.setSize(width, height)
-        renderer.setPixelRatio(1) // Lock to 1x for speed, not 2x
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)) // Up to 2x for high-DPI screens
         renderer.setClearColor(0x000000, 1)
         renderer.autoClear = false
-        console.log('[v0] Renderer initialized, size:', width, 'x', height)
+        renderer.outputColorSpace = THREE.SRGBColorSpace
+        console.log('[v0] Renderer initialized with high quality settings, size:', width, 'x', height)
         
         // Load panorama image with CORS
         const textureLoader = new THREE.TextureLoader()
@@ -133,13 +139,17 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         texture.encoding = THREE.sRGBColorSpace
         texture.wrapS = THREE.ClampToEdgeWrapping
         texture.wrapT = THREE.ClampToEdgeWrapping
+        texture.minFilter = THREE.LinearFilter // Smooth filtering to prevent artifacts
+        texture.magFilter = THREE.LinearFilter
 
-        // Create OPTIMIZED sphere geometry (48 segments for 7x less geometry than 128)
-        const geometry = new THREE.SphereGeometry(sphereScale, 48, 48)
+        // Create high-quality sphere geometry (256 segments for smooth curves without seams)
+        const geometry = new THREE.SphereGeometry(sphereScale, 256, 256)
         const material = new THREE.MeshBasicMaterial({
           map: texture,
           side: THREE.BackSide,
           toneMapped: false,
+          depthTest: false, // Disable depth testing to prevent z-fighting during crossfade
+          depthWrite: false, // Prevent depth buffer conflicts
         })
         const sphere = new THREE.Mesh(geometry, material)
         
@@ -187,38 +197,42 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           const deltaTime = (currentTime - lastFrameTime) / 1000
           lastFrameTime = currentTime
 
-          // Dual-layer crossfade transition (600ms for smooth festival transitions)
+          // Dual-layer crossfade transition (3 seconds from second 27-30 for gentle festival transitions)
           if (isTransitioningRef.current && materialRef.current && nextMaterialRef.current) {
-            transitionProgressRef.current += deltaTime / 0.6
+            transitionProgressRef.current += deltaTime / 3.0 // 3-second crossfade
             if (transitionProgressRef.current >= 1) {
               transitionProgressRef.current = 1
               isTransitioningRef.current = false
               
-              // Cleanup old sphere
-              materialRef.current.opacity = 1
-              materialRef.current.transparent = false
+              // Ensure next layer is now fully visible
+              materialRef.current.opacity = 0
+              materialRef.current.transparent = true
+              nextMaterialRef.current.opacity = 1
+              nextMaterialRef.current.transparent = false
+              
+              // Cleanup old sphere after transition completes
               if (nextSphereRef.current) {
                 sceneRef.current?.remove(nextSphereRef.current)
               }
               nextSphereRef.current = null
               nextMaterialRef.current = null
             } else {
-              // Smooth easing for elegant crossfade
+              // Ultra-smooth easing function for imperceptible transitions
               const easeProgress = transitionProgressRef.current < 0.5 
                 ? 2 * transitionProgressRef.current * transitionProgressRef.current 
                 : 1 - Math.pow(-2 * transitionProgressRef.current + 2, 2) / 2
               
-              // Crossfade both layers for zero black frames
+              // Crossfade with very subtle rotation pause for immersive feel
               materialRef.current.opacity = 1 - easeProgress
               materialRef.current.transparent = true
               nextMaterialRef.current.opacity = easeProgress
-              nextMaterialRef.current.transparent = true
+              nextMaterialRef.current.transparent = easeProgress > 0
               
-              // Gentle rotation during transition
-              rotationYRef.current = rotationSpeed * (1 - 0.7 * easeProgress)
+              // Gentle rotation during transition (slows to 10% speed at midpoint)
+              rotationYRef.current = rotationSpeed * (1 - 0.9 * easeProgress)
             }
           } else {
-            // Normal state
+            // Normal state - current layer fully visible
             if (materialRef.current) {
               materialRef.current.opacity = 1
               materialRef.current.transparent = false
@@ -303,16 +317,25 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         console.log('[v0] Early preloading next panorama:', nextImageUrl)
         
         textureLoader.load(nextImageUrl, (newTexture: any) => {
-          // Create material for next sphere
+          // Optimize texture for seamless crossfade
+          newTexture.wrapS = THREE.ClampToEdgeWrapping
+          newTexture.wrapT = THREE.ClampToEdgeWrapping
+          newTexture.minFilter = THREE.LinearFilter
+          newTexture.magFilter = THREE.LinearFilter
+          newTexture.colorSpace = 'srgb'
+          
+          // Create material for next sphere with artifact-free rendering
           const nextMaterial = new THREE.MeshBasicMaterial({
             map: newTexture,
             side: THREE.BackSide,
             transparent: true,
             opacity: 0,
             toneMapped: false,
+            depthTest: false, // Prevent z-fighting during crossfade
+            depthWrite: false,
           })
           
-          // Create next sphere ready for crossfade
+          // Create next sphere ready for seamless crossfade
           const nextSphere = new THREE.Mesh(sphereRef.current.geometry, nextMaterial)
           nextSphere.rotation.y = sphereRef.current.rotation.y
           
@@ -321,7 +344,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           nextMaterialRef.current = nextMaterial
           nextTextureRef.current = newTexture
           
-          console.log('[v0] Next panorama preloaded and ready for crossfade')
+          console.log('[v0] Next panorama preloaded and ready for seamless crossfade')
         }, undefined, (err: any) => {
           console.error('[v0] Error preloading next image:', err)
         })

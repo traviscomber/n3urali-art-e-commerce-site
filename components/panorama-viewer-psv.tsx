@@ -302,7 +302,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         
         console.log('[v0] Early preloading next panorama:', nextImageUrl)
         
-        textureLoader.load(nextImageUrl, (newTexture: any) => {
+        textureLoader.load(nextImageUrl, (newTexture) => {
           // Create material for next sphere
           const nextMaterial = new THREE.MeshBasicMaterial({
             map: newTexture,
@@ -322,7 +322,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           nextTextureRef.current = newTexture
           
           console.log('[v0] Next panorama preloaded and ready for crossfade')
-        }, undefined, (err: any) => {
+        }, undefined, (err) => {
           console.error('[v0] Error preloading next image:', err)
         })
       } catch (err) {
@@ -335,30 +335,28 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
     return () => clearTimeout(timeout)
   }, [nextImageUrl])
 
-  // Auto-advance to next image with gentle 3-second crossfade from second 27-30
+  // Auto-advance to next image with crossfade when timer expires
   useEffect(() => {
     if (!enableFestivalTransitions || !autoAdvanceInterval || !onAutoAdvance) return
     if (isTransitioningRef.current) return
     
-    const CROSSFADE_DURATION = 3000 // 3 seconds for gentle, overlapping crossfade
+    const CROSSFADE_DURATION = 600 // 600ms for smooth crossfade
     
-    // Start crossfade at second 27 (3 seconds before the 30s interval ends)
-    const crossfadeStartTime = autoAdvanceInterval - CROSSFADE_DURATION // 27 seconds for 30s interval
+    // Start crossfade early so it completes by the autoAdvanceInterval time
+    const crossfadeStartTime = autoAdvanceInterval - CROSSFADE_DURATION - 50 // 50ms buffer
     
     const timeout = setTimeout(() => {
       // Only advance if next image is preloaded and ready
       if (nextSphereRef.current && nextMaterialRef.current) {
         transitionProgressRef.current = 0
         isTransitioningRef.current = true
+        console.log('[v0] Starting auto-advance crossfade transition (finishes at ~30s)')
         
-        // Start the next image immediately (second 27) with overlapping crossfade
-        onAutoAdvance?.()
-        console.log('[v0] Starting 3-second gentle crossfade from image 1 to image 2 (sec 27-30)')
-        
-        // Complete the transition after 3 seconds
+        // After transition completes, advance to next image
         const transitionTimeout = setTimeout(() => {
-          console.log('[v0] Crossfade complete - image 2 now fully visible')
-        }, CROSSFADE_DURATION)
+          console.log('[v0] Crossfade complete, auto-advance to next image')
+          onAutoAdvance?.()
+        }, CROSSFADE_DURATION + 50)
         
         return () => clearTimeout(transitionTimeout)
       } else {

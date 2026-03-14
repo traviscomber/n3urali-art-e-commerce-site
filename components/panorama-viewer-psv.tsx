@@ -203,7 +203,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
             firstFrameRendered = true
             setIsLoading(false)
             console.log('[v0] First frame rendered, loading complete')
-          }          // Dual-layer crossfade transition (3 seconds from second 27-30 for gentle festival transitions)
+          }          // Dual-layer crossfade transition with enhanced fade effects
           if (isTransitioningRef.current && materialRef.current && nextMaterialRef.current) {
             transitionProgressRef.current += deltaTime / 3.0 // 3-second crossfade
             if (transitionProgressRef.current >= 1) {
@@ -218,7 +218,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
               sphereRef.current = nextSphereRef.current
               materialRef.current = nextMaterialRef.current
               
-              // Ensure current layer is fully visible
+              // Ensure current layer is fully visible with no fade
               materialRef.current.opacity = 1
               materialRef.current.transparent = false
               
@@ -228,16 +228,21 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
               
               console.log('[v0] Crossfade complete, next image now current')
             } else {
-              // Ultra-smooth easing function for imperceptible transitions
-              const easeProgress = transitionProgressRef.current < 0.5 
-                ? 2 * transitionProgressRef.current * transitionProgressRef.current 
-                : 1 - Math.pow(-2 * transitionProgressRef.current + 2, 2) / 2
+              // Enhanced easing with smooth fade in and fade out
+              // Cubic ease-in-out for more natural motion
+              let easeProgress: number
+              if (transitionProgressRef.current < 0.5) {
+                easeProgress = 4 * transitionProgressRef.current * transitionProgressRef.current * transitionProgressRef.current
+              } else {
+                const p = 2 * transitionProgressRef.current - 2
+                easeProgress = 0.5 * p * p * p + 1
+              }
               
-              // Crossfade with very subtle rotation pause for immersive feel
-              materialRef.current.opacity = 1 - easeProgress
-              materialRef.current.transparent = true
-              nextMaterialRef.current.opacity = easeProgress
-              nextMaterialRef.current.transparent = easeProgress > 0
+              // Fade current image out while fading next image in
+              materialRef.current.opacity = Math.max(0, 1 - easeProgress)
+              materialRef.current.transparent = easeProgress > 0
+              nextMaterialRef.current.opacity = Math.min(1, easeProgress)
+              nextMaterialRef.current.transparent = easeProgress < 1
               
               // Gentle rotation during transition (slows to 10% speed at midpoint)
               rotationYRef.current = rotationSpeed * (1 - 0.9 * easeProgress)

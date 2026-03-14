@@ -279,7 +279,9 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
             setIsLoading(false)
             console.log('[v0] First frame rendered, loading complete')
             // Reset fade timer when new image starts
-            imageStartTimeRef.current = Date.now()
+            const now = Date.now()
+            imageStartTimeRef.current = now
+            console.log(`[v0] FADE TIMER RESET: imageStartTime=${now}ms, FADE_OUT_START_TIME=${FADE_OUT_START_TIME}ms, FADE_OUT_END_TIME=${FADE_OUT_START_TIME + FADE_IN_DURATION}ms`)
           }
 
           // Dual-layer crossfade transition with enhanced fade effects
@@ -346,9 +348,11 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
                 else if (elapsedTime >= FADE_OUT_START_TIME && elapsedTime <= FADE_OUT_START_TIME + FADE_IN_DURATION) {
                   const fadeOutProgress = (elapsedTime - FADE_OUT_START_TIME) / FADE_IN_DURATION
                   // Use cubic easing for smooth fade out
-                  opacity = 1 - (fadeOutProgress < 0.5 
+                  const cubicEase = fadeOutProgress < 0.5 
                     ? 4 * fadeOutProgress * fadeOutProgress * fadeOutProgress
-                    : 1 - Math.pow(-2 * fadeOutProgress + 2, 3) / 2)
+                    : 1 - Math.pow(-2 * fadeOutProgress + 2, 3) / 2
+                  opacity = 1 - cubicEase
+                  console.log(`[v0] FADE-OUT: elapsed=${elapsedTime}ms, progress=${fadeOutProgress.toFixed(3)}, easeProgress=${cubicEase.toFixed(3)}, opacity=${opacity.toFixed(3)}`)
                 }
               }
               

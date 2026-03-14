@@ -302,7 +302,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
         
         console.log('[v0] Early preloading next panorama:', nextImageUrl)
         
-        textureLoader.load(nextImageUrl, (newTexture) => {
+        textureLoader.load(nextImageUrl, (newTexture: any) => {
           // Create material for next sphere
           const nextMaterial = new THREE.MeshBasicMaterial({
             map: newTexture,
@@ -322,7 +322,7 @@ export const PanoramaViewerPSV = React.memo(function PanoramaViewerPSV({
           nextTextureRef.current = newTexture
           
           console.log('[v0] Next panorama preloaded and ready for crossfade')
-        }, undefined, (err) => {
+        }, undefined, (err: any) => {
           console.error('[v0] Error preloading next image:', err)
         })
       } catch (err) {

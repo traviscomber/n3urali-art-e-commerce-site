@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Image from 'next/image'
 import { useLanguage } from '@/lib/contexts/language-context'
 
@@ -48,17 +47,16 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
     code: 'mosey',
   }
 
-  // Featured still image
-  const featuredImage = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png'
+  // Hero image
+  const heroImage = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png'
 
-  // Project thumbnails (using teaserImages or fallback)
+  // Project thumbnails
   const projects = teaserImages.slice(0, 4).map((img) => ({
     id: img.id,
     title: img.title,
     image: img.thumbnail_medium_url || img.original_url || '',
   }))
 
-  // Fallback projects if no images
   const projectsData = projects.length > 0 ? projects : [
     { id: '1', title: 'Project 1', image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png' },
     { id: '2', title: 'Project 2', image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth2-5zeFMllXp1WFWUyJgvnpY8plIxwQts.png' },
@@ -95,54 +93,56 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
   ]
 
   return (
-    <div className="w-full max-w-full overflow-hidden bg-black">
-      {/* Hero Section */}
-      <section className="w-full py-12 sm:py-16 md:py-20 px-6 sm:px-12 md:px-16 lg:px-24">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-light text-slate-100 mb-2">
-            {t('showsPage.pageTitle')}
-          </h1>
-          <p className="text-slate-400 text-sm sm:text-base mb-6">
-            {t('showsPage.pageSubtitle')}
-          </p>
-          <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-3xl mb-4">
-            {getTranslatedDescription(currentShow.description || currentShow.synopsis)}
-          </p>
+    <div className="w-full bg-black text-white">
+      {/* Hero Section with Background Image */}
+      <section className="relative w-full overflow-hidden">
+        {/* Background image */}
+        <div className="absolute inset-0">
+          <Image
+            src={heroImage}
+            alt="Shows hero background"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
         </div>
-      </section>
 
-      {/* Featured Still Image Section */}
-      <section className="w-full py-12 sm:py-16 md:py-20 px-6 sm:px-12 md:px-16 lg:px-24">
-        <div className="max-w-7xl mx-auto">
-          <div className="relative bg-slate-900 rounded-lg overflow-hidden aspect-video sm:aspect-auto sm:h-96 md:h-[28rem]">
-            <Image
-              src={featuredImage}
-              alt="Featured still image"
-              fill
-              className="object-cover"
-            />
-            <div className="absolute top-4 right-4 bg-black/60 px-3 py-1 rounded text-slate-300 text-xs font-light">
-              Still Image
-            </div>
+        {/* Content */}
+        <div className="relative z-10 px-6 sm:px-12 md:px-16 lg:px-24 py-24 md:py-32">
+          <div className="max-w-3xl">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-light mb-3 text-gray-100">
+              {t('showsPage.pageTitle')}
+            </h1>
+            <p className="text-gray-400 text-sm md:text-base mb-6 font-light">
+              {t('showsPage.pageSubtitle')}
+            </p>
+            <p className="text-gray-300 text-sm md:text-base leading-relaxed max-w-2xl">
+              {getTranslatedDescription(currentShow.description || currentShow.synopsis)}
+            </p>
           </div>
         </div>
       </section>
 
       {/* Projects Section */}
-      <section className="w-full py-12 sm:py-16 md:py-20 px-6 sm:px-12 md:px-16 lg:px-24 border-t border-slate-800">
+      <section className="w-full px-6 sm:px-12 md:px-16 lg:px-24 py-20 md:py-28 border-t border-gray-800">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-light text-slate-100 mb-8">
+          <h2 className="text-4xl md:text-5xl font-light text-gray-100 mb-8">
             Projects:
           </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-8 md:gap-12">
-            {/* Left: Thumbnails */}
-            <div className="flex flex-col gap-3">
-              {projectsData.map((project, idx) => (
+          <p className="text-gray-400 text-sm md:text-base mb-12 leading-relaxed">
+            {t('showsPage.projectsDesc') || 'The following productions are currently in development.'}
+          </p>
+
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+            {/* Thumbnails - Left side grid */}
+            <div className="col-span-1 flex flex-col gap-4">
+              {projectsData.slice(0, 3).map((project, idx) => (
                 <div
                   key={project.id}
                   onClick={() => setProjectIndex(idx)}
-                  className={`relative cursor-pointer rounded overflow-hidden aspect-square transition-all ${
-                    idx === projectIndex ? 'ring-2 ring-cyan-400' : 'opacity-60 hover:opacity-80'
+                  className={`relative cursor-pointer overflow-hidden aspect-square transition-all duration-300 ${
+                    idx === projectIndex ? 'ring-2 ring-cyan-500' : 'opacity-70 hover:opacity-100'
                   }`}
                 >
                   <Image
@@ -155,16 +155,15 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
               ))}
             </div>
 
-            {/* Right: Main Display */}
-            <div className="relative bg-slate-900 rounded-lg overflow-hidden aspect-video sm:aspect-auto sm:h-96 md:h-full flex items-center justify-center">
-              <Image
-                src={projectsData[projectIndex].image}
-                alt={projectsData[projectIndex].title}
-                fill
-                className="object-cover"
-              />
-              <div className="absolute top-4 right-4 bg-black/60 px-3 py-1 rounded text-slate-300 text-xs font-light">
-                Video player
+            {/* Featured image - Right side */}
+            <div className="col-span-1 lg:col-span-3">
+              <div className="relative bg-gray-900 overflow-hidden aspect-square lg:aspect-auto lg:h-full min-h-80">
+                <Image
+                  src={projectsData[projectIndex].image}
+                  alt={projectsData[projectIndex].title}
+                  fill
+                  className="object-cover"
+                />
               </div>
             </div>
           </div>
@@ -172,20 +171,20 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       </section>
 
       {/* Production Section */}
-      <section className="w-full py-12 sm:py-16 md:py-20 px-6 sm:px-12 md:px-16 lg:px-24 border-t border-slate-800">
+      <section className="w-full px-6 sm:px-12 md:px-16 lg:px-24 py-20 md:py-28 border-t border-gray-800">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-light text-slate-100 mb-4">
+          <h2 className="text-4xl md:text-5xl font-light text-gray-100 mb-8">
             Production
           </h2>
-          <p className="text-slate-400 text-sm sm:text-base mb-12 leading-relaxed">
-            {t('showsPage.productionDesc')}
+          <p className="text-gray-400 text-sm md:text-base mb-16 leading-relaxed max-w-3xl">
+            {t('showsPage.productionDesc') || 'Multiple production stages and departments contribute to creating immersive experiences.'}
           </p>
 
-          <div className="space-y-8 md:space-y-12">
+          <div className="space-y-12">
             {productionSections.map((section, idx) => (
-              <div key={idx} className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-6 md:gap-12 items-center">
-                {/* Image */}
-                <div className="relative bg-slate-800 rounded-lg overflow-hidden aspect-square md:aspect-auto md:h-80">
+              <div key={idx} className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-8 md:gap-12 items-start">
+                {/* Image - Left */}
+                <div className="relative bg-gray-900 overflow-hidden aspect-square h-80">
                   <Image
                     src={section.image}
                     alt={section.title}
@@ -194,12 +193,12 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                   />
                 </div>
 
-                {/* Content */}
-                <div className="flex flex-col gap-4">
-                  <h3 className="text-2xl sm:text-3xl font-light text-slate-100">
+                {/* Content - Right */}
+                <div className="flex flex-col justify-start pt-4">
+                  <h3 className="text-2xl md:text-3xl font-light text-gray-100 mb-4">
                     {section.title}
                   </h3>
-                  <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                  <p className="text-gray-400 text-sm md:text-base leading-relaxed">
                     {section.description}
                   </p>
                 </div>
@@ -210,17 +209,23 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       </section>
 
       {/* Collaboration Section */}
-      <section className="w-full py-12 sm:py-16 md:py-20 px-6 sm:px-12 md:px-16 lg:px-24 border-t border-slate-800">
+      <section className="w-full px-6 sm:px-12 md:px-16 lg:px-24 py-20 md:py-28 border-t border-gray-800">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-light text-slate-100 mb-4">
+          <h2 className="text-4xl md:text-5xl font-light text-gray-100 mb-8">
             Collaboration
           </h2>
-          <p className="text-slate-400 text-sm sm:text-base leading-relaxed max-w-3xl mb-8">
-            {t('showsPage.collaborationDesc')}
+          <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-3xl mb-12">
+            {t('showsPage.collaborationDesc') || 'We are always open to collaborations on fresh and innovative projects. Get in touch to discuss the development of your creative vision.'}
           </p>
-          <button className="px-6 py-2 border border-cyan-400 text-cyan-400 text-sm font-light hover:bg-cyan-400/10 transition-colors rounded">
-            {t('showsPage.contactNow')}
-          </button>
+          
+          <div className="flex flex-wrap gap-4">
+            <button className="px-8 py-3 border border-cyan-500 text-cyan-500 text-sm font-light hover:bg-cyan-500/10 transition-colors duration-200">
+              {t('showsPage.contactNow') || 'Contact Now'}
+            </button>
+            <button className="px-8 py-3 border border-cyan-500 text-cyan-500 text-sm font-light hover:bg-cyan-500/10 transition-colors duration-200">
+              {t('showsPage.environments') || 'Environments'}
+            </button>
+          </div>
         </div>
       </section>
     </div>

@@ -28,28 +28,33 @@ interface ShowsPageClientProps {
   teaserImages: TeaserImage[]
 }
 
-// Helper to render video or image
-const MediaRenderer = ({ src, alt, isVideo, className = '' }: { src: string; alt: string; isVideo: boolean; className?: string }) => {
-  if (isVideo) {
-    return (
-      <video
-        src={src}
-        className={`w-full h-full object-cover ${className}`}
-        controls
-        controlsList="nodownload"
-        preload="metadata"
-      />
-    )
-  }
-  return (
-    <Image
-      src={src}
-      alt={alt}
-      fill
-      className={`object-cover ${className}`}
-    />
-  )
-}
+// Play button overlay for video thumbnails
+const PlayButton = () => (
+  <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-colors duration-300">
+    <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+      <svg className="w-5 h-5 text-gray-900 ml-1" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M8 5v14l11-7z" />
+      </svg>
+    </div>
+  </div>
+)
+
+// Video player for main display
+const VideoPlayer = ({ src, poster, title }: { src: string; poster?: string; title: string }) => (
+  <video
+    key={src}
+    src={src}
+    poster={poster}
+    className="w-full h-full object-cover"
+    controls
+    controlsList="nodownload"
+    preload="metadata"
+    playsInline
+  >
+    <source src={src} type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+)
 
 export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientProps) {
   const { t } = useLanguage()
@@ -73,25 +78,35 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
   // Hero image
   const heroImage = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png'
 
-  // Project videos - Friendly URLs for streaming (no download prompts)
-  const videoUrls = [
-    'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f104dd3cb4a6f89bc_d20260318_m223700_c005_v0501007_t0037_u01773873420347',
-    'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f106d4181cfdd9871_d20260318_m223738_c005_v0501042_t0040_u01773873458458',
-    'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f116eb29c29bc8758_d20260318_m223632_c005_v0501000_t0006_u01773873392916',
+  // Project videos with thumbnail images and video URLs
+  const videoProjects = [
+    {
+      videoUrl: 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f104dd3cb4a6f89bc_d20260318_m223700_c005_v0501007_t0037_u01773873420347',
+      thumbnail: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png',
+    },
+    {
+      videoUrl: 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f106d4181cfdd9871_d20260318_m223738_c005_v0501042_t0040_u01773873458458',
+      thumbnail: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth2-5zeFMllXp1WFWUyJgvnpY8plIxwQts.png',
+    },
+    {
+      videoUrl: 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f116eb29c29bc8758_d20260318_m223632_c005_v0501000_t0006_u01773873392916',
+      thumbnail: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth3-mZG3PGuOFqePUhTm63gOYOXUhfDN6d.png',
+    },
   ]
 
   const projects = teaserImages.slice(0, 4).map((img, idx) => ({
     id: img.id,
     title: img.title,
-    image: idx < 3 ? videoUrls[idx] : (img.thumbnail_medium_url || img.original_url || ''),
+    thumbnail: idx < 3 ? videoProjects[idx].thumbnail : (img.thumbnail_medium_url || img.original_url || ''),
+    videoUrl: idx < 3 ? videoProjects[idx].videoUrl : null,
     isVideo: idx < 3,
   }))
 
   const projectsData = projects.length > 0 ? projects : [
-    { id: '1', title: 'Project 1', image: 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f104dd3cb4a6f89bc_d20260318_m223700_c005_v0501007_t0037_u01773873420347', isVideo: true },
-    { id: '2', title: 'Project 2', image: 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f106d4181cfdd9871_d20260318_m223738_c005_v0501042_t0040_u01773873458458', isVideo: true },
-    { id: '3', title: 'Project 3', image: 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f116eb29c29bc8758_d20260318_m223632_c005_v0501000_t0006_u01773873392916', isVideo: true },
-    { id: '4', title: 'Project 4', image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth4-W0eVn7cqin99zRFZN90EDL8J39HY9V.png', isVideo: false },
+    { id: '1', title: 'Project 1', thumbnail: videoProjects[0].thumbnail, videoUrl: videoProjects[0].videoUrl, isVideo: true },
+    { id: '2', title: 'Project 2', thumbnail: videoProjects[1].thumbnail, videoUrl: videoProjects[1].videoUrl, isVideo: true },
+    { id: '3', title: 'Project 3', thumbnail: videoProjects[2].thumbnail, videoUrl: videoProjects[2].videoUrl, isVideo: true },
+    { id: '4', title: 'Project 4', thumbnail: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth4-W0eVn7cqin99zRFZN90EDL8J39HY9V.png', videoUrl: null, isVideo: false },
   ]
 
   const productionSections = [
@@ -214,14 +229,14 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                           : 'opacity-70 hover:opacity-100 hover:ring-1 hover:ring-gray-500'
                       }`}
                     >
-                      <MediaRenderer
-                        src={project.image}
+                      <Image
+                        src={project.thumbnail}
                         alt={project.title}
-                        isVideo={project.isVideo}
-                        className="hover:scale-110 transition-transform duration-500"
+                        fill
+                        className="object-cover hover:scale-110 transition-transform duration-500"
                       />
-                      {/* Hover overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      {/* Play button overlay for videos */}
+                      {project.isVideo && <PlayButton />}
                     </div>
                     {/* Project name banner */}
                     <div className={`text-center transition-all duration-300 ${
@@ -235,22 +250,30 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
               {/* Featured image/video - Right side with enhanced styling */}
               <div className="col-span-1 lg:col-span-4">
-                <div className="relative bg-gradient-to-br from-gray-900 to-black overflow-hidden aspect-square lg:aspect-auto lg:h-full min-h-80 rounded-xl shadow-2xl border border-gray-700 group">
-                  <MediaRenderer
-                    src={projectsData[projectIndex].image}
-                    alt={projectsData[projectIndex].title}
-                    isVideo={projectsData[projectIndex].isVideo}
-                    className="group-hover:scale-105 transition-transform duration-700"
-                  />
-                  {/* Subtle overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
+                <div className="relative bg-gradient-to-br from-gray-900 to-black overflow-hidden aspect-video lg:aspect-auto lg:h-full min-h-80 rounded-xl shadow-2xl border border-gray-700">
+                  {projectsData[projectIndex].isVideo && projectsData[projectIndex].videoUrl ? (
+                    <VideoPlayer
+                      src={projectsData[projectIndex].videoUrl}
+                      poster={projectsData[projectIndex].thumbnail}
+                      title={projectsData[projectIndex].title}
+                    />
+                  ) : (
+                    <Image
+                      src={projectsData[projectIndex].thumbnail}
+                      alt={projectsData[projectIndex].title}
+                      fill
+                      className="object-cover"
+                    />
+                  )}
                   
-                  {/* Featured project name banner - bottom overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-12 pb-6 px-6 pointer-events-none">
-                    <h3 className="text-2xl md:text-3xl font-light text-white">
-                      {projectsData[projectIndex].title}
-                    </h3>
-                  </div>
+                  {/* Featured project name banner - bottom overlay (only for images) */}
+                  {!projectsData[projectIndex].isVideo && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-12 pb-6 px-6 pointer-events-none">
+                      <h3 className="text-2xl md:text-3xl font-light text-white">
+                        {projectsData[projectIndex].title}
+                      </h3>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

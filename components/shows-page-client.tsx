@@ -85,7 +85,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       thumbnail: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/SurrealShowsIcn-FrWPb5ADa9osWM6AP695tFrWsXhDe0.png',
     },
     {
-      videoUrl: 'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/El+Trauko.mov',
+      videoUrl: 'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/ElTrauko.mov',
       thumbnail: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TraukoShowsIcn-hbpVd2oWbxUZI2myBVRf7sWJ0budwW.png',
     },
     {

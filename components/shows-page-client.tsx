@@ -82,7 +82,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
   const videoProjects = [
     {
       videoUrl: 'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/SurrealShows.mov',
-      thumbnail: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png',
+      thumbnail: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/SurrealShowsIcn-FrWPb5ADa9osWM6AP695tFrWsXhDe0.png',
     },
     {
       videoUrl: 'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/SurrealShows.mov',

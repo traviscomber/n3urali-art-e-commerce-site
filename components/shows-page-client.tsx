@@ -148,7 +148,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
               {/* Shows presentation types - Clean card style matching Production section */}
               <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-8 md:p-10 transition-all duration-300">
-                <h3 className="text-lg md:text-xl font-light text-teal-300 mb-6 flex items-center gap-3">
+                <h3 className="text-lg md:text-xl font-light text-white mb-6 flex items-center gap-3">
                   <span className="inline-block w-1 h-6 bg-teal-400 rounded"></span>
                   Shows can be presented as:
                 </h3>
@@ -158,7 +158,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                       <div className="flex-shrink-0 w-5 h-5 rounded-sm bg-teal-500/30 border border-teal-500/40 flex items-center justify-center mt-0.5 group-hover:bg-teal-500/50 transition-all duration-300">
                         <span className="text-teal-300 text-xs font-semibold">•</span>
                       </div>
-                      <span className="text-gray-300 text-sm md:text-base font-light group-hover:text-teal-200 transition-colors duration-300">
+                      <span className="text-white text-sm md:text-base font-light group-hover:text-teal-200 transition-colors duration-300">
                         {item}
                       </span>
                     </div>

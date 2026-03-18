@@ -139,36 +139,46 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
             {t('showsPage.projectsDesc') || 'The following productions are currently in development.'}
           </p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-            {/* Thumbnails - Left side grid */}
-            <div className="col-span-1 flex flex-col gap-4">
-              {projectsData.slice(0, 3).map((project, idx) => (
-                <div
-                  key={project.id}
-                  onClick={() => setProjectIndex(idx)}
-                  className={`relative cursor-pointer overflow-hidden aspect-square transition-all duration-300 ${
-                    idx === projectIndex ? 'ring-2 ring-cyan-500' : 'opacity-70 hover:opacity-100'
-                  }`}
-                >
+          <div className="flex flex-col gap-6 mb-8">
+            {/* Text content first on all screens */}
+            <div className="w-full">
+              <p className="text-gray-300 text-sm md:text-base leading-relaxed max-w-3xl whitespace-pre-line">
+                {t('showsPage.projectsDesc') || 'The following productions are currently in development.'}
+              </p>
+            </div>
+
+            {/* Images section - below text on mobile, grid on desktop */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Thumbnails - Left side grid on desktop */}
+              <div className="col-span-1 flex flex-col gap-4">
+                {projectsData.slice(0, 3).map((project, idx) => (
+                  <div
+                    key={project.id}
+                    onClick={() => setProjectIndex(idx)}
+                    className={`relative cursor-pointer overflow-hidden aspect-square transition-all duration-300 ${
+                      idx === projectIndex ? 'ring-2 ring-cyan-500' : 'opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Featured image - Right side */}
+              <div className="col-span-1 lg:col-span-3">
+                <div className="relative bg-gray-900 overflow-hidden aspect-square lg:aspect-auto lg:h-full min-h-80">
                   <Image
-                    src={project.image}
-                    alt={project.title}
+                    src={projectsData[projectIndex].image}
+                    alt={projectsData[projectIndex].title}
                     fill
                     className="object-cover"
                   />
                 </div>
-              ))}
-            </div>
-
-            {/* Featured image - Right side */}
-            <div className="col-span-1 lg:col-span-3">
-              <div className="relative bg-gray-900 overflow-hidden aspect-square lg:aspect-auto lg:h-full min-h-80">
-                <Image
-                  src={projectsData[projectIndex].image}
-                  alt={projectsData[projectIndex].title}
-                  fill
-                  className="object-cover"
-                />
               </div>
             </div>
           </div>
@@ -188,9 +198,19 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
           <div className="space-y-8">
             {productionSections.map((section, idx) => (
               <div key={idx} className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
-                {/* Image - Left with Frame Effect */}
-                <div className="md:w-64 md:h-64 flex-shrink-0">
-                  <div className="relative w-full h-full bg-gray-900 border border-gray-700 overflow-hidden">
+                {/* Content - shows first on mobile naturally due to flex-col */}
+                <div className="flex-1 bg-gray-900/50 border border-gray-800 p-8 md:p-10 flex flex-col justify-center md:order-2">
+                  <h3 className="text-2xl md:text-3xl font-light text-gray-100 mb-4">
+                    {section.title}
+                  </h3>
+                  <p className="text-gray-400 text-sm md:text-base leading-relaxed">
+                    {section.description}
+                  </p>
+                </div>
+
+                {/* Image - below text on mobile, left on desktop */}
+                <div className="md:w-64 md:h-64 flex-shrink-0 md:order-1">
+                  <div className="relative w-full h-full bg-gray-900 border border-gray-700 overflow-hidden aspect-square">
                     <Image
                       src={section.image}
                       alt={section.title}
@@ -198,16 +218,6 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                       className="object-cover"
                     />
                   </div>
-                </div>
-
-                {/* Content - Right with Background */}
-                <div className="flex-1 bg-gray-900/50 border border-gray-800 p-8 md:p-10 flex flex-col justify-center">
-                  <h3 className="text-2xl md:text-3xl font-light text-gray-100 mb-4">
-                    {section.title}
-                  </h3>
-                  <p className="text-gray-400 text-sm md:text-base leading-relaxed">
-                    {section.description}
-                  </p>
                 </div>
               </div>
             ))}

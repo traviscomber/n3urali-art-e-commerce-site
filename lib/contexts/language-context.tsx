@@ -76,7 +76,7 @@ const translations = {
     // Shows Page Specific
     "showsPage.pageTitle": "Espectáculos",
     "showsPage.pageSubtitle": "Historias de Domo Cinemático",
-    "showsPage.descriptionDefault": "Serie de experiencias de domo completo construidas alrededor de narrativas culturales, temas científicos y exploración visual. Cada producción está diseñada específicamente para geometría de domo, donde la imagen, el sonido y el espacio forman una única experiencia.",
+    "showsPage.descriptionDefault": "Serie de experiencias de domo completo construidas alrededor de narrativas culturales, temas científicos y exploración visual. Cada producción está diseñada específicamente para geometría de domo, donde la imagen, el sonido y el espacio forman una única experiencia.\n\nAdemás de las producciones originales, el estudio desarrolla experiencias de domo personalizadas para museos, instituciones educativas, lugares inmersivos y eventos.",
     "showsPage.projectsDesc": "Los siguientes proyectos están en desarrollo y representan lo mejor de nuestras producciones inmersivas. Cada proyecto está optimizado para instalaciones de domo de alta resolución.",
     "showsPage.perfectFor": "Perfecto para:",
     "showsPage.perfectFor1": "Instalaciones de domo cinemático",
@@ -369,7 +369,7 @@ const translations = {
     // Shows Page Specific
     "showsPage.pageTitle": "Shows",
     "showsPage.pageSubtitle": "Cinematic Dome Stories",
-    "showsPage.descriptionDefault": "Series of fulldome experiences built around cultural narratives, scientific themes, and visual exploration. Each production is designed specifically for dome geometry, where image, sound, and space form a single experience.",
+    "showsPage.descriptionDefault": "Series of fulldome experiences built around cultural narratives, scientific themes, and visual exploration. Each production is designed specifically for dome geometry, where image, sound, and space form a single experience.\n\nAlongside original productions, the studio develops custom dome experiences for museums, educational institutions, immersive venues, and events.",
     "showsPage.projectsDesc": "The following productions are currently in development and represent the best of our immersive creations. Each project is optimized for high-resolution dome installations.",
     "showsPage.perfectFor": "Perfect for:",
     "showsPage.perfectFor1": "Cinematic dome installations",

@@ -46,9 +46,9 @@ const VideoPlayer = ({ src, poster, title }: { src: string; poster?: string; tit
     src={src}
     poster={poster}
     className="w-full h-full object-cover"
-    controls
-    controlsList="nodownload"
-    preload="metadata"
+    autoPlay
+    loop
+    muted
     playsInline
   >
     <source src={src} type="video/mp4" />

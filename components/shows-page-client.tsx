@@ -132,12 +132,12 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       </section>
 
       {/* Projects Section */}
-      <section className="w-full px-6 sm:px-12 md:px-16 lg:px-24 py-20 md:py-28 border-t border-gray-800">
+      <section className="w-full px-6 sm:px-12 md:px-16 lg:px-24 py-20 md:py-28 border-t border-gray-800 bg-gradient-to-b from-black via-gray-950 to-black">
         <div className="max-w-7xl">
           <h2 className="text-4xl md:text-5xl font-light text-gray-100 mb-12">
             Projects:
           </h2>
-          <div className="flex flex-col gap-8 mb-8">
+          <div className="flex flex-col gap-12 mb-8">
             {/* Text content first on all screens - properly formatted with bullets and line breaks */}
             <div className="w-full max-w-4xl">
               <p className="text-gray-300 text-sm md:text-base leading-relaxed whitespace-pre-line text-left">
@@ -148,36 +148,57 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
             {/* Images section - below text on mobile, grid on desktop */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8">
               {/* Thumbnails - Left side grid on desktop */}
-              <div className="col-span-1 flex flex-col gap-4">
+              <div className="col-span-1 flex flex-col gap-6">
                 {projectsData.slice(0, 3).map((project, idx) => (
                   <div
                     key={project.id}
-                    onClick={() => setProjectIndex(idx)}
-                    className={`relative cursor-pointer overflow-hidden aspect-square transition-all duration-300 rounded-lg ${
-                      idx === projectIndex ? 'ring-2 ring-cyan-500 shadow-lg shadow-cyan-500/30' : 'opacity-60 hover:opacity-100'
-                    }`}
+                    className="flex flex-col gap-3"
                   >
-                    <Image
-                      src={project.image}
-                      alt={project.title}
-                      fill
-                      className="object-cover hover:scale-105 transition-transform duration-300"
-                    />
+                    <div
+                      onClick={() => setProjectIndex(idx)}
+                      className={`relative cursor-pointer overflow-hidden aspect-square transition-all duration-300 rounded-lg group ${
+                        idx === projectIndex 
+                          ? 'ring-2 ring-cyan-500 shadow-2xl shadow-cyan-500/40 scale-105' 
+                          : 'opacity-70 hover:opacity-100 hover:ring-1 hover:ring-cyan-400'
+                      }`}
+                    >
+                      <Image
+                        src={project.image}
+                        alt={project.title}
+                        fill
+                        className="object-cover hover:scale-110 transition-transform duration-500"
+                      />
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                    {/* Project name banner */}
+                    <div className={`text-center transition-all duration-300 ${
+                      idx === projectIndex ? 'text-cyan-400 font-semibold' : 'text-gray-400 font-light'
+                    }`}>
+                      <p className="text-xs md:text-sm truncate">{project.title}</p>
+                    </div>
                   </div>
                 ))}
               </div>
 
               {/* Featured image - Right side with enhanced styling */}
               <div className="col-span-1 lg:col-span-4">
-                <div className="relative bg-gradient-to-br from-gray-900 to-black overflow-hidden aspect-square lg:aspect-auto lg:h-full min-h-80 rounded-lg shadow-2xl border border-gray-700">
+                <div className="relative bg-gradient-to-br from-gray-900 to-black overflow-hidden aspect-square lg:aspect-auto lg:h-full min-h-80 rounded-xl shadow-2xl border border-gray-700 group">
                   <Image
                     src={projectsData[projectIndex].image}
                     alt={projectsData[projectIndex].title}
                     fill
-                    className="object-cover"
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
                   />
-                  {/* Subtle overlay for text readability if needed */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                  {/* Subtle overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+                  
+                  {/* Featured project name banner - bottom overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-12 pb-6 px-6">
+                    <h3 className="text-2xl md:text-3xl font-light text-cyan-400">
+                      {projectsData[projectIndex].title}
+                    </h3>
+                  </div>
                 </div>
               </div>
             </div>

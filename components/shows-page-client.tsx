@@ -94,32 +94,43 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
   return (
     <div className="w-full bg-black text-white">
-      {/* Hero Section with Background Image */}
+      {/* Hero Section with Video Background */}
       <section className="relative w-full overflow-hidden">
-        {/* Background image */}
+        {/* Video Background */}
         <div className="absolute inset-0">
-          <Image
-            src={heroImage}
-            alt="Shows hero background"
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
+          {/* Video placeholder - replace with actual video source */}
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+            poster="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png"
+          >
+            <source src="/videos/shows-hero.mp4" type="video/mp4" />
+            <source src="/videos/shows-hero.webm" type="video/webm" />
+          </video>
+          
+          {/* Dark gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent"></div>
         </div>
 
         {/* Content */}
-        <div className="relative z-10 px-6 sm:px-12 md:px-16 lg:px-24 py-24 md:py-32">
+        <div className="relative z-10 px-6 sm:px-12 md:px-16 lg:px-24 py-24 md:py-40 min-h-[600px] flex items-center">
           <div className="max-w-3xl">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-light mb-3 text-gray-100">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-light mb-3 text-cyan-300">
               {t('showsPage.pageTitle')}
             </h1>
-            <p className="text-gray-400 text-sm md:text-base mb-6 font-light">
+            <p className="text-gray-400 text-sm md:text-base mb-8 font-light tracking-wide">
               {t('showsPage.pageSubtitle')}
             </p>
-            <p className="text-gray-300 text-sm md:text-base leading-relaxed max-w-2xl">
-              {getTranslatedDescription(currentShow.description || currentShow.synopsis)}
-            </p>
+            <div className="space-y-4 max-w-2xl">
+              {(currentShow.description || currentShow.synopsis)?.split('\n\n').map((paragraph, idx) => (
+                <p key={idx} className="text-gray-300 text-sm md:text-base leading-relaxed">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
           </div>
         </div>
       </section>

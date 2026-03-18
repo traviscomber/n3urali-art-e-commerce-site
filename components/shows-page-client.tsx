@@ -28,6 +28,29 @@ interface ShowsPageClientProps {
   teaserImages: TeaserImage[]
 }
 
+// Helper to render video or image
+const MediaRenderer = ({ src, alt, isVideo, className = '' }: { src: string; alt: string; isVideo: boolean; className?: string }) => {
+  if (isVideo) {
+    return (
+      <video
+        src={src}
+        className={`w-full h-full object-cover ${className}`}
+        controls
+        controlsList="nodownload"
+        preload="metadata"
+      />
+    )
+  }
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      className={`object-cover ${className}`}
+    />
+  )
+}
+
 export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientProps) {
   const { t } = useLanguage()
   const [projectIndex, setProjectIndex] = useState(0)
@@ -50,7 +73,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
   // Hero image
   const heroImage = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png'
 
-  // Project thumbnails - Override with Backblaze video URLs for first 3 projects
+  // Project videos - Friendly URLs for streaming (no download prompts)
   const videoUrls = [
     'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f104dd3cb4a6f89bc_d20260318_m223700_c005_v0501007_t0037_u01773873420347',
     'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f106d4181cfdd9871_d20260318_m223738_c005_v0501042_t0040_u01773873458458',
@@ -61,13 +84,14 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
     id: img.id,
     title: img.title,
     image: idx < 3 ? videoUrls[idx] : (img.thumbnail_medium_url || img.original_url || ''),
+    isVideo: idx < 3,
   }))
 
   const projectsData = projects.length > 0 ? projects : [
-    { id: '1', title: 'Project 1', image: 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f104dd3cb4a6f89bc_d20260318_m223700_c005_v0501007_t0037_u01773873420347' },
-    { id: '2', title: 'Project 2', image: 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f106d4181cfdd9871_d20260318_m223738_c005_v0501042_t0040_u01773873458458' },
-    { id: '3', title: 'Project 3', image: 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f116eb29c29bc8758_d20260318_m223632_c005_v0501000_t0006_u01773873392916' },
-    { id: '4', title: 'Project 4', image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth4-W0eVn7cqin99zRFZN90EDL8J39HY9V.png' },
+    { id: '1', title: 'Project 1', image: 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f104dd3cb4a6f89bc_d20260318_m223700_c005_v0501007_t0037_u01773873420347', isVideo: true },
+    { id: '2', title: 'Project 2', image: 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f106d4181cfdd9871_d20260318_m223738_c005_v0501042_t0040_u01773873458458', isVideo: true },
+    { id: '3', title: 'Project 3', image: 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f116eb29c29bc8758_d20260318_m223632_c005_v0501000_t0006_u01773873392916', isVideo: true },
+    { id: '4', title: 'Project 4', image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth4-W0eVn7cqin99zRFZN90EDL8J39HY9V.png', isVideo: false },
   ]
 
   const productionSections = [
@@ -190,11 +214,11 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                           : 'opacity-70 hover:opacity-100 hover:ring-1 hover:ring-gray-500'
                       }`}
                     >
-                      <Image
+                      <MediaRenderer
                         src={project.image}
                         alt={project.title}
-                        fill
-                        className="object-cover hover:scale-110 transition-transform duration-500"
+                        isVideo={project.isVideo}
+                        className="hover:scale-110 transition-transform duration-500"
                       />
                       {/* Hover overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -209,20 +233,20 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                 ))}
               </div>
 
-              {/* Featured image - Right side with enhanced styling */}
+              {/* Featured image/video - Right side with enhanced styling */}
               <div className="col-span-1 lg:col-span-4">
                 <div className="relative bg-gradient-to-br from-gray-900 to-black overflow-hidden aspect-square lg:aspect-auto lg:h-full min-h-80 rounded-xl shadow-2xl border border-gray-700 group">
-                  <Image
+                  <MediaRenderer
                     src={projectsData[projectIndex].image}
                     alt={projectsData[projectIndex].title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    isVideo={projectsData[projectIndex].isVideo}
+                    className="group-hover:scale-105 transition-transform duration-700"
                   />
                   {/* Subtle overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
                   
                   {/* Featured project name banner - bottom overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-12 pb-6 px-6">
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-12 pb-6 px-6 pointer-events-none">
                     <h3 className="text-2xl md:text-3xl font-light text-white">
                       {projectsData[projectIndex].title}
                     </h3>

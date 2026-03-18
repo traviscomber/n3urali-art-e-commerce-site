@@ -172,29 +172,31 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
       {/* Production Section */}
       <section className="w-full px-6 sm:px-12 md:px-16 lg:px-24 py-20 md:py-28 border-t border-gray-800">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-light text-gray-100 mb-8">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-light text-gray-100 mb-6">
             Production
           </h2>
           <p className="text-gray-400 text-sm md:text-base mb-16 leading-relaxed max-w-3xl">
             {t('showsPage.productionDesc') || 'Multiple production stages and departments contribute to creating immersive experiences.'}
           </p>
 
-          <div className="space-y-12">
+          <div className="space-y-8">
             {productionSections.map((section, idx) => (
-              <div key={idx} className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-8 md:gap-12 items-start">
-                {/* Image - Left */}
-                <div className="relative bg-gray-900 overflow-hidden aspect-square h-80">
-                  <Image
-                    src={section.image}
-                    alt={section.title}
-                    fill
-                    className="object-cover"
-                  />
+              <div key={idx} className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
+                {/* Image - Left with Frame Effect */}
+                <div className="md:w-64 md:h-64 flex-shrink-0">
+                  <div className="relative w-full h-full bg-gray-900 border border-gray-700 overflow-hidden">
+                    <Image
+                      src={section.image}
+                      alt={section.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                 </div>
 
-                {/* Content - Right */}
-                <div className="flex flex-col justify-start pt-4">
+                {/* Content - Right with Background */}
+                <div className="flex-1 bg-gray-900/50 border border-gray-800 p-8 md:p-10 flex flex-col justify-center">
                   <h3 className="text-2xl md:text-3xl font-light text-gray-100 mb-4">
                     {section.title}
                   </h3>

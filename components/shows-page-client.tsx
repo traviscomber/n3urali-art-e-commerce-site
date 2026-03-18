@@ -180,8 +180,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                       onClick={() => setProjectIndex(idx)}
                       className={`relative cursor-pointer overflow-hidden aspect-square transition-all duration-300 rounded-lg group ${
                         idx === projectIndex 
-                          ? 'ring-2 ring-teal-500 shadow-2xl shadow-teal-500/40 scale-105' 
-                          : 'opacity-70 hover:opacity-100 hover:ring-1 hover:ring-teal-400'
+                          ? 'ring-2 ring-gray-600 shadow-2xl shadow-gray-600/40 scale-105' 
+                          : 'opacity-70 hover:opacity-100 hover:ring-1 hover:ring-gray-500'
                       }`}
                     >
                       <Image

@@ -103,7 +103,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
             muted
             loop
             playsInline
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover animate-fade-in"
           >
             <source src="https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f1106b5a21d7a0c35_d20260318_m210234_c005_v0501039_t0038_u01773867754314" type="video/mp4" />
           </video>

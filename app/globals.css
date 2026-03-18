@@ -676,9 +676,17 @@
   animation-play-state: paused;
 }
 
-.animate-scroll {
-  animation: scroll 1.5s ease-in-out infinite;
-}
+  .animate-scroll {
+    animation: scroll 1.5s ease-in-out infinite;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease-in;
+  }
+
+  .animate-fade-out {
+    animation: fadeOut 0.8s ease-out;
+  }
 
 .animate-kenBurnsZoom {
   animation: kenBurnsZoom 10s ease-out forwards;

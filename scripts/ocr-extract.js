@@ -20,7 +20,7 @@ async function extractTextFromImage() {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4-vision',
+        model: 'gpt-4o',
         messages: [
           {
             role: 'user',

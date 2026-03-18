@@ -77,6 +77,7 @@ const translations = {
     "showsPage.pageTitle": "Espectáculos Inmersivos",
     "showsPage.pageSubtitle": "Narrativas Cinematográficas para Domo",
     "showsPage.descriptionDefault": "Explora nuestros espectáculos curados diseñados para instalaciones de domo y experiencias inmersivas.",
+    "showsPage.projectsDesc": "Los siguientes proyectos están en desarrollo y representan lo mejor de nuestras producciones inmersivas. Cada proyecto está optimizado para instalaciones de domo de alta resolución.",
     "showsPage.perfectFor": "Perfecto para:",
     "showsPage.perfectFor1": "Instalaciones de domo cinemático",
     "showsPage.perfectFor2": "Eventos inmersivos y festivales",
@@ -102,6 +103,7 @@ const translations = {
     "showsPage.productionDesc": "Nuestro proceso de producción combina dirección artística de vanguardia, herramientas de IA propietarias y artesanía cinematográfica para crear experiencias que transforman espacios.",
     "showsPage.collaborationDesc": "Colaboramos con instituciones culturales, operadores de domo y marcas para traer visiones inmersivas a la vida. Nuestro equipo trabaja junto con tu visión para crear experiencias personalizadas.",
     "showsPage.contactNow": "Contacta Ahora",
+    "showsPage.environments": "Ambientes",
 
     // Environments Section
     "environments.landingTitle": "Ambientes Inmersivos",
@@ -368,6 +370,7 @@ const translations = {
     "showsPage.pageTitle": "Immersive Shows",
     "showsPage.pageSubtitle": "Cinematic Narratives for Dome",
     "showsPage.descriptionDefault": "Explore our curated shows designed for dome installations and immersive experiences.",
+    "showsPage.projectsDesc": "The following productions are currently in development and represent the best of our immersive creations. Each project is optimized for high-resolution dome installations.",
     "showsPage.perfectFor": "Perfect for:",
     "showsPage.perfectFor1": "Cinematic dome installations",
     "showsPage.perfectFor2": "Immersive events and festivals",
@@ -393,6 +396,7 @@ const translations = {
     "showsPage.productionDesc": "Our production process combines cutting-edge art direction, proprietary AI tools, and cinematic craftsmanship to create experiences that transform spaces.",
     "showsPage.collaborationDesc": "We collaborate with cultural institutions, dome operators, and brands to bring immersive visions to life. Our team works alongside your vision to create personalized experiences.",
     "showsPage.contactNow": "Contact Now",
+    "showsPage.environments": "Environments",
 
     // Environments Section
     "environments.landingTitle": "Immersive Environments",

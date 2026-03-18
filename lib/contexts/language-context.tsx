@@ -2,8 +2,6 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { useSearchParams } from "next/navigation"
-import { translationsES } from "@/lib/translations/es"
-import { translationsEN } from "@/lib/translations/en"
 
 type Language = "es" | "en"
 
@@ -16,48 +14,80 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
-const translations = {
-  es: translationsES,
-  en: translationsEN,
+// Dynamically load translations to avoid webpack serialization bloat
+const loadTranslations = async (lang: Language): Promise<Record<string, string>> => {
+  try {
+    if (lang === "es") {
+      const { translationsES } = await import("@/lib/translations/es")
+      return translationsES
+    } else {
+      const { translationsEN } = await import("@/lib/translations/en")
+      return translationsEN
+    }
+  } catch (error) {
+    console.error(`Failed to load ${lang} translations:`, error)
+    return {}
+  }
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>("en")
   const [isLoaded, setIsLoaded] = useState(false)
+  const [translationCache, setTranslationCache] = useState<Record<Language, Record<string, string>>>({
+    es: {},
+    en: {},
+  })
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    const langParam = searchParams?.get("lang") as Language | null
-    if (langParam && (langParam === "es" || langParam === "en")) {
-      setLanguageState(langParam)
-      localStorage.setItem("language", langParam)
-    } else {
-      const savedLang = localStorage.getItem("language") as Language | null
-      if (savedLang && (savedLang === "es" || savedLang === "en")) {
-        setLanguageState(savedLang)
+    const initializeLanguage = async () => {
+      const langParam = searchParams?.get("lang") as Language | null
+      let selectedLang: Language = "en"
+
+      if (langParam && (langParam === "es" || langParam === "en")) {
+        selectedLang = langParam
+        localStorage.setItem("language", langParam)
+      } else {
+        const savedLang = localStorage.getItem("language") as Language | null
+        if (savedLang && (savedLang === "es" || savedLang === "en")) {
+          selectedLang = savedLang
+        }
       }
+
+      setLanguageState(selectedLang)
+
+      // Load translations dynamically
+      const translations = await loadTranslations(selectedLang)
+      setTranslationCache((prev) => ({ ...prev, [selectedLang]: translations }))
+      setIsLoaded(true)
     }
-    setIsLoaded(true)
+
+    initializeLanguage()
   }, [searchParams])
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)
     localStorage.setItem("language", lang)
+
+    // Load the other language translations on demand
+    if (!translationCache[lang] || Object.keys(translationCache[lang]).length === 0) {
+      loadTranslations(lang).then((translations) => {
+        setTranslationCache((prev) => ({ ...prev, [lang]: translations }))
+      })
+    }
   }
 
   const t = (key: string): string => {
-    // Default to English if language is undefined or invalid
-    const validLanguage = (language === "es" || language === "en") ? language : "en"
-    const translationObj = translations[validLanguage as keyof typeof translations]
-    if (!translationObj) {
-      // Fallback to English if even that fails
-      const enObj = translations.en
-      return enObj?.[key as keyof typeof enObj] || key
-    }
-    return translationObj[key as keyof typeof translationObj] || key
+    const validLanguage = language === "es" || language === "en" ? language : "en"
+    const translations = translationCache[validLanguage]
+    return translations?.[key] || key
   }
 
-  return <LanguageContext.Provider value={{ language, setLanguage, t, isLoaded }}>{children}</LanguageContext.Provider>
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t, isLoaded }}>
+      {children}
+    </LanguageContext.Provider>
+  )
 }
 
 export function useLanguage() {

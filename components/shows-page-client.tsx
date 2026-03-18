@@ -137,7 +137,6 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
           <h2 className="text-4xl md:text-5xl font-light text-gray-100 mb-8">
             Projects:
           </h2>
-          <p className="text-gray-400 text-sm md:text-base mb-12 leading-relaxed">
           <div className="flex flex-col gap-6 mb-8">
             {/* Text content first on all screens - properly formatted with bullets and line breaks */}
             <div className="w-full">

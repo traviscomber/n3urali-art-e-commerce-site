@@ -94,17 +94,20 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
   return (
     <div className="w-full bg-black text-white">
-      {/* Hero Section with Background Image */}
+      {/* Hero Section with Background Video */}
       <section className="relative w-full overflow-hidden">
-        {/* Background Image */}
+        {/* Background Video */}
         <div className="absolute inset-0 z-0">
-          <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png"
-            alt="Shows hero background - cinematic dome landscape"
-            fill
-            className="object-cover"
-            priority
-          />
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+            poster="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png"
+          >
+            <source src="https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f1106b5a21d7a0c35_d20260318_m210234_c005_v0501039_t0038_u01773867754314" type="video/mp4" />
+          </video>
           {/* Dark gradient overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent"></div>
         </div>

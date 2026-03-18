@@ -125,9 +125,9 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
               {t('showsPage.pageSubtitle')}
             </p>
             <div className="space-y-4 max-w-2xl">
-              {(currentShow.description || currentShow.synopsis)?.split('\n\n').map((paragraph, idx) => (
+              {t('showsPage.descriptionDefault')?.split('\n').map((paragraph, idx) => (
                 <p key={idx} className="text-gray-300 text-sm md:text-base leading-relaxed">
-                  {paragraph}
+                  {paragraph.trim()}
                 </p>
               ))}
             </div>

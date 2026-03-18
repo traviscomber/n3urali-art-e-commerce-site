@@ -139,10 +139,32 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
           </h2>
           <div className="flex flex-col gap-12 mb-8">
             {/* Text content first on all screens - properly formatted with bullets and line breaks */}
-            <div className="w-full max-w-4xl">
-              <p className="text-gray-300 text-sm md:text-base leading-relaxed whitespace-pre-line text-left">
-                {t('showsPage.projectsDesc') || 'The following productions are currently in development.'}
-              </p>
+            <div className="w-full max-w-4xl space-y-8">
+              {/* Introduction paragraphs */}
+              <div className="text-gray-300 text-sm md:text-base leading-relaxed whitespace-pre-line text-left">
+                <p className="mb-6">A selection of developed and in-progress worlds.</p>
+                <p>Each project represents a different type of environment, from natural systems to abstract spatial compositions and narrative-driven worlds.</p>
+              </div>
+
+              {/* Shows presentation types - Enhanced card style */}
+              <div className="bg-gradient-to-br from-gray-900/80 via-gray-950 to-black border border-gray-700/60 rounded-xl p-8 md:p-10 shadow-lg hover:shadow-xl hover:border-gray-600 transition-all duration-300 backdrop-blur-sm">
+                <h3 className="text-lg md:text-xl font-light text-cyan-400 mb-6 flex items-center gap-3">
+                  <span className="inline-block w-1 h-6 bg-gradient-to-b from-cyan-500 to-cyan-400 rounded"></span>
+                  Shows can be presented as:
+                </h3>
+                <div className="space-y-3">
+                  {['Fulldome Experiences', 'Immersive Installations', 'Educational Environments', 'Custom Spatial Productions'].map((item, idx) => (
+                    <div key={idx} className="flex items-start gap-4 group">
+                      <div className="flex-shrink-0 w-5 h-5 rounded-sm bg-gradient-to-br from-cyan-500/30 to-cyan-400/20 border border-cyan-500/40 flex items-center justify-center mt-0.5 group-hover:from-cyan-500/50 group-hover:to-cyan-400/30 transition-all duration-300">
+                        <span className="text-cyan-400 text-xs font-semibold">•</span>
+                      </div>
+                      <span className="text-gray-300 text-sm md:text-base font-light group-hover:text-cyan-300 transition-colors duration-300">
+                        {item}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Images section - below text on mobile, grid on desktop */}

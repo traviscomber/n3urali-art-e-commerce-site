@@ -134,48 +134,50 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       {/* Projects Section */}
       <section className="w-full px-6 sm:px-12 md:px-16 lg:px-24 py-20 md:py-28 border-t border-gray-800">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-light text-gray-100 mb-8">
+          <h2 className="text-4xl md:text-5xl font-light text-gray-100 mb-12">
             Projects:
           </h2>
-          <div className="flex flex-col gap-6 mb-8">
+          <div className="flex flex-col gap-8 mb-8">
             {/* Text content first on all screens - properly formatted with bullets and line breaks */}
-            <div className="w-full">
-              <p className="text-gray-300 text-sm md:text-base leading-relaxed max-w-3xl whitespace-pre-line">
+            <div className="w-full max-w-4xl">
+              <p className="text-gray-300 text-sm md:text-base leading-relaxed whitespace-pre-line text-left">
                 {t('showsPage.projectsDesc') || 'The following productions are currently in development.'}
               </p>
             </div>
 
             {/* Images section - below text on mobile, grid on desktop */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8">
               {/* Thumbnails - Left side grid on desktop */}
               <div className="col-span-1 flex flex-col gap-4">
                 {projectsData.slice(0, 3).map((project, idx) => (
                   <div
                     key={project.id}
                     onClick={() => setProjectIndex(idx)}
-                    className={`relative cursor-pointer overflow-hidden aspect-square transition-all duration-300 ${
-                      idx === projectIndex ? 'ring-2 ring-cyan-500' : 'opacity-70 hover:opacity-100'
+                    className={`relative cursor-pointer overflow-hidden aspect-square transition-all duration-300 rounded-lg ${
+                      idx === projectIndex ? 'ring-2 ring-cyan-500 shadow-lg shadow-cyan-500/30' : 'opacity-60 hover:opacity-100'
                     }`}
                   >
                     <Image
                       src={project.image}
                       alt={project.title}
                       fill
-                      className="object-cover"
+                      className="object-cover hover:scale-105 transition-transform duration-300"
                     />
                   </div>
                 ))}
               </div>
 
-              {/* Featured image - Right side */}
-              <div className="col-span-1 lg:col-span-3">
-                <div className="relative bg-gray-900 overflow-hidden aspect-square lg:aspect-auto lg:h-full min-h-80">
+              {/* Featured image - Right side with enhanced styling */}
+              <div className="col-span-1 lg:col-span-4">
+                <div className="relative bg-gradient-to-br from-gray-900 to-black overflow-hidden aspect-square lg:aspect-auto lg:h-full min-h-80 rounded-lg shadow-2xl border border-gray-700">
                   <Image
                     src={projectsData[projectIndex].image}
                     alt={projectsData[projectIndex].title}
                     fill
                     className="object-cover"
                   />
+                  {/* Subtle overlay for text readability if needed */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                 </div>
               </div>
             </div>
@@ -189,7 +191,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
           <h2 className="text-4xl md:text-5xl font-light text-gray-100 mb-6">
             Production
           </h2>
-          <p className="text-gray-400 text-sm md:text-base mb-16 leading-relaxed max-w-3xl">
+          <p className="text-gray-400 text-sm md:text-base mb-16 leading-relaxed max-w-3xl text-left">
             {t('showsPage.productionDesc') || 'Multiple production stages and departments contribute to creating immersive experiences.'}
           </p>
 
@@ -197,23 +199,23 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
             {productionSections.map((section, idx) => (
               <div key={idx} className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
                 {/* Content - shows first on mobile naturally due to flex-col */}
-                <div className="flex-1 bg-gray-900/50 border border-gray-800 p-8 md:p-10 flex flex-col justify-center md:order-2">
+                <div className="flex-1 bg-gray-900/50 border border-gray-800 p-8 md:p-10 flex flex-col justify-center md:order-2 rounded-lg">
                   <h3 className="text-2xl md:text-3xl font-light text-gray-100 mb-4">
                     {section.title}
                   </h3>
-                  <p className="text-gray-400 text-sm md:text-base leading-relaxed">
+                  <p className="text-gray-400 text-sm md:text-base leading-relaxed text-left">
                     {section.description}
                   </p>
                 </div>
 
                 {/* Image - below text on mobile, left on desktop */}
                 <div className="md:w-64 md:h-64 flex-shrink-0 md:order-1">
-                  <div className="relative w-full h-full bg-gray-900 border border-gray-700 overflow-hidden aspect-square">
+                  <div className="relative w-full h-full bg-gradient-to-br from-gray-900 to-black border border-gray-700 overflow-hidden aspect-square md:aspect-auto rounded-lg shadow-lg">
                     <Image
                       src={section.image}
                       alt={section.title}
                       fill
-                      className="object-cover"
+                      className="object-cover hover:scale-110 transition-transform duration-300"
                     />
                   </div>
                 </div>

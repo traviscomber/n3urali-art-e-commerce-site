@@ -60,7 +60,7 @@ export const translationsEN = {
   "showsPage.pageTitle": "Shows",
   "showsPage.pageSubtitle": "Cinematic Dome Stories",
   "showsPage.descriptionDefault": "Series of fulldome experiences built around cultural narratives, scientific themes, and visual exploration. Each production is designed specifically for dome geometry, where image, sound, and space form a single experience.\n\nAlongside original productions, the studio develops custom dome experiences for museums, educational institutions, immersive venues, and events.",
-  "showsPage.projectsDesc": "A selection of developed and in-progress worlds.\n\nEach project represents a different type of environment, from natural systems to abstract spatial compositions and narrative-driven worlds.\n\nShows can be presented as:\nfulldome experiences\nimmersive installations\neducational environments\ncustom spatial productions",
+  "showsPage.projectsDesc": "A selection of developed and in-progress worlds.\n\nEach project represents a different type of environment, from natural systems to abstract spatial compositions and narrative-driven worlds.\n\nShows can be presented as:\n• Fulldome Experiences\n• Immersive Installations\n• Educational Environments\n• Custom Spatial Productions",
   "showsPage.perfectFor": "Perfect for:",
   "showsPage.perfectFor1": "Cinematic dome installations",
   "showsPage.perfectFor2": "Immersive events and festivals",

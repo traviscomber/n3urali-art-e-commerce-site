@@ -60,7 +60,7 @@ export const translationsES = {
   "showsPage.pageTitle": "Espectáculos",
   "showsPage.pageSubtitle": "Historias de Domo Cinemático",
   "showsPage.descriptionDefault": "Serie de experiencias de domo completo construidas alrededor de narrativas culturales, temas científicos y exploración visual. Cada producción está diseñada específicamente para geometría de domo, donde la imagen, el sonido y el espacio forman una única experiencia.\n\nAdemás de las producciones originales, el estudio desarrolla experiencias de domo personalizadas para museos, instituciones educativas, lugares inmersivos y eventos.",
-  "showsPage.projectsDesc": "Una selección de mundos desarrollados y en progreso.\n\nCada proyecto representa un tipo diferente de entorno, desde sistemas naturales hasta composiciones espaciales abstractas y mundos impulsados por narrativas.\n\nLos espectáculos se pueden presentar como:\nexperiencias de domo completo\ninstalaciones inmersivas\nambientes educativos\nproducciones espaciales personalizadas",
+  "showsPage.projectsDesc": "Una selección de mundos desarrollados y en progreso.\n\nCada proyecto representa un tipo diferente de entorno, desde sistemas naturales hasta composiciones espaciales abstractas y mundos impulsados por narrativas.\n\nLos espectáculos se pueden presentar como:\n• Experiencias de Domo Completo\n• Instalaciones Inmersivas\n• Ambientes Educativos\n• Producciones Espaciales Personalizadas",
   "showsPage.perfectFor": "Perfecto para:",
   "showsPage.perfectFor1": "Instalaciones de domo cinemático",
   "showsPage.perfectFor2": "Eventos inmersivos y festivales",

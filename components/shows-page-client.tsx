@@ -85,12 +85,12 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       thumbnail: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/SurrealShowsIcn-FrWPb5ADa9osWM6AP695tFrWsXhDe0.png',
     },
     {
-      videoUrl: 'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/SurrealShows.mov',
+      videoUrl: 'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/El+Trauko.mov',
       thumbnail: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth2-5zeFMllXp1WFWUyJgvnpY8plIxwQts.png',
     },
     {
-      videoUrl: 'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/SurrealShows.mov',
-      thumbnail: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth3-mZG3PGuOFqePUhTm63gOYOXUhfDN6d.png',
+      videoUrl: 'https://f005.backblazeb2.com/file/Neuraliart/VIDEOS/MossyShows.mov',
+      thumbnail: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/MossyShowsIcn-cKLYi9YhEAWt9e6O7pBOj0EDnHctbj.png',
     },
   ]
 

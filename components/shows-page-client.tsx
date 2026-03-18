@@ -195,7 +195,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                     </div>
                     {/* Project name banner */}
                     <div className={`text-center transition-all duration-300 ${
-                      idx === projectIndex ? 'text-teal-300 font-semibold' : 'text-gray-400 font-light'
+                      idx === projectIndex ? 'text-white font-semibold' : 'text-gray-400 font-light'
                     }`}>
                       <p className="text-xs md:text-sm truncate">{project.title}</p>
                     </div>
@@ -217,7 +217,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                   
                   {/* Featured project name banner - bottom overlay */}
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-12 pb-6 px-6">
-                    <h3 className="text-2xl md:text-3xl font-light text-teal-300">
+                    <h3 className="text-2xl md:text-3xl font-light text-white">
                       {projectsData[projectIndex].title}
                     </h3>
                   </div>

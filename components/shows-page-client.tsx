@@ -146,16 +146,16 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                 <p>Each project represents a different type of environment, from natural systems to abstract spatial compositions and narrative-driven worlds.</p>
               </div>
 
-              {/* Shows presentation types - Enhanced card style */}
-              <div className="bg-gradient-to-br from-gray-900/80 via-gray-950 to-black border border-gray-700/60 rounded-xl p-8 md:p-10 shadow-lg hover:shadow-xl hover:border-gray-600 transition-all duration-300 backdrop-blur-sm">
+              {/* Shows presentation types - Clean card style matching Production section */}
+              <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-8 md:p-10 transition-all duration-300">
                 <h3 className="text-lg md:text-xl font-light text-teal-300 mb-6 flex items-center gap-3">
-                  <span className="inline-block w-1 h-6 bg-gradient-to-b from-teal-400 to-teal-300 rounded"></span>
+                  <span className="inline-block w-1 h-6 bg-teal-400 rounded"></span>
                   Shows can be presented as:
                 </h3>
                 <div className="space-y-3">
                   {['Fulldome Experiences', 'Immersive Installations', 'Educational Environments', 'Custom Spatial Productions'].map((item, idx) => (
                     <div key={idx} className="flex items-start gap-4 group">
-                      <div className="flex-shrink-0 w-5 h-5 rounded-sm bg-gradient-to-br from-teal-500/30 to-teal-400/20 border border-teal-500/40 flex items-center justify-center mt-0.5 group-hover:from-teal-500/50 group-hover:to-teal-400/30 transition-all duration-300">
+                      <div className="flex-shrink-0 w-5 h-5 rounded-sm bg-teal-500/30 border border-teal-500/40 flex items-center justify-center mt-0.5 group-hover:bg-teal-500/50 transition-all duration-300">
                         <span className="text-teal-300 text-xs font-semibold">•</span>
                       </div>
                       <span className="text-gray-300 text-sm md:text-base font-light group-hover:text-teal-200 transition-colors duration-300">

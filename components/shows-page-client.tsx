@@ -139,11 +139,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
             Projects:
           </h2>
           <p className="text-gray-400 text-sm md:text-base mb-12 leading-relaxed">
-            {t('showsPage.projectsDesc') || 'The following productions are currently in development.'}
-          </p>
-
           <div className="flex flex-col gap-6 mb-8">
-            {/* Text content first on all screens */}
+            {/* Text content first on all screens - properly formatted with bullets and line breaks */}
             <div className="w-full">
               <p className="text-gray-300 text-sm md:text-base leading-relaxed max-w-3xl whitespace-pre-line">
                 {t('showsPage.projectsDesc') || 'The following productions are currently in development.'}

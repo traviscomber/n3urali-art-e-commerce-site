@@ -148,17 +148,17 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
               {/* Shows presentation types - Enhanced card style */}
               <div className="bg-gradient-to-br from-gray-900/80 via-gray-950 to-black border border-gray-700/60 rounded-xl p-8 md:p-10 shadow-lg hover:shadow-xl hover:border-gray-600 transition-all duration-300 backdrop-blur-sm">
-                <h3 className="text-lg md:text-xl font-light text-cyan-400 mb-6 flex items-center gap-3">
-                  <span className="inline-block w-1 h-6 bg-gradient-to-b from-cyan-500 to-cyan-400 rounded"></span>
+                <h3 className="text-lg md:text-xl font-light text-teal-300 mb-6 flex items-center gap-3">
+                  <span className="inline-block w-1 h-6 bg-gradient-to-b from-teal-400 to-teal-300 rounded"></span>
                   Shows can be presented as:
                 </h3>
                 <div className="space-y-3">
                   {['Fulldome Experiences', 'Immersive Installations', 'Educational Environments', 'Custom Spatial Productions'].map((item, idx) => (
                     <div key={idx} className="flex items-start gap-4 group">
-                      <div className="flex-shrink-0 w-5 h-5 rounded-sm bg-gradient-to-br from-cyan-500/30 to-cyan-400/20 border border-cyan-500/40 flex items-center justify-center mt-0.5 group-hover:from-cyan-500/50 group-hover:to-cyan-400/30 transition-all duration-300">
-                        <span className="text-cyan-400 text-xs font-semibold">•</span>
+                      <div className="flex-shrink-0 w-5 h-5 rounded-sm bg-gradient-to-br from-teal-500/30 to-teal-400/20 border border-teal-500/40 flex items-center justify-center mt-0.5 group-hover:from-teal-500/50 group-hover:to-teal-400/30 transition-all duration-300">
+                        <span className="text-teal-300 text-xs font-semibold">•</span>
                       </div>
-                      <span className="text-gray-300 text-sm md:text-base font-light group-hover:text-cyan-300 transition-colors duration-300">
+                      <span className="text-gray-300 text-sm md:text-base font-light group-hover:text-teal-200 transition-colors duration-300">
                         {item}
                       </span>
                     </div>
@@ -180,8 +180,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                       onClick={() => setProjectIndex(idx)}
                       className={`relative cursor-pointer overflow-hidden aspect-square transition-all duration-300 rounded-lg group ${
                         idx === projectIndex 
-                          ? 'ring-2 ring-cyan-500 shadow-2xl shadow-cyan-500/40 scale-105' 
-                          : 'opacity-70 hover:opacity-100 hover:ring-1 hover:ring-cyan-400'
+                          ? 'ring-2 ring-teal-500 shadow-2xl shadow-teal-500/40 scale-105' 
+                          : 'opacity-70 hover:opacity-100 hover:ring-1 hover:ring-teal-400'
                       }`}
                     >
                       <Image
@@ -195,7 +195,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                     </div>
                     {/* Project name banner */}
                     <div className={`text-center transition-all duration-300 ${
-                      idx === projectIndex ? 'text-cyan-400 font-semibold' : 'text-gray-400 font-light'
+                      idx === projectIndex ? 'text-teal-300 font-semibold' : 'text-gray-400 font-light'
                     }`}>
                       <p className="text-xs md:text-sm truncate">{project.title}</p>
                     </div>
@@ -217,7 +217,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                   
                   {/* Featured project name banner - bottom overlay */}
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-12 pb-6 px-6">
-                    <h3 className="text-2xl md:text-3xl font-light text-cyan-400">
+                    <h3 className="text-2xl md:text-3xl font-light text-teal-300">
                       {projectsData[projectIndex].title}
                     </h3>
                   </div>

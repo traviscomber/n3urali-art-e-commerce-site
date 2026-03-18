@@ -74,9 +74,9 @@ const translations = {
     "shows.description.chile": "Explora los extraordinarios paisajes y sitios sagrados de Chile, la nación geográficamente más diversa de América del Sur. Desde el Desierto de Atacama hasta los glaciares de la Patagonia, desde antiguos caminos incas hasta los místicos bosques de Pumalín, descubre Chile a través de múltiples colecciones inmersivas de 360°.",
 
     // Shows Page Specific
-    "showsPage.pageTitle": "Espectáculos Inmersivos",
-    "showsPage.pageSubtitle": "Narrativas Cinematográficas para Domo",
-    "showsPage.descriptionDefault": "Explora nuestros espectáculos curados diseñados para instalaciones de domo y experiencias inmersivas.",
+    "showsPage.pageTitle": "Espectáculos",
+    "showsPage.pageSubtitle": "Historias de Domo Cinemático",
+    "showsPage.descriptionDefault": "Series de experiencias de domo completo construidas alrededor de narrativas culturales, temas científicos y exploración visual. Cada producción está diseñada específicamente para geometría de domo, donde la imagen, el sonido y el espacio forman una única experiencia.\n\nAdemás de las producciones originales, el estudio desarrolla experiencias de domo personalizadas para museos, instituciones educativas, lugares inmersivos y eventos.",
     "showsPage.projectsDesc": "Los siguientes proyectos están en desarrollo y representan lo mejor de nuestras producciones inmersivas. Cada proyecto está optimizado para instalaciones de domo de alta resolución.",
     "showsPage.perfectFor": "Perfecto para:",
     "showsPage.perfectFor1": "Instalaciones de domo cinemático",
@@ -367,9 +367,9 @@ const translations = {
     "shows.description.chile": "Explore the extraordinary landscapes and sacred sites of Chile, South America's most geographically diverse nation. From the Atacama Desert to Patagonian glaciers, from ancient Inca roads to mystical Pumalín forests, discover Chile through multiple immersive 360° collections.",
 
     // Shows Page Specific
-    "showsPage.pageTitle": "Immersive Shows",
-    "showsPage.pageSubtitle": "Cinematic Narratives for Dome",
-    "showsPage.descriptionDefault": "Explore our curated shows designed for dome installations and immersive experiences.",
+    "showsPage.pageTitle": "Shows",
+    "showsPage.pageSubtitle": "Cinematic Dome Stories",
+    "showsPage.descriptionDefault": "Series of fulldome experiences built around cultural narratives, scientific themes, and visual exploration. Each production is designed specifically for dome geometry, where image, sound, and space form a single experience.\n\nAlongside original productions, the studio develops custom dome experiences for museums, educational institutions, immersive venues, and events.",
     "showsPage.projectsDesc": "The following productions are currently in development and represent the best of our immersive creations. Each project is optimized for high-resolution dome installations.",
     "showsPage.perfectFor": "Perfect for:",
     "showsPage.perfectFor1": "Cinematic dome installations",

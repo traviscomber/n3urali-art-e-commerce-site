@@ -133,7 +133,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
       {/* Projects Section */}
       <section className="w-full px-6 sm:px-12 md:px-16 lg:px-24 py-20 md:py-28 border-t border-gray-800">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl">
           <h2 className="text-4xl md:text-5xl font-light text-gray-100 mb-12">
             Projects:
           </h2>
@@ -187,7 +187,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
       {/* Production Section */}
       <section className="w-full px-6 sm:px-12 md:px-16 lg:px-24 py-20 md:py-28 border-t border-gray-800">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl">
           <h2 className="text-4xl md:text-5xl font-light text-gray-100 mb-6">
             Production
           </h2>
@@ -227,7 +227,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
       {/* Collaboration Section */}
       <section className="w-full px-6 sm:px-12 md:px-16 lg:px-24 py-20 md:py-28 border-t border-gray-800">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl">
           <h2 className="text-4xl md:text-5xl font-light text-gray-100 mb-8">
             Collaboration
           </h2>

@@ -58,9 +58,9 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
   }))
 
   const projectsData = projects.length > 0 ? projects : [
-    { id: '1', title: 'Project 1', image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png' },
-    { id: '2', title: 'Project 2', image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth2-5zeFMllXp1WFWUyJgvnpY8plIxwQts.png' },
-    { id: '3', title: 'Project 3', image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth3-mZG3PGuOFqePUhTm63gOYOXUhfDN6d.png' },
+    { id: '1', title: 'Project 1', image: 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f104dd3cb4a6f89bc_d20260318_m223700_c005_v0501007_t0037_u01773873420347' },
+    { id: '2', title: 'Project 2', image: 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f106d4181cfdd9871_d20260318_m223738_c005_v0501042_t0040_u01773873458458' },
+    { id: '3', title: 'Project 3', image: 'https://f005.backblazeb2.com/b2api/v1/b2_download_file_by_id?fileId=4_z98ffc2d7197217df97910c16_f116eb29c29bc8758_d20260318_m223632_c005_v0501000_t0006_u01773873392916' },
     { id: '4', title: 'Project 4', image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth4-W0eVn7cqin99zRFZN90EDL8J39HY9V.png' },
   ]
 

@@ -94,23 +94,17 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
   return (
     <div className="w-full bg-black text-white">
-      {/* Hero Section with Video Background */}
+      {/* Hero Section with Background Image */}
       <section className="relative w-full overflow-hidden">
-        {/* Video Background */}
-        <div className="absolute inset-0">
-          {/* Video placeholder - replace with actual video source */}
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover"
-            poster="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png"
-          >
-            <source src="/videos/shows-hero.mp4" type="video/mp4" />
-            <source src="/videos/shows-hero.webm" type="video/webm" />
-          </video>
-          
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png"
+            alt="Shows hero background - cinematic dome landscape"
+            fill
+            className="object-cover"
+            priority
+          />
           {/* Dark gradient overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent"></div>
         </div>
@@ -125,7 +119,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
               {t('showsPage.pageSubtitle')}
             </p>
             <div className="space-y-4 max-w-2xl">
-              {t('showsPage.descriptionDefault')?.split('\n').map((paragraph, idx) => (
+              {t('showsPage.descriptionDefault')?.split('\n\n').map((paragraph, idx) => (
                 <p key={idx} className="text-gray-300 text-sm md:text-base leading-relaxed">
                   {paragraph.trim()}
                 </p>

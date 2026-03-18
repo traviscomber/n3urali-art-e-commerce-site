@@ -39,6 +39,16 @@ const PlayButton = () => (
   </div>
 )
 
+// Loading spinner overlay
+const LoadingSpinner = () => (
+  <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
+    <div className="relative w-12 h-12">
+      <div className="absolute inset-0 rounded-full border-2 border-gray-700"></div>
+      <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-white animate-spin"></div>
+    </div>
+  </div>
+)
+
 // Video player for main display
 const VideoPlayer = ({ src, poster, title }: { src: string; poster?: string; title: string }) => (
   <video
@@ -59,6 +69,14 @@ const VideoPlayer = ({ src, poster, title }: { src: string; poster?: string; tit
 export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientProps) {
   const { t } = useLanguage()
   const [projectIndex, setProjectIndex] = useState(0)
+  const [loadingIndex, setLoadingIndex] = useState<number | null>(null)
+
+  const handleThumbnailClick = (idx: number) => {
+    setLoadingIndex(idx)
+    setProjectIndex(idx)
+    // Clear loading after video metadata is loaded
+    setTimeout(() => setLoadingIndex(null), 500)
+  }
 
   const getTranslatedDescription = (description: string | undefined): string => {
     if (!description) return t('showsPage.descriptionDefault')
@@ -222,7 +240,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                     className="flex flex-col gap-3"
                   >
                     <div
-                      onClick={() => setProjectIndex(idx)}
+                      onClick={() => handleThumbnailClick(idx)}
                       className={`relative cursor-pointer overflow-hidden aspect-square transition-all duration-300 rounded-lg group ${
                         idx === projectIndex 
                           ? 'ring-2 ring-gray-600 shadow-2xl shadow-gray-600/40 scale-105' 
@@ -237,6 +255,8 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                       />
                       {/* Play button overlay for videos */}
                       {project.isVideo && <PlayButton />}
+                      {/* Loading spinner when clicked */}
+                      {loadingIndex === idx && <LoadingSpinner />}
                     </div>
                     {/* Project name banner */}
                     <div className={`text-center transition-all duration-300 ${
@@ -265,6 +285,9 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                       className="object-cover"
                     />
                   )}
+                  
+                  {/* Loading spinner in featured area */}
+                  {loadingIndex === projectIndex && <LoadingSpinner />}
                   
                   {/* Featured project name banner - bottom overlay (only for images) */}
                   {!projectsData[projectIndex].isVideo && (

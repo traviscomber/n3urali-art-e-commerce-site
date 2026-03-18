@@ -114,16 +114,16 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
   const projects = teaserImages.slice(0, 4).map((img, idx) => ({
     id: img.id,
-    title: img.title,
+    title: idx === 0 ? 'Surreal Shows' : idx === 1 ? 'Chilean Mythology' : idx === 2 ? 'Mossy Adventures' : img.title,
     thumbnail: idx < 3 ? videoProjects[idx].thumbnail : (img.thumbnail_medium_url || img.original_url || ''),
     videoUrl: idx < 3 ? videoProjects[idx].videoUrl : null,
     isVideo: idx < 3,
   }))
 
   const projectsData = projects.length > 0 ? projects : [
-    { id: '1', title: 'Project 1', thumbnail: videoProjects[0].thumbnail, videoUrl: videoProjects[0].videoUrl, isVideo: true },
-    { id: '2', title: 'Project 2', thumbnail: videoProjects[1].thumbnail, videoUrl: videoProjects[1].videoUrl, isVideo: true },
-    { id: '3', title: 'Project 3', thumbnail: videoProjects[2].thumbnail, videoUrl: videoProjects[2].videoUrl, isVideo: true },
+    { id: '1', title: 'Surreal Shows', thumbnail: videoProjects[0].thumbnail, videoUrl: videoProjects[0].videoUrl, isVideo: true },
+    { id: '2', title: 'Chilean Mythology', thumbnail: videoProjects[1].thumbnail, videoUrl: videoProjects[1].videoUrl, isVideo: true },
+    { id: '3', title: 'Mossy Adventures', thumbnail: videoProjects[2].thumbnail, videoUrl: videoProjects[2].videoUrl, isVideo: true },
     { id: '4', title: 'Project 4', thumbnail: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth4-W0eVn7cqin99zRFZN90EDL8J39HY9V.png', videoUrl: null, isVideo: false },
   ]
 

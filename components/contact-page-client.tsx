@@ -57,6 +57,7 @@ export function ContactPageClient() {
         setEmail('')
         setMessage('')
         setSelectedOptions([])
+        setIsSubmitting(false)
         // Keep form locked and modal visible for 8 seconds, then auto-close
         setTimeout(() => {
           setSubmitSuccess(false)
@@ -104,6 +105,7 @@ export function ContactPageClient() {
               <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
                 {t('contact.whatsappDescription')}
               </p>
+              <p className="text-cyan-400 text-sm sm:text-base mt-4 font-medium">+62 823 4013 7013</p>
             </div>
             <a
               href={whatsappLink}

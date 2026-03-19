@@ -99,7 +99,7 @@ export function ContactPageClient() {
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
           {/* Left Column - WhatsApp */}
-          <div className="bg-slate-900/50 rounded-lg p-8 sm:p-12 border border-slate-800 flex flex-col justify-between min-h-[300px]">
+          <div className="bg-transparent rounded-lg p-8 sm:p-12 border border-transparent flex flex-col justify-between min-h-[300px]">
             <div>
               <div className="mb-6 flex justify-center sm:justify-start">
                 <img 
@@ -118,7 +118,7 @@ export function ContactPageClient() {
               href={whatsappLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full px-6 py-3 border border-black bg-black text-slate-300 text-sm font-medium hover:bg-slate-900 transition-colors text-center mt-8"
+              className="w-full px-6 py-3 border border-transparent bg-transparent text-slate-300 text-sm font-medium hover:bg-slate-900/30 transition-colors text-center mt-8"
             >
               {t('contact.contactNow')}
             </a>

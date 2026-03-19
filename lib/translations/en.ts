@@ -78,7 +78,7 @@ export const translationsEN = {
   "showsPage.characters": "Characters",
   "showsPage.charactersDesc": "Some productions introduce characters that move through the environment and provide narrative structure. Characters are designed as part of the world.",
   "showsPage.story": "Story",
-  "showsPage.storyDesc": "Enveloping narrative that wraps the visual experience. Our stories are crafted for dome installations, designed to keep audiences captive in a continuous emotional journey.",
+  "showsPage.storyDesc": "Narratives are developed as spatial journeys. Instead of linear scenes, the story unfolds through environments that evolve across the dome.",
   "showsPage.soundNarration": "Sound and Narration",
   "showsPage.soundNarrationDesc": "Immersive sound design and professional narration that completes the visual experience. Each sound is positioned for spatial depth, creating a truly enveloping experience.",
   "showsPage.mastering": "Mastering",

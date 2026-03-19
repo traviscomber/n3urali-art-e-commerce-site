@@ -76,7 +76,7 @@ export const translationsEN = {
   "showsPage.worldBuilding": "World Building",
   "showsPage.worldBuildingDesc": "Productions begins with the construction of a world. Rather than assembling scenes, the studio develops complete environments. Geographic references, environmental structures, and cultural elements are used to build coherent worlds designed for fulldome projection.",
   "showsPage.characters": "Characters",
-  "showsPage.charactersDesc": "Enveloping character design that tells stories through form, movement, and visual presence. Each character is a complete visual narrative, designed to resonate emotionally.",
+  "showsPage.charactersDesc": "Some productions introduce characters that move through the environment and provide narrative structure. Characters are designed as part of the world.",
   "showsPage.story": "Story",
   "showsPage.storyDesc": "Enveloping narrative that wraps the visual experience. Our stories are crafted for dome installations, designed to keep audiences captive in a continuous emotional journey.",
   "showsPage.soundNarration": "Sound and Narration",

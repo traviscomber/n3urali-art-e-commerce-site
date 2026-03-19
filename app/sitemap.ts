@@ -88,6 +88,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: 'weekly' as const,
         priority: 0.85,
       },
+      // Environment detail pages - Mythical, Art, Culture, Nature
+      {
+        url: `${baseUrl}/environments/mythical`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.80,
+      },
+      {
+        url: `${baseUrl}/environments/art`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.80,
+      },
+      {
+        url: `${baseUrl}/environments/culture`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.80,
+      },
+      {
+        url: `${baseUrl}/environments/nature`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.80,
+      },
       {
         url: `${baseUrl}/theatre`,
         lastModified: new Date(),

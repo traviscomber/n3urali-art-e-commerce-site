@@ -193,7 +193,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
       </section>
 
       {/* Projects Section */}
-      <section className="w-full px-6 sm:px-12 md:px-16 lg:px-24 py-20 md:py-28 border-t border-gray-800 bg-gradient-to-b from-black via-gray-950 to-black">
+      <section className="w-full px-6 sm:px-12 md:px-16 lg:px-24 py-20 md:py-28 border-t border-gray-800 bg-black">
         <div className="max-w-7xl">
           <h2 className="text-4xl md:text-5xl font-light text-gray-100 mb-12">
             Projects:

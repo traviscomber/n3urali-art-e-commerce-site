@@ -74,7 +74,7 @@ export const translationsEN = {
   "showsPage.sendEmail": "Send Email",
   "showsPage.whatsapp": "WhatsApp",
   "showsPage.worldBuilding": "World Building",
-  "showsPage.worldBuildingDesc": "Detailed worlds built from imagination, each element carefully designed for visual depth and narrative coherence. From speculative geology to interdimensional architecture.",
+  "showsPage.worldBuildingDesc": "Productions begins with the construction of a world. Rather than assembling scenes, the studio develops complete environments. Geographic references, environmental structures, and cultural elements are used to build coherent worlds designed for fulldome projection.",
   "showsPage.characters": "Characters",
   "showsPage.charactersDesc": "Enveloping character design that tells stories through form, movement, and visual presence. Each character is a complete visual narrative, designed to resonate emotionally.",
   "showsPage.story": "Story",

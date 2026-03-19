@@ -28,14 +28,12 @@ interface ShowsPageClientProps {
   teaserImages: TeaserImage[]
 }
 
-// Play button overlay for video thumbnails
+// Play icon overlay for video thumbnails - minimal and non-intrusive
 const PlayButton = () => (
-  <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-colors duration-300">
-    <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-      <svg className="w-5 h-5 text-gray-900 ml-1" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M8 5v14l11-7z" />
-      </svg>
-    </div>
+  <div className="absolute bottom-2 right-2 text-white/60 hover:text-white/90 transition-colors duration-300">
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M8 5v14l11-7z" />
+    </svg>
   </div>
 )
 

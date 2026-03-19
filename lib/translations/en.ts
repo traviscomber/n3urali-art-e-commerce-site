@@ -82,7 +82,7 @@ export const translationsEN = {
   "showsPage.soundNarration": "Sound and Narration",
   "showsPage.soundNarrationDesc": "Narration can be adapted for multiple languages and different educational contexts. Sound environments are produced using spatial audio design and professional sound production systems. Audio is developed as an environmental layer.",
   "showsPage.mastering": "Mastering",
-  "showsPage.masteringDesc": "Professional-grade production and mastering in 8K for dome projection. Every frame is optimized for high-fidelity dome projection environments.",
+  "showsPage.masteringDesc": "All productions are finalized in native 4096 × 4096 fulldome format and optimized for dome projection systems. Compatible with mobile domes and permanent installations.",
   "showsPage.productionDesc": "Our production process combines cutting-edge art direction, proprietary AI tools, and cinematic craftsmanship to create experiences that transform spaces.",
   "showsPage.collaborationDesc": "We collaborate with cultural institutions, dome operators, and brands to bring immersive visions to life. Our team works alongside your vision to create personalized experiences.",
   "showsPage.contactNow": "Contact Now",

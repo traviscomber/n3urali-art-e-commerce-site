@@ -80,7 +80,7 @@ export const translationsEN = {
   "showsPage.story": "Story",
   "showsPage.storyDesc": "Narratives are developed as spatial journeys. Instead of linear scenes, the story unfolds through environments that evolve across the dome.",
   "showsPage.soundNarration": "Sound and Narration",
-  "showsPage.soundNarrationDesc": "Immersive sound design and professional narration that completes the visual experience. Each sound is positioned for spatial depth, creating a truly enveloping experience.",
+  "showsPage.soundNarrationDesc": "Narration can be adapted for multiple languages and different educational contexts. Sound environments are produced using spatial audio design and professional sound production systems. Audio is developed as an environmental layer.",
   "showsPage.mastering": "Mastering",
   "showsPage.masteringDesc": "Professional-grade production and mastering in 8K for dome projection. Every frame is optimized for high-fidelity dome projection environments.",
   "showsPage.productionDesc": "Our production process combines cutting-edge art direction, proprietary AI tools, and cinematic craftsmanship to create experiences that transform spaces.",

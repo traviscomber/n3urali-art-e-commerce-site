@@ -129,27 +129,27 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
     {
       title: t('showsPage.worldBuilding'),
       description: t('showsPage.worldBuildingDesc'),
-      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png',
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Worlds%20building-TnXkJTfO9NnTrCfwEKYYNzsD6CHIjR.png',
     },
     {
       title: t('showsPage.characters'),
       description: t('showsPage.charactersDesc'),
-      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth2-5zeFMllXp1WFWUyJgvnpY8plIxwQts.png',
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Characters-KuQlpdF2I4NisGE6Bk8mPXshSdFSaD.png',
     },
     {
       title: t('showsPage.story'),
       description: t('showsPage.storyDesc'),
-      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth3-mZG3PGuOFqePUhTm63gOYOXUhfDN6d.png',
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Story-6IV3JNSMGznTlw8V0yyTua2rVNN5rP.png',
     },
     {
       title: t('showsPage.soundNarration'),
       description: t('showsPage.soundNarrationDesc'),
-      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth4-W0eVn7cqin99zRFZN90EDL8J39HY9V.png',
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/SoundNarration-FwF0TpwkVNI3NGiNNGSVCzETulNHtr.png',
     },
     {
       title: t('showsPage.mastering'),
       description: t('showsPage.masteringDesc'),
-      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth5-HHbnx40rB7gy6IkODw4wqBQWJcPzhY.png',
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Mastering-nt39ZS8pb8H2dtaDTJZ09pa5pA0O20.png',
     },
   ]
 

@@ -232,40 +232,71 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
 
             {/* Images section - below text on mobile, grid on desktop */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8">
-              {/* Thumbnails - Left side grid on desktop */}
-              <div className="col-span-1 flex flex-col gap-6">
-                {projectsData.slice(0, 3).map((project, idx) => (
-                  <div
-                    key={project.id}
-                    className="flex flex-col gap-3"
-                  >
+              {/* Thumbnails with Navigation - Left side on desktop */}
+              <div className="col-span-1 flex flex-col gap-6 items-center">
+                {/* Up Arrow Button */}
+                <button
+                  onClick={() => {
+                    const newIndex = projectIndex === 0 ? projectsData.length - 1 : projectIndex - 1
+                    handleThumbnailClick(newIndex)
+                  }}
+                  className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-300 text-gray-300 hover:text-white"
+                  aria-label="Previous project"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                  </svg>
+                </button>
+
+                {/* Thumbnail Images */}
+                <div className="flex flex-col gap-6">
+                  {projectsData.slice(0, 3).map((project, idx) => (
                     <div
-                      onClick={() => handleThumbnailClick(idx)}
-                      className={`relative cursor-pointer overflow-hidden aspect-square transition-all duration-300 rounded-lg group ${
-                        idx === projectIndex 
-                          ? 'ring-2 ring-gray-600 shadow-2xl shadow-gray-600/40 scale-105' 
-                          : 'opacity-70 hover:opacity-100 hover:ring-1 hover:ring-gray-500'
-                      }`}
+                      key={project.id}
+                      className="flex flex-col gap-3"
                     >
-                      <Image
-                        src={project.thumbnail}
-                        alt={project.title}
-                        fill
-                        className="object-cover hover:scale-110 transition-transform duration-500"
-                      />
-                      {/* Play button overlay for videos */}
-                      {project.isVideo && <PlayButton />}
-                      {/* Loading spinner when clicked */}
-                      {loadingIndex === idx && <LoadingSpinner />}
+                      <div
+                        onClick={() => handleThumbnailClick(idx)}
+                        className={`relative cursor-pointer overflow-hidden aspect-square transition-all duration-300 rounded-lg group ${
+                          idx === projectIndex 
+                            ? 'ring-2 ring-gray-600 shadow-2xl shadow-gray-600/40 scale-105' 
+                            : 'opacity-70 hover:opacity-100 hover:ring-1 hover:ring-gray-500'
+                        }`}
+                      >
+                        <Image
+                          src={project.thumbnail}
+                          alt={project.title}
+                          fill
+                          className="object-cover hover:scale-110 transition-transform duration-500"
+                        />
+                        {/* Play button overlay for videos */}
+                        {project.isVideo && <PlayButton />}
+                        {/* Loading spinner when clicked */}
+                        {loadingIndex === idx && <LoadingSpinner />}
+                      </div>
+                      {/* Project name banner */}
+                      <div className={`text-center transition-all duration-300 ${
+                        idx === projectIndex ? 'text-white font-semibold' : 'text-gray-400 font-light'
+                      }`}>
+                        <p className="text-xs md:text-sm truncate">{project.title}</p>
+                      </div>
                     </div>
-                    {/* Project name banner */}
-                    <div className={`text-center transition-all duration-300 ${
-                      idx === projectIndex ? 'text-white font-semibold' : 'text-gray-400 font-light'
-                    }`}>
-                      <p className="text-xs md:text-sm truncate">{project.title}</p>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+
+                {/* Down Arrow Button */}
+                <button
+                  onClick={() => {
+                    const newIndex = projectIndex === projectsData.length - 1 ? 0 : projectIndex + 1
+                    handleThumbnailClick(newIndex)
+                  }}
+                  className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors duration-300 text-gray-300 hover:text-white"
+                  aria-label="Next project"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
               </div>
 
               {/* Featured image/video - Right side with enhanced styling */}

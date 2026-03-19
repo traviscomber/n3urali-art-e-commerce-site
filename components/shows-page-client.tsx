@@ -70,10 +70,10 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
   const [loadingIndex, setLoadingIndex] = useState<number | null>(null)
 
   const handleThumbnailClick = (idx: number) => {
-    setLoadingIndex(idx)
     setProjectIndex(idx)
-    // Clear loading after video metadata is loaded
-    setTimeout(() => setLoadingIndex(null), 500)
+    setLoadingIndex(idx)
+    // Clear loading immediately after switching projects
+    setLoadingIndex(null)
   }
 
   const getTranslatedDescription = (description: string | undefined): string => {

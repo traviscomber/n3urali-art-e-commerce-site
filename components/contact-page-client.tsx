@@ -101,6 +101,13 @@ export function ContactPageClient() {
           {/* Left Column - WhatsApp */}
           <div className="bg-slate-900/50 rounded-lg p-8 sm:p-12 border border-slate-800 flex flex-col justify-between min-h-[300px]">
             <div>
+              <div className="mb-6 flex justify-center sm:justify-start">
+                <img 
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Luxury-Whatsapp-logo-design-on-transparent-background-PNG-UeqdXh84CY6OPx5vLFRMfWVxcjhvAQ.png"
+                  alt="WhatsApp Logo"
+                  className="w-16 h-16 sm:w-20 sm:h-20 object-contain"
+                />
+              </div>
               <h3 className="text-2xl sm:text-3xl font-light text-slate-100 mb-4">{t('contact.whatsappTitle')}</h3>
               <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
                 {t('contact.whatsappDescription')}

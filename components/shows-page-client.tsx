@@ -298,7 +298,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
               </div>
 
               {/* Featured image/video - Right side with enhanced styling */}
-              <div className="col-span-1 lg:col-span-3">
+              <div className="col-span-1 lg:col-span-4 pl-0 lg:pl-8">
                 <div className="relative bg-black overflow-hidden aspect-video lg:aspect-auto lg:h-full min-h-80 shadow-2xl">
                   {projectsData[projectIndex].isVideo && projectsData[projectIndex].videoUrl ? (
                     <VideoPlayer

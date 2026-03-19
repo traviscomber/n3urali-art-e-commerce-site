@@ -255,7 +255,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
                     >
                       <div
                         onClick={() => handleThumbnailClick(idx)}
-                        className={`relative cursor-pointer overflow-hidden aspect-square transition-all duration-300 rounded-lg group ${
+                        className={`relative cursor-pointer overflow-hidden w-48 h-48 transition-all duration-300 rounded-lg group ${
                           idx === projectIndex 
                             ? 'ring-2 ring-gray-600 shadow-2xl shadow-gray-600/40 scale-105' 
                             : 'opacity-70 hover:opacity-100 hover:ring-1 hover:ring-gray-500'
@@ -298,7 +298,7 @@ export function ShowsPageClient({ collections, teaserImages }: ShowsPageClientPr
               </div>
 
               {/* Featured image/video - Right side with enhanced styling */}
-              <div className="col-span-1 lg:col-span-4">
+              <div className="col-span-1 lg:col-span-3">
                 <div className="relative bg-black overflow-hidden aspect-video lg:aspect-auto lg:h-full min-h-80 shadow-2xl">
                   {projectsData[projectIndex].isVideo && projectsData[projectIndex].videoUrl ? (
                     <VideoPlayer

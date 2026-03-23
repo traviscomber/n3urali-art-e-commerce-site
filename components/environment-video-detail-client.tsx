@@ -185,12 +185,12 @@ export function EnvironmentVideoDetailClient({
                   </div>
                 </div>
               ) : (
-                <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-900 shadow-2xl shadow-cyan-500/20">
+                <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-black shadow-2xl shadow-cyan-500/20">
                   <Image
                     src={video.thumbnail_medium_url || video.original_url || "/placeholder.svg"}
                     alt={video.title}
                     fill
-                    className="object-cover"
+                    className="object-cover w-full h-full"
                     priority
                   />
                 </div>

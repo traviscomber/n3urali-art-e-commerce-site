@@ -400,7 +400,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                   </div>
                 </Link>
               ) : (
-                <Link href="/environments/volcanoes-0" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                <Link href="/environments/oceans-2" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                   <Image
                     src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat2-JsjbkCmrWRtUS7eM4bS7btJ1v62vhx.png"
                     alt="Tropical paradise bay"
@@ -439,7 +439,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                   </div>
                 </Link>
               ) : (
-                <Link href="/environments/volcanoes-2" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                <Link href="/environments/volcanoes-1" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                   <Image
                     src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat4-rzoHjM9BDiPVOHxpm0Mo3KRXkz7dqk.png"
                     alt="Lava power"

@@ -530,7 +530,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
 
             <div className="w-full max-w-full overflow-hidden px-4 sm:px-12 md:px-16 lg:px-20 py-8 sm:py-12">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-                <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                <Link href="/environments/heritage-0" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                   <Image
                     src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult1-dhVGWchKNmJw81kGmXDaXIJ5cd2xFk.png"
                     alt="Purple sunset halo"
@@ -540,9 +540,9 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                   <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
                     <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Purple sunset halo</p>
                   </div>
-                </div>
+                </Link>
 
-                <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                <Link href="/environments/heritage-1" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                   <Image
                     src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult2-g8bXETDkCu4snNrPouTKozSZSfGxMl.png"
                     alt="Canoe adventure"
@@ -552,9 +552,9 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                   <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
                     <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Canoe adventure</p>
                   </div>
-                </div>
+                </Link>
 
-                <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                <Link href="/environments/heritage-2" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                   <Image
                     src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult3-rkJrAmWhsEN0xY7OOeNbBueEgYyjBY.png"
                     alt="Sunset over ancient temple"
@@ -564,9 +564,9 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                   <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
                     <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Sunset over ancient temple</p>
                   </div>
-                </div>
+                </Link>
 
-                <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                <Link href="/environments/heritage-3" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                   <Image
                     src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult4-fOr7dFUw2LF1ihBOtwpZSNb9txsVJq.png"
                     alt="Walking walls of Valparaiso"
@@ -576,9 +576,9 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                   <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
                     <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Walking walls of Valparaiso</p>
                   </div>
-                </div>
+                </Link>
 
-                <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                <Link href="/environments/heritage-4" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                   <Image
                     src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsCult5-YMhIkyjNnvCMyh91uvItbrfSuoxm5n.png"
                     alt="Celestial gates"
@@ -588,7 +588,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                   <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-end p-3 sm:p-5">
                     <p className="text-white text-xs sm:text-sm md:text-base font-light line-clamp-2">Celestial gates</p>
                   </div>
-                </div>
+                </Link>
 
                 <div className="flex items-center justify-center col-span-1 sm:col-span-2 md:col-span-1">
                   <button className="text-cyan-400 hover:text-cyan-300 transition-colors font-light text-xs sm:text-sm">

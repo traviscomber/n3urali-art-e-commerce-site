@@ -373,7 +373,7 @@ export function EnvironmentsPageClient({ collections, environmentImages }: Envir
                   </div>
                 </Link>
               ) : (
-                <Link href="/environments/oceans-0" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
+                <Link href="/environments/forest-0" className="relative w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-800 group">
                   <Image
                     src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNat1-nkk8Hy0OO5lAUZFfWloX0E7soAeK9U.png"
                     alt="Chilled trees forest walking"

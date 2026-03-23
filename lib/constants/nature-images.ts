@@ -27,4 +27,11 @@ export const natureCategoryImages = {
     { title: 'Luminous Core', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatForest3-S4S0XaZaMQkEJusaSE3bWOZeY3AW6J.png' },
     { title: 'Galaxy Gateway', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsNatForest4-tNByaNI3nRcEoY8bQ6kEl47zetVA9u.png' },
   ],
+  'mythic': [
+    { title: 'Mythic-1', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth1-H84nMKGLtexvnnGTyJQiMR35z0ne2Q.png' },
+    { title: 'Mythic-2', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth2-5zeFMllXp1WFWUyJgvnpY8plIxwQts.png' },
+    { title: 'Mythic-3', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth3-mZG3PGuOFqePUhTm63gOYOXUhfDN6d.png' },
+    { title: 'Mythic-4', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth4-W0eVn7cqin99zRFZN90EDL8J39HY9V.png' },
+    { title: 'Mythic-5', url: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnvsMyth5-HHbnx40rB7gy6IkODw4wqBQWJcPzhY.png' },
+  ],
 } as const

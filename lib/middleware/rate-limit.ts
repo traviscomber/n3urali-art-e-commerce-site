@@ -1,25 +1,40 @@
-import { Ratelimit } from '@upstash/ratelimit';
-import { Redis } from '@upstash/redis';
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-});
+let ratelimit: Ratelimit | null = null
 
-// Sliding window rate limiter
-const ratelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(100, '1 m'),
-  analytics: true,
-  prefix: 'ratelimit',
-});
+function getRateLimit() {
+  if (ratelimit) return ratelimit
+
+  const url = process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN
+
+  if (!url || !token) return null
+
+  const redis = new Redis({ url, token })
+
+  ratelimit = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(100, '1 m'),
+    analytics: true,
+    prefix: 'ratelimit',
+  })
+
+  return ratelimit
+}
 
 export async function checkRateLimit(identifier: string) {
+  const limiter = getRateLimit()
+
+  if (!limiter) {
+    return { success: true, limit: 100, remaining: 99, reset: Date.now() + 60000 }
+  }
+
   try {
-    const { success, limit, remaining, reset } = await ratelimit.limit(identifier);
-    return { success, limit, remaining, reset };
+    const { success, limit, remaining, reset } = await limiter.limit(identifier)
+    return { success, limit, remaining, reset }
   } catch {
-    // Fail open in case Redis is unavailable
-    return { success: true, limit: 100, remaining: 99, reset: Date.now() + 60000 };
+    // Fail open if Redis is temporarily unavailable.
+    return { success: true, limit: 100, remaining: 99, reset: Date.now() + 60000 }
   }
 }

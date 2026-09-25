@@ -1,4 +1,6 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "fluid": true,
   "version": 2,
   "buildCommand": "pnpm run build",
   "devCommand": "pnpm run dev",
